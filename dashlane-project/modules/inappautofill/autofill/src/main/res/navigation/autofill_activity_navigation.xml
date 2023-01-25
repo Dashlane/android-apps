@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/all_accounts_navi"
+    app:startDestination="@id/nav_wait_for_decision">
+
+    <include app:graph="@navigation/navigable_bottom_sheet_dialog_navigation" />
+
+    <fragment
+        android:id="@+id/nav_wait_for_decision"
+        android:name="com.dashlane.autofill.api.navigation.WaitForNavigationDecisionFragment">
+        <action
+            android:id="@+id/to_nav_all_accounts_dialog"
+            app:destination="@id/navigable_bottom_sheet_dialog_navigation"
+            app:popUpTo="@+id/nav_wait_for_decision"
+            app:popUpToInclusive="true">
+            <argument
+                android:name="navigationGraphId"
+                android:defaultValue="@navigation/autofill_bottom_sheet_dialog_navigation"
+                app:argType="reference"
+                app:nullable="false" />
+            <argument
+                android:name="startDestinationId"
+                android:defaultValue="@id/nav_all_accounts"
+                app:argType="reference"
+                app:nullable="false" />
+        </action>
+        <action
+            android:id="@+id/to_nav_create_account_dialog"
+            app:destination="@id/navigable_bottom_sheet_dialog_navigation"
+            app:popUpTo="@+id/nav_wait_for_decision"
+            app:popUpToInclusive="true">
+            <argument
+                android:name="navigationGraphId"
+                android:defaultValue="@navigation/autofill_bottom_sheet_dialog_navigation"
+                app:argType="reference"
+                app:nullable="false" />
+            <argument
+                android:name="startDestinationId"
+                android:defaultValue="@id/nav_root_decision"
+                app:argType="reference"
+                app:nullable="false" />
+        </action>
+        <action
+            android:id="@+id/to_nav_change_password_dialog"
+            app:destination="@id/navigable_bottom_sheet_dialog_navigation"
+            app:popUpTo="@+id/nav_wait_for_decision"
+            app:popUpToInclusive="true">
+            <argument
+                android:name="navigationGraphId"
+                android:defaultValue="@navigation/autofill_bottom_sheet_dialog_navigation"
+                app:argType="reference"
+                app:nullable="false" />
+            <argument
+                android:name="startDestinationId"
+                android:defaultValue="@id/nav_change_password"
+                app:argType="reference"
+                app:nullable="false" />
+            <argument
+                android:name="startDestinationArgs"
+                app:argType="android.os.Bundle"
+                app:nullable="false" />
+        </action>
+    </fragment>
+</navigation>

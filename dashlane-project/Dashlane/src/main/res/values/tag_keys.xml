@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="VIEW_DB_ID" type="id"/>
+    <item name="VIEW_DB_UID" type="id"/>
+    <item name="VIEW_ITEM_TYPE" type="id"/>
+    <item name="VIEW_URL" type="id"/>
+    <item name="address" type="id"/>
+    <item name="email" type="id"/>
+    <item name="creditcard_issue_month" type="id"/>
+    <item name="address_house_number" type="id"/>
+    <item name="address_building" type="id"/>
+    <item name="address_floor" type="id"/>
+    <item name="address_appartment" type="id"/>
+    <item name="address_doorcode" type="id"/>
+
+    <item name="position" type="id"></item>
+
+</resources>

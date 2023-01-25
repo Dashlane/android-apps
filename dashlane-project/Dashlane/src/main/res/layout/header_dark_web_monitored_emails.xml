@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_normal"
+    >
+
+    <TextView
+        android:id="@+id/header_dark_web_monitored_emails_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody1"
+        app:layout_constraintEnd_toStartOf="@+id/collapse_arrow"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="1 email monitored"
+        />
+
+    <TextView
+        android:id="@+id/header_dark_web_monitored_emails_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="?colorOnBackgroundMedium"
+        app:layout_constraintEnd_toStartOf="@+id/collapse_arrow"
+        app:layout_constraintStart_toEndOf="@+id/header_dark_web_monitored_emails_indicator"
+        app:layout_constraintTop_toBottomOf="@id/header_dark_web_monitored_emails_title"
+        tools:text="Scanning regularly"
+        />
+
+    <ImageView
+        android:id="@+id/collapse_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/and_accessibility_action_expand"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_arrow_up_outlined"
+        />
+
+    <ImageView
+        android:id="@+id/header_dark_web_monitored_emails_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="@dimen/spacing_small"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@+id/header_dark_web_monitored_emails_subtitle"
+        app:layout_constraintEnd_toStartOf="@+id/header_dark_web_monitored_emails_subtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header_dark_web_monitored_emails_title"
+        app:srcCompat="@drawable/dark_web_email_monitored_indicator"
+        tools:tint="@color/text_positive_standard"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

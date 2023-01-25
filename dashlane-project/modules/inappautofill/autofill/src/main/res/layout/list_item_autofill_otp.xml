@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?colorSurface"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_normal"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:drawablePadding="@dimen/spacing_extra_small"
+        android:text="@string/autofill_sms_otp_proposition"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="?colorOnSurface"
+        />
+
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:importantForAccessibility="no"
+        android:src="@drawable/day_night_logo"
+        />
+
+</LinearLayout>

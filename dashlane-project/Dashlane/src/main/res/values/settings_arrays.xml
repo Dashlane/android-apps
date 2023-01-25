@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="timeout_strings">
+        <item>@string/setting_timeout_inf</item>
+        <item>@string/setting_timeout_5</item>
+        <item>@string/setting_timeout_30</item>
+        <item>@string/setting_timeout_60</item>
+        <item>@string/setting_timeout_180</item>
+        <item>@string/setting_timeout_300</item>
+        <item>@string/setting_timeout_900</item>
+    </string-array>
+
+    <integer-array name="timeout_values">
+        <item>-1</item>
+        <item>5</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>300</item>
+        <item>900</item>
+    </integer-array>
+</resources>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:dashlane="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_normal"
+    >
+
+    <TextView
+        android:id="@+id/item_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_small"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textSize="@dimen/dashlane_font_size_medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Your Setting name"
+        />
+
+    <TextView
+        android:id="@+id/item_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="?colorOnBackgroundMedium"
+        dashlane:layout_constraintEnd_toEndOf="@+id/item_title"
+        dashlane:layout_constraintStart_toStartOf="@+id/item_title"
+        dashlane:layout_constraintTop_toBottomOf="@+id/item_title"
+        tools:text="Blablablabla blabla bla blabla"
+        />
+
+    <TextView
+        android:id="@+id/item_third_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceCaption"
+        android:textColor="?colorOnBackgroundMedium"
+        dashlane:layout_constraintBottom_toBottomOf="parent"
+        dashlane:layout_constraintStart_toStartOf="@+id/item_title"
+        dashlane:layout_constraintTop_toBottomOf="@+id/item_subtitle"
+        tools:text="Setting > General"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

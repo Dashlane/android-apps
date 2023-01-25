@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="false"
+    tools:context=".offer.list.view.OffersActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/offer_details_benefits_recyclerview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fadeScrollbars="false"
+        android:padding="@dimen/spacing_normal"
+        android:scrollbarFadeDuration="0"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toTopOf="@id/offer_details_bottom_sheet"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="640dp"
+        tools:listitem="@layout/offer_details_benefit_item" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/offer_details_bottom_sheet"
+        style="@style/Widget.MaterialComponents.BottomSheet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?colorSurface"
+        android:padding="@dimen/spacing_normal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_max="640dp"
+        tools:visibility="visible">
+
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/offer_details_cta_flow"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            app:constraint_referenced_ids="offer_details_monthly_group,offer_details_yearly_group"
+            app:flow_horizontalGap="@dimen/spacing_normal"
+            app:flow_wrapMode="chain"
+            app:layout_constraintBottom_toTopOf="@id/offer_details_barrier"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/offer_details_monthly_group"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:constraint_referenced_ids="offer_details_monthly_cta, offer_details_monthly_cta_additional_info"
+            app:flow_wrapMode="chain" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/offer_details_yearly_group"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:constraint_referenced_ids="offer_details_yearly_cta, offer_details_yearly_cta_additional_info"
+            app:flow_wrapMode="chain" />
+
+        <Button
+            android:id="@+id/offer_details_monthly_cta"
+            style="@style/Widget.Dashlane.Button.Monthly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constrainedWidth="true"
+            tools:ignore="MissingConstraints"
+            tools:text="$6.00\nfor 1 month" />
+
+        <TextView
+            android:id="@+id/offer_details_monthly_cta_additional_info"
+            style="@style/TextAppearance.Dashlane.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_neutral_quiet"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/offer_details_monthly_cta"
+            app:layout_constraintStart_toStartOf="@+id/offer_details_monthly_cta"
+            app:layout_constraintTop_toBottomOf="@id/offer_details_monthly_cta"
+            tools:text="then $X per month"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/offer_details_yearly_cta"
+            style="@style/Widget.Dashlane.Button.Yearly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constrainedWidth="true"
+            tools:ignore="MissingConstraints"
+            tools:text="$36.00\nfor 12 months" />
+
+        <TextView
+            android:id="@+id/offer_details_yearly_cta_additional_info"
+            style="@style/TextAppearance.Dashlane.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_neutral_quiet"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/offer_details_yearly_cta"
+            app:layout_constraintStart_toStartOf="@+id/offer_details_yearly_cta"
+            app:layout_constraintTop_toBottomOf="@id/offer_details_yearly_cta"
+            tools:text="then $X per year"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/offer_details_barrier"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+
+            android:orientation="horizontal"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="offer_details_monthly_cta_additional_info,offer_details_yearly_cta_additional_info" />
+
+        <TextView
+            android:id="@+id/offer_details_disclaimer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textAppearance="?textAppearanceCaption"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/offer_details_barrier"
+            tools:text="@string/plan_disclaimer_default" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

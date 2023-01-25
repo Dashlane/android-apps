@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="password_generator_max_length_generated_password">40</integer>
+    <integer name="password_generator_min_length_generated_password">4</integer>
+</resources>

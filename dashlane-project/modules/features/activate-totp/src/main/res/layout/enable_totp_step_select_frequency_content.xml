@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RadioButton
+        android:id="@+id/option_new_device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/enable_totp_select_frequency_option_new_device"
+        android:textColor="@color/text_neutral_catchy" />
+
+    <RadioButton
+        android:id="@+id/option_every_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/enable_totp_select_frequency_option_every_time"
+        android:textColor="@color/text_neutral_catchy" />
+
+</RadioGroup>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dashlane="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_alert"
+        android:icon="@drawable/action_bar_menu_alert"
+        android:title="@string/talk_to_me_menu_entry_title"
+        dashlane:showAsAction="always" />
+
+</menu>

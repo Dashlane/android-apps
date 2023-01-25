@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fragment_lock_pincode_logout_margin_top">2dp</dimen>
+    <dimen name="fragment_lock_pincode_header_margin_top">35dp</dimen>
+    <dimen name="fragment_lock_pincode_keyboard_margin_top">18.5dp</dimen>
+    <dimen name="fragment_lock_pincode_header_pin_area_margin_top">22.5dp</dimen>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/topic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceHeadline2"
+        android:textColor="?colorTextCatchy"
+        tools:text="Enter your PIN Code"
+        />
+
+    <TextView
+        android:id="@+id/question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fragment_lock_pincode_header_line2_margin_top"
+        android:gravity="center_horizontal"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textColor="?colorOnBackgroundMedium"
+        tools:text="Logged in as randomemail@provider.com"
+        />
+
+
+</LinearLayout>

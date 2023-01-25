@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_update_needed">A new update is available</string>
+    <string name="app_update_needed_button">Install</string>
+</resources>

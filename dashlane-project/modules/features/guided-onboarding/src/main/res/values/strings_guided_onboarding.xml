@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guided_onboarding_question_number">%1$d of %2$d</string>
+
+    <string name="guided_onboarding_brings_title">How can we make your life easier?</string>
+
+    <string name="guided_onboarding_brings_autofill_title">Type my logins for me</string>
+    <string name="guided_onboarding_brings_autofill_detail">Gladly! Our Autofill feature will help you log in to sites and apps instantly.</string>
+    <string name="guided_onboarding_brings_m2w_title">Sync logins across my devices</string>
+    <string name="guided_onboarding_brings_m2w_detail">Consider it done. We’ll help you install Dashlane everywhere you use the internet so you\'ll always have access to your logins.</string>
+    <string name="guided_onboarding_brings_dwm_title">Warn me about hacks</string>
+    <string name="guided_onboarding_brings_dwm_detail">We’ve got your back. We’ll notify you when a website you have an account with gets hacked, and then help you protect your account.</string>
+
+    <string name="guided_onboarding_handle_title">How do you keep track of your logins?</string>
+
+    <string name="guided_onboarding_handle_memory_title">I remember them</string>
+    <string name="guided_onboarding_handle_memory_detail">Time to free up some of your precious brain space! Your Vault’s ready to store everything you need—on any device and browser.</string>
+    <string name="guided_onboarding_handle_other_title">I do something else</string>
+    <string name="guided_onboarding_handle_other_detail">Great to have you here! You’ll love how easy and secure life will feel with your new Vault—and how it works on any device and browser.</string>
+    <string name="guided_onboarding_handle_digital_tool_title">I use a digital tool</string>
+    <string name="guided_onboarding_handle_digital_tool_detail">You’ll love your new vault—and how it works on any device and browser. We’re ready to import from Chrome, password managers, or Excel files.</string>
+
+    <string name="guided_onboarding_dwm_title">Find out if your info has been part of a breach</string>
+    <string name="guided_onboarding_dwm_email_title">We’ll search for breaches associated with your email, then help you secure your accounts.</string>
+
+    <string name="guided_onboarding_skip_button">Skip</string>
+    <string name="guided_onboarding_trust_button_v2">What about security?</string>
+    <string name="guided_onboarding_continue">Continue</string>
+    <string name="guided_onboarding_dwm_positive_button">Check for breaches</string>
+
+    <string name="guided_onboarding_handle_memory_action">Add your first login</string>
+    <string name="guided_onboarding_handle_browser_action">Import from your browser</string>
+    <string name="guided_onboarding_handle_password_manager_action">Import from password manager</string>
+    <string name="guided_onboarding_handle_csv_action">Import your Excel file</string>
+    <string name="guided_onboarding_handle_other_action">Add your first login</string>
+    <string name="guided_onboarding_handle_digital_tool_action">Get your logins in a safe place</string>
+    
+    <string name="guided_onboarding_dwm_email_placeholder" translatable="false"randomemail@provider.com</string>
+
+    <string name="guided_onboarding_building_plan_title">We’re building your setup plan</string>
+    <string name="guided_onboarding_plan_ready_title">Your plan is ready!</string>
+</resources>

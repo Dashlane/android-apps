@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dashlane.m2w">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application>
+        <activity
+            android:name=".M2wIntroActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Dashlane.Modal" />
+        <activity
+            android:name=".M2wConnectActivity"
+            android:label="@string/m2w_connect_title"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Dashlane" />
+    </application>
+</manifest>

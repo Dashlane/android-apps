@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:minWidth="280dp"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/spacing_big">
+
+        <ImageView
+            android:id="@+id/dialog_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/dialog_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:textColor="@color/text_neutral_catchy"
+            tools:text="This is a title" />
+
+        <TextView
+            android:id="@+id/dialog_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:lineSpacingExtra="@dimen/spacing_extra_small"
+            android:textAppearance="?textAppearanceSubtitle1"
+            tools:text="This is a test message. Keep up the Good work" />
+
+        <com.dashlane.ui.activities.intro.IntroButtonBarLayout
+            android:id="@+id/buttons_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:gravity="end">
+
+            <com.dashlane.design.component.compat.view.ButtonMediumView
+                android:id="@+id/dialog_negative_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:visibility="gone"
+                app:intensity="quiet"
+                app:mood="brand"
+                tools:enabled="true"
+                tools:text="Close"
+                tools:visibility="visible" />
+
+            <com.dashlane.design.component.compat.view.ButtonMediumView
+                android:id="@+id/dialog_positive_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:layout_marginLeft="@dimen/spacing_normal"
+                app:intensity="catchy"
+                app:mood="brand"
+                tools:text="Go Premium" />
+        </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+    </LinearLayout>
+</ScrollView>

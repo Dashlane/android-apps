@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_medium"
+        android:text="@string/enable_totp_display_recovery_codes_header"
+        android:textAllCaps="true"
+        android:textAppearance="?textAppearanceCaption"
+        android:textColor="@color/text_neutral_quiet" />
+
+    <TextView
+        android:id="@+id/recovery_codes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/background_enable_totp_surface"
+        android:fontFamily="@font/roboto_mono_regular"
+        android:padding="16dp"
+        android:textIsSelectable="true"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="@color/text_neutral_catchy"
+        tools:text="VKLLSDRFVCDFREZA" />
+
+    <com.dashlane.ui.widgets.view.Infobox
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/enable_totp_display_recovery_codes_info" />
+
+</LinearLayout>

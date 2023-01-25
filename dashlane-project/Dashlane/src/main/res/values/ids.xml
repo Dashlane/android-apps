@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="ID_SEARCH_VIEW" type="id" />
+    <item name="tag_password_transformation" type="id" />
+    <item name="tag_item_position" type="id" />
+
+    <item name="password_safety_label_textview" type="id" />
+    <item name="password_safety_strength_textview" type="id" />
+    <item name="password_safety_reused_textview" type="id" />
+    <item name="password_safety_compromised_textview" type="id" />
+
+    <item name="quick_actions_open_menu" type="id" />
+</resources>

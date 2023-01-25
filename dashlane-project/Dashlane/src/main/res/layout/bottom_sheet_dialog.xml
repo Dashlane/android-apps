@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_sheet_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bottom_sheet_round_corner"
+    android:gravity="start"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/linear_layout_vertical_margin"
+    android:paddingBottom="@dimen/linear_layout_vertical_margin"
+    android:theme="@style/Theme.Dashlane"
+    />

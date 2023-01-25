@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="dashlane_labs_title">What is Dashlane Labs?</string>
+    
+    <string name="dashlane_labs_description">[INTERNAL] \"Dashlane Labs\" is a special section in the settings of our iOS, Android and Web extensions which will allow early adopters to toggle alpha or beta features on or off for themselves and to give us early feedback before we release them to production.</string>
+    
+    <string name="dashlane_labs_feedback_title">Feedback</string>
+    
+    <string name="dashlane_labs_feedback_description">[INTERNAL] We would love to hear about what you think of Dashlane Labs!</string>
+    
+    <string name="dashlane_labs_feedback_share">Share feedback</string>
+</resources>

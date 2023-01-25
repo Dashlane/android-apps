@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_cta_primary">Get started</string>
+    <string name="welcome_cta_secondary">Log in</string>
+    <string name="welcome_trust_title">The app that makes the internet easier</string>
+    <string name="welcome_trust_description">Discover why we have 50,000 five-star reviews and counting.</string>
+    <string name="welcome_vault_title">Every login, everywhere</string>
+    <string name="welcome_vault_description">Store logins, IDs, and payment information in your vault.</string>
+    <string name="welcome_autofill_title">End the tedious typing</string>
+    <string name="welcome_autofill_description">Use your favorite websites and apps without typing a username or password.</string>
+    <string name="welcome_alert_title">Purpose-built for security</string>
+    <string name="welcome_alert_description">Receive real-time alerts and customized action plans to stay one step ahead.</string>
+    <string name="welcome_encryption_title">We don’t want your data</string>
+    <string name="welcome_encryption_description">Our patented zero-knowledge encryption means your data remains private, even from us.</string>
+    <string name="welcome_backup_title">Sign up for Dashlane</string>
+    <string name="welcome_backup_description">Sync your 2FA tokens across the Dashlane Authenticator and Password Manager apps, so you always have access to your accounts.</string>
+</resources>

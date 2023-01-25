@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="error">Error</string>
+    <string name="general_error">Error</string>
+
+    <string name="dashlane_main_app_name">Dashlane</string>
+
+    <string name="notification_channel_security_title">Security alerts</string>
+    <string name="notification_channel_token_title">Verification codes</string>
+    <string name="notification_channel_passive_title">General</string>
+    <string name="notification_channel_vpn_title">WiFi and VPN</string>
+    <string name="notification_channel_marketing_title">Promotions and tips</string>
+    <string name="notification_channel_otp_title">One-time access codes</string>
+    <string name="notification_channel_follow_up_notification_title">Quick access notification</string>
+
+    <string name="master_password">Enter Master Password</string>
+    <string name="password_is_not_correct_please_try_again">Invalid Password. Please check your Master Password.</string>
+    <string name="password_is_not_correct_please_try_again_with_login_issues">Wrong Master Password. Are you experiencing %1$s</string>
+    <string name="password_is_not_correct_please_try_again_with_login_issues_underline">login issues?</string>
+    <string name="description_add_password_button">Add login</string>
+</resources>

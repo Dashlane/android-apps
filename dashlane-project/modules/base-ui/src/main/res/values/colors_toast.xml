@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="toast_font_color">@color/brand_white</color>
+    <color name="toast_font_color_dark">@color/brand_black</color>
+    <color name="toast_background_color">@color/brand_darkest_grey</color>
+    <color name="toast_background_color_dark">@color/brand_grey_05</color>
+</resources>

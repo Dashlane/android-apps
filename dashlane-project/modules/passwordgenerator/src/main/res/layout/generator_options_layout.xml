@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:id="@+id/password_generator_option_length_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/fragment_password_generator_length_margin_top"
+            android:maxLines="1"
+            android:text="@string/password_generator_length1"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="@color/text_neutral_quiet"
+            />
+
+        <TextView
+            android:id="@+id/password_generator_option_length_min_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/password_generator_option_length_title"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="@dimen/fragment_password_generator_length_min_margin_top"
+            android:maxLines="1"
+            android:textAppearance="?textAppearanceBody1"
+            />
+
+        <TextView
+            android:id="@+id/password_generator_option_length_max_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/password_generator_option_length_title"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="@dimen/fragment_password_generator_length_min_margin_top"
+            android:maxLines="1"
+            android:textAppearance="?textAppearanceBody1"
+            />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/password_generator_option_length_seek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/password_generator_option_length_title"
+            android:layout_marginTop="@dimen/fragment_password_generator_length_seek_margin_top"
+            android:layout_toStartOf="@+id/password_generator_option_length_max_title"
+            android:layout_toEndOf="@+id/password_generator_option_length_min_title"
+            android:paddingStart="@dimen/fragment_password_generator_length_seek_margin_left_right"
+            android:paddingEnd="@dimen/fragment_password_generator_length_seek_margin_left_right"
+            android:stepSize="1"
+            android:valueFrom="@integer/password_generator_min_length_generated_password"
+            android:valueTo="@integer/password_generator_max_length_generated_password"
+            app:tickVisible="false"
+            tools:contentDescription="@string/and_accessibility_generator_password_length"
+            />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/fragment_password_generator_separator_margin_top"
+        android:visibility="invisible"
+        />
+
+    <include
+        android:id="@+id/password_generator_option_digits"
+        layout="@layout/include_fragment_password_generator_options_item"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/fragment_password_generator_option_separator_margin_top"
+        android:visibility="invisible"
+        />
+
+    <include
+        android:id="@+id/password_generator_option_letters"
+        layout="@layout/include_fragment_password_generator_options_item"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/fragment_password_generator_option_separator_margin_top"
+        android:visibility="invisible"
+        />
+
+    <include
+        android:id="@+id/password_generator_option_symbols"
+        layout="@layout/include_fragment_password_generator_options_item"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/fragment_password_generator_option_separator_margin_top"
+        android:visibility="invisible"
+        />
+
+    <include
+        android:id="@+id/password_generator_option_ambiguous"
+        layout="@layout/include_fragment_password_generator_options_item"
+        />
+</LinearLayout>

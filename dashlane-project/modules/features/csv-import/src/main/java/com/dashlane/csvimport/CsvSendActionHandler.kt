@@ -1,0 +1,73 @@
+package com.dashlane.csvimport
+
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import androidx.lifecycle.ViewModelProvider
+import com.dashlane.navigation.NavigationHelper.Destination
+import com.dashlane.navigation.NavigationUriBuilder
+import com.dashlane.session.SessionRetrieverComponent
+import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.useractivity.log.usage.UsageLogCode75
+import com.dashlane.util.coroutines.getDeferredViewModel
+import com.dashlane.util.getParcelableExtraCompat
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+
+
+class CsvSendActionHandler : DashlaneActivity() {
+    override var requireUserUnlock = false
+
+    private val hasSession: Boolean
+        get() = SessionRetrieverComponent(this).sessionManager.session != null
+
+    private val uri: Uri
+        get() = requireNotNull(intent?.takeIf { it.action == Intent.ACTION_SEND }
+            ?.getParcelableExtraCompat(Intent.EXTRA_STREAM)) { "uri == null" }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        launch(Dispatchers.Main.immediate) {
+            runCatching {
+                val intent = if (hasSession) {
+                    CsvImportActivity.newIntent(
+                        this@CsvSendActionHandler,
+                        uri,
+                        UsageLogCode75.Origin.FROM_THIRD_PARTY
+                    )
+                } else {
+                    Intent(Intent.ACTION_VIEW).apply {
+                        data = NavigationUriBuilder()
+                            .origin(UsageLogCode75.Origin.FROM_THIRD_PARTY.code)
+                            .host(Destination.MainPath.CSV_IMPORT)
+                            .appendQueryParameter(Destination.PathQueryParameters.CsvImport.URI, copiedUri().toString())
+                            .build()
+                    }
+                }
+
+                startActivity(intent)
+            }
+
+            finish()
+        }
+    }
+
+    private suspend fun copiedUri(): Uri {
+        val copyViewModel = ViewModelProvider(this)
+            .getDeferredViewModel<Uri>("copy")
+
+        val deferred = copyViewModel.deferred ?: copyViewModel.async(Dispatchers.IO) {
+            val file = File.createTempFile("csv_send_action_handler", null, cacheDir)
+
+            requireNotNull(contentResolver.openInputStream(uri)) { "cannot open uri" }
+                .use { input -> file.outputStream().use { output -> input.copyTo(output) } }
+
+            Uri.fromFile(file)
+        }
+
+        return deferred.await()
+    }
+}

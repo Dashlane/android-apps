@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trust_faq_title">Here are the questions we get asked most often:</string>
+    <string name="trust_faq_what_if_hacked_title">What if Dashlane gets hacked?</string>
+    <string name="trust_faq_what_if_hacked_detail">&lt;b&gt;Hackers won’t be able to see your passwords.&lt;/b&gt; We don’t save your Master Password in any form. Without it, your data remains safely indecipherable. This means that even in the unlikely event that Dashlane is hacked, everything in your account will remain securely encrypted.</string>
+    <string name="trust_faq_can_dashlane_see_title">Can Dashlane see my passwords?</string>
+    <string name="trust_faq_can_dashlane_see_detail">&lt;b&gt;We can’t.&lt;/b&gt; Everything you store in Dashlane is encrypted (converted to a scrambled code). The key to access this data is your Master Password, and only you know that. </string>
+    <string name="trust_faq_how_dashlane_make_money_title">How does Dashlane make money?</string>
+    <string name="trust_faq_how_dashlane_make_money_detail">&lt;b&gt;We have a Premium plan.&lt;/b&gt; We never sell or share any data. You can learn more about our plans in your account section in the app.</string>
+    <string name="trust_faq_can_i_leave_title">Can I leave and take my data?</string>
+    <string name="trust_faq_can_i_leave_detail">&lt;b&gt;Yes, you can.&lt;/b&gt; We built a feature that allows you to export your data whenever you like.</string>
+    <string name="trust_faq_is_it_more_secure_title">Is Dashlane really more secure?</string>
+    <string name="trust_faq_is_it_more_secure_detail">&lt;b&gt;The simple answer is yes.&lt;/b&gt; We designed Dashlane to be decentralized, which means that every user’s account is completely separate. So, even in the highly unlikely event that someone broke into Dashlane’s server and an account was compromised, all others would remain safe.\n\nIn contrast, Login with Facebook and other similar features from Big Tech are centralized systems. Which means all accounts are at risk when they get hacked.</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_keyboard_announcement_autofill_title">The new Autofill update has arrived</string>
+    <string name="autofill_keyboard_announcement_autofill_on_body">Now you can autofill your accounts directly from your compatible keyboard.</string>
+    <string name="autofill_keyboard_announcement_autofill_on_positive_cta">OK, got it</string>
+
+    <string name="autofill_keyboard_announcement_autofill_off_body">Turn on Autofill to fill your logins directly from your compatible keyboard.</string>
+    <string name="autofill_keyboard_announcement_autofill_off_positive_cta">Activate Autofill</string>
+    <string name="autofill_keyboard_announcement_autofill_off_negative_cta">Do it Later</string>
+</resources>

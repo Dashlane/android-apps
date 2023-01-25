@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="breach_alert_popup_dark_web_title">Dark web alert</string>
+    <string name="breach_alert_popup_dark_web_title_plural">Dark web alerts</string>
+    <string name="breach_alert_popup_dark_web_positive_button">View</string>
+    <string name="breach_alert_popup_dark_web_negative_button">Not now</string>
+    <string name="breach_alert_popup_dark_web_body">We found some of your information on the dark web. View the details and our advice to secure your info.</string>
+
+    <string name="breach_alert_popup_dark_web_password_hidden_placeholder" translatable="false">••••••••••••••••••••••••</string>
+
+    <string name="dwm_alert_unknown_domain">Unknown domain</string>
+    <string name="dwm_breaches_section_title">Discovered on the Dark Web</string>
+
+    <string name="dwm_breach_delete_undo_desc">Alert deleted</string>
+    <string name="dwm_breach_delete_undo_cta">Undo</string>
+
+    <string name="dwm_dark_web_alert_detail_title">Dark Web alert</string>
+    <string name="dwm_dark_web_alert_detail_subtitle">We have found some of your information by browsing the dark web.\nThe data below is exposed and available to hackers that may use it.</string>
+    <string name="dwm_alert_detail_title">Security alert</string>
+    <string name="dwm_alert_detail_subtitle">This website has been breached, and data has been stolen.\nThis means your account and data are at risk.</string>
+    <string name="dwm_alert_detail_date_label">Breach date</string>
+    <string name="dwm_alert_detail_password_label">Affected passwords</string>
+    <string name="dwm_alert_detail_email_label">Affected email address</string>
+    <string name="dwm_alert_detail_website_label">Affected websites</string>
+    <string name="dwm_alert_detail_other_label">Other data affected</string>
+    <string name="dwm_alert_detail_advice_label">Our advice</string>
+    <string name="dwm_alert_detail_delete_cta">Delete alert</string>
+    <string name="dwm_alert_detail_advice_creditcard">Reach out to %1$s to figure which credit card has been compromised and contact your bank to order a new one.</string>
+    <string name="dwm_alert_detail_advice_creditcard_nodomain">Contact your bank to report your credit card as compromised and order a new one.</string>
+    <string name="dwm_alert_detail_advice_password">Change your password and avoid reusing it for other accounts.</string>
+    <string name="dwm_alert_detail_advice_password_multiple">This password is reused for %1$d other logins saved in Dashlane. Change them now.</string>
+    <string name="dwm_alert_detail_advice_password_changed">You’ve taken the necessary actions to change this password on your affected accounts. Please make sure you don\'t use this password again for any account.</string>
+    <string name="dwm_alert_detail_view_accounts_cta">View affected accounts</string>
+    <string name="dwm_alert_detail_change_password_cta">Change password</string>
+    <string name="dwm_alert_detail_mark_done_cta">Mark as done</string>
+    <string name="dwm_emails_monitored_subtitle_scanning">Regularly scanning</string>
+    <string name="dwm_emails_monitored_add_email_button">Add email</string>
+    <string name="empty_dwm_breaches">Our Dark Web Monitoring feature is active, so we’ll let you know if we find anything in the future.</string>
+    <string name="empty_dwm_breaches_email_pending">Verify your email to start Dark Web Monitoring.</string>
+    <string name="empty_dwm_breaches_resolved">No resolved alerts yet.</string>
+    <string name="empty_dwm_breaches_button">Check pending alerts</string>
+    <string name="dwm_email_placeholder"randomemail@provider.com</string>
+    <string name="dwm_alert_solved">Alert resolved</string>
+    <plurals name="dwm_emails_monitored_spot">
+        <item quantity="one">%1$d spot available</item>
+        <item quantity="other">%1$d spots available</item>
+    </plurals>
+    <plurals name="dwm_emails_monitored_title">
+        <item quantity="one">Monitoring %1$d email</item>
+        <item quantity="other">Monitoring %1$d emails</item>
+    </plurals>
+    <plurals name="dwm_emails_monitored_subtitle_pending">
+        <item quantity="one">Go to your inbox to verify this email.</item>
+        <item quantity="other">Go to your inbox to verify these emails.</item>
+    </plurals>
+    <string name="dwm_status_pending">Pending (%1$s)</string>
+    <string name="dwm_status_resolved">Resolved (%1$s)</string>
+    <plurals name="dwm_breaches_deleted">
+        <item quantity="one">%1$d alert deleted</item>
+        <item quantity="other">%1$d alerts deleted</item>
+    </plurals>
+    <plurals name="dwm_breaches_selected">
+        <item quantity="one">%1$d alert selected</item>
+        <item quantity="other">%1$d alerts selected</item>
+    </plurals>
+</resources>

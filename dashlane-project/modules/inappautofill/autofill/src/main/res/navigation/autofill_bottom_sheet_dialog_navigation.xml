@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/all_accounts_navigation"
+    app:startDestination="@id/nav_all_accounts">
+
+    <fragment
+        android:id="@+id/nav_root_decision"
+        android:name="com.dashlane.autofill.api.navigation.AutofillBottomSheetRootFragment">
+        <action
+            android:id="@+id/to_nav_create_account"
+            app:destination="@+id/nav_create_account"
+            app:popUpTo="@+id/nav_root_decision"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/to_nav_change_password"
+            app:destination="@+id/nav_change_password"
+            app:popUpTo="@+id/nav_root_decision"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_all_accounts"
+        android:name="com.dashlane.autofill.api.viewallaccounts.view.BottomSheetAuthentifiantsSearchAndFilterDialogFragment"
+        tools:layout="@layout/bottom_sheet_authentifiant_list_dialog_fragment">
+        <action
+            android:id="@+id/create_account_from_all_accounts"
+            app:destination="@id/nav_create_account"
+            app:enterAnim="@anim/slide_in_bottom"
+            app:exitAnim="@anim/slide_out_bottom"
+            app:popEnterAnim="@anim/slide_in_bottom"
+            app:popExitAnim="@anim/slide_out_bottom" />
+        <action
+            android:id="@+id/link_service_from_all_accounts"
+            app:destination="@id/nav_link_service"
+            app:enterAnim="@anim/slide_in_bottom"
+            app:exitAnim="@anim/slide_out_bottom"
+            app:popEnterAnim="@anim/slide_in_bottom"
+            app:popExitAnim="@anim/slide_out_bottom" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_create_account"
+        android:name="com.dashlane.autofill.api.createaccount.BottomSheetCreateAccountDialogFragment"
+        tools:layout="@layout/bottom_sheet_create_account_layout">
+        <argument
+            android:name="args_webpage"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="args_package_name"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_change_password"
+        android:name="com.dashlane.autofill.api.changepassword.BottomSheetChangePasswordDialogFragment"
+        tools:layout="@layout/bottom_sheet_create_account_layout">
+        <argument
+            android:name="args_webpage"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="args_package_name"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_link_service"
+        android:name="com.dashlane.autofill.api.rememberaccount.view.AutofillLinkServiceFragment"
+        tools:layout="@layout/bottom_sheet_link_service">
+        <argument
+            android:name="form_source"
+            app:argType="com.dashlane.autofill.formdetector.model.AutoFillFormSource" />
+        <argument
+            android:name="item_id"
+            app:argType="string" />
+    </fragment>
+</navigation>

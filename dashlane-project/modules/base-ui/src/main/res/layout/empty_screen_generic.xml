@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingHorizontal="@dimen/spacing_normal">
+
+        <com.dashlane.ui.widgets.view.Infobox
+            android:id="@+id/empty_screen_infobox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:layout_constraintBottom_toTopOf="@+id/empty_screen_img"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="Secure Notes is a paid feature. Upgrade to our Essentials plan to store and share encrypted documents." />
+
+        <ImageView
+            android:id="@+id/empty_screen_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_marginBottom="@dimen/spacing_big"
+            android:importantForAccessibility="no"
+            app:layout_constraintBottom_toTopOf="@+id/guideline"
+            app:layout_constraintEnd_toEndOf="@+id/empty_screen_line2"
+            app:layout_constraintStart_toStartOf="@+id/empty_screen_line2"
+            app:layout_constraintTop_toBottomOf="@+id/empty_screen_infobox"
+            app:tint="@color/text_brand_quiet"
+            tools:src="@drawable/ic_empty_password" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_huge"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.4" />
+
+        <TextView
+            android:id="@+id/empty_screen_line1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="?textAppearanceHeadline1"
+            app:layout_constraintEnd_toEndOf="@+id/empty_screen_line2"
+            app:layout_constraintStart_toStartOf="@+id/empty_screen_line2"
+            app:layout_constraintTop_toBottomOf="@+id/guideline"
+            tools:text="Add your passwords" />
+
+        <TextView
+            android:id="@+id/empty_screen_line2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_big"
+            android:gravity="center"
+            android:textAppearance="?textAppearanceBody1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/empty_screen_line1"
+            app:layout_goneMarginTop="0dp"
+            tools:text="start adding passwords to your Dashlane Vault." />
+
+        <Button
+            android:id="@+id/empty_screen_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_huge"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/empty_screen_line2"
+            app:layout_constraintStart_toStartOf="@+id/empty_screen_line2"
+            app:layout_constraintTop_toBottomOf="@+id/empty_screen_line2"
+            app:layout_constraintVertical_bias="0"
+            tools:text="Check pending alerts"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

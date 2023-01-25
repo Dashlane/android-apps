@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="get_started_dismiss">Dismiss this section</string>
+
+    <string name="get_started_step_check_dwm_alerts_title">Address your previous breaches</string>
+    <string name="get_started_step_check_dwm_alerts_subtitle">We’ll help you secure your accounts to prevent further breaches.</string>
+    <string name="get_started_step_check_dwm_alerts_cta">View scan results</string>
+    <string name="get_started_step_secure_vault_title">Get your logins in a safe place</string>
+    <string name="get_started_step_secure_vault_subtitle">We’ll help you retrieve your logins and put them where they belong—here</string>
+    <string name="get_started_step_secure_vault_cta">Add logins</string>
+    <string name="get_started_step_enable_autofill_title">Forget about typing your logins</string>
+    <string name="get_started_step_enable_autofill_subtitle">We’ll help you log in automatically whenever you want, securely</string>
+    <string name="get_started_step_enable_autofill_cta">Activate Autofill</string>
+    <string name="get_started_step_add_computer_title">Access your logins on your computer</string>
+    <string name="get_started_step_add_computer_subtitle">We’ll help you connect your computer so you’ll always be able to use your logins</string>
+    <string name="get_started_step_add_computer_cta">Connect computer</string>
+</resources>

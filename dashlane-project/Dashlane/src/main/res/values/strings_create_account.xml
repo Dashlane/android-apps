@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="confirm">Confirm</string>
+    <string name="create_account_confirm_unlikely_email">The email address you entered has not been recognized and may be incorrect. Continue account creation with this email address?</string>
+    <string name="create_account_choose_password_title">...and a Master Password. The one to rule them all.</string>
+    <string name="create_account_choose_password_see_tips">Need help? See our tips</string>
+    <string name="create_account_choose_password_hint">Create your Master Password</string>
+    <string name="create_account_choose_password_tips">Note: For your security, we don’t store your Master Password. Make sure you remember it!</string>
+    <string name="create_account_email_title">Let\'s start with your email...</string>
+    <string name="create_account_email_subtitle">We don\'t need much to get the ball rolling.</string>
+    <string name="create_account_confirm_password_title">Got it. Can you type it one more time?</string>
+    <string name="create_account_confirm_password_subtitle">Just making sure you\'re happy with it.</string>
+    <string name="create_account_confirm_password_hint">Type your Master Password again</string>
+    <string name="create_account_tos_offers">I’d like to receive emails with tips and special offers for Dashlane.</string>
+    <string name="create_account_tos_conditions_required_indicator">*</string>
+    <string name="create_account_error_email_description">The email address that you entered appears invalid. Please check it, and try again.</string>
+    <string name="create_account_error_email_empty_description">You need to enter an email address to proceed.</string>
+    <string name="username_exists_already">There already is an account with that email address. Try logging in, or create an account with another email address.</string>
+    <string name="unable_to_verify_username_with_dashlane_at_this_time_please_try_again_later">Unable to verify username with Dashlane at this time. Please try again later.</string>
+    <string name="passwords_do_not_match">This doesn\'t match your Master Password. Please try again.</string>
+
+    <string name="password_creation_empty_title">Create a strong Master Password</string>
+    <string name="password_creation_empty_suggestion_1">Using symbols, single digits, and uppercase letters does not make your password stronger.</string>
+    <string name="password_creation_empty_suggestion_2">Use multiple words, and avoid common phrases like \"atthebeach.\"</string>
+
+    <string name="create_account_tos_bottom_sheet_title">Please agree to our Terms of Service and Privacy Policy</string>
+    <string name="create_account_tos_bottom_sheet_conditions_template">I agree with the %1$s and %2$s.</string>
+    <string name="create_account_tos_bottom_sheet_conditions_link_text_terms_of_service">Terms of Service</string>
+    <string name="create_account_tos_bottom_sheet_conditions_link_text_privacy_policy">Privacy Policy</string>
+    <string name="create_account_tos_bottom_sheet_cta_agree">I agree</string>
+
+    <string name="create_account_settings_title">Make Dashlane fast and easy</string>
+    <string name="create_account_settings_biometric">Biometric unlock</string>
+    <string name="create_account_settings_biometric_desc">Unlock Dashlane with one look or touch</string>
+    <string name="create_account_settings_resetmp">Master Password reset</string>
+    <string name="create_account_settings_resetmp_desc">In case you forget it</string>
+    <string name="create_account_settings_info_cta">How it works</string>
+    <string name="create_account_settings_info_back">Back</string>
+    <string name="create_account_settings_info_description">If you turn on &lt;b&gt;Biometric unlock&lt;/b&gt; or &lt;b&gt;Master Password reset&lt;/b&gt; we\'ll encrypt your Master Password and store it on your device. It remains encrypted from everyone, including us.&lt;br/&gt;&lt;br/&gt;Note: &lt;b&gt;Master Password reset&lt;/b&gt; needs &lt;b&gt;Biometric unlock&lt;/b&gt; enabled to work.</string>
+    <string name="create_account_settings_warning_toast">Master Password reset needs Biometric unlock enabled to work.</string>
+
+    <string name="create_account_cta_continue">Continue</string>
+</resources>

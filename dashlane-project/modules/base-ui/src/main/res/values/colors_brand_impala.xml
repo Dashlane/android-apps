@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <color name="brand_impala_teal_01">#008AA8</color>
+
+    
+    <color name="brand_impala_dark_teal_00">#002932</color>
+
+    
+    <color name="brand_impala_bluish_black_00">#0C0E14</color>
+    <color name="brand_impala_bluish_black_01">#181A1F</color>
+</resources>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dashlane="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#000"
+    android:backgroundTint="@color/item_highlighted_background_tint"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:ignore="Overdraw, ButtonStyle"
+    >
+
+    <com.dashlane.ui.widgets.view.AutoBorderedImageView
+        android:id="@+id/sharing_pending_invite_icon"
+        android:layout_width="@dimen/list_sharing_item_content_icon_item_width"
+        android:layout_height="@dimen/list_sharing_item_content_icon_item_height"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:scaleType="fitCenter"
+        dashlane:applyBorderOnColors="@array/border_needed_for_color"
+        dashlane:applyDominantColorOnDefaultBackground="true"
+        dashlane:borderColor="@color/list_credentials_icon_border"
+        dashlane:borderDrawable="@drawable/list_credential_icon_border"
+        dashlane:defaultBackground="@drawable/list_credential_icon_border_white_bg"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/spacing_normal"
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:layout_toLeftOf="@+id/sharing_pending_invite_btn_holder"
+        android:layout_toRightOf="@+id/sharing_pending_invite_icon"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:id="@+id/sharing_pending_invite_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?textAppearanceSubtitle1"
+            tools:text="Behance"
+            />
+
+        <TextView
+            android:id="@+id/sharing_pending_invite_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            tools:text="randomemail@provider.com"
+            />
+
+        <TextView
+            android:id="@+id/sharing_pending_invite_waiting_sync_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            android:layout_weight="1"
+            android:includeFontPadding="false"
+            android:textAppearance="?textAppearanceCaption"
+            android:textColor="?colorOnBackgroundMedium"
+            android:visibility="gone"
+            tools:text="randomemail@provider.com"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sharing_pending_invite_btn_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/sharing_pending_invite_btn_refuse"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:layout_marginRight="2dp"
+            android:text="@string/sharing_pending_invite_button_refuse"
+            android:textAllCaps="true"
+            android:textSize="@dimen/dashlane_font_size_small"
+            />
+
+        <Button
+            android:id="@+id/sharing_pending_invite_btn_accept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="0dp"
+            android:maxLines="1"
+            android:text="@string/sharing_pending_invite_button_accept"
+            />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

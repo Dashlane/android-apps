@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="login_logo_margin_top">24dp</dimen>
+    <dimen name="login_content_min_height">320dp</dimen>
+</resources>

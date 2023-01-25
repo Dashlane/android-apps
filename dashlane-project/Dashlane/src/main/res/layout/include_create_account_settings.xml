@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    tools:context=".createaccount.CreateAccountActivity"
+    >
+
+    <TextView
+        android:id="@+id/settings_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:gravity="bottom|start"
+        android:lines="2"
+        android:text="@string/create_account_settings_title"
+        android:textAppearance="?textAppearanceHeadline2"
+        android:textColor="@color/text_inverse_catchy"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_huge"
+        android:theme="@style/Theme.Dashlane"
+        app:cardBackgroundColor="@color/container_agnostic_neutral_supershy"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_title"
+        >
+
+        <LinearLayout
+            android:id="@+id/info_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_normal"
+            android:paddingEnd="@dimen/spacing_normal"
+            android:visibility="gone"
+            >
+
+            <Button
+                android:id="@+id/settings_info_back_btn"
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/create_account_settings_info_back"
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_backward_outlined"
+                app:iconGravity="start"
+                />
+
+            <com.dashlane.ui.widgets.view.HtmlTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:text="@string/create_account_settings_info_description"
+                android:textAppearance="?textAppearanceBody1"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/settings_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_normal"
+            android:paddingEnd="@dimen/spacing_normal"
+            >
+
+            <RelativeLayout
+                android:id="@+id/setting_biometric"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingTop="@dimen/fragment_setting_list_item_padding_top"
+                android:paddingRight="@dimen/spacing_normal"
+                android:paddingBottom="@dimen/spacing_normal"
+                tools:ignore="UnusedAttribute"
+                >
+
+                <TextView
+                    android:id="@+id/setting_biometric_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    android:layout_toLeftOf="@+id/setting_biometric_checkbox"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    android:textColor="@color/text_neutral_catchy"
+                    tools:text="@string/create_account_settings_biometric"
+                    />
+
+                <TextView
+                    android:id="@+id/setting_biometric_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/setting_biometric_title"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="@dimen/fragment_setting_list_item_description_margin_top"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    android:layout_toLeftOf="@+id/setting_biometric_checkbox"
+                    android:textAppearance="?textAppearanceBody2"
+                    android:textColor="@color/text_neutral_quiet"
+                    tools:text="@string/create_account_settings_biometric_desc"
+                    />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/setting_biometric_checkbox"
+                    style="@style/Widget.Dashlane.Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/setting_resetmp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:paddingLeft="@dimen/spacing_normal"
+                android:paddingTop="@dimen/fragment_setting_list_item_padding_top"
+                android:paddingRight="@dimen/spacing_normal"
+                android:paddingBottom="@dimen/spacing_normal"
+                tools:ignore="UnusedAttribute"
+                >
+
+                <TextView
+                    android:id="@+id/setting_resetmp_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    android:layout_toLeftOf="@+id/setting_resetmp_checkbox"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    android:textColor="@color/text_neutral_catchy"
+                    tools:text="@string/create_account_settings_biometric"
+                    />
+
+                <TextView
+                    android:id="@+id/setting_resetmp_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/setting_resetmp_title"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="@dimen/fragment_setting_list_item_description_margin_top"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    android:layout_toLeftOf="@+id/setting_resetmp_checkbox"
+                    android:textAppearance="?textAppearanceBody2"
+                    android:textColor="@color/text_neutral_quiet"
+                    tools:text="@string/create_account_settings_biometric_desc"
+                    />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/setting_resetmp_checkbox"
+                    style="@style/Widget.Dashlane.Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    />
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/settings_info_show_btn"
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:text="@string/create_account_settings_info_cta"
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_forward_outlined"
+                app:iconGravity="end"
+                />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

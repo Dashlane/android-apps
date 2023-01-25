@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_application_lock_title_default">Choose how to unlock Dashlane</string>
+    <string name="onboarding_application_lock_title_pin">Unlock Dashlane with your PIN</string>
+    <string name="onboarding_application_lock_description_default">Breeze through logins! Use biometrics (fingerprint unlock) or a PIN to unlock your Dashlane app quickly and securely.</string>
+    <string name="onboarding_application_lock_description_pin">Breeze through logins! Use your PIN to log in to Dashlane quickly and securely on this device.</string>
+    <string name="onboarding_application_lock_cta_skip_default">Skip</string>
+    <string name="onboarding_application_lock_cta_negative_default">Use PIN</string>
+    <string name="onboarding_application_lock_cta_positive_default">Use biometrics</string>
+    <string name="onboarding_application_lock_cta_positive_pin">Use PIN</string>
+    <string name="onboarding_application_lock_title_use_2fa">Biometrics or PIN unlock is required to set up 2FA</string>
+    <string name="onboarding_application_lock_description_use_2fa">To set up 2FA for Dashlane, you need to pair this app with the Authenticator app. Biometrics or PIN unlock is required to pair these apps.\n\nYou can update your unlock methods in your security settings at any time.</string>
+    <string name="onboarding_application_lock_link_use_2fa">Learn more about Dashlane Authenticator</string>
+</resources>

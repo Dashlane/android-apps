@@ -1,0 +1,5 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:alpha="@dimen/emphasis_disabled" android:color="?colorOnSurface" android:state_enabled="false" />
+    <item android:alpha="@dimen/emphasis_medium" android:color="?colorOnSurface" android:state_checkable="true" android:state_checked="false" />
+    <item android:alpha="1.00" android:color="?colorSecondary" />
+</selector>

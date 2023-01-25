@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    tools:background="@drawable/background_widget_infobox"
+    tools:backgroundTint="@color/container_expressive_neutral_quiet_idle"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <ImageView
+        android:id="@+id/infobox_icon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/ic_widget_infobox"
+        app:layout_constraintBaseline_toBaselineOf="@id/infobox_title"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="ContentDescription"
+        tools:tint="@color/text_neutral_standard"
+        />
+
+    <TextView
+        android:id="@+id/infobox_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textAppearance="?textAppearanceBody1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/infobox_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@tools:sample/lorem"
+        tools:textColor="@color/text_neutral_standard"
+        />
+
+    <TextView
+        android:id="@+id/infobox_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textAppearance="?textAppearanceBody2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/infobox_icon"
+        app:layout_constraintTop_toBottomOf="@id/infobox_title"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        tools:textColor="@color/text_neutral_standard"
+        />
+
+    <LinearLayout
+        android:id="@+id/infobox_buttons_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/divider_empty_spacing_normal"
+        android:gravity="center_horizontal|end"
+        android:orientation="horizontal"
+        android:showDividers="middle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/infobox_text"
+        />
+
+</merge>

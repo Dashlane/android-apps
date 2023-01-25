@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="forwarder_guided_password_change" type="layout">
+        @layout/include_guided_password_change_land
+    </item>
+</resources>

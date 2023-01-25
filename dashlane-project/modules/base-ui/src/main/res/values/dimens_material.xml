@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="emphasis_medium" format="float" type="dimen">0.6</item>
+    <item name="emphasis_disabled" format="float" type="dimen">0.38</item>
+
+    <item name="high_ripple_default_alpha" format="float" type="dimen">0.48</item>
+    <item name="high_ripple_focused_alpha" format="float" type="dimen">0.48</item>
+    <item name="high_ripple_hovered_alpha" format="float" type="dimen">0.16</item>
+    <item name="high_ripple_pressed_alpha" format="float" type="dimen">0.48</item>
+    <item name="low_ripple_default_alpha" format="float" type="dimen">0.24</item>
+    <item name="low_ripple_focused_alpha" format="float" type="dimen">0.24</item>
+    <item name="low_ripple_hovered_alpha" format="float" type="dimen">0.08</item>
+    <item name="low_ripple_pressed_alpha" format="float" type="dimen">0.24</item>
+</resources>

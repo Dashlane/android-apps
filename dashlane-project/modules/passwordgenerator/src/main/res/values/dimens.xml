@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="fragment_password_generator_password_card_margin">16dp</dimen>
+    <dimen name="fragment_password_generator_password_card_height">220dp</dimen>
+
+    <dimen name="fragment_password_generator_length_margin_top">25dp</dimen>
+    <dimen name="fragment_password_generator_length_min_margin_top">19dp</dimen>
+    <dimen name="fragment_password_generator_length_seek_margin_left_right">16dp</dimen>
+    <dimen name="fragment_password_generator_length_seek_margin_top">12dp</dimen>
+    <dimen name="fragment_password_generator_separator_margin_top">15dp</dimen>
+    <dimen name="fragment_password_generator_option_margin_top">6.5dp</dimen>
+    <dimen name="fragment_password_generator_option_separator_margin_top">8.5dp</dimen>
+</resources>

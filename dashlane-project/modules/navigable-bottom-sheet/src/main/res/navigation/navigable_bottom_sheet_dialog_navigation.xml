@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigable_bottom_sheet_dialog_navigation"
+    app:startDestination="@id/bottom_sheet_dialog">
+    <dialog
+        android:id="@+id/bottom_sheet_dialog"
+        android:name="com.dashlane.bottomnavigation.NavigableBottomSheetDialogFragment"
+        tools:layout="@layout/navigable_bottom_sheet_dialog_fragment">
+        <argument
+            app:argType="reference"
+            android:name="navigationGraphId"
+            app:nullable="false" />
+        <argument
+            android:name="startDestinationId"
+            android:defaultValue="@id/use_graph_start_destination"
+            app:argType="reference"
+            app:nullable="false" />
+        <argument
+            android:name="startDestinationArgs"
+            android:defaultValue="@null"
+            app:argType="android.os.Bundle"
+            app:nullable="true" />
+        <argument
+            app:argType="boolean"
+            android:name="consumeBackPress"
+            android:defaultValue="true"
+            app:nullable="false" />
+    </dialog>
+</navigation>

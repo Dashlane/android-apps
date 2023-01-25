@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/autofill_demo_constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        >
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/Widget.MaterialComponents.Toolbar.Surface"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="@android:color/transparent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_scrollFlags="scroll|enterAlways"
+            />
+
+        <ImageView
+            android:id="@+id/website_icon"
+            android:layout_width="48dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_ultra_huge"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            />
+
+        <TextView
+            android:id="@+id/autofill_demo_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_huge"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:text="@string/autofill_demo_title"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_catchy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/website_icon"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintVertical_chainStyle="packed"
+            />
+
+        <TextView
+            android:id="@+id/autofill_demo_subtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:text="@string/autofill_demo_subtitle"
+            android:textAppearance="?textAppearanceSubtitle1"
+            app:layout_constraintEnd_toEndOf="@id/autofill_demo_title"
+            app:layout_constraintStart_toStartOf="@id/autofill_demo_title"
+            app:layout_constraintTop_toBottomOf="@id/autofill_demo_title"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintVertical_chainStyle="packed"
+            />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/login"
+            android:hint="@string/autofill_demo_email_hint"
+            style="@style/Widget.Dashlane.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_big"
+            app:layout_constraintBottom_toTopOf="@+id/password"
+            app:layout_constraintEnd_toEndOf="@id/autofill_demo_title"
+            app:layout_constraintStart_toStartOf="@id/autofill_demo_title"
+            app:layout_constraintTop_toBottomOf="@id/autofill_demo_subtitle"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintVertical_chainStyle="packed"
+            >
+
+            <EditText
+                android:id="@+id/edit_text_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext|flagNoExtractUi"
+                android:inputType="text"
+                android:lines="1"
+                android:maxLines="1"
+                tools:ignore="LabelFor"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/password"
+            android:hint="@string/autofill_demo_password_hint"
+            style="@style/Widget.Dashlane.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_marginBottom="@dimen/spacing_huge"
+            app:layout_constraintBottom_toTopOf="@+id/cta_setup"
+            app:layout_constraintEnd_toEndOf="@id/autofill_demo_title"
+            app:layout_constraintStart_toStartOf="@id/autofill_demo_title"
+            app:layout_constraintTop_toBottomOf="@+id/login"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:passwordToggleEnabled="true"
+            >
+
+            <EditText
+                android:id="@+id/edit_text_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone|flagNoExtractUi"
+                android:inputType="textPassword"
+                android:lines="1"
+                tools:ignore="LabelFor"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <Button
+            android:id="@+id/cta_setup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:text="@string/autofill_demo_cta_setup"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/autofill_demo_title"
+            />
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/autofill_preview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_extra_small"
+            android:layout_marginBottom="@dimen/spacing_big"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/login"
+            app:layout_constraintStart_toStartOf="@id/login"
+            app:layout_constraintTop_toBottomOf="@id/login"
+            app:layout_constraintVertical_bias="0"
+            tools:visibility="visible"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/container_agnostic_neutral_supershy"
+                android:orientation="vertical"
+                >
+
+                <include
+                    android:id="@+id/pause_item"
+                    layout="@layout/list_dashlane_pause_item"
+                    />
+
+                <include
+                    layout="@layout/list_item_autofill_api"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:layout_marginBottom="@dimen/spacing_small"
+                    />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_big"
+        android:paddingBottom="@dimen/spacing_normal">
+
+        <TextView
+            android:id="@+id/vpn_third_party_activate_account_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_small"
+            android:text="@string/vpn_third_party_activate_account_title"
+            android:textAlignment="textStart"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_catchy"
+            app:layout_constraintBottom_toTopOf="@+id/vpn_third_party_activate_account_body"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/vpn_third_party_activate_account_body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/vpn_third_party_activate_account_body"
+            android:textAlignment="textStart"
+            android:textAppearance="?textAppearanceBody1"
+            app:layout_constraintBottom_toTopOf="@+id/vpn_third_party_activate_account_learn_more_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/vpn_third_party_activate_account_learn_more_button"
+            style="?borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/vpn_third_party_activate_account_learn_more_button"
+            app:layout_constraintBottom_toTopOf="@+id/vpn_third_party_activate_account_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_chainStyle="spread" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/vpn_third_party_activate_account_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/vpn_third_party_activate_account_email_hint"
+            app:errorEnabled="true"
+            app:layout_constraintBottom_toTopOf="@+id/vpn_third_party_activate_account_positive_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed">
+
+            <com.dashlane.util.TextInputAutoCompleteTextView
+                android:id="@+id/vpn_third_party_activate_account_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableTint="@color/text_brand_standard"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress"
+                android:lines="1"
+                android:textColor="@color/text_neutral_catchy"
+                android:textSize="16sp"
+                tools:drawableEnd="@drawable/ic_clear"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <CheckBox
+            android:id="@+id/vpn_third_party_activate_account_terms_checkbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:minHeight="48dp"
+            android:text="@string/vpn_third_party_activate_account_terms_of_service"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="@color/text_neutral_quiet"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/vpn_third_party_activate_account_layout"
+            app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_activate_account_layout" />
+
+        <Button
+            android:id="@+id/vpn_third_party_activate_account_positive_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/vpn_third_party_activate_account_positive_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

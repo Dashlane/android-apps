@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/purchase_checking_navigation"
+    app:startDestination="@id/nav_purchase_checking_loading">
+    <fragment
+        android:id="@+id/nav_purchase_checking_loading"
+        android:name="com.dashlane.plans.ui.view.PurchaseCheckingProgressFragment"
+        tools:layout="@layout/fragment_purchase_checking_loading">
+    </fragment>
+    <fragment
+        android:id="@+id/nav_purchase_checking_success"
+        android:name="com.dashlane.plans.ui.view.PurchaseCheckingSuccessFragment"
+        tools:layout="@layout/fragment_purchase_checking_result">
+        <argument
+            android:name="planName"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="familyBundle"
+            app:argType="boolean"
+            app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_purchase_checking_error"
+        android:name="com.dashlane.plans.ui.view.PurchaseCheckingErrorFragment"
+        tools:layout="@layout/fragment_purchase_checking_result">
+    </fragment>
+    <action
+        android:id="@+id/go_to_purchase_offer_success"
+        app:destination="@id/nav_purchase_checking_success"
+        app:enterAnim="@anim/fade_slide_in_bottom"
+        app:exitAnim="@anim/fade_slide_out_top"
+        app:popEnterAnim="@anim/fade_slide_in_left"
+        app:popExitAnim="@anim/fade_slide_out_right" />
+    <action
+        android:id="@+id/go_to_purchase_offer_error"
+        app:destination="@id/nav_purchase_checking_error"
+        app:enterAnim="@anim/fade_slide_in_bottom"
+        app:exitAnim="@anim/fade_slide_out_top"
+        app:popEnterAnim="@anim/fade_slide_in_bottom"
+        app:popExitAnim="@anim/fade_slide_out_top" />
+</navigation>

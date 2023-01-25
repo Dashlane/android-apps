@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_big"
+        >
+
+        <ImageView
+            android:id="@+id/logo_domain"
+            android:layout_width="48dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="@dimen/spacing_huge"
+            android:importantForAccessibility="no"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/domain"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:gravity="center"
+            android:textAppearance="?textAppearanceHeadline1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/logo_domain"
+            tools:text="yahoo.com"
+            />
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:gravity="center"
+            android:text="@string/dwm_alert_detail_subtitle"
+            android:textAppearance="?textAppearanceBody1"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/domain"
+            app:layout_goneMarginTop="@dimen/spacing_normal"
+            />
+
+        <View
+            android:id="@+id/breach_solved_background"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="@drawable/background_dwm_alert_solved"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/domain"
+            app:layout_goneMarginTop="@dimen/spacing_normal"
+            />
+
+        <TextView
+            android:id="@+id/breach_solved_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="@string/dwm_alert_solved"
+            android:textAppearance="@style/TextAppearance.Dashlane.Body2"
+            android:textColor="@color/text_positive_standard"
+            app:layout_constraintBottom_toBottomOf="@+id/breach_solved_background"
+            app:layout_constraintEnd_toEndOf="@+id/breach_solved_background"
+            app:layout_constraintStart_toEndOf="@+id/breach_solved_image"
+            app:layout_constraintTop_toTopOf="@+id/breach_solved_background"
+            />
+
+        <ImageView
+            android:id="@+id/breach_solved_image"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/breach_solved_text"
+            app:layout_constraintEnd_toStartOf="@+id/breach_solved_text"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="@+id/breach_solved_background"
+            app:layout_constraintTop_toTopOf="@+id/breach_solved_text"
+            app:srcCompat="@drawable/ic_modal_done"
+            app:tint="@color/text_positive_standard"
+            />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/breach_solved_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="breach_solved_text,breach_solved_background,breach_solved_image"
+            tools:layout_editor_absoluteX="24dp"
+            tools:layout_editor_absoluteY="24dp"
+            />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/subtitle_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="breach_solved_image,breach_solved_background,subtitle,breach_solved_text"
+            tools:layout_editor_absoluteX="24dp"
+            tools:layout_editor_absoluteY="325dp"
+            />
+
+        <TextView
+            android:id="@+id/breach_date_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/dwm_alert_detail_date_label"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subtitle_barrier"
+            />
+
+        <TextView
+            android:id="@+id/breach_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?textAppearanceBody1"
+            android:textColor="?colorOnBackground"
+            app:layout_constraintBottom_toTopOf="@+id/breach_mail_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_date_label"
+            tools:text="November 20, 2017"
+            />
+
+        <TextView
+            android:id="@+id/breach_mail_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_big"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:text="@string/dwm_alert_detail_email_label"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constraintBottom_toTopOf="@id/breach_mail"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_date"
+            />
+
+
+        <TextView
+            android:id="@+id/breach_mail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?textAppearanceBody1"
+            android:textColor="?colorOnBackground"
+            app:layout_constraintBottom_toTopOf="@+id/breach_website_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_mail_label"
+
+
+            tools:text="randomemail@provider.com, randomemail@provider.com"
+            />
+
+        <TextView
+            android:id="@+id/breach_website_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/dwm_alert_detail_website_label"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constraintBottom_toTopOf="@+id/breach_website"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_mail"
+            />
+
+        <TextView
+            android:id="@+id/breach_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/roboto_medium"
+            android:textAppearance="?textAppearanceBody1"
+            android:textColor="?colorOnBackground"
+            app:layout_constraintBottom_toTopOf="@id/breach_password_input_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_website_label"
+
+            tools:text="bookface.com, linkedout.com, elgoog.com"
+            />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/breach_password_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:hint="@string/dwm_alert_detail_password_label"
+            android:textColorHint="?colorOnBackgroundMedium"
+            app:errorEnabled="false"
+            app:hintTextAppearance="?textAppearanceBody2"
+            app:layout_constraintBottom_toTopOf="@id/breach_other_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_website"
+
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="?colorSecondary"
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/breach_password_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="textPassword"
+                android:text="@string/breach_alert_popup_dark_web_password_hidden_placeholder"
+                android:textAppearance="?textAppearanceBody1"
+                android:textColor="?colorOnBackground"
+                android:textSize="@dimen/dashlane_font_size_small"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/breach_other_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/dwm_alert_detail_other_label"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constraintBottom_toTopOf="@+id/breach_other"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_password_input_layout"
+            />
+
+        <TextView
+            android:id="@+id/breach_other"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?textAppearanceBody1"
+            android:textColor="?colorOnBackground"
+            app:layout_constraintBottom_toTopOf="@id/breach_advice_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_other_label"
+            tools:text="Username, addresses, IP address, location data, personal information, social network information"
+            />
+
+
+        <TextView
+            android:id="@+id/breach_advice_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/dwm_alert_detail_advice_label"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constraintBottom_toTopOf="@+id/breach_infobox_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_other"
+            />
+
+        <LinearLayout
+            android:id="@+id/breach_infobox_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@id/delete_cta"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_advice_label"
+            />
+
+        <Button
+            android:id="@+id/delete_cta"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_huge"
+            android:layout_marginBottom="@dimen/spacing_huge"
+            android:text="@string/dwm_alert_detail_delete_cta"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/breach_infobox_layout"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="csv_import_tablet_max_width">@null</dimen>
+    <dimen name="custom_csv_import_vertical_spacing">16dp</dimen>
+    <dimen name="custom_csv_import_title_text_size">24sp</dimen>
+</resources>

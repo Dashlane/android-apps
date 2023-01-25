@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="invalidated_biometric_prompt_title">Your security settings have changed</string>
+    <string name="invalidated_biometric_prompt_description">We\'ve disabled biometric authentication because your phone security settings have changed. Would you like to enable it again?</string>
+    <string name="invalidated_biometric_prompt_cta_positive">Re-enable biometric</string>
+    <string name="invalidated_biometric_prompt_cta_negative">Close</string>
+</resources>

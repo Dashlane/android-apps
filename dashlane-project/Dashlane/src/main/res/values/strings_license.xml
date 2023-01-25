@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="license_show_license">License</string>
+    <string name="license_go_url">Website</string>
+</resources>

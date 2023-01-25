@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_screen_header_last_searched">Last searched</string>
+    <string name="search_screen_empty_state_body">Nothing stored in Dashlane matches your search.</string>
+</resources>

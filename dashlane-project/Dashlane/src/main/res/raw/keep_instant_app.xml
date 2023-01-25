@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:tools="http://schemas.android.com/tools"
+           tools:keep="
+           @string/instant_app_promotion_dialog_later,
+           @string/instant_app_promotion_dialog_install,
+           @string/instant_app_promotion_dialog_message
+"/>

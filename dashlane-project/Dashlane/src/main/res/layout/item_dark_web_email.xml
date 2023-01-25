@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:dashlane="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/list_sharing_item_content_min_height"
+    android:padding="@dimen/spacing_normal"
+    >
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/list_sharing_item_content_icon_width"
+        android:layout_height="@dimen/list_sharing_item_content_icon_height"
+        android:scaleType="fitCenter"
+        dashlane:layout_constraintBottom_toBottomOf="parent"
+        dashlane:layout_constraintStart_toStartOf="parent"
+        dashlane:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/item_line1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:ellipsize="end"
+        android:gravity="left"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody1"
+        dashlane:layout_constraintEnd_toStartOf="@+id/delete"
+        dashlane:layout_constraintStart_toEndOf="@+id/icon"
+        dashlane:layout_constraintTop_toTopOf="@+id/icon"
+        dashlane:layout_goneMarginEnd="@dimen/spacing_normal"
+        tools:text="randomemail@provider.com"
+        />
+
+    <TextView
+        android:id="@+id/item_line2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="@color/text_neutral_quiet"
+        dashlane:layout_constraintEnd_toEndOf="@+id/item_line1"
+        dashlane:layout_constraintStart_toStartOf="@+id/item_line1"
+        dashlane:layout_constraintTop_toBottomOf="@+id/item_line1"
+        tools:text="pending"
+        />
+
+    <ImageView
+        android:id="@+id/delete"
+        android:layout_width="@dimen/minimum_clickable_area_size"
+        android:layout_height="@dimen/minimum_clickable_area_size"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/and_accessibility_deleted_monitored_email"
+        android:scaleType="center"
+        app:srcCompat="@drawable/close_cross"
+        app:tint="@color/text_neutral_quiet"
+        dashlane:layout_constraintBottom_toBottomOf="parent"
+        dashlane:layout_constraintEnd_toEndOf="parent"
+        dashlane:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

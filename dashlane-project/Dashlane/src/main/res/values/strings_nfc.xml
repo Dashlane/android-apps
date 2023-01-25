@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nfc_creditcard_prompt_title">Tap your card to the back of your device</string>
+    <string name="nfc_creditcard_prompt_message">If you don\'t have an NFC enabled card, you can still enter your card number manually.</string>
+    <string name="nfc_creditcard_prompt_positive_button">Enter manually</string>
+    <string name="nfc_creditcard_success_title">Success!</string>
+    <string name="nfc_creditcard_success_message">Now you just need to add your security code before saving.</string>
+    <string name="nfc_creditcard_success_positive_button">Add security code</string>
+
+    <string name="nfc_creditcard_prompt_error_title">This card can\'t be read properly</string>
+    <string name="nfc_creditcard_prompt_error_message">We got an error while reading this card. You can try again or enter your card number manually.</string>
+</resources>

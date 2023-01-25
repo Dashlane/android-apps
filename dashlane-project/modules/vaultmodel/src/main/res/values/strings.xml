@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="company">Company</string>
+    <string name="identity">Name</string>
+    <string name="title_mr">Mr</string>
+    <string name="title_mrs">Mrs</string>
+    <string name="title_ms">Ms</string>
+    <string name="title_miss">Miss</string>
+    <string name="no_title">No title specified</string>
+    <string name="title_mx">Mx</string>
+    <string name="title_none_of_these">None of these</string>
+    <string name="securenote">Secure Note</string>
+    <string name="securenote_name">Untitled note</string>
+    <string name="no_color">No color</string>
+    <string name="blue">Blue</string>
+    <string name="purple">Purple</string>
+    <string name="pink">Pink</string>
+    <string name="crimson">Red</string>
+    <string name="earth">Brown</string>
+    <string name="green">Green</string>
+    <string name="orange">Orange</string>
+    <string name="yellow">Yellow</string>
+    <string name="gray">Grey</string>
+    <string name="email">Email</string>
+    <string name="email_type_home">Personal</string>
+    <string name="email_type_work">Work</string>
+    <string name="phone_type_mobile">Cell phone</string>
+    <string name="phone_type_landline">Home phone</string>
+    <string name="phone_type_work_mobile">Work cell phone</string>
+    <string name="phone_type_work_landline">Work</string>
+    <string name="phone_type_fax">Fax</string>
+    <string name="phone_type_work_fax">Work fax</string>
+    <string name="phone_type_any">Other</string>
+    <string name="no_type">No type</string>
+    <string name="address">Address</string>
+    <string name="unspecified_category">No category</string>
+    <string name="bank_statement">Bank Account</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="no_gender">No gender specified</string>
+    <string name="website">Website</string>
+    <string name="phone">Phone number</string>
+</resources>

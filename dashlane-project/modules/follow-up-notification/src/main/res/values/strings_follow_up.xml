@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="follow_up_copy_action">Copy</string>
+
+    <string name="notifications_settings_header">Notifications</string>
+    <string name="general_notifications_settings_title">General notifications</string>
+    <string name="general_notifications_settings_description">Manage your Dashlane notifications</string>
+
+    <string name="follow_up_settings_title">Quick access notification</string>
+    <string name="follow_up_settings_description">When you’re copying info in Dashlane, we’ll hold the rest of the info in the notification panel</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dashlane.darkweb.registration.ui">
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.APP_EMAIL" />
+        </intent>
+    </queries>
+    <application>
+        <activity
+            android:name="com.dashlane.darkweb.ui.intro.DarkWebSetupIntroActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name="com.dashlane.darkweb.ui.setup.DarkWebSetupMailActivity"
+            android:parentActivityName="com.dashlane.darkweb.ui.intro.DarkWebSetupIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.dashlane.darkweb.ui.result.DarkWebSetupResultActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+    </application>
+</manifest>

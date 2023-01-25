@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="@dimen/minimum_clickable_area_size"
+    android:paddingHorizontal="@dimen/spacing_normal"
+    android:paddingVertical="@dimen/spacing_extra_small"
+    tools:context=".current.CurrentPlanActivity"
+    >
+
+    <ImageView
+        android:id="@+id/current_benefit_icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:baseline="16dp"
+        android:src="@drawable/ic_current_benefit"
+        app:layout_constraintBaseline_toBaselineOf="@id/current_benefit_text"
+        app:layout_constraintEnd_toStartOf="@id/current_benefit_text"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/current_benefit_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_extra_small"
+        android:textAppearance="?textAppearanceBody1"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/current_benefit_more_info_icon"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/current_benefit_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@sample/current_plan_benefits"
+        />
+
+    <ImageView
+        android:id="@+id/current_benefit_more_info_icon"
+        android:layout_width="16sp"
+        android:layout_height="16sp"
+        android:layout_marginStart="@dimen/spacing_extra_small"
+        android:baseline="13sp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_current_benefit_more_info"
+        app:layout_constraintBaseline_toBaselineOf="@id/current_benefit_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/current_benefit_text"
+        app:tint="@color/text_brand_standard" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

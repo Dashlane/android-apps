@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingBottom="16dp"
+        tools:text="@string/breach_alert_popup_regular_title"
+        android:textAppearance="?textAppearanceHeadline1" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?textAppearanceBody1"
+            android:textColor="?colorOnBackgroundMedium"
+            tools:text="@string/breach_alert_popup_regular_description" />
+
+    </androidx.core.widget.NestedScrollView>
+
+    <com.dashlane.ui.activities.intro.IntroButtonBarLayout
+        android:id="@+id/buttonBar"
+        style="?buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layoutDirection="locale"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/negative"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:lines="1"
+            tools:text="@string/breach_alert_popup_close" />
+
+        <Button
+            android:id="@+id/positive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lines="1"
+            tools:text="@string/breach_alert_popup_view"
+            tools:ignore="ButtonStyle" />
+
+    </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+
+</LinearLayout>

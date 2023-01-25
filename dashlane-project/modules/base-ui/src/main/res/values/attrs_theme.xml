@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="colorTextCatchy" format="color" />
+    <attr name="colorOnBackgroundMedium" format="color" />
+
+    <attr name="colorAccentOnPrimary" format="color" />
+</resources>

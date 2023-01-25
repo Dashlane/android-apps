@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/container_expressive_neutral_catchy_disabled" android:state_enabled="false" />
+    <item android:color="@color/container_expressive_neutral_quiet_active_dark_mode" android:state_checked="true" />
+    <item android:color="@android:color/transparent" />
+</selector>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/vault_coordinator_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <com.google.android.material.appbar.AppBarLayout
+            style="@style/Widget.Dashlane.AppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_scrollFlags="scroll|enterAlways|snap"
+                >
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/search_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/spacing_normal"
+                    android:accessibilityTraversalBefore="@id/filter_tab_layout"
+                    app:cardCornerRadius="6dp"
+                    app:cardBackgroundColor="@color/container_agnostic_neutral_supershy"
+                    >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_normal_for_button"
+                        android:layout_marginEnd="@dimen/spacing_normal_for_button"
+                        android:drawablePadding="@dimen/spacing_small"
+                        android:gravity="start|center_vertical"
+                        android:minHeight="@dimen/minimum_clickable_area_size"
+                        android:text="@string/vault_search_hint"
+                        android:textAllCaps="false"
+                        android:textColor="@color/text_neutral_quiet"
+                        app:drawableStartCompat="@drawable/ic_search"
+                        app:drawableTint="@color/text_neutral_standard"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        />
+
+                </androidx.cardview.widget.CardView>
+            </FrameLayout>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/filter_tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tabMode="scrollable"
+                />
+
+            <FrameLayout
+                android:id="@+id/vault_announcement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+
+                <include layout="@layout/include_layout_vault_autofill_announcement" />
+            </FrameLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/vault_view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <FrameLayout
+        android:id="@+id/fab_menu_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:accessibilityTraversalAfter="@id/data_list_floating_button"
+        android:background="@color/oddity_overlay"
+        android:clickable="true"
+        android:elevation="@dimen/ab_elevation"
+        android:focusable="true"
+        android:visibility="gone"
+        />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/data_list_floating_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/floating_button_bottom_margin_right"
+        android:layout_marginBottom="@dimen/floating_button_bottom_margin_bottom"
+        android:accessibilityLiveRegion="polite"
+        android:text="@string/vault_fab_add_item"
+        android:ellipsize="end"
+        android:textAllCaps="true"
+        app:icon="@drawable/fab_plus_icon_selector"
+        />
+</FrameLayout>

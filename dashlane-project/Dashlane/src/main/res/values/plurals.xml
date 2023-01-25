@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="sharing_shared_counter_groups">
+        <item quantity="one">@string/sharing_shared_counter_groups_one</item>
+        <item quantity="other">@string/sharing_shared_counter_groups_other</item>
+    </plurals>
+    <plurals name="sharing_shared_counter_users">
+        <item quantity="one">@string/sharing_shared_counter_users_one</item>
+        <item quantity="other">@string/sharing_shared_counter_users_other</item>
+    </plurals>
+    <plurals name="sharing_shared_group_items">
+        <item quantity="one">@string/sharing_shared_group_items_one</item>
+        <item quantity="other">@string/sharing_shared_group_items_other</item>
+    </plurals>
+    <plurals name="sharing_shared_group_members">
+        <item quantity="one">@string/sharing_shared_group_members_one</item>
+        <item quantity="other">@string/sharing_shared_group_members_other</item>
+    </plurals>
+</resources>

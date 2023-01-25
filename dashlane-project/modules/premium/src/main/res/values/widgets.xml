@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    
+
+    <eat-comment />
+
+    
+    <style name="Widget.Dashlane.Button.Yearly" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:textColor">@color/button_secondary_text_color</item>
+        <item name="iconTint">@color/button_secondary_text_color</item>
+        <item name="rippleColor">@color/button_secondary_ripple_color</item>
+        <item name="backgroundTint">@color/button_secondary_background_tint</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
+    </style>
+
+    
+    <style name="Widget.Dashlane.Button.Monthly" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:textColor">@color/button_primary_text_color</item>
+        <item name="iconTint">@color/button_primary_text_color</item>
+        <item name="rippleColor">@color/button_primary_ripple_color</item>
+        <item name="backgroundTint">@color/button_primary_background_tint</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
+    </style>
+</resources>

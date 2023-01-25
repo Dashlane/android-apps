@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.dashlane.barcodescanner">
+
+    <uses-sdk tools:overrideLibrary="
+      androidx.camera.camera2, androidx.camera.core,
+      androidx.camera.view, androidx.camera.lifecycle" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <application>
+        <activity android:name=".BarCodeCaptureActivity" />
+    </application>
+</manifest>

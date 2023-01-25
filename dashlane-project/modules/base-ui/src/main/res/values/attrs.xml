@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ViewAnimatorPager">
+        <attr name="in_return_animation" format="reference" />
+        <attr name="out_return_animation" format="reference" />
+        <attr name="pop_return" format="boolean"/>
+    </declare-styleable>
+</resources>

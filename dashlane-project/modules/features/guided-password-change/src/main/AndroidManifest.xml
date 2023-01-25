@@ -1,0 +1,10 @@
+<manifest package="com.dashlane.guidedpasswordchange"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name="com.dashlane.guidedpasswordchange.OnboardingGuidedPasswordChangeActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Dashlane.Modal" />
+    </application>
+</manifest>

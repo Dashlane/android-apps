@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="colorControlHighlightDrawer">
+        <item name="colorControlHighlight">@color/container_expressive_neutral_quiet_hover</item>
+    </style>
+</resources>

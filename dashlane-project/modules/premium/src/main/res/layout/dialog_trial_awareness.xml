@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/spacing_big"
+        >
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/dialog_trial_awareness_illustration"
+            android:layout_width="wrap_content"
+            android:layout_height="160dp"
+            android:importantForAccessibility="no"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_autoPlay="true"
+            app:lottie_enableMergePathsForKitKatAndAbove="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/lottie_free_trial_started"
+            />
+
+        <TextView
+            android:id="@+id/dialog_trial_awareness_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textAppearance="?textAppearanceHeadline2"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dialog_trial_awareness_illustration"
+            tools:text="@string/free_trial_started_dialog_title"
+            />
+
+        <com.dashlane.ui.widgets.view.HtmlTextView
+            android:id="@+id/dialog_trial_awareness_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dialog_trial_awareness_title"
+            tools:text="@string/free_trial_started_dialog_description"
+            />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/spacing_small"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dialog_trial_awareness_message"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

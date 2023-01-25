@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_do_not_show_again_pause_brand_text" translatable="false">Dashlane</string>
+    <string name="autofill_do_not_show_again_pause_action_text">Pause</string>
+
+    <string name="autofill_sms_otp_proposition">Get Dashlane to autofill your SMS codes for you</string>
+
+    <string name="autofill_change_password_popup_title">Change password</string>
+    <string name="autofill_create_account_popup_title">Add new login</string>
+
+    <string name="autofill_view_all_accounts_popup_title">View all logins</string>
+    <string name="autofill_view_all_accounts_popup_title_no_results">No results found.</string>
+
+    <string name="autofill_title">Autofill with Dashlane</string>
+</resources>

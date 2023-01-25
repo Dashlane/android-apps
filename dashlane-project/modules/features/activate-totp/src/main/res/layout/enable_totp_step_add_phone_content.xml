@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/country_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/mtrl_dropdown_arrow"
+        app:endIconTint="@color/text_neutral_quiet"
+        app:layout_constraintEnd_toStartOf="@+id/number_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/country"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:lines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Spinner
+        android:id="@+id/country_spinner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@null"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="@+id/country_layout"
+        app:layout_constraintEnd_toEndOf="@+id/country_layout"
+        app:layout_constraintStart_toStartOf="@+id/country_layout"
+        app:layout_constraintTop_toTopOf="@+id/country_layout" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/number_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/mtrl_dropdown_arrow"
+        app:endIconTint="@android:color/transparent"
+        android:hint="@string/enable_totp_add_phone_hint"
+        app:layout_constraintBaseline_toBaselineOf="@+id/country_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/country_layout">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="phone"
+            android:lines="1"
+            tools:text="06 59 49 50 59" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/error"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/enable_totp_add_phone_error"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="@color/text_danger_quiet"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/number_layout"
+        app:layout_constraintStart_toStartOf="@+id/country_layout"
+        app:layout_constraintTop_toBottomOf="@+id/country_layout"
+        tools:visibility="visible" />
+
+    <com.dashlane.ui.widgets.view.Infobox
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/enable_totp_add_phone_info"
+        app:layout_constraintEnd_toEndOf="@+id/number_layout"
+        app:layout_constraintStart_toStartOf="@+id/country_layout"
+        app:layout_constraintTop_toBottomOf="@+id/error" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

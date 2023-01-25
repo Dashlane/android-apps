@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/list_sharing_item_content_min_height"
+    android:padding="@dimen/spacing_normal"
+    >
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/list_sharing_item_content_icon_width"
+        android:layout_height="@dimen/list_sharing_item_content_icon_height"
+        android:background="@drawable/background_circle"
+        android:backgroundTint="@color/container_expressive_brand_quiet_idle"
+        android:importantForAccessibility="no"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_empty_personalinfo"
+        app:tint="@color/text_brand_standard"
+        />
+
+    <TextView
+        android:id="@+id/item_line1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:ellipsize="end"
+        android:gravity="left"
+        android:maxLines="1"
+        android:text="@string/dwm_email_placeholder"
+        android:textAppearance="?textAppearanceBody1"
+        android:textColor="@color/text_neutral_quiet"
+        app:layout_constraintBottom_toBottomOf="@+id/icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toTopOf="@+id/icon"
+        app:layout_goneMarginEnd="@dimen/spacing_normal"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

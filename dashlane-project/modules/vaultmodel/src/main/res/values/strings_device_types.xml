@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="device_windows">Windows</string>
+    <string name="device_mac">Mac</string>
+    <string name="device_android">Android</string>
+    <string name="device_iphone">iPhone</string>
+    <string name="device_ipad">iPad</string>
+    <string name="device_standalone">Extension</string>
+    <string name="device_web_app">Web app</string>
+    <string name="device_unknow">Unknown device</string>
+</resources>

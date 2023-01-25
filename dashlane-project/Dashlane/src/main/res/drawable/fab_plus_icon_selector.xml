@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" >
+        <rotate
+            android:fromDegrees="135"
+            android:toDegrees="135"
+            android:pivotX="50%"
+            android:pivotY="50%"
+            android:drawable="@drawable/fab_plus_icon"/>
+    </item>
+    <item android:drawable="@drawable/fab_plus_icon"/>
+</selector>

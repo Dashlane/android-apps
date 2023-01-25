@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="getStartedStepViewStyle" format="reference" />
+
+    <declare-styleable name="GetStartedStepView">
+        <attr name="stepTitle" format="string" />
+        <attr name="stepSubtitle" format="string" />
+        <attr name="stepNumber" format="integer" />
+        <attr name="stepCta" format="string" />
+        <attr name="stepPreview" format="reference" />
+        <attr name="stepPreviewForeground" format="reference" />
+        <attr name="completion" format="boolean" />
+        <attr name="stepNumberColor" format="color" />
+        <attr name="stepTitleColor" format="color" />
+        <attr name="stepCompletionColor" format="color" />
+        <attr name="stepBackgroundTint" format="color" />
+        <attr name="shapeAppearance" />
+        <attr name="android:elevation" />
+    </declare-styleable>
+</resources>

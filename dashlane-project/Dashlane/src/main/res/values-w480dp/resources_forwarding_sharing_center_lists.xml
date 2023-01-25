@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="list_item_content_sharing_by_user_layout" type="layout">
+        @layout/list_item_content_sharing_by_user_tablet
+    </item>
+    <item name="sharing_pending_invitation_layout_forwarder" type="layout">
+        @layout/sharing_pending_invitation_layout_tablet
+    </item>
+</resources>

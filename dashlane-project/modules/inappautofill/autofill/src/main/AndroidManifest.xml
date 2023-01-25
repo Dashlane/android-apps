@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dashlane.autofill.api">
+
+    <application>
+        <activity
+            android:name="com.dashlane.autofill.passwordendpoint.SettingsRedirectionActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.dashlane.autofill.passwordendpoint.VaultRedirectionActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.dashlane.autofill.api.unlockfill.AutofillAuthActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.NoAnimation" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.ui.SmsOtpAutofillActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.NoAnimation" />
+
+        <service
+            android:name="com.dashlane.autofillapi.AutoFillAPIService"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.autofill"
+                android:resource="@xml/autofill_service_config" />
+        </service>
+
+        <activity
+            android:name="com.dashlane.autofill.api.viewallaccounts.view.AutofillViewAllItemsActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.pause.view.AutofillPauseActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.createaccount.view.AutofillCreateAccountActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.request.save.SaveRequestActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.changepassword.view.AutofillChangePasswordActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.actionssources.view.ActionsSourcesActivity"
+            android:label="@string/autofill_actioned_sources_title" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.revertactionssettings.RevertActionsActivity"
+            android:label="@string/autofill_revert_actions_title" />
+
+        <activity
+            android:name="com.dashlane.autofill.api.emptywebsitewarning.view.EmptyWebsiteWarningActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+    </application>
+</manifest>

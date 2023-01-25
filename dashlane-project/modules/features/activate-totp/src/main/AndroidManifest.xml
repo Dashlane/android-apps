@@ -1,0 +1,21 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dashlane.activatetotp">
+
+    <application>
+        <activity
+            android:name=".DownloadAuthenticatorAppIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".EnableTotpActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar" />
+
+        <activity
+            android:name="com.dashlane.disabletotp.DisableTotpActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar" />
+
+        <activity
+            android:name="com.dashlane.disabletotp.DisableTotpEnforcedIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+    </application>
+</manifest>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plan_action_bar_title">Your plan: %1$s</string>
+    <string name="plan_free_action_bar_title">Free</string>
+    <string name="plan_trial_action_bar_title">Premium (30-day trial)</string>
+    <string name="plan_essentials_action_bar_title">Essentials</string>
+    <string name="plan_premium_action_bar_title">Premium</string>
+    <string name="plan_premium_family_action_bar_title">Friends &amp; Family</string>
+    <string name="plan_premium_plus_action_bar_title">Premium Plus</string>
+    <string name="plan_premium_plus_family_action_bar_title">Premium Plus Family</string>
+    <string name="plan_legacy_action_bar_title">Free (pre-2.0)</string>
+
+    <string name="plan_premium_title">Premium</string>
+    <string name="plan_premium_family_title">Friends &amp; Family</string>
+    <string name="plan_premium_plus_title">Premium Plus</string>
+
+    <string name="no_date_plan_subtitle">Upgrade to get the best of Dashlane</string>
+
+    <string name="plan_activating_features">Activating your new features...</string>
+    <string name="plan_bought_thanks_title">Thanks for signing up for %1$s!</string>
+    <string name="plan_bought_thanks_message">Your new features are ready to use on all of your devices.</string>
+    <string name="family_plan_bought_thanks_message">Check your inbox for a welcome email on getting started and inviting members to your family plan.</string>
+    <string name="plan_check_purchase_error_title">Your upgrade is being processed</string>
+    <string name="plan_check_purchase_error_message">It\'s taking a little while to process your upgrade, but your new features will be available soon.</string>
+</resources>

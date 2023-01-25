@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="follow_up_notification_collapse_text">Quickly access this info by swiping down while in the other app.</string>
+
+    <string name="follow_up_notification_label_password">Password</string>
+    <string name="follow_up_notification_label_login">Username</string>
+    <string name="follow_up_notification_label_otp_code">2-factor authentication (2FA)</string>
+    <string name="follow_up_notification_label_email">Email</string>
+    <string name="follow_up_notification_label_secondary_login">Alternate username</string>
+    <string name="follow_up_notification_label_payments_number">Number</string>
+    <string name="follow_up_notification_label_payments_security_code">Security code</string>
+    <string name="follow_up_notification_label_payments_expiration_date">Expiration date</string>
+    <string name="follow_up_notification_label_paypal_login">Username</string>
+    <string name="follow_up_notification_label_paypal_password">Password</string>
+    <string name="follow_up_notification_label_bankaccount_bank">Bank</string>
+    <string name="follow_up_notification_label_bankaccount_bic_swift">BIC</string>
+    <string name="follow_up_notification_label_bankaccount_routing_number">Routing number</string>
+    <string name="follow_up_notification_label_bankaccount_sort_code">Sort code</string>
+    <string name="follow_up_notification_label_bankaccount_iban">IBAN</string>
+    <string name="follow_up_notification_label_bankaccount_account_number">Account number</string>
+    <string name="follow_up_notification_label_bankaccount_clabe">CLABE</string>
+    <string name="follow_up_notification_label_address">Address</string>
+    <string name="follow_up_notification_label_city">City</string>
+    <string name="follow_up_notification_label_zip_code">ZIP code</string>
+    <string name="follow_up_notification_label_ids_number">Number</string>
+    <string name="follow_up_notification_label_ids_issue_date">Issue date</string>
+    <string name="follow_up_notification_label_ids_expiration_date">Expiration date</string>
+    <string name="follow_up_notification_label_passport_number">Number</string>
+    <string name="follow_up_notification_label_passport_issue_date">Issue date</string>
+    <string name="follow_up_notification_label_passport_expiration_date">Expiration date</string>
+    <string name="follow_up_notification_label_driverlicense_number">Number</string>
+    <string name="follow_up_notification_label_driverlicense_issue_date">Issue date</string>
+    <string name="follow_up_notification_label_driverlicense_expiration_date">Expiration date</string>
+
+    <string name="follow_up_notification_vault_item_label_address">Address</string>
+    <string name="follow_up_notification_vault_item_label_authentifiant">Login</string>
+    <string name="follow_up_notification_vault_item_label_bank">Bank</string>
+    <string name="follow_up_notification_vault_item_label_drivers_license">Driver\'s License</string>
+    <string name="follow_up_notification_vault_item_label_ids">ID card</string>
+    <string name="follow_up_notification_vault_item_label_passport">Passport</string>
+    <string name="follow_up_notification_vault_item_label_credit_card">Payment card</string>
+    <string name="follow_up_notification_vault_item_label_paypal">PayPal</string>
+</resources>

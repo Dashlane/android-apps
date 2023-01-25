@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/view_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:maxWidth="@dimen/size_480dp"
+    tools:theme="@style/Theme.Dashlane.Modal">
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/buttons_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/logo_imageview"
+                android:layout_width="0dp"
+                android:layout_height="96dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="24dp"
+                android:importantForAccessibility="no"
+                android:scaleType="fitStart"
+                app:layout_constraintBottom_toTopOf="@+id/title_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:tint="@color/text_brand_quiet" />
+
+            <TextView
+                android:id="@+id/title_textview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:textAppearance="?textAppearanceHeadline1"
+                android:textColor="?colorTextCatchy"
+                app:layout_constraintBottom_toTopOf="@+id/description_textview"
+                app:layout_constraintEnd_toEndOf="@+id/logo_imageview"
+                app:layout_constraintStart_toStartOf="@+id/logo_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/logo_imageview"
+                tools:text="Title here" />
+
+            <TextView
+                android:id="@+id/description_textview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textAppearance="?textAppearanceBody1"
+                android:textColor="?colorOnBackground"
+                app:layout_constraintBottom_toTopOf="@+id/details_container"
+                app:layout_constraintEnd_toEndOf="@+id/logo_imageview"
+                app:layout_constraintStart_toStartOf="@+id/logo_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/title_textview"
+                tools:text="Description here" />
+
+            <LinearLayout
+                android:id="@+id/details_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:layout_marginBottom="@dimen/spacing_small"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/links_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/description_textview"
+                app:layout_goneMarginBottom="0dp"
+                app:layout_goneMarginTop="0dp"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/links_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:layout_marginBottom="@dimen/spacing_small"
+                android:divider="@drawable/divider_empty_spacing_small"
+                android:orientation="vertical"
+                android:showDividers="middle"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/infobox"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/details_container"
+                app:layout_goneMarginBottom="0dp"
+                app:layout_goneMarginTop="0dp"
+                tools:visibility="visible" />
+
+            <com.dashlane.ui.widgets.view.Infobox
+                android:id="@+id/infobox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/logo_imageview"
+                app:layout_constraintStart_toStartOf="@+id/logo_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/links_container" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    
+    <com.dashlane.ui.activities.intro.IntroButtonBarLayout
+        android:id="@+id/buttons_layout"
+        style="?buttonBarStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_normal"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:gravity="bottom"
+        android:layoutDirection="locale"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/scroll_view"
+        app:layout_constraintStart_toStartOf="@+id/scroll_view"
+        app:layout_constraintTop_toBottomOf="@+id/scroll_view">
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/neutral_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            app:intensity="supershy"
+            app:mood="brand"
+            tools:text="Neutral"
+            tools:visibility="visible" />
+
+        <Space
+            android:id="@+id/spacer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible" />
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/negative_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            app:intensity="quiet"
+            app:mood="brand"
+            tools:text="Negative"
+            tools:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.dashlane.design.component.compat.view.ButtonMediumView
+                android:id="@+id/positive_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:intensity="catchy"
+                app:mood="brand"
+                tools:text="positive"
+                tools:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/view_progress"
+                style="?indeterminateProgressStyle"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/text_inverse_catchy"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+    </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

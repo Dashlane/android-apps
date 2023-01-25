@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_category_advanced">Advanced Settings</string>
+    <string name="settings_category_security">Security</string>
+    <string name="settings_category_security_description">Application lock and other security settings</string>
+    <string name="settings_category_general">General</string>
+    <string name="settings_category_general_description">Auto-login, sync, and other general settings</string>
+    <string name="settings_category_help">Help</string>
+    <string name="settings_category_help_description">Get help using Dashlane</string>
+    <string name="settings_help_troubleshooting">Troubleshooting</string>
+    <string name="settings_help_troubleshooting_description">Consult the help center to answer your questions</string>
+
+    
+    
+    <string name="setting_in_app_login_category">Autofill</string>
+
+    <string name="setting_in_app_login_enabled_title">Autofill</string>
+    <string name="setting_in_app_login_enabled_description">Fill forms using your data stored in Dashlane</string>
+
+    <string name="setting_in_app_login_browser_enabled_title">Additional Autofill permissions</string>
+    <string name="setting_in_app_login_browser_enabled_description">Enhance Autofill and allow Dashlane to detect form fields and autofill details on all web pages</string>
+
+
+    
+    <string name="setting_change_master_password_title">Change Master Password</string>
+    <string name="setting_change_master_password_description">Change the Master Password you use to access Dashlane</string>
+    <string name="setting_manage_devices_title">Manage activity</string>
+    <string name="setting_manage_devices_description">Manage devices connected to your Dashlane account</string>
+</resources>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plans_action_bar_title">Plan options</string>
+
+    <string name="plans_periodicity_toggle_monthly">Monthly prices</string>
+    <string name="plans_periodicity_toggle_yearly">Annual prices</string>
+
+    <string name="plans_on_going_trial">You’re on a free trial</string>
+    <string name="plans_on_going_plan">Your current plan</string>
+
+
+    <string name="plans_essentials_title">Essentials</string>
+    <string name="plans_essentials_description">Get unlimited logins synced across &lt;strong&gt;2 devices&lt;/strong&gt;.</string>
+
+    
+    <string name="plans_advanced_title">Advanced</string>
+    
+    <string name="plans_advanced_description">Manage unlimited passwords on all your devices, plus get advanced security tools.</string>
+
+    <plurals name="benefit_limited_device">
+        <item quantity="one">Sync across %1$d device</item>
+        <item quantity="other">Sync across %1$d devices</item>
+    </plurals>
+    <string name="plans_premium_title">Premium</string>
+    <string name="plans_premium_description">Get unlimited logins synced across &lt;strong&gt;unlimited devices&lt;/strong&gt;, plus Dark Web Monitoring and VPN protection.</string>
+    <string name="plans_premium_description_with_no_vpn_mention">Get unlimited logins synced across &lt;strong&gt;unlimited devices&lt;/strong&gt;, plus Dark Web Monitoring.</string>
+    <string name="plans_family_title">Family</string>
+    <string name="plans_family_description">Protect the whole family with &lt;strong&gt;10 individual Premium accounts&lt;/strong&gt; for one low price.</string>
+
+    <string name="plans_price_billed_monthly_suffix">/month</string>
+    <string name="plans_price_billed_yearly_suffix">/year</string>
+
+    <plurals name="plans_offer_call_out_fixed_percent_discount_monthly">
+        <item quantity="one">%1$s off your first month</item>
+        <item quantity="other">%1$s off your first %2$d months</item>
+    </plurals>
+    <plurals name="plans_offer_call_out_fixed_percent_discount_yearly">
+        <item quantity="one">%1$s off your first year</item>
+        <item quantity="other">%1$s off your first %2$d years</item>
+    </plurals>
+
+    <plurals name="plans_offer_call_out_simple_saving_over_fixed_period_monthly">
+        <item quantity="one">Save on your first month</item>
+        <item quantity="other">Save on your first %1$d months</item>
+    </plurals>
+    <plurals name="plans_offer_call_out_simple_saving_over_fixed_period_yearly">
+        <item quantity="one">Save on your first year</item>
+        <item quantity="other">Save on your first %1$d years</item>
+    </plurals>
+
+    <plurals name="plans_offer_call_out_free_trial_monthly">
+        <item quantity="one">First month free</item>
+        <item quantity="other">First %1$d months free</item>
+    </plurals>
+    <plurals name="plans_offer_call_out_free_trial_yearly">
+        <item quantity="one">First year free</item>
+        <item quantity="other">First %1$d years free</item>
+    </plurals>
+
+    <plurals name="plans_offers_mismatch_cycles_single_payment_price_monthly">
+        <item quantity="one">%1$s for %2$d month</item>
+        <item quantity="other">%1$s for %2$d months</item>
+    </plurals>
+    <plurals name="plans_offers_mismatch_cycles_single_payment_price_yearly">
+        <item quantity="one">%1$s for %2$d year</item>
+        <item quantity="other">%1$s for %2$d years</item>
+    </plurals>
+
+    <plurals name="plans_offers_mismatch_cycles_recurring_payment_price_monthly">
+        <item quantity="one">%1$s%2$s for %3$d month</item>
+        <item quantity="other">%1$s%2$s for %3$d months</item>
+    </plurals>
+    <plurals name="plans_offers_mismatch_cycles_recurring_payment_price_yearly">
+        <item quantity="one">%1$s%2$s for %3$d year</item>
+        <item quantity="other">%1$s%2$s for %3$d years</item>
+    </plurals>
+
+    <string name="plans_offers_mismatch_cycles_info">Then %1$s %2$s</string>
+
+    <string name="plans_yearly_saving_tag">SAVE %1$s</string>
+    <string name="plans_best_yearly_saving_tag">SAVE UP TO %1$s</string>
+
+    <string name="plan_details_essentials_title">Essentials</string>
+
+    
+    <string name="plan_details_advanced_title">Advanced</string>
+
+    <string name="plan_details_premium_title">Premium</string>
+    <string name="plan_details_family_title">Family</string>
+
+    <string name="benefit_individual_acount">1 account</string>
+    <string name="benefit_bundle">%1$d &lt;strong&gt;%2$s&lt;/strong&gt; accounts</string>
+    <string name="benefit_bundle_account_type_premium">Premium</string>
+    <string name="benefit_store_passwords_limited_arg">Up to &lt;strong&gt;%1$s logins&lt;/strong&gt;</string>
+    <string name="benefit_store_passwords_unlimited">Unlimited logins</string>
+    <string name="benefit_unlimited_devices">Sync across &lt;strong&gt;unlimited devices&lt;/strong&gt;</string>
+    <string name="benefit_autofill">Form &amp; payment autofill</string>
+    <string name="benefit_security_alerts_basic">Personalized security alerts</string>
+    <string name="benefit_security_alerts_advanced">&lt;strong&gt;Dark Web Monitoring&lt;/strong&gt; &amp;amp; alerts</string>
+    <string name="benefit_vpn">&lt;strong&gt;VPN&lt;/strong&gt; for WiFi protection</string>
+    <string name="benefit_secure_files">&lt;strong&gt;%1$s GB of encrypted file storage&lt;/strong&gt;</string>
+    <string name="benefit_password_sharing_limited">Securely share up to %1$s logins</string>
+    <string name="benefit_password_sharing_unlimited">Unlimited login sharing</string>
+    <string name="benefit_2fa_basic">2-factor authentication (2FA)</string>
+    <string name="benefit_2fa_advanced">U2F authentication</string>
+    <string name="benefit_secure_notes">Secure Notes</string>
+    <string name="benefit_password_generator">Password Generator</string>
+
+
+    <string name="plan_details_price_billed_monthly">"%1$s\nfor 1 month"</string>
+    <string name="plan_details_price_billed_yearly">"%1$s\nfor 12 months"</string>
+
+    <plurals name="plan_details_pending_offer_single_payment_price_monthly">
+        <item quantity="one">%1$s\nfor %2$d month</item>
+        <item quantity="other">%1$s\nfor %2$d months</item>
+    </plurals>
+    <plurals name="plan_details_pending_offer_single_payment_price_yearly">
+        <item quantity="one">%1$s\nfor %2$d year</item>
+        <item quantity="other">%1$s\nfor %2$d years</item>
+    </plurals>
+
+    <plurals name="plan_details_pending_offer_recurring_payment_price_monthly">
+        <item quantity="one">%1$s%2$s\nfor %3$d month</item>
+        <item quantity="other">%1$s%2$s\nfor %3$d months</item>
+    </plurals>
+    <plurals name="plan_details_pending_offer_recurring_payment_price_yearly">
+        <item quantity="one">%1$s%2$s\nfor %3$d year</item>
+        <item quantity="other">%1$s%2$s\nfor %3$d years</item>
+    </plurals>
+
+    <string name="plans_details_additional_pricing_info">Then %1$s %2$s</string>
+
+    <string name="plan_disclaimer_default">Cancel at any time. For more information on Dashlane, see our %1$s and %2$s.</string>
+    <string name="plan_disclaimer_legal_arg_privacy_policy">Privacy Policy</string>
+    <string name="plan_disclaimer_legal_arg_terms_of_service">Terms of Service</string>
+
+    <string name="offer_empty_state_title">Something went wrong</string>
+    <string name="offer_empty_state_message">An unexpected issue occurred while loading this screen. Please try again later.</string>
+
+    <string name="billing_platform_conflict_warning_app_store">You purchased your subscription via the App Store, so you\'ll need to make any changes through your Apple ID.</string>
+    <string name="billing_platform_conflict_warning_web_Store">You purchased your subscription via the Dashlane website, so you\'ll need to make any changes through our web app.</string>
+    <string name="billing_platform_conflict_warning_fallback">You purchased your subscription via a third-party service (e.g. the App Store), so you\'ll need to make any changes through that service.</string>
+</resources>

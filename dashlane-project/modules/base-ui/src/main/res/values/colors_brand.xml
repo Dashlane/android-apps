@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
+    
+    <eat-comment />
+
+    
+    <color name="brand_dash_green_00">#0E353D</color>
+
+    
+    <color name="brand_mid_green_00">#0E6476</color>
+    <color name="brand_mid_green_05">#D9E6E9</color>
+
+    
+    <eat-comment />
+
+    <color name="brand_black">#000000</color>
+    <color name="brand_darkest_grey">#494643</color>
+    <color name="brand_grey_04">#E0DDDA</color>
+    <color name="brand_grey_05">#EBE9E7</color>
+    <color name="brand_white">#FFFFFF</color>
+
+    
+    <eat-comment />
+
+    
+    <color name="brand_validator_red">#E00635</color>
+</resources>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?selectableItemBackground"
+    android:paddingStart="@dimen/spacing_big"
+    android:paddingTop="@dimen/spacing_small"
+    android:paddingEnd="@dimen/spacing_big"
+    android:paddingBottom="@dimen/spacing_big"
+    >
+
+    <TextView
+        android:id="@+id/attachment_item_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="?colorOnBackgroundMedium"
+        app:layout_constraintStart_toEndOf="@+id/attachment_left_column"
+        app:layout_constraintTop_toBottomOf="@+id/attachment_item_name"
+        tools:text="Jan 9, 2014 - 13.5mb"
+        />
+
+    <TextView
+        android:id="@+id/attachment_item_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceSubtitle1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/attachment_left_column"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="My_first_upload.pdf"
+        />
+
+    <FrameLayout
+        android:id="@+id/attachment_left_column"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/attachment_item_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            app:srcCompat="@drawable/ic_attachment_clipboard_default"
+            />
+
+        <ProgressBar
+            android:id="@+id/attachment_item_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="false"
+            android:indeterminateOnly="false"
+            android:max="100"
+            android:progressDrawable="@drawable/progress_circular"
+            />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

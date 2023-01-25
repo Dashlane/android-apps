@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="expandableCardViewStyle" format="reference" />
+
+    <declare-styleable name="ExpandableCardView">
+        <attr name="headerLayout" format="reference" />
+        <attr name="expandableLayout" format="reference" />
+        <attr name="arrow" format="reference" />
+    </declare-styleable>
+
+</resources>

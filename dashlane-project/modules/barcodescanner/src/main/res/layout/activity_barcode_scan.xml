@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/topLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    >
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:elevation="@dimen/ab_elevation"
+        android:orientation="vertical"
+        android:theme="?actionBarTheme">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:navigationIcon="?homeAsUpIndicator" />
+
+        <TextView
+            android:id="@+id/scan_header_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/spacing_big"
+            android:paddingRight="@dimen/spacing_big"
+            android:paddingBottom="@dimen/spacing_small"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_catchy"
+            tools:text="Activate 2FA for this login" />
+
+        <TextView
+            android:id="@+id/scan_prompt_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/spacing_big"
+            android:paddingRight="@dimen/spacing_big"
+            android:paddingBottom="@dimen/spacing_big"
+            android:textAppearance="?textAppearanceBody1"
+            tools:text="Scan the QR code provided by Amazon to activate 2FA with Dashlane Authenticator." />
+
+    </LinearLayout>
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:layout_alignParentBottom="true"
+        android:background="@color/container_expressive_brand_catchy_idle"
+        />
+
+</RelativeLayout>

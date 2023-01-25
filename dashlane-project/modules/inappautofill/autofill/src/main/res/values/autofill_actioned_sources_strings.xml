@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_pause_resume_unlink_settings_description">Resume Autofill on paused websites and apps, and manage accounts linked via manual Autofill</string>
+    <string name="autofill_pause_resume_unlink_settings_title">Paused &amp; manual Autofill</string>
+    
+    <string name="autofill_pause_resume_settings_title">Paused Autofill</string>
+    
+    <string name="autofill_pause_resume_settings_description">Resume Autofill on paused websites and apps</string>
+
+    <string name="autofill_actioned_sources_title">Paused &amp; manual Autofill</string>
+    
+    <string name="autofill_actioned_sources_paused_title">Paused Autofill</string>
+    <string name="autofill_actioned_sources_all_header">All</string>
+    <string name="autofill_actioned_sources_items_empty_title">Nothing here yet</string>
+    <string name="autofill_actioned_sources_items_empty_description">We\'ll display a list of apps and websites that have Dashlane Autofill paused.</string>
+    <string name="autofill_actioned_sources_forget_error_message">We can\'t open this right now. Please try again later.</string>
+
+    <string name="autofill_list_items_error_title">Something went wrong</string>
+    <string name="autofill_list_items_error_description">Please refresh this page or try again later.</string>
+    <string name="autofill_list_items_error_retry_action">Refresh page</string>
+</resources>

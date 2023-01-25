@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:gravity="left|bottom"
+    android:paddingLeft="@dimen/spacing_normal"
+    android:paddingRight="@dimen/spacing_normal"
+    android:paddingBottom="11.5dp"
+    android:textAppearance="?textAppearanceSubtitle1"
+    android:textColor="@color/text_neutral_quiet"
+    tools:text="Passsword Manager"
+    />

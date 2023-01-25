@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/vpn_third_party_account_background"
+    android:paddingStart="@dimen/spacing_normal"
+    android:paddingTop="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_big">
+
+    <ImageView
+        android:id="@+id/vpn_third_party_account_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/vpn_third_party_hotspot_shield_name"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_hotspot_shield_account_icon" />
+
+    <TextView
+        android:id="@+id/vpn_third_party_account_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginEnd="@dimen/spacing_normal"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/vpn_third_party_hotspot_shield_name"
+        android:textAppearance="?textAppearanceBody1"
+        android:textColor="@color/text_neutral_catchy"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/vpn_third_party_account_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/vpn_third_party_account_icon"
+        app:layout_constraintTop_toTopOf="@+id/vpn_third_party_account_icon"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/vpn_third_party_account_login_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:drawablePadding="@dimen/spacing_extra_small"
+        android:text="@string/vpn_third_party_account_login"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="@color/text_neutral_quiet"
+        app:drawableRightCompat="@drawable/ic_lock"
+        app:drawableTint="@color/text_neutral_quiet"
+        app:layout_constraintStart_toStartOf="@+id/vpn_third_party_account_icon"
+        app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_account_icon" />
+
+    <TextView
+        android:id="@+id/vpn_third_party_account_login"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody1"
+        app:layout_constraintEnd_toStartOf="@+id/vpn_third_party_copy_login"
+        app:layout_constraintStart_toStartOf="@+id/vpn_third_party_account_login_title"
+        app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_account_login_title"
+        tools:text="randomemail@provider.com" />
+
+    <Button
+        android:id="@+id/vpn_third_party_copy_login"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/copy"
+        app:layout_constraintBottom_toBottomOf="@+id/vpn_third_party_account_login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/vpn_third_party_account_login" />
+
+    <TextView
+        android:id="@+id/vpn_third_party_account_password_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:drawablePadding="@dimen/spacing_extra_small"
+        android:text="@string/vpn_third_party_account_password"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="@color/text_neutral_quiet"
+        app:drawableRightCompat="@drawable/ic_lock"
+        app:drawableTint="@color/text_neutral_quiet"
+        app:layout_constraintStart_toStartOf="@+id/vpn_third_party_account_icon"
+        app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_account_login" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/vpn_third_party_account_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint=""
+        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_marginStart="0dp"
+        app:endIconMode="password_toggle"
+        app:hintTextAppearance="?textAppearanceBody1"
+        app:layout_constraintEnd_toStartOf="@+id/vpn_third_party_copy_password"
+        app:layout_constraintStart_toStartOf="@+id/vpn_third_party_account_password_title"
+        app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_account_login">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/vpn_third_party_account_password_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:inputType="textPassword"
+            android:longClickable="false"
+            android:textAppearance="?textAppearanceBody1"
+            tools:text="•••••••••••••••••" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/vpn_third_party_copy_password"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/copy"
+        app:layout_constraintBottom_toBottomOf="@+id/vpn_third_party_account_password"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

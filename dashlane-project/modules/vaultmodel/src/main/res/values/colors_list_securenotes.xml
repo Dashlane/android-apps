@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="securenote_color_pink">#ffafdc</color>
+    <color name="securenote_color_red">#e2624d</color>
+    <color name="securenote_color_orange">#fa9343</color>
+    <color name="securenote_color_yellow">#ffc566</color>
+    <color name="securenote_color_green">#9bae26</color>
+    <color name="securenote_color_blue">#2e80c7</color>
+    <color name="securenote_color_gray">#d3d3d3</color>
+    <color name="securenote_color_brown">#a98259</color>
+    <color name="securenote_color_purple">#b86fd1</color>
+
+</resources>

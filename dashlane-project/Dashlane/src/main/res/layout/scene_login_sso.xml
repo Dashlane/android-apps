@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/view_login_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:maxWidth="@dimen/size_480dp"
+    tools:context="com.dashlane.login.LoginActivity"
+    >
+
+    <TextView
+        android:id="@+id/topic"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/sso_lock_topic_default"
+        android:textAppearance="?textAppearanceHeadline2"
+        android:textColor="?colorTextCatchy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="24dp"
+        android:textAppearance="?textAppearanceBody1"
+        android:textColor="?colorTextCatchy"
+        app:layout_constraintBottom_toTopOf="@+id/buttons"
+        app:layout_constraintEnd_toEndOf="@+id/topic"
+        app:layout_constraintStart_toStartOf="@+id/topic"
+        app:layout_constraintTop_toBottomOf="@+id/topic"
+        app:layout_constraintVertical_bias="0"
+        tools:text="randomemail@provider.com"
+        />
+
+    <Spinner
+        android:id="@+id/email_spinner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:backgroundTint="?colorTextCatchy"
+        android:popupBackground="?colorSurface"
+        android:spinnerMode="dropdown"
+        app:layout_constraintBottom_toBottomOf="@+id/email"
+        app:layout_constraintEnd_toEndOf="@+id/topic"
+        app:layout_constraintStart_toStartOf="@+id/topic"
+        app:layout_constraintTop_toTopOf="@+id/email"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="cancel,unlock"
+        />
+
+    <Button
+        android:id="@+id/cancel"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/cancel"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/unlock"
+        app:layout_constraintEnd_toStartOf="@+id/unlock"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <Button
+        android:id="@+id/unlock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/fragment_lock_master_password_button_unlock"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?indeterminateProgressStyle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:indeterminateTint="@color/text_inverse_catchy"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@id/unlock"
+        app:layout_constraintEnd_toEndOf="@id/unlock"
+        app:layout_constraintStart_toStartOf="@id/unlock"
+        app:layout_constraintTop_toTopOf="@id/unlock"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

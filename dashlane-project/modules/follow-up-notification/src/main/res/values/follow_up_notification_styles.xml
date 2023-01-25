@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget.Dashlane.FollowUpNotification.Item.Attribute" parent="Theme.Dashlane">
+    </style>
+    <style name="TextAppearance.Dashlane.FollowUpNotification.Item.Attribute.Name"
+        parent="TextAppearance.Compat.Notification.Title">
+    </style>
+    <style name="TextAppearance.Dashlane.FollowUpNotification.Item.Attribute.Label"
+        parent="TextAppearance.Compat.Notification.Line2">
+        <item name="font">@font/roboto_regular</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_neutral_quiet</item>
+    </style>
+    <style name="TextAppearance.Dashlane.FollowUpNotification.Item.Attribute.Value.Number"
+        parent="TextAppearance.Compat.Notification">
+        <item name="font">@font/roboto_mono_regular</item>
+        <item name="fontFamily">monospace</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_neutral_standard</item>
+    </style>
+    <style name="Widget.Dashlane.FollowUpNotification.Item.Attribute.CopyAction"
+        parent="Widget.Compat.NotificationActionContainer">
+    </style>
+    <style name="Widget.Dashlane.FollowUpNotification.Item.Attribute.CopyActionText"
+        parent="Widget.Compat.NotificationActionText">
+        <item name="font">@font/roboto_medium</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_brand_standard</item>
+    </style>
+</resources>

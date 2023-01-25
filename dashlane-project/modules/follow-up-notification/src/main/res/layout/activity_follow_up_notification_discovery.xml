@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Theme.Dashlane.LockedOut.Transparent.Modal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_notification_quick_start"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_normal"
+        android:paddingBottom="48dp"
+        tools:context=".ui.InContextDiscoveryActivity"
+        >
+
+        <ImageView
+            android:id="@+id/discovery_screen_swipe_icon"
+            android:layout_width="16dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_ultra_huge"
+            android:rotation="180"
+            android:scaleType="fitXY"
+            android:visibility="visible"
+            app:srcCompat="@drawable/ic_arrow_collapse"
+            app:tint="@color/text_neutral_quiet"
+            tools:visibility="visible"
+            />
+
+        <TextView
+            android:id="@+id/discovery_screen_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_huge"
+            android:gravity="center_horizontal"
+            android:maxWidth="@dimen/size_480dp"
+            android:text="@string/follow_up_notification_action_item_title"
+            android:textAppearance="?textAppearanceHeadline5"
+            android:textColor="@color/text_inverse_catchy"
+            tools:text="@string/follow_up_notification_action_item_title"
+            />
+
+        <TextView
+            android:id="@+id/discovery_screen_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:gravity="center_horizontal"
+            android:maxWidth="@dimen/size_480dp"
+            android:text="@string/follow_up_notification_action_item_description"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="@color/text_inverse_standard"
+            tools:text="@string/follow_up_notification_action_item_description"
+            />
+
+        <ImageView
+            android:id="@+id/discovery_screen_notification_example"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_big"
+            android:maxWidth="@dimen/size_480dp"
+            android:src="@drawable/ic_follow_up_preview"
+            />
+
+        <Button
+            android:id="@+id/discovery_screen_button"
+            style="?materialButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/discovery_screen_button"
+            />
+
+    </LinearLayout>
+</ScrollView>

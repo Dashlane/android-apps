@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <com.dashlane.ui.widgets.view.HtmlTextView
+        android:id="@+id/offer_details_benefit_item_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/spacing_small"
+        android:textAppearance="?textAppearanceBody1"
+        app:drawableStartCompat="@drawable/ic_check_offer_details_benefit_icon"
+        app:drawableTint="@color/text_neutral_standard"
+        tools:text="Store unlimited passwords on unlimited devices"
+        />
+
+</FrameLayout>

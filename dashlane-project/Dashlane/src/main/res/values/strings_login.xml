@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="request_duo_challenge_button">Use Duo app instead</string>
+    <string name="request_duo_challenge_prompt">You have just been sent a push notification by Duo. Use your Duo app to verify your identity.\nYour notification expires in 30 seconds.</string>
+    <string name="request_duo_challenge_declined">The Duo notification was denied. Please try again.</string>
+
+    <string name="request_u2f_verification_fail">Looks like this key isn\'t registered with your account. Please register it in your account settings and try again.</string>
+    <string name="u2f_login_popup_title">Authenticate using a U2F Key</string>
+    <string name="u2f_login_popup_message">You can use USB or NFC keys to authenticate. If your U2F key has NFC capability, make sure your NFC is enabled and then tap the key to the back of your device to authenticate.</string>
+    <string name="u2f_login_confirm_presence_popup_title">U2F Key detected!</string>
+    <string name="u2f_login_confirm_presence_popup_message">Please press the button on your key to authenticate</string>
+
+    <string name="login_monobucket_log_out">Log out</string>
+    <string name="login_monobucket_unlink_previous_device">Unlink previous device</string>
+    <string name="login_monobucket_see_premium_plan">Upgrade to Premium</string>
+    <string name="login_monobucket_title">Your current plan supports only 1 device</string>
+    <string name="login_monobucket_subtitle">Upgrade to Premium to access your data on unlimited devices. Or, unlink your previous device to continue.</string>
+
+    <string name="login_monobucket_unregister_device_title">Unlink your previous device?</string>
+    <string name="login_monobucket_unregister_device_message">All your Dashlane data will be securely transferred to your new device.</string>
+    <string name="login_monobucket_unregister_device_date">Last active %1$s</string>
+    <string name="login_monobucket_unregister_device_cancel">Cancel</string>
+    <string name="login_monobucket_unregister_device_unlink">Unlink</string>
+
+    <string name="login_sync_progress_monobucket_unregister">Unlinking previous device…</string>
+    <string name="login_sync_progress_deciphering">Downloading your data…</string>
+    <string name="login_sync_progress_saving">Securely storing your data…</string>
+    <string name="login_sync_progress_finalizing">Finalizing your settings…</string>
+    <string name="login_sync_progress_notes">It may take a minute.</string>
+    <string name="login_sync_progress_success">You’re all set up!</string>
+
+    <string name="login_email_page_validate_button">Continue</string>
+    <string name="login_password_page_login_button">Log in</string>
+
+    <string name="enter_masterpassword">Unlock with your Master Password</string>
+    <string name="unlock_biometrics">Unlock with your biometrics</string>
+
+    <string name="login_settings_complete_cta">Jump in</string>
+
+    <string name="login_device_limit_log_out">Log out</string>
+    <string name="login_device_limit_unlink_previous_device">Unlink device</string>
+    <string name="login_device_limit_see_premium_plan">Upgrade to Premium</string>
+    <string name="login_device_limit_title_dynamic">Your plan supports only %1$d devices</string>
+    <string name="login_device_limit_subtitle">Upgrade to Premium to access your data on unlimited devices. Or, unlink a device to stay on your current plan.</string>
+    <string name="login_device_limit_tip">Our Premium plan also includes unlimited logins, VPN, and Dark Web Monitoring.</string>
+    <string name="login_device_limit_unregister_devices_title">Select the devices to unlink</string>
+    <string name="login_device_limit_unregister_devices_message_dynamic">The Essentials plan supports only %1$d devices. Unlink all but one from this list.</string>
+    <string name="login_device_limit_unregister_devices_caption">We’ll securely transfer your Dashlane data to your new device in the next step.</string>
+    <string name="login_device_limit_unregister_device_date">Last active %1$s</string>
+    <string name="login_sync_progress_device_limit_unregister">Unlinking selected device(s)</string>
+    <string name="login_sync_progress_unlink_devices_error_title">Something went wrong</string>
+    <string name="login_sync_progress_unlink_devices_error_message">There was a problem with unlinking your device(s). Please try again or contact Dashlane Support for help.</string>
+    <string name="login_sync_progress_unlink_devices_error_positive_button">Try again</string>
+    <string name="login_sync_progress_unlink_devices_error_negative_button">Cancel</string>
+
+    
+    <string name="login_dialog_enforce_twofa_limit_title">Set up 2FA to access your vault</string>
+    
+    <string name="login_dialog_enforce_twofa_limit_description">Your company requires you to use 2-factor authentication (2FA) for additional security.\n\nYou can set up 2FA on this mobile device using Dashlane Authenticator. To use a different authenticator app, log in from your computer browser.</string>
+    
+    <string name="login_dialog_enforce_twofa_positive_button">Set up 2FA</string>
+    
+    <string name="login_dialog_enforce_twofa_negative_button">Log out</string>
+
+</resources>

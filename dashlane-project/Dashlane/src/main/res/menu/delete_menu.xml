@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:dashlane="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_delete"
+        android:icon="@drawable/action_bar_menu_delete"
+        android:title="@string/delete"
+        dashlane:showAsAction="always"
+        />
+
+</menu>

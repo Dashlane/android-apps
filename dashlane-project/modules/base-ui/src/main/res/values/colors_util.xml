@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="undefined">#FF00FF</color>
+    <color name="switch_thumb_normal">#ECECEC</color>
+    <color name="switch_track_normal">#B2B2B2</color>
+</resources>

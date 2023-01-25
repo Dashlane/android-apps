@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:paddingLeft="@dimen/spacing_normal"
+    android:paddingTop="@dimen/fragment_setting_list_item_padding_top"
+    android:paddingRight="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_normal"
+    tools:ignore="UnusedAttribute"
+    >
+
+    <TextView
+        android:id="@+id/setting_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:layout_toLeftOf="@+id/setting_trailing"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textColor="@color/text_neutral_catchy"
+        tools:text="Pin code lock"
+        />
+
+    <TextView
+        android:id="@+id/setting_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/setting_title"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="@dimen/fragment_setting_list_item_description_margin_top"
+        android:layout_marginRight="@dimen/spacing_normal"
+        android:layout_toLeftOf="@+id/setting_trailing"
+        android:textAppearance="?textAppearanceBody2"
+        tools:text="Use a pincode to lock the app"
+        />
+
+    <FrameLayout
+        android:id="@+id/setting_trailing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:visibility="gone"
+        >
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/setting_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:saveEnabled="false"
+            android:visibility="invisible"
+            />
+
+        <ProgressBar
+            android:id="@+id/setting_progress_bar"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            />
+
+    </FrameLayout>
+
+</RelativeLayout>

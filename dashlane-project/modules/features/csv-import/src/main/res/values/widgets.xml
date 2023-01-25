@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget.Dashlane.Button.CsvImport" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:textColor">@color/button_csv_import_text_color</item>
+        <item name="iconTint">@color/button_csv_import_text_color</item>
+        <item name="rippleColor">@color/button_csv_import_ripple_color</item>
+        <item name="backgroundTint">@color/button_csv_import_background_tint</item>
+    </style>
+</resources>

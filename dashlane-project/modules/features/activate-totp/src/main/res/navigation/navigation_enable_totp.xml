@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_enable_totp"
+    app:startDestination="@+id/nav_enable_totp_select_frequency">
+
+    <fragment
+        android:id="@+id/nav_enable_totp_select_frequency"
+        android:name="com.dashlane.activatetotp.EnableTotpSelectFrequencyFragment"
+        tools:layout="@layout/enable_totp_step_select_frequency_content">
+        <action
+            android:id="@+id/go_to_recovery_info"
+            app:destination="@id/nav_enable_totp_recovery_info" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enable_totp_recovery_info"
+        android:name="com.dashlane.activatetotp.EnableTotpRecoveryInfoFragment"
+        tools:layout="@layout/enable_totp_step_recovery_info_content">
+
+        <argument
+            android:name="totpLogin"
+            app:argType="boolean" />
+
+        <action
+            android:id="@+id/go_to_add_phone"
+            app:destination="@id/nav_enable_totp_add_phone" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enable_totp_add_phone"
+        android:name="com.dashlane.activatetotp.EnableTotpAddPhoneFragment"
+        tools:layout="@layout/enable_totp_step_add_phone_content">
+
+        <argument
+            android:name="totpLogin"
+            app:argType="boolean" />
+
+        <action
+            android:id="@+id/go_to_fetch_info"
+            app:destination="@id/nav_enable_totp_fetch_info" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enable_totp_fetch_info"
+        android:name="com.dashlane.activatetotp.EnableTotpFetchInfoFragment"
+        tools:layout="@layout/activate_totp_loading">
+
+        <argument
+            android:name="totpLogin"
+            app:argType="boolean" />
+
+        <argument
+            android:name="phoneNumber"
+            app:argType="string"
+            app:nullable="false" />
+
+        <argument
+            android:name="country"
+            app:argType="string"
+            app:nullable="false" />
+
+        <action
+            android:id="@+id/go_to_display_recovery_codes"
+            app:destination="@id/nav_enable_totp_display_recovery_codes"
+            app:popUpTo="@id/nav_enable_totp_add_phone"
+            app:popUpToInclusive="false" />
+
+        <action
+            android:id="@+id/go_to_fetch_info_error"
+            app:destination="@id/nav_enable_totp_fetch_info_error"
+            app:popUpTo="@id/nav_enable_totp_add_phone"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enable_totp_fetch_info_error"
+        android:name="com.dashlane.activatetotp.EnableTotpFetchInfoErrorFragment"
+        tools:layout="@layout/activate_totp_error" />
+
+    <fragment
+        android:id="@+id/nav_enable_totp_display_recovery_codes"
+        android:name="com.dashlane.activatetotp.EnableTotpDisplayRecoveryCodesFragment"
+        tools:layout="@layout/enable_totp_step_display_recovery_codes_content">
+
+        <argument
+            android:name="recoveryCodes"
+            app:argType="string"
+            app:nullable="false" />
+
+        <argument
+            android:name="serverKey"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
+            android:name="otpAuthUrl"
+            app:argType="string"
+            app:nullable="false" />
+
+        <action
+            android:id="@+id/go_to_activation"
+            app:destination="@id/nav_enable_totp_activation" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enable_totp_activation"
+        android:name="com.dashlane.activatetotp.EnableTotpActivationFragment"
+        tools:layout="@layout/activate_totp_loading">
+
+        <argument
+            android:name="serverKey"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
+            android:name="otpAuthUrl"
+            app:argType="string"
+            app:nullable="false" />
+
+        <action
+            android:id="@+id/go_to_complete"
+            app:destination="@id/nav_enable_totp_complete"
+            app:popUpTo="@id/nav_enable_totp_select_frequency"
+            app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/go_to_activation_error"
+            app:destination="@id/nav_enable_totp_activation_error"
+            app:popUpTo="@id/nav_enable_totp_display_recovery_codes"
+            app:popUpToInclusive="false" />
+
+        <action
+            android:id="@+id/go_to_activation_no_connection"
+            app:destination="@id/nav_enable_totp_activation_no_connection"
+            app:popUpTo="@id/nav_enable_totp_display_recovery_codes"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enable_totp_activation_error"
+        android:name="com.dashlane.activatetotp.EnableTotpActivationErrorFragment"
+        tools:layout="@layout/activate_totp_error" />
+
+    <fragment
+        android:id="@+id/nav_enable_totp_activation_no_connection"
+        android:name="com.dashlane.activatetotp.EnableTotpActivationNoConnectionFragment"
+        tools:layout="@layout/activate_totp_error" />
+
+    <fragment
+        android:id="@+id/nav_enable_totp_complete"
+        android:name="com.dashlane.activatetotp.EnableTotpCompleteFragment"
+        tools:layout="@layout/fragment_enable_totp_complete" />
+</navigation>

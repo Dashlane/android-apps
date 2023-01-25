@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="csv_import_title">
+        <item quantity="one">@string/csv_import_title_one</item>
+        <item quantity="other">@string/csv_import_title_other</item>
+    </plurals>
+    <plurals name="csv_import_success_message">
+        <item quantity="one">@string/csv_import_success_message_one</item>
+        <item quantity="other">@string/csv_import_success_message_other</item>
+    </plurals>
+</resources>

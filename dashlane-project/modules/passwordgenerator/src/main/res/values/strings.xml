@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="generated_password">Generator</string>
+    <string name="password_generator_previously_generated">Previously generated</string>
+
+    <string name="password_generator_length1">Length:</string>
+    <string name="password_generator_digits">Digits (e.g. 345)</string>
+    <string name="password_generator_letters">Letters (e.g. Aa)</string>
+    <string name="password_generator_symbols">Symbols (@&amp;$!#?)</string>
+    <string name="password_generator_ambiguous">Similar characters (e.g. 1l| O0 Z2)</string>
+    <string name="and_accessibility_generator_password_length">%1$s password length.</string>
+</resources>

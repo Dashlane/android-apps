@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/spacing_big"
+    android:paddingTop="@dimen/spacing_normal"
+    android:paddingEnd="@dimen/spacing_big"
+    android:paddingBottom="@dimen/spacing_normal"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <ImageView
+        android:id="@+id/action_icon"
+        android:layout_width="@dimen/action_icon_size"
+        android:layout_height="@dimen/action_icon_size"
+        app:tint="?colorControlNormal"
+        />
+
+    <TextView
+        android:id="@+id/action_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_big"
+        android:layout_weight="1"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceListItem"
+        android:textSize="16sp"
+        tools:text="Copy"
+        />
+</LinearLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setting_backup_category">Backup</string>
+    <string name="setting_backup_export">Export your Vault</string>
+    <string name="setting_backup_export_description">Back up your Dashlane data to an encrypted file</string>
+    <string name="setting_backup_import">Restore your Vault</string>
+    <string name="setting_backup_import_description">Restore your data from an encrypted backup</string>
+
+    <string name="backup_export_title">Encrypt this backup with a password</string>
+    <string name="backup_export_cta_primary">Encrypt and export</string>
+    <string name="backup_export_cta_secondary">Cancel</string>
+    <string name="backup_export_success_message">Backup saved to your Download Folder</string>
+    <string name="backup_export_sharing_fallback_success_message">Backup was generated and shared</string>
+    <string name="backup_export_sharing_fallback_title">Share your file</string>
+    <string name="backup_export_success_action">See file</string>
+    <string name="backup_export_failure_message">That didn\'t seem to work. Please check you have free space on your phone.</string>
+    <string name="backup_export_failure_action">Try again</string>
+
+    <string name="backup_import_title">Unlock %1$s</string>
+    <string name="backup_import_message">Enter the password you were using when you created this backup.</string>
+    <string name="backup_import_cta_primary">Unlock and restore</string>
+    <string name="backup_import_cta_secondary">Cancel</string>
+    <plurals name="backup_import_success_message">
+        <item quantity="one">%1$d item imported successfully</item>
+        <item quantity="other">%1$d items imported successfully</item>
+    </plurals>
+    <string name="backup_import_failure_message">"That file looked empty. Please check you selected a \".dash\" file."</string>
+    <string name="backup_import_failure_action">Try again</string>
+    <string name="backup_password_hint">Enter password</string>
+    <string name="backup_failure_invalid_password">Invalid password. Verify it and try again.</string>
+</resources>

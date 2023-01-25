@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:theme="@style/Theme.Dashlane.Modal">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:maxWidth="@dimen/size_480dp">
+
+        <ImageView
+            android:id="@+id/onboarding_image"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_ultra_huge"
+            android:importantForAccessibility="no"
+            android:src="@drawable/onboarding_accessibility_services"
+            app:layout_constraintBottom_toTopOf="@+id/guideline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".5" />
+
+        <TextView
+            android:id="@+id/onboarding_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:breakStrategy="high_quality"
+            android:text="@string/accessibility_onboarding_title"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_catchy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/guideline" />
+
+
+        <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:layout_constraintBottom_toTopOf="@+id/onboarding_agreement_checkbox"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/onboarding_title"
+            app:layout_constraintVertical_bias="0.0">
+
+            <TextView
+                android:id="@+id/onboarding_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/spacing_small"
+                android:breakStrategy="balanced"
+                android:paddingBottom="@dimen/spacing_big"
+                android:text="@string/accessibility_onboarding_body"
+                android:textAppearance="?textAppearanceBody1" />
+        </ScrollView>
+
+        <CheckBox
+            android:id="@+id/onboarding_agreement_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_big"
+            android:text="@string/accessibility_onboarding_checkbox"
+            app:layout_constraintBottom_toTopOf="@+id/buttons_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.dashlane.ui.activities.intro.IntroButtonBarLayout
+            android:id="@+id/buttons_layout"
+            style="?buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:layoutDirection="locale"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/spacing_small"
+            android:paddingBottom="@dimen/spacing_small"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Space
+                android:id="@+id/spacer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/onboarding_negative_button"
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:layout_marginEnd="@dimen/spacing_small"
+                android:text="@string/cancel" />
+
+            <Button
+                android:id="@+id/onboarding_positive_button"
+                style="?materialButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:enabled="false"
+                android:text="@string/onboarding_in_app_login_step2_positive_button" />
+
+        </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

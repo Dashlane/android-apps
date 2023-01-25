@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_dashlane_authenticator_message_in_progress">You have an authentication request in Dashlane Authenticator</string>
+    <string name="login_dashlane_authenticator_request_rejected">Authentication rejected</string>
+    <string name="login_dashlane_authenticator_request_approved">Authentication accepted</string>
+    <string name="login_dashlane_authenticator_request_timed_out">Authentication timed out</string>
+    <string name="login_dashlane_authenticator_use_email_token">Send code to email</string>
+    <string name="login_dashlane_authenticator_resend_request">Resend request</string>
+    <string name="login_dashlane_authenticator_use_totp">Enter 2FA token</string>
+    <string name="login_totp_use_dashlane_authenticator">Receive a push notification</string>
+</resources>

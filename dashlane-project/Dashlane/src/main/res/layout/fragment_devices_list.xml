@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <GridView
+        android:id="@+id/device_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:columnWidth="@dimen/fragment_grid_devices_column_width"
+        android:gravity="center"
+        android:horizontalSpacing="8dp"
+        android:numColumns="auto_fit"
+        android:paddingTop="@dimen/fragment_grid_devices_top_padding"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="8dp"
+        />
+
+
+    <TextView
+        android:id="@+id/progressbar_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:paddingLeft="@dimen/spacing_normal"
+        android:paddingRight="@dimen/spacing_normal"
+        android:text="@string/loading_devices"
+        android:textAppearance="?textAppearanceSubtitle1"
+        tools:ignore="RelativeOverlap"
+        />
+
+    <ProgressBar
+        android:id="@+id/progressbar"
+        style="?indeterminateProgressStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressbar_label"
+        android:layout_centerHorizontal="true"
+        />
+</RelativeLayout>

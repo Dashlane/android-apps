@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.dashlane"
+    android:installLocation="auto"
+    android:targetSandboxVersion="2"
+    tools:ignore="UnusedAttribute">
+
+    
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <permission
+        android:name="dashlane.permission.PERMISSION"
+        android:protectionLevel="signature" />
+
+    <permission
+        android:name="com.dashlane.notification.autofill.NOT_NOW"
+        android:protectionLevel="signature" />
+    <permission
+        android:name="com.dashlane.notification.autofillapi.TOTP_NOTIFICATION"
+        android:protectionLevel="signature" />
+    <permission
+        android:name="com.dashlane.notification.followupnotification.FOLLOW_UP_NOTIFICATION"
+        android:protectionLevel="signature" />
+    <permission
+        android:name="com.dashlane.authentication.PACKAGE_REMOVED"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.dashlane.notification.autofill.NOT_NOW" />
+    <uses-permission android:name="com.dashlane.notification.autofillapi.TOTP_NOTIFICATION" />
+    <uses-permission android:name="com.dashlane.notification.followupnotification.FOLLOW_UP_NOTIFICATION" />
+
+    
+    
+    
+    <uses-permission android:name="com.adjust.preinstall.READ_PERMISSION" />
+
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.network"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false" />
+
+    <application
+        android:name="com.dashlane.DashlaneApplication"
+        android:allowBackup="true"
+        android:backupAgent="com.dashlane.backup.DashlaneBackupAgent"
+        android:extractNativeLibs="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/dashlane_main_app_name"
+        android:largeHeap="true"
+        android:localeConfig="@xml/locales_config"
+        android:supportsRtl="false"
+        android:taskAffinity=""
+        android:theme="@style/Theme.Dashlane.NoActionBar.DrawsStatusBarBackground"
+        tools:replace="android:supportsRtl, android:allowBackup">
+        
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="unused" />
+        <meta-data
+            android:name="tapad.APP_ID"
+            android:value="dashlane-id-tracker" />
+        <meta-data
+            android:name="com.dashlane.util.DashlaneGlideModule"
+            android:value="AppGlideModule" />
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="barcode" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        
+
+        <meta-data
+            android:name="WindowManagerPreference:FreeformWindowSize"
+            android:value="tablet" />
+        <meta-data
+            android:name="WindowManagerPreference:FreeformWindowOrientation"
+            android:value="landscape" />
+
+        
+        <meta-data
+            android:name="android.webkit.WebView.EnableSafeBrowsing"
+            android:value="true" />
+
+        
+
+        <meta-data
+            android:name="io.sentry.dsn"
+            android:value="hidden_value" />
+        
+        <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false" />
+
+        
+        <activity
+            android:name="com.dashlane.ui.activities.SplashScreenActivity"
+            android:exported="true"
+            android:label="@string/dashlane_main_app_name"
+            android:noHistory="true"
+            android:theme="@style/Theme.Dashlane.SplashScreen">
+            <intent-filter>
+                <action android:name="com.dashlane.SPLASHSCREEN" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            
+            <nav-graph android:value="@navigation/drawer_navigation" />
+            
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="otpauth" />
+            </intent-filter>
+        </activity>
+
+        
+        <activity
+            android:name=".login.LoginActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:exported="false"
+            android:label="@string/dashlane_main_app_name"
+            android:theme="@style/Theme.Dashlane.Login.LockedOut.TranslucentWindow"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.dashlane.login.progress.LoginSyncProgressActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+
+        <activity
+            android:name="com.dashlane.login.settings.LoginSettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+
+        <activity
+            android:name=".login.monobucket.MonobucketActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
+
+        <activity
+            android:name=".login.devicelimit.DeviceLimitActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
+
+        <activity
+            android:name=".login.devicelimit.UnlinkDevicesActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
+
+        <activity
+            android:name=".login.pages.enforce2fa.Enforce2faLimitActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".login.lock.OnboardingApplicationLockActivity"
+            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+        
+
+        
+        <activity
+            android:name="com.dashlane.createaccount.CreateAccountActivity"
+            android:exported="false"
+            android:label="@string/dashlane_main_app_name"
+            android:theme="@style/Theme.Dashlane.Login.LockedOut"
+            android:windowSoftInputMode="adjustResize" />
+
+
+        
+
+        
+        <activity
+            android:name=".ui.activities.HomeActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingInAppLoginActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        
+        <activity
+            android:name="com.dashlane.ui.screens.activities.onboarding.hardwareauth.OnboardingHardwareAuthActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".ui.screens.activities.onboarding.hardwareauth.HardwareAuthActivationActivity"
+            android:label=""
+            android:theme="@style/Theme.Dashlane.Transparent" />
+
+        <activity
+            android:name=".masterpassword.ChangeMasterPasswordActivity"
+            android:theme="@style/Theme.Dashlane"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".masterpassword.warning.ChangeMPWarningDesktopActivity"
+            android:noHistory="true"
+            android:theme="@style/Theme.Dashlane.NoActionBar.DrawsStatusBarBackground"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".masterpassword.tips.MasterPasswordTipsActivity"
+            android:theme="@style/Theme.Dashlane" />
+
+        
+        <activity
+            android:name=".item.ItemEditViewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Dashlane.DialogWhenTablet"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.util.FinishingActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        
+
+        
+        <activity
+            android:name="com.dashlane.ui.activities.debug.DebugActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        
+
+        <activity
+            android:name=".ui.activities.DashlaneWrapperActivity"
+            android:theme="@style/Theme.Dashlane.DialogWhenTablet"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.activities.firstpassword.AddFirstPasswordActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.activities.firstpassword.autofilldemo.AutofillDemoActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.activities.firstpassword.faq.FAQFirstPasswordActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".item.linkedwebsites.LinkedServicesActivity"
+            android:theme="@style/Theme.Dashlane.DialogWhenTablet"
+            android:windowSoftInputMode="adjustResize" />
+
+        
+        <activity
+            android:name=".attachment.ui.AttachmentListActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.dashlane.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
+
+
+        
+        
+        <receiver
+            android:name=".async.broadcasts.BrazeBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.dashlane.intent.BRAZE_PUSH_RECEIVED" />
+                <action android:name="com.dashlane.intent.BRAZE_NOTIFICATION_OPENED" />
+            </intent-filter>
+        </receiver>
+
+        
+        
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
+
+        <receiver
+            android:name="com.dashlane.async.broadcasts.GCMAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.dashlane.gcm.CLEAR_NOTIFICATIONS" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".DashlaneFcmService"
+            android:exported="false"
+            tools:ignore="ExportedService">
+            
+
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <receiver
+            android:name="com.dashlane.async.broadcasts.InstallReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+
+
+        
+        <receiver
+            android:name=".notification.AutofillReceiver"
+            android:permission="com.dashlane.notification.autofill.NOT_NOW" />
+
+        <receiver
+            android:name=".autofill.api.totp.services.AutofillApiTotpNotificationReceiver"
+            android:permission="com.dashlane.notification.autofillapi.TOTP_NOTIFICATION" />
+
+        
+        <receiver
+            android:name="com.dashlane.authenticator.AuthenticatorUninstalledReceiver"
+            android:permission="com.dashlane.authenticator.PACKAGE_REMOVED"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <data android:scheme="package" android:sspPrefix="com.dashlane.authenticator" />
+            </intent-filter>
+        </receiver>
+
+        
+
+        
+        <service
+            android:name="com.dashlane.authentication.accountsmanager.DashlaneAuthenticatorService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        
+        <service
+            android:name="com.dashlane.autofill.accessibility.DashlaneAccessibilityService"
+            android:enabled="@bool/is_accessibility_supported"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_meta" />
+        </service>
+        <service
+            android:name="com.dashlane.autofill.accessibility.NoOpDashlaneAccessibilityService"
+            android:enabled="@bool/is_no_op_accessibility_supported"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/no_op_accessibility_service_meta" />
+        </service>
+        <service android:name="com.dashlane.ui.DashlaneBubble" />
+        <service android:name="com.dashlane.ui.InAppLoginWindow" />
+        <service android:name="com.dashlane.ui.DashlaneInAppLoggedOut" />
+
+        <activity
+            android:name=".ui.screens.settings.LicensesActivity"
+            android:label="@string/activity_title_licenses"
+            android:parentActivityName=".ui.activities.HomeActivity" />
+
+        <activity
+            android:name=".ui.screens.activities.GeneratedPasswordHistoryActivity"
+            android:label="@string/action_bar_password_generated"
+            android:parentActivityName=".ui.activities.HomeActivity" />
+
+        
+        <activity
+            android:name=".plans.ui.view.PurchaseCheckingActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".plans.ui.view.PurchaseCheckingActivityLockedOut"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:theme="@style/Theme.Dashlane.LockedOut" />
+
+
+        
+        <activity android:name=".ui.activities.DisclaimerActivity" />
+
+        
+        <activity
+            android:name=".ui.activities.onboarding.InAppLoginIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        
+        <activity
+            android:name=".accountrecovery.AccountRecoveryBiometricIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".accountrecovery.AccountRecoveryIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".accountrecovery.AccountRecoveryIntroDialogActivity"
+            android:label=""
+            android:theme="@style/Theme.Dashlane.Transparent" />
+
+        
+        <activity
+            android:name=".login.sso.LoginSsoActivity"
+            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+
+        <activity
+            android:name=".login.sso.migration.MigrationToSsoMemberIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".login.sso.migration.MigrationToSsoMemberActivity"
+            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+
+        
+        
+        <service
+            android:name=".authenticator.AuthenticatorPasswordManagerService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="com.dashlane.PasswordManagerService" />
+            </intent-filter>
+        </service>
+
+        
+        
+        
+        <receiver
+            android:name="com.adjust.sdk.AdjustPreinstallReferrerReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.attribution.SYSTEM_INSTALLER_REFERRER" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

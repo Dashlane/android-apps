@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dashlane="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="500dp"
+    android:background="@drawable/bottom_sheet_half_round_rectangle"
+    android:paddingLeft="@dimen/spacing_small"
+    android:paddingTop="11dp"
+    android:paddingRight="@dimen/spacing_normal"
+    android:theme="@style/Theme.Dashlane"
+    tools:ignore="Overdraw"
+    >
+
+    <ImageView
+        android:id="@+id/handle"
+        android:layout_width="52dp"
+        android:layout_height="5dp"
+        android:src="@drawable/handle_round_rectangle_shape"
+        dashlane:layout_constraintLeft_toLeftOf="parent"
+        dashlane:layout_constraintRight_toRightOf="parent"
+        dashlane:layout_constraintTop_toTopOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/dashlogo"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="@dimen/spacing_normal"
+        android:scaleType="centerInside"
+        android:src="@drawable/day_night_logo"
+        dashlane:layout_constraintStart_toStartOf="parent"
+        dashlane:layout_constraintTop_toBottomOf="@id/handle"
+        dashlane:tint="@color/text_neutral_catchy"
+        />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginTop="14dp"
+        android:paddingBottom="14dp"
+        android:text="@string/autofill_view_all_accounts_search_sheet_title"
+        android:textAppearance="?textAppearanceHeadline6"
+        android:textColor="@color/text_neutral_catchy"
+        dashlane:layout_constraintEnd_toEndOf="parent"
+        dashlane:layout_constraintStart_toEndOf="@+id/dashlogo"
+        dashlane:layout_constraintTop_toBottomOf="@id/handle"
+        tools:text="Pause Dashlane Autofill \n Paypal.com"
+        />
+
+    <Button
+        android:id="@+id/pause_for_one_hour"
+        style="?borderlessButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginEnd="@dimen/spacing_small"
+        android:minHeight="56dp"
+        android:text="@string/autofill_do_not_show_again_pause_for_one_hour"
+        android:theme="@style/ThemeOverlay.Dashlane.Neutral"
+        dashlane:layout_constraintBottom_toBottomOf="parent"
+        dashlane:layout_constraintEnd_toStartOf="@+id/pause_for_one_day"
+        dashlane:layout_constraintStart_toStartOf="parent"
+        dashlane:layout_constraintTop_toBottomOf="@id/title"
+        />
+
+    <Button
+        android:id="@+id/pause_for_one_day"
+        style="?borderlessButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginEnd="@dimen/spacing_small"
+        android:minHeight="56dp"
+        android:text="@string/autofill_do_not_show_again_pause_for_one_day"
+        android:theme="@style/ThemeOverlay.Dashlane.Neutral"
+        dashlane:layout_constraintBottom_toBottomOf="parent"
+        dashlane:layout_constraintEnd_toStartOf="@+id/pause_permanent"
+        dashlane:layout_constraintStart_toEndOf="@id/pause_for_one_hour"
+        dashlane:layout_constraintTop_toBottomOf="@id/title"
+        />
+
+    <Button
+        android:id="@+id/pause_permanent"
+        style="?borderlessButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginEnd="@dimen/spacing_small"
+        android:minHeight="56dp"
+        android:text="@string/autofill_do_not_show_again_pause_permanent"
+        android:theme="@style/ThemeOverlay.Dashlane.Neutral"
+        dashlane:layout_constraintBottom_toBottomOf="parent"
+        dashlane:layout_constraintEnd_toEndOf="parent"
+        dashlane:layout_constraintStart_toEndOf="@id/pause_for_one_day"
+        dashlane:layout_constraintTop_toBottomOf="@id/title"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

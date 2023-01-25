@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    >
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:textAppearance="?textAppearanceHeadline6"
+        android:textSize="16sp"
+        tools:text="@string/backup_import_title"
+        />
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="?colorOnBackgroundMedium"
+        android:visibility="gone"
+        tools:text="@string/backup_import_message"
+        tools:visibility="visible"
+        />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="@string/backup_password_hint"
+        app:errorEnabled="true"
+        app:passwordToggleEnabled="true"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:inputType="textPassword"
+            android:lines="1"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.dashlane.ui.activities.intro.IntroButtonBarLayout
+        android:id="@+id/buttons_layout"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:layoutDirection="locale"
+        android:orientation="horizontal"
+        >
+
+        <Space
+            android:id="@+id/spacer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible"
+            />
+
+        <Button
+            android:id="@+id/secondary_cta"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            tools:text="@string/backup_import_cta_secondary"
+            />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+            <Button
+                android:id="@+id/primary_cta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?colorSecondary"
+                android:lines="1"
+                android:textColor="?colorOnSecondary"
+                tools:text="@string/backup_import_cta_primary"
+                />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?indeterminateProgressStyle"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="?colorOnSecondary"
+                android:visibility="gone"
+                />
+
+        </FrameLayout>
+
+    </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+
+</LinearLayout>

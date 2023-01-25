@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/view_login_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:maxWidth="@dimen/size_480dp"
+    tools:context="com.dashlane.login.LoginActivity"
+    android:theme="@style/Theme.Dashlane.Login.LockedOut"
+    >
+    
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/spacing_big"
+        android:layout_marginTop="@dimen/login_logo_margin_top"
+        android:src="@drawable/logo_lock_up"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?colorTextCatchy"
+        />
+
+    <TextView
+        android:id="@+id/topic"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="@dimen/spacing_big"
+        android:layout_marginTop="24dp"
+        android:layout_marginRight="@dimen/spacing_big"
+        android:text="@string/unlock_biometrics"
+        android:textAppearance="?textAppearanceHeadline2"
+        android:textColor="?colorTextCatchy"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logo"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/top_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="logo,topic"
+        />
+
+    
+
+    <FrameLayout
+        android:id="@+id/view_login_email_header_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/spacing_big"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:layout_marginRight="@dimen/spacing_big"
+        android:layout_marginBottom="@dimen/spacing_small"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_barrier"
+        >
+
+        
+
+        <EditText
+            android:id="@+id/view_login_email_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:textColor="?colorTextCatchy"
+            android:transitionName="email"
+            android:paddingEnd="@dimen/spacing_huge"
+            android:background="@null"
+            tools:ignore="LabelFor,TextFields"
+            tools:text="randomemail@provider.com"
+            />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <dimen name="material_splash_bitmap_width">144dp</dimen>
+    <dimen name="material_splash_bitmap_height">80dp</dimen>
+    <dimen name="default_rounded_bitmap_border_size">1dp</dimen>
+
+    
+    <dimen name="spacing_extra_small">6dp</dimen>
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_normal">16dp</dimen>
+    <dimen name="spacing_big">24dp</dimen>
+    <dimen name="spacing_huge">32dp</dimen>
+    <dimen name="spacing_ultra_huge">48dp</dimen>
+
+    
+
+    <dimen name="spacing_normal_for_button">10dp</dimen>
+
+    
+
+    <dimen name="size_480dp">480dp</dimen>
+    <dimen name="size_600dp">600dp</dimen>
+    <dimen name="size_720dp" tools:ignore="UnusedResources">720dp</dimen>
+
+    
+    <dimen name="dashlane_font_size_huge">24sp</dimen>
+    <dimen name="dashlane_font_size_big">20sp</dimen>
+    <dimen name="dashlane_font_size_medium">16sp</dimen>
+    <dimen name="dashlane_font_size_small">14sp</dimen>
+
+    <dimen name="circle_drawable_inset">6dp</dimen>
+
+    
+    <dimen name="small_clickable_area_size">40dp</dimen>
+    <dimen name="minimum_clickable_area_size">48dp</dimen>
+    <dimen name="big_clickable_area_size">56dp</dimen>
+
+    
+    <dimen name="dashlane_toast_elevation">2dp</dimen>
+
+    
+    <dimen name="code_input_underline_spacing">4dp</dimen>
+</resources>

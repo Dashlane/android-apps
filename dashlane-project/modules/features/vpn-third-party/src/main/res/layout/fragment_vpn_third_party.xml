@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:animateLayoutChanges="true"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/vpn_third_party_title"
+            style="?textAppearanceHeadline1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_big"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:text="@string/vpn_third_party_activate_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/vpn_third_party_subtitle"
+            style="?textAppearanceBody2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:text="@string/vpn_third_party_activate_subtitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_title" />
+
+        <include
+            android:id="@+id/vpn_third_party_account"
+            layout="@layout/include_vpn_third_party_account"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_big"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_small"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/vpn_third_party_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_subtitle"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/vpn_third_party_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:text="@string/vpn_third_party_activate_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_account" />
+
+        <com.dashlane.ui.widgets.view.Infobox
+            android:id="@+id/vpn_third_party_infobox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_huge"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:visibility="gone"
+            app:primaryButtonText="@string/vpn_third_party_activate_infobox_positive_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_button"
+            app:secondaryButtonText="@string/vpn_third_party_activate_infobox_negative_button"
+            app:title="@string/vpn_third_party_activate_infobox_title"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/vpn_third_party_faq_title"
+            style="?textAppearanceBody1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:text="@string/vpn_third_party_faq_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_infobox" />
+
+        <include
+            layout="@layout/include_vpn_third_party_faq"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_faq_title" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,0 +1,152 @@
+package com.dashlane.vault
+
+import com.dashlane.autofill.api.pause.services.PausedFormSourcesProvider
+import com.dashlane.autofill.formdetector.model.ApplicationFormSource
+import com.dashlane.autofill.formdetector.model.WebDomainFormSource
+import com.dashlane.events.AppEvents
+import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.ext.application.KnownApplication
+import com.dashlane.hermes.LogRepository
+import com.dashlane.hermes.generated.definitions.Scope
+import com.dashlane.hermes.generated.events.user.VaultReport
+import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.security.identitydashboard.breach.BreachLoader
+import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
+import com.dashlane.security.identitydashboard.password.GroupOfAuthentifiant
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.url.toUrlDomainOrNull
+import com.dashlane.util.inject.OptionalProvider
+import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.obfuscated.isNullOrEmpty
+import com.dashlane.xml.domain.SyncObject
+import com.dashlane.xml.domain.SyncObjectType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import kotlin.math.roundToInt
+
+
+
+class VaultReportLogger @Inject constructor(
+    @GlobalCoroutineScope private val coroutineScope: CoroutineScope,
+    private val appEvents: AppEvents,
+    private val userPreferencesManager: UserPreferencesManager,
+    private val logRepository: LogRepository,
+    private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
+    private val mainDataAccessor: MainDataAccessor,
+    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+    private val pausedFormSourcesProvider: PausedFormSourcesProvider,
+    private val breachLoader: BreachLoader
+) {
+    private val credentialDataQuery get() = mainDataAccessor.getCredentialDataQuery()
+    private val genericDataQuery get() = mainDataAccessor.getGenericDataQuery()
+    private val vaultDataQuery get() = mainDataAccessor.getVaultDataQuery()
+
+    fun start() {
+        appEvents.register(this, SyncFinishedEvent::class.java, false) {
+            if (it.state != SyncFinishedEvent.State.SUCCESS) return@register
+
+            val now = Instant.now()
+            if (now >= userPreferencesManager.vaultReportLatestTriggerTimestamp.plus(24, ChronoUnit.HOURS)) {
+                userPreferencesManager.vaultReportLatestTriggerTimestamp = now
+                logVaultReports()
+            }
+        }
+    }
+
+    fun stop() {
+        appEvents.unregister(this, SyncFinishedEvent::class.java)
+    }
+
+    private fun logVaultReports() {
+        coroutineScope.launch {
+            Scope.values().mapNotNull { buildVaultReport(it) }.forEach { logRepository.queueEvent(it) }
+        }
+    }
+
+    private suspend fun buildVaultReport(scope: Scope): VaultReport? = withContext(Dispatchers.Default) {
+        val teamspaceType = when (scope) {
+            Scope.GLOBAL -> Teamspace.Type.COMBINED
+            Scope.PERSONAL -> Teamspace.Type.PERSONAL
+            Scope.TEAM -> Teamspace.Type.COMPANY
+        }
+
+        val teamspace = teamspaceAccessorProvider.get()
+            ?.all
+            ?.firstOrNull { it.type == teamspaceType }
+            ?: return@withContext null
+
+        val credentials = vaultDataQuery.queryAll(
+            vaultFilter {
+                ignoreUserLock()
+                specificDataType(SyncObjectType.AUTHENTIFIANT)
+                specificSpace(teamspace)
+            }
+        ).map { it.syncObject as SyncObject.Authentifiant }
+
+        val evaluatorResult = authentifiantSecurityEvaluator.computeResult(
+            credentialDataQuery = credentialDataQuery,
+            genericDataQuery = genericDataQuery,
+            vaultDataQuery = vaultDataQuery,
+            teamspace = teamspace,
+            ignoreUserLock = true
+        )
+        val securityAlerts = breachLoader.getBreachesWrapper(ignoreUserLock = true)
+        val darkWebAlerts = securityAlerts.filter { it.publicBreach.isDarkWebBreach() }
+        val authentifiantsByDarkWebBreach =
+            evaluatorResult.authentifiantsByBreach.filter { it.groupBy.isDarkWebBreach() }
+
+        val passwordReused = evaluatorResult.authentifiantsBySimilarity.uniqueAuthentifiant()
+        val passwordCompromised = evaluatorResult.authentifiantsByBreach.uniqueAuthentifiant()
+        val passwordsWeak = evaluatorResult.authentifiantsByStrength.uniqueAuthentifiant()
+        VaultReport(
+            scope = scope,
+            passwordsTotalCount = evaluatorResult.totalCredentials,
+            passwordsSafeCount = evaluatorResult.totalSafeCredentials,
+            passwordsReusedCount = passwordReused.count(),
+            passwordsCompromisedCount = passwordCompromised.count(),
+            passwordsWeakCount = passwordsWeak.count(),
+            passwordsExcludedCount = evaluatorResult.authentifiantsIgnored.count(),
+            securityScore = (evaluatorResult.securityScore.coerceIn(0f, 1f) * 100).roundToInt(),
+            passwordsWithOtpCount = credentials.count { !it.password.isNullOrEmpty() && (!it.otpSecret.isNullOrEmpty() || !it.otpUrl.isNullOrEmpty()) },
+            passwordChangerCompatibleCredentialsCount = 0,
+            domainsWithoutAutofillCount = computeDomainsWithoutAutofillCount(),
+            passwordsWithAutologinDisabledCount = computeDomainsWithoutAutofillCount(),
+            securityAlertsCount = securityAlerts.count(),
+            securityAlertsActiveCount = evaluatorResult.authentifiantsByBreach.count(),
+            darkWebAlertsCount = darkWebAlerts.count(),
+            darkWebAlertsActiveCount = authentifiantsByDarkWebBreach.count(),
+            passwordsCompromisedThroughDarkWebCount = authentifiantsByDarkWebBreach.uniqueAuthentifiantCount()
+        )
+    }
+
+    private suspend fun computeDomainsWithoutAutofillCount(): Int {
+        val now = Instant.now()
+
+        return pausedFormSourcesProvider.getAllPausedFormSources()
+            .filter { it.pauseUntil > now }
+            .mapNotNull {
+                when (val source = it.autoFillFormSource) {
+                    is ApplicationFormSource -> KnownApplication.getPrimaryWebsite(source.packageName)
+                    is WebDomainFormSource -> source.webDomain
+                }?.toUrlDomainOrNull()
+            }
+            .toSet()
+            .count()
+    }
+
+    companion object {
+        private fun List<GroupOfAuthentifiant<*>>.uniqueAuthentifiantCount() =
+            flatMap { it.authentifiants }.toSet().count()
+
+        private fun List<GroupOfAuthentifiant<*>>.uniqueAuthentifiant() =
+            flatMap { it.authentifiants }.toSet()
+    }
+}

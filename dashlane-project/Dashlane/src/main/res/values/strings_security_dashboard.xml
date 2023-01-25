@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="security_dashboard_filter_sensitive_only">Only show critical accounts</string>
+    <string name="security_dashboard_list_reused">Reused</string>
+    <string name="security_dashboard_list_weak">Weak</string>
+    <string name="security_dashboard_list_exclude">Excluded</string>
+    <string name="security_dashboard_list_compromised">Compromised</string>
+    <string name="security_dashboard_list_safe">Strong</string>
+
+    <string name="security_dashboard_option_exclude">Exclude</string>
+    <string name="security_dashboard_option_include">Include</string>
+    <string name="security_dashboard_option_go_to_website">Go to website</string>
+
+    <string name="security_dashboard_list_compromised_empty_title">Fantastic! You don\'t have any compromised passwords.</string>
+
+    <string name="security_dashboard_list_reused_empty_title">Excellent! You don\'t have any reused passwords.</string>
+
+    <string name="security_dashboard_list_weak_empty_title">Great job! You don\'t have any weak passwords.</string>
+
+    <string name="security_dashboard_list_exclude_empty_title">Logins that you choose to exclude from your Password Health score will appear here.</string>
+
+    <string name="security_dashboard_password_health_title">Password Health</string>
+    
+    <string name="security_dashboard_password_health_advice_title">Password Health Score</string>
+    <string name="security_dashboard_password_health_body_normal">Increase your score by updating your passwords.</string>
+    <string name="security_dashboard_password_health_body_empty_state">Add at least 5 logins to Dashlane to get a Password Health score.</string>
+
+    
+    <string name="security_dashboard_header_breach">%1$s data breach from %2$s</string>
+    <string name="security_dashboard_header_reused">Password used %1$s times</string>
+
+    <string name="breach_data_involved_username">usernames</string>
+    <string name="breach_data_involved_password">passwords</string>
+    <string name="breach_data_involved_email">emails</string>
+    <string name="breach_data_involved_credit_card">credit cards</string>
+    <string name="breach_data_involved_phone">phone numbers</string>
+    <string name="breach_data_involved_address">addresses</string>
+    <string name="breach_data_involved_ssn">social security numbers</string>
+    <string name="breach_data_involved_ip">IP address</string>
+    <string name="breach_data_involved_location">location data</string>
+    <string name="breach_data_involved_personal_information">personal information</string>
+    <string name="breach_data_involved_social_network">social network information</string>
+
+    <string name="password_health_item_title">Password Health</string>
+    <string name="password_health_item_cta">Explore</string>
+    <string name="password_health_module_password_breakdown_title">Password breakdown</string>
+    <string name="password_health_score_label">Score</string>
+
+    
+    <string name="notification_public_breach_title">Security Alert</string>
+    <plurals name="notification_public_breach_description">
+        <item quantity="one">You have a new security alert requiring your attention.</item>
+        <item quantity="other">You have new security alerts requiring your attention.</item>
+    </plurals>
+
+
+    
+    <string name="powered_by_transunion">Powered by TRANSUNION</string>
+    <string name="powered_by_aig">Powered by AIG</string>
+
+    <string name="identity_protection_package_learn_more">Learn more</string>
+
+    
+    <string name="credit_monitoring_active_title">Credit Monitoring</string>
+    <string name="credit_monitoring_active_description_1">Monitor your credit score and history from your CreditView Dashboard.</string>
+    <string name="credit_monitoring_active_description_2">Receive email alerts when your credit may change.</string>
+    <string name="credit_monitoring_active_description_3">Compare your score to the national average.</string>
+    <string name="credit_monitoring_active_cta">Check my CreditView</string>
+
+    <string name="identity_protection_active_title">Identity Theft Insurance</string>
+    <string name="identity_protection_active_description_1">If you’ve suffered losses due to identity theft, call %1$s to file a claim.</string>
+    <string name="identity_protection_phone_number" translatable="false">1-866-434-3572</string>
+    <string name="identity_protection_active_description_2">Provide the email address you use to log in to Dashlane. No code is required.</string>
+    <string name="identity_protection_active_description_3">Claim up to $1 million in identity theft damages.</string>
+
+    <string name="identity_restoration_active_title">Identity Restoration</string>
+    <string name="identity_restoration_active_description_1">If your identity has been stolen, call %1$s and provide the Dashlane code: %2$s.</string>
+    <string name="identity_restoration_phone_number" translatable="false">1-855-288-5422</string>
+    <string name="identity_restoration_dashlane_code" translatable="false">697431</string>
+
+    <string name="identity_restoration_active_description_2">Your dedicated TransUnion representative will assess the extent of your identity theft.</string>
+    <string name="identity_restoration_active_description_3">A specialized team of identity theft experts will create a customized action plan to streamline the process of restoring your identity.</string>
+
+    
+    <string name="dark_web_module_title_get_alerts">Get alerts for breaches and hacks</string>
+    <string name="dark_web_status_pending">Pending your verification</string>
+    <string name="dark_web_status_active">Active</string>
+    <string name="dark_web_status_disabled">Inactive</string>
+
+    <string name="dark_web_module_discover_title">Have 24/7 Surveillance</string>
+    <string name="dark_web_module_discover_description">A team of cybersecurity experts monitor up to 5 of your email addresses to check if your passwords,IDs, or financial information are involved in a breach.</string>
+
+    <string name="dark_web_module_be_the_first_title">Be the first to know</string>
+    <string name="dark_web_module_be_the_first_description">We send you a report of current breaches and detailed alerts as soon as we discover new information.</string>
+
+    <string name="dark_web_module_get_expert_advice_title">Get expert advice</string>
+    <string name="dark_web_module_get_expert_advice_description">We help you change your compromised passwords and instruct you on how to bolster your digital security.</string>
+
+    <string name="dark_web_module_start_monitoring_cta">Start monitoring</string>
+</resources>

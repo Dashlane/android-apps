@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:id="@+id/chip_sharing_contact_wrapper"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    android:background="@drawable/sharing_contact_bubble"
+    android:orientation="horizontal"
+    tools:backgroundTint="@color/users_profile_color0"
+    tools:ignore="Overdraw"
+    >
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingLeft="@dimen/spacing_small"
+        android:paddingRight="@dimen/spacing_small"
+        android:maxLines="1"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/dashlane_font_size_medium"
+        tools:text="randomemail@provider.com"/>
+
+    <FrameLayout
+        android:id="@+id/delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|right"
+        android:layout_marginRight="@dimen/spacing_small"
+        android:background="@drawable/background_circle_error"
+        android:visibility="gone"
+        tools:visibility="gone">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/close_cross"
+            />
+    </FrameLayout>
+
+</FrameLayout>

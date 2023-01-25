@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    
+    <FrameLayout
+        android:layout_width="512dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:clipChildren="false"
+        tools:ignore="UselessParent">
+
+        
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            >
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/pincode_keyboard_scroller"
+                android:clipChildren="false"
+                >
+
+                <include
+                    android:id="@+id/pincode_header"
+                    layout="@layout/include_fragment_lock_pincode_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="@dimen/spacing_normal"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    android:layout_marginTop="@dimen/fragment_lock_pincode_landscape_header_margin_top"
+                    />
+
+                <com.dashlane.ui.widgets.PinCodeView
+                    android:id="@+id/pincode_enter_area"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/pincode_header"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="@dimen/spacing_normal"
+                    android:layout_marginRight="@dimen/spacing_normal"
+                    android:layout_marginTop="@dimen/fragment_lock_pincode_header_pin_area_margin_top"
+                    />
+
+                <Button
+                    android:id="@+id/lock_pincode_logout"
+                    style="?borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/pincode_enter_area"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="@dimen/spacing_normal"
+                    android:layout_marginTop="@dimen/fragment_lock_pincode_logout_landscape_margin_top"
+                    android:minHeight="@dimen/minimum_clickable_area_size"
+                    android:minWidth="@dimen/minimum_clickable_area_size"
+                    android:text="@string/logout"
+                    android:textAllCaps="true"
+                    />
+            </RelativeLayout>
+
+
+            <ScrollView
+                android:id="@+id/pincode_keyboard_scroller"
+                android:layout_width="@dimen/fragment_lock_pincode_landscape_keyboard_width"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                >
+
+                <com.dashlane.ui.widgets.PinCodeKeyboardView
+                    android:id="@+id/pincode_keyboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    />
+            </ScrollView>
+
+        </RelativeLayout>
+    </FrameLayout>
+</FrameLayout>

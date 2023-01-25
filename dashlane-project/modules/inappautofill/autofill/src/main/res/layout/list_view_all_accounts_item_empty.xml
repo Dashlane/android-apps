@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:background="@color/container_agnostic_neutral_supershy"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/spacing_normal"
+    android:paddingTop="@dimen/spacing_small"
+    android:paddingEnd="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_small"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <TextView
+        android:id="@+id/line2TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:paddingBottom="@dimen/spacing_small"
+        android:singleLine="true"
+        android:text="@string/autofill_view_all_accounts_popup_title_no_results"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="@color/text_neutral_quiet"
+        />
+
+    <TextView
+        android:id="@+id/line1TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:paddingTop="@dimen/spacing_small"
+        android:singleLine="true"
+        android:text="@string/autofill_view_all_accounts_popup_title"
+        android:textAppearance="?textAppearanceButton"
+        android:textColor="?attr/colorSecondary"
+        />
+
+</LinearLayout>

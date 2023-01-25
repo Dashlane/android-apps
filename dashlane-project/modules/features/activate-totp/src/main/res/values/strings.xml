@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="download_authenticator_app_intro_title">Use our Authenticator app to set up 2FA</string>
+    <string name="download_authenticator_app_intro_description">The Authenticator app will automatically pair with your Dashlane account.1. Download Dashlane Authenticator from the Play Store\n\n2. Return to the security settings in this app to finish setting up 2FA\n</string>
+    <string name="download_authenticator_app_intro_link">Learn more about Dashlane Authenticator</string>
+    <string name="download_authenticator_app_intro_cta_positive">Open Play Store</string>
+
+    
+    <string name="enable_totp_step_number">%1$d of %2$d</string>
+
+    
+    <string name="enable_totp_select_frequency_title">Set your preferences</string>
+    <string name="enable_totp_select_frequency_description">How often should we send you an authentication request?</string>
+    <string name="enable_totp_select_frequency_option_new_device">When you log in on a new device</string>
+    <string name="enable_totp_select_frequency_option_every_time">Every time you log in</string>
+    <string name="enable_totp_select_frequency_cta">Next</string>
+
+    
+    <string name="enable_totp_recovery_info_title">Set up a recovery method</string>
+    <string name="enable_totp_recovery_info_description">If you can’t access your Authenticator app, you can log in to your Dashlane account with a recovery code.</string>
+    <string name="enable_totp_recovery_info_option_title">How to access your recovery codes:</string>
+    <string name="enable_totp_recovery_info_option_1">Receive them via text to your mobile phone</string>
+    <string name="enable_totp_recovery_info_option_2">Save the list generated during this setup in a secure place</string>
+    <string name="enable_totp_recovery_info_cta">Start setup</string>
+
+    
+    <string name="enable_totp_add_phone_title">Add a mobile phone number</string>
+    <string name="enable_totp_add_phone_hint">Phone number</string>
+    <string name="enable_totp_add_phone_info">Make sure you enter a valid phone number that’s able to receive texts.</string>
+    <string name="enable_totp_add_phone_cta">Next</string>
+    <string name="enable_totp_add_phone_error">Enter a valid mobile phone number</string>
+
+    
+    <string name="activate_totp_fetch_info_message">Setting up your preferences</string>
+
+    
+    <string name="enable_totp_fetch_info_error_title">We couldn’t set up your recovery method</string>
+    <string name="enable_totp_fetch_info_error_description">There was an issue setting up your recovery method. Please try again.</string>
+    <string name="enable_totp_fetch_info_error_cta_positive">Try again</string>
+    <string name="enable_totp_fetch_info_error_cta_negative">Cancel</string>
+
+    
+    <string name="enable_totp_display_recovery_codes_title">Store these recovery codes somewhere secure</string>
+    <string name="enable_totp_display_recovery_codes_header">Your recovery codes</string>
+    <string name="enable_totp_display_recovery_codes_info">Store these outside of Dashlane. That way they’re available if you can’t log in with other authentication methods.</string>
+    <string name="enable_totp_display_recovery_codes_cta_positive">Save recovery codes</string>
+    <string name="enable_totp_display_recovery_codes_cta_negative">Skip</string>
+    <string name="enable_totp_display_recovery_codes_dialog_title">Did you save your codes?</string>
+    <string name="enable_totp_display_recovery_codes_dialog_message">If you can’t access your other authentication methods, you’ll need these codes to log in to Dashlane.</string>
+    <string name="enable_totp_display_recovery_codes_dialog_cta_positive">Yes</string>
+    <string name="enable_totp_display_recovery_codes_dialog_cta_negative">Go back</string>
+
+    
+    <string name="enable_totp_activation_message_loading">Finishing 2FA setup...</string>
+    <string name="enable_totp_activation_message_complete">You’re all set!</string>
+
+    
+    <string name="enable_totp_activation_error_title">Try setting up 2FA again in a few minutes</string>
+    <string name="enable_totp_activation_error_description">We couldn’t set up 2FA for Dashlane. Please wait a few minutes then try again.</string>
+    <string name="enable_totp_activation_error_cta">Return to settings</string>
+
+    
+    <string name="enable_totp_activation_no_connection_title">There’s an issue with your internet connection</string>
+    <string name="enable_totp_activation_no_connection_description">We couldn’t set up 2FA due to an issue with your internet connection. Please check your connection then try again.</string>
+    <string name="enable_totp_activation_no_connection_cta_positive">Try again</string>
+    <string name="enable_totp_activation_no_connection_cta_negative">Cancel</string>
+
+    
+    <string name="enable_totp_complete_title">You added an extra layer of security to your account</string>
+    <string name="enable_totp_complete_description">When you log in to Dashlane on a new device, you’ll be asked to:\n• Accept the authentication request in your Authenticator app\n• Or, enter the 6-digit token from your Authenticator</string>
+    <string name="enable_totp_complete_cta_positive">View token</string>
+    <string name="enable_totp_complete_cta_negative">Skip</string>
+
+    
+    <string name="disable_totp_confirmation_title">Turn off 2FA? </string>
+    <string name="disable_totp_confirmation_message">2FA is an extra layer of security. If you turn it off, you won’t be sent a push request or asked for a 6-digit token when logging in to your account.</string>
+    <string name="disable_totp_confirmation_cta_positive">Yes, turn off</string>
+    <string name="disable_totp_confirmation_cta_negative">Cancel</string>
+
+    
+    <string name="disable_totp_enter_token_title">Enter the 6-digit token from your authenticator app.</string>
+    <string name="disable_totp_enter_token_error">Incorrect token</string>
+    <string name="disable_totp_enter_token_info">Can’t access your authenticator?</string>
+    <string name="disable_totp_enter_token_info_link">Use a recovery code.</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_title">2FA recovery</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_choice_description">Use one of the 10 recovery codes that were generated when you set up 2FA. We can also send you codes by text message.</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_choice_button_positive">Use a recovery code</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_choice_button_negative">Receive a text message</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_backup_description">Enter one of the recovery codes that were generated when you set up 2FA.</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_backup_button_positive">Turn off 2FA</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_backup_button_negative">Cancel</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_backup_hint">Enter a recovery code</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_backup_error">Incorrect recovery code</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_phone_description">We\'ll send a text message with two recovery codes to the phone number associated with this account.</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_phone_button_positive">Send</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_phone_button_negative">Cancel</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_phone_backup_description">Enter one of the recovery codes you received by text message.</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_phone_backup_button_positive">Turn off 2FA</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_phone_backup_button_negative">Cancel</string>
+    <string name="disable_totp_enter_token_cta">Next</string>
+
+    
+    <string name="disable_totp_error_title">Try turning off 2FA again in a few minutes</string>
+    <string name="disable_totp_error_description">We couldn’t turn off 2FA for Dashlane. Please wait a few minutes then try again.</string>
+    <string name="disable_totp_error_cta">Return to settings</string>
+
+    
+    <string name="disable_totp_deactivation_message_loading">2FA is turned off</string>
+    <string name="disable_totp_deactivation_message_complete">2FA is turned off</string>
+
+    
+    
+    <string name="disable_totp_enforced_intro_title">Temporarily turn off 2FA?</string>
+    
+    <string name="disable_totp_enforced_intro_description">Your admin requires 2FA. If you need to update your 2FA preferences, you’ll need to turn off then re-setup 2FA.\n\nWhile 2FA is off, you won’t be able to access your vault.</string>
+    
+    <string name="disable_totp_enforced_intro_cta_positive">Continue</string>
+    
+    <string name="disable_totp_enforced_intro_cta_negative">Cancel</string>
+</resources>

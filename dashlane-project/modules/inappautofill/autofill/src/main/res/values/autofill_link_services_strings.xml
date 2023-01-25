@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="autofill_rememberaccount_message">We\'ll autofill that for you next time.</string>
+    
+    <string name="autofill_link_existing">Link %1$s to existing login?</string>
+    
+    <string name="autofill_link_existing_detail">To autofill your %1$s login details on %2$s, add this website to your existing login:</string>
+    
+    <string name="autofill_link_existing_detail_app">To autofill your %1$s login details on %2$s, add this app to your existing login:</string>
+    
+    <string name="autofill_link_website">Link Website</string>
+    
+    <string name="autofill_link_app">Link App</string>
+    
+    <string name="autofill_cancel">Maybe later</string>
+</resources>

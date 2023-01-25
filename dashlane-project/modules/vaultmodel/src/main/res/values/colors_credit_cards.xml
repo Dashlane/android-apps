@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="credit_card_blue1">#ff3290cc</color>
+    <color name="credit_card_blue2">#ff105079</color>
+    <color name="credit_card_black">#ff171819</color>
+    <color name="credit_card_silver">#ffa6a6a6</color>
+    <color name="credit_card_white">#fff5f5f5</color>
+    <color name="credit_card_red">#ffbd0505</color>
+    <color name="credit_card_orange">#fff6c000</color>
+    <color name="credit_card_gold">#ffdfc279</color>
+    <color name="credit_card_green1">#ff008e28</color>
+    <color name="credit_card_green2">#ff39725e</color>
+</resources>

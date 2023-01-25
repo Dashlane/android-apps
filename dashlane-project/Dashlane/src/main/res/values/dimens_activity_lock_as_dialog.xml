@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="activity_lock_as_dialog_mp_width">320dp</dimen>
+    <dimen name="activity_lock_as_dialog_mp_height">380dp</dimen>
+
+    <dimen name="activity_lock_as_dialog_pin_width">320dp</dimen>
+    <dimen name="activity_lock_as_dialog_pin_height">560dp</dimen>
+</resources>

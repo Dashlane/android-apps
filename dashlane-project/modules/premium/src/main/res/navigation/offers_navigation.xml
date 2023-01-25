@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/offers_navigation"
+    app:startDestination="@id/nav_offers_overview">
+    <fragment
+        android:id="@+id/nav_offers_details"
+        android:name="com.dashlane.premium.offer.details.view.OfferDetailsFragment"
+        tools:layout="@layout/fragment_offer_details">
+        <argument
+            android:name="offerType"
+            app:argType="com.dashlane.premium.offer.common.model.OfferType" />
+        <argument
+            android:name="origin"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="intendedPeriodicity"
+            android:defaultValue="MONTHLY"
+            app:argType="com.dashlane.premium.offer.common.model.ProductPeriodicity" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_offers_overview"
+        android:name="com.dashlane.premium.offer.list.view.OfferListFragment"
+        android:label="@string/plans_action_bar_title"
+        tools:layout="@layout/fragment_offer_list">
+        <argument
+            android:name="origin"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="offerType"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/go_to_offers_details_from_offers_overview"
+            app:destination="@id/nav_offers_details" />
+    </fragment>
+</navigation>

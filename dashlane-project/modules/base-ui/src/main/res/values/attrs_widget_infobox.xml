@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="infoboxStyle" format="reference" />
+    <attr name="warningInfoboxStyle" format="reference" />
+    <attr name="warningBorderlessButtonStyle" format="reference" />
+    <attr name="warningButtonStyle" format="reference" />
+
+    <declare-styleable name="Infobox">
+        <attr name="android:text" />
+        <attr name="title" format="string" />
+        <attr name="primaryButtonText" format="string" />
+        <attr name="secondaryButtonText" format="string" />
+        <attr name="tint" format="color" />
+        <attr name="backgroundTint" format="color" />
+        <attr name="warning" format="boolean" />
+    </declare-styleable>
+</resources>

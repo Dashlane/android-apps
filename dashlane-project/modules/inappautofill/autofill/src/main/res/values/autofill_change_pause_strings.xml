@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_changepause_toggle_title">Pause Autofill</string>
+    <string name="autofill_changepause_application_not_paused">This will pause Autofill on this application</string>
+    <string name="autofill_changepause_website_not_paused">This will pause Autofill on this website</string>
+    <string name="autofill_changepause_application_permanent_paused">Autofill is paused on this application</string>
+    <string name="autofill_changepause_website_permanent_paused">Autofill is paused on this website</string>
+    <string name="autofill_changepause_remove_pause_application_message">Autofill resumed on %1$s</string>
+    <string name="autofill_changepause_remove_pause_website_message">Autofill resumed on %1$s</string>
+    <string name="autofill_changepause_remove_pause_error_message">Something went wrong. Please try resuming Dashlane Autofill again.</string>
+    <plurals name="autofill_changepause_application_paused_by_hours">
+        <item quantity="one">Autofill will resume on this application in %1$d hour</item>
+        <item quantity="other">Autofill will resume on this application in %1$d hours</item>
+    </plurals>
+    <plurals name="autofill_changepause_application_paused_by_minutes">
+        <item quantity="one">Autofill will resume on this application in %1$d minute</item>
+        <item quantity="other">Autofill will resume on this application in %1$d minutes</item>
+    </plurals>
+    <plurals name="autofill_changepause_website_paused_by_hours">
+        <item quantity="one">Autofill will resume on this website in %1$d hour</item>
+        <item quantity="other">Autofill will resume on this website in %1$d hours</item>
+    </plurals>
+    <plurals name="autofill_changepause_website_paused_by_minutes">
+        <item quantity="one">Autofill will resume on this website in %1$d minute</item>
+        <item quantity="other">Autofill will resume on this website in %1$d minutes</item>
+    </plurals>
+</resources>

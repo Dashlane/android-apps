@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_incorrect_warning_title">Do you trust this app?</string>
+    <string name="autofill_incorrect_warning_message">Some of this app’s security details don’t look legitimate.\nWe recommend you only autofill in apps you trust.</string>
+
+    <string name="autofill_mismatch_warning_title">You’re about to autofill your “%1$s” account in the %2$s app</string>
+
+    <string name="autofill_unknown_warning_title">This app isn’t familiar to us</string>
+    <string name="autofill_unknown_warning_message">We recommend you only autofill in apps you trust. Do you want to autofill here?</string>
+
+    <string name="autofill_warning_cancel">Cancel</string>
+    <string name="autofill_warning_accept">Allow Autofill</string>
+    <string name="autofill_unknown_warning_accept">Allow</string>
+    <string name="autofill_warning_do_not_show_again">Don’t show me this again</string>
+    <string name="autofill_warning_we_will_remember">We’ll remember this next time.</string>
+</resources>

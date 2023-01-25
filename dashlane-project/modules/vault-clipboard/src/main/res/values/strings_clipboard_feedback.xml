@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="copied_">Copied</string>
+    <string name="feedback_copy_password">Password copied</string>
+    <string name="feedback_copy_login">Username copied</string>
+    <string name="feedback_copy_email">Email copied</string>
+    <string name="feedback_copy_secondary_login">Alternate username copied</string>
+    <string name="feedback_copy_payments_number">Card number copied</string>
+    <string name="feedback_copy_payments_security_code">Card code copied</string>
+    <string name="feedback_copy_payments_expiration_date">Card expiration date copied</string>
+    <string name="feedback_copy_paypal_login">PayPal username copied</string>
+    <string name="feedback_copy_paypal_password">PayPal password copied</string>
+    <string name="feedback_copy_bankaccount_bank">Bank account copied</string>
+    <string name="feedback_copy_bankaccount_bic_swift">BIC copied</string>
+    <string name="feedback_copy_bankaccount_routing_number">Routing number copied</string>
+    <string name="feedback_copy_bankaccount_sort_code">Sort code copied</string>
+    <string name="feedback_copy_bankaccount_iban">IBAN copied</string>
+    <string name="feedback_copy_bankaccount_account_number">Account number copied</string>
+    <string name="feedback_copy_bankaccount_clabe">CLABE copied</string>
+    <string name="feedback_copy_address">Address copied</string>
+    <string name="feedback_copy_city">City copied</string>
+    <string name="feedback_copy_zip_code">Zip code copied</string>
+    <string name="feedback_copy_ids_number">ID number copied</string>
+    <string name="feedback_copy_ids_issue_date">ID issue date copied</string>
+    <string name="feedback_copy_ids_expiration_date">ID expiration date copied</string>
+    <string name="feedback_copy_passport_number">Passport number copied</string>
+    <string name="feedback_copy_passport_issue_date">Passport issue date copied</string>
+    <string name="feedback_copy_passport_expiration_date">Passport expiration date copied</string>
+    <string name="feedback_copy_driverlicense_number">Driver\'s license number copied</string>
+    <string name="feedback_copy_driverlicense_issue_date">Driver\'s license issue date copied</string>
+    <string name="feedback_copy_driverlicense_expiration_date">Driver\'s license expiration date copied</string>
+    <string name="feedback_copy_social_security_number">Social security number copied</string>
+    <string name="feedback_copy_fiscal_number">Fiscal number copied</string>
+    <string name="feedback_copy_just_email">Email copied</string>
+    <string name="feedback_copy_phone_number">Phone number copied</string>
+    <string name="feedback_copy_personal_website">Personal website copied</string>
+    <string name="feedback_copy_name_holder">Name holder copied</string>
+    <string name="feedback_copy_otp_code">One-time access code copied</string>
+    <string name="feedback_copy_first_name">First name copied</string>
+    <string name="feedback_copy_last_name">Last name copied</string>
+    <string name="feedback_copy_middle_name">Middle name copied</string>
+    <string name="feedback_copy_company_name">Company name copied</string>
+    <string name="feedback_copy_company_title">Company title copied</string>
+    <string name="feedback_copy_tax_online_number">Tax online number copied</string>
+</resources>

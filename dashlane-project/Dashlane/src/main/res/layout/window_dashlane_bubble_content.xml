@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/Theme.Dashlane"
+    tools:layout_height="match_parent"
+    tools:layout_width="match_parent"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/spacing_small"
+        android:layout_marginRight="@dimen/spacing_small"
+        android:background="@drawable/in_app_login_content_background"
+        android:elevation="16dp"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_normal"
+        >
+
+        <TextView
+            android:id="@+id/info_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_small"
+            android:paddingLeft="6dp"
+            android:paddingTop="6dp"
+            android:paddingRight="6dp"
+            android:textAppearance="?textAppearanceSubtitle1"
+            android:textColor="?colorOnBackgroundMedium"
+            tools:text="Autofill login and password with:"
+            />
+
+        <ListView
+            android:id="@+id/suggestions_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@null"
+            android:dividerHeight="@dimen/spacing_normal"
+            android:drawSelectorOnTop="true"
+            android:listSelector="?selectableItemBackground"
+            android:paddingLeft="6dp"
+            android:paddingTop="6dp"
+            android:paddingRight="6dp"
+            android:scrollbarStyle="outsideOverlay"
+            />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/close"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="7dp"
+            android:layout_marginBottom="4.5dp"
+            android:text="@string/inapp_login_close_btn"
+            />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/arrow_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:src="@drawable/in_app_login_arrow_top"
+        />
+
+    <ImageView
+        android:id="@+id/arrow_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center"
+        android:layout_marginRight="@dimen/spacing_extra_small"
+        android:rotation="90"
+        android:src="@drawable/in_app_login_arrow_top"
+        />
+
+    <ImageView
+        android:id="@+id/arrow_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center"
+        android:layout_marginLeft="@dimen/spacing_extra_small"
+        android:rotation="90"
+        android:src="@drawable/in_app_login_arrow_bottom"
+        />
+
+    <ImageView
+        android:id="@+id/arrow_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="6dp"
+        android:src="@drawable/in_app_login_arrow_bottom"
+        />
+
+</FrameLayout>

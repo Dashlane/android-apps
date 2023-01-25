@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="users_profile_color0">#5B9FD9</color>
+    <color name="users_profile_color1">#B86FD1</color>
+    <color name="users_profile_color2">#FFAFDC</color>
+    <color name="users_profile_color3">#E2624D</color>
+    <color name="users_profile_color4">#A98259</color>
+    <color name="users_profile_color5">#9BAE26</color>
+    <color name="users_profile_color6">#FA9343</color>
+    <color name="users_profile_color7">#FFC566</color>
+
+</resources>

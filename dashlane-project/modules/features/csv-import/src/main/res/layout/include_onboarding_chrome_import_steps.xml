@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:theme="@style/Theme.Dashlane.Modal"
+    >
+
+    
+
+    <com.dashlane.ui.widgets.view.HtmlTextView
+        android:id="@+id/text_step1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/minimum_clickable_area_size"
+        android:padding="8dp"
+        android:text="@string/chrome_import_onboarding_step1"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textColor="@color/chrome_import_step_text_tint_selector"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon_step1"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/icon_step1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chrome_import_step1"
+        app:layout_constraintBottom_toBottomOf="@+id/text_step1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/text_step1"
+        />
+
+    
+
+    <com.dashlane.ui.widgets.view.HtmlTextView
+        android:id="@+id/text_step2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/minimum_clickable_area_size"
+        android:padding="8dp"
+        android:text="@string/chrome_import_onboarding_step2"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textColor="@color/chrome_import_step_text_tint_selector"
+        app:layout_constraintEnd_toEndOf="@+id/text_step1"
+        app:layout_constraintStart_toStartOf="@+id/text_step1"
+        app:layout_constraintTop_toBottomOf="@+id/text_step1"
+        />
+
+    <ImageView
+        android:id="@+id/icon_step2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chrome_import_step2"
+        app:layout_constraintBottom_toBottomOf="@+id/text_step2"
+        app:layout_constraintEnd_toEndOf="@+id/icon_step1"
+        app:layout_constraintStart_toStartOf="@+id/icon_step1"
+        app:layout_constraintTop_toTopOf="@+id/text_step2"
+        />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/border_neutral_quiet_idle"
+        app:layout_constraintBottom_toTopOf="@+id/icon_step2"
+        app:layout_constraintEnd_toEndOf="@+id/icon_step1"
+        app:layout_constraintStart_toStartOf="@+id/icon_step1"
+        app:layout_constraintTop_toBottomOf="@+id/icon_step1"
+        />
+
+    
+
+    <com.dashlane.ui.widgets.view.HtmlTextView
+        android:id="@+id/text_step3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/minimum_clickable_area_size"
+        android:padding="8dp"
+        android:text="@string/chrome_import_onboarding_step3"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textColor="@color/chrome_import_step_text_tint_selector"
+        app:layout_constraintEnd_toEndOf="@id/text_step1"
+        app:layout_constraintStart_toStartOf="@id/text_step1"
+        app:layout_constraintTop_toBottomOf="@+id/text_step2"
+        />
+
+    <ImageView
+        android:id="@+id/icon_step3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chrome_import_step3"
+        app:layout_constraintBottom_toBottomOf="@+id/text_step3"
+        app:layout_constraintEnd_toEndOf="@+id/icon_step1"
+        app:layout_constraintStart_toStartOf="@+id/icon_step1"
+        app:layout_constraintTop_toTopOf="@+id/text_step3"
+        />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/border_neutral_quiet_idle"
+        app:layout_constraintBottom_toTopOf="@+id/icon_step3"
+        app:layout_constraintEnd_toEndOf="@+id/icon_step1"
+        app:layout_constraintStart_toStartOf="@+id/icon_step1"
+        app:layout_constraintTop_toBottomOf="@+id/icon_step2"
+        />
+
+    
+
+    <com.dashlane.ui.widgets.view.HtmlTextView
+        android:id="@+id/text_step4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/minimum_clickable_area_size"
+        android:padding="8dp"
+        android:text="@string/chrome_import_onboarding_step4"
+        android:textAppearance="?textAppearanceSubtitle1"
+        android:textColor="@color/chrome_import_step_text_tint_selector"
+        app:layout_constraintEnd_toEndOf="@+id/text_step1"
+        app:layout_constraintStart_toStartOf="@+id/text_step1"
+        app:layout_constraintTop_toBottomOf="@+id/text_step3"
+        />
+
+    <ImageView
+        android:id="@+id/icon_step4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chrome_import_step4"
+        app:layout_constraintBottom_toBottomOf="@+id/text_step4"
+        app:layout_constraintEnd_toEndOf="@+id/icon_step1"
+        app:layout_constraintStart_toStartOf="@+id/icon_step1"
+        app:layout_constraintTop_toTopOf="@+id/text_step4"
+        />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@color/border_neutral_quiet_idle"
+        app:layout_constraintBottom_toTopOf="@+id/icon_step4"
+        app:layout_constraintEnd_toEndOf="@+id/icon_step1"
+        app:layout_constraintStart_toStartOf="@+id/icon_step1"
+        app:layout_constraintTop_toBottomOf="@+id/icon_step3"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

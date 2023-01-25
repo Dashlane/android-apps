@@ -1,0 +1,10 @@
+<manifest package="com.dashlane.securearchive"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".BackupActivity"
+            android:theme="@style/Theme.Dashlane.Modal.Dialog"
+            android:windowSoftInputMode="stateAlwaysVisible"/>
+    </application>
+</manifest>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="false"
+    android:focusable="false"
+    android:includeFontPadding="false"
+    android:paddingLeft="@dimen/list_credentials_item_header_padding_left"
+    android:paddingTop="@dimen/list_credentials_item_header_padding_top"
+    android:paddingBottom="@dimen/list_credentials_item_header_padding_bottom"
+    android:textAppearance="?textAppearanceCaption"
+    tools:ignore="RtlSymmetry"
+    tools:text="Design"
+    />

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/border_brand_standard_idle" android:state_focused="true" />
+    <item android:color="@color/border_neutral_standard_hover" android:state_hovered="true" />
+    <item android:color="@color/border_neutral_standard_active" android:state_enabled="false" />
+    <item android:color="@color/border_neutral_standard_idle" />
+</selector>

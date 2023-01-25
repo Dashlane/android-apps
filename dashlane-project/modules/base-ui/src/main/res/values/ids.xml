@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="toolbar" type="id" />
+    <item name="content_frame" type="id" />
+    <item name="copy_action_list" type="id" />
+    <item name="infobox_button_primary" type="id" />
+    <item name="infobox_button_secondary" type="id" />
+</resources>

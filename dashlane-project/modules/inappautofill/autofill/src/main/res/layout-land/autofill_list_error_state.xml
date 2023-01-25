@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginStart="@dimen/spacing_big"
+    android:layout_marginTop="@dimen/spacing_small"
+    android:layout_marginEnd="@dimen/spacing_big"
+    android:layout_marginBottom="@dimen/spacing_small"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <ImageView
+        android:id="@+id/autofill_list_pauses_error_state_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_close_outlinedauto_login_error_state"
+        android:layout_marginEnd="@dimen/spacing_huge"
+        app:layout_constraintEnd_toStartOf="@id/autofill_list_pauses_error_state_message"
+        app:layout_constraintTop_toTopOf="@id/autofill_list_pauses_error_state_heading"
+        app:layout_constraintBottom_toBottomOf="@id/autofill_list_pauses_error_state_message"
+        app:tint="@color/text_danger_quiet"
+        tools:ignore="ContentDescription"
+        />
+
+    <TextView
+        android:id="@+id/autofill_list_pauses_error_state_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/autofill_list_items_error_title"
+        android:textAppearance="?textAppearanceHeadline1"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:layout_marginStart="@dimen/spacing_ultra_huge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/autofill_list_pauses_error_state_message"
+        />
+
+    <TextView
+        android:id="@+id/autofill_list_pauses_error_state_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/autofill_list_items_error_description"
+        android:textAppearance="?textAppearanceBody1"
+        android:textColor="?colorOnBackgroundMedium"
+        android:layout_marginBottom="@dimen/spacing_huge"
+        android:layout_marginStart="@dimen/spacing_ultra_huge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/autofill_list_pauses_error_state_action"
+        style="?materialButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_ultra_huge"
+        android:text="@string/autofill_list_items_error_retry_action"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/autofill_list_pauses_error_state_message"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

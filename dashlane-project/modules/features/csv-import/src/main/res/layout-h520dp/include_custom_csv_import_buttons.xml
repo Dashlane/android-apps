@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="32dp"
+    android:orientation="vertical"
+    tools:showIn="@layout/activity_custom_csv_import"
+    >
+
+    <Button
+        android:id="@+id/button_url"
+        style="@style/Widget.Dashlane.Button.CsvImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/custom_csv_import_category_url"
+        />
+
+    <Button
+        android:id="@+id/button_username"
+        style="@style/Widget.Dashlane.Button.CsvImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/custom_csv_import_category_username"
+        />
+
+    <Button
+        android:id="@+id/button_password"
+        style="@style/Widget.Dashlane.Button.CsvImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/custom_csv_import_category_password"
+        />
+
+    <Button
+        android:id="@+id/button_other"
+        style="@style/Widget.Dashlane.Button.CsvImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/custom_csv_import_category_none"
+        />
+
+</LinearLayout>

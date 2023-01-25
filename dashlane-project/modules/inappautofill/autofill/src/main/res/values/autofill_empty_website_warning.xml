@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_empty_website_title">Add this website to your %1$s login?</string>
+    <string name="autofill_empty_website_description">Make sure this website’s URL is correct.</string>
+    <string name="autofill_empty_website_email_label">Email</string>
+    <string name="autofill_empty_website_name_label">Item name</string>
+    <string name="autofill_empty_website_tag_new">New</string>
+    <string name="autofill_empty_website_tag_website_label">Website</string>
+    <string name="autofill_empty_website_cta_negative">Cancel</string>
+    <string name="autofill_empty_website_cta_positive">Add website</string>
+
+    <string name="autofill_empty_website_toast">The website was added to your %1$s account.</string>
+</resources>

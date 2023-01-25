@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginStart="@dimen/spacing_big"
+    android:layout_marginTop="@dimen/spacing_small"
+    android:layout_marginEnd="@dimen/spacing_big"
+    android:layout_marginBottom="@dimen/spacing_small"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <ImageView
+        android:id="@+id/autofill_list_pauses_empty_state_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_auto_login_outlinedauto_login_empty_state"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/autofill_list_pauses_empty_state_heading"
+        app:layout_constraintBottom_toBottomOf="@id/autofill_list_pauses_empty_state_message"
+        app:tint="@color/text_brand_quiet"
+        />
+
+    <TextView
+        android:id="@+id/autofill_list_pauses_empty_state_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/autofill_actioned_sources_items_empty_title"
+        android:textAppearance="?textAppearanceHeadline1"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:layout_marginStart="@dimen/spacing_huge"
+        android:layout_marginEnd="@dimen/spacing_huge"
+        app:layout_constraintStart_toEndOf="@id/autofill_list_pauses_empty_state_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/autofill_list_pauses_empty_state_message"
+        />
+
+    <TextView
+        android:id="@+id/autofill_list_pauses_empty_state_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="@string/autofill_actioned_sources_items_empty_description"
+        android:textAppearance="?textAppearanceBody1"
+        android:layout_marginStart="@dimen/spacing_huge"
+        android:layout_marginEnd="@dimen/spacing_huge"
+        app:layout_constraintStart_toEndOf="@id/autofill_list_pauses_empty_state_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:animateLayoutChanges="true"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_big"
+        android:paddingBottom="@dimen/spacing_normal">
+
+        <TextView
+            android:id="@+id/authenticator_enter_activation_key_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_huge"
+            android:text="@string/authenticator_enter_activation_key_title"
+            android:textAlignment="textStart"
+            android:textAppearance="?textAppearanceHeadline1"
+            app:layout_constraintBottom_toTopOf="@+id/authenticator_enter_activation_key_input_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/authenticator_enter_activation_key_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/authenticator_enter_activation_key_input_label"
+            app:expandedHintEnabled="false"
+            app:layout_constraintBottom_toTopOf="@+id/authenticator_enter_activation_key_positive_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:placeholderText="@string/authenticator_enter_activation_key_input_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/authenticator_enter_activation_key_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                android:lines="1"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/authenticator_enter_activation_key_positive_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="@string/authenticator_enter_activation_key_positive_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

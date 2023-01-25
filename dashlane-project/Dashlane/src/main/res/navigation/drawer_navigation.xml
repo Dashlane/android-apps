@@ -1,0 +1,905 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_navigation"
+    app:startDestination="@id/nav_home">
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.dashlane.ui.activities.fragments.vault.VaultFragment"
+        android:label="@string/vault_action_bar_title"
+        tools:layout="@layout/fragment_vault">
+        <deepLink
+            android:id="@+id/deeplink_home"
+            app:uri="dashlane:///vault?origin={origin}" />
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <argument
+            android:name="filter"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_personal_plan"
+        android:name="com.dashlane.ui.activities.fragments.checklist.ChecklistFragment"
+        android:label="@string/menu_v3_section_personal_plan"
+        tools:layout="@layout/fragment_checklist">
+        <deepLink
+            android:id="@+id/deeplink_personal_plan"
+            app:uri="dashlane:///personal-plan?origin={origin}" />
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_notif_center"
+        android:name="com.dashlane.notificationcenter.NotificationCenterFragment"
+        android:label="@string/talk_to_me_toolbar_title"
+        tools:layout="@layout/fragment_actionitem_center">
+        <deepLink
+            android:id="@+id/deeplink_item_center"
+            app:uri="dashlane:///action_item_center?origin={origin}" />
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_center_to_section_details"
+            app:destination="@id/nav_action_center_section_details"
+            app:enterAnim="@anim/fadein_activity"
+            app:exitAnim="@anim/fadeout_activity"
+            app:popEnterAnim="@anim/fadein_activity"
+            app:popExitAnim="@anim/fadeout_activity" />
+        <action
+            android:id="@+id/action_center_to_sharing_center"
+            app:destination="@id/nav_sharing_center"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_center_to_breach_alert_detail"
+            app:destination="@id/nav_breach_alert_detail"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_password_generator"
+        android:name="com.dashlane.ui.activities.fragments.PasswordGeneratorAndGeneratedPasswordFragment"
+        android:label="@string/action_bar_password_generator"
+        tools:layout="@layout/fragment_password_generator">
+        <deepLink
+            android:id="@+id/deeplink_password_generator"
+            app:uri="dashlane:///password-generator?origin={origin}" />
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_action_center_section_details"
+        android:name="com.dashlane.notificationcenter.details.NotificationCenterSectionDetailsFragment"
+        android:label="@string/talk_to_me_toolbar_title"
+        tools:layout="@layout/activity_notification_center_details">
+        <argument
+            android:name="extra_section"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_center_section_to_sharing_center"
+            app:destination="@id/nav_sharing_center"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_center_section_to_breach_alert_detail"
+            app:destination="@id/nav_breach_alert_detail"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <activity
+        android:id="@+id/nav_item_edit_view"
+        android:name="com.dashlane.item.ItemEditViewActivity"
+        tools:layout="@layout/activity_item_edit_view">
+        <argument
+            android:name="uid"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="data_type"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="force_edit"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="data_type_name"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="url"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="sender"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="success_intent"
+            android:defaultValue="@null"
+            app:argType="android.content.Intent"
+            app:nullable="true" />
+        <argument
+            android:name="otp"
+            android:defaultValue="@null"
+            app:argType="com.dashlane.authenticator.Otp"
+            app:nullable="true" />
+    </activity>
+    <activity
+        android:id="@+id/nav_follow_up_notification_discovery_screen"
+        android:name="com.dashlane.followupnotification.discovery.FollowUpNotificationDiscoveryActivity"
+        tools:layout="@layout/activity_follow_up_notification_discovery">
+        <argument
+            android:name="is_reminder"
+            app:argType="boolean"
+            app:nullable="false" />
+    </activity>
+    <activity
+        android:id="@+id/nav_in_app_login"
+        android:name="com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingInAppLoginActivity"
+        tools:layout="@layout/activity_onboarding_in_app_login">
+        <argument
+            android:name="origin"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="extra_onboarding_type"
+            android:defaultValue="AUTO_FILL_API"
+            app:argType="com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingType" />
+        <deepLink
+            android:id="@+id/deeplink_in_app_login"
+            app:uri="dashlane:///in-app-login?origin={origin}" />
+    </activity>
+    <fragment
+        android:id="@+id/nav_password_analysis"
+        android:name="com.dashlane.security.identitydashboard.password.PasswordAnalysisFragment"
+        android:label="@string/security_dashboard_password_health_title"
+        tools:layout="@layout/fragment_dashboard_password_analysis">
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <argument
+            android:name="tab"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="breach_focus"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/password_analysis_to_item_edit"
+            app:destination="@id/nav_item_edit_view"
+            app:enterAnim="@anim/fadein_activity"
+            app:exitAnim="@anim/fadeout_activity"
+            app:popEnterAnim="@anim/fadein_activity"
+            app:popExitAnim="@anim/fadeout_activity" />
+        <deepLink
+            android:id="@+id/deeplink_password_analysis"
+            app:uri="dashlane:///password-health?tab={tab}&amp;breachFocus={breach_focus}&amp;origin={origin}" />
+        <deepLink
+            android:id="@+id/deeplink_password_analysis_2"
+            app:uri="dashlane:///password-health/{tab}?origin={origin}" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_identity_dashboard"
+        android:name="com.dashlane.security.identitydashboard.IdentityDashboardFragment"
+        android:label="@string/menu_v3_section_security_dashboard"
+        tools:layout="@layout/fragment_dashboard_identity">
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <deepLink
+            android:id="@+id/deeplink_security_dashboard"
+            app:uri="dashlane:///security-dashboard?origin={origin}" />
+        <action
+            android:id="@+id/identity_dashboard_to_password_analysis"
+            app:destination="@id/nav_password_analysis"
+            app:enterAnim="@anim/fadein_activity"
+            app:exitAnim="@anim/fadeout_activity"
+            app:popEnterAnim="@anim/fadein_activity"
+            app:popExitAnim="@anim/fadeout_activity" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_sharing_center"
+        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingCenterFragment"
+        android:label="@string/menu_v3_section_sharing_center"
+        tools:layout="@layout/fragment_data_list">
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <argument
+            android:name="needsRefresh"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <deepLink
+            android:id="@+id/deeplink_sharing_center"
+            app:uri="dashlane:///sharing?origin={origin}" />
+        <action
+            android:id="@+id/sharing_center_to_share_user_groups"
+            app:destination="@id/nav_share_user_groups"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/sharing_center_to_share_items_for_users"
+            app:destination="@id/nav_share_items_for_users"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_new_share"
+        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.itemselection.SharingItemSelectionTabFragment"
+        android:label="@string/menu_v3_section_sharing_center"
+        tools:layout="@layout/fragment_tablayout_viewpager2_with_fab">
+        <argument
+            android:name="args_usage_log_from"
+            app:argType="string" />
+        <action
+            android:id="@+id/new_share_to_share_people_selection"
+            app:destination="@id/nav_share_people_selection"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_share_user_groups"
+        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.group.UserGroupTabFragment"
+        android:label="@string/menu_v3_section_sharing_center"
+        tools:layout="@layout/fragment_tablayout_viewpager2">
+        <argument
+            android:name="args_group_id"
+            app:argType="string" />
+        <argument
+            android:name="args_group_name"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_share_items_for_users"
+        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.items.SharingItemsForUserFragment"
+        android:label="@string/menu_v3_section_sharing_center"
+        tools:layout="@layout/fragment_data_list">
+        <argument
+            android:name="args_member_login"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_share_users_for_items"
+        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.users.SharingUserForItemsFragment"
+        android:label="@string/menu_v3_section_sharing_center"
+        tools:layout="@layout/fragment_data_list">
+        <argument
+            android:name="args_item_uid"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_share_people_selection"
+        android:name="com.dashlane.ui.screens.sharing.SharingNewSharePeopleFragment"
+        android:label="@string/menu_v3_section_sharing_center"
+        tools:layout="@layout/fragment_sharing_message">
+        <argument
+            android:name="argsAuthentifiantUIDs"
+            app:argType="string[]" />
+        <argument
+            android:name="argsSecureNotesUIDs"
+            app:argType="string[]" />
+        <argument
+            android:name="from"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/share_people_selection_to_sharing_center"
+            app:destination="@id/nav_sharing_center"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.dashlane.ui.screens.settings.SettingsFragment"
+        android:label="@string/action_bar_settings">
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <argument
+            android:name="id"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <deepLink
+            android:id="@+id/deeplink_settings"
+            app:uri="dashlane:///settings?origin={origin}" />
+        <deepLink
+            android:id="@+id/deeplink_settings_id"
+            app:uri="dashlane:///settings/{id}?origin={origin}" />
+        <action
+            android:id="@+id/settings_to_autofill_paused_and_linked"
+            app:destination="@id/nav_autofill_paused_and_linked"
+            app:enterAnim="@anim/fadein_activity"
+            app:exitAnim="@anim/fadeout_activity"
+            app:popEnterAnim="@anim/fadein_activity"
+            app:popExitAnim="@anim/fadeout_activity" />
+        <action
+            android:id="@+id/settings_to_manage_devices"
+            app:destination="@id/nav_manage_devices" />
+        <action
+            android:id="@+id/settings_to_dashlane_labs"
+            app:destination="@id/nav_dashlane_labs" />
+    </fragment>
+    <activity
+        android:id="@+id/nav_download_authenticator_app"
+        android:name="com.dashlane.activatetotp.DownloadAuthenticatorAppIntroActivity"
+        tools:layout="@layout/activity_intro">
+        <deepLink
+            android:id="@+id/deeplink_download_authenticator"
+            app:uri="dashlane:///download_authenticator" />
+    </activity>
+    <fragment
+        android:id="@+id/nav_vpn_third_party"
+        android:name="com.dashlane.vpn.thirdparty.VpnThirdPartyFragment"
+        android:label="@string/action_bar_title_vpn_third_party"
+        tools:layout="@layout/fragment_vpn_third_party">
+        <deepLink
+            android:id="@+id/deeplink_vpn"
+            app:uri="dashlane:///vpn?origin={origin}" />
+        <action
+            android:id="@+id/go_to_get_started_from_vpn_third_party"
+            app:destination="@id/nav_vpn_third_party_get_started_dialog" />
+        <action
+            android:id="@+id/go_to_learn_more_about_vpn_from_vpn_third_party"
+            app:destination="@id/nav_vpn_third_party_learn_more_dialog" />
+        <action
+            android:id="@+id/go_to_activate_account_from_vpn_third_party"
+            app:destination="@id/nav_vpn_third_party_activate_account"
+            app:enterAnim="@anim/fadein_activity"
+            app:exitAnim="@anim/fadeout_activity"
+            app:popEnterAnim="@anim/fadein_activity"
+            app:popExitAnim="@anim/fadeout_activity" />
+    </fragment>
+    <activity
+        android:id="@+id/nav_vpn_third_party_activate_account"
+        android:name="com.dashlane.vpn.thirdparty.activate.VpnThirdPartyActivateAccountActivity"
+        android:label="@string/action_bar_title_vpn_third_party">
+        <argument
+            android:name="email"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="suggestions"
+            android:defaultValue="@null"
+            app:argType="string[]"
+            app:nullable="true" />
+    </activity>
+    <activity
+        android:id="@+id/nav_vpn_b2b_intro"
+        android:name="com.dashlane.vpn.thirdparty.VpnB2bIntroActivity"
+        android:label="@string/action_bar_title_vpn_third_party" />
+    <fragment
+        android:id="@+id/nav_dark_web_monitoring"
+        android:name="com.dashlane.security.darkwebmonitoring.DarkWebMonitoringFragment"
+        android:label="@string/menu_v3_section_dark_web_monitoring"
+        tools:layout="@layout/fragment_darkweb_monitoring">
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <action
+            android:id="@+id/dark_web_monitoring_to_breach_alert_detail"
+            app:destination="@id/nav_breach_alert_detail"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_breach_alert_detail"
+        android:name="com.dashlane.security.darkwebmonitoring.detail.BreachAlertDetailFragment"
+        android:label="@string/dwm_alert_detail_title"
+        tools:layout="@layout/fragment_breach_alert_detail">
+        <argument
+            android:name="breach"
+            app:argType="com.dashlane.security.identitydashboard.breach.BreachWrapper" />
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+    </fragment>
+
+    <activity
+        android:id="@+id/nav_csv_import"
+        android:name="com.dashlane.csvimport.CsvImportActivity"
+        tools:layout="@layout/activity_csv_import">
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <argument
+            android:name="uri"
+            app:argType="string" />
+        <deepLink
+            android:id="@+id/deep_link_csv_import"
+            app:uri="dashlane:///csv-import?origin={origin}&amp;uri={uri}" />
+    </activity>
+    <activity
+        android:id="@+id/nav_csv_import_intro"
+        android:name="com.dashlane.csvimport.CsvFileImportIntroActivity"
+        tools:layout="@layout/activity_intro">
+        <argument
+            android:name="fromCompetitor"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </activity>
+    <activity
+        android:id="@+id/nav_chrome_import_intro"
+        android:name="com.dashlane.csvimport.OnboardingChromeImportActivity"
+        tools:layout="@layout/activity_intro">
+        <argument
+            android:name="origin"
+            app:argType="string" />
+    </activity>
+    <activity
+        android:id="@+id/nav_m2w_intro"
+        android:name="com.dashlane.m2w.M2wIntroActivity"
+        tools:layout="@layout/activity_intro">
+        <argument
+            android:name="origin"
+            app:argType="string" />
+    </activity>
+    <activity
+        android:id="@+id/nav_autofill_paused_and_linked"
+        android:name="com.dashlane.autofill.api.actionssources.view.ActionsSourcesActivity"
+        tools:layout="@layout/activity_autofill_actions_sources">
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+        <deepLink
+            android:id="@+id/deeplink_autofill_paused_and_linked"
+            app:uri="dashlane:///paused-and-linked?origin={origin}" />
+    </activity>
+    <fragment
+        android:id="@+id/nav_manage_devices"
+        android:name="com.dashlane.ui.screens.settings.DevicesFragment"
+        android:label="@string/action_bar_title_devices"
+        tools:layout="@layout/fragment_devices_list">
+        <deepLink
+            android:id="@+id/deeplink_manage_devices"
+            app:uri="dashlane:///devices" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_search"
+        android:name="com.dashlane.ui.screens.fragments.search.SearchFragment"
+        android:label="@string/search"
+        tools:layout="@layout/fragment_search">
+        <argument
+            android:name="args_query"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <deepLink
+            android:id="@+id/deeplink_search"
+            app:uri="dashlane:///search?q={args_query}" />
+    </fragment>
+    <activity
+        android:id="@+id/nav_in_app_login_intro"
+        android:name="com.dashlane.ui.activities.onboarding.InAppLoginIntroActivity"
+        tools:layout="@layout/activity_intro">
+        <argument
+            android:name="origin"
+            app:argType="string"
+            app:nullable="false" />
+    </activity>
+    <fragment
+        android:id="@+id/nav_credential_add_step_1"
+        android:name="com.dashlane.ui.screens.fragments.userdata.CredentialAddStep1Fragment"
+        android:label="@string/action_bar_title_credential_create_step1"
+        tools:layout="@layout/fragment_create_credential_step1">
+        <argument
+            android:name="param_sender"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="param_success_intent"
+            android:defaultValue="@null"
+            app:argType="android.content.Intent"
+            app:nullable="true" />
+        <argument
+            android:name="expand_import_options"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </fragment>
+    <activity
+        android:id="@+id/nav_offers"
+        android:name="com.dashlane.premium.offer.list.view.OffersActivity"
+        tools:layout="@layout/activity_offers">
+        <argument
+            android:name="offerType"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="origin"
+            app:argType="string"
+            app:nullable="true" />
+    </activity>
+    <activity
+        android:id="@+id/nav_m2w_connect"
+        android:name="com.dashlane.m2w.M2wConnectActivity"
+        tools:layout="@layout/activity_m2w_connect">
+        <argument
+            android:name="origin"
+            android:defaultValue="pushnotification"
+            app:argType="string" />
+        <deepLink
+            android:id="@+id/deeplink_m2w"
+            app:uri="dashlane:///m2d?origin={origin}" />
+    </activity>
+    <activity
+        android:id="@+id/nav_paywall"
+        android:name="com.dashlane.premium.paywall.common.PaywallActivity">
+        <argument
+            android:name="origin"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="paywallIntroType"
+            app:argType="com.dashlane.premium.paywall.common.PaywallIntroType" />
+    </activity>
+    <activity
+        android:id="@+id/nav_guided_password_change"
+        android:name="com.dashlane.guidedpasswordchange.OnboardingGuidedPasswordChangeActivity">
+        <argument
+            android:name="website_domain"
+            app:argType="string" />
+        <argument
+            android:name="item_id"
+            app:argType="string" />
+        <argument
+            android:name="username"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="origin"
+            app:argType="string"
+            app:nullable="true" />
+    </activity>
+    <action
+        android:id="@+id/go_to_authenticator_dashboard"
+        app:destination="@id/nav_authenticator_dashboard"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <dialog
+        android:id="@+id/nav_authenticator_get_started_dialog"
+        android:name="com.dashlane.authenticator.GetStartedAuthenticatorBottomSheetDialogFragment" />
+    <dialog
+        android:id="@+id/nav_vpn_third_party_get_started_dialog"
+        android:name="com.dashlane.vpn.thirdparty.GetStartedVpnBottomSheetDialogFragment" />
+    <dialog
+        android:id="@+id/nav_vpn_third_party_learn_more_dialog"
+        android:name="com.dashlane.vpn.thirdparty.LearnMoreAboutVpnBottomSheetDialogFragment" />
+    <dialog
+        android:id="@+id/nav_quick_action_dialog"
+        android:name="com.dashlane.ui.quickactions.QuickActionsBottomSheetFragment">
+        <argument
+            android:name="itemId"
+            app:argType="string" />
+        <argument
+            android:name="itemListContext"
+            app:argType="com.dashlane.ui.adapter.ItemListContext" />
+        <argument
+            android:name="originPage"
+            app:argType="string"
+            app:nullable="true" />
+    </dialog>
+    <dialog
+        android:id="@+id/nav_delete_vault_item_dialog"
+        android:name="com.dashlane.item.delete.DeleteVaultItemFragment">
+        <argument
+            android:name="itemId"
+            app:argType="string" />
+        <argument
+            android:name="isShared"
+            app:argType="boolean" />
+    </dialog>
+    <action
+        android:id="@+id/go_to_authenticator_suggestions"
+        app:destination="@id/nav_authenticator_suggestions"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <activity
+        android:id="@+id/nav_current_plan"
+        android:name="com.dashlane.premium.current.CurrentPlanActivity">
+        <argument
+            android:name="origin"
+            app:argType="string" />
+    </activity>
+    <fragment
+        android:id="@+id/nav_authenticator_dashboard"
+        android:name="com.dashlane.authenticator.AuthenticatorDashboardFragment"
+        android:label="@string/action_bar_title_authenticator">
+        <argument
+            android:name="otpUri"
+            app:argType="android.net.Uri"
+            app:nullable="true" />
+        <action
+            android:id="@+id/go_to_get_started_from_authenticator_dashboard"
+            app:destination="@id/nav_authenticator_get_started_dialog" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_authenticator_suggestions"
+        android:name="com.dashlane.authenticator.AuthenticatorSuggestionsFragment"
+        android:label="@string/action_bar_title_authenticator">
+        <action
+            android:id="@+id/go_to_get_started_from_authenticator_suggestions"
+            app:destination="@id/nav_authenticator_get_started_dialog" />
+        <argument
+            android:name="hasSetupOtpCredentials"
+            app:argType="boolean" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_dashlane_labs"
+        android:name="com.dashlane.ui.screens.settings.list.general.labs.DashlaneLabsFragment"
+        android:label="@string/setting_dashlane_labs" />
+    <action
+        android:id="@+id/go_to_home"
+        app:destination="@id/nav_home"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim"
+        app:popUpTo="@id/nav_home"
+        app:popUpToInclusive="true" />
+    <action
+        android:id="@+id/go_to_personal_plan"
+        app:destination="@id/nav_personal_plan"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim"
+        app:popUpTo="@id/nav_personal_plan"
+        app:popUpToInclusive="true" />
+    <action
+        android:id="@+id/go_to_notification_center"
+        app:destination="@id/nav_notif_center"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_password_generator"
+        app:destination="@id/nav_password_generator"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_identity_dashboard"
+        app:destination="@id/nav_identity_dashboard"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_password_analysis"
+        app:destination="@id/nav_password_analysis"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_credential_add_step_1"
+        app:destination="@id/nav_credential_add_step_1"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_item_edit"
+        app:destination="@id/nav_item_edit_view"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_sharing_center"
+        app:destination="@id/nav_sharing_center"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_action_center_section_details"
+        app:destination="@id/nav_action_center_section_details"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_action_center_alert_detail"
+        app:destination="@id/nav_breach_alert_detail"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_settings"
+        app:destination="@id/nav_settings"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_vpn_b2b_intro"
+        app:destination="@id/nav_vpn_b2b_intro"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_third_party_vpn"
+        app:destination="@id/nav_vpn_third_party"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_dark_web_monitoring"
+        app:destination="@id/nav_dark_web_monitoring"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_csv_import_intro"
+        app:destination="@id/nav_csv_import_intro"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_chrome_import_intro"
+        app:destination="@id/nav_chrome_import_intro"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_m2w_intro"
+        app:destination="@id/nav_m2w_intro"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_search"
+        app:destination="@id/nav_search"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_new_share"
+        app:destination="@id/nav_new_share"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_share_people_selection"
+        app:destination="@id/nav_share_people_selection" />
+    <action
+        android:id="@+id/go_to_share_users_for_items"
+        app:destination="@id/nav_share_users_for_items"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_in_app_login_intro"
+        app:destination="@id/nav_in_app_login_intro"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_in_app_login"
+        app:destination="@id/nav_in_app_login"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_offers"
+        app:destination="@id/nav_offers"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_m2w"
+        app:destination="@id/nav_m2w_connect"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_paywall"
+        app:destination="@id/nav_paywall"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_breach_alert_detail"
+        app:destination="@id/nav_breach_alert_detail"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_guided_password_change"
+        app:destination="@id/nav_guided_password_change"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/nav_item_edit_view_to_follow_up_notification_discovery_screen"
+        app:destination="@id/nav_follow_up_notification_discovery_screen"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_current_plan"
+        app:destination="@id/nav_current_plan"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
+        android:id="@+id/go_to_quick_actions"
+        app:destination="@id/nav_quick_action_dialog" />
+    <action
+        android:id="@+id/go_to_delete_item"
+        app:destination="@id/nav_delete_vault_item_dialog" />
+</navigation>

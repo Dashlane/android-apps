@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:animateLayoutChanges="true"
+    android:fillViewport="true">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingBottom="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_big"
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_normal">
+
+        <TextView
+            android:id="@+id/authenticator_multiple_matches_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="96dp"
+            android:text="@string/authenticator_multiple_matches_title"
+            android:textAlignment="textStart"
+            android:textAppearance="?textAppearanceHeadline1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/authenticator_multiple_matches_subtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:text="@string/authenticator_multiple_matches_subtitle"
+            android:textAppearance="?textAppearanceBody1"
+            app:layout_constraintEnd_toEndOf="@+id/authenticator_multiple_matches_title"
+            app:layout_constraintStart_toStartOf="@+id/authenticator_multiple_matches_title"
+            app:layout_constraintTop_toBottomOf="@+id/authenticator_multiple_matches_title" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/authenticator_multiple_matches_list"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_big"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/authenticator_multiple_matches_subtitle"
+            tools:itemCount="3"
+            tools:listitem="@layout/authenticator_credential_multiple_matches_item" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

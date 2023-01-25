@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    tools:background="@drawable/background_widget_infobox"
+    tools:backgroundTint="@color/step_infobox_background_tint"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <ImageView
+        android:id="@+id/infobox_icon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_widget_infobox"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/text_brand_standard"
+        />
+
+    <TextView
+        android:id="@+id/infobox_icon_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Dashlane.Body2"
+        android:textColor="@color/text_brand_standard"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="01"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/infobox_icon_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="infobox_icon,infobox_icon_text"
+        tools:layout_editor_absoluteX="70dp"
+        tools:layout_editor_absoluteY="12dp"
+        />
+
+    <TextView
+        android:id="@+id/infobox_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="@color/text_brand_standard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/infobox_icon_barrier"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        />
+
+    <LinearLayout
+        android:id="@+id/infobox_buttons_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/divider_empty_spacing_small"
+        android:gravity="center_horizontal|end"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/infobox_text"
+        />
+</merge>

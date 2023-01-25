@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chrome_import_onboarding_title">Import passwords and login details from Chrome</string>
+    <string name="chrome_import_onboarding_step1">1. In the Chrome menu, go to &lt;b&gt;Settings&lt;/b&gt;</string>
+    <string name="chrome_import_onboarding_step2">2. Tap &lt;b&gt;Passwords&lt;/b&gt;</string>
+    <string name="chrome_import_onboarding_step3">3. Tap &lt;b&gt;Export passwords…&lt;/b&gt; in the menu</string>
+    <string name="chrome_import_onboarding_step4">4. Select &lt;b&gt;Import to Dashlane&lt;/b&gt;</string>
+    <string name="chrome_import_onboarding_primary_cta">Open Chrome</string>
+    <string name="chrome_import_onboarding_secondary_cta">Maybe Later</string>
+    <string name="chrome_import_onboarding_illustration_app_name">Chrome</string>
+    <string name="chrome_import_onboarding_illustration_settings">Settings</string>
+    <string name="chrome_import_onboarding_illustration_passwords">Passwords</string>
+    <string name="chrome_import_onboarding_illustration_export_passwords">Export passwords and login details…</string>
+    <string name="import_chooser_label">Import to Dashlane</string>
+    <string name="chrome_import_onboarding_error_title">Looks like there\'s a problem with your file</string>
+    <string name="chrome_import_onboarding_error_message">Try importing from Chrome again, or skip the import for now.</string>
+    <string name="chrome_import_onboarding_error_primary_cta">Skip Import</string>
+    <string name="chrome_import_onboarding_error_secondary_cta">Retry</string>
+    <string name="csv_import_title_one">We found %1$d login. Let\'s import it!</string>
+    <string name="csv_import_title_other">We found %1$d logins. Let\'s import them!</string>
+    <string name="csv_import_primary_cta">Import</string>
+    <string name="csv_import_secondary_cta">Cancel</string>
+    <string name="csv_import_empty_state_title">We couldn\'t find any passwords or login details in that file</string>
+    <string name="csv_import_empty_state_heading">Add passwords to your Vault</string>
+    <string name="csv_import_empty_state_description">You can still add logins individually, or skip this step for now</string>
+    <string name="csv_import_empty_state_primary_cta">Skip step</string>
+    <string name="csv_import_empty_state_secondary_cta">Add individually</string>
+    <string name="csv_import_success_message_one">%1$d login imported successfully</string>
+    <string name="csv_import_success_message_other">%1$d passwords imported successfully</string>
+
+    
+
+    <string name="csv_file_import_title">Import from a csv file</string>
+    <string name="csv_file_import_description_line1">1. Export your passwords and login details from the other app or website into a CSV file</string>
+    <string name="csv_file_import_description_line2">2. Save the CSV file in a folder on your device</string>
+    <string name="csv_file_import_description_line3">3. Select your file and choose to import it to Dashlane</string>
+    <string name="csv_file_import_primary_cta">Select file</string>
+    <string name="csv_file_import_secondary_cta">Cancel</string>
+
+    <string name="csv_file_import_title_competitor">Import from a password manager</string>
+    <string name="csv_file_import_description_competitor_line1">1. Export the passwords and login details stored in the other password manager into a CSV file</string>
+    <string name="csv_file_import_description_competitor_line2">2. Save the CSV file in a folder on your device</string>
+    <string name="csv_file_import_description_competitor_line3">3. Select your file and choose to import it to Dashlane</string>
+    <string name="csv_file_import_competitor_primary_cta">Select file</string>
+    <string name="csv_file_import_competitor_secondary_cta">Cancel</string>
+
+    
+    <string name="csv_file_import_error_title">Your file was not imported</string>
+    <string name="csv_file_import_error_description">There was an issue with your CSV file. Go to Dashlane Support for help with importing passwords and login details.</string>
+    <string name="csv_file_import_error_positive">Get help</string>
+    <string name="csv_file_import_error_negative">Close</string>
+
+    
+    <string name="import_methods_name_chrome">From Chrome</string>
+    <string name="import_methods_name_m2d">From your computer</string>
+    <string name="import_methods_name_csv">From a CSV file</string>
+    <string name="import_methods_name_competitor">From another password manager</string>
+    <string name="import_methods_name_dashlane_secure_archive">From an encrypted backup file</string>
+
+    
+    <string name="import_methods_empty_state_title">Add your logins</string>
+    <string name="import_methods_empty_state_description">Start adding logins to your Dashlane vault.</string>
+
+    
+    <string name="custom_csv_import_title">What is</string>
+    <string name="custom_csv_import_message">Select the right category</string>
+    <string name="custom_csv_import_category_url">Website or app</string>
+    <string name="custom_csv_import_category_username">Username or email</string>
+    <string name="custom_csv_import_category_password">Password</string>
+    <string name="custom_csv_import_category_none">Other (won\'t be imported)</string>
+    <string name="custom_csv_import_primary_cta_next">Next</string>
+    <string name="custom_csv_import_primary_cta_done">Validate</string>
+    <string name="custom_csv_import_secondary_cta">Cancel</string>
+    <string name="custom_csv_import_toggle_collapsed">View all data</string>
+    <string name="custom_csv_import_toggle_expanded">Collapse</string>
+    <string name="custom_csv_import_item_description_url">is a website or app</string>
+    <string name="custom_csv_import_item_description_username">is a username or email</string>
+    <string name="custom_csv_import_item_description_password">is a password</string>
+    <string name="custom_csv_import_item_description_none">Select a category</string>
+    <string name="custom_csv_import_instructions_title">Let\'s match your file</string>
+    <string name="custom_csv_import_instructions_message">We found %1$d types of data in your file. Match them with ours to import your passwords and login details.</string>
+    <string name="custom_csv_import_instructions_primary_cta">Start matching</string>
+</resources>

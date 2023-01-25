@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingLeft="@dimen/spacing_big"
+        android:paddingRight="@dimen/spacing_big"
+        android:paddingBottom="@dimen/spacing_small"
+        tools:theme="@style/Theme.Dashlane.Modal"
+        >
+
+        <ImageView
+            android:id="@+id/view_darkweb_result_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="120dp"
+            android:scaleType="fitStart"
+            android:src="@drawable/logo_darkweb_result"
+            app:layout_constraintBottom_toTopOf="@+id/view_darkweb_result_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:tint="@color/text_brand_quiet"
+            />
+
+        <TextView
+            android:id="@+id/view_darkweb_result_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_big"
+            android:gravity="center"
+            android:text="@string/darkweb_setup_result_title"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_catchy"
+            app:layout_constraintBottom_toTopOf="@+id/view_darkweb_result_body"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_darkweb_result_logo"
+            />
+
+        <TextView
+            android:id="@+id/view_darkweb_result_body"
+            style="?textAppearanceBody1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="@string/darkweb_setup_result_body_no_color"
+            app:layout_constraintBottom_toTopOf="@+id/view_darkweb_result_open_email_app"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/view_darkweb_result_title"
+            app:layout_constraintTop_toBottomOf="@+id/view_darkweb_result_title"
+            />
+
+        <Button
+            android:id="@+id/view_darkweb_result_email_confirmed"
+            style="?borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/darkweb_setup_result_button_email_confirmed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <Button
+            android:id="@+id/view_darkweb_result_open_email_app"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/darkweb_setup_result_button_open_email_app"
+            app:layout_constraintBottom_toTopOf="@+id/view_darkweb_result_email_confirmed"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bottom_sheet_half_round_rectangle"
+    android:padding="16dp"
+    android:theme="@style/Theme.Dashlane"
+    tools:ignore="Overdraw"
+    >
+
+    <ImageView
+        android:id="@+id/handle"
+        android:layout_width="52dp"
+        android:layout_height="5dp"
+        android:src="@drawable/handle_round_rectangle_shape"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/dialog_title_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_help_outlined"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/dialog_title"
+        app:tint="@color/text_neutral_catchy"
+        />
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
+        android:text="@string/autofill_mismatch_warning_title"
+        android:textAppearance="?textAppearanceHeadline6"
+        android:textColor="@color/text_neutral_catchy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/dialog_title_icon"
+        app:layout_constraintTop_toBottomOf="@+id/handle"
+        />
+
+    <CheckBox
+        android:id="@+id/checkbox_do_not_show_again"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="4dp"
+        android:text="@string/autofill_warning_do_not_show_again"
+        android:textAppearance="?textAppearanceBody1"
+        android:textColor="@color/text_neutral_quiet"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_title"
+        />
+
+    <Button
+        android:id="@+id/autofill_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="4dp"
+        android:text="@string/autofill_unknown_warning_accept"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/checkbox_do_not_show_again"
+        />
+
+    <Button
+        android:id="@+id/cancel_button"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/autofill_warning_cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/autofill_button"
+        app:layout_constraintTop_toBottomOf="@id/checkbox_do_not_show_again"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

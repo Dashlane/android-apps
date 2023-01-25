@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/onboarding_dark_web_monitoring_navigation"
+    app:startDestination="@id/nav_onboarding_dwm_loading">
+    <fragment
+        android:id="@+id/nav_onboarding_dwm_loading"
+        android:name="com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitoringLoadingFragment"
+        tools:layout="@layout/fragment_onboarding_dark_web_monitoring_loading">
+        <action
+            android:id="@+id/loading_to_success_email_confirmed"
+            app:destination="@id/nav_onboarding_dwm_success_email_confirmed"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/loading_to_success_no_alerts"
+            app:destination="@id/nav_onboarding_dwm_success_no_alerts"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/loading_to_error"
+            app:destination="@id/nav_onboarding_dwm_error"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_onboarding_dwm_success_email_confirmed"
+        android:name="com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitoringEmailConfirmedFragment"
+        tools:layout="@layout/fragment_onboarding_dark_web_monitoring_email_confirmed" />
+    <fragment
+        android:id="@+id/nav_onboarding_dwm_success_no_alerts"
+        android:name="com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitoringNoAlertsFragment"
+        tools:layout="@layout/fragment_onboarding_dark_web_monitoring_no_alerts" />
+    <fragment
+        android:id="@+id/nav_onboarding_dwm_error"
+        android:name="com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitoringErrorFragment"
+        tools:layout="@layout/fragment_onboarding_dark_web_monitoring_error" />
+    <action
+        android:id="@+id/go_to_loading"
+        app:destination="@id/nav_onboarding_dwm_loading"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim" />
+</navigation>

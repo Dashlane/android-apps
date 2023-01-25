@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".current.CurrentPlanActivity"
+    >
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/spacing_small"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/current_plan_cta_flow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <include layout="@layout/current_plan_header_background_item" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_current_plan_diamond"
+                app:layout_constraintBottom_toBottomOf="@id/header_background"
+                app:layout_constraintDimensionRatio="W,46:103"
+                app:layout_constraintStart_toStartOf="@id/current_plan_title"
+                app:layout_constraintTop_toTopOf="@id/header_background"
+                />
+
+            <TextView
+                android:id="@+id/current_plan_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/current_plan_title_trial"
+                android:textAppearance="?textAppearanceHeadline1"
+                android:textColor="@color/text_neutral_catchy"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/header_background"
+                app:layout_constraintWidth_max="@dimen/size_480dp"
+                tools:text="What’s included in the 30-day Premium trial:"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/current_plan_benefits_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/current_plan_title"
+                app:layout_constraintWidth_max="@dimen/size_480dp"
+                tools:itemCount="8"
+                tools:listitem="@layout/current_plan_benefit_item"
+                />
+
+            <com.dashlane.ui.widgets.view.Infobox
+                android:id="@+id/current_plan_suggestion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/current_plan_benefits_container"
+                app:layout_constraintWidth_max="@dimen/size_480dp"
+                tools:text="The Dashlane Free plan supports 50 passwords on only one device and no access to the Premium features above."
+                tools:title="After Trial you will be switched to Free plan"
+                />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="@dimen/spacing_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/current_plan_suggestion"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/current_plan_secondary_cta"
+        style="?borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/current_plan_cta_close"
+        app:layout_constrainedWidth="true"
+        tools:ignore="MissingConstraints"
+        tools:text="Close"
+        />
+
+    <Button
+        android:id="@+id/current_plan_primary_cta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/current_plan_cta_all_plans"
+        app:layout_constrainedWidth="true"
+        tools:ignore="MissingConstraints"
+        tools:text="See our plans"
+        />
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/current_plan_cta_flow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_normal"
+        android:layout_marginBottom="@dimen/spacing_small"
+        app:constraint_referenced_ids="current_plan_secondary_cta,current_plan_primary_cta"
+        app:flow_horizontalBias="1"
+        app:flow_horizontalGap="@dimen/spacing_normal"
+        app:flow_horizontalStyle="packed"
+        app:flow_wrapMode="chain"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_max="@dimen/size_480dp"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

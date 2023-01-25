@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="password_strength_very_low">Extremely weak</string>
+    <string name="password_strength_low">Very weak</string>
+    <string name="password_strength_medium">Not so strong</string>
+    <string name="password_strength_safe">Strong</string>
+    <string name="password_strength_high">Super strong</string>
+
+    <string name="password_strength_description_very_low">Let’s make this password stronger.</string>
+    <string name="password_strength_description_low">Good, but we can make it stronger.</string>
+    <string name="password_strength_description_medium">It’s just short of great.</string>
+    <string name="password_strength_description_safe">Now that’s a strong password!</string>
+    <string name="password_strength_description_high">Ultimate password strength reached!</string>
+
+    <string name="your_password_strength_is_very_low">Nice start</string>
+    <string name="your_password_strength_is_low">Keep it up</string>
+    <string name="your_password_strength_is_medium">Good progress</string>
+    <string name="your_password_strength_is_safe">Loving this</string>
+    <string name="your_password_strength_is_high">Boom! Now that’s strong</string>
+    <string name="password_creation_not_strong_enough">Your password is not strong enough</string>
+
+    <string name="zxcvbn_warning_straight_rows_of_keys_are_easy_to_guess">Using straight rows of keys like ¨\"QWERTY\" makes your password weak.</string>
+    <string name="zxcvbn_warning_short_keyboard_patterns_are_easy_to_guess">Using short keyboard patterns like \"QWERFV\" makes your password weak.</string>
+    <string name="zxcvbn_warning_repeats_like_abcabcabc_are_only_slightly_harder_to_guess_than_abc">Using letter patterns like \"tujtujtuj\" makes your password weak.</string>
+    <string name="zxcvbn_warning_repeats_like_aaa_are_easy_to_guess">Repeating the same letter like \"gggg\" makes your password weak.</string>
+    <string name="zxcvbn_warning_sequences_like_abc_or_6543_are_easy_to_guess">Using sequences like \"abc\" and \"6543\" makes your password weak.</string>
+    <string name="zxcvbn_warning_recent_years_are_easy_to_guess">Using recent years makes your password weak.</string>
+    <string name="zxcvbn_warning_dates_are_often_easy_to_guess">Using dates makes your password weak.</string>
+    <string name="zxcvbn_warning_this_is_a_top_10_common_password">This is one of the 10 most common passwords.</string>
+    <string name="zxcvbn_warning_this_is_a_top_100_common_password">This is one of the 100 most common passwords.</string>
+    <string name="zxcvbn_warning_this_is_a_very_common_password">This is a very common password.</string>
+    <string name="zxcvbn_warning_this_is_similar_to_a_commonly_used_password">This is similar to a common password.</string>
+    <string name="zxcvbn_warning_a_word_by_itself_is_easy_to_guess">Using only one word makes your password weak.</string>
+    <string name="zxcvbn_warning_names_and_surnames_by_themselves_are_easy_to_guess">Using only a name makes your password weak.</string>
+    <string name="zxcvbn_warning_common_names_and_surnames_are_easy_to_guess">Using popular names or last names makes your password weak.</string>
+
+    <string name="zxcvbn_suggestion_use_a_few_words_avoid_common_phrases">Use multiple words and avoid common phrases like \"atthebeach.\"</string>
+    <string name="zxcvbn_suggestion_no_need_for_symbols_digits_or_uppercase_letters">Symbols, single digits, and uppercase letters do not make your password strong.</string>
+    <string name="zxcvbn_suggestion_add_another_word_or_two_uncommon_words_are_better">Add another word or two. Uncommon words make your password strong.</string>
+    <string name="zxcvbn_suggestion_use_a_longer_keyboard_pattern_with_more_turns">Use a longer and more complex keyboard pattern.</string>
+    <string name="zxcvbn_suggestion_avoid_repeated_words_and_characters">Repeating words and letters makes your password weak.</string>
+    <string name="zxcvbn_suggestion_avoid_sequences">Avoid sequences like \"abc\" and \"6543.\"</string>
+    <string name="zxcvbn_suggestion_avoid_recent_years">Avoid years of birth.</string>
+    <string name="zxcvbn_suggestion_avoid_years_that_are_associated_with_you">Avoid years that are important to you.</string>
+    <string name="zxcvbn_suggestion_avoid_dates_and_years_that_are_associated_with_you">Avoid dates and years that are important to you.</string>
+    <string name="zxcvbn_suggestion_capitalization_doesnt_help_very_much">Capitalizing letters does not make your password strong.</string>
+    <string name="zxcvbn_suggestion_all_uppercase_is_almost_as_easy_to_guess_as_all_lowercase">Capitalizing letters does not make your password strong.</string>
+    <string name="zxcvbn_suggestion_reversed_words_arent_much_harder_to_guess">Words typed backwards like \"drowssaP\" do not make your password strong.</string>
+    <string name="zxcvbn_suggestion_predictable_substitutions_like_at_instead_of_a_dont_help_very_much">Using substitutions like \"@\" instead of \"a\" does not make your password strong.</string>
+</resources>

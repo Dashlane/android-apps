@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_screen_title_introduction">Access your info from a notification</string>
+    <string name="discovery_screen_body_introduction">After you copy something, you can access the rest of the info from your notification panel — and avoid coming back to Dashlane.</string>
+
+    <string name="discovery_screen_title_reminder">Swipe down to access your info</string>
+    <string name="discovery_screen_body_reminder">After you copy something, you can access the rest of the info from your notification panel — and avoid coming back to Dashlane.</string>
+
+    <string name="discovery_screen_button">Ok, got it</string>
+</resources>

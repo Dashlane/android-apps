@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_create_account_title">Add login</string>
+    <string name="autofill_create_account_save">Save</string>
+    <string name="autofill_create_account_website">Website</string>
+    <string name="autofill_create_account_email">Email</string>
+</resources>

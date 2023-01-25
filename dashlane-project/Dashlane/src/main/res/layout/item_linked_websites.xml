@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    >
+
+    <LinearLayout
+        android:id="@+id/editable_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        >
+
+        <EditText
+            android:id="@+id/website_url"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/multi_domain_credentials_hint"
+            android:imeOptions="actionNext"
+            android:inputType="textUri"
+            android:minHeight="@dimen/minimum_clickable_area_size"
+            />
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/remove_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/and_accessibility_delete_website_url"
+            android:src="@drawable/ic_trash"
+            app:buttonLayout="iconOnly"
+            app:intensity="supershy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:mood="brand"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/view_only_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible"
+        >
+
+        <ImageView
+            android:id="@+id/website_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="4dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/ic_web"
+            app:tint="@color/text_neutral_standard"
+            />
+
+        <ImageView
+            android:id="@+id/website_icon_image"
+            android:layout_width="48dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="4dp"
+            android:visibility="gone"
+            />
+
+        <TextView
+            android:id="@+id/website_url_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textAppearance="?textAppearanceBody1"
+            android:textColor="@color/text_neutral_catchy"
+            tools:text="amazon.com"
+            />
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/open_website_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/and_accessibility_open_linked_website"
+            android:src="@drawable/ic_action_open"
+            android:text="@string/login_alt"
+            app:buttonLayout="iconOnly"
+            app:intensity="supershy"
+            app:mood="brand"
+            />
+    </LinearLayout>
+</FrameLayout>

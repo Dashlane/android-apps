@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lifetime_plan">Free of charge, for life.</string>
+    <plurals name="plan_days_left">
+        <item quantity="one">%1$s day left</item>
+        <item quantity="other">%1$s days left</item>
+    </plurals>
+    <string name="plan_expires_on">Expires on %1$s</string>
+    <string name="plan_renews_on">Renews on %1$s</string>
+    <string name="plan_renews_monthly">Renews monthly</string>
+    <string name="plan_renews_yearly">Renews annually</string>
+    <string name="plan_renews_generic">Renews automatically</string>
+</resources>

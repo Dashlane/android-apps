@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="sharing_tag_member_login" type="id"></item>
+    <item name="sharing_tag_member_group" type="id"></item>
+
+    <item name="sharing_tag_shared_item_group_uid" type="id"></item>
+    <item name="sharing_tag_shared_item_item_uid" type="id"></item>
+    <item name="sharing_tag_shared_member_email" type="id"></item>
+
+    <item name="contact_picker_contact_tag" type="id"></item>
+    <item name="contact_adapter_sharing_email_tag" type="id"></item>
+    <item name="view_holder_pattern_tag" type="id"></item>
+    <item name="contact_adapter_view_holder" type="id"></item>
+    <item name="popular_website_adapter_view_url" type="id"></item>
+</resources>

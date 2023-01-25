@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:name="com.dashlane.ui.activities.fragments.recentitems.RecentItemsRecyclerFragment"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dashlane="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.activities.HomeActivity">
+
+    <com.dashlane.ui.widgets.view.MultiColumnRecyclerView
+        android:id="@+id/dashboard_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:clipToPadding="false"
+        android:focusable="true"
+        dashlane:fastScrollEnabled="true"
+        dashlane:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb_selector"
+        dashlane:fastScrollHorizontalTrackDrawable="@drawable/fastscroll_line_selector"
+        dashlane:fastScrollVerticalThumbDrawable="@drawable/fastscroll_thumb_selector"
+        dashlane:fastScrollVerticalTrackDrawable="@drawable/fastscroll_line_selector"
+        />
+
+    <ProgressBar
+        android:id="@+id/data_list_loading"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="visible"/>
+</FrameLayout>

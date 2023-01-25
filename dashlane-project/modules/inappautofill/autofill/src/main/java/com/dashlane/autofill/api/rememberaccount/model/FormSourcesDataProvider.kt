@@ -1,0 +1,13 @@
+package com.dashlane.autofill.api.rememberaccount.model
+
+import com.dashlane.autofill.formdetector.model.AutoFillFormSource
+
+
+
+interface FormSourcesDataProvider {
+    suspend fun link(formSource: AutoFillFormSource, authentifiantId: String)
+    suspend fun unlink(formSource: AutoFillFormSource, authentifiantId: String)
+    suspend fun isLinked(formSource: AutoFillFormSource, authentifiantId: String): Boolean
+    suspend fun getAllLinkedFormSources(): List<RememberedFormSource>
+    suspend fun getAllLinkedFormSourceAuthentifiantIds(autofillFormSource: AutoFillFormSource): List<String>
+}

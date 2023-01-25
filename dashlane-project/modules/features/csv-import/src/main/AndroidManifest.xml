@@ -1,0 +1,39 @@
+<manifest package="com.dashlane.csvimport"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".CsvFileImportIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal"
+            />
+
+        <activity
+            android:name=".OnboardingChromeImportActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Dashlane.Modal"
+            />
+
+        <activity
+            android:name=".CsvImportActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar"
+            />
+
+        <activity
+            android:name=".CsvSendActionHandler"
+            android:label="@string/import_chooser_label"
+            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/csv"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".CustomCsvImportActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar"
+            />
+    </application>
+</manifest>

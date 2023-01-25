@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vault_fab_add_item">Add item</string>
+    <string name="vault_fab_add_password">Add login</string>
+    <string name="vault_fab_add_secure_note">Add Secure Note</string>
+    <string name="vault_fab_add_payment">Add payment</string>
+    <string name="vault_fab_add_personal_info">Add personal info</string>
+    <string name="vault_fab_add_id">Add ID</string>
+    <string name="vault_header_suggested">Suggested</string>
+    <string name="vault_header_most_recent">Most recent</string>
+    <string name="vault_search_hint">Find an item, tool, or setting</string>
+    <string name="vault_action_bar_title">Home</string>
+
+    <string name="vault_filter_all_items">All items</string>
+    <string name="vault_filter_passwords">Logins</string>
+    <string name="vault_filter_secure_notes">Secure Notes</string>
+    <string name="vault_filter_payments">Payments</string>
+    <string name="vault_filter_personal_info">Personal info</string>
+    <string name="vault_filter_ids">IDs</string>
+
+    <string name="vault_offline_sync_error_message">You’re offline. We need an active internet connection to refresh and sync your vault.</string>
+    <string name="vault_unknown_sync_error_message">We had an issue refreshing your vault. Please try again later.</string>
+</resources>

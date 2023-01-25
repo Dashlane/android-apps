@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true">
+
+    <Button
+        android:id="@+id/authenticator_suggestions_setup_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:text="@string/authenticator_dashboard_setup_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/authenticator_suggestions_container" />
+
+    <LinearLayout
+        android:id="@+id/authenticator_suggestions_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:background="@drawable/authenticator_list_background"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/authenticator_suggestions_title">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/authenticator_suggestions_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_small"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:nestedScrollingEnabled="false"
+            tools:itemCount="5"
+            tools:listitem="@layout/authenticator_credential_item" />
+
+        <Button
+            android:id="@+id/authenticator_suggestions_see_all"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/authenticator_see_all" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/authenticator_suggestions_title"
+        style="?textAppearanceHeadline1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/authenticator_suggestions_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_sms_otp_dialog_error_title">We haven’t found anything…</string>
+    <string name="autofill_sms_otp_dialog_error_detail_timeout">It might be slow or hasn’t been sent. Please try and resend the code, or fill the code manually.</string>
+    <string name="autofill_sms_otp_dialog_success_title">We retrieved this SMS code:</string>
+    <string name="autofill_sms_otp_dialog_waiting_title">Just a moment. We\'re waiting for your SMS code.</string>
+    <string name="autofill_sms_otp_dialog_cancel_button">Cancel</string>
+    <string name="autofill_sms_otp_dialog_autofill_button">Autofill</string>
+
+    <string name="autofill_view_all_accounts_search_sheet_title">Search Dashlane</string>
+    <string name="autofill_view_all_accounts_search_sheet_terms_field_hint">Search Dashlane</string>
+
+    <string name="browser_logout_title">You\'re logged out of Dashlane</string>
+
+    <string name="autofill_do_not_show_again_choose_pause_title" translatable="false">@string/autofill_do_not_show_again_choose_pause_title_portrait</string>
+    <string name="autofill_do_not_show_again_choose_pause_inside_dashlane_title" translatable="false">@string/autofill_do_not_show_again_choose_pause_title_inside_dashlane_landscape</string>
+    <string name="autofill_do_not_show_again_choose_pause_title_portrait">Pause Dashlane Autofill for:\n%1$s</string>
+    <string name="autofill_do_not_show_again_choose_pause_title_landscape">Pause Dashlane Autofill for: %1$s</string>
+    <string name="autofill_do_not_show_again_choose_pause_title_inside_dashlane_landscape">Pause Autofill on %1$s</string>
+    <string name="autofill_do_not_show_again_paused_permanent_application_message">Autofill is now paused on this application. To resume it, go to Dashlane Settings.</string>
+    <string name="autofill_do_not_show_again_paused_permanent_website_message">Autofill is now paused on this site. To resume it, go to Dashlane Settings.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_hour_application_message">Autofill is paused for 1 hour on this application.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_hour_website_message">Autofill is paused for 1 hour on this site.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_day_application_message">Autofill is paused for 1 day on this application.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_day_website_message">Autofill is paused for 1 day on this site.</string>
+    <string name="autofill_do_not_show_again_pause_error_message">Something went wrong. Please try pausing Dashlane Autofill again.</string>
+    <string name="autofill_do_not_show_again_pause_for_one_hour">For 1 hour</string>
+    <string name="autofill_do_not_show_again_pause_for_one_day">For 1 day</string>
+    <string name="autofill_do_not_show_again_pause_permanent">Until I turn it back on</string>
+
+    <string name="autofill_totp_notification_first_display_title">Your code for \"%1$s\" is ready</string>
+    <string name="autofill_totp_notification_first_display_title_no_credential_name">Your code is ready</string>
+    <string name="autofill_totp_notification_first_display_text">Code: %1$s.\nCopy and paste it from here</string>
+    <string name="autofill_totp_notification_update_new_code_title">Here\'s your new code</string>
+    <string name="autofill_totp_notification_update_new_code_text">Code: %1$s.\nCopy and paste it from here</string>
+    <string name="autofill_totp_notification_code_copied_title">Your code is in your Clipboard</string>
+    <string name="autofill_totp_notification_code_copied_text">Copied code: %1$s.\nYou can paste it from here</string>
+    <string name="autofill_totp_notification_safeguard_code_title">Your last code expired</string>
+    <string name="autofill_totp_notification_safeguard_code_text">New code: %1$s.\nCopy and paste this new one</string>
+    <string name="autofill_totp_notification_dismiss_action">Close</string>
+    <string name="autofill_totp_notification_copy_action">Copy</string>
+    <string name="autofill_totp_automatically_copy">2FA token copied</string>
+
+    <string name="autofill_form_source_application">Application</string>
+    <string name="autofill_form_source_website">Website</string>
+</resources>

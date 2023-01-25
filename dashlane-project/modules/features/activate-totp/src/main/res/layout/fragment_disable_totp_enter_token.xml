@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:padding="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/disable_totp_enter_token_title"
+                android:textAppearance="?textAppearanceHeadline1"
+                android:textColor="@color/text_neutral_catchy"
+                android:labelFor="@+id/token"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/token_layout"
+                android:layout_width="match_parent"
+                android:layout_marginTop="32dp"
+                android:layout_height="wrap_content"
+                app:errorEnabled="false">
+
+                <EditText
+                    android:id="@+id/token"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_mono_regular"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:letterSpacing="1.0"
+                    android:lines="1"
+                    android:maxLength="6"
+                    android:text="000000"
+                    android:textColor="@color/text_neutral_catchy"
+                    android:textSize="24sp"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/error"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/disable_totp_enter_token_error"
+                    android:textAppearance="?textAppearanceCaption"
+                    android:textColor="@color/text_danger_quiet"
+                    android:visibility="invisible" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/disable_totp_enter_token_info"
+                android:textAppearance="?textAppearanceBody2"
+                android:textColor="@color/text_neutral_standard" />
+
+            <Button
+                android:id="@+id/link"
+                android:minWidth="0dp"
+                android:paddingLeft="0dp"
+                android:paddingRight="0dp"
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/disable_totp_enter_token_info_link" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <com.dashlane.ui.activities.intro.IntroButtonBarLayout
+        android:id="@+id/buttons_layout"
+        style="?buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|end"
+        android:layoutDirection="locale"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <Button
+            android:id="@+id/button_positive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:enabled="false"
+            android:text="@string/disable_totp_enter_token_cta"
+            tools:ignore="ButtonStyle" />
+
+    </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+</LinearLayout>

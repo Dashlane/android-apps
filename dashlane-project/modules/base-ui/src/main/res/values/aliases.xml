@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dashlane_notification">@color/brand_mid_green_00</color>
+    <color name="ic_launcher_background">@color/brand_dash_green_00</color>
+</resources>

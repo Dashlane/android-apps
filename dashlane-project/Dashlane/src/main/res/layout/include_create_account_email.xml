@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/spacing_big"
+    android:paddingRight="@dimen/spacing_big"
+    tools:context=".createaccount.CreateAccountActivity"
+    >
+
+    <TextView
+        android:id="@+id/create_account_email_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:text="@string/create_account_email_title"
+        android:textAppearance="?textAppearanceHeadline2"
+        android:textColor="@color/text_inverse_catchy"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/create_account_email_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:text="@string/create_account_email_subtitle"
+        android:textAppearance="?textAppearanceBody1"
+        android:textColor="@color/text_inverse_standard"
+        app:layout_constraintTop_toBottomOf="@id/create_account_email_title"
+        />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/view_create_account_email_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/email_address_login_screen"
+        app:errorEnabled="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/create_account_email_subtitle"
+        app:layout_constraintVertical_chainStyle="packed"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/view_create_account_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:inputType="textEmailAddress"
+            android:lines="1"
+            android:minHeight="@dimen/minimum_clickable_area_size"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    
+    <TextView
+        android:id="@+id/installation_id_debug"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:textColor="@color/text_inverse_standard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="multi_domain_credentials_add_website">Link a website</string>
+    
+    <string name="multi_domain_credentials_add_service">Link a service</string>
+    <string name="multi_domain_credentials_title">Websites</string>
+    <string name="multi_domain_credentials_added_by_you">Added by you</string>
+    <string name="multi_domain_credentials_hint">Web address</string>
+    <string name="multi_domain_credentials_automatically_added">Added by Dashlane</string>
+    <string name="multi_domain_credentials_main_website">Primary</string>
+    <string name="multi_domain_credentials_update_validation">Changes saved</string>
+    <string name="multi_domain_credentials_duplicate">Your %1$s login already uses this website. If the usernames match, this could be a duplicate login.</string>
+    <string name="multi_domain_credentials_duplicate_title">Are you sure you want to add %1$s?</string>
+    <string name="multi_domain_credentials_duplicate_positive">Add website</string>
+    <string name="multi_domain_credentials_cta_done">Done</string>
+    <plurals name="multi_domain_credentials_autofill_plurals">
+        <item quantity="one">Autofills on %1$d other service</item>
+        <item quantity="other">Autofills on %1$d other services</item>
+    </plurals>
+    
+    <string name="linked_services_websites_title">Websites</string>
+    
+    <string name="linked_services_apps_title">Apps</string>
+    
+    <string name="linked_services_apps_not_installed">Not installed</string>
+    
+    <string name="linked_services_empty_state_title">No linked apps yet</string>
+    
+    <string name="linked_services_empty_state_description">You can link apps that use the same login details to this primary item. Select %1$s the next time you autofill your login details.</string>
+</resources>

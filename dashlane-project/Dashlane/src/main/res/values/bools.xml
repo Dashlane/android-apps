@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <bool name="masterpassword_section4_tips_display">true</bool>
+    <bool name="is_accessibility_supported">true</bool>
+    
+
+    <bool name="is_no_op_accessibility_supported">false</bool>
+    
+    <bool name="vpn_process_enabled" tools:ignore="UnusedResources">false</bool>
+</resources>

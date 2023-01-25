@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dashlane="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bottom_sheet_half_round_rectangle"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/spacing_normal"
+    android:paddingRight="@dimen/spacing_normal"
+    android:theme="@style/Theme.Dashlane"
+    tools:ignore="Overdraw"
+    >
+
+    <ImageView
+        android:id="@+id/handle"
+        android:layout_width="52dp"
+        android:layout_height="5dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="11dp"
+        android:src="@drawable/handle_round_rectangle_shape"
+        dashlane:layout_constraintBottom_toTopOf="@+id/title_layout"
+        dashlane:layout_constraintHorizontal_bias="0.5"
+        dashlane:layout_constraintLeft_toLeftOf="parent"
+        dashlane:layout_constraintRight_toRightOf="parent"
+        dashlane:layout_constraintTop_toTopOf="parent"
+        />
+
+    <LinearLayout
+        android:id="@+id/title_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        dashlane:layout_constraintBottom_toTopOf="@+id/scrollView"
+        dashlane:layout_constraintEnd_toEndOf="parent"
+        dashlane:layout_constraintHorizontal_bias="0.5"
+        dashlane:layout_constraintStart_toStartOf="parent"
+        dashlane:layout_constraintTop_toBottomOf="@+id/handle"
+        >
+
+        <ImageView
+            android:id="@+id/dashlogo"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/day_night_logo"
+            dashlane:tint="@color/text_neutral_catchy"
+            />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:textColor="@color/text_neutral_catchy"
+            tools:text="@string/autofill_empty_website_title"
+            />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/spacing_huge"
+        dashlane:layout_constraintEnd_toEndOf="parent"
+        dashlane:layout_constraintStart_toStartOf="parent"
+        dashlane:layout_constraintTop_toBottomOf="@+id/title_layout"
+        >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/spacing_big"
+            >
+
+            <TextView
+                android:id="@+id/description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_huge"
+                android:text="@string/autofill_empty_website_description"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                dashlane:layout_constraintEnd_toEndOf="parent"
+                dashlane:layout_constraintHorizontal_bias="0.0"
+                dashlane:layout_constraintStart_toStartOf="parent"
+                dashlane:layout_constraintTop_toTopOf="parent"
+                />
+
+
+            <TextView
+                android:id="@+id/email_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_huge"
+                android:text="@string/autofill_empty_website_email_label"
+                android:textAppearance="@style/TextAppearance.Dashlane.Caption"
+                android:textColor="@color/text_neutral_quiet"
+                dashlane:layout_constraintStart_toStartOf="parent"
+                dashlane:layout_constraintTop_toBottomOf="@+id/description"
+                tools:text="Email"
+                />
+
+            <TextView
+                android:id="@+id/email"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_extra_small"
+                android:textAppearance="@style/TextAppearance.Dashlane.Body1"
+                android:textColor="@color/text_neutral_quiet"
+                dashlane:layout_constraintStart_toStartOf="parent"
+                dashlane:layout_constraintTop_toBottomOf="@+id/email_label"
+                tools:text="randomemail@provider.com"
+                />
+
+            <TextView
+                android:id="@+id/name_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/autofill_empty_website_name_label"
+                android:textAppearance="@style/TextAppearance.Dashlane.Caption"
+                android:textColor="@color/text_neutral_quiet"
+                dashlane:layout_constraintStart_toStartOf="parent"
+                dashlane:layout_constraintTop_toBottomOf="@+id/email"
+                tools:text="Name"
+                />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_extra_small"
+                android:textAppearance="@style/TextAppearance.Dashlane.Body1"
+                android:textColor="@color/text_neutral_quiet"
+                dashlane:layout_constraintStart_toStartOf="parent"
+                dashlane:layout_constraintTop_toBottomOf="@+id/name_label"
+                tools:text="My awesome Account" />
+
+            <TextView
+                android:id="@+id/website_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/autofill_empty_website_tag_website_label"
+                android:textAppearance="@style/TextAppearance.Dashlane.Caption"
+                android:textColor="@color/text_neutral_catchy"
+                dashlane:layout_constraintStart_toStartOf="parent"
+                dashlane:layout_constraintTop_toBottomOf="@+id/name" />
+
+            <com.dashlane.design.component.compat.view.BadgeView
+                android:id="@+id/tag_new"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_extra_small"
+                android:text="@string/autofill_empty_website_tag_new"
+                dashlane:layout_constraintBottom_toBottomOf="@+id/website_suggestion"
+                dashlane:layout_constraintStart_toEndOf="@+id/website_suggestion"
+                dashlane:layout_constraintTop_toTopOf="@+id/website_suggestion" />
+
+            <TextView
+                android:id="@+id/website_suggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_extra_small"
+                android:textAppearance="@style/TextAppearance.Dashlane.Body1"
+                android:textColor="@color/text_neutral_catchy"
+                dashlane:layout_constraintBottom_toBottomOf="parent"
+                dashlane:layout_constraintStart_toStartOf="parent"
+                dashlane:layout_constraintTop_toBottomOf="@+id/website_label"
+                tools:text="amazon.co.uk"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end|center_vertical"
+        android:orientation="horizontal"
+        dashlane:layout_constraintBottom_toBottomOf="parent"
+        dashlane:layout_constraintEnd_toEndOf="parent"
+        dashlane:layout_constraintHorizontal_bias="0.5"
+        dashlane:layout_constraintStart_toStartOf="parent"
+        >
+
+        <Button
+            android:id="@+id/negative_cta"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:text="@string/autofill_empty_website_cta_negative"
+            />
+
+        <Button
+            android:id="@+id/positive_cta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/autofill_empty_website_cta_positive"
+            tools:ignore="ButtonStyle" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

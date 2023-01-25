@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_disable_totp"
+    app:startDestination="@+id/nav_disable_totp_enter_token">
+
+    <fragment
+        android:id="@+id/nav_disable_totp_enter_token"
+        android:name="com.dashlane.disabletotp.token.DisableTotpEnterTokenFragment"
+        tools:layout="@layout/fragment_disable_totp_enter_token">
+
+        <action
+            android:id="@+id/go_to_deactivation"
+            app:destination="@id/nav_disable_totp_deactivation" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_disable_totp_deactivation"
+        android:name="com.dashlane.disabletotp.deactivation.DisableTotpDeactivationFragment"
+        tools:layout="@layout/activate_totp_loading">
+
+        <argument
+            android:name="otp"
+            app:argType="string"
+            app:nullable="false" />
+
+        <argument
+            android:name="isBackupCode"
+            app:argType="boolean"
+            app:nullable="false" />
+
+        <action
+            android:id="@+id/go_to_deactivation_error"
+            app:destination="@id/nav_disable_totp_deactivation_error"
+            app:popUpTo="@id/nav_disable_totp_enter_token"
+            app:popUpToInclusive="false" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_disable_totp_deactivation_error"
+        android:name="com.dashlane.disabletotp.DisableTotpDeactivationErrorFragment"
+        tools:layout="@layout/activate_totp_error" />
+</navigation>

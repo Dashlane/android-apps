@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="file_no_name">Unnamed file</string>
+    <string name="attachments_view_section_title">Attached Files</string>
+    <string name="attachment_item_description_date_size">%1$s - %2$s</string>
+    <string name="attachments_activity_title">Attached Files</string>
+    <string name="upload_file_dialog_title">Uploading file...</string>
+    <string name="retrieve_file_dialog_title">Uploading file...</string>
+    <string name="retrieve_file_dialog_message">Fetching %1$s from the app</string>
+    <string name="download_file_access_error">You do not have the rights to access this file.</string>
+    <string name="download_file_generic_error">Could not download %1$s. Please try again.</string>
+    <string name="downloading_file_progress">Downloading %1$s...</string>
+    <string name="upload_file_no_space">You cannot upload this file because it exceeds your storage allowance.</string>
+    <string name="upload_file_error">Something went wrong. Please check your connection and try again.</string>
+    <string name="delete_file_confirm_title">Delete file permanently</string>
+    <string name="delete_file_confirm">You will not be able to recover %1$s after deleting it. If you exported a copy to your Downloads folder, it will remain there until you delete it manually.</string>
+    <string name="delete_files_confirm">If you delete these %1$s files, they cannot be recovered.</string>
+    <string name="delete_file_error">%1$s was not deleted. Please check your connection and try again.</string>
+    <string name="file_version_error">Please update your Dashlane app on the Play Store to upload this file format.</string>
+    <string name="file_open_error">Unable to find an application to open %1$s.</string>
+    <string name="file_type_error_upload">This file type is not supported.</string>
+    <string name="file_type_error_download">You cannot download this file as it is not supported by your Dashlane Android app.</string>
+    <string name="file_too_big_error">This file is too large. The maximum file size is %1$s</string>
+    <string name="open_file_action">View</string>
+    <string name="export_file_action">Save a copy to Download folder</string>
+    <string name="delete_file_action">Delete</string>
+    <string name="export_file_confirm">%1$s will no longer be secured by Dashlane, and other apps will have access to it if you save a copy to the Download folder.</string>
+    <string name="export_file_confirm_title">Save a copy to Download folder</string>
+    <string name="export_public_folder_done">File exported to Download folder.</string>
+    <string name="open_public_folder">Open Downloads</string>
+    <string name="decryption_error">We couldn\'t decrypt this file. Please contact Support for help.</string>
+    <string name="export_error">We couldn\'t save this file to storage. Please contact Support for help.</string>
+    <string name="storage_error">Something went wrong. We could\'t find a valid storage to save the file.</string>
+
+    <plurals name="attachment_quantity">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <plurals name="file_selected_quantity">
+        <item quantity="one">%1$d file selected</item>
+        <item quantity="other">%1$d files selected</item>
+    </plurals>
+</resources>

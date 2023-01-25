@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="most_used_password_autologin_intro_title">Activate Dashlane Autofill</string>
+    <string name="most_used_password_autologin_intro_text">Log in to your accounts with a tap—it\'s that easy!</string>
+    <string name="most_used_password_autologin_intro_negative_button">Skip</string>
+    <string name="most_used_password_autologin_positive_button">Activate Autofill</string>
+</resources>

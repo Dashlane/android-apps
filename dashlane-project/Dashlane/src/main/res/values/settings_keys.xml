@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="settings_sync_now" type="id"></item>
+    <item name="settings_premium" type="id"></item>
+
+    <item name="settings_about_version" type="id"></item>
+    <item name="settings_about_version_code" type="id"></item>
+    <item name="settings_debug_link" type="id"></item>
+    <item name="settings_send_love" type="id"></item>
+    <item name="settings_send_feedback" type="id"></item>
+    <item name="settings_invite_your_friend" type="id"></item>
+
+    <item name="settings_browser_default" type="id"></item>
+    <item name="settings_browser_icon" type="id"></item>
+
+    <item name="settings_labs" type="id"></item>
+
+    <item name="settings_logout" type="id"></item>
+
+</resources>

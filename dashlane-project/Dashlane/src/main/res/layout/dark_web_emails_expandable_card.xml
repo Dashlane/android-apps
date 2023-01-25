@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.dashlane.ui.widgets.view.ExpandableCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dark_web_monitored_emails"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:foreground="?selectableItemBackground"
+    app:arrow="@id/collapse_arrow"
+    app:expandableLayout="@layout/item_dark_web_email_recycler"
+    app:headerLayout="@layout/header_dark_web_monitored_emails"
+    app:layout_scrollFlags="scroll"
+    />

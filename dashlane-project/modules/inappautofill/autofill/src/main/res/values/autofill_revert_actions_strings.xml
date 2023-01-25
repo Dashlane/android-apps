@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_revert_actions_title">Undo</string>
+    <string name="autofill_revert_actions_pause_header">Pause</string>
+    <string name="autofill_revert_actions_unlink_account_header">Accounts linked via manual Autofill</string>
+</resources>

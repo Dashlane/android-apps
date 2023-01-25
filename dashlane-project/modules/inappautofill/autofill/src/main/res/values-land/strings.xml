@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_do_not_show_again_choose_pause_title" translatable="false">@string/autofill_do_not_show_again_choose_pause_title_landscape</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sso_contact_administrator_message">Please contact your company Admin to get access to this account creation.</string>
+    <string name="sso_complete_login_message">Logging you in…</string>
+    <string name="sso_lock_topic_default">Unlock with SSO</string>
+    <string name="sso_lock_use_sso">Use SSO</string>
+    <string name="sso_error_not_correct">Invalid SSO. Please try again.</string>
+
+    
+    <string name="sso_member_migration_intro_title">Your company has enabled single sign-on (SSO)</string>
+    <string name="sso_member_migration_intro_description">Authenticate securely with multiple websites by logging in just once with your company SSO login.\n\nClick below to log in with SSO while we\'ll do all the setup work.</string>
+    <string name="sso_member_migration_intro_link">Learn more about SSO.</string>
+    <string name="sso_member_migration_intro_info">Note: Your organization has enabled SSO for Dashlane. While typically prohibited by internal policies, your IT administrator may be able to access the information you store in Dashlane, including personal logins. Dashlane has no control over other organization\'s policies.</string>
+    <string name="sso_member_migration_intro_cta_positive">Log in with SSO</string>
+    <string name="sso_member_migration_intro_cta_negative">Cancel</string>
+    <string name="sso_member_migration_message">Encrypting your data</string>
+
+    
+    <string name="master_password_user_migration_warning_title">Create a Master Password</string>
+    <string name="master_password_user_migration_warning_message">Your account rights have changed. Create a strong Master Password to log in to Dashlane going forward.</string>
+    <string name="master_password_user_migration_warning_cta_positive">Create Master Password</string>
+    <string name="master_password_user_migration_warning_cta_negative">Log out</string>
+</resources>

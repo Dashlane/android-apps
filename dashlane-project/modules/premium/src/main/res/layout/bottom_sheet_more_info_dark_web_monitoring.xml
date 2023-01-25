@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/spacing_big"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <TextView
+        android:id="@+id/benefit_more_info_dark_web_monitoring_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/current_benefit_more_info_dark_web_monitoring_title"
+        android:textAppearance="?textAppearanceHeadline2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/benefit_more_info_dark_web_monitoring_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_extra_small"
+        android:text="@string/current_benefit_more_info_dark_web_monitoring_text"
+        android:textAppearance="?textAppearanceSubtitle1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/benefit_more_info_dark_web_monitoring_title"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

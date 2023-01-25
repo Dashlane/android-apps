@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_unlink_account_error_message">We couldn\'t remove that login from this list. Please try again.</string>
+    <string name="autofill_unlinkaccount_unlink_message">We’ll no longer autofill that login on %1$s</string>
+    <string name="autofill_unlink_account_items_empty_description">We\'ll display a list of logins you\'ve manually autofilled on this website.</string>
+</resources>

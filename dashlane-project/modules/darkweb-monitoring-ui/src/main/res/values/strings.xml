@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="darkweb_setup_button_cancel">CANCEL</string>
+    <string name="darkweb_setup_button_next">CONFIRM</string>
+    <string name="darkweb_setup_button_close">CLOSE</string>
+
+    
+    <string name="darkweb_setup_intro_title">Start a dark web scan</string>
+    <string name="darkweb_setup_intro_body">Dashlane will scan the web for leaked or stolen personal data associated with any of your email addresses. This email will be automatically monitored from now on.</string>
+
+    
+    <string name="darkweb_setup_mail_title">Enter the email you\'d like to scan and monitor</string>
+    <string name="darkweb_setup_mail_hint">Enter email address</string>
+    <string name="darkweb_setup_mail_empty">You need to enter an email address to proceed.</string>
+    <string name="darkweb_setup_mail_invalid">That email format doesn\'t look right. Please check it and try again.</string>
+    <string name="darkweb_setup_mail_error">Oops! Something went wrong. Please try signing up again.</string>
+    <string name="darkweb_setup_mail_limit_reached">You can scan and monitor up to 5 email addresses. If you\'d like to add a new email, please remove an existing email address first.</string>
+
+    
+    <string name="darkweb_setup_result_title">Verify your email</string>
+    <string name="darkweb_setup_result_body_no_color">We’ve sent an activation link to &lt;br /&gt; &lt;b&gt; %1$s &lt;/b&gt; &lt;br /&gt; &lt;br /&gt; Verify this email address within 24 hours to activate Dark Web Monitoring.</string>
+    <string name="darkweb_setup_result_button_open_email_app">Open my email app</string>
+    <string name="darkweb_setup_result_button_email_confirmed">I\'ve confirmed my email</string>
+    
+    <string name="darkweb_notification_new_alert_title">Dark Web Monitoring</string>
+    <string name="darkweb_notification_new_alert_description">We found some of your information where it shouldn\'t be. Take action now.</string>
+    <string name="darkweb_notification_confirm_alert_title">Dark Web Monitoring</string>
+    <plurals name="darkweb_notification_confirm_alert_description">
+        <item quantity="one">You have a new security alerts requiring your attention.</item>
+        <item quantity="other">You have new security alerts requiring your attention.</item>
+    </plurals>
+</resources>

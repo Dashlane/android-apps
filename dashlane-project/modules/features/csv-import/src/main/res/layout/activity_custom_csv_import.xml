@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical"
+    tools:ignore="ButtonStyle"
+    >
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/container_expressive_brand_quiet_idle"
+        android:elevation="4dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/custom_csv_import_title"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:textColor="@color/text_neutral_catchy"
+            android:textSize="18sp"
+            />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/custom_csv_import_vertical_spacing"
+            android:textAppearance="?textAppearanceHeadline6"
+            android:textColor="@color/text_neutral_catchy"
+            android:textSize="@dimen/custom_csv_import_title_text_size"
+            tools:text="facebook"
+            />
+
+        <com.rd.PageIndicatorView
+            android:id="@+id/page_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/custom_csv_import_vertical_spacing"
+            android:layout_marginBottom="16dp"
+            app:piv_animationType="worm"
+            app:piv_autoVisibility="false"
+            app:piv_padding="4dp"
+            app:piv_radius="3dp"
+            app:piv_selectedColor="@color/container_expressive_brand_catchy_idle"
+            app:piv_unselectedColor="@color/container_expressive_neutral_quiet_idle"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            />
+
+        <TextView
+            android:id="@+id/view_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/custom_csv_import_vertical_spacing"
+            android:layout_marginBottom="8dp"
+            android:background="?selectableItemBackground"
+            android:drawableEnd="@drawable/ic_arrow_down_text_secondary_24dp"
+            android:drawablePadding="4dp"
+            android:padding="8dp"
+            android:text="@string/custom_csv_import_toggle_collapsed"
+            android:visibility="gone"
+            />
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1"
+        android:maxWidth="@dimen/csv_import_tablet_max_width"
+        >
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:fillViewport="true"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/button_bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/custom_csv_import_vertical_spacing"
+                    android:text="@string/custom_csv_import_message"
+                    android:textAppearance="?textAppearanceSubtitle1"
+                    android:textColor="@color/text_neutral_quiet"
+                    />
+
+                <include layout="@layout/include_custom_csv_import_buttons" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <com.dashlane.ui.activities.intro.IntroButtonBarLayout
+            android:id="@+id/button_bar"
+            style="?buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/container_agnostic_neutral_supershy"
+            android:elevation="8dp"
+            android:gravity="bottom"
+            android:layoutDirection="locale"
+            android:orientation="horizontal"
+            android:paddingStart="24dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            >
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                />
+
+            <Button
+                android:id="@+id/secondary_cta"
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:lines="1"
+                android:text="@string/custom_csv_import_secondary_cta"
+                />
+
+            <Button
+                android:id="@+id/primary_cta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="@string/custom_csv_import_primary_cta_next"
+                />
+
+        </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

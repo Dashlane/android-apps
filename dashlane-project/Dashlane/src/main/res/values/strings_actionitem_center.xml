@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="talk_to_me_menu_entry_title">Notification Center</string>
+    <string name="talk_to_me_toolbar_title">Notification Center</string>
+    <string name="talk_to_me_empty_description">We\'ll display important notifications that need your attention here.</string>
+    <string name="action_item_activate_fingerprint_title">Set up biometric unlock</string>
+    <string name="action_item_activate_fingerprint_description">Access your account the safe and simple way with biometric authentication.</string>
+    <string name="action_item_activate_pin_title">Unlock Dashlane with a PIN</string>
+    <string name="action_item_activate_pin_description">Access your account the safe and simple way by using a PIN.</string>
+    <string name="action_item_auto_fill_title">Log in to apps instantly</string>
+    <string name="action_item_auto_fill_description">Activate Autofill to log in to apps without typing a password.</string>
+    <string name="action_item_undo_dismiss_description">Item deleted.</string>
+    <string name="action_item_undo_dismiss_cta">Undo</string>
+    <string name="action_item_zero_password_title">Getting started</string>
+    <string name="action_item_zero_password_description">Storing logins is easy. Add your first one now and see.</string>
+    <string name="action_item_chrome_import_title">Retrieve your passwords and login details from Chrome</string>
+    <string name="action_item_chrome_import_description">Import the passwords and login details you have saved in Chrome to Dashlane.</string>
+    <string name="action_item_account_recovery_title">Enable Master Password reset</string>
+    <string name="action_item_account_recovery_description">Make sure you can reset your Master Password if you ever forget it</string>
+    <string name="action_item_free_trial_started_title">Your free trial has started!</string>
+    <string name="action_item_free_trial_started_description">Try out Dashlane Premium for free.</string>
+    <string name="action_item_trial_upgrade_recommendation_title">Enjoying our Premium features?</string>
+    <string name="action_item_trial_upgrade_recommendation_description_essentials">Based on app usage, our Essentials plan looks like a good fit for you. Upgrade today.</string>
+    <string name="action_item_trial_upgrade_recommendation_description_premium">Based on app usage, our Premium plan looks like a good fit for you. Upgrade today.</string>
+    <string name="action_item_trial_upgrade_recommendation_description_family">Based on app usage, our Friends &amp; Family plan looks like a good fit for you. Upgrade today.</string>
+
+    
+    <string name="section_header_see_all_button_with_count">See all (%1$d)</string>
+    <string name="section_header_see_all_button">See all</string>
+
+    <string name="section_header_breach_alert_title_no_count">Security</string>
+    <string name="section_header_sharing_title_no_count">Sharing</string>
+    <string name="section_header_getting_started_title_no_count">Getting Started</string>
+    <string name="section_header_your_account_title_no_count">Your Account</string>
+    <string name="section_header_whats_new_title_no_count">What’s New</string>
+    <string name="section_header_promotions_title_no_count">Promotions</string>
+
+    <string name="action_item_security_alert_title">Security Alert</string>
+    <string name="action_item_security_alert_description">%1$s has been breached and your account may be compromised. Take action to resolve the alert.</string>
+    <string name="action_item_dm_alert_title">Dark Web Alert</string>
+    <string name="action_item_dm_alert_description">We found some of your information on the dark web. Take action to resolve the alert.</string>
+
+    <string name="action_item_sharing_invitation_item_title">Sharing invitation</string>
+    <string name="action_item_sharing_invitation_item_description_password">"%1$s has shared their %2$s login with you. Accept the invitation to use it."</string>
+    <string name="action_item_sharing_invitation_item_description_secure_note">"%1$s has shared a Secure Note with you. Accept the invitation to view it."</string>
+
+    <string name="action_item_sharing_invitation_group_description">%1$s has invited you to a group. Join it to get access to the group’s items.</string>
+</resources>

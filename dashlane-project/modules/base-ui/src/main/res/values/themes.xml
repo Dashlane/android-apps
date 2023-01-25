@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Dashlane" parent="Theme.Dashlane.DayNight">
+        <item name="radioButtonStyle">@style/Widget.Dashlane.RadioButton</item>
+    </style>
+
+    <style name="Theme.Dashlane.Modal" parent="Theme.Dashlane.NoActionBar">
+        <item name="android:statusBarColor">#32000000</item>
+    </style>
+
+    <style name="Theme.Dashlane.LockedOut" parent="Theme.Dashlane.NoActionBar.PrimaryBackground">
+        
+        <item name="colorPrimary">@color/brand_dash_green_00</item>
+        <item name="colorPrimaryDark">#0B2A31</item>
+        <item name="colorOnPrimary">@color/brand_white</item>
+        <item name="colorAccentOnPrimary">@color/text_inverse_catchy</item>
+    </style>
+
+    <style name="Theme.Dashlane.DayNight" parent="Base.Theme.Dashlane">
+        
+        <item name="colorPrimary">@color/brand_mid_green_05</item>
+        <item name="colorPrimaryDark">#AEB8BA</item>
+        <item name="colorSecondary">@color/brand_mid_green_00</item>
+
+        <item name="colorOnPrimary">@color/brand_dash_green_00</item>
+        <item name="colorOnSecondary">@color/brand_white</item>
+    </style>
+
+    <style name="Base.Theme.Dashlane.DayNight" parent="Theme.MaterialComponents.Light">
+        
+        <item name="colorAccentOnPrimary">@color/text_brand_standard</item>
+    </style>
+
+    <style name="Base.Theme.Dashlane" parent="Base.Theme.Dashlane.DayNight">
+        
+        <item name="colorError">@color/text_danger_standard</item>
+
+        <item name="colorOnError">@color/brand_white</item>
+
+        <item name="colorTextCatchy">@color/text_neutral_catchy</item>
+        <item name="colorOnBackground">@color/text_neutral_standard</item>
+        <item name="colorOnBackgroundMedium">@color/text_neutral_quiet</item>
+        <item name="colorOnSurface">@color/text_neutral_standard</item>
+
+
+        <item name="android:textColorHint">?colorOnBackgroundMedium</item>
+
+        <item name="colorSurface">@color/container_agnostic_neutral_supershy</item>
+        <item name="android:textColorLink">@color/text_brand_standard</item>
+
+        <item name="elevationOverlayEnabled">false</item>
+
+        
+        <item name="textAppearanceHeadline1">@style/TextAppearance.Dashlane.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.Dashlane.Headline2</item>
+        <item name="textAppearanceHeadline3">@style/TextAppearance.Dashlane.Headline3</item>
+        <item name="textAppearanceHeadline4">@style/TextAppearance.Dashlane.Headline4</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.Dashlane.Headline5</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.Dashlane.Headline6</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.Dashlane.Subtitle1</item>
+        <item name="textAppearanceSubtitle2">@style/TextAppearance.Dashlane.Subtitle2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.Dashlane.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.Dashlane.Body2</item>
+        <item name="textAppearanceButton">@style/TextAppearance.Dashlane.Button</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.Dashlane.Caption</item>
+        <item name="textAppearanceOverline">@style/TextAppearance.Dashlane.Overline</item>
+
+        <item name="android:textAppearanceLargePopupMenu">?textAppearanceSubtitle1</item>
+
+        
+        <item name="autoCompleteTextViewStyle">@style/Widget.Dashlane.AutoCompleteTextView</item>
+        <item name="borderlessButtonStyle">@style/Widget.Dashlane.TextButton</item>
+        <item name="checkboxStyle">@style/Widget.Dashlane.Checkbox</item>
+        <item name="editTextStyle">@style/Widget.Dashlane.EditText</item>
+        <item name="infoboxStyle">@style/Widget.Dashlane.Infobox</item>
+        <item name="warningInfoboxStyle">@style/Widget.Dashlane.Infobox.Warning</item>
+        <item name="materialButtonStyle">@style/Widget.Dashlane.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.Dashlane.Button.Outlined</item>
+        <item name="switchStyle">@style/Widget.Dashlane.Switch</item>
+        <item name="textInputStyle">@style/Widget.Dashlane.TextInputLayout</item>
+        <item name="android:textViewStyle">@style/Widget.Dashlane.TextView</item>
+        <item name="getStartedStepViewStyle">@style/Widget.Dashlane.GetStartedStepView</item>
+        <item name="expandableCardViewStyle">@style/Widget.Dashlane.ExpandableCardView</item>
+        <item name="tabStyle">@style/Widget.Dashlane.TabLayout</item>
+        <item name="appBarLayoutStyle">@style/Widget.Dashlane.AppBarLayout</item>
+        <item name="floatingActionButtonStyle">@style/Widget.Dashlane.FloatingActionButton</item>
+        <item name="extendedFloatingActionButtonStyle">@style/Widget.Dashlane.ExtendedFloatingActionButton</item>
+        <item name="materialCardViewStyle">@style/Widget.Dashlane.CardView</item>
+        <item name="warningButtonStyle">@style/Widget.Dashlane.Button.Infobox.Primary.Warning</item>
+        <item name="warningBorderlessButtonStyle">@style/Widget.Dashlane.Button.Infobox.Secondary.Warning</item>
+
+        
+        <item name="android:windowBackground">@color/background_alternate</item>
+
+        
+        <item name="actionBarStyle">@style/Widget.Dashlane.ActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.Dashlane.ActionBar</item>
+
+        
+        <item name="android:alertDialogTheme">
+            @style/Theme.Dashlane.DeviceDefault.Dialog.Alert
+        </item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Dashlane.Dialog.Alert</item>
+        <item name="android:datePickerDialogTheme">@style/ThemeOverlay.Dashlane.Dialog</item>
+        <item name="android:timePickerDialogTheme">@style/ThemeOverlay.Dashlane.Dialog</item>
+        <item name="materialAlertDialogTheme">@style/Theme.Dashlane.DashlaneSystemDialog</item>
+        <item name="materialCalendarTheme">@style/ThemeOverlay.Dashlane.MaterialCalendar</item>
+
+        
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Dashlane.BottomSheetDialog</item>
+
+        
+        <item name="sliderStyle">@style/Widget.Dashlane.Slider</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog" />
+
+    <style name="Theme.Dashlane.DashlaneSystemDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+        <item name="buttonBarPositiveButtonStyle">?buttonBarButtonStyle</item>
+        <item name="buttonBarNeutralButtonStyle">?buttonBarButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">?buttonBarButtonStyle</item>
+    </style>
+
+    <style name="Theme.Dashlane.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">#32000000</item>
+    </style>
+
+    <style name="Theme.Dashlane.NoActionBar.PrimaryBackground">
+        <item name="android:windowBackground">@color/container_agnostic_inverse_standard</item>
+
+        <item name="colorError">@color/brand_white</item>
+
+        <item name="colorTextCatchy">@color/text_inverse_catchy</item>
+        <item name="colorOnBackground">@color/text_inverse_standard</item>
+        <item name="colorOnBackgroundMedium">@color/text_inverse_quiet</item>
+        <item name="colorOnError">@color/brand_validator_red</item>
+
+        
+        <item name="autoCompleteTextViewStyle">
+            @style/Widget.Dashlane.AutoCompleteTextView.OnPrimary
+        </item>
+        <item name="borderlessButtonStyle">@style/Widget.Dashlane.TextButton.Inverse</item>
+        <item name="checkboxStyle">@style/Widget.Dashlane.Checkbox.Inverse</item>
+        <item name="editTextStyle">@style/Widget.Dashlane.EditText.Inverse</item>
+        <item name="switchStyle">@style/Widget.Dashlane.Switch.Inverse</item>
+        <item name="textInputStyle">@style/Widget.Dashlane.TextInputLayout.Inverse</item>
+    </style>
+
+    <style name="Theme.Dashlane.NoActionBar.DrawsStatusBarBackground">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <style name="Theme.Dashlane.TransparentSystemBars" parent="Theme.Dashlane.NoActionBar">
+        <item name="android:windowLightStatusBar">@bool/dashlane_is_light</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.Dashlane.Dialog">
+        <item name="android:colorBackground">?attr/colorBackgroundFloating</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="listPreferredItemPaddingLeft">24dip</item>
+        <item name="listPreferredItemPaddingRight">24dip</item>
+
+        <item name="android:listDivider">@null</item>
+
+        <item name="android:buttonBarStyle">@style/Widget.AppCompat.ButtonBar.AlertDialog</item>
+        <item name="android:borderlessButtonStyle">@style/Widget.AppCompat.Button.Borderless</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
+    <style name="Theme.Dashlane.Dialog.FixedSize">
+        <item name="windowFixedWidthMajor">@dimen/theme_dialog_fixed_width_major</item>
+        <item name="windowFixedWidthMinor">@dimen/theme_dialog_fixed_width_minor</item>
+        <item name="windowFixedHeightMajor">@dimen/theme_dialog_fixed_height_major</item>
+        <item name="windowFixedHeightMinor">@dimen/theme_dialog_fixed_height_minor</item>
+    </style>
+
+    <style name="Theme.Dashlane.DialogWhenTablet" parent="Theme.Dashlane.NoActionBar" />
+
+    <style name="ThemeOverlay.Dashlane.ActionBar" parent="ThemeOverlay.MaterialComponents.ActionBar.Surface">
+        <item name="android:textColorPrimary">@color/text_neutral_standard</item>
+        <item name="android:textColorSecondary">@color/text_neutral_quiet</item>
+        <item name="actionMenuTextColor">@color/text_neutral_standard</item>
+        <item name="colorControlNormal">@color/text_neutral_standard</item>
+        <item name="android:colorBackground">@color/container_agnostic_neutral_standard</item>
+        <item name="searchViewStyle">@style/Widget.AppCompat.SearchView.ActionBar</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.Dialog" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowTitleStyle">@style/DialogWindowTitle.Dashlane</item>
+        <item name="materialButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.Dialog.Alert" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:windowTitleStyle">@style/DialogWindowTitle.Dashlane</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+        <item name="materialButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+    </style>
+
+    <style name="Theme.Dashlane.DeviceDefault.Dialog.Alert" parent="Theme.Dashlane.DeviceDefault.Dialog.Alert.DayNight">
+        <item name="android:windowTitleStyle">@style/DialogWindowTitle.Dashlane</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+        <item name="materialButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+    </style>
+
+    <style name="Theme.Dashlane.DeviceDefault.Dialog.Alert.DayNight" parent="@android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
+
+    <style name="ThemeOverlay.Dashlane.Shape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearanceComponent.SmallCornerSize</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearanceComponent.MediumCornerSize</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.MaterialCalendar" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="android:windowTitleStyle">@style/DialogWindowTitle.Dashlane</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+        <item name="materialButtonStyle">@style/Widget.Dashlane.TextButton.Dialog.Flush</item>
+        <item name="buttonBarPositiveButtonStyle">?buttonBarButtonStyle</item>
+        <item name="buttonBarNeutralButtonStyle">?buttonBarButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">?buttonBarButtonStyle</item>
+    </style>
+</resources>

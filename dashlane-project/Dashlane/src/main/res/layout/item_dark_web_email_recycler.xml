@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dark_web_emails_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:itemCount="5"
+        tools:listitem="@layout/item_dark_web_email_placeholder"
+        />
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_normal"
+        app:constraint_referenced_ids="dark_web_emails_spots_available,dark_web_emails_add_email"
+        app:flow_horizontalBias="1"
+        app:flow_horizontalGap="@dimen/spacing_big"
+        app:flow_horizontalStyle="packed"
+        app:flow_wrapMode="chain"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dark_web_emails_recycler"
+        />
+
+    <TextView
+        android:id="@+id/dark_web_emails_spots_available"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?textAppearanceBody1"
+        tools:text="3 spots available"
+        />
+
+    <Button
+        android:id="@+id/dark_web_emails_add_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:maxWidth="150dp"
+        android:text="@string/dwm_emails_monitored_add_email_button"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dashlane.followupnotification">
+
+    <application>
+        <activity
+            android:name=".services.FollowUpNotificationCopyReceiver"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Dashlane.Transparent" />
+        <activity
+            android:name=".discovery.FollowUpNotificationDiscoveryActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Dashlane.LockedOut.Transparent.Modal" />
+
+        <receiver
+            android:name=".services.FollowUpNotificationDismissReceiver"
+            android:permission="com.dashlane.notification.followupnotification.FOLLOW_UP_NOTIFICATION" />
+    </application>
+
+</manifest>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:maxWidth="@dimen/size_480dp"
+    tools:context=".plans.ui.view.PurchaseCheckingActivity"
+    >
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/plan_bought_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_normal"
+            android:paddingEnd="@dimen/spacing_normal"
+            >
+
+            <ImageView
+                android:id="@+id/plan_bought_thanks_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="82dp"
+                android:layout_marginBottom="@dimen/spacing_big"
+                android:importantForAccessibility="no"
+                tools:src="@drawable/ic_purchase_check_success"
+                />
+
+            <TextView
+                android:id="@+id/plan_bought_thanks_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/plan_bought_thanks_title"
+                android:textAppearance="?textAppearanceHeadline1"
+                android:textColor="@color/text_neutral_catchy"
+                />
+
+            <TextView
+                android:id="@+id/plan_bought_thanks_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/plan_bought_thanks_message"
+                android:textAppearance="?textAppearanceBody1"
+                />
+        </LinearLayout>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/plan_bought_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_normal"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:text="@string/close"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

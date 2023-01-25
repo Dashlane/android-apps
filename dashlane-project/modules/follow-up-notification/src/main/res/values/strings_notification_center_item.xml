@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="follow_up_notification_action_item_title">Access your info with a swipe</string>
+    <string name="follow_up_notification_action_item_description">When you\'re copying something, we\'ll hold the rest of the info in the notification panel.</string>
+    <string name="follow_up_notification_action_item_detail_toolbar_label">Quick access</string>
+</resources>

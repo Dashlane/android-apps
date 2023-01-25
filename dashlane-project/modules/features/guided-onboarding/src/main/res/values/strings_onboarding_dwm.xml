@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guided_onboarding_dwm_email_confirmed_title">Email confirmed</string>
+    <string name="guided_onboarding_dwm_email_confirmed_body">We’ve prepared a plan to help you take back control.</string>
+    <string name="guided_onboarding_dwm_no_alerts_title">Everything looks great. Let’s begin!</string>
+    <string name="guided_onboarding_dwm_no_alerts_body">Our Dark Web Monitoring feature is active, so we’ll let you know if we find anything in the future.</string>
+    <string name="guided_onboarding_dwm_loading">Fetching email confirmation</string>
+    <string name="guided_onboarding_dwm_try_again">Try again</string>
+    <string name="guided_onboarding_dwm_email_error">We haven’t received the email confirmation yet</string>
+</resources>

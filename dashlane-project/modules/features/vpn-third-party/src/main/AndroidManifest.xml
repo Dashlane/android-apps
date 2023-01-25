@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dashlane.vpn.thirdparty">
+
+    <application>
+        <activity
+            android:name="com.dashlane.vpn.thirdparty.activate.VpnThirdPartyActivateAccountActivity"
+            android:theme="@style/Theme.Dashlane.Modal"
+            android:windowSoftInputMode="adjustResize" />
+
+        
+        <activity
+            android:name="com.dashlane.vpn.thirdparty.VpnB2bIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+    </application>
+</manifest>

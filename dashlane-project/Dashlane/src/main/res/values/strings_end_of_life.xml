@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cta_endoflife_update">Update</string>
+    <string name="cta_endoflife_close">Close</string>
+    <string name="cta_endoflife_learn_more">Learn more</string>
+
+    <string name="expired_version_noupdate_desc">Visit the Help Center to learn more about what you can do to keep using Dashlane.</string>
+    <string name="expired_version_noupdate_title">This version of the app is no longer supported</string>
+
+    <string name="expired_version_update_possible_desc">Update the app via the App Store to continue using Dashlane.</string>
+    <string name="expired_version_update_possible_title">This version of the app is no longer supported</string>
+
+    <string name="update_recommended_update_possible_title">Update your app to access the latest features</string>
+
+    <string name="update_required_noupdate_desc">You’ll lose access to the app in %1$s days</string>
+    <string name="update_required_noupdate_title">This version of the app will stop working soon</string>
+
+    <string name="update_required_update_possible_desc">This version of the app is no longer supported. Update your app within %1$s days to continue using Dashlane.</string>
+    <string name="update_required_update_possible_title">Reminder: Update your app now to keep using Dashlane</string>
+
+    <string name="update_strongly_encouraged_noupdate_desc">This version of the app will stop working soon. There seems to be an issue updating the app on your device. Visit the Help Center to learn more.</string>
+    <string name="update_strongly_encouraged_noupdate_title">This version of the app is out of date</string>
+
+    <string name="update_strongly_encouraged_update_possible_desc">This version of the app is out of date. It will stop working soon.</string>
+    <string name="update_strongly_encouraged_update_possible_title">Update your app to keep using Dashlane</string>
+
+</resources>

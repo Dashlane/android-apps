@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="ShapeAppearanceComponent.SmallCornerSize" parent="">
+    <item name="cornerSize">6dp</item>
+  </style>
+
+  <style name="ShapeAppearanceComponent.MediumCornerSize" parent="">
+    <item name="cornerSize">8dp</item>
+  </style>
+
+</resources>

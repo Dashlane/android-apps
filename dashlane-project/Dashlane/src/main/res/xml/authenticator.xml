@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+                       android:accountType="com.dashlane"
+                       android:label="@string/dashlane_main_app_name"
+                       android:icon="@mipmap/ic_launcher"
+                       android:smallIcon="@mipmap/ic_launcher"/>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:layout_height="wrap_content"
+    tools:layout_width="match_parent"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/startKeyline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="56dp"
+        />
+
+    <ImageView
+        android:id="@+id/checkStep"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:baseline="19dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_checklist_check"
+        app:layout_constraintBaseline_toBaselineOf="@id/titleStep"
+        app:layout_constraintEnd_toStartOf="@id/startKeyline"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="ContentDescription"
+        tools:visibility="visible"
+        />
+
+    <TextView
+        android:id="@+id/numberStep"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:layout_marginEnd="@dimen/spacing_normal"
+        android:fontFamily="@font/roboto_medium"
+        android:textSize="12sp"
+        app:layout_constraintBaseline_toBaselineOf="@id/titleStep"
+        app:layout_constraintEnd_toStartOf="@id/startKeyline"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="01"
+        tools:visibility="visible"
+        />
+
+    <TextView
+        android:id="@+id/titleStep"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:layout_marginEnd="@dimen/spacing_normal"
+        android:fontFamily="@font/roboto_bold"
+        android:textAppearance="?textAppearanceHeadline6"
+        android:textColor="@color/text_neutral_catchy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/startKeyline"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@tools:sample/lorem"
+        />
+
+    <TextView
+        android:id="@+id/subtitleStep"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:textAppearance="?textAppearanceBody2"
+        app:layout_constraintEnd_toEndOf="@id/titleStep"
+        app:layout_constraintStart_toEndOf="@id/startKeyline"
+        app:layout_constraintTop_toBottomOf="@id/titleStep"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="@tools:sample/lorem"
+        />
+
+    
+
+    <LinearLayout
+        android:id="@+id/previewStepLayout"
+        android:layout_width="0dp"
+        android:layout_height="144dp"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:layout_marginEnd="@dimen/spacing_normal"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitleStep"
+        >
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="UselessParent"
+            >
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/previewStep"
+                android:layout_width="wrap_content"
+                android:layout_height="144dp"
+                app:lottie_enableMergePathsForKitKatAndAbove="true"
+                />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/previewForegroundStep"
+                android:layout_width="wrap_content"
+                android:layout_height="144dp"
+                app:lottie_enableMergePathsForKitKatAndAbove="true"
+                app:lottie_loop="false"
+                />
+
+        </FrameLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/ctaStep"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/spacing_normal"
+        android:layout_marginRight="@dimen/spacing_normal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/previewStepLayout"
+        tools:text="add passwords"
+        />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="@dimen/spacing_normal_for_button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ctaStep"
+        />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="@dimen/spacing_big"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleStep"
+        />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/expandGroupStep"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="subtitleStep,previewStepLayout,ctaStep"
+        />
+
+</merge>

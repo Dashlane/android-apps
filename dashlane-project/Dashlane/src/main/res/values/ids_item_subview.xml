@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="item_subview_title" type="id"/>
+    <item name="item_subview_spinner" type="id"/>
+    <item name="item_subview_imageview" type="id"/>
+    <item name="item_subview_textview" type="id"/>
+    <item name="item_subview_text_input_layout" type="id"/>
+    <item name="item_subview_strength_level_progress_bar" type="id"/>
+    <item name="item_subview_strength_level_textview" type="id"/>
+</resources>

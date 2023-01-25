@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dashlane.premium">
+
+    <application>
+        
+        <activity
+            android:name=".offer.list.view.OffersActivity"
+            android:label="@string/plans_action_bar_title"
+            android:theme="@style/Theme.Dashlane.NoActionBar" />
+
+        <activity
+            android:name=".paywall.common.PaywallActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".current.CurrentPlanActivity"
+            android:theme="@style/Theme.Dashlane.DialogWhenTablet" />
+    </application>
+</manifest>

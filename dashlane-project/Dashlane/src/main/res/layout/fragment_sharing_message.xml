@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
+    >
+    
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/email_addresses_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginRight="@dimen/spacing_normal"
+            android:text="@string/sharing_emergency_email_addresses_label"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="@color/text_neutral_quiet" />
+
+        <com.dashlane.ui.widgets.view.SharingContactAutocompleteTextView
+            android:id="@+id/email_addresses_tokens"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/email_addresses_label"
+            android:layout_marginLeft="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_marginRight="@dimen/spacing_normal"
+            android:hint="@string/sharing_emergency_email_addresses_input_hint"
+            android:minHeight="@dimen/minimum_clickable_area_size"
+            android:nextFocusUp="@id/email_addresses_tokens"
+            android:nextFocusDown="@id/email_addresses_tokens"
+            android:paddingLeft="0dp"
+            android:paddingRight="0dp"
+            android:textColor="@color/text_neutral_standard"
+            android:textCursorDrawable="@null"
+            android:textSize="@dimen/dashlane_font_size_small"
+            tools:hint="Type email address"
+            />
+
+        <View
+            android:id="@+id/email_section_separator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/email_addresses_tokens"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:background="?dividerHorizontal"
+            />
+
+        <RelativeLayout
+            android:id="@+id/permission_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/email_section_separator"
+            >
+
+            <TextView
+                android:id="@+id/permission_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_big"
+                android:layout_marginRight="@dimen/spacing_normal"
+                android:text="@string/sharing_add_group_member_choose_permission"
+                android:textAppearance="?textAppearanceBody2"
+                android:textColor="@color/text_neutral_quiet" />
+
+            <ImageButton
+                android:id="@+id/permission_info"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignTop="@id/permission_value"
+                android:layout_alignBottom="@id/permission_value"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="@dimen/spacing_small"
+                android:layout_marginRight="@dimen/spacing_normal"
+                android:background="?selectableItemBackground"
+                android:contentDescription="@string/and_accessibility_info"
+                android:padding="@dimen/spacing_small"
+                android:src="@drawable/ic_info_24"
+                app:tint="@color/text_brand_standard"
+                />
+
+            <Button
+                android:id="@+id/permission_change"
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/permission_value"
+                android:layout_alignBottom="@id/permission_value"
+                android:layout_marginLeft="@dimen/spacing_small"
+                android:layout_marginRight="@dimen/spacing_small"
+                android:layout_toLeftOf="@id/permission_info"
+                android:text="@string/sharing_emergency_permission_change_cta"
+                tools:text="Change" />
+
+            <TextView
+                android:id="@+id/permission_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/permission_label"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="@dimen/spacing_normal"
+                android:layout_marginRight="@dimen/spacing_small"
+                android:layout_toLeftOf="@id/permission_change"
+                android:gravity="center_vertical"
+                android:minHeight="48dp"
+                android:text="@string/sharing_permission_limited"
+                android:textAppearance="?textAppearanceBody1"
+                />
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/permission_value"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:background="?dividerHorizontal"
+                />
+        </RelativeLayout>
+
+    </RelativeLayout>
+</ScrollView>

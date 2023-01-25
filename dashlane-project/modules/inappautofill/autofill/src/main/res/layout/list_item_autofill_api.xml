@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/autofill_regular_suggestion"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/container_agnostic_neutral_supershy"
+    android:paddingStart="@dimen/spacing_normal"
+    android:paddingTop="@dimen/spacing_small"
+    android:paddingEnd="@dimen/spacing_normal"
+    android:paddingBottom="@dimen/spacing_small"
+    android:theme="@style/Theme.Dashlane"
+    android:orientation="horizontal"
+    >
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1">
+        <TextView
+            android:id="@+id/line1TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnSurface"
+            tools:text="randomemail@provider.com"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/autofillUnsecureWarning"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/line2TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/spacing_extra_small"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textAppearance="?textAppearanceCaption"
+            android:textColor="@color/text_neutral_quiet"
+            tools:text="randomemail@provider.com"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/autofillUnsecureWarning"
+            app:layout_constraintTop_toBottomOf="@id/line1TextView"
+            />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/autofillUnsecureWarning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_warning_outlined"
+        android:layout_gravity="center_vertical"
+        android:visibility="gone" />
+
+</LinearLayout>

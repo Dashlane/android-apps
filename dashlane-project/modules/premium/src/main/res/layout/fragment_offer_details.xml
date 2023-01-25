@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/offer_details_state_flipper"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="false"
+    tools:context=".offer.list.view.OffersActivity"
+    >
+
+    <ProgressBar
+        android:id="@+id/offer_details_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
+    <include
+        android:id="@+id/offer_details_ideal_state"
+        layout="@layout/offer_details_content"
+        />
+
+</FrameLayout>

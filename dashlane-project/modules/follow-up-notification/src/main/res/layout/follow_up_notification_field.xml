@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ll_attribute"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
+    style="@style/Widget.Dashlane.FollowUpNotification.Item.Attribute"
+    >
+
+    <LinearLayout
+        android:id="@+id/ll_attribute_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_attribute_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="@string/follow_up_notification_label_payments_number"
+            android:textAppearance="@style/TextAppearance.Dashlane.FollowUpNotification.Item.Attribute.Label"
+            />
+
+        <TextView
+            android:id="@+id/tv_attribute_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="11111111111"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.Dashlane.FollowUpNotification.Item.Attribute.Value.Number"
+            />
+    </LinearLayout>
+    <Button
+        android:id="@+id/btn_attribute_action"
+        style="@style/Widget.Dashlane.FollowUpNotification.Item.Attribute.CopyAction"
+        android:layout_gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/follow_up_copy_action"
+        android:textAppearance="@style/Widget.Dashlane.FollowUpNotification.Item.Attribute.CopyActionText"
+        />
+</LinearLayout>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/spacing_normal"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <ImageView
+        android:id="@+id/handle"
+        android:layout_width="52dp"
+        android:layout_height="5dp"
+        android:src="@drawable/handle_round_rectangle_shape"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/vpn_third_party_learn_more_logo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/handle"
+        app:srcCompat="@drawable/ic_bottom_sheet_vpn_logo"
+        app:tint="@color/text_brand_quiet"
+        />
+
+    <TextView
+        android:id="@+id/vpn_third_party_learn_more_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:text="@string/vpn_third_party_learn_more_dialog_title"
+        android:textAppearance="?textAppearanceHeadline2"
+        android:textColor="@color/text_neutral_catchy"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_learn_more_logo"
+        />
+
+    <TextView
+        android:id="@+id/vpn_third_party_learn_more_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:text="@string/vpn_third_party_learn_more_dialog_body"
+        android:textAppearance="?textAppearanceSubtitle1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vpn_third_party_learn_more_title"
+        />
+
+    <Button
+        android:id="@+id/vpn_third_party_learn_more_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:text="@string/vpn_third_party_learn_more_dialog_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_learn_more_text"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

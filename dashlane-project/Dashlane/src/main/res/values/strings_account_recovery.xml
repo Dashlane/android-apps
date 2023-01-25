@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_recovery_setting_title">Master Password reset</string>
+    <string name="account_recovery_setting_description">Use your biometrics to reset your Master Password if you forget it</string>
+    <string name="account_recovery_password_is_not_correct">Wrong Master Password. We can help you %1$s</string>
+    <string name="account_recovery_password_is_not_correct_underline">reset your Master Password.</string>
+    <string name="account_recovery_biometric_prompt_title">Authenticate with biometrics</string>
+    <string name="account_recovery_biometric_prompt_description">Reset password for %1$s</string>
+    
+    <string name="account_recovery_reset_password_title">Reset Master Password</string>
+    <string name="account_recovery_reset_password_desc">Create a new Master Password to access your Dashlane account.</string>
+    <string name="account_recovery_reset_password_validation">I\'m ready</string>
+
+    
+    <string name="account_recovery_biometric_intro_title">Let\'s enable biometric unlock</string>
+    <string name="account_recovery_biometric_intro_description">We use biometric unlock to check that it\'s you resetting your Master Password.</string>
+    <string name="account_recovery_biometric_intro_positive_cta">Enable biometrics</string>
+    <string name="account_recovery_biometric_intro_negative_cta">Maybe later</string>
+
+    
+    <string name="account_recovery_intro_title">Also enable Master Password reset?</string>
+    <string name="account_recovery_intro_description">This lets you reset your Master Password if you ever forget it.</string>
+    <string name="account_recovery_intro_positive_cta">Enable reset</string>
+    <string name="account_recovery_intro_negative_cta">Maybe later</string>
+
+    
+    <string name="account_recovery_intro_dialog_title">Never be locked out—enable Master Password reset</string>
+    <string name="account_recovery_intro_dialog_description">This lets you reset your Master Password if you ever forget it. We really recommend it.</string>
+    <string name="account_recovery_intro_dialog_positive_cta">Enable</string>
+    <string name="account_recovery_intro_dialog_negative_cta">Maybe later</string>
+    <string name="account_recovery_intro_dialog_success_message">Master Password reset enabled</string>
+
+    
+    <string name="account_recovery_biometric_deactivation_title">This will also disable Master Password reset</string>
+    <string name="account_recovery_biometric_deactivation_message">Biometric unlock needs to be enabled to use Master Password reset.</string>
+    <string name="account_recovery_biometric_deactivation_positive_cta">Disable both</string>
+    <string name="account_recovery_biometric_deactivation_negative_cta">Cancel</string>
+
+    
+    <string name="account_recovery_deactivation_title">Disable Master Password reset?</string>
+    <string name="account_recovery_deactivation_message">You will not be able to access your account and data if you forget your Master Password</string>
+    <string name="account_recovery_deactivation_positive_cta">Disable</string>
+    <string name="account_recovery_deactivation_negative_cta">Keep enabled</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_v3_header_security_boosters">Security tools</string>
+    <string name="menu_v3_header_manage_account">My account</string>
+    <string name="menu_v3_upgrade">Upgrade</string>
+    <string name="menu_v3_teamspace_select">Select a Space</string>
+    <string name="menu_v3_teamspace_change">Change space</string>
+    <string name="menu_v3_section_dark_web_monitoring">Dark Web Monitoring</string>
+    <string name="menu_v3_section_personal_plan">Get started</string>
+    <string name="menu_v3_section_sharing_center">Sharing Center</string>
+    <string name="menu_v3_section_security_dashboard">Password Health</string>
+    <string name="menu_v3_lock_app">Lock app</string>
+    <string name="menu_v3_remaining_days">%1$d days to try it for free</string>
+</resources>

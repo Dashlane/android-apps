@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_autofill_title">Dashlane Autofill</string>
+    <string name="notification_autofill_description">Want automatic logins for your favorite apps? Activate Dashlane Autofill.</string>
+    <string name="notification_autofill_action">Not Now</string>
+    <string name="notification_autofill_action_positive">Activate</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_login_password">Autofill username and password:</string>
+    <string name="autofill_login_only">Autofill login:</string>
+    <string name="autofill_password_only">Autofill password:</string>
+    <string name="autofill_unverified_application">Unverified application</string>
+</resources>

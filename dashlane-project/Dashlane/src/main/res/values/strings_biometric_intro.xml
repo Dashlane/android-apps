@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_biometric_intro_title">Protect your data with your biometrics</string>
+    <string name="onboarding_biometric_intro_description">Activate biometric authentication to open Dashlane with Fingerprint or Face Recognition.</string>
+    <string name="onboarding_biometric_intro_confirm_button">Activate biometrics</string>
+    <string name="onboarding_biometric_intro_cancel_button">Maybe later</string>
+</resources>

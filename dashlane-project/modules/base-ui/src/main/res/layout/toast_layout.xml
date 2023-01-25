@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/custom_toast_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipToPadding="false"
+    android:gravity="center_horizontal"
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_small"
+    >
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/toast_background"
+        android:elevation="@dimen/dashlane_toast_elevation"
+        android:textColor="@color/brand_white"
+        tools:text="This is a testing Toast"
+        />
+</LinearLayout>

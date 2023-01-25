@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    
+    <style name="ThemeOverlay.Dashlane.Base.DashlaneAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="dialogPreferredPadding">32dp</item>
+        
+        <item name="android:textAppearanceMedium">?textAppearanceHeadline1</item>
+
+        <item name="materialAlertDialogTitlePanelStyle">
+            @style/DashlaneAlertDialog.Dashlane.Title.Panel
+        </item>
+        <item name="materialAlertDialogTitleTextStyle">
+            @style/DashlaneAlertDialog.Dashlane.Title.Text
+        </item>
+        <item name="materialAlertDialogTitleIconStyle">
+            @style/DashlaneAlertDialog.Dashlane.Title.Icon
+        </item>
+        <item name="materialAlertDialogBodyTextStyle">
+            @style/DashlaneAlertDialog.Dashlane.Body.Text
+        </item>
+        <item name="buttonBarStyle">@style/DashlaneAlertDialog.Dashlane.ButtonBar</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Dashlane.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Dashlane.TextButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Dashlane.TextButton</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.DashlaneAlertDialog" parent="ThemeOverlay.Dashlane.Base.DashlaneAlertDialog">
+        <item name="buttonBarStyle">@style/DashlaneAlertDialog.Dashlane.ButtonBar</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Dashlane.Button</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.DashlaneAlertDialog.Secondary" parent="ThemeOverlay.Dashlane.Base.DashlaneAlertDialog">
+        <item name="buttonBarStyle">@style/DashlaneAlertDialog.Dashlane.ButtonBar.Secondary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Dashlane.TextButton</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.DashlaneAlertDialog.SmallTitle" parent="ThemeOverlay.Dashlane.DashlaneAlertDialog">
+        <item name="android:textAppearanceMedium">?textAppearanceBody1</item>
+    </style>
+
+    <style name="DashlaneAlertDialog.Dashlane.Title.Panel" parent="MaterialAlertDialog.MaterialComponents.Title.Panel">
+        <item name="android:paddingTop">32dp</item>
+        <item name="android:paddingBottom">16dp</item>
+    </style>
+
+    <style name="DashlaneAlertDialog.Dashlane.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textAppearance">?textAppearanceHeadline1</item>
+        <item name="android:textColor">?colorOnSurface</item>
+    </style>
+
+    <style name="DashlaneAlertDialog.Dashlane.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textAppearance">?textAppearanceBody1</item>
+    </style>
+
+    <style name="DashlaneAlertDialog.Dashlane.Title.Icon" parent="MaterialAlertDialog.MaterialComponents.Title.Icon">
+        <item name="android:layout_gravity">start|top</item>
+    </style>
+
+    <style name="DashlaneAlertDialog.Dashlane.ButtonBar" parent="Widget.AppCompat.ButtonBar">
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:paddingBottom">32dp</item>
+    </style>
+
+    <style name="DashlaneAlertDialog.Dashlane.ButtonBar.Secondary" parent="Widget.AppCompat.ButtonBar">
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.DashlaneWarningDialog" parent="ThemeOverlay.Dashlane.DashlaneAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Dashlane.DashlaneWarningDialog.Button</item>
+    </style>
+</resources>

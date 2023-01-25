@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="m2w_intro_title">Have your logins everywhere</string>
+    <string name="m2w_intro_body">Connect your computer to access your logins whenever you need them</string>
+    <string name="m2w_intro_start">Connect computer</string>
+    <string name="m2w_intro_skip">Do later</string>
+
+    <string name="m2w_connect_title">Connect your computer</string>
+    <string name="m2w_connect_cta_done">Done</string>
+
+    <string name="m2w_connect_url_prompt">On your computer, go to the address above</string>
+    <string name="m2w_connect_url_prompt_landscape">On your computer, go to the address on the left</string>
+    <string name="m2w_connect_url_detail">We\'ve built an easy way to install Dashlane on your browser</string>
+    <string name="m2w_connect_url_value" translatable="false">dashlane.com/addweb</string>
+
+    <string name="m2w_connect_confirm_cta_positive">Yes</string>
+    <string name="m2w_connect_confirm_cta_negative">Not yet</string>
+    <string name="m2w_connect_confirm_message">Have you logged in to Dashlane on your computer?</string>
+</resources>

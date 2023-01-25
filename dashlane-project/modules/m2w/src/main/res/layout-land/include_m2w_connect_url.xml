@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".M2wConnectActivity"
+    >
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5"
+        />
+
+    <ImageView
+        android:id="@+id/view_m2w_url_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
+        android:src="@drawable/img_m2w_url"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_url"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/view_m2w_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/m2w_url_background"
+        android:fontFamily="@font/roboto_mono_regular"
+        android:gravity="center"
+        android:letterSpacing="-0.01555555556"
+        android:lines="1"
+        android:paddingStart="@dimen/spacing_big"
+        android:paddingTop="12dp"
+        android:paddingEnd="@dimen/spacing_big"
+        android:paddingBottom="12dp"
+        android:text="@string/m2w_connect_url_value"
+        android:textColor="@color/text_inverse_catchy"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/view_m2w_url_logo"
+        app:layout_constraintEnd_toStartOf="@id/guideline_url"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view_m2w_url_logo"
+        />
+
+    <TextView
+        android:id="@+id/view_m2w_url_prompt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/m2w_connect_url_prompt_landscape"
+        android:textAppearance="?textAppearanceHeadline1"
+        android:textColor="@color/text_neutral_catchy"
+        app:layout_constraintBottom_toTopOf="@+id/view_m2w_url_detail"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/guideline_url"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        />
+
+    <TextView
+        android:id="@+id/view_m2w_url_detail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/m2w_connect_url_detail"
+        android:textAppearance="?textAppearanceBody1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/view_m2w_url_prompt"
+        app:layout_constraintStart_toStartOf="@+id/view_m2w_url_prompt"
+        app:layout_constraintTop_toBottomOf="@+id/view_m2w_url_prompt"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

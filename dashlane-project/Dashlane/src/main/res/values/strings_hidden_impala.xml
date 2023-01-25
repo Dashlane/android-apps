@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hidden_impala_title" translatable="false">Hidden Impala</string>
+    <string name="hidden_impala_message" translatable="false">You found the hidden impala!</string>
+    <string name="hidden_impala_credits" translatable="false">With love, by the impala team:\n\nEduardo Taborda\nGuillaume Bouxin\nHadrien De Sousa\nJonathan Salamon\nMarion Hayoun\nMartin Devillers\nSami Zerouta\nSebastien Eggenspieler\nStan Kocken\nXavier Falempin\nXiaoyi Li</string>
+    <string name="hidden_impala_positive_button" translatable="false">This is a triumph</string>
+</resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".discovery.FollowUpNotificationDiscoveryActivity"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingBottom="@dimen/spacing_ultra_huge"
+        >
+
+        <ImageView
+            android:id="@+id/follow_up_icon"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="@drawable/background_circle"
+            android:backgroundTint="?colorSecondary"
+            android:padding="8dp"
+            android:src="@drawable/ic_action_item_info_circle_outlined"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?colorOnSecondary"
+            />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:maxLines="2"
+            android:text="@string/follow_up_notification_action_item_title"
+            android:textAppearance="?textAppearanceSubtitle1"
+            app:layout_constraintBottom_toBottomOf="@+id/follow_up_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/follow_up_icon"
+            app:layout_constraintTop_toTopOf="@+id/follow_up_icon"
+            />
+
+        <TextView
+            android:id="@+id/title_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:maxLines="3"
+            android:text="@string/follow_up_notification_action_item_description"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorOnBackgroundMedium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/follow_up_icon"
+            tools:text="When you’re copying something, we’ll hold the rest of the info in the notification panel."
+            />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_ultra_huge"
+            android:layout_marginEnd="@dimen/spacing_big"
+            android:src="@drawable/ic_follow_up_preview"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_description"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

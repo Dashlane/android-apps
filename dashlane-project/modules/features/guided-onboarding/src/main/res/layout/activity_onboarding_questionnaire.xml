@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".OnboardingQuestionnaireActivity"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:animateLayoutChanges="true"
+        android:clipToPadding="false"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingStart="@dimen/spacing_small"
+        android:paddingTop="@dimen/spacing_big"
+        android:paddingEnd="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_normal"
+        tools:context=".ui.activities.onboarding.questionnaire.OnboardingQuestionnaireActivity"
+        >
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/button_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/and_accessibility_back_button"
+            android:src="?homeAsUpIndicator"
+            app:buttonLayout="iconOnly"
+            app:intensity="supershy"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/onboarding_questionnaire_question_number"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_big"
+            android:textAllCaps="true"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_quiet"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/button_back"
+            tools:text="@string/guided_onboarding_question_number"
+            />
+
+        <TextView
+            android:id="@+id/onboarding_questionnaire_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_catchy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/onboarding_questionnaire_question_number"
+            tools:text="@string/guided_onboarding_handle_title"
+            />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/animationView"
+            android:layout_width="0dp"
+            android:layout_height="140dp"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@+id/question_subtitle"
+            app:lottie_autoPlay="true"
+            app:lottie_enableMergePathsForKitKatAndAbove="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/guided_onboarding_lottie_01_autofill"
+            />
+
+        <TextView
+            android:id="@+id/question_subtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/guided_onboarding_dwm_email_title"
+            android:textAppearance="@style/TextAppearance.Dashlane.Subtitle1"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/onboarding_questionnaire_title"
+            app:layout_goneMarginTop="@dimen/spacing_normal"
+            />
+
+        <View
+            android:id="@+id/barrier"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_huge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/animationView"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/q1A1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:answerdetail="@string/guided_onboarding_brings_autofill_detail"
+            app:answertitle="@string/guided_onboarding_brings_autofill_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/barrier"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/q1A2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:answerdetail="@string/guided_onboarding_brings_m2w_detail"
+            app:answertitle="@string/guided_onboarding_brings_m2w_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/q1A1"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/q1A3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:answerdetail="@string/guided_onboarding_brings_dwm_detail"
+            app:answertitle="@string/guided_onboarding_brings_dwm_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/q1A2"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/q2A1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:answerdetail="@string/guided_onboarding_handle_memory_detail"
+            app:answertitle="@string/guided_onboarding_handle_memory_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/barrier"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/q2A2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:answerdetail="@string/guided_onboarding_handle_digital_tool_detail"
+            app:answertitle="@string/guided_onboarding_handle_digital_tool_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/q2A1"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/q2A3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:answerdetail="@string/guided_onboarding_handle_other_detail"
+            app:answertitle="@string/guided_onboarding_handle_other_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/q2A2"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/q3A1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_big"
+            app:answershowdetail="false"
+            app:answertitle="@string/guided_onboarding_dwm_email_placeholder"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@+id/animationView"
+            tools:visibility="gone"
+            />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/lower_barrier"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_ultra_huge"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="q2A1,q2A2,q2A3,q1A1,q1A2,q1A3,q3A1"
+            />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/button_flow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_big"
+            app:constraint_referenced_ids="button_trust,button_skip,button_continue"
+            app:flow_horizontalBias="1"
+            app:flow_horizontalGap="@dimen/spacing_small"
+            app:flow_horizontalStyle="packed"
+            app:flow_wrapMode="chain"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lower_barrier"
+            app:layout_constraintVertical_bias="1"
+            />
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/button_trust"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guided_onboarding_trust_button_v2"
+            android:visibility="gone"
+            app:intensity="quiet"
+            app:layout_constrainedWidth="true"
+            app:mood="brand" />
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/button_skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guided_onboarding_skip_button"
+            android:visibility="gone"
+            app:intensity="quiet"
+            app:layout_constrainedWidth="true"
+            app:mood="brand"
+            tools:visibility="visible" />
+
+        <com.dashlane.design.component.compat.view.ButtonMediumView
+            android:id="@+id/button_continue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guided_onboarding_continue"
+            app:intensity="catchy"
+            app:layout_constrainedWidth="true"
+            app:mood="brand" />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/progress_animation"
+            android:layout_width="0dp"
+            android:layout_height="96dp"
+            android:layout_marginBottom="16dp"
+            android:importantForAccessibility="no"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/button_flow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button_back"
+            app:lottie_enableMergePathsForKitKatAndAbove="true"
+            app:lottie_rawRes="@raw/guided_onboarding_lottie_building_plan"
+            />
+
+        <TextView
+            android:id="@+id/plan_ready_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_big"
+            android:layout_marginEnd="@dimen/spacing_big"
+            android:accessibilityLiveRegion="assertive"
+            android:text="@string/guided_onboarding_building_plan_title"
+            android:textAppearance="@style/TextAppearance.Dashlane.Headline1"
+            android:visibility="gone"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/progress_animation"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

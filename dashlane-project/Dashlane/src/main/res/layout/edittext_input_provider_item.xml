@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EditText
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:imeOptions="flagNoExtractUi"
+    android:inputType="textMultiLine"
+    android:paddingTop="@dimen/spacing_small"
+    android:paddingBottom="@dimen/spacing_normal"
+    android:paddingLeft="4dp"
+    android:textAppearance="?textAppearanceSubtitle1"
+    android:textColor="@color/edittext_input_provider_item_text_color"
+    tools:ignore="LabelFor"
+    />

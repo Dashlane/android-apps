@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:dashlane="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/sharing_share_item_send"
+        android:icon="@drawable/sharing_send"
+        android:title="@string/go_button"
+        dashlane:showAsAction="always"
+        dashlane:iconTint="@color/text_neutral_catchy"
+        />
+    
+
+</menu>

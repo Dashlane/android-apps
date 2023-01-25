@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_bar_title_vpn_third_party">Virtual private network</string>
+    <string name="menu_vpn">VPN</string>
+    <string name="vpn_third_party_activate_title">Activate your Hotspot Shield account</string>
+    <string name="vpn_third_party_activate_subtitle">You’ll need to use this account info to log in to the VPN for the first time.</string>
+    <string name="vpn_third_party_activate_button">Activate account</string>
+    <string name="vpn_third_party_all_set_title">You’re all set!</string>
+    <string name="vpn_third_party_all_set_subtitle">You can now log in to your Hotspot Shield account with the following username and password.</string>
+    <string name="vpn_third_party_install_app_button">Get the app</string>
+    <string name="vpn_third_party_launch_app_button">Launch Hotspot Shield</string>
+    <string name="vpn_third_party_faq_title">Frequently asked questions</string>
+    <string name="vpn_third_party_hotspot_shield_name">VPN Hotspot Shield</string>
+    <string name="vpn_third_party_account_login">Username</string>
+    <string name="vpn_third_party_account_password">Password</string>
+
+    <string name="vpn_third_party_faq_question_1_title">What is a VPN?</string>
+    <string name="vpn_third_party_faq_question_1_body">A virtual private network (VPN) protects your identity and data online. It creates an encrypted connection to the internet which hides your IP address and personal, trackable data.\n\nThis is particularly important when you use unsecure public WiFi in places like airports and cafes because these connections are often very easy to hack. But it can also allow you to anonymously access blocked content on streaming services and social networking sites.</string>
+    <string name="vpn_third_party_faq_question_2_title">What does the partnership with Hotspot Shield mean for me?</string>
+    <string name="vpn_third_party_faq_question_2_body">It means you have a top-rated VPN included in your Dashlane Premium plan. You just need to set it up via Dashlane the first time. After that, you can use the VPN via the Hotspot Shield app itself.</string>
+    <string name="vpn_third_party_faq_question_3_title">I need help</string>
+    <string name="vpn_third_party_faq_question_3_body">For additional questions about how to set up the VPN, please see our %1$s.\n\nFor help with the Hotspot Shield app, please visit the %2$s.</string>
+    <string name="vpn_third_party_faq_question_3_link_faq">FAQ page</string>
+    <string name="vpn_third_party_faq_question_3_link_hotspot_shield_support">Hotspot Shield Support Center</string>
+
+    <string name="vpn_third_party_faq_question_button">Read more</string>
+
+    <string name="vpn_third_party_activate_infobox_title">Your Dashlane VPN is now provided by Hotspot Shield</string>
+    <string name="vpn_third_party_activate_infobox_positive_button">Learn more</string>
+    <string name="vpn_third_party_activate_infobox_negative_button">Dismiss</string>
+
+    <string name="vpn_third_party_learn_more_dialog_title">Your Dashlane VPN is now provided by Hotspot Shield</string>
+    <string name="vpn_third_party_learn_more_dialog_body">We’ve partnered with %1$s to offer Premium users the fastest virtual private network (VPN) on the market.</string>
+    <string name="vpn_third_party_learn_more_dialog_body_link">Hotspot Shield</string>
+    <string name="vpn_third_party_learn_more_dialog_button">Ok, got it</string>
+
+    <string name="vpn_third_party_get_started_dialog_title">Try our improved VPN experience</string>
+    <string name="vpn_third_party_get_started_dialog_body">We’ve partnered with %1$s to provide the best VPN experience. Activate your account then download their app.</string>
+    <string name="vpn_third_party_get_started_dialog_button">Get started</string>
+    <string name="vpn_third_party_get_started_dialog_body_link">Hotspot Shield</string>
+
+    <string name="vpn_third_party_activate_account_email_hint">Email</string>
+    <string name="vpn_third_party_activate_account_title">Enter an email for your account</string>
+    <string name="vpn_third_party_activate_account_body">Hotspot Shield will use it to activate your account. We’ll generate a secure password for you.</string>
+    <string name="vpn_third_party_activate_account_positive_button">Confirm</string>
+    <string name="vpn_third_party_activate_account_learn_more_button">Learn more</string>
+    <string name="vpn_third_party_activate_account_terms_of_service">I agree with Hotspot Shield’s Terms of Service and Privacy Policy.</string>
+    <string name="vpn_third_party_activate_account_terms_link">Terms of Service</string>
+    <string name="vpn_third_party_activate_account_policy_link">Privacy Policy</string>
+    <string name="vpn_third_party_activate_account_email_error">That email format doesn’t look right. Let’s try again.</string>
+
+    <string name="vpn_third_party_account_activating">Finalizing your account…</string>
+    <string name="vpn_third_party_account_activated">Account created</string>
+    <string name="vpn_third_party_account_activation_error_title">Something went wrong</string>
+    <string name="vpn_third_party_account_activation_error_body">We’re having trouble activating your account right now. Please try again, and contact Customer Support if it doesn’t work.</string>
+    <string name="vpn_third_party_account_activation_error_positive_button">Try again</string>
+    <string name="vpn_third_party_account_activation_error_negative_button">Contact support</string>
+
+    <string name="vpn_third_party_account_activation_error_email_title">This email is already in use</string>
+    <string name="vpn_third_party_account_activation_error_email_body">Try another email or contact Hotspot Shield support for help.</string>
+    <string name="vpn_third_party_account_activation_error_email_positive_button">Try again</string>
+    <string name="vpn_third_party_account_activation_error_email_negative_button">Contact support</string>
+
+    <string name="menu_third_party_vpn_new">NEW</string>
+    <string name="vpn_third_party_notification_center_title">Try our improved VPN experience</string>
+    <string name="vpn_third_party_notification_center_body">We’re now offering a new and improved VPN experience from Hotspot Shield.</string>
+
+    <string name="vpn_intro_title_b2b">VPN is disabled</string>
+    <string name="vpn_intro_body_b2b">Dashlane\'s virtual private network (VPN) isn’t available in your plan. Please contact your admin for more details.</string>
+    <string name="vpn_intro_button_close_b2b">Ok, got it</string>
+</resources>

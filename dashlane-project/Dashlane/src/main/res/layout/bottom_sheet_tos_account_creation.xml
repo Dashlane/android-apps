@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/spacing_big"
+    android:theme="@style/Theme.Dashlane"
+    >
+
+    <TextView
+        android:id="@+id/tv_tos_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/create_account_tos_bottom_sheet_title"
+        android:textAppearance="?textAppearanceHeadline2"
+        app:layout_constraintBottom_toTopOf="@id/view_tos_offers"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <CheckBox
+        android:id="@+id/view_tos_offers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:breakStrategy="high_quality"
+        android:minHeight="@dimen/minimum_clickable_area_size"
+        android:padding="4dp"
+        android:text="@string/create_account_tos_offers"
+        android:textAppearance="?textAppearanceSubtitle1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_tos_title"
+        app:layout_constraintVertical_bias="0"
+        />
+
+    <CheckBox
+        android:id="@+id/view_tos_conditions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="@null"
+        android:minHeight="@null"
+        app:layout_constraintBottom_toBottomOf="@+id/view_tos_conditions_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view_tos_conditions_text"
+        app:layout_constraintVertical_bias="0"
+        />
+
+    <TextView
+        android:id="@+id/view_tos_conditions_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        android:padding="4dp"
+        android:textAppearance="?textAppearanceSubtitle1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/view_tos_conditions"
+        app:layout_constraintTop_toBottomOf="@id/view_tos_offers"
+        tools:text="@string/create_account_tos_bottom_sheet_conditions_template"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/view_tos_conditions_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="view_tos_conditions,view_tos_conditions_text"
+        />
+
+    <Button
+        android:id="@+id/cta_agree_tos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:layout_marginBottom="@dimen/spacing_big"
+        android:enabled="false"
+        android:text="@string/create_account_tos_bottom_sheet_cta_agree"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_tos_conditions"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
