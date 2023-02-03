@@ -100,7 +100,7 @@ public enum SwEnum {
     SW_6FFF("6FFF", "Card dead (overuse, …)"),
     SW_6F("6F", "No precise diagnosis (procedure byte), (ISO 7816-3)"),
     SW_9000("9000", "Command successfully executed (OK)"),
-    SW_9004("9004", "PIN not succesfully verified, 3 or more PIN tries left"),
+    SW_9004("9004", "PIN not successfully verified, 3 or more PIN tries left"),
     SW_9008("9008", "Key/file not found"),
     SW_9080("9080", "Unblock Try Counter has reached zero"),
     SW_9101("9101", "States.activity, States.lock Status or States.lockable has wrong value"),
@@ -118,7 +118,7 @@ public enum SwEnum {
     SW_9681("9681", "Slave not found"),
     SW_9700("9700", "PIN blocked and Unblock Try Counter is 1 or 2"),
     SW_9702("9702", "Main keys are blocked"),
-    SW_9704("9704", "PIN not succesfully verified, 3 or more PIN tries left"),
+    SW_9704("9704", "PIN not successfully verified, 3 or more PIN tries left"),
     SW_9784("9784", "Base key"),
     SW_9785("9785", "Limit exceeded - C-MAC key"),
     SW_9786("9786", "SM error - Limit exceeded - R-MAC key"),
@@ -127,13 +127,13 @@ public enum SwEnum {
     SW_9789("9789", "Service not available"),
     SW_9804("9804", "Access conditions not satisfied"),
     SW_9900("9900", "1 PIN try left"),
-    SW_9904("9904", "PIN not succesfully verified, 1 PIN try left"),
+    SW_9904("9904", "PIN not successfully verified, 1 PIN try left"),
     SW_9985("9985", "Wrong status - Cardholder lock"),
     SW_9986("9986", "Missing privilege"),
     SW_9987("9987", "PIN is not installed"),
     SW_9988("9988", "Wrong status - R-MAC state"),
     SW_9A00("9A00", "2 PIN try left"),
-    SW_9A04("9A04", "PIN not succesfully verified, 2 PIN try left"),
+    SW_9A04("9A04", "PIN not successfully verified, 2 PIN try left"),
     SW_9A71("9A71", "Wrong parameter value - Double agent AID"),
     SW_9A72("9A72", "Wrong parameter value - Double agent Type"),
     SW_9D05("9D05", "Incorrect certificate type"),
@@ -180,9 +180,9 @@ public enum SwEnum {
     SW_9D63("9D63", "Crypto functions not available"),
     SW_9D64("9D64", "No application loaded"),
     SW_9E00("9E00", "PIN not installed"),
-    SW_9E04("9E04", "PIN not succesfully verified, PIN not installed"),
+    SW_9E04("9E04", "PIN not successfully verified, PIN not installed"),
     SW_9F00("9F00", "PIN blocked and Unblock Try Counter is 3"),
-    SW_9F04("9F04", "PIN not succesfully verified, PIN blocked and Unblock Try Counter is 3");
+    SW_9F04("9F04", "PIN not successfully verified, PIN blocked and Unblock Try Counter is 3");
 
     
 
