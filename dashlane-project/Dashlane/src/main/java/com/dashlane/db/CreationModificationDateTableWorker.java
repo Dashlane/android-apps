@@ -198,7 +198,7 @@ public class CreationModificationDateTableWorker extends DatabaseTableWorker {
 
             switch (accessType) {
                 case AccessType.READ:
-                    myList.get(uid).mLocallyViewdDate = Long.toString(accessDate);
+                    myList.get(uid).mLocallyViewedDate = Long.toString(accessDate);
                     break;
                 case AccessType.MODIFY:
                     myList.get(uid).mUserModificationDate = Long.toString(accessDate);
@@ -308,7 +308,7 @@ public class CreationModificationDateTableWorker extends DatabaseTableWorker {
         private SyncObjectType mDataType;
         private String mCreationDate;
         private String mUserModificationDate;
-        private String mLocallyViewdDate;
+        private String mLocallyViewedDate;
 
         PendingUpdateItem(SyncObjectType dataType) {
             this(dataType, "0", "0", "0");
@@ -319,7 +319,7 @@ public class CreationModificationDateTableWorker extends DatabaseTableWorker {
             mDataType = dataType;
             mCreationDate = creationDate;
             mUserModificationDate = userModificationDate;
-            mLocallyViewdDate = locallyViewedDate;
+            mLocallyViewedDate = locallyViewedDate;
         }
 
         
@@ -328,7 +328,7 @@ public class CreationModificationDateTableWorker extends DatabaseTableWorker {
             return "UPDATE " + DataTypeToSql.getTableName(mDataType) + " SET "
                    + DataIdentifierSql.FIELD_CREATION_DATE + " = " + mCreationDate
                    + ", " + DataIdentifierSql.FIELD_USER_MODIFICATION_DATE + " = " + mUserModificationDate
-                   + ", " + DataIdentifierSql.FIELD_LOCALLY_VIEWED_DATE + " = " + mLocallyViewdDate
+                   + ", " + DataIdentifierSql.FIELD_LOCALLY_VIEWED_DATE + " = " + mLocallyViewedDate
                    + " WHERE uid = '" + uid + "';";
         }
     }
