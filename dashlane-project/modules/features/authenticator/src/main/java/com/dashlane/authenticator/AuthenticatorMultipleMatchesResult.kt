@@ -21,7 +21,7 @@ class AuthenticatorMultipleMatchesResult : DashlaneActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mutliple_matches_result)
+        setContentView(R.layout.activity_multiple_matches_result)
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
