@@ -179,16 +179,16 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
 
     private fun showRegisterDialog(errorMessageId: String) {
         val messageResId = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            R.string.onboarding_dialog_hardware_registeration_module_google_fp_title_fingeronly
+            R.string.onboarding_dialog_hardware_registration_module_google_fp_title_fingeronly
         } else {
-            R.string.onboarding_dialog_hardware_registeration_module_google_fp_title
+            R.string.onboarding_dialog_hardware_registration_module_google_fp_title
         }
         val message = getString(messageResId) + "\n" + errorMessageId
         DialogHelper()
             .builder(this)
             .setMessage(message)
             .setCancelable(true)
-            .setPositiveButton(R.string.onboarding_dialog_hardware_registeration_module_google_fp_button) { _, _ ->
+            .setPositiveButton(R.string.onboarding_dialog_hardware_registration_module_google_fp_button) { _, _ ->
                 biometricAuthModule.logRegisterBiometrics()
                 val lockManager = lockRepository.getLockManager(sessionManager.session!!)
                 lockManager.startAutoLockGracePeriod()

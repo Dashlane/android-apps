@@ -381,9 +381,9 @@
     <string name="fragment_dialog_propose_hardware_module_google_fp_desc">Instead of typing in your Master Password, use biometrics to unlock your Dashlane app quickly and securely.</string>
     <string name="onboarding_dialog_auth_required_hardware_module_google_fp_title">Authenticate with biometric to activate it for Dashlane</string>
     <string name="onboarding_dialog_auth_required_hardware_module_google_fp_button">Cancel</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_title">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_title_fingeronly">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_button">Go</string>
+    <string name="onboarding_dialog_hardware_registration_module_google_fp_title">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
+    <string name="onboarding_dialog_hardware_registration_module_google_fp_title_fingeronly">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
+    <string name="onboarding_dialog_hardware_registration_module_google_fp_button">Go</string>
     <string name="window_biometric_unlock_hardware_module_google_fp_title">Unlock Dashlane with biometrics</string>
     <string name="dashlane_save">Save</string>
     <string name="error_credential_must_have_at_least">Please add login details and either a website or item name before saving</string>
