@@ -27,7 +27,7 @@ import com.dashlane.preference.UserPreferencesManager;
 import com.dashlane.session.SessionCredentialsSaver;
 import com.dashlane.session.SessionManager;
 import com.dashlane.ui.AutoFillDisablerKt;
-import com.dashlane.ui.ScreeenshotEnablerKt;
+import com.dashlane.ui.ScreenshotEnablerKt;
 import com.dashlane.ui.activities.DashlaneActivity;
 import com.dashlane.ui.endoflife.EndOfLife;
 import com.dashlane.useractivity.log.install.InstallLogCode69;
@@ -97,7 +97,7 @@ public class LoginActivity extends DashlaneActivity implements LoginSsoLoggerCon
         super.onCreate(savedInstanceState);
         AutoFillDisablerKt.disableAutoFill(this);
         setContentView(R.layout.activity_login);
-        ScreeenshotEnablerKt.applyScreenshotAllowedFlag(getWindow(), SingletonProvider.getScreenshotPolicy());
+        ScreenshotEnablerKt.applyScreenshotAllowedFlag(getWindow(), SingletonProvider.getScreenshotPolicy());
 
         View view = findViewById(R.id.view_login_root_container);
         LoginViewProxy viewProxy = new LoginViewProxy(view);

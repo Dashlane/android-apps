@@ -13,7 +13,7 @@ import com.dashlane.login.lock.LockSetting;
 import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory;
 import com.dashlane.login.sso.LoginSsoLogger;
 import com.dashlane.ui.AutoFillDisablerKt;
-import com.dashlane.ui.ScreeenshotEnablerKt;
+import com.dashlane.ui.ScreenshotEnablerKt;
 import com.dashlane.ui.activities.DashlaneActivity;
 import com.dashlane.ui.endoflife.EndOfLife;
 import com.dashlane.useractivity.log.install.InstallLogCode69;
@@ -61,7 +61,7 @@ public class CreateAccountActivity extends DashlaneActivity
         super.onCreate(savedInstanceState);
         AutoFillDisablerKt.disableAutoFill(this);
         setContentView(R.layout.activity_login_create_account);
-        ScreeenshotEnablerKt.applyScreenshotAllowedFlag(getWindow(), SingletonProvider.getScreenshotPolicy());
+        ScreenshotEnablerKt.applyScreenshotAllowedFlag(getWindow(), SingletonProvider.getScreenshotPolicy());
 
         View view = findViewById(R.id.view_login_root);
         CreateAccountViewProxy viewProxy = new CreateAccountViewProxy(view);
