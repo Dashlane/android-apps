@@ -10,5 +10,5 @@
     android:paddingBottom="11.5dp"
     android:textAppearance="?textAppearanceSubtitle1"
     android:textColor="@color/text_neutral_quiet"
-    tools:text="Passsword Manager"
+    tools:text="Password Manager"
     />
