@@ -113,7 +113,7 @@ class ChecklistViewModel @Inject constructor(
     }
 
     private fun onAutofillActivationCompletionAcknowledged() {
-        provider.saveAutofillActiationCompletedAndAcknowledgedAutofill()
+        provider.saveAutofillActivationCompletedAndAcknowledgedAutofill()
     }
 
     private fun onM2DCompletionAcknowledged() {

@@ -78,7 +78,7 @@ class ChecklistDataProvider @Inject constructor(
     override fun saveAddCredentialCompletedAndAcknowledged() =
         userPreferencesManager.putBoolean(KEY_CHECKLIST_ADD_CREDENTIAL_ACKNOWLEDGED, true)
 
-    override fun saveAutofillActiationCompletedAndAcknowledgedAutofill() =
+    override fun saveAutofillActivationCompletedAndAcknowledgedAutofill() =
         userPreferencesManager.putBoolean(KEY_CHECKLIST_AUTOFILL_ACTIVATION_ACKNOWLEDGED, true)
 
     override fun saveM2DCompletedAndAcknowledged() =
