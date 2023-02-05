@@ -6,8 +6,8 @@ package com.github.devnied.emvnfccard.model.enums;
 
 public enum ServiceCode1Enum implements IKeyEnum {
 
-	INTERNATIONNAL(1, "International interchange", "None"),
-	INTERNATIONNAL_ICC(2, "International interchange", "Integrated circuit card"),
+	INTERNATIONAL(1, "International interchange", "None"),
+	INTERNATIONAL_ICC(2, "International interchange", "Integrated circuit card"),
 	NATIONAL(5, "National interchange", "None"),
 	NATIONAL_ICC(6, "National interchange", "Integrated circuit card"),
 	PRIVATE(7, "Private", "None");
