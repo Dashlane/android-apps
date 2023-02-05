@@ -294,8 +294,8 @@
     <string name="ui_sharing_error_nothing_to_share">Oops! Something went wrong. (Error - 1002)</string>
     <string name="ui_sharing_error_fail_applying_local_changes">Oops! Something went wrong. (Error - 1003)</string>
     <string name="ui_sharing_error_public_keys_not_found">Oops! Something went wrong. (Error - 1004)</string>
-    <string name="ui_sharing_error_non_transactionnal_events_1">Oops! Something went wrong. (Error - 1005)</string>
-    <string name="ui_sharing_error_non_transactionnal_events_2">Oops! Something went wrong. (Error - 1006)</string>
+    <string name="ui_sharing_error_non_transactional_events_1">Oops! Something went wrong. (Error - 1005)</string>
+    <string name="ui_sharing_error_non_transactional_events_2">Oops! Something went wrong. (Error - 1006)</string>
     <string name="ui_sharing_error_wrong_lock">Oops! Something went wrong. Please try again later. (Error - 1007)</string>
     <string name="ui_sharing_error_network_or_server_error">Please check your connection and try again.</string>
     <string name="ui_sharing_error_unknown">Oops! Something went wrong. (Error - 1008)</string>
