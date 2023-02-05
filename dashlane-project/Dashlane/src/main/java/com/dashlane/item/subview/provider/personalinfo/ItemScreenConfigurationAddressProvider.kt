@@ -263,7 +263,7 @@ class ItemScreenConfigurationAddressProvider(
         item: VaultItem<SyncObject.Address>
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
-            context.getString(R.string.address_hint_receipent),
+            context.getString(R.string.address_hint_recipient),
             item.syncObject.receiver,
             false,
             VaultItem<*>::copyForUpdatedReceiver

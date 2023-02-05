@@ -117,7 +117,7 @@
     <string name="address_hint_house_number">House number</string>
     <string name="address_hint_city">City</string>
     <string name="address_hint_zipcode">Zip code</string>
-    <string name="address_hint_receipent">Recipient</string>
+    <string name="address_hint_recipient">Recipient</string>
     <string name="address_hint_building">Building</string>
     <string name="address_hint_floor">Floor</string>
     <string name="address_hint_apartment">Apartment</string>
