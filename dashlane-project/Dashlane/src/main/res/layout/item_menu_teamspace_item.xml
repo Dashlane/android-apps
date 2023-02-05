@@ -28,7 +28,7 @@
         android:maxLines="1"
         android:textAppearance="?textAppearanceSubtitle1"
         android:textColor="@color/text_neutral_catchy"
-        tools:text="Dasboard"
+        tools:text="Dashboard"
         />
 
 </LinearLayout>

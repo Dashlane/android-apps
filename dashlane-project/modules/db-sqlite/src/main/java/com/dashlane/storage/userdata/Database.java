@@ -177,8 +177,8 @@ public abstract class Database {
         mDb.endTransaction();
     }
 
-    public Cursor rawQuery(String sql, String[] selectonArgs) {
-        return mDb.rawQuery(sql, selectonArgs);
+    public Cursor rawQuery(String sql, String[] selectionArgs) {
+        return mDb.rawQuery(sql, selectionArgs);
     }
 
     public boolean inTransaction() {

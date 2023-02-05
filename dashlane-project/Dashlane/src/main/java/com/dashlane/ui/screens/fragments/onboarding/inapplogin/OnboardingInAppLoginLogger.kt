@@ -15,7 +15,7 @@ class OnboardingInAppLoginLogger(
     fun logDismissSuccessScreen(from: String?, type: UsageLogCode95.Type?) {
         log(
             UsageLogCode95(
-                action = UsageLogCode95.Action.DISSMISS_SUCCESS_SCREEN,
+                action = UsageLogCode95.Action.DISMISS_SUCCESS_SCREEN,
                 fromStr = from,
                 type = type
             )

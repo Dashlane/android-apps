@@ -29,7 +29,7 @@ class AuthModuleLogger(
     }
 
     fun logUsageLogoutFromBiometrics() {
-        sendUsageLog35("askLgout")
+        sendUsageLog35("askLogout")
         sendUsageLog75(UsageLogConstant.LockAction.logout, UsageLogConstant.LockSubAction.fromApp)
     }
 
@@ -47,7 +47,7 @@ class AuthModuleLogger(
     }
 
     fun logUsageStartOnboarding() {
-        sendUsageLog35("onbardingStart")
+        sendUsageLog35("onboardingStart")
     }
 
     private fun sendUsageLog35(action: String) {

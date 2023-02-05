@@ -333,7 +333,7 @@ public enum CountryCodeEnum implements IKeyEnum {
 
 	
 
-	GG("Guemsey", "GGY", 831),
+	GG("Guernsey", "GGY", 831),
 
 	
 

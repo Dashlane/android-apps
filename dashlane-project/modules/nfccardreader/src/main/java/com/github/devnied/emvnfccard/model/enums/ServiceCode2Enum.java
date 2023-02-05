@@ -8,7 +8,7 @@ public enum ServiceCode2Enum implements IKeyEnum {
 
 	NORMAL(0, "Normal"),
 	BY_ISSUER(2, "By issuer"),
-	BY_ISSUER_WIHOUT_BI_AGREEMENT(4, "By issuer unless explicit bilateral agreement applies");
+	BY_ISSUER_WITHOUT_BI_AGREEMENT(4, "By issuer unless explicit bilateral agreement applies");
 
 	private final int value;
 	private final String authorizationProcessing;

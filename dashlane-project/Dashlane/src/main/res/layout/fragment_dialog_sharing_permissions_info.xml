@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
-            android:text="@string/sharing_permission_explaination_description_limited"
+            android:text="@string/sharing_permission_explanation_description_limited"
             android:textAppearance="?textAppearanceBody2"
             />
 
@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
-            android:text="@string/sharing_permission_explaination_description_admin"
+            android:text="@string/sharing_permission_explanation_description_admin"
             android:textAppearance="?textAppearanceBody2"
             />
     </LinearLayout>

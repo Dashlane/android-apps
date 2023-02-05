@@ -29,7 +29,7 @@ object TimedDocumentDbConverter {
     }
 
     internal fun putExpireDate(cv: ContentValues, value: LocalDate?) {
-        putLocalDate(cv, TimedDocumentSql.FIELD_EXPIERY_DATE, value)
+        putLocalDate(cv, TimedDocumentSql.FIELD_EXPIRY_DATE, value)
     }
 }
 
@@ -37,4 +37,4 @@ internal fun Cursor.getDeliveryDateField() =
     getLocalDate(this, TimedDocumentSql.FIELD_DELIVERY_DATE)
 
 internal fun Cursor.getExpireDateField() =
-    getLocalDate(this, TimedDocumentSql.FIELD_EXPIERY_DATE)
+    getLocalDate(this, TimedDocumentSql.FIELD_EXPIRY_DATE)

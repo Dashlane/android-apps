@@ -61,8 +61,8 @@ public final class DataFactory {
         
         Calendar now = Calendar.getInstance();
 
-        int currenctYear = now.get(Calendar.YEAR);
-        int startYearOfCurrentDecade = currenctYear - (currenctYear % 10);
+        int currentYear = now.get(Calendar.YEAR);
+        int startYearOfCurrentDecade = currentYear - (currentYear % 10);
 
         int days = 100 * (dateBytes[0] & 0xF) + 10 * (0xF & dateBytes[1] >>> 4) + (dateBytes[1] & 0xF);
 

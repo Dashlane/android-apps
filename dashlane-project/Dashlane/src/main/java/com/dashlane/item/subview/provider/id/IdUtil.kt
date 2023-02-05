@@ -98,7 +98,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldFullName(
     isOther: Boolean
 ): ItemSubView<String>? {
     return subViewFactory.createSubViewString(
-        context.getString(R.string.abstact_ids_hint_full_name),
+        context.getString(R.string.abstract_ids_hint_full_name),
         fullName(item),
         false,
         { it, value ->

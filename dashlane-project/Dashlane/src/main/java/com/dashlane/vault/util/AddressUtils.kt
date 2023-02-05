@@ -26,7 +26,7 @@ fun SummaryObject.Address.getAddressCompleteWithoutName(c: Context): String {
         builder.append(c.getString(R.string.floor)).append(" ").append(floor).append(", ")
     }
     if (door.isNotSemanticallyNull()) {
-        builder.append(c.getString(R.string.appartment)).append(" ").append(door).append(", ")
+        builder.append(c.getString(R.string.apartment)).append(" ").append(door).append(", ")
     }
     if (zipCode.isNotSemanticallyNull()) {
         builder.append(zipCode).append(" ")

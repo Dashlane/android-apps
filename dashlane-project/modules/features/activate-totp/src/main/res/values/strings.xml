@@ -18,7 +18,7 @@
 
     
     <string name="enable_totp_recovery_info_title">Set up a recovery method</string>
-    <string name="enable_totp_recovery_info_description">If you can’t access your Authenticator app, you can log in to your Dashlane account with a recovery code.</string>
+    <string name="enable_totp_recovery_info_description">If you can’t access your Authenticator app, you can log into your Dashlane account with a recovery code.</string>
     <string name="enable_totp_recovery_info_option_title">How to access your recovery codes:</string>
     <string name="enable_totp_recovery_info_option_1">Receive them via text to your mobile phone</string>
     <string name="enable_totp_recovery_info_option_2">Save the list generated during this setup in a secure place</string>
@@ -47,7 +47,7 @@
     <string name="enable_totp_display_recovery_codes_cta_positive">Save recovery codes</string>
     <string name="enable_totp_display_recovery_codes_cta_negative">Skip</string>
     <string name="enable_totp_display_recovery_codes_dialog_title">Did you save your codes?</string>
-    <string name="enable_totp_display_recovery_codes_dialog_message">If you can’t access your other authentication methods, you’ll need these codes to log in to Dashlane.</string>
+    <string name="enable_totp_display_recovery_codes_dialog_message">If you can’t access your other authentication methods, you’ll need these codes to log into Dashlane.</string>
     <string name="enable_totp_display_recovery_codes_dialog_cta_positive">Yes</string>
     <string name="enable_totp_display_recovery_codes_dialog_cta_negative">Go back</string>
 
@@ -68,13 +68,13 @@
 
     
     <string name="enable_totp_complete_title">You added an extra layer of security to your account</string>
-    <string name="enable_totp_complete_description">When you log in to Dashlane on a new device, you’ll be asked to:\n• Accept the authentication request in your Authenticator app\n• Or, enter the 6-digit token from your Authenticator</string>
+    <string name="enable_totp_complete_description">When you log into Dashlane on a new device, you’ll be asked to:\n• Accept the authentication request in your Authenticator app\n• Or, enter the 6-digit token from your Authenticator</string>
     <string name="enable_totp_complete_cta_positive">View token</string>
     <string name="enable_totp_complete_cta_negative">Skip</string>
 
     
     <string name="disable_totp_confirmation_title">Turn off 2FA? </string>
-    <string name="disable_totp_confirmation_message">2FA is an extra layer of security. If you turn it off, you won’t be sent a push request or asked for a 6-digit token when logging in to your account.</string>
+    <string name="disable_totp_confirmation_message">2FA is an extra layer of security. If you turn it off, you won’t be sent a push request or asked for a 6-digit token when logging into your account.</string>
     <string name="disable_totp_confirmation_cta_positive">Yes, turn off</string>
     <string name="disable_totp_confirmation_cta_negative">Cancel</string>
 

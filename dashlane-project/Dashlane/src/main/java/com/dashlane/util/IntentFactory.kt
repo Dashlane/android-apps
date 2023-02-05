@@ -20,7 +20,7 @@ object IntentFactory {
         intent.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.checkout_dashlane))
         intent.putExtra(
             Intent.EXTRA_TEXT, String.format(
-                activity.getString(R.string.refferal_text), TextUtil
+                activity.getString(R.string.referral_text), TextUtil
                     .generateRefferalUrl(refid)
             )
         )

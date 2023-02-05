@@ -14,7 +14,7 @@
     <string name="date_of_birth">Date of birth</string>
     <string name="copy" tools:override="true">Copy</string>
     <string name="state">State</string>
-    <string name="expiery_date">Expiration date</string>
+    <string name="expiry_date">Expiration date</string>
     <string name="country">Country</string>
     <string name="type">Type</string>
     <string name="email_address">Email</string>
@@ -32,7 +32,7 @@
     <string name="latest_update_header_for_shared_item">Modified by you</string>
     <string name="now_display_format">Just now</string>
     <string name="checkout_dashlane">Check out Dashlane</string>
-    <string name="refferal_text">All my personal data at hand for instant shopping, logging in, registering anywhere. Try it: %1$s</string>
+    <string name="referral_text">All my personal data at hand for instant shopping, logging in, registering anywhere. Try it: %1$s</string>
     <string name="enter_pin">Unlock with your PIN</string>
     <string name="pin">Unlock Dashlane with a PIN</string>
     <string name="use_pin">Use a PIN</string>
@@ -41,7 +41,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="log_out_of_dashlane_">Log out of Dashlane?</string>
-    <string name="make_sure_you_have_internet_for_refferalid">Please check your connection and try again.</string>
+    <string name="make_sure_you_have_internet_for_referralid">Please check your connection and try again.</string>
     <string name="network_error">Network error</string>
     <string name="dashlane_sync_in_progress">Dashlane sync in progress</string>
     <string name="your_dashlane_account_is_beeing_synchronized">Your Dashlane account is being synchronized</string>
@@ -82,7 +82,7 @@
     <string name="incomplete">Incomplete</string>
     <string name="building">Building</string>
     <string name="floor">Floor</string>
-    <string name="appartment">Apartment</string>
+    <string name="apartment">Apartment</string>
     <string name="issue_place">Place of issue</string>
     <string name="rate_no_thx">No, thanks</string>
     <string name="go_button">GO</string>
@@ -117,10 +117,10 @@
     <string name="address_hint_house_number">House number</string>
     <string name="address_hint_city">City</string>
     <string name="address_hint_zipcode">Zip code</string>
-    <string name="address_hint_receipent">Recipient</string>
+    <string name="address_hint_recipient">Recipient</string>
     <string name="address_hint_building">Building</string>
     <string name="address_hint_floor">Floor</string>
-    <string name="address_hint_appartment">Apartment</string>
+    <string name="address_hint_apartment">Apartment</string>
     <string name="address_hint_doorcode">Door code</string>
     <string name="company_hint_company">Company</string>
     <string name="company_hint_job">Job title</string>
@@ -135,7 +135,7 @@
     <string name="phone_hint_number">Number</string>
     <string name="personal_website_hint_name">Item name</string>
     <string name="personal_website_hint_url">Website</string>
-    <string name="abstact_ids_hint_full_name">Full name</string>
+    <string name="abstract_ids_hint_full_name">Full name</string>
     <string name="passport_hint_number">Number</string>
     <string name="tax_statement_hint_number">Tax number</string>
     <string name="tax_statement_hint_online_number">Online registration number</string>
@@ -294,8 +294,8 @@
     <string name="ui_sharing_error_nothing_to_share">Oops! Something went wrong. (Error - 1002)</string>
     <string name="ui_sharing_error_fail_applying_local_changes">Oops! Something went wrong. (Error - 1003)</string>
     <string name="ui_sharing_error_public_keys_not_found">Oops! Something went wrong. (Error - 1004)</string>
-    <string name="ui_sharing_error_non_transactionnal_events_1">Oops! Something went wrong. (Error - 1005)</string>
-    <string name="ui_sharing_error_non_transactionnal_events_2">Oops! Something went wrong. (Error - 1006)</string>
+    <string name="ui_sharing_error_non_transactional_events_1">Oops! Something went wrong. (Error - 1005)</string>
+    <string name="ui_sharing_error_non_transactional_events_2">Oops! Something went wrong. (Error - 1006)</string>
     <string name="ui_sharing_error_wrong_lock">Oops! Something went wrong. Please try again later. (Error - 1007)</string>
     <string name="ui_sharing_error_network_or_server_error">Please check your connection and try again.</string>
     <string name="ui_sharing_error_unknown">Oops! Something went wrong. (Error - 1008)</string>
@@ -311,7 +311,7 @@
     <string name="ui_sharing_error_user_not_active">Oops! Something went wrong. Please try again later. (Error - 1017)</string>
     <string name="ui_sharing_error_action_not_valid">Oops! Something went wrong. (Error - 1018)</string>
     <string name="ui_sharing_error_public_key_not_ready">Please try again later. Your data needs to sync before you can start sharing.</string>
-    <string name="ui_sharing_error_data_not_ready">This contact needs to log in to Dashlane before you can request to view their data.</string>
+    <string name="ui_sharing_error_data_not_ready">This contact needs to log into Dashlane before you can request to view their data.</string>
     <string name="ui_sharing_error_please_update_wrong_sharing_version">Your request to share failed. Please update Dashlane and try again.</string>
     <string name="ui_sharing_error_sharing_skipped">Oops! Something went wrong. (Error - 1022)</string>
     <string name="ui_sharing_error_dialog_title">An error occurred</string>
@@ -320,7 +320,7 @@
     <string name="enum_sharing_permission_admin">Full rights</string>
     <string name="enum_sharing_permission_limited">Limited rights</string>
     <string name="enum_sharing_permission_revoked">Revoked</string>
-    <string name="sharing_permission_explaination_title">Permission settings</string>
+    <string name="sharing_permission_explanation_title">Permission settings</string>
     <string name="settings_category_sharing">Misc</string>
     <string name="fragment_credential_create_step1_input_label">Search for a website or app</string>
     <string name="fragment_credential_create_step1_add_empty_item">Add login</string>
@@ -364,8 +364,8 @@
     <string name="sharing_emergency_permission_change_cta">Change</string>
     <string name="sharing_emergency_email_addresses_label">Share with</string>
     <string name="sharing_emergency_email_addresses_input_hint">Type email addresses</string>
-    <string name="sharing_permission_explaination_description_limited">People with limited rights can only use shared items with Dashlane</string>
-    <string name="sharing_permission_explaination_description_admin">People with full rights can use shared items with Dashlane\n\nThey can also:\n\n- View and edit logins\n- Share these items with others\n- Edit and revoke others\' sharing rights\n- Revoke your access</string>
+    <string name="sharing_permission_explanation_description_limited">People with limited rights can only use shared items with Dashlane</string>
+    <string name="sharing_permission_explanation_description_admin">People with full rights can use shared items with Dashlane\n\nThey can also:\n\n- View and edit logins\n- Share these items with others\n- Edit and revoke others\' sharing rights\n- Revoke your access</string>
     <string name="error_cannot_add_empty_item">Fill out all required fields to save this item.</string>
     <string name="menu_user_profile_status_free">Free plan</string>
     <string name="menu_user_profile_status_legacy">Free (pre-2.0) plan</string>
@@ -381,9 +381,9 @@
     <string name="fragment_dialog_propose_hardware_module_google_fp_desc">Instead of typing in your Master Password, use biometrics to unlock your Dashlane app quickly and securely.</string>
     <string name="onboarding_dialog_auth_required_hardware_module_google_fp_title">Authenticate with biometric to activate it for Dashlane</string>
     <string name="onboarding_dialog_auth_required_hardware_module_google_fp_button">Cancel</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_title">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_title_fingeronly">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_button">Go</string>
+    <string name="onboarding_dialog_hardware_registration_module_google_fp_title">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
+    <string name="onboarding_dialog_hardware_registration_module_google_fp_title_fingeronly">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
+    <string name="onboarding_dialog_hardware_registration_module_google_fp_button">Go</string>
     <string name="window_biometric_unlock_hardware_module_google_fp_title">Unlock Dashlane with biometrics</string>
     <string name="dashlane_save">Save</string>
     <string name="error_credential_must_have_at_least">Please add login details and either a website or item name before saving</string>
@@ -452,7 +452,7 @@
     <string name="sharing_status_pending_short">Pending</string>
     <string name="login_token_where_is_cta">Where is my code?</string>
     <string name="login_token_where_is_popup_title">Where is my code?</string>
-    <string name="login_token_where_is_popup_message">We sent a verification code to your primary contact email address, which may be different from the address you use to log in to Dashlane.\n\nIf you use Dashlane on another mobile device, you can also access the code in your app.</string>
+    <string name="login_token_where_is_popup_message">We sent a verification code to your primary contact email address, which may be different from the address you use to log into Dashlane.\n\nIf you use Dashlane on another mobile device, you can also access the code in your app.</string>
     <string name="login_token_where_is_popup_resend">Resend code</string>
     <string name="sharing_center_label_pending_invitation">Pending sharing requests</string>
     <string name="sharing_pending_invite_item_group_description">Shared by %1$s</string>
@@ -546,7 +546,7 @@
     <string name="change_master_password_progress_success_message">Nice job on the new Master Password!</string>
     <string name="change_master_password_new_password_hint">New Master Password</string>
     <string name="change_mp_warning_desktop_title">This change will deauthorize your other devices</string>
-    <string name="change_mp_warning_desktop_description">It\'s not a big deal—you\'ll just need to log in to each device again with your new Master Password. You\'ll also see the introduction steps, but feel free to skip them.</string>
+    <string name="change_mp_warning_desktop_description">It\'s not a big deal—you\'ll just need to log into each device again with your new Master Password. You\'ll also see the introduction steps, but feel free to skip them.</string>
     <string name="change_mp_warning_desktop_nosync_title">Only the data on this device will be saved</string>
     <string name="change_mp_warning_desktop_nosync_description">Changing your Master Password on this device will remove any data stored on your other devices.</string>
     <string name="change_mp_warning_desktop_positive_button">Change Master Password</string>

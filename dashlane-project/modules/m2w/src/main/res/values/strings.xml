@@ -15,5 +15,5 @@
 
     <string name="m2w_connect_confirm_cta_positive">Yes</string>
     <string name="m2w_connect_confirm_cta_negative">Not yet</string>
-    <string name="m2w_connect_confirm_message">Have you logged in to Dashlane on your computer?</string>
+    <string name="m2w_connect_confirm_message">Have you logged into Dashlane on your computer?</string>
 </resources>

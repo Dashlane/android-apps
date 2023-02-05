@@ -5,7 +5,7 @@
     <string name="guided_onboarding_brings_title">How can we make your life easier?</string>
 
     <string name="guided_onboarding_brings_autofill_title">Type my logins for me</string>
-    <string name="guided_onboarding_brings_autofill_detail">Gladly! Our Autofill feature will help you log in to sites and apps instantly.</string>
+    <string name="guided_onboarding_brings_autofill_detail">Gladly! Our Autofill feature will help you log into sites and apps instantly.</string>
     <string name="guided_onboarding_brings_m2w_title">Sync logins across my devices</string>
     <string name="guided_onboarding_brings_m2w_detail">Consider it done. We’ll help you install Dashlane everywhere you use the internet so you\'ll always have access to your logins.</string>
     <string name="guided_onboarding_brings_dwm_title">Warn me about hacks</string>

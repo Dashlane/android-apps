@@ -88,7 +88,7 @@
     <string name="plan_details_premium_title">Premium</string>
     <string name="plan_details_family_title">Family</string>
 
-    <string name="benefit_individual_acount">1 account</string>
+    <string name="benefit_individual_account">1 account</string>
     <string name="benefit_bundle">%1$d &lt;strong&gt;%2$s&lt;/strong&gt; accounts</string>
     <string name="benefit_bundle_account_type_premium">Premium</string>
     <string name="benefit_store_passwords_limited_arg">Up to &lt;strong&gt;%1$s logins&lt;/strong&gt;</string>

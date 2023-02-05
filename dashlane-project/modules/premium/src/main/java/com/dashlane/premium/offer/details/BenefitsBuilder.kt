@@ -45,7 +45,7 @@ internal class BenefitsBuilder(
                     arg2 = StringResArg(accountTypeResId)
                 )
             } else {
-                StringText(R.string.benefit_individual_acount)
+                StringText(R.string.benefit_individual_account)
             }
         }
 

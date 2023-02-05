@@ -79,7 +79,7 @@ class SearchableSettingInRecyclerView(
 
         val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<SearchableSettingInRecyclerView> =
             DashlaneRecyclerAdapter.ViewType(
-                R.layout.item_searcheable_setting, ViewHolder::class.java
+                R.layout.item_searchable_setting, ViewHolder::class.java
             )
     }
 }

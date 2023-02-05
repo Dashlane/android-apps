@@ -11,7 +11,7 @@ object DashlaneUrls {
     const val COUNTRY = "/1/country/get"
     const val PREMIUM_STATUS = "/3/premium/status"
     const val FEATURE_FLIPPING = "/1/features/getForUser"
-    const val PUSH_NOTIFICATION = "/1/devices/setPushNoficationID"
+    const val PUSH_NOTIFICATION = "/1/devices/setPushNotificationID"
     const val USER_NUMBER_DEVICES = "/1/devices/numberOfDevices"
     const val HAS_DESKTOP_DEVICE = "/1/devices/hasDesktopDevice"
     const val VERIFY_RECEIPT = "/3/premium/verifyReceipt"

@@ -44,7 +44,7 @@ The on cancel of the `NavigableBottomSheetDialogFragment` can be propagated to t
 or to the activity that implements the `NavigableBottomSheetDialogFragmentCanceledListener`
 
 In order to access the `NavHostFragment` from the fragments being loaded inside the bottom sheet
- dilaog, one can make those fragments implement the interface `NavigableBottomSheetFragment`
+ dialog, one can make those fragments implement the interface `NavigableBottomSheetFragment`
  
 In order to delegate the navigation to the activity one can make the fragments loaded in the
  bottom sheet to implement the `DelegateNavigationBottomSheetFragment` and call the

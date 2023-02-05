@@ -33,12 +33,12 @@ class ImportFromChromeLogger(
 
     fun logOnboardingErrorSkipClicked() = log(
         subtype = "chrome_android_csv",
-        action = "click_skip_after_errror_message_onboarding_screen"
+        action = "click_skip_after_error_message_onboarding_screen"
     )
 
     fun logOnboardingErrorRetryClicked() = log(
         subtype = "chrome_android_csv",
-        action = "click_retry_after_errror_message_onboarding_screen"
+        action = "click_retry_after_error_message_onboarding_screen"
     )
 
     fun logCsvImportDisplayed() = log(
@@ -64,7 +64,7 @@ class ImportFromChromeLogger(
 
     fun logCsvImportAddManuallyClicked() = log(
         subtype = "chrome_android_csv",
-        action = "click_add_manually_after_errror_message_onboarding_screen"
+        action = "click_add_manually_after_error_message_onboarding_screen"
     )
 
     private fun log(

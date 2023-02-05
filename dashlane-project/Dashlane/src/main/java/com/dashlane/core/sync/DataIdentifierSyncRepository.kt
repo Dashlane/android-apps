@@ -37,10 +37,10 @@ class DataIdentifierSyncRepository(
     @Inject
     constructor(
         dao: DataSyncDao,
-        datebaseItemSaver: DatabaseItemSaverImplLegacy
+        databaseItemSaver: DatabaseItemSaverImplLegacy
     ) : this(
         dao,
-        datebaseItemSaver,
+        databaseItemSaver,
         XmlSerialization
     )
 

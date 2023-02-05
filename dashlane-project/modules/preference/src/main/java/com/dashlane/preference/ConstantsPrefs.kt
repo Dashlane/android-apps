@@ -10,7 +10,7 @@ class ConstantsPrefs {
         internal const val DEVICE_COUNTRY_REFRESH = "deviceCountryRefreshTimestamp"
         internal const val DEVICE_EUROPEAN_UNION_STATUS = "deviceIsInEuropeanUnion"
         internal const val IS_USER_LOCKED = "isUserLocked"
-        internal const val REFFERAL_ID = "refferalUrl"
+        internal const val REFFERAL_ID = "referralUrl"
         internal const val ACCESS_KEY = "pref_api_auth_access_key"
         internal const val RSA_PUBLIC_KEY = "pref_rsa_public_key"
         internal const val PINCODE_ON = "pincodeOn"
@@ -186,7 +186,7 @@ class ConstantsPrefs {
 
         const val VPN_THIRD_PARTY_GET_STARTED_DISPLAYED = "vpn_third_party_get_started_displayed"
 
-        const val CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP = "crypto_migration_attempt_timstamp"
+        const val CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP = "crypto_migration_attempt_timestamp"
 
         
 

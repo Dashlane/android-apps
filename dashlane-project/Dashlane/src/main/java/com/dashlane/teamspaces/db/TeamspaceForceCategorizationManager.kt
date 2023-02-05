@@ -183,9 +183,9 @@ class TeamspaceForceCategorizationManager @Inject constructor(
         val logger = TeamspaceForceCategorizationLogger(userDataRepository)
 
         items.forEach { item ->
-            val annonSpaceId = spaces.find { item.syncObject.spaceId == it.teamId }?.anonTeamId
+            val anonSpaceId = spaces.find { item.syncObject.spaceId == it.teamId }?.anonTeamId
             val logCode11: UsageLogCode11Wrapper = logger.newLog()
-                .setSpaceId(annonSpaceId)
+                .setSpaceId(anonSpaceId)
                 .setType(getUsageLogNameFromType(item.syncObjectType))
                 .setItemId(item.anonymousId)
                 .setFrom(
