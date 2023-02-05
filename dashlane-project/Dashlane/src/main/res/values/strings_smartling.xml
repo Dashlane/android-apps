@@ -135,7 +135,7 @@
     <string name="phone_hint_number">Number</string>
     <string name="personal_website_hint_name">Item name</string>
     <string name="personal_website_hint_url">Website</string>
-    <string name="abstact_ids_hint_full_name">Full name</string>
+    <string name="abstract_ids_hint_full_name">Full name</string>
     <string name="passport_hint_number">Number</string>
     <string name="tax_statement_hint_number">Tax number</string>
     <string name="tax_statement_hint_online_number">Online registration number</string>
