@@ -311,7 +311,7 @@
     <string name="ui_sharing_error_user_not_active">Oops! Something went wrong. Please try again later. (Error - 1017)</string>
     <string name="ui_sharing_error_action_not_valid">Oops! Something went wrong. (Error - 1018)</string>
     <string name="ui_sharing_error_public_key_not_ready">Please try again later. Your data needs to sync before you can start sharing.</string>
-    <string name="ui_sharing_error_data_not_ready">This contact needs to log in to Dashlane before you can request to view their data.</string>
+    <string name="ui_sharing_error_data_not_ready">This contact needs to log into Dashlane before you can request to view their data.</string>
     <string name="ui_sharing_error_please_update_wrong_sharing_version">Your request to share failed. Please update Dashlane and try again.</string>
     <string name="ui_sharing_error_sharing_skipped">Oops! Something went wrong. (Error - 1022)</string>
     <string name="ui_sharing_error_dialog_title">An error occurred</string>
@@ -452,7 +452,7 @@
     <string name="sharing_status_pending_short">Pending</string>
     <string name="login_token_where_is_cta">Where is my code?</string>
     <string name="login_token_where_is_popup_title">Where is my code?</string>
-    <string name="login_token_where_is_popup_message">We sent a verification code to your primary contact email address, which may be different from the address you use to log in to Dashlane.\n\nIf you use Dashlane on another mobile device, you can also access the code in your app.</string>
+    <string name="login_token_where_is_popup_message">We sent a verification code to your primary contact email address, which may be different from the address you use to log into Dashlane.\n\nIf you use Dashlane on another mobile device, you can also access the code in your app.</string>
     <string name="login_token_where_is_popup_resend">Resend code</string>
     <string name="sharing_center_label_pending_invitation">Pending sharing requests</string>
     <string name="sharing_pending_invite_item_group_description">Shared by %1$s</string>
@@ -546,7 +546,7 @@
     <string name="change_master_password_progress_success_message">Nice job on the new Master Password!</string>
     <string name="change_master_password_new_password_hint">New Master Password</string>
     <string name="change_mp_warning_desktop_title">This change will deauthorize your other devices</string>
-    <string name="change_mp_warning_desktop_description">It\'s not a big deal—you\'ll just need to log in to each device again with your new Master Password. You\'ll also see the introduction steps, but feel free to skip them.</string>
+    <string name="change_mp_warning_desktop_description">It\'s not a big deal—you\'ll just need to log into each device again with your new Master Password. You\'ll also see the introduction steps, but feel free to skip them.</string>
     <string name="change_mp_warning_desktop_nosync_title">Only the data on this device will be saved</string>
     <string name="change_mp_warning_desktop_nosync_description">Changing your Master Password on this device will remove any data stored on your other devices.</string>
     <string name="change_mp_warning_desktop_positive_button">Change Master Password</string>

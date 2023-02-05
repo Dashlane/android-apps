@@ -7,8 +7,8 @@
     <string name="action_item_activate_fingerprint_description">Access your account the safe and simple way with biometric authentication.</string>
     <string name="action_item_activate_pin_title">Unlock Dashlane with a PIN</string>
     <string name="action_item_activate_pin_description">Access your account the safe and simple way by using a PIN.</string>
-    <string name="action_item_auto_fill_title">Log in to apps instantly</string>
-    <string name="action_item_auto_fill_description">Activate Autofill to log in to apps without typing a password.</string>
+    <string name="action_item_auto_fill_title">Log into apps instantly</string>
+    <string name="action_item_auto_fill_description">Activate Autofill to log into apps without typing a password.</string>
     <string name="action_item_undo_dismiss_description">Item deleted.</string>
     <string name="action_item_undo_dismiss_cta">Undo</string>
     <string name="action_item_zero_password_title">Getting started</string>

@@ -2,14 +2,14 @@
 <resources>
     <string name="guided_password_toolbar_title">Change password</string>
     <string name="guided_password_change_title">Change your %1$s password</string>
-    <string name="guided_password_change_step_1">Log in to %1$s</string>
+    <string name="guided_password_change_step_1">Log into %1$s</string>
     <string name="guided_password_change_step_2">Go to the change password page</string>
     <string name="guided_password_change_step_3">Select Change password to generate a secure password</string>
     <string name="guided_password_change_step_4">Save your new password, then come back to the Dashlane app via the back arrow</string>
     <string name="guided_password_change_positive_button">Change password</string>
     <string name="guided_password_change_success">%1$s password updated</string>
     <string name="guided_password_change_enable_autofill_dialog_title">Activate Autofill to change your password</string>
-    <string name="guided_password_change_enable_autofill_dialog_message">It’s super quick and will let you log in to apps and websites automatically.</string>
+    <string name="guided_password_change_enable_autofill_dialog_message">It’s super quick and will let you log into apps and websites automatically.</string>
     <string name="guided_password_change_enable_autofill_dialog_positive_button">Activate</string>
     <string name="guided_password_change_enable_autofill_dialog_negative_button">Not now</string>
 </resources>

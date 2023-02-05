@@ -17,7 +17,7 @@
 
     
     <string name="master_password_user_migration_warning_title">Create a Master Password</string>
-    <string name="master_password_user_migration_warning_message">Your account rights have changed. Create a strong Master Password to log in to Dashlane going forward.</string>
+    <string name="master_password_user_migration_warning_message">Your account rights have changed. Create a strong Master Password to log into Dashlane going forward.</string>
     <string name="master_password_user_migration_warning_cta_positive">Create Master Password</string>
     <string name="master_password_user_migration_warning_cta_negative">Log out</string>
 </resources>

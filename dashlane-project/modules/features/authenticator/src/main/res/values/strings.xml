@@ -48,7 +48,7 @@
     <string name="authenticator_faq_question_1_title">What is the Authenticator?</string>
     <string name="authenticator_faq_question_2_title">What is 2FA for?</string>
     <string name="authenticator_faq_question_3_title">I need help</string>
-    <string name="authenticator_faq_question_1_body">It generates authentication codes every time you log in to an app or site you’ve set up 2FA for.</string>
+    <string name="authenticator_faq_question_1_body">It generates authentication codes every time you log into an app or site you’ve set up 2FA for.</string>
     <string name="authenticator_faq_question_2_body">Setting up 2FA for your services adds an extra layer of security by asking to authenticate with a second factor in order to log in.</string>
     <string name="authenticator_faq_question_3_body">If you need more help, visit our Help Center or contact our Support team.</string>
     <string name="authenticator_faq_question_1_button">Learn more about 2FA</string>

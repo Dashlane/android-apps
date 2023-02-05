@@ -3,10 +3,10 @@
     <string name="action_bar_title_vpn_third_party">Virtual private network</string>
     <string name="menu_vpn">VPN</string>
     <string name="vpn_third_party_activate_title">Activate your Hotspot Shield account</string>
-    <string name="vpn_third_party_activate_subtitle">You’ll need to use this account info to log in to the VPN for the first time.</string>
+    <string name="vpn_third_party_activate_subtitle">You’ll need to use this account info to log into the VPN for the first time.</string>
     <string name="vpn_third_party_activate_button">Activate account</string>
     <string name="vpn_third_party_all_set_title">You’re all set!</string>
-    <string name="vpn_third_party_all_set_subtitle">You can now log in to your Hotspot Shield account with the following username and password.</string>
+    <string name="vpn_third_party_all_set_subtitle">You can now log into your Hotspot Shield account with the following username and password.</string>
     <string name="vpn_third_party_install_app_button">Get the app</string>
     <string name="vpn_third_party_launch_app_button">Launch Hotspot Shield</string>
     <string name="vpn_third_party_faq_title">Frequently asked questions</string>
