@@ -82,7 +82,7 @@
     <string name="incomplete">Incomplete</string>
     <string name="building">Building</string>
     <string name="floor">Floor</string>
-    <string name="appartment">Apartment</string>
+    <string name="apartment">Apartment</string>
     <string name="issue_place">Place of issue</string>
     <string name="rate_no_thx">No, thanks</string>
     <string name="go_button">GO</string>
@@ -120,7 +120,7 @@
     <string name="address_hint_receipent">Recipient</string>
     <string name="address_hint_building">Building</string>
     <string name="address_hint_floor">Floor</string>
-    <string name="address_hint_appartment">Apartment</string>
+    <string name="address_hint_apartment">Apartment</string>
     <string name="address_hint_doorcode">Door code</string>
     <string name="company_hint_company">Company</string>
     <string name="company_hint_job">Job title</string>
