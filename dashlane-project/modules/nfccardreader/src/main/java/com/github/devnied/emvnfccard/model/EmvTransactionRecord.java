@@ -28,7 +28,7 @@ public class EmvTransactionRecord extends AbstractByteBean<EmvTransactionRecord>
 	
 
 	@Data(index = 2, size = 8, readHexa = true, tag = "9f27")
-	private String cyptogramData;
+	private String cryptogramData;
 
 	
 
@@ -63,8 +63,8 @@ public class EmvTransactionRecord extends AbstractByteBean<EmvTransactionRecord>
 
 	
 
-	public String getCyptogramData() {
-		return cyptogramData;
+	public String getCryptogramData() {
+		return cryptogramData;
 	}
 
 	
@@ -93,8 +93,8 @@ public class EmvTransactionRecord extends AbstractByteBean<EmvTransactionRecord>
 
 	
 
-	public void setCyptogramData(final String cyptogramData) {
-		this.cyptogramData = cyptogramData;
+	public void setCryptogramData(final String cryptogramData) {
+		this.cryptogramData = cryptogramData;
 	}
 
 	
