@@ -47,7 +47,7 @@ class AuthModuleLogger(
     }
 
     fun logUsageStartOnboarding() {
-        sendUsageLog35("onbardingStart")
+        sendUsageLog35("onboardingStart")
     }
 
     private fun sendUsageLog35(action: String) {
