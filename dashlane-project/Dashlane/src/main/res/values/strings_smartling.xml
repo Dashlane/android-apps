@@ -14,7 +14,7 @@
     <string name="date_of_birth">Date of birth</string>
     <string name="copy" tools:override="true">Copy</string>
     <string name="state">State</string>
-    <string name="expiery_date">Expiration date</string>
+    <string name="expiry_date">Expiration date</string>
     <string name="country">Country</string>
     <string name="type">Type</string>
     <string name="email_address">Email</string>

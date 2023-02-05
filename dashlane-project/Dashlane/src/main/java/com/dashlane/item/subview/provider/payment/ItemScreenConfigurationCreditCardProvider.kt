@@ -546,7 +546,7 @@ class ItemScreenConfigurationCreditCardProvider(
         val expirationDate = item.syncObject.expireDate
         return when {
             editMode -> ItemEditValueDateSubView(
-                context.getString(R.string.expiery_date),
+                context.getString(R.string.expiry_date),
                 expirationDate?.atFirstDayOfMonth(),
                 expirationDate?.formatToShortDate(),
                 VaultItem<*>::copyForUpdatedExpirationDate
@@ -571,7 +571,7 @@ class ItemScreenConfigurationCreditCardProvider(
         expirationDate: YearMonth
     ): ItemSubView<LocalDate?> {
         val view = ItemReadValueDateSubView(
-            context.getString(R.string.expiery_date),
+            context.getString(R.string.expiry_date),
             expirationDate.atFirstDayOfMonth(),
             expirationDate.formatToShortDate()
         )

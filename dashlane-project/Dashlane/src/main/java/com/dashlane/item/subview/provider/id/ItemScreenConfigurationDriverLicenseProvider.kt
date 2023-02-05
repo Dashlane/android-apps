@@ -111,7 +111,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
                 editMode,
                 listener,
                 item.syncObject.expireDate,
-                context.getString(R.string.expiery_date),
+                context.getString(R.string.expiry_date),
                 CopyField.DriverLicenseExpirationDate,
                 VaultItem<*>::copyForUpdatedExpirationDate
             ),
