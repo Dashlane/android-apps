@@ -91,7 +91,7 @@ public class Constants {
         public static final String ORIGIN = "origin";
         public static final String SHOULD_SEND_REPORTS = "Send";
         public static final String CONTENT = "content";
-        public static final String REFFERAL_STRING = "refferal_string";
+        public static final String REFFERAL_STRING = "referral_string";
 
         
         public static final String LANGUAGE = "language";

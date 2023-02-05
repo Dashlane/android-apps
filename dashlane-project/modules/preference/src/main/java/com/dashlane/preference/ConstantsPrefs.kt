@@ -10,7 +10,7 @@ class ConstantsPrefs {
         internal const val DEVICE_COUNTRY_REFRESH = "deviceCountryRefreshTimestamp"
         internal const val DEVICE_EUROPEAN_UNION_STATUS = "deviceIsInEuropeanUnion"
         internal const val IS_USER_LOCKED = "isUserLocked"
-        internal const val REFFERAL_ID = "refferalUrl"
+        internal const val REFFERAL_ID = "referralUrl"
         internal const val ACCESS_KEY = "pref_api_auth_access_key"
         internal const val RSA_PUBLIC_KEY = "pref_rsa_public_key"
         internal const val PINCODE_ON = "pincodeOn"

@@ -32,7 +32,7 @@
     <string name="latest_update_header_for_shared_item">Modified by you</string>
     <string name="now_display_format">Just now</string>
     <string name="checkout_dashlane">Check out Dashlane</string>
-    <string name="refferal_text">All my personal data at hand for instant shopping, logging in, registering anywhere. Try it: %1$s</string>
+    <string name="referral_text">All my personal data at hand for instant shopping, logging in, registering anywhere. Try it: %1$s</string>
     <string name="enter_pin">Unlock with your PIN</string>
     <string name="pin">Unlock Dashlane with a PIN</string>
     <string name="use_pin">Use a PIN</string>
@@ -41,7 +41,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="log_out_of_dashlane_">Log out of Dashlane?</string>
-    <string name="make_sure_you_have_internet_for_refferalid">Please check your connection and try again.</string>
+    <string name="make_sure_you_have_internet_for_referralid">Please check your connection and try again.</string>
     <string name="network_error">Network error</string>
     <string name="dashlane_sync_in_progress">Dashlane sync in progress</string>
     <string name="your_dashlane_account_is_beeing_synchronized">Your Dashlane account is being synchronized</string>

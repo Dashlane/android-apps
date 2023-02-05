@@ -53,7 +53,7 @@ object InviteFriendsIntentHelper {
                 }
             })
         } else {
-            toaster.show(R.string.make_sure_you_have_internet_for_refferalid, Toast.LENGTH_LONG)
+            toaster.show(R.string.make_sure_you_have_internet_for_referralid, Toast.LENGTH_LONG)
         }
     }
 }
