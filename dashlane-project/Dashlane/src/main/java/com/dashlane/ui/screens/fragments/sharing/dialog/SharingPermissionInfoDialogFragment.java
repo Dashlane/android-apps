@@ -17,7 +17,7 @@ public class SharingPermissionInfoDialogFragment {
 
     public static NotificationDialogFragment newInstance(Context context) {
         return new NotificationDialogFragment.Builder()
-                .setTitle(context, R.string.sharing_permission_explaination_title)
+                .setTitle(context, R.string.sharing_permission_explanation_title)
                 .setPositiveButtonText(context, R.string.ok)
                 .setCustomView(R.layout.fragment_dialog_sharing_permissions_info)
                 .build();

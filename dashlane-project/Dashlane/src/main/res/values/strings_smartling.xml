@@ -320,7 +320,7 @@
     <string name="enum_sharing_permission_admin">Full rights</string>
     <string name="enum_sharing_permission_limited">Limited rights</string>
     <string name="enum_sharing_permission_revoked">Revoked</string>
-    <string name="sharing_permission_explaination_title">Permission settings</string>
+    <string name="sharing_permission_explanation_title">Permission settings</string>
     <string name="settings_category_sharing">Misc</string>
     <string name="fragment_credential_create_step1_input_label">Search for a website or app</string>
     <string name="fragment_credential_create_step1_add_empty_item">Add login</string>
@@ -364,8 +364,8 @@
     <string name="sharing_emergency_permission_change_cta">Change</string>
     <string name="sharing_emergency_email_addresses_label">Share with</string>
     <string name="sharing_emergency_email_addresses_input_hint">Type email addresses</string>
-    <string name="sharing_permission_explaination_description_limited">People with limited rights can only use shared items with Dashlane</string>
-    <string name="sharing_permission_explaination_description_admin">People with full rights can use shared items with Dashlane\n\nThey can also:\n\n- View and edit logins\n- Share these items with others\n- Edit and revoke others\' sharing rights\n- Revoke your access</string>
+    <string name="sharing_permission_explanation_description_limited">People with limited rights can only use shared items with Dashlane</string>
+    <string name="sharing_permission_explanation_description_admin">People with full rights can use shared items with Dashlane\n\nThey can also:\n\n- View and edit logins\n- Share these items with others\n- Edit and revoke others\' sharing rights\n- Revoke your access</string>
     <string name="error_cannot_add_empty_item">Fill out all required fields to save this item.</string>
     <string name="menu_user_profile_status_free">Free plan</string>
     <string name="menu_user_profile_status_legacy">Free (pre-2.0) plan</string>
