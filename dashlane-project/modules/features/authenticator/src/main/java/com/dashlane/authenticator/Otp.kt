@@ -8,15 +8,11 @@ import com.dashlane.authenticator.UriParser.DEFAULT_DIGITS
 import com.dashlane.authenticator.UriParser.DEFAULT_PERIOD
 import com.dashlane.authenticator.util.Base32String
 import com.dashlane.authenticator.util.PasscodeGenerator
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.xml.domain.SyncObject
-import kotlinx.parcelize.Parcelize
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-
-
+import kotlinx.parcelize.Parcelize
 
 @Keep
 @Parcelize
@@ -30,8 +26,8 @@ open class Otp(
 ) : Parcelable {
 
     fun isStandardOtp() = this is Totp && secret.isNotSemanticallyNull() &&
-            DEFAULT_DIGITS == digits && DEFAULT_PERIOD == period &&
-            DEFAULT_ALGORITHM.equals(algorithm, ignoreCase = true)
+        DEFAULT_DIGITS == digits && DEFAULT_PERIOD == period &&
+        DEFAULT_ALGORITHM.equals(algorithm, ignoreCase = true)
 
     open fun getPin(timeOrCounter: Long? = null): Pin? = null
 
@@ -42,7 +38,6 @@ open class Otp(
             val pcg = PasscodeGenerator(signer, digits)
             pcg.generateResponseCode(currentState)
         } catch (e: Exception) {
-            Log.v(RuntimeException("Crypto failure while compute pin", e))
             null
         }
     }

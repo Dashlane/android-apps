@@ -5,14 +5,11 @@ import com.dashlane.autofill.api.common.GeneratePasswordDataProvider
 import com.dashlane.autofill.api.common.domain.AutofillGeneratePasswordService
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountService
 import com.dashlane.autofill.api.createaccount.domain.CredentialInfo
-import com.dashlane.ext.application.KnownApplication
 import com.dashlane.util.PackageUtilities
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.formatTitle
 import com.dashlane.xml.domain.SyncObject
-
-
 
 class CreateAccountDataProvider(
     generatorService: AutofillGeneratePasswordService,
@@ -22,7 +19,7 @@ class CreateAccountDataProvider(
     override suspend fun saveCredentialToVault(credential: CredentialInfo): VaultItem<SyncObject.Authentifiant>? =
         service.saveNewAuthentifiant(credential)
 
-    override fun getMatchingWebsite(packageName: String) = KnownApplication.getPrimaryWebsite(packageName)
+    override fun getMatchingWebsite(packageName: String) = service.getWebsiteForPackage(packageName)
 
     override fun getCredentialTitle(
         context: Context?,

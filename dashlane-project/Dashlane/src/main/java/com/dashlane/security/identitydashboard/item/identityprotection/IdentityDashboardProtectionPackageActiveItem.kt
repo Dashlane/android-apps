@@ -14,8 +14,7 @@ import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 import kotlin.math.roundToInt
 
 class IdentityDashboardProtectionPackageActiveItem(
-    val listener: ActiveProtectionPackageListener,
-    val logger: IdentityDashboardProtectionPackageLogger
+    val listener: ActiveProtectionPackageListener
 ) : IdentityDashboardItem {
 
     override fun getViewType() = VIEW_TYPE
@@ -39,7 +38,6 @@ class IdentityDashboardProtectionPackageActiveItem(
             setCreditMonitoringSection(bulletSpan)
             setCreditIdentityProtectionSection(bulletSpan)
             setIdentityRestorationSection(bulletSpan)
-            item.logger.logOnActivePackageShow()
         }
 
         private fun setCreditMonitoringSection(bulletSpan: BulletSpan) {
@@ -122,7 +120,6 @@ class IdentityDashboardProtectionPackageActiveItem(
     }
 
     interface ActiveProtectionPackageListener {
-        fun logOnActivePackageShow()
         fun onActiveCreditViewClick()
         fun onActiveProtectionLearnMoreClick()
         fun onActiveRestorationLearnMoreClick()

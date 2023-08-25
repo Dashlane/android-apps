@@ -10,8 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
 
-
-
 public class TeamspaceAdapterItem implements MenuDef.Item {
 
     private final static DashlaneRecyclerAdapter.ViewType<MenuDef.Item> VIEW_TYPE =

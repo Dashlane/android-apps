@@ -9,12 +9,10 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.useractivity.log.inject.UserActivityComponent.Companion.invoke
 import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogCode57
 import com.dashlane.useractivity.log.usage.UsageLogConstant.FabAction
 import com.dashlane.useractivity.log.usage.UsageLogConstant.FabSubType
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObjectType
 
 class VaultFabMenuItemNavigator(
@@ -192,11 +190,9 @@ class VaultFabMenuItemNavigator(
         fabViewProxy.hideFABMenu(false)
         val navigator = SingletonProvider.getNavigator()
         if (type === SyncObjectType.AUTHENTIFIANT) {
-            navigator.goToCredentialAddStep1(
-                UsageLogCode57.Sender.MANUAL.code
-            )
+            navigator.goToCredentialAddStep1(null)
         } else {
-            navigator.goToCreateItem(type.desktopId)
+            navigator.goToCreateItem(type.xmlObjectName)
         }
     }
 

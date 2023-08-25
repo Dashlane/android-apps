@@ -18,6 +18,9 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.dashlane.R;
 import com.dashlane.autofill.AutofillAnalyzerDef;
 import com.dashlane.autofill.AutofillOrigin;
@@ -26,21 +29,19 @@ import com.dashlane.autofill.accessibility.DashlaneAccessibilityService;
 import com.dashlane.autofill.accessibility.alwayson.AlwaysOnEventHandler;
 import com.dashlane.autofill.accessibility.alwayson.AlwaysOnUiManager;
 import com.dashlane.autofill.formdetector.model.AccessibilityLoginForm;
+import com.dashlane.core.helpers.PackageNameSignatureHelper;
 import com.dashlane.core.helpers.PackageSignatureStatus;
 import com.dashlane.dagger.autofill.AutofillComponent;
 import com.dashlane.dagger.singleton.SingletonComponentProxy;
 import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.debug.DeveloperUtilities;
 import com.dashlane.login.lock.LockManager;
-import com.dashlane.managers.PerfLogManager;
 import com.dashlane.navigation.NavigationConstants;
 import com.dashlane.navigation.NavigationHelper;
 import com.dashlane.security.DashlaneIntent;
 import com.dashlane.session.Session;
 import com.dashlane.ui.adapters.CredentialSuggestionsAdapter;
 import com.dashlane.ui.controllers.interfaces.SuggestionPicker;
-import com.dashlane.useractivity.log.usage.UsageLogCode96;
-import com.dashlane.util.DevUtil;
 import com.dashlane.util.DeviceUtils;
 import com.dashlane.util.StringUtils;
 import com.dashlane.vault.model.AuthentifiantKt;
@@ -50,14 +51,14 @@ import com.dashlane.vault.util.AuthentifiantPackageNameSignatureUtilKt;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import wei.mark.standout.StandOutWindow;
 import wei.mark.standout.constants.StandOutFlags;
 import wei.mark.standout.ui.Window;
 
-
-
+@AndroidEntryPoint
 public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
         View.OnClickListener, SuggestionPicker {
     public static final int WINDOW_ID = InAppLoginWindow.class.hashCode();
@@ -69,6 +70,9 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
     private AlwaysOnEventHandler.ScanResult mLastScanResult;
     private LayoutInflater mLayoutInflater;
     private ArrayAdapter<AuthentifiantWithWarningInfo> mSuggestionAdapter;
+
+    @Inject
+    PackageNameSignatureHelper packageNameSignatureHelper;
 
     public static int[] getWindowDimensions(Context context, int resultCount) {
         LayoutInflater layoutInflater = LayoutInflater.from(context)
@@ -210,7 +214,7 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
     public void onPickSuggestion(int position) {
         boolean isDebugLock = false;
         if (DeveloperUtilities.systemIsInDebug(getApplicationContext())
-            && SingletonProvider.getDaDaDa().isInAppAutologinLockDebug()) {
+                && SingletonProvider.getDaDaDa().isInAppAutologinLockDebug()) {
             isDebugLock = (UNLOCK_COUNT % 2 == 0);
             ++UNLOCK_COUNT;
         }
@@ -220,12 +224,11 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
         }
         SingletonComponentProxy singletonComponent = SingletonProvider.getComponent();
         LockManager lockManager = singletonComponent.getLockRepository()
-                                                    .getLockManager(session);
+                .getLockManager(session);
         boolean isLock = lockManager.isInAppLoginLocked() || isDebugLock;
 
         SummaryObject.Authentifiant authentifiant = mSuggestionAdapter.getItem(position).authentifiant;
         String domainName = AuthentifiantKt.getUrlForUsageLog(authentifiant);
-        PerfLogManager.getInstance().sendPerfLog(PerfLogManager.PerfLogLocations.appLogin.name());
 
         AutofillAnalyzerDef.IAutofillUsageLog autofillUsageLog = singletonComponent.getAutofillUsageLog();
 
@@ -241,13 +244,8 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
             if (alwaysOnUiManager != null) {
                 alwaysOnUiManager.onItemPicked(authentifiant.getId());
             }
-            autofillUsageLog.onClickToAutoFillCredentialNotLock(AutofillOrigin.IN_APP_LOGIN,
-                    getLastScanPackageName(),
-                    domainName);
         }
         StandOutWindow.closeAll(this, InAppLoginWindow.class);
-        /
-
     }
 
     public void onPickAddAnAccount() {
@@ -262,8 +260,6 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
                 .encodedAuthority(NavigationHelper.Destination.MainPath.PASSWORDS)
                 .path(NavigationHelper.Destination.SecondaryPath.Items.NEW)
                 .appendPath(useUrlOverPackageName ? websiteUrl : packageName)
-                .appendQueryParameter(NavigationHelper.Destination.PathQueryParameters.FROM,
-                        UsageLogCode96.Sender.DASHLANE.getCode())
                 .appendQueryParameter(NavigationHelper.Destination.PathQueryParameters.IS_PACKAGE_NAME,
                         Boolean.toString(!useUrlOverPackageName))
                 .build();
@@ -271,25 +267,15 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
         createNewAccount.setData(createNewAccountUri);
         createNewAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         createNewAccount.putExtra(NavigationConstants.HOME_FORCE_CHANGE_CONTENT, true);
-        DevUtil.startActivityOrDefaultErrorMessage(this, createNewAccount, false);
+        startActivity(createNewAccount);
         StandOutWindow.closeAll(this, InAppLoginWindow.class);
-
-        InAppLoginWindowLogger.log(this,
-                UsageLogCode96.Action.CLIC_ADD_CRED,
-                packageName,
-                mSuggestionAdapter.getCount() > 0);
     }
 
     @Override
     public void onClick(View v) {
         if (R.id.close == v.getId()) {
-            InAppLoginWindowLogger.log(this,
-                    UsageLogCode96.Action.CLOSE_WEBCARD,
-                    getLastScanPackageName(),
-                    mSuggestionAdapter.getCount() > 0);
             StandOutWindow.closeAll(this, InAppLoginWindow.class);
             StandOutWindow.closeAll(this, DashlaneBubble.class);
-
         }
     }
 
@@ -345,7 +331,7 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
     private boolean mayBeUnsafeApplicationFor(String packageName, SummaryObject.Authentifiant authentifiant) {
         return packageName != null
                 && AuthentifiantPackageNameSignatureUtilKt
-                .getSignatureVerificationWith(authentifiant, this, packageName) !=
+                .getSignatureVerificationWith(authentifiant, packageNameSignatureHelper, packageName) !=
                 PackageSignatureStatus.VERIFIED;
     }
 

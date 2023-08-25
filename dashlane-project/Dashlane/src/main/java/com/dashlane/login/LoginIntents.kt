@@ -3,6 +3,8 @@ package com.dashlane.login
 import android.app.Activity
 import android.content.Intent
 import android.os.Parcelable
+import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyActivity
 import com.dashlane.login.devicelimit.DeviceLimitActivity
 import com.dashlane.login.lock.LockSetting
 import com.dashlane.login.monobucket.MonobucketActivity
@@ -10,7 +12,6 @@ import com.dashlane.login.pages.enforce2fa.Enforce2faLimitActivity
 import com.dashlane.login.progress.LoginSyncProgressActivity
 import com.dashlane.login.settings.LoginSettingsActivity
 import com.dashlane.login.sso.LoginSsoActivity
-import com.dashlane.login.sso.LoginSsoLogger
 import com.dashlane.login.sso.migration.MigrationToSsoMemberActivity
 import com.dashlane.login.sso.migration.MigrationToSsoMemberIntroActivity
 import com.dashlane.masterpassword.ChangeMasterPasswordActivity
@@ -22,11 +23,7 @@ import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.util.clearTask
 import com.dashlane.util.clearTop
 
-
-
 object LoginIntents {
-
-    
 
     fun createLoginActivityIntent(activity: Activity): Intent =
         Intent(activity, LoginActivity::class.java).apply {
@@ -70,9 +67,18 @@ object LoginIntents {
         }
     }
 
+    fun createAccountRecoveryKeyIntent(activity: Activity, registeredUserDevice: RegisteredUserDevice, authTicket: String?): Intent {
+        return LoginAccountRecoveryKeyActivity.newIntent(activity).apply {
+            putExtra(LoginAccountRecoveryKeyActivity.EXTRA_REGISTERED_USER_DEVICE, registeredUserDevice)
+            putExtra(LoginAccountRecoveryKeyActivity.AUTH_TICKET, authTicket)
+            clearTask()
+            val intent = activity.intent
+            copyOriginExtras(intent)
+        }
+    }
+
     fun createMigrationToSsoMemberIntent(
         activity: Activity,
-        loggerConfig: LoginSsoLogger.Config,
         login: String,
         serviceProviderUrl: String,
         isNitroProvider: Boolean,
@@ -80,7 +86,6 @@ object LoginIntents {
     ): Intent {
         val migrationToSsoMemberIntent = MigrationToSsoMemberActivity.newIntent(
             activity,
-            loggerConfig,
             login = login,
             serviceProviderUrl = serviceProviderUrl,
             isNitroProvider = isNitroProvider,
@@ -110,8 +115,6 @@ object LoginIntents {
             if (clearTask) clearTask()
         }
 
-    
-
     fun createProgressActivityIntent(activity: Activity): Intent =
         Intent(activity, LoginSyncProgressActivity::class.java).apply {
             val intent = activity.intent
@@ -120,8 +123,6 @@ object LoginIntents {
 
             clearTop()
         }
-
-    
 
     fun createHomeActivityIntent(activity: Activity): Intent =
         Intent(activity, HomeActivity::class.java).apply {
@@ -135,15 +136,13 @@ object LoginIntents {
         login: String,
         serviceProviderUrl: String,
         isSsoProvider: Boolean,
-        migrateToMasterPasswordUser: Boolean,
-        loggerConfig: LoginSsoLogger.Config
+        migrateToMasterPasswordUser: Boolean
     ): Intent =
         Intent(activity, LoginSsoActivity::class.java).apply {
             putExtra(LoginSsoActivity.KEY_LOGIN, login)
             putExtra(LoginSsoActivity.KEY_SERVICE_PROVIDER_URL, serviceProviderUrl)
             putExtra(LoginSsoActivity.KEY_IS_SSO_PROVIDER, isSsoProvider)
             putExtra(LoginSsoActivity.KEY_MIGRATE_TO_MASTER_PASSWORD_USER, migrateToMasterPasswordUser)
-            putExtra(LoginSsoActivity.KEY_LOGGER_CONFIG, loggerConfig)
             copyOriginExtras(activity.intent)
         }
 
@@ -156,14 +155,11 @@ object LoginIntents {
             if (clearTask) clearTask()
         }
 
-    
-
     fun shouldCloseLoginAfterSuccess(originalIntent: Intent): Boolean {
         return originalIntent.getBooleanExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, false)
     }
 
     private fun Intent.copyOriginExtras(intent: Intent) {
-
         copyParcelableExtra<Intent>(intent, NavigationConstants.STARTED_WITH_INTENT)
         copyParcelableArrayExtra(intent, LoginSyncProgressActivity.EXTRA_DEVICE_SYNC_LIMIT_UNREGISTRATION)
 

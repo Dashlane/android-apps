@@ -2,8 +2,6 @@ package com.dashlane.autofill.api.securitywarnings.data
 
 import com.google.gson.Gson
 
-
-
 internal class SecurityWarningJsonToPreferencesNoCache constructor(
     private val preferencesManager: SecurityWarningsPreferencesManagerWrapper
 ) : SecurityWarningJsonToPreferences {

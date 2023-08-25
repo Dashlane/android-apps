@@ -2,39 +2,21 @@ package com.github.devnied.emvnfccard.utils;
 
 import java.math.BigInteger;
 
-
-
 public final class BytesUtils {
-
-    
 
     private static final int MAX_BIT_INTEGER = 31;
 
-    
-
     private static final int HEXA = 16;
-
-    
 
     private static final int LEFT_MASK = 0xF0;
 
-    
-
     private static final int RIGHT_MASK = 0xF;
-
-    
 
     private static final int CHAR_DIGIT_ZERO = 0x30;
 
-    
-
     private static final int CHAR_DIGIT_SEVEN = 0x37;
 
-    
-
     private static final char CHAR_SPACE = (char) 0x20;
-
-    
 
     public static int byteArrayToInt(final byte[] byteArray) {
         if (byteArray == null) {
@@ -42,8 +24,6 @@ public final class BytesUtils {
         }
         return byteArrayToInt(byteArray, 0, byteArray.length);
     }
-
-    
 
     public static int byteArrayToInt(final byte[] byteArray, final int startPos, final int length) {
         if (byteArray == null) {
@@ -62,37 +42,25 @@ public final class BytesUtils {
         return value;
     }
 
-    
-
     public static String bytesToString(final byte[] pBytes) {
         return formatByte(pBytes, true, false);
     }
-
-    
 
     public static String bytesToString(final byte[] pBytes, final boolean pTruncate) {
         return formatByte(pBytes, true, pTruncate);
     }
 
-    
-
     public static String bytesToStringNoSpace(final byte pByte) {
         return formatByte(new byte[] { pByte }, false, false);
     }
-
-    
 
     public static String bytesToStringNoSpace(final byte[] pBytes) {
         return formatByte(pBytes, false, false);
     }
 
-    
-
     public static String bytesToStringNoSpace(final byte[] pBytes, final boolean pTruncate) {
         return formatByte(pBytes, false, pTruncate);
     }
-
-    
 
     private static String formatByte(final byte[] pByte, final boolean pSpace, final boolean pTruncate) {
         String result;
@@ -126,8 +94,6 @@ public final class BytesUtils {
         return result;
     }
 
-    
-
     public static byte[] fromString(final String pData) {
         if (pData == null) {
             throw new IllegalArgumentException("Argument can't be null");
@@ -151,8 +117,6 @@ public final class BytesUtils {
         return result;
     }
 
-    
-
     public static boolean matchBitByBitIndex(final int pVal, final int pBitIndex) {
         if (pBitIndex < 0 || pBitIndex > MAX_BIT_INTEGER) {
             throw new IllegalArgumentException(
@@ -160,8 +124,6 @@ public final class BytesUtils {
         }
         return (pVal & 1 << pBitIndex) != 0;
     }
-
-    
 
     public static byte setBit(final byte pData, final int pBitIndex, final boolean pOn) {
         if (pBitIndex < 0 || pBitIndex > 7) {
@@ -175,8 +137,6 @@ public final class BytesUtils {
         }
         return ret;
     }
-
-    
 
     public static String toBinary(final byte[] pBytes) {
         String ret = null;
@@ -192,8 +152,6 @@ public final class BytesUtils {
         return ret;
     }
 
-    
-
     public static byte[] toByteArray(final int value) {
         return new byte[] { 
                             (byte) (value >> 24), 
@@ -202,8 +160,6 @@ public final class BytesUtils {
                             (byte) value 
         };
     }
-
-    
 
     private BytesUtils() {
     }

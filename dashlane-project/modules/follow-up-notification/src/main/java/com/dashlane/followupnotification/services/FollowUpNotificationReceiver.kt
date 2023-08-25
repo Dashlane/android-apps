@@ -15,8 +15,6 @@ object FollowUpNotificationReceiver {
     const val NOTIFICATION_COPY_FIELD_INDEX_EXTRA = "notification_copy_field_index"
 }
 
-
-
 class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -49,8 +47,6 @@ class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
         }
     }
 }
-
-
 
 class FollowUpNotificationCopyReceiver : AppCompatActivity() {
 

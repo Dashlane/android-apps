@@ -2,8 +2,6 @@ package com.dashlane.item.subview.readonly
 
 import androidx.annotation.ColorInt
 
-
-
 class ItemReadValueNumberSubView(
     val header: String,
     override var value: String,

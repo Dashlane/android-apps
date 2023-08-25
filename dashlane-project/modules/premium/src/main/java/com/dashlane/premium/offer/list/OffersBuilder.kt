@@ -25,7 +25,6 @@ internal class OffersBuilder(
     private val yearlySavings: Map<OfferType, Float?>? = null,
     private val currentOffer: CurrentOffer?,
     private val vpnMentionAllowed: Boolean,
-    private val supportIntroductoryOffers: Boolean
 ) {
 
     fun build(): Offers {
@@ -121,63 +120,24 @@ internal class OffersBuilder(
     private fun ProductDetailsWrapper?.toOfferOverview(
         type: OfferType,
         periodicity: ProductPeriodicity
-    ): OfferOverview {
-        if (!supportIntroductoryOffers) {
-            return buildOfferWithoutIntroOffers(type, periodicity)
-        }
-
-        return when (this) {
-            is ProductDetailsWrapper.IntroductoryOfferProduct -> {
-                OfferOverview.IntroductoryOffer(
-                    type = type,
-                    title = type.getTitle(),
-                    description = type.getDescription(),
-                    pricing = getPricingInfo(
-                        basePricingPhase = this.basePricingPhase,
-                        introPricingPhase = this.introductoryPricingPhase
-                    ),
-                    onGoingRes = getOnGoingRes(type, periodicity),
-                    discountCallOut = DiscountCallOut.getOfferCallOut(
-                        basePricingPhase = this.basePricingPhase,
-                        introPricingPhase = this.introductoryPricingPhase
-                    )
-                )
-            }
-            is ProductDetailsWrapper.BasePlanProduct -> {
-                OfferOverview.BaseOffer(
-                    type = type,
-                    title = type.getTitle(),
-                    description = type.getDescription(),
-                    pricing = getPricingInfo(
-                        basePricingPhase = this.basePricingPhase,
-                        introPricingPhase = null
-                    ),
-                    onGoingRes = getOnGoingRes(type, periodicity)
-                )
-            }
-            null -> OfferOverview.BaseOffer(
+    ): OfferOverview = when (this) {
+        is ProductDetailsWrapper.IntroductoryOfferProduct -> {
+            OfferOverview.IntroductoryOffer(
                 type = type,
                 title = type.getTitle(),
                 description = type.getDescription(),
-                pricing = getPricingInfo(null, null),
-                onGoingRes = getOnGoingRes(type, periodicity)
+                pricing = getPricingInfo(
+                    basePricingPhase = this.basePricingPhase,
+                    introPricingPhase = this.introductoryPricingPhase
+                ),
+                onGoingRes = getOnGoingRes(type, periodicity),
+                discountCallOut = DiscountCallOut.getOfferCallOut(
+                    basePricingPhase = this.basePricingPhase,
+                    introPricingPhase = this.introductoryPricingPhase
+                )
             )
         }
-    }
-
-    private fun ProductDetailsWrapper?.buildOfferWithoutIntroOffers(
-        type: OfferType,
-        periodicity: ProductPeriodicity
-    ): OfferOverview {
-        return if (this == null) {
-            OfferOverview.BaseOffer(
-                type = type,
-                title = type.getTitle(),
-                description = type.getDescription(),
-                pricing = getPricingInfo(null, null),
-                onGoingRes = getOnGoingRes(type, periodicity)
-            )
-        } else {
+        is ProductDetailsWrapper.BasePlanProduct -> {
             OfferOverview.BaseOffer(
                 type = type,
                 title = type.getTitle(),
@@ -189,5 +149,12 @@ internal class OffersBuilder(
                 onGoingRes = getOnGoingRes(type, periodicity)
             )
         }
+        null -> OfferOverview.BaseOffer(
+            type = type,
+            title = type.getTitle(),
+            description = type.getDescription(),
+            pricing = getPricingInfo(null, null),
+            onGoingRes = getOnGoingRes(type, periodicity)
+        )
     }
 }

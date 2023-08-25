@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 
 import com.dashlane.core.premium.PremiumType.Type;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.logger.ExceptionLog;
 import com.dashlane.preference.ConstantsPrefs;
 import com.dashlane.preference.UserPreferencesManager;
 import com.dashlane.premium.enddate.FormattedEndDate;
@@ -110,7 +109,6 @@ public class PremiumStatus implements FormattedEndDateProvider {
                 initPreferencesForMarketingMessageFromUserType(userPreferencesManager);
             }
         } catch (JSONException e) {
-            ExceptionLog.v(e);
             mIsRefreshed = false;
         }
     }
@@ -371,7 +369,6 @@ public class PremiumStatus implements FormattedEndDateProvider {
         try {
             return Instant.ofEpochSecond(Long.parseLong(time));
         } catch (NumberFormatException e) {
-            ExceptionLog.v(e);
             return null;
         }
     }

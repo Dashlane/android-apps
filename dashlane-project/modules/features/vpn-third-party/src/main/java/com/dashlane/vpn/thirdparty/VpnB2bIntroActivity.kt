@@ -17,7 +17,8 @@ class VpnB2bIntroActivity : DashlaneActivity() {
         presenter.setView(IntroScreenViewProxy(this))
     }
 
-    private class Presenter : BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
+    private class Presenter :
+        BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
         IntroScreenContract.Presenter {
 
         override fun onViewChanged() {

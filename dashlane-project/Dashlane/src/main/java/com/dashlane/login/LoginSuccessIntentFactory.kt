@@ -2,6 +2,7 @@ package com.dashlane.login
 
 import android.app.Activity
 import android.content.Intent
+import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.login.devicelimit.UnlinkDevicesActivity
 import com.dashlane.login.monobucket.MonobucketActivity
 import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
@@ -10,17 +11,13 @@ import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import javax.inject.Inject
 
-
-
 class LoginSuccessIntentFactory @Inject constructor(
     private val activity: Activity,
     private val sessionManager: SessionManager,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val userPreferencesManager: UserPreferencesManager,
-    private val ssoLoggerConfigProvider: LoginSsoLoggerConfigProvider
+    private val userPreferencesManager: UserPreferencesManager
 ) {
     private val devicesCount get() = userPreferencesManager.devicesCount
-    private val ssoLoggerConfig get() = ssoLoggerConfigProvider.ssoLoggerConfig
 
     fun createLoginBiometricSetupIntent() =
         LoginIntents.createSettingsActivityIntent(activity)
@@ -43,13 +40,17 @@ class LoginSuccessIntentFactory @Inject constructor(
         return LoginIntents.createHomeActivityIntent(activity)
     }
 
-    fun createAccountRecoveryIntent(): Intent {
+    fun createBiometricRecoveryIntent(): Intent {
         sessionManager.session?.let(sessionCredentialsSaver::saveCredentialsIfNecessary)
         return LoginIntents.createChangeMasterPasswordIntent(
             activity,
             ChangeMasterPasswordOrigin.Recovery,
             devicesCount
         )
+    }
+
+    fun createAccountRecoveryKeyIntent(registeredUserDevice: RegisteredUserDevice, authTicket: String?): Intent {
+        return LoginIntents.createAccountRecoveryKeyIntent(activity, registeredUserDevice, authTicket)
     }
 
     fun createLoginSsoIntent(
@@ -62,8 +63,7 @@ class LoginSuccessIntentFactory @Inject constructor(
         login,
         serviceProviderUrl,
         isSsoProvider,
-        migrateToMasterPasswordUser,
-        ssoLoggerConfig
+        migrateToMasterPasswordUser
     )
 
     fun createMigrationToMasterPasswordUserIntent(
@@ -87,7 +87,6 @@ class LoginSuccessIntentFactory @Inject constructor(
         sessionManager.session?.let(sessionCredentialsSaver::saveCredentialsIfNecessary)
         return LoginIntents.createMigrationToSsoMemberIntent(
             activity,
-            ssoLoggerConfig,
             login = login,
             serviceProviderUrl = serviceProviderUrl,
             isNitroProvider = isNitroProvider,

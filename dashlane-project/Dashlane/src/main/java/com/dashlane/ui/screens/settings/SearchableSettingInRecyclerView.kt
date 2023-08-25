@@ -14,8 +14,6 @@ import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.toHighlightedSpannable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class SearchableSettingInRecyclerView(
     val item: SearchableSettingItem,
     private val targetText: String? = null,
@@ -79,7 +77,8 @@ class SearchableSettingInRecyclerView(
 
         val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<SearchableSettingInRecyclerView> =
             DashlaneRecyclerAdapter.ViewType(
-                R.layout.item_searcheable_setting, ViewHolder::class.java
+                R.layout.item_searcheable_setting,
+                ViewHolder::class.java
             )
     }
 }

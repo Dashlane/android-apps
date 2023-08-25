@@ -11,8 +11,6 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
-
-
 class IncomingTransactionsHelper @Inject constructor(
     private val transactionCipher: TransactionCipher,
     private val syncLogs: SyncLogs

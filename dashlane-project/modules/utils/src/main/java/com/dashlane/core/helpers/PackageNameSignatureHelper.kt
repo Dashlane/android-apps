@@ -1,7 +1,6 @@
 package com.dashlane.core.helpers
 
 import android.content.Context
-import android.content.pm.PackageManager
 import com.dashlane.core.helpers.SignatureVerification.KnownApplicationIncorrect
 import com.dashlane.core.helpers.SignatureVerification.KnownApplicationVerified
 import com.dashlane.core.helpers.SignatureVerification.MismatchUnknown
@@ -11,71 +10,55 @@ import com.dashlane.core.helpers.SignatureVerification.VaultLinkedAppsIncorrect
 import com.dashlane.core.helpers.SignatureVerification.VaultLinkedAppsVerified
 import com.dashlane.core.helpers.SignatureVerification.WithSignatureUnknown
 import com.dashlane.ext.application.KnownApplication
-import com.dashlane.ext.application.KnownApplication.Companion.getKnownApplication
-import com.dashlane.ext.application.KnownApplication.Companion.getSignature
+import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.util.PackageUtilities.getSignatures
 import com.dashlane.vault.summary.SummaryObject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-
-class PackageNameSignatureHelper {
-
-    
+@Singleton
+class PackageNameSignatureHelper @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val knownApplicationProvider: KnownApplicationProvider
+) {
 
     fun getPackageNameSignatureVerificationStatus(
-        context: Context?,
         packageName: String,
         linkedServices: SummaryObject.LinkedServices?,
         url: String?
     ): PackageSignatureStatus =
-        getPackageNameSignatureVerificationStatus(context?.packageManager, packageName, linkedServices, url)
-
-    fun getPackageNameSignatureVerificationStatus(
-        packageManager: PackageManager?,
-        packageName: String,
-        linkedServices: SummaryObject.LinkedServices?,
-        url: String?
-    ): PackageSignatureStatus =
-        getPackageNameDetailedSignatureVerificationStatus(packageManager, packageName, linkedServices, url).secureResult
-
-    
+        getPackageNameDetailedSignatureVerificationStatus(packageName, linkedServices, url).secureResult
 
     fun getPackageNameDetailedSignatureVerificationStatus(
-        context: Context?,
         packageName: String,
         linkedServices: SummaryObject.LinkedServices?,
         url: String?
     ): SignatureVerification {
-        val packageManager = context?.packageManager
-        return getPackageNameDetailedSignatureVerificationStatus(packageManager, packageName, linkedServices, url)
-    }
-
-    
-
-    private fun getPackageNameDetailedSignatureVerificationStatus(
-        packageManager: PackageManager?,
-        packageName: String,
-        linkedServices: SummaryObject.LinkedServices?,
-        url: String?
-    ): SignatureVerification {
-        val apkSignatures = getSignatures(packageManager, packageName)
+        
+        val apkSignatures = getSignatures(context.packageManager, packageName)
         if (apkSignatures == null || !apkSignatures.hasSignatures()) {
             return NoSignatureUnknown()
         }
-        val linkedServicesStoredSignatures = getStoredSignatures(packageName, linkedServices)
+
+        
+        val linkedServicesStoredSignatures = getLinkedAppsSignatures(packageName, linkedServices)
         if (linkedServicesStoredSignatures.hasSignatures()) {
-            return signatureVerification(apkSignatures, linkedServicesStoredSignatures)
+            return linkedAppsSignatureVerification(apkSignatures, linkedServicesStoredSignatures)
         }
 
         
-        val knownApplication = getKnownApplication(packageName) ?: return WithSignatureUnknown(apkSignatures)
+        val knownApplication = knownApplicationProvider.getKnownApplication(packageName)
+            ?: return WithSignatureUnknown(apkSignatures)
         val knownApplicationStoredSignature = knownApplication.signatures
         if (knownApplicationStoredSignature == null || !knownApplicationStoredSignature.hasSignatures()) {
             return WithSignatureUnknown(apkSignatures)
         }
-        val knownApplicationForUrlStoredSignature = getSignature(packageName, url)
-        if (knownApplicationForUrlStoredSignature != null && knownApplicationForUrlStoredSignature.hasSignatures()) {
+
+        
+        val knownApplicationForUrlStoredSignature = knownApplicationProvider.getSignature(packageName, url)
+        if (knownApplicationForUrlStoredSignature != null) {
             
             return knownSignatureVerification(apkSignatures, knownApplicationForUrlStoredSignature, knownApplication)
         }
@@ -87,7 +70,10 @@ class PackageNameSignatureHelper {
         }
     }
 
-    private fun signatureVerification(apkSignatures: AppSignature, appSignature: AppSignature): VaultLinkedApps {
+    private fun linkedAppsSignatureVerification(
+        apkSignatures: AppSignature,
+        appSignature: AppSignature
+    ): VaultLinkedApps {
         return if (isSignaturesMatch(apkSignatures, appSignature)) {
             VaultLinkedAppsVerified(apkSignatures, appSignature)
         } else {
@@ -96,18 +82,16 @@ class PackageNameSignatureHelper {
     }
 
     private fun knownSignatureVerification(
-        apkSignatures: AppSignature?,
-        knownApplicationSignature: AppSignature?,
+        apkSignatures: AppSignature,
+        knownApplicationSignature: AppSignature,
         knownApplication: KnownApplication
     ): SignatureVerification.Known {
-        return if (isSignaturesMatch(apkSignatures!!, knownApplicationSignature!!)) {
+        return if (isSignaturesMatch(apkSignatures, knownApplicationSignature)) {
             KnownApplicationVerified(apkSignatures, knownApplicationSignature, knownApplication)
         } else {
             KnownApplicationIncorrect(apkSignatures, knownApplicationSignature, knownApplication)
         }
     }
-
-    
 
     private fun isSignaturesMatch(apkSignatures: AppSignature, storedSignatures: AppSignature): Boolean {
         return if (storedSignatures.sha256Signatures.isNullOrEmpty()) {
@@ -116,8 +100,6 @@ class PackageNameSignatureHelper {
             isAllSignaturesFound(apkSignatures.sha256Signatures, storedSignatures.sha256Signatures)
         }
     }
-
-    
 
     private fun isAllSignaturesFound(
         apkSignatures: List<String>?,
@@ -137,9 +119,7 @@ class PackageNameSignatureHelper {
         return true
     }
 
-    
-
-    private fun getStoredSignatures(
+    private fun getLinkedAppsSignatures(
         packageName: String,
         linkedServices: SummaryObject.LinkedServices?,
     ): AppSignature {

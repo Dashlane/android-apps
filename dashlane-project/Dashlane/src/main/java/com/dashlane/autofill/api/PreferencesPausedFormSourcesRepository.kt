@@ -11,8 +11,6 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-
-
 class PreferencesPausedFormSourcesRepository @VisibleForTesting constructor(
     val globalPreferencesManager: GlobalPreferencesManager,
     val coroutineContext: CoroutineContext = Dispatchers.IO

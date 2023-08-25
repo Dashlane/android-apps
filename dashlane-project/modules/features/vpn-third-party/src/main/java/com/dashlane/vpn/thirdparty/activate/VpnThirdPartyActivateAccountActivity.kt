@@ -9,8 +9,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class VpnThirdPartyActivateAccountActivity : AppCompatActivity(), CurrentPageViewLogger.Owner,
-    VpnThirdPartyActivateAccountErrorListener, VpnThirdPartySetupEmailFragment.Listener {
+class VpnThirdPartyActivateAccountActivity :
+    AppCompatActivity(),
+    CurrentPageViewLogger.Owner,
+    VpnThirdPartyActivateAccountErrorListener,
+    VpnThirdPartySetupEmailFragment.Listener {
 
     override val currentPageViewLogger by lazy { CurrentPageViewLogger(this) }
     private var presenter: VpnThirdPartyActivateAccountPresenter? = null

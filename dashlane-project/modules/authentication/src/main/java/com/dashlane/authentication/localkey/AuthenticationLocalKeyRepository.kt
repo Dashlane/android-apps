@@ -5,8 +5,6 @@ import com.dashlane.session.AppKey
 import com.dashlane.session.LocalKey
 import com.dashlane.session.Username
 
-
-
 interface AuthenticationLocalKeyRepository {
 
     suspend fun createForRemote(

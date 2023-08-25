@@ -22,6 +22,9 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    
+    <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
+
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
@@ -54,7 +57,6 @@
     <uses-permission android:name="com.dashlane.notification.autofillapi.TOTP_NOTIFICATION" />
     <uses-permission android:name="com.dashlane.notification.followupnotification.FOLLOW_UP_NOTIFICATION" />
 
-    
     
     
     <uses-permission android:name="com.adjust.preinstall.READ_PERMISSION" />
@@ -110,7 +112,6 @@
             android:value="@integer/google_play_services_version" />
 
         
-
         <meta-data
             android:name="WindowManagerPreference:FreeformWindowSize"
             android:value="tablet" />
@@ -124,10 +125,9 @@
             android:value="true" />
 
         
-
         <meta-data
             android:name="io.sentry.dsn"
-            android:value="hidden_value" />
+/>
         
         <meta-data
             android:name="io.sentry.auto-init"
@@ -292,6 +292,11 @@
             android:theme="@style/Theme.Dashlane.DialogWhenTablet"
             android:windowSoftInputMode="adjustResize" />
 
+        <activity
+            android:name=".item.collection.CollectionSelectorActivity"
+            android:theme="@style/Theme.Dashlane.DialogWhenTablet"
+            android:windowSoftInputMode="adjustResize" />
+
         
         <activity
             android:name=".attachment.ui.AttachmentListActivity"
@@ -308,7 +313,6 @@
 
 
         
-        
         <receiver
             android:name=".async.broadcasts.BrazeBroadcastReceiver"
             android:exported="false">
@@ -318,7 +322,6 @@
             </intent-filter>
         </receiver>
 
-        
         
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -337,7 +340,6 @@
             android:exported="false"
             tools:ignore="ExportedService">
             
-
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -449,17 +451,22 @@
 
         
         <activity
-            android:name=".accountrecovery.AccountRecoveryBiometricIntroActivity"
+            android:name=".biometricrecovery.BiometricRecoveryIntroActivity"
             android:theme="@style/Theme.Dashlane.Modal" />
 
         <activity
-            android:name=".accountrecovery.AccountRecoveryIntroActivity"
+            android:name=".biometricrecovery.MasterPasswordResetIntroActivity"
             android:theme="@style/Theme.Dashlane.Modal" />
 
         <activity
-            android:name=".accountrecovery.AccountRecoveryIntroDialogActivity"
+            android:name=".biometricrecovery.MasterPasswordResetIntroDialogActivity"
             android:label=""
             android:theme="@style/Theme.Dashlane.Transparent" />
+
+        
+        <activity
+            android:name=".login.accountrecoverykey.LoginAccountRecoveryKeyActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         
         <activity
@@ -475,7 +482,6 @@
             android:theme="@style/Theme.Dashlane.Login.LockedOut" />
 
         
-        
         <service
             android:name=".authenticator.AuthenticatorPasswordManagerService"
             android:exported="true"
@@ -487,7 +493,6 @@
 
         
         
-        
         <receiver
             android:name="com.adjust.sdk.AdjustPreinstallReferrerReceiver"
             android:exported="false">
@@ -495,5 +500,16 @@
                 <action android:name="com.attribution.SYSTEM_INSTALLER_REFERRER" />
             </intent-filter>
         </receiver>
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
     </application>
 </manifest>

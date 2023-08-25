@@ -5,10 +5,8 @@ import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.useractivity.log.usage.UsageLogCode105
-
-
+import com.dashlane.useractivity.log.usage.UsageLogRepository
 
 class TeamspaceUsageLogSpaceChanged(
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
@@ -41,7 +39,7 @@ class TeamspaceUsageLogSpaceChanged(
         sendUsageLog105(teamspace.anonTeamId, action)
     }
 
-    override fun onChange(teamspace: Teamspace) { 
+    override fun onChange(teamspace: Teamspace?) { 
     }
 
     override fun onTeamspacesUpdate() { 

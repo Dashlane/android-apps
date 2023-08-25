@@ -16,9 +16,6 @@ import com.dashlane.security.darkwebmonitoring.item.DarkWebBreachItem
 import com.dashlane.security.darkwebmonitoring.item.DarkWebEmailItem
 import com.dashlane.security.darkwebmonitoring.item.DarkWebEmptyItem
 import com.dashlane.security.darkwebmonitoring.item.DarkWebHeaderItem
-import com.dashlane.security.darkwebmonitoring.item.DarkwebMonitoringLogger.Companion.DARK_WEB_MODULE_ORIGIN
-import com.dashlane.security.darkwebmonitoring.item.DarkwebMonitoringLoggerImpl
-import com.dashlane.security.identitydashboard.breach.BreachLoggerImpl
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.widgets.view.empty.EmptyScreenConfiguration.Builder
@@ -26,9 +23,6 @@ import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.presenter.BasePresenter
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -36,6 +30,9 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 
 @OptIn(kotlinx.coroutines.ObsoleteCoroutinesApi::class)
@@ -46,8 +43,6 @@ class DarkWebMonitoringPresenter @Inject constructor(
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     dataProvider: DarkWebMonitoringContract.DataProvider,
     private val lockManager: LockManager,
-    private val logger: BreachLoggerImpl,
-    private val darkWebModuleLogger: DarkwebMonitoringLoggerImpl,
     private val navigator: Navigator,
     private val viewModel: DarkWebMonitoringAlertViewModel,
     lifecycleOwner: LifecycleOwner
@@ -117,7 +112,8 @@ class DarkWebMonitoringPresenter @Inject constructor(
             )
         } else {
             createBreachItems(
-                pendingBreaches, DarkWebEmptyItem(
+                pendingBreaches,
+                DarkWebEmptyItem(
                     Builder()
                         .setImage(getDrawable(context, R.drawable.ic_empty_breaches))
                         .setLine2(context.getString(R.string.empty_dwm_breaches))
@@ -193,13 +189,11 @@ class DarkWebMonitoringPresenter @Inject constructor(
         when (item) {
             is DarkWebBreachItem -> {
                 navigator.goToBreachAlertDetail(item.breach, "dark_web")
-                logger.logOpenAlertDetail()
             }
         }
     }
 
     override fun onDeleteClicked(item: DarkWebEmailStatus) {
-        darkWebModuleLogger.onClickRemoveEmail(item)
         fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) {
             provider.unlistenDarkWeb(item.email)
             refreshList()
@@ -207,12 +201,11 @@ class DarkWebMonitoringPresenter @Inject constructor(
     }
 
     override fun onInactiveDarkwebCtaClick() {
-        darkWebModuleLogger.onInactiveClickRegisterEmail()
-        navigateToSetupMailDarkWeb(DARK_WEB_MODULE_ORIGIN)
+        navigateToSetupMailDarkWeb()
     }
 
     override fun onAddDarkWebEmailClick() {
-        navigateToSetupMailDarkWeb(DarkWebSetupMailActivity.ORIGIN_ADD_ADDRESS)
+        navigateToSetupMailDarkWeb()
     }
 
     private suspend fun refreshList() {
@@ -220,10 +213,9 @@ class DarkWebMonitoringPresenter @Inject constructor(
         refreshActor.trySend(Unit)
     }
 
-    private fun navigateToSetupMailDarkWeb(origin: String) {
+    private fun navigateToSetupMailDarkWeb() {
         val context = this.context ?: return
         val intent = Intent(context, DarkWebSetupMailActivity::class.java)
-        intent.putExtra(DarkWebSetupMailActivity.ORIGIN_KEY, origin)
         context.startActivity(intent)
     }
 
@@ -253,8 +245,6 @@ class DarkWebMonitoringPresenter @Inject constructor(
             else -> return false
         }
     }
-
-    
 
     private fun deleteSelectedItems() {
         fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) {

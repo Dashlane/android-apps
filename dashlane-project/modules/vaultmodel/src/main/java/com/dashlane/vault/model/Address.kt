@@ -44,7 +44,8 @@ fun createAddress(
             this.linkedPhone = linkedPhone
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.Address>.copySyncObject(builder: SyncObject.Address.Builder.() -> Unit = {}):

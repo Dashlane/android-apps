@@ -11,8 +11,6 @@ object KnownLinkedDomains {
     internal val urlDomainLinks: UrlDomainLinks =
         ExternalRepositoryUrlDomainLinks(ImmutableHardcodedLinkedDomainsRepository())
 
-    
-
     @JvmStatic
     fun getWebsitesLinkedTo(website: String): Set<String> {
         val websiteDomain = website.toUrlDomainOrNull() ?: return emptySet()
@@ -26,15 +24,11 @@ object KnownLinkedDomains {
         }.toSet() + website
     }
 
-    
-
     fun getMatchingLinkedDomainSet(urlDomainString: String?): Set<UrlDomain>? {
         return urlDomainString?.toUrlDomainOrNull()?.let {
             urlDomainLinks.matchLinkedDomains(it)?.linkedDomains
         }
     }
-
-    
 
     fun getMatchingLinkedDomainId(urlDomainString: String?): String? {
         return urlDomainString?.toUrlDomainOrNull()?.let {
@@ -42,13 +36,9 @@ object KnownLinkedDomains {
         }
     }
 
-    
-
     fun getMatchingLinkedDomainId(urlDomain: UrlDomain): String? {
         return urlDomainLinks.matchLinkedDomains(urlDomain)?.linkedDomainsId
     }
-
-    
 
     fun findLinkedDomainsIdsContaining(search: String): List<String> {
         return urlDomainLinks.filterLinkedDomains(search).map { it.linkedDomainsId }

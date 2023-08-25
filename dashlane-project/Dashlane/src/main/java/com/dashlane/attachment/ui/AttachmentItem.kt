@@ -4,8 +4,6 @@ import com.dashlane.R
 import com.dashlane.securefile.Attachment
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 
-
-
 class AttachmentItem : Attachment(), DashlaneRecyclerAdapter.ViewTypeProvider {
     enum class DownloadState {
         NOT_DOWNLOADED,
@@ -15,8 +13,10 @@ class AttachmentItem : Attachment(), DashlaneRecyclerAdapter.ViewTypeProvider {
 
     @Transient
     var downloadState = DownloadState.NOT_DOWNLOADED
+
     @Transient
     var downloadProgress = 0
+
     @Transient
     var selected = false
 

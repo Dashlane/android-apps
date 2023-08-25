@@ -23,8 +23,6 @@ import com.dashlane.ui.menu.MenuDef
 import com.dashlane.ui.menu.MenuItemProvider
 import com.skocken.presentation.presenter.BaseItemPresenter
 
-
-
 open class MenuHeaderPresenter internal constructor(
     private val injectedMenuComponent: MenuComponent? = null
 ) : BaseItemPresenter<MenuHeaderDef.IDataProvider?, MenuHeaderDef.IView?>(),

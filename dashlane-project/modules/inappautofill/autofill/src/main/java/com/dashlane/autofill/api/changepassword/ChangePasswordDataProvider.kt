@@ -6,8 +6,6 @@ import com.dashlane.autofill.api.common.GeneratePasswordDataProvider
 import com.dashlane.autofill.api.common.domain.AutofillGeneratePasswordService
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class ChangePasswordDataProvider(
     private val website: String?,
     private val packageName: String?,

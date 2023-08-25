@@ -5,8 +5,6 @@ import com.dashlane.R
 import com.dashlane.item.subview.Action
 import com.dashlane.ui.util.DialogHelper
 
-
-
 class LimitedSharingRightsInfoAction : Action {
 
     override val icon: Int = R.drawable.ic_info_24

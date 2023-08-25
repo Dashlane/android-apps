@@ -2,23 +2,27 @@ package com.dashlane.login.pages.password
 
 import com.dashlane.core.sync.DataSyncHelper
 import com.dashlane.session.Session
-import com.dashlane.util.logI
+import com.dashlane.session.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-
-class InitialSync(private val session: Session, private val dataSyncHelper: DataSyncHelper) {
-    
+@Singleton
+class InitialSync @Inject constructor(
+    private val sessionManager: SessionManager,
+    private val dataSyncHelper: DataSyncHelper
+) {
+    private val session: Session?
+        get() = sessionManager.session
 
     fun CoroutineScope.launchInitialSync() {
-        launchInitialSync(session)
+        session?.run { launchInitialSync(this) }
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private fun CoroutineScope.launchInitialSync(session: Session) = launch(Dispatchers.Default) {
-        logI { "Launching initial sync" }
         launch { dataSyncHelper.runInitialSync(session) }
     }
 }

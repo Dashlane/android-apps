@@ -64,7 +64,8 @@ fun createAuthentifiant(
             this.isFavorite = isFavorite
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 @CheckResult
@@ -102,8 +103,6 @@ val SummaryObject.Authentifiant.urlDomain: String?
 val SyncObject.Authentifiant.urlDomain: String?
     get() = urlForGoToWebsite?.toUrlOrNull()?.root
 
-
-
 val SyncObject.Authentifiant.urlForUsageLog: String
     get() = toSummary<SummaryObject.Authentifiant>().urlForUsageLog
 
@@ -136,8 +135,6 @@ val SummaryObject.Authentifiant.urlForGoToWebsite: String?
 
 val String.getUrlDisplayName: String?
     get() = toUrlOrNull(false)?.root
-
-
 
 fun SummaryObject.Authentifiant.urlForUI(): String? = if (useFixedUrl == true) {
     userSelectedUrl

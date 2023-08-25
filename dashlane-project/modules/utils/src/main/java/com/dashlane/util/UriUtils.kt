@@ -6,8 +6,6 @@ import android.provider.OpenableColumns
 import androidx.core.content.FileProvider
 import java.io.File
 
-
-
 object UriUtils {
 
     @JvmStatic

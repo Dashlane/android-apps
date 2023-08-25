@@ -12,10 +12,11 @@ import androidx.lifecycle.LifecycleOwner
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
-import com.dashlane.hermes.inject.HermesComponent
 import com.skocken.presentation.definition.Base
-
-
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 
 @JvmOverloads
 fun Activity.setCurrentPageView(page: AnyPage, fromAutofill: Boolean = false) {
@@ -23,7 +24,6 @@ fun Activity.setCurrentPageView(page: AnyPage, fromAutofill: Boolean = false) {
         currentPageViewLogger.setCurrentPageView(page, fromAutofill)
     } else {
         
-        logI("PageView") { "Event not sent" }
 
         if (BuildConfig.DEBUG) {
             error("Host Activity must extend CurrentPageViewLogger.Owner")
@@ -31,33 +31,23 @@ fun Activity.setCurrentPageView(page: AnyPage, fromAutofill: Boolean = false) {
     }
 }
 
-
-
 @JvmOverloads
 fun Fragment.setCurrentPageView(page: AnyPage, fromAutofill: Boolean = false) {
     activity?.setCurrentPageView(page, fromAutofill)
 }
-
-
 
 @JvmOverloads
 fun Base.IPresenter.setCurrentPageView(page: AnyPage, fromAutofill: Boolean = false) {
     activity?.setCurrentPageView(page, fromAutofill)
 }
 
-
-
 @JvmOverloads
 fun Context.logPageView(page: AnyPage, fromAutofill: Boolean = false) {
-    HermesComponent(this)
-        .logRepository
-        .logPageView(page, fromAutofill)
+    val entryPoint = EntryPointAccessors.fromApplication<PageViewLoggerEntryPoint>(applicationContext)
+    entryPoint.logRepository().logPageView(page, fromAutofill)
 }
 
-
-
 private fun LogRepository.logPageView(page: AnyPage, fromAutofill: Boolean) {
-    logI("PageView") { "page: $page fromAutofill: $fromAutofill" }
     queuePageView(
         component = if (fromAutofill) BrowseComponent.OS_AUTOFILL else BrowseComponent.MAIN_APP,
         page = page
@@ -78,11 +68,14 @@ fun CurrentPageViewLogger(activity: AppCompatActivity): CurrentPageViewLogger = 
 private class CurrentPageViewLoggerImpl(
     activity: AppCompatActivity
 ) : CurrentPageViewLogger, LifecycleEventObserver {
-    private val logRepository = HermesComponent(activity).logRepository
     private var latestPageView: Pair<AnyPage, Boolean>? = null
     private var resumedAtLeastOnce = false
+    var logRepository: LogRepository
 
     init {
+        val entryPoint =
+            EntryPointAccessors.fromApplication(activity, PageViewLoggerEntryPoint::class.java)
+        logRepository = entryPoint.logRepository()
         activity.lifecycle.addObserver(this)
     }
 
@@ -105,4 +98,10 @@ private class CurrentPageViewLoggerImpl(
     private fun logLatestPageView() {
         latestPageView?.let { (page, fromAutofill) -> logRepository.logPageView(page, fromAutofill) }
     }
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface PageViewLoggerEntryPoint {
+    fun logRepository(): LogRepository
 }

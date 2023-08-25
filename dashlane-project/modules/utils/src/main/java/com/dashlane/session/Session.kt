@@ -3,34 +3,20 @@ package com.dashlane.session
 import com.dashlane.cryptography.CryptographyKey
 import java.io.Closeable
 
-
-
 @Suppress("UseDataClass")
 class Session(
-    
-
     val username: Username,
-    
-
     val accessKey: String,
-    
-
     val secretKey: String,
     localKey: LocalKey,
     appKey: AppKey,
-    
-
     remoteKey: VaultKey.RemoteKey? = null
 ) {
     val userId: String
         get() = username.email
 
-    
-
     val deviceId
         get() = accessKey
-
-    
 
     val uki: String
         get() = if (secretKey.startsWith(accessKey)) secretKey else "$accessKey-$secretKey"
@@ -41,6 +27,7 @@ class Session(
     private val _remoteKey = remoteKey?.clone()
     val remoteKey: VaultKey.RemoteKey?
         get() = _remoteKey?.clone()
+
     @Suppress("IfThenToElvis")
     val vaultKey: VaultKey
         get() = if (_remoteKey == null) (_appKey as AppKey.Password).toVaultKey() else _remoteKey.clone()
@@ -98,8 +85,6 @@ class Session(
         result = 31 * result + sessionId.hashCode()
         return result
     }
-
-    
 
     data class UserKeys(
         val app: AppKey,

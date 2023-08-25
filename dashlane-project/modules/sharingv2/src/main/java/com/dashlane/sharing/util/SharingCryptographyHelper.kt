@@ -30,8 +30,6 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import javax.inject.Inject
 
-
-
 class SharingCryptographyHelper @Inject internal constructor(
     private val cryptography: Cryptography,
     private val sharingCryptography: SharingCryptography,
@@ -129,10 +127,10 @@ class SharingCryptographyHelper @Inject internal constructor(
     fun newGroupUid(): String =
         generateUniqueIdentifier()
 
-    fun encryptItemKey(data: ByteArray?, key: CryptographyKey.Raw32): String =
+    fun encryptItemKey(data: ByteArray, key: CryptographyKey.Raw32): String =
         cryptography.createKwc5EncryptionEngine(key)
             .use { encryptionEngine ->
-                encryptionEngine.encryptByteArrayToBase64String(data!!, compressed = false)
+                encryptionEngine.encryptByteArrayToBase64String(data, compressed = false)
             }
             .value
 
@@ -166,11 +164,13 @@ class SharingCryptographyHelper @Inject internal constructor(
         val acceptSignatureToEncrypt = getAcceptSignatureToEncrypt(groupId, groupKey)
         return if (acceptSignatureToEncrypt.isEmpty()) {
             false
-        } else sharingCryptography.verifySignatureRsaBase64OrDefault(
+        } else {
+            sharingCryptography.verifySignatureRsaBase64OrDefault(
             acceptSignatureToEncrypt,
             acceptSignatureEncrypted.asSharingSignatureBase64(),
             signaturePublicKey
         )
+        }
     }
 
     fun generateProposeSignature(userIdOrAlias: String, groupKey: CryptographyKey.Raw32): String {
@@ -191,7 +191,9 @@ class SharingCryptographyHelper @Inject internal constructor(
         val proposeSignatureToEncrypt = getProposeSignatureToEncrypt(userIdOrAlias)
         return if (proposeSignatureToEncrypt.isEmpty()) {
             false
-        } else hmacSha256(proposeSignatureToEncrypt, groupKey) == proposeSignatureEncrypted
+        } else {
+            hmacSha256(proposeSignatureToEncrypt, groupKey) == proposeSignatureEncrypted
+        }
     }
 
     private fun hmacSha256(data: ByteArray, key: ByteArray): String =

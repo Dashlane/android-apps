@@ -5,14 +5,10 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.dashlane.autofill.api.totp.services.TotpNotificationUpdateService
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.util.isSemanticallyNull
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-
-
 
 internal class TotpNotificationUpdateServiceImpl @Inject constructor(@ApplicationContext val context: Context) :
     TotpNotificationUpdateService {
@@ -45,7 +41,6 @@ internal class TotpNotificationUpdateServiceImpl @Inject constructor(@Applicatio
 
             workManager.enqueue(request)
         } catch (e: Exception) {
-            Log.v(e)
         }
     }
 

@@ -3,8 +3,6 @@ package com.dashlane.ui.activities.fragments.list
 import android.view.View
 import com.dashlane.R
 
-
-
 class ItemWrapperOneColViewHolder(itemView: View) : ItemWrapperViewHolder(itemView) {
     init {
         findViewByIdEfficient<View>(R.id.item_icon)?.let { iconView ->

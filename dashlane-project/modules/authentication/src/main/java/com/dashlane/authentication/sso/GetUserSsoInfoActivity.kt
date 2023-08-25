@@ -7,14 +7,13 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.dashlane.authentication.R
 import com.dashlane.authentication.sso.utils.toIdpUrl
 import com.dashlane.authentication.sso.webview.NitroSsoWebView
 import com.dashlane.url.toUrlDomain
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
-
 
 @AndroidEntryPoint
 class GetUserSsoInfoActivity : AppCompatActivity() {
@@ -79,14 +78,13 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
                     is NitroSsoInfoViewModel.NitroState.Default -> {
                         nitroViewModel.authenticate(nitroUrl = nitroUrl, domainName = domainName)
                     }
-                    is NitroSsoInfoViewModel.NitroState.Ready -> {
+                    is NitroSsoInfoViewModel.NitroState.Init -> {
                         setContentView(
                             NitroSsoWebView(
                                 context = this@GetUserSsoInfoActivity,
                                 trustedDomain = state.data.idpAuthorizeUrl.toUrlDomain(),
                                 redirectionUrl = state.data.spCallbackUrl,
-                                onSamlIntercepted = { samlResponse ->
-                                    
+                                onSamlResponse = { samlResponse ->
                                     nitroViewModel.confirmLogin(
                                         samlResponse = samlResponse,
                                         email = login,
@@ -95,9 +93,17 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
                                 },
                                 onError = { error -> finishWithResult(error) }
                             ).apply {
+                                id = R.id.nitro_sso_webview
                                 loadUrl(state.data.idpAuthorizeUrl.toIdpUrl(login).toString())
                             }
                         )
+                        nitroViewModel.onWebviewReady()
+                    }
+                    is NitroSsoInfoViewModel.NitroState.Ready -> {
+                        
+                        if (findViewById<NitroSsoWebView>(R.id.nitro_sso_webview) == null) {
+                            nitroViewModel.authenticate(nitroUrl = nitroUrl, domainName = domainName)
+                        }
                     }
                     is NitroSsoInfoViewModel.NitroState.Loading -> {
                         

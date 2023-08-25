@@ -1,6 +1,4 @@
 
-
-
 package com.dashlane.authenticator.util;
 
 import androidx.annotation.NonNull;
@@ -12,12 +10,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 
-
-
 public class PasscodeGenerator {
     private static final int MAX_PASSCODE_LENGTH = 9;
-
-    
 
     private static final int[] DIGITS_POWER
             
@@ -26,11 +20,7 @@ public class PasscodeGenerator {
     private final Signer signer;
     private final int codeLength;
 
-    
-
     public interface Signer {
-        
-
         byte[] sign(byte[] data) throws GeneralSecurityException;
     }
 
@@ -52,15 +42,11 @@ public class PasscodeGenerator {
         return result;
     }
 
-    
-
     public String generateResponseCode(long state)
             throws GeneralSecurityException {
         byte[] value = ByteBuffer.allocate(8).putLong(state).array();
         return generateResponseCode(value);
     }
-
-    
 
     public String generateResponseCode(byte[] challenge)
             throws GeneralSecurityException {
@@ -74,8 +60,6 @@ public class PasscodeGenerator {
         int pinValue = truncatedHash % DIGITS_POWER[codeLength];
         return padOutput(pinValue);
     }
-
-    
 
     private int hashToInt(byte[] bytes, int start) {
         DataInput input = new DataInputStream(

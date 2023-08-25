@@ -8,13 +8,10 @@ import android.content.IntentFilter
 import android.content.IntentSender
 import android.os.Bundle
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.google.android.gms.auth.api.phone.SmsCodeAutofillClient
 import com.google.android.gms.auth.api.phone.SmsCodeRetriever
 import com.google.android.gms.common.api.ResolvableApiException
-
-
 
 class SmsOtpAutofillActivity : AutoFillResponseActivity() {
 
@@ -39,7 +36,6 @@ class SmsOtpAutofillActivity : AutoFillResponseActivity() {
 
     override fun onStart() {
         super.onStart()
-        autofillUsageLog.onClickToAutoFillSmsOtp(getAutofillApiOrigin(forKeyboardAutofill), packageName)
         val intentFilter = IntentFilter(SmsCodeRetriever.SMS_CODE_RETRIEVED_ACTION)
         registerReceiver(smsReceiver, intentFilter)
         fetchSmsCode()

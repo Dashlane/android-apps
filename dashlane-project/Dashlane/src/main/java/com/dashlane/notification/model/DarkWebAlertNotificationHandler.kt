@@ -9,16 +9,12 @@ import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
 import com.dashlane.notification.FcmMessage
 import com.dashlane.notification.appendBreachNotificationExtra
-import com.dashlane.notification.appendNotificationExtras
 import com.dashlane.notification.getJsonData
-import com.dashlane.notification.getLogName
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.SplashScreenActivity
 import com.dashlane.util.clearTask
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.notification.buildNotification
-
-
 
 class DarkWebAlertNotificationHandler(context: Context, message: FcmMessage) :
     AbstractNotificationHandler(context, message) {
@@ -29,8 +25,6 @@ class DarkWebAlertNotificationHandler(context: Context, message: FcmMessage) :
         parseMessage()
         notificationId = NOTIFICATION_ID
     }
-
-    
 
     override fun handlePushNotification() {
         if (!isForLastLoggedInUser) return
@@ -59,7 +53,6 @@ class DarkWebAlertNotificationHandler(context: Context, message: FcmMessage) :
         val notificationIntent = DashlaneIntent.newInstance(context, SplashScreenActivity::class.java).apply {
             clearTask()
             appendBreachNotificationExtra()
-            appendNotificationExtras(fcmMessage.code.getLogName())
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -76,8 +69,11 @@ class DarkWebAlertNotificationHandler(context: Context, message: FcmMessage) :
             setChannel(NotificationHelper.Channel.SECURITY)
             setAutoCancel()
         }
-        fcmHelper.logDisplay(fcmMessage.code.getLogName())
-        NotificationManagerCompat.from(context).notify(notificationId, notification)
+        try {
+            NotificationManagerCompat.from(context).notify(notificationId, notification)
+        } catch (e: SecurityException) {
+            
+        }
     }
 
     private fun getTitleAndMessageSetupComplete(): Pair<String, String> {
@@ -89,7 +85,9 @@ class DarkWebAlertNotificationHandler(context: Context, message: FcmMessage) :
     private fun getTitleAndMessageNewAlert(counter: Int): Pair<String, String> {
         val title = context.getString(R.string.darkweb_notification_confirm_alert_title)
         val message = context.resources.getQuantityString(
-            R.plurals.darkweb_notification_confirm_alert_description, counter, counter
+            R.plurals.darkweb_notification_confirm_alert_description,
+            counter,
+            counter
         )
         return title to message
     }

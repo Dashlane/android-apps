@@ -2,6 +2,7 @@ package com.dashlane.sharing.internal.builder.request
 
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.SharingKeys
+import com.dashlane.server.api.endpoints.sharinguserdevice.AuditLogDetails
 import com.dashlane.server.api.endpoints.sharinguserdevice.InviteItemGroupMembersService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemForEmailing
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
@@ -21,8 +22,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-
 class InviteItemGroupMembersRequestBuilder @Inject constructor(
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
@@ -41,7 +40,8 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
         itemsForEmailing: List<ItemForEmailing>,
         usersUpload: List<UserToInvite>,
         userGroupsUpload: List<GroupToInvite>,
-        myUserGroupsAcceptedOrPending: List<UserGroup>
+        myUserGroupsAcceptedOrPending: List<UserGroup>,
+        auditLogs: AuditLogDetails?
     ): InviteItemGroupMembersService.Request {
         return withContext(defaultCoroutineDispatcher) {
             val groupCryptographyKey =
@@ -50,15 +50,19 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
 
             val usersToInvite = usersUpload.mapNotNull {
                 
-                if (itemGroup.isUserAcceptedOrPending(it.userId)) null
-                else createUserInvite(groupCryptographyKey, it)
+                if (itemGroup.isUserAcceptedOrPending(it.userId)) {
+                    null
+                } else {
+                    createUserInvite(groupCryptographyKey, it)
+                }
             }
             val userGroupsToInvite = userGroupsUpload.mapNotNull {
                 val userGroupId: String = it.userGroup.groupId
 
                 
-                if (itemGroup.isUserGroupAcceptedOrPending(userGroupId)) null
-                else {
+                if (itemGroup.isUserGroupAcceptedOrPending(userGroupId)) {
+                    null
+                } else {
                     createUserGroupToInvite(groupCryptographyKey, it, itemGroup, userGroupId)
                 }
             }
@@ -72,6 +76,7 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
                 users = usersToInvite.takeUnless { it.isEmpty() },
                 groups = userGroupsToInvite.takeUnless { it.isEmpty() },
                 itemsForEmailing = itemsForEmailing.takeUnless { it.isEmpty() },
+                auditLogDetails = auditLogs
             )
         }
     }
@@ -89,7 +94,8 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
 
         val acceptSignatureGroup: String = sharingCryptography.generateAcceptationSignature(
             itemGroup.groupId,
-            groupKeyByteArray, privateKey
+            groupKeyByteArray,
+            privateKey
         ) ?: return null
 
         val groupKeyEncrypted = sharingCryptography.generateGroupKeyEncrypted(
@@ -108,8 +114,6 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
             groupKey = groupKeyEncrypted
         )
     }
-
-    
 
     private fun createUserInvite(
         groupKey: CryptographyKey.Raw32,

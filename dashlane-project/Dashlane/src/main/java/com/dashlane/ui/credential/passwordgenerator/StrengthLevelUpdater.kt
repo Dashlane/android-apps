@@ -7,8 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-
-
 class StrengthLevelUpdater(private val coroutineScope: CoroutineScope) {
 
     private var lastJob: Job? = null

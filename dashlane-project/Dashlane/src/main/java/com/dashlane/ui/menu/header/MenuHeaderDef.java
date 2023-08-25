@@ -7,8 +7,6 @@ import com.dashlane.teamspaces.model.Teamspace;
 import com.dashlane.ui.menu.MenuDef;
 import com.skocken.presentation.definition.Base;
 
-
-
 public interface MenuHeaderDef {
 
     interface IPresenter extends Base.IItemPresenter<MenuDef.Item> {

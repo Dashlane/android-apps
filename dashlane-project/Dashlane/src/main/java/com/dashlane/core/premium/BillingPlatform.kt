@@ -1,7 +1,5 @@
 package com.dashlane.core.premium
 
-
-
 enum class BillingPlatform {
     PLAY_STORE, 
     APP_STORE, 

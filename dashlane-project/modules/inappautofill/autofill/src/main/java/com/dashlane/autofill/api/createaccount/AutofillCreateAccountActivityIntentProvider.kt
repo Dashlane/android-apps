@@ -7,8 +7,6 @@ import com.dashlane.autofill.api.fillresponse.CreateAccountActionIntentProvider
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import javax.inject.Inject
 
-
-
 class AutofillCreateAccountActivityIntentProvider @Inject constructor() : CreateAccountActionIntentProvider {
     override fun getCreateAccountIntentSender(
         context: Context,

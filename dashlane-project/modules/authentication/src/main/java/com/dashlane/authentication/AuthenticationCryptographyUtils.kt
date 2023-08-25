@@ -31,8 +31,6 @@ internal fun Cryptography.createAppDecryptionEngine(key: AppKey): DecryptionEngi
 internal fun Cryptography.createVaultDecryptionEngine(key: VaultKey): DecryptionEngine =
     key.cryptographyKey.use(::createDecryptionEngine)
 
-
-
 internal fun Cryptography.createPasswordEncryptionEngine(
     key: VaultKey.Password,
     settings: Settings
@@ -41,41 +39,29 @@ internal fun Cryptography.createPasswordEncryptionEngine(
         createEncryptionEngine(settings.cryptographyMarker, it, settings.cryptographyFixedSalt)
     }
 
-
-
 internal fun Cryptography.createRemoteKeyEncryptionEngine(
     remoteKey: VaultKey.RemoteKey
 ): EncryptionEngine =
     remoteKey.cryptographyKey.use(::createFlexibleNoDerivation64EncryptionEngine)
-
-
 
 fun Cryptography.createSsoEncryptionEngine(
     ssoKey: AppKey.SsoKey
 ): EncryptionEngine =
     ssoKey.cryptographyKey.use(::createFlexibleNoDerivation64EncryptionEngine)
 
-
-
 fun EncryptionEngine.encryptRemoteKey(
     remoteKey: VaultKey.RemoteKey
 ): EncryptedBase64String =
     remoteKey.cryptographyKeyBytes.use(ObfuscatedByteArray::toByteArray).use(::encryptByteArrayToBase64String)
-
-
 
 @Throws(CryptographyException::class)
 internal fun DecryptionEngine.decryptRemoteKey(
     remoteKey: EncryptedBase64String
 ): VaultKey.RemoteKey = decryptBase64ToByteArray(remoteKey).use(VaultKey::RemoteKey)
 
-
-
 internal fun XmlEncryptionEngine.encryptSettings(
     settings: SyncObject.Settings
 ): EncryptedBase64String = encryptXmlTransactionToBase64String(settings.toTransaction())
-
-
 
 @Throws(CryptographyException::class, XmlException::class)
 internal fun XmlDecryptionEngine.decryptSettings(
@@ -83,20 +69,14 @@ internal fun XmlDecryptionEngine.decryptSettings(
 ): SyncObject.Settings =
     decryptBase64ToXmlTransaction(settings).toObject(SyncObjectType.SETTINGS) as SyncObject.Settings
 
-
-
 internal fun EncryptionEngine.encryptSharingPrivateKey(
     privateKey: SharingKeys.Private
 ): EncryptedBase64String = encryptUtf8ToBase64String(privateKey.value)
-
-
 
 @Throws(CryptographyException::class)
 internal fun DecryptionEngine.decryptSharingPrivateKey(
     privateKey: EncryptedBase64String
 ): String = decryptBase64ToUtf8String(privateKey)
-
-
 
 @Throws(CryptographyException::class)
 internal fun DecryptionEngine.decryptBackupToken(

@@ -12,8 +12,9 @@ suspend fun SharingItemUpdater.handleServerResponse(
     val content = response.data
     val itemGroup = content.itemGroups?.firstOrNull()
     val userGroup = content.userGroups?.firstOrNull()
-    if (itemGroup == null && userGroup == null)
+    if (itemGroup == null && userGroup == null) {
         throw SharingResponseException("The response doesn't contain one itemGroup or userGroup")
+    }
     itemGroup?.also {
         update(SharingItemUpdaterRequest.toSaveItemGroup(it, null))
     }

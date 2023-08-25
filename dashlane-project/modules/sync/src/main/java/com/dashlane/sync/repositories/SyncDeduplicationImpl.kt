@@ -19,8 +19,6 @@ class SyncDeduplicationImpl @Inject constructor() : SyncDeduplication {
             .values.filter { it.size > 1 }
             .flatMap { dropMostRecent(it) }
 
-    
-
     private fun dropMostRecent(list: List<OutgoingTransaction.Update>): List<OutgoingTransaction.Update> =
         list - list.maxByOrNull(OutgoingTransaction.Update::date)!!
 }

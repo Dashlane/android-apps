@@ -1,9 +1,7 @@
 package com.dashlane.autofill.core
 
-import com.dashlane.autofill.AutofillOrigin
 import com.dashlane.autofill.api.createaccount.AutofillCreateAccountLogger
 import com.dashlane.autofill.api.util.DomainWrapper
-import com.dashlane.autofill.core.AutofillUsageLog.Companion.getSenderUsage96
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.DismissType
@@ -18,14 +16,10 @@ import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogCode57
-import com.dashlane.useractivity.log.usage.UsageLogCode96
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.useractivity.log.usage.copyWithValuesFromAuthentifiant
-import com.dashlane.useractivity.log.usage.fillAndSend
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.TeamSpaceUtils
 import com.dashlane.vault.util.getTeamSpaceLog
 import com.dashlane.xml.domain.SyncObject
@@ -92,32 +86,6 @@ class AutofillCreateAccountLoggerImpl @Inject constructor(
                 from = UsageLogCode11.From.AUTOFILL_CREATE_ACCOUNT,
                 action = UsageLogCode11.Action.ADD
             ).copyWithValuesFromAuthentifiant(credential)
-        )
-
-        bySessionUsageLogRepository[sessionManager.session]?.apply {
-            UsageLogCode57(
-                spaceId = teamId,
-                sender = UsageLogCode57.Sender.AUTOFILL_CREATE_ACCOUNT,
-                action = UsageLogCode57.Action.ADD
-            ).fillAndSend(this, credential.toSummary())
-        }
-    }
-
-    override fun logOnClickCreateAccount(
-        @AutofillOrigin origin: Int,
-        packageName: String,
-        webAppDomain: String,
-        hasCredential: Boolean
-    ) {
-        log(
-            UsageLogCode96(
-                action = UsageLogCode96.Action.CLICK_CREATE_ACCOUNT,
-                app = packageName,
-                sender = getSenderUsage96(origin),
-                webappDomain = webAppDomain,
-                hasCredentials = hasCredential,
-                type = UsageLogCode96.Type.AUTHENTICATION
-            )
         )
     }
 }

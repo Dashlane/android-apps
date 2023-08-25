@@ -17,9 +17,8 @@ import com.dashlane.vault.toItemType
 import com.dashlane.vault.util.getTeamSpaceLog
 import javax.inject.Inject
 
-class AutofillSaveRequestLoggerImpl @Inject constructor(
-    private val logRepository: LogRepository
-) : AutofillSaveRequestLogger {
+class AutofillSaveRequestLoggerImpl @Inject constructor(private val logRepository: LogRepository) :
+    AutofillSaveRequestLogger {
 
     override fun onSave(
         itemType: ItemType,
@@ -44,11 +43,12 @@ class AutofillSaveRequestLoggerImpl @Inject constructor(
                 isNativeApp = domainWrapper.isNativeApp
             )
         )
+        val action = saveType.toLogAction()
         logRepository.queueEvent(
             UpdateVaultItem(
                 itemId = ItemId(vaultItem.uid),
                 itemType = vaultItem.syncObjectType.toItemType(),
-                action = saveType.toLogAction(),
+                action = action,
                 space = vaultItem.getTeamSpaceLog(),
             )
         )

@@ -4,24 +4,18 @@ import com.dashlane.followupnotification.data.FollowUpNotificationRepository
 import com.dashlane.followupnotification.domain.CopyFollowUpNotificationToClipboard
 import com.dashlane.followupnotification.domain.CreateFollowUpNotification
 import com.dashlane.followupnotification.domain.FollowUpNotification
-import com.dashlane.followupnotification.services.FollowUpAutoRemovalService
 import com.dashlane.followupnotification.services.FollowUpNotificationDisplayService
 import com.dashlane.followupnotification.services.FollowUpNotificationLogger
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
-
-
 
 class FollowUpNotificationApiImpl @Inject constructor(
     private val createFollowUpNotification: CreateFollowUpNotification,
     private val copyFollowUpNotificationToClipboard: CopyFollowUpNotificationToClipboard,
     private val followUpNotificationRepository: FollowUpNotificationRepository,
     private val followUpNotificationDisplayService: FollowUpNotificationDisplayService,
-    private val followUpNotificationLogger: FollowUpNotificationLogger,
-    private val followUpAutoRemovalService: FollowUpAutoRemovalService
+    private val followUpNotificationLogger: FollowUpNotificationLogger
 ) : FollowUpNotificationApi {
 
     override fun startFollowUpNotification(summaryObject: SummaryObject, copyField: CopyField?) {
@@ -36,7 +30,6 @@ class FollowUpNotificationApiImpl @Inject constructor(
                 startFollowUpNotification(it)
             }
         } catch (e: Exception) {
-            Log.v(e)
         }
     }
 
@@ -72,6 +65,5 @@ class FollowUpNotificationApiImpl @Inject constructor(
     private fun startFollowUpNotification(it: FollowUpNotification) {
         followUpNotificationRepository.add(it)
         followUpNotificationDisplayService.displayNotification(it)
-        followUpAutoRemovalService.registerToRemove(it.id)
     }
 }

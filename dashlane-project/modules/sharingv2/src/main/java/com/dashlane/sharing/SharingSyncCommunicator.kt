@@ -23,6 +23,9 @@ interface SharingSyncCommunicator {
     data class GetSharingResult(
         val itemGroups: List<ItemGroup>,
         val itemContents: List<ItemContent>,
-        val userGroup: List<UserGroup>
-    )
+        val userGroups: List<UserGroup>
+    ) {
+        val isEmptyResult: Boolean
+            get() = itemGroups.isEmpty() && userGroups.isEmpty() && itemContents.isEmpty()
+    }
 }

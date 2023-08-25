@@ -11,8 +11,6 @@ import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.hermes.generated.definitions.Domain
 import dagger.hilt.android.qualifiers.ApplicationContext
 
-
-
 internal class SecurityWarningsProcessor(
     private val securityWarningsView: SecurityWarningsView,
     @ApplicationContext

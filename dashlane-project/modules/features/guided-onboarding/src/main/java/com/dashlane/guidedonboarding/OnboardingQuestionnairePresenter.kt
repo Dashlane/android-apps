@@ -32,6 +32,7 @@ internal class OnboardingQuestionnairePresenter(
 
     private var currentStep: QuestionnaireStep = QuestionnaireStep.QUESTION_1
     private var selectedAnswers = arrayOf<QuestionnaireAnswer?>(null, null, null)
+
     
     private var planAnimPlayed = false
 

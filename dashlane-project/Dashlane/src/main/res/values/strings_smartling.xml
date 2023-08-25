@@ -158,17 +158,11 @@
     <string name="datatype_fiscal_statement">Tax numbers</string>
     <string name="datatype_id_card">ID cards</string>
     <string name="datatype_identity">Names</string>
-    <string name="datatype_merchant">Merchant</string>
     <string name="datatype_passport">Passports</string>
     <string name="datatype_paymentpaypal">Paypal</string>
     <string name="datatype_paymentcreditcard">Credit/debit cards</string>
-    <string name="datatype_personaldata_default">Personal data</string>
     <string name="datatype_personal_website">Personal websites</string>
     <string name="datatype_phone">Phones</string>
-    <string name="datatype_purchase_article">Purchase article</string>
-    <string name="datatype_purchase_basket">Purchase basket</string>
-    <string name="datatype_purchase_category">Purchase category</string>
-    <string name="datatype_purchase_confirmation">Purchase confirmation</string>
     <string name="datatype_social_security_statement">Social security numbers</string>
     <string name="datatype_secure_note">Secure Note</string>
     <string name="datatype_secure_note_category">Secure Note category</string>
@@ -260,7 +254,6 @@
     <string name="sharing_contextual_manage_contact_pending_resend_invite">Resend your request</string>
     <string name="sharing_contextual_manage_contact_pending_cancel_invite">Cancel your request</string>
     <string name="sharing_dialog_error_premium_status_undefined_description">An error occurred. Please log out and log in again.</string>
-    <string name="empty_screen_authentifiants_button">Add a login</string>
     <string name="empty_screen_securenotes_line1">Add secure notes</string>
     <string name="empty_screen_securenotes_line2">Store important notes here—like WiFi passwords and access codes.</string>
     <string name="empty_screen_vault_allitems_line1">One secure place for all your important info</string>

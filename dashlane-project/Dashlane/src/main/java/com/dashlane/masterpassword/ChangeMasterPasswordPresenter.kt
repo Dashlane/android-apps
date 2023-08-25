@@ -166,7 +166,9 @@ class ChangeMasterPasswordPresenter(
                 currentStep = Step.ENTER_NEW_PASSWORD
                 initCurrentStep()
             }
-        } else null
+        } else {
+            null
+        }
 
         showDialog(
             context!!.getString(R.string.change_master_password_pop_failure_title),

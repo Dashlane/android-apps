@@ -16,8 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
-
 class AuthenticatorViewProxy(
     private val otpCodeView: TextView,
     private val actionView: ImageView,

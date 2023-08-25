@@ -11,8 +11,6 @@ import com.dashlane.util.ActivityListenerWindowCallback
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 open class BaseDialogFragment : DialogFragment() {
 

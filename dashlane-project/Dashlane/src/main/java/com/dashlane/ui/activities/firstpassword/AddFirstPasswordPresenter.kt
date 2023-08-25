@@ -4,10 +4,10 @@ import android.os.Bundle
 import androidx.lifecycle.viewModelScope
 import com.dashlane.core.DataSync
 import com.dashlane.guidedonboarding.R
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.firstpassword.autofilldemo.AutofillDemoActivity
 import com.dashlane.ui.activities.firstpassword.faq.FAQFirstPasswordActivity
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.util.getImageDrawableByWebsiteUrl
 import com.dashlane.util.getSerializableCompat
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
@@ -21,7 +21,8 @@ import javax.inject.Inject
 class AddFirstPasswordPresenter @Inject constructor(
     dataProvider: AddFirstPassword.DataProvider,
     val logger: AddFirstPasswordLogger,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val dataSync: DataSync
 ) : BasePresenter<AddFirstPassword.DataProvider, AddFirstPassword.ViewProxy>(),
     AddFirstPassword.Presenter {
 
@@ -83,7 +84,7 @@ class AddFirstPasswordPresenter @Inject constructor(
                 logger.onCredentialSaved(credential)
                 displayAutofillDemo = true
                 view.displayAutofillDemoPrompt()
-                DataSync.sync(UsageLogCode134.Origin.SAVE)
+                dataSync.sync(Trigger.SAVE)
             }
         }
     }

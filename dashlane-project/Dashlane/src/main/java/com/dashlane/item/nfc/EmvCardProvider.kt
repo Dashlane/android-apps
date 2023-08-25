@@ -3,8 +3,6 @@ package com.dashlane.item.nfc
 import android.nfc.tech.IsoDep
 import com.github.devnied.emvnfccard.parser.IProvider
 
-
-
 class EmvCardProvider(private val tagCom: IsoDep) : IProvider {
 
     override fun transceive(command: ByteArray): ByteArray? =

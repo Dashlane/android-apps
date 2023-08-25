@@ -25,8 +25,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-
-
 class PasswordValidationResultByZxcvbnViewProxy(private val scope: CoroutineScope) : PasswordValidationResultViewProxy {
 
     private var previousJob: Job? = null
@@ -50,7 +48,9 @@ class PasswordValidationResultByZxcvbnViewProxy(private val scope: CoroutineScop
                 strengthHorizontalIndicatorView.visibility = View.GONE
                 passwordStrengthTextView.setText(R.string.password_creation_empty_title)
                 setTextOrGone(
-                    tipsView, R.id.suggestions, getFormattedTips(
+                    tipsView,
+                    R.id.suggestions,
+                    getFormattedTips(
                         tipsView,
                         listOf(
                             context.getString(R.string.password_creation_empty_suggestion_1),

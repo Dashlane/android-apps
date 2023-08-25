@@ -5,11 +5,7 @@ import com.dashlane.server.api.endpoints.sync.SyncDownloadTransaction
 import com.dashlane.server.api.endpoints.sync.SyncUploadTransaction
 import kotlinx.coroutines.channels.SendChannel
 
-
-
 interface TransactionCipher {
-
-    
 
     suspend fun decipherIncomingTransactions(
         transactions: List<SyncDownloadTransaction>,
@@ -17,8 +13,6 @@ interface TransactionCipher {
         sharedIds: Set<String>,
         progressChannel: SendChannel<Unit>? = null
     ): Pair<List<IncomingTransaction>, List<Throwable>>
-
-    
 
     suspend fun cipherOutgoingTransactions(
         transactions: List<OutgoingTransaction>,

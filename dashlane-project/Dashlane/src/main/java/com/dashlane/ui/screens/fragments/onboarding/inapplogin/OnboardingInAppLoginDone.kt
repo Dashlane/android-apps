@@ -17,8 +17,6 @@ import com.skocken.presentation.presenter.BasePresenter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class OnboardingInAppLoginDone : BaseUiFragment() {
 

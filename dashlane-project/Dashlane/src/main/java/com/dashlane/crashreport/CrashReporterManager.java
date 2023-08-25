@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.dashlane.BuildConfig;
 import com.dashlane.crashreport.reporter.SentryCrashReporter;
 import com.dashlane.preference.GlobalPreferencesManager;
-import com.dashlane.util.DevUtil;
 import com.dashlane.util.userfeatures.UserFeaturesChecker;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,12 +26,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import dagger.hilt.android.qualifiers.ApplicationContext;
-
-
 
 @Singleton
 public class CrashReporterManager implements CrashReporter {
@@ -53,8 +51,6 @@ public class CrashReporterManager implements CrashReporter {
         mUserFeaturesChecker = userFeaturesChecker;
     }
 
-    
-
     @Override
     public void init(@NonNull Application application) {
         if (BuildConfig.DEBUG) {
@@ -68,7 +64,7 @@ public class CrashReporterManager implements CrashReporter {
 
         Thread.UncaughtExceptionHandler defaultHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            mCrashReporterLogger.onCrashHappened();
+            mCrashReporterLogger.onCrashHappened(thread.toString(), throwable);
             if (!BuildConfig.CRASHLYTICS_ENABLED) {
                 emailCrashReport(application, crashDeviceId, throwable);
             }
@@ -89,8 +85,6 @@ public class CrashReporterManager implements CrashReporter {
             mCrashReporters.add(new SentryCrashReporter(mContext, getCrashReporterId(), mUserFeaturesChecker));
         }
     }
-
-    
 
     private void emailCrashReport(@NonNull Application application, String deviceId, Throwable throwable) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
@@ -117,9 +111,9 @@ public class CrashReporterManager implements CrashReporter {
         intent.putExtra(Intent.EXTRA_TEXT, writer.toString());
 
         if (intent.resolveActivity(application.getPackageManager()) != null) {
-            Intent chooser = Intent.createChooser(intent, "Send Dashlane Crash");
-            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            DevUtil.startActivityOrDefaultErrorMessage(application, chooser);
+            Intent chooserIntent = Intent.createChooser(intent, "Send Dashlane Crash");
+            chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            application.startActivity(chooserIntent);
         }
     }
 
@@ -159,8 +153,6 @@ public class CrashReporterManager implements CrashReporter {
     }
 
     public interface Client {
-
-        
 
         void log(@NonNull String traceWithDate, @NonNull String rawTrace);
 

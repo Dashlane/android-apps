@@ -19,7 +19,8 @@ import com.dashlane.util.showToaster
 import com.skocken.presentation.viewproxy.BaseViewProxy
 import kotlin.properties.Delegates
 
-class CreateAccountViewProxy(rootView: View) : BaseViewProxy<CreateAccountContract.Presenter>(rootView),
+class CreateAccountViewProxy(rootView: View) :
+    BaseViewProxy<CreateAccountContract.Presenter>(rootView),
     CreateAccountContract.ViewProxy {
 
     override val root: ConstraintLayout = findViewByIdEfficient(R.id.view_login_root)!!
@@ -55,8 +56,6 @@ class CreateAccountViewProxy(rootView: View) : BaseViewProxy<CreateAccountContra
     private val minContentHeight = resources.getDimensionPixelSize(R.dimen.login_content_min_height)
 
     private var showLogo by Delegates.observable(true) { _, oldValue, newValue ->
-        
-
         if (oldValue != newValue) {
             if (newValue) {
                 ConstraintSet().run {

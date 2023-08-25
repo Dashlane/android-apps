@@ -9,15 +9,14 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import com.dashlane.R
+import com.dashlane.dagger.singleton.KnownApplicationEntryPoint
 import com.dashlane.ext.application.ExternalApplication
-import com.dashlane.ext.application.KnownApplication
 import com.dashlane.ui.activities.fragments.list.action.ActionItemHelper
 import com.dashlane.util.ToasterImpl
 import com.dashlane.util.tryOrNull
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-
-
+import dagger.hilt.android.EntryPointAccessors
 
 @SuppressLint("InflateParams")
 class LoginOpener(private val activity: Activity) {
@@ -67,19 +66,23 @@ class LoginOpener(private val activity: Activity) {
         buildApplicationsBottomSheet(applicationOptions, defaultApplicationFromUrl, defaultIntent, listener)
     }
 
-    
-
     private fun getApplicationOptions(
         url: String,
         packageNames: Set<String>,
         defaultPackageName: String?
-    ) = packageNames.plus(KnownApplication.getPackageNames(url))
-        .let {
-            
-            defaultPackageName?.let { packageNames.minus(defaultPackageName) } ?: it
-        }
-        .mapNotNull { ExternalApplication.of(activity, it) }
-        .sortedBy { it.title }
+    ): List<ExternalApplication> {
+        val knownApplicationProvider = EntryPointAccessors.fromApplication(
+            activity,
+            KnownApplicationEntryPoint::class.java
+        ).knownApplicationProvider
+        return packageNames.plus(knownApplicationProvider.getPackageNamesCanOpen(url))
+            .let {
+                
+                defaultPackageName?.let { packageNames.minus(defaultPackageName) } ?: it
+            }
+            .mapNotNull { ExternalApplication.of(activity, it) }
+            .sortedBy { it.title }
+    }
 
     private fun buildApplicationsBottomSheet(
         applicationOptions: List<ExternalApplication>,

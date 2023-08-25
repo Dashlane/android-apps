@@ -1,12 +1,25 @@
 package com.dashlane.premium.current
 
 import android.os.Bundle
+import com.dashlane.hermes.LogRepository
 import com.dashlane.premium.R
-import com.dashlane.premium.current.dagger.CurrentPlanComponent
+import com.dashlane.premium.current.other.CurrentPlanStatusProvider
 import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.util.userfeatures.UserFeaturesChecker
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class CurrentPlanActivity : DashlaneActivity() {
-    private val component by lazy(LazyThreadSafetyMode.NONE) { CurrentPlanComponent(this) }
+
+    @Inject
+    lateinit var userFeaturesChecker: UserFeaturesChecker
+
+    @Inject
+    lateinit var currentPlanStatusProvider: CurrentPlanStatusProvider
+
+    @Inject
+    lateinit var logRepository: LogRepository
 
     private lateinit var presenter: CurrentPlanPresenter
 
@@ -15,13 +28,13 @@ class CurrentPlanActivity : DashlaneActivity() {
         setContentView(R.layout.activity_current_plan)
 
         val provider = CurrentPlanDataProvider(
-            userFeaturesChecker = component.userFeaturesChecker,
-            statusProvider = component.currentPlanStatusProvider
+            userFeaturesChecker = userFeaturesChecker,
+            statusProvider = currentPlanStatusProvider
         )
 
         presenter = CurrentPlanPresenter(
-            navigator = component.navigator,
-            logger = CurrentPlanLogger(component.logRepository)
+            navigator = navigator,
+            logger = CurrentPlanLogger(logRepository)
         ).apply {
             setView(CurrentPlanViewProxy(this@CurrentPlanActivity))
             setProvider(provider)

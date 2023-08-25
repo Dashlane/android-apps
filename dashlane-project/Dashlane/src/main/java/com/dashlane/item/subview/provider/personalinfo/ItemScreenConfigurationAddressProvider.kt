@@ -3,11 +3,9 @@ package com.dashlane.item.subview.provider.personalinfo
 import android.content.Context
 import com.dashlane.R
 import com.dashlane.core.domain.State
-import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.AddressLogger
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
@@ -38,24 +36,18 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.utils.Country
 
-
-
 class ItemScreenConfigurationAddressProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    deviceInfoRepository: DeviceInfoRepository,
     sessionManager: SessionManager,
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
-
-    override val logger = AddressLogger(
-        teamspaceAccessor, deviceInfoRepository, mainDataAccessor.getDataCounter(),
-        sessionManager, bySessionUsageLogRepository
-    )
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -152,7 +144,9 @@ class ItemScreenConfigurationAddressProvider(
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace()) {
             subViewFactory.createSpaceSelector(
-                item.syncObject.spaceId, teamspaceAccessor, null,
+                item.syncObject.spaceId,
+                teamspaceAccessor,
+                null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
         } else {
@@ -176,7 +170,8 @@ class ItemScreenConfigurationAddressProvider(
                 editMode -> ItemEditValueListSubView(
                     phoneHeader,
                     selectedNumber,
-                    phoneList.map { it.first }) { it, value -> it.copyForUpdatedPhone(phoneList, value) }
+                    phoneList.map { it.first }
+                ) { it, value -> it.copyForUpdatedPhone(phoneList, value) }
                 else -> ItemReadValueListSubView(phoneHeader, selectedNumber, phoneList.map { it.first })
             }
         } else {
@@ -347,7 +342,8 @@ class ItemScreenConfigurationAddressProvider(
             else -> ItemReadValueListSubView(
                 stateHeader,
                 selectedState,
-                stateList.map { it.name })
+                stateList.map { it.name }
+            )
         }
     }
 

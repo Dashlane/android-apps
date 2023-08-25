@@ -7,8 +7,6 @@ import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import javax.inject.Inject
 
-
-
 class LockSelfCheckActivityListener @Inject constructor(
     private val lockManager: LockManager
 ) : AbstractActivityLifecycleListener() {

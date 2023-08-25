@@ -18,8 +18,6 @@ import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.google.android.material.textfield.TextInputEditText
 
-
-
 class CreateAccountViewProxy(
     dialogView: View,
     private val toaster: Toaster,
@@ -102,8 +100,6 @@ class CreateAccountViewProxy(
     override fun displayError(message: String) {
         toaster.show(message, Toast.LENGTH_SHORT)
     }
-
-    
 
     private fun checkMandatoryFields() = login?.text.isNotSemanticallyNull() && password?.text.isNotSemanticallyNull()
 }

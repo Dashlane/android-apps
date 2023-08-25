@@ -12,8 +12,6 @@ import com.dashlane.util.MeasureUtilKt;
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
-
-
 @SuppressWarnings("unused")
 public class LogoBehavior extends CoordinatorLayout.Behavior<ImageView> {
     private float mCustomFinalHeight;

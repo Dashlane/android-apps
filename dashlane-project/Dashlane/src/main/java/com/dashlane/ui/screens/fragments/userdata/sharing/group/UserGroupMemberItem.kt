@@ -4,8 +4,6 @@ import android.content.Context
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingUserGroupUser
 
-
-
 class UserGroupMemberItem(
     context: Context,
     private val user: SharingUserGroupUser,

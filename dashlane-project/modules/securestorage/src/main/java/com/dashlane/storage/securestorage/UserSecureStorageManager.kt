@@ -5,8 +5,6 @@ import com.dashlane.cryptography.encodeUtf8ToByteArray
 import com.dashlane.session.Session
 import com.dashlane.session.Username
 
-
-
 class UserSecureStorageManager(
     val secureStorageManager: SecureStorageManager
 ) {
@@ -72,8 +70,10 @@ class UserSecureStorageManager(
     }
 
     fun readPin(session: Session): String? =
-        session.localKey.use { secureStorageManager.getKeyData(SecureDataKey.PIN_CODE, session.username, it)
-            ?.decodeUtf8ToString() }
+        session.localKey.use {
+            secureStorageManager.getKeyData(SecureDataKey.PIN_CODE, session.username, it)
+            ?.decodeUtf8ToString()
+        }
 
     fun wipePin(username: Username) {
         val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
@@ -81,11 +81,13 @@ class UserSecureStorageManager(
     }
 
     fun storeUserFeature(session: Session, data: String) =
-        session.localKey.use { secureStorageManager.storeKeyData(data.encodeToByteArray(), SecureDataKey.USER_FEATURE, session.username, it) }
+        session.localKey.use { secureStorageManager.storeKeyData(data.encodeToByteArray(), SecureDataKey.USER_FEATURE_FLIPS, session.username, it) }
 
     fun readUserFeature(session: Session): String? =
-        session.localKey.use { secureStorageManager.getKeyData(SecureDataKey.USER_FEATURE, session.username, it)
-            ?.decodeUtf8ToString() }
+        session.localKey.use {
+            secureStorageManager.getKeyData(SecureDataKey.USER_FEATURE_FLIPS, session.username, it)
+            ?.decodeUtf8ToString()
+        }
 
     fun wipeUserData(username: Username) {
         secureStorageManager.wipeUserData(username)

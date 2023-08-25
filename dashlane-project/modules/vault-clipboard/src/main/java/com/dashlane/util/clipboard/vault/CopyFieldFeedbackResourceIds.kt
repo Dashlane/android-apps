@@ -2,8 +2,6 @@ package com.dashlane.util.clipboard.vault
 
 import com.dashlane.util.clipboard.R
 
-
-
 @SuppressWarnings("kotlin:S1479")
 fun CopyField.getFeedback() = when (this) {
     CopyField.Password -> R.string.feedback_copy_password

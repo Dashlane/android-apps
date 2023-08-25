@@ -22,7 +22,8 @@ class LoginDashlaneAuthenticatorPresenter(
 ) : LoginBasePresenter<LoginDashlaneAuthenticatorContract.DataProvider, LoginDashlaneAuthenticatorContract.ViewProxy>(
     rootPresenter,
     coroutineScope
-), LoginDashlaneAuthenticatorContract.Presenter {
+),
+LoginDashlaneAuthenticatorContract.Presenter {
     private var useEmailTokenJob: Job? = null
 
     override fun onNextClicked() = Unit
@@ -52,6 +53,7 @@ class LoginDashlaneAuthenticatorPresenter(
                 authenticationHolder.deferred?.cancel()
                 authenticationHolder.deferred = null
             }
+
             is AuthenticationSecondFactor.EmailToken -> {
                 useEmailTokenJob = launch {
                     try {
@@ -101,13 +103,13 @@ class LoginDashlaneAuthenticatorPresenter(
             } catch (_: AuthenticationExpiredVersionException) {
                 view.showError(R.string.expired_version_noupdate_title)
                 return@launch
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 view.showError(R.string.login_dashlane_authenticator_request_rejected)
                 return@launch
             }
 
             view.showSuccess {
-                rootPresenter.showPrimaryFactorStep(credentials)
+                rootPresenter.showPrimaryFactorStep(registeredUserDevice = credentials, authTicket = null)
                 authenticationHolder.deferred = null
             }
         }

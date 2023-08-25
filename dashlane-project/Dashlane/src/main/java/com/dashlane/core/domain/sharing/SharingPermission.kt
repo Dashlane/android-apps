@@ -3,8 +3,6 @@ package com.dashlane.core.domain.sharing
 import com.dashlane.R
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 
-
-
 enum class SharingPermission(val stringResource: Int) {
     ADMIN(R.string.enum_sharing_permission_admin),
     LIMITED(R.string.enum_sharing_permission_limited),

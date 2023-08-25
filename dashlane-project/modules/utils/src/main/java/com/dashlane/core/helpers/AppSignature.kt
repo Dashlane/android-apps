@@ -3,8 +3,6 @@ package com.dashlane.core.helpers
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-
-
 @Parcelize
 data class AppSignature(
     val packageName: String,

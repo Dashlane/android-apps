@@ -55,7 +55,8 @@ class SecureFileStorageImpl @Inject constructor(
 
         withContext(Dispatchers.IO) {
             body.source().use { source ->
-                (object : ForwardingSink(secureFile.file.sink()) {
+                (
+                    object : ForwardingSink(secureFile.file.sink()) {
                     var downloadedSize = 0L
 
                     override fun write(source: Buffer, byteCount: Long) {
@@ -63,7 +64,8 @@ class SecureFileStorageImpl @Inject constructor(
                         downloadedSize += byteCount
                         progression.trySend(downloadedSize * 100F / body.contentLength())
                     }
-                }).buffer().use { sink ->
+                }
+                ).buffer().use { sink ->
                     sink.writeAll(source)
                 }
             }

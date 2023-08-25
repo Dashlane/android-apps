@@ -8,26 +8,17 @@ import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.navigation.NavigationUtils
 import com.dashlane.session.SessionTrasher
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.install.InstallLogRepository
-import com.dashlane.usersupportreporter.UserSupportFileLogger
 import com.dashlane.util.Constants
-import com.dashlane.util.installlogs.DataLossTrackingLogger
 import kotlinx.coroutines.runBlocking
-
-
 
 class PasswordResetReceiver(
     private val activity: DashlaneActivity,
-    private val userSupportFileLogger: UserSupportFileLogger,
-    private val sessionTrasher: SessionTrasher,
-    private val installLogRepository: InstallLogRepository
+    private val sessionTrasher: SessionTrasher
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
         if (action == Constants.BROADCASTS.PASSWORD_SUCCESS_BROADCAST) {
             if (!intent.getBooleanExtra(Constants.BROADCASTS.SUCCESS_EXTRA, false)) {
-                DataLossTrackingLogger(installLogRepository).log(DataLossTrackingLogger.Reason.PASSWORD_RESET_BROADCAST)
-                userSupportFileLogger.add("Password reset triggered")
                 SingletonProvider.getSessionManager().session?.let {
                     runBlocking { sessionTrasher.trash(it.username, true) }
                 }

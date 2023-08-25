@@ -6,14 +6,14 @@ class SecureDataKey {
     companion object {
         const val LOCAL_KEY = "lk"
 
-        
-
         const val SECRET_KEY = "uki"
 
         @Deprecated("Anonymous user id is no longer stored in a dedicated file, it can be found in the settings")
         const val ANONYMOUS_USER_ID = "anonid"
         const val SETTINGS = "settings"
-        const val USER_FEATURE = "user_feature"
+
+        
+        const val USER_FEATURE_FLIPS = "user_feature_flips"
         const val RSA_PRIVATE_KEY = "rsa_private_key"
         const val PIN_CODE = "pin_code"
         const val PREMIUM_SERVER_RESPONSE = "premium_server_response"
@@ -21,11 +21,7 @@ class SecureDataKey {
         const val REMOTE_KEY = "remote_key"
         const val SERVER_KEY = "server_key"
 
-        
-
         const val DEVICE_ANALYTICS_ID = "deviceAnalyticsId"
-
-        
 
         const val USER_ANALYTICS_ID = "userAnalyticsId"
     }
@@ -37,7 +33,7 @@ class SecureDataKey {
         SECRET_KEY,
         RSA_PRIVATE_KEY,
         PIN_CODE,
-        USER_FEATURE,
+        USER_FEATURE_FLIPS,
         PREMIUM_SERVER_RESPONSE,
         ANONYMOUS_USER_ID,
         SETTINGS,

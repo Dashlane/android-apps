@@ -26,6 +26,7 @@
     <string name="current_benefit_dark_web_monitoring">Dark Web Monitoring</string>
     <string name="current_benefit_family_bundle">%1$s separate accounts under one plan</string>
     <string name="current_benefit_vpn">VPN</string>
+    <string name="current_benefit_vpn_family">VPN (1 account per plan)</string>
     <string name="current_benefit_premium_plus">Credit monitoring, identity insurance and restoration</string>
     
     <string name="current_benefit_secure_file_storage">Encrypted file storage</string>

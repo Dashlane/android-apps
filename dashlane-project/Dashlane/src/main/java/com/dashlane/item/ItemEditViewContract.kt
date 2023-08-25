@@ -20,8 +20,6 @@ interface ItemEditViewContract {
         val listener: UiUpdateListener
         var isToolbarCollapsed: Boolean
 
-        
-
         fun setConfiguration(
             screenConfiguration: ScreenConfiguration,
             isEditMode: Boolean,
@@ -29,77 +27,41 @@ interface ItemEditViewContract {
             isChangingMode: Boolean
         )
 
-        
-
         fun setMenus(menuActions: List<MenuAction>, menu: Menu)
-
-        
 
         fun selectMenuItem(item: MenuItem): Boolean
 
-        
-
         fun askForSave(action: (Boolean) -> Unit)
-
-        
 
         fun showConfirmDeleteDialog(itemId: String, isShared: Boolean)
 
-        
-
         fun showSaveConfirmation()
 
-        
-
         interface UiUpdateListener {
-            
-
             fun notifySubViewChanged(itemSubView: ItemSubView<*>)
-
-            
 
             fun notifyColorChanged(color: Int)
 
-            
-
             fun notifyHeaderChanged(itemHeader: ItemHeader, editMode: Boolean)
-
-            
 
             fun notifyDeleteClicked()
 
-            
-
             fun notifyRestorePassword()
-
-            
 
             fun notifyPotentialBarCodeScan(requestCode: Int, resultCode: Int, data: Intent?)
 
-            
-
             fun notifyNotEnoughDataToSave(@StringRes message: Int)
-
-            
 
             fun showNfcPromptDialog(dismissAction: () -> Unit)
 
-            
-
             fun showNfcErrorDialog()
-
-            
 
             fun showNfcSuccessDialog(
                 subviewToFocus: ItemSubView<*>? = null,
                 dismissAction: () -> Unit
             )
 
-            
-
             fun showRestorePromptDialog()
-
-            
 
             fun openLinkedServices(
                 itemId: String,
@@ -110,54 +72,36 @@ interface ItemEditViewContract {
                 urlDomain: String?
             )
 
-            
+            fun openCollectionSelector(
+                fromViewOnly: Boolean,
+                temporaryCollections: List<String>,
+                spaceId: String
+            )
 
             fun notifyOtpRefreshed(otp: Otp)
         }
     }
 
     interface Presenter : Base.IPresenter {
-        
-
         val isSecureNote: Boolean
-
-        
 
         fun setup(context: Context, options: ItemEditViewSetupOptions)
 
-        
-
         fun createMenu(menu: Menu): Boolean
-
-        
 
         fun selectMenuItem(item: MenuItem): Boolean
 
-        
-
         fun deleteClicked()
-
-        
 
         fun restorePassword()
 
-        
-
         fun otpRefreshed(otp: Otp)
-
-        
 
         fun onBackPressed()
 
-        
-
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
 
-        
-
         fun onNewIntent(data: Intent)
-
-        
 
         fun onNewActivityLaunching(callback: Callback)
 
@@ -174,19 +118,11 @@ interface ItemEditViewContract {
 
     interface DataProvider : Base.IDataProvider {
 
-        
-
         val vaultItem: VaultItem<*>
-
-        
 
         val isEditMode: Boolean
 
-        
-
         val isSetup: Boolean
-
-        
 
         suspend fun setup(
             context: Context,
@@ -194,15 +130,9 @@ interface ItemEditViewContract {
             listener: View.UiUpdateListener
         ): Boolean
 
-        
-
         suspend fun onSetupEnd(context: Context, options: ItemEditViewSetupOptions, listener: View.UiUpdateListener)
 
-        
-
         fun getScreenConfiguration(): ScreenConfiguration
-
-        
 
         suspend fun save(
             context: Context,
@@ -210,15 +140,9 @@ interface ItemEditViewContract {
             newAttachments: String? = null
         ): Boolean
 
-        
-
         suspend fun saveRefreshedOtp(otp: Otp)
 
-        
-
         fun hasUnsavedChanges(): Boolean
-
-        
 
         fun changeMode(
             context: Context,
@@ -226,17 +150,11 @@ interface ItemEditViewContract {
             listener: View.UiUpdateListener
         )
 
-        
-
         suspend fun restorePassword(): Boolean
-
-        
 
         fun onNewIntent(intent: Intent, coroutineScope: CoroutineScope)
 
         fun logViewDisplay()
-
-        
 
         fun setTemporaryLinkedServices(
             context: Context,
@@ -244,8 +162,6 @@ interface ItemEditViewContract {
             temporaryWebsites: List<String>?,
             temporaryApps: List<String>?
         )
-
-        
 
         fun getAdditionalData(): Bundle
     }

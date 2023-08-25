@@ -66,8 +66,6 @@ class AuthenticatorDashboardViewModel @Inject constructor(
     private val editMode: Boolean
         get() = editState.value == EditLogins
 
-    
-
     var otpUri: Uri? = null
     private lateinit var loadedCredentials: List<CredentialItem>
 

@@ -10,8 +10,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.drawable.ContactDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 data class DarkWebEmailItem(val emailStatus: DarkWebEmailStatus) : DashlaneRecyclerAdapter.ViewTypeProvider {
 
     var deleteListener: DeleteListener? = null

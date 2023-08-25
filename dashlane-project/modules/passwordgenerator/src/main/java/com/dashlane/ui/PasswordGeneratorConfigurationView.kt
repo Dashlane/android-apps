@@ -12,8 +12,6 @@ import com.dashlane.passwordgenerator.R
 import com.google.android.material.slider.Slider
 import kotlin.math.roundToInt
 
-
-
 class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet?) : FrameLayout(context, attrSet) {
     private val slider: Slider
     private val digit: ToggleView
@@ -57,16 +55,12 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
         updateSwitches()
     }
 
-    
-
     private fun setPasswordLengthMaxMin(min: Int, max: Int) {
         slider.valueFrom = min.toFloat()
         slider.valueTo = max.toFloat()
         findViewById<TextView>(R.id.password_generator_option_length_min_title).text = min.toString()
         findViewById<TextView>(R.id.password_generator_option_length_max_title).text = max.toString()
     }
-
-    
 
     private fun initAmbiguous(view: View): ToggleView {
         val layout = view.findViewById<RelativeLayout>(R.id.password_generator_option_ambiguous)
@@ -79,8 +73,6 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
         }
     }
 
-    
-
     private fun initSymbols(view: View): ToggleView {
         val layout = view.findViewById<RelativeLayout>(R.id.password_generator_option_symbols)
         return layout.findViewById<ToggleView>(R.id.option_switch).apply {
@@ -92,8 +84,6 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
         }
     }
 
-    
-
     private fun initLetter(view: View): ToggleView {
         val layout = view.findViewById<RelativeLayout>(R.id.password_generator_option_letters)
         return layout.findViewById<ToggleView>(R.id.option_switch).apply {
@@ -104,8 +94,6 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
             }
         }
     }
-
-    
 
     private fun initDigits(view: View): ToggleView {
         val layout = view.findViewById<RelativeLayout>(R.id.password_generator_option_digits)
@@ -119,22 +107,16 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
         }
     }
 
-    
-
     private fun updateSwitches() {
         enableAllEssentialSwitches()
         preventDisablingEssentialOption()
     }
-
-    
 
     private fun enableAllEssentialSwitches() {
         digit.readOnly = false
         letters.readOnly = false
         symbols.readOnly = false
     }
-
-    
 
     private fun preventDisablingEssentialOption() {
         when {
@@ -158,8 +140,6 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
         }
     }
 
-    
-
     fun getConfiguration(updatedLength: Int? = null) =
         PasswordGeneratorCriteria(
             length = updatedLength ?: slider.value.roundToInt(),
@@ -168,8 +148,6 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
             symbols = symbols.checked,
             ambiguousChars = ambiguous.checked
         )
-
-    
 
     fun setNewConfiguration(minLength: Int, maxLength: Int, defaultCriteria: PasswordGeneratorCriteria) {
         
@@ -188,8 +166,6 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
         
         updateSwitches()
     }
-
-    
 
     interface ConfigurationChangeListener {
         fun onLengthUpdated(criteria: PasswordGeneratorCriteria, fromUser: Boolean)

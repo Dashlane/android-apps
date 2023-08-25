@@ -1,7 +1,5 @@
 package com.dashlane.ui.screens.settings.item
 
-
-
 interface SettingChange {
 
     interface Listenable {

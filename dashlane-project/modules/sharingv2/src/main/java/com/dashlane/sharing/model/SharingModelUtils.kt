@@ -179,8 +179,11 @@ fun getMaxPermission(
     userGroupMembers: List<UserGroupMember>
 ): Permission {
     val list = (userGroupMembers.map { it.permission }) + userDownload?.permission
-    return if (list.contains(Permission.ADMIN)) Permission.ADMIN
-    else Permission.LIMITED
+    return if (list.contains(Permission.ADMIN)) {
+        Permission.ADMIN
+    } else {
+        Permission.LIMITED
+    }
 }
 
 fun getMaxStatus(
@@ -188,10 +191,15 @@ fun getMaxStatus(
     userGroupMembers: List<UserGroupMember>
 ): Status {
     val list = (userGroupMembers.map { it.status }) + userDownload?.status
-    return if (list.contains(Status.ACCEPTED)) Status.ACCEPTED
-    else if (list.contains(Status.PENDING)) Status.PENDING
-    else if (list.contains(Status.REFUSED)) Status.REFUSED
-    else Status.REVOKED
+    return if (list.contains(Status.ACCEPTED)) {
+        Status.ACCEPTED
+    } else if (list.contains(Status.PENDING)) {
+        Status.PENDING
+    } else if (list.contains(Status.REFUSED)) {
+        Status.REFUSED
+    } else {
+        Status.REVOKED
+    }
 }
 
 fun UserGroup.getUser(login: String) = users.find { it.userId == login }

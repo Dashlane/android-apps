@@ -9,8 +9,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.menu.MenuDef
 import com.dashlane.ui.menu.MenuUsageLogger
 
-
-
 open class MenuItem @JvmOverloads constructor(
     @DrawableRes val iconResId: Int,
     @DrawableRes val iconSelectedResId: Int,

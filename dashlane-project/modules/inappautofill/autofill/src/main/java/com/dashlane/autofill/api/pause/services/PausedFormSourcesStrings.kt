@@ -10,8 +10,6 @@ import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class PausedFormSourcesStrings @Inject constructor(
     @ApplicationContext
     private val context: Context,

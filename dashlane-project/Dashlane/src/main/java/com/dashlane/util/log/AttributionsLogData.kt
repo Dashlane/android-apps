@@ -4,13 +4,12 @@ import android.content.Context
 import com.adjust.sdk.Adjust
 import com.adjust.sdk.AndroidIdUtil
 import com.dashlane.hermes.generated.definitions.Android
-import com.dashlane.logger.Log
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 data class AttributionLogData(
     val isMarketingOptIn: Boolean,
@@ -26,7 +25,6 @@ class AttributionsLogDataProvider @Inject constructor(
     suspend fun getAttributionLogData() = withContext(defaultCoroutineDispatcher) {
         val advertisingInfo =
             runCatching { AdvertisingIdClient.getAdvertisingIdInfo(context) }
-                .onFailure { Log.d("ATTRIBUTION", "Unable to get attribution info.", it) }
                 .getOrNull()
         AttributionLogData(
             advertisingInfo.isMarketingOptIn,

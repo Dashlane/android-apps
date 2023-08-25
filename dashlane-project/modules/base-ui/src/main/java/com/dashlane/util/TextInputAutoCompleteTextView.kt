@@ -7,8 +7,6 @@ import android.view.inputmethod.InputConnection
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import com.google.android.material.textfield.TextInputLayout
 
-
-
 class TextInputAutoCompleteTextView : AppCompatAutoCompleteTextView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)

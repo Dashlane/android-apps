@@ -13,22 +13,24 @@ import com.dashlane.navigation.NavigationConstants
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.getParcelableExtraCompat
+import kotlin.properties.Delegates
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlin.properties.Delegates
 
 class LoginTokenPresenter(
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
     private val loginLogger: LoginLogger
 ) :
-    LoginBasePresenter<LoginTokenContract.DataProvider, LoginTokenContract.ViewProxy>(rootPresenter, coroutineScope),
+    LoginBasePresenter<LoginTokenContract.DataProvider, LoginTokenContract.ViewProxy>(
+        rootPresenter,
+        coroutineScope
+    ),
     LoginTokenContract.Presenter {
 
     override fun onWhereIsClicked() {
-        provider.resendTokenClicked()
         popupShown = true
     }
 
@@ -46,12 +48,11 @@ class LoginTokenPresenter(
                             provider.resendToken()
                         }
                     }
-                    .setNegativeButton(R.string.close) { _, _ -> provider.resendTokenPopupClosed() }
+                    .setNegativeButton(R.string.close) { _, _ -> }
                     .setOnDismissListener {
-                        provider.resendTokenPopupDismissed()
                         popupShown = false
                     }
-                    .create().apply { setOnShowListener { provider.resendTokenPopupOpened() } }
+                    .create()
                     .show()
             }
         }
@@ -79,10 +80,8 @@ class LoginTokenPresenter(
         }
     }
 
-    
-
-    private fun notifyTokenValid(registeredUserDevice: RegisteredUserDevice) {
-        rootPresenter.showPrimaryFactorStep(registeredUserDevice)
+    private fun notifyTokenValid(registeredUserDevice: RegisteredUserDevice, authTicket: String?) {
+        rootPresenter.showPrimaryFactorStep(registeredUserDevice, authTicket)
     }
 
     override fun onNextClicked() {
@@ -93,7 +92,7 @@ class LoginTokenPresenter(
         job?.cancel()
         job = launch {
             rootPresenter.showProgress = true
-            val credentials = try {
+            val (registeredUserDevice, authTicket) = try {
                 provider.validateToken(view.tokenText, auto)
             } catch (e: CancellationException) {
                 return@launch
@@ -103,7 +102,7 @@ class LoginTokenPresenter(
             } finally {
                 rootPresenter.showProgress = false
             }
-            notifyTokenValid(credentials)
+            notifyTokenValid(registeredUserDevice, authTicket)
         }
     }
 
@@ -135,13 +134,12 @@ class LoginTokenPresenter(
         outState.putBoolean(STATE_TOKEN_POPUP, popupShown)
     }
 
-    
-
     private fun checkTokenDeepLink() {
         val activity = this.activity ?: return
         val view = this.viewOrNull ?: return
         val intentOrigin =
-            activity.intent.getParcelableExtraCompat<Intent>(NavigationConstants.STARTED_WITH_INTENT) ?: return
+            activity.intent.getParcelableExtraCompat<Intent>(NavigationConstants.STARTED_WITH_INTENT)
+                ?: return
         val callingUri = intentOrigin.data ?: return
         if (NavigationHelper.Destination.MainPath.LOGIN != callingUri.lastPathSegment) return
         val tokenStr = callingUri.getQueryParameter("token") ?: return
@@ -156,7 +154,6 @@ class LoginTokenPresenter(
 
         
         activity.intent.removeExtra(NavigationConstants.STARTED_WITH_INTENT)
-        provider.logger.logTokenViaDeepLink()
         view.tokenText = token.toString()
     }
 

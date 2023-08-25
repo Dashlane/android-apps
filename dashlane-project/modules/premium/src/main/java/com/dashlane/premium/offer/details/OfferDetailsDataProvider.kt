@@ -37,8 +37,6 @@ internal class OfferDetailsDataProvider @Inject constructor(
             FAMILY -> R.string.plan_details_family_title
         }
 
-    
-
     suspend fun getOffer(offerType: OfferType): OffersState {
         val storeOffers = getStoreOffers()
             ?: return OffersState.NoStoreOffersResultAvailable
@@ -94,9 +92,7 @@ internal class OfferDetailsDataProvider @Inject constructor(
             option = option,
             storeOffers = storeOffers
         )
-        val priceInfo = if (productDetails is ProductDetailsWrapper.IntroductoryOfferProduct &&
-            userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.INTRO_OFFERS)
-        ) {
+        val priceInfo = if (productDetails is ProductDetailsWrapper.IntroductoryOfferProduct) {
             val introOfferPricingPhase = productDetails.introductoryPlanOffer.pricingPhases.first()
             OfferDetails.PriceInfo.PendingOffer(
                 currencyCode = currencyCode,
@@ -131,7 +127,7 @@ internal class OfferDetailsDataProvider @Inject constructor(
             ADVANCED -> storeOffers.essentials.capabilities
             PREMIUM -> storeOffers.premium.capabilities
             FAMILY -> storeOffers.family.capabilities
-        }.let { BenefitsBuilder(it, userFeaturesChecker).build() }
+        }.let { BenefitsBuilder(it, userFeaturesChecker).build(this == FAMILY) }
 
     companion object {
         private const val MICRO = 1_000_000.0f

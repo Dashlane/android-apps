@@ -6,8 +6,6 @@ import com.dashlane.session.repository.AccountStatusRepository
 import com.dashlane.ui.menu.item.MenuItem.PremiumTag
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 
-
-
 class CapabilityMenuItemPremiumTagProvider(
     private val sessionManager: SessionManager,
     private val accountStatusRepository: AccountStatusRepository,

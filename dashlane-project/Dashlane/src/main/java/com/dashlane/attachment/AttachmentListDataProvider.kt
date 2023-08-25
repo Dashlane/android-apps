@@ -4,10 +4,10 @@ import android.Manifest
 import androidx.annotation.RequiresPermission
 import com.dashlane.attachment.ui.AttachmentItem
 import com.dashlane.core.DataSync
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.securefile.extensions.toSecureFile
 import com.dashlane.securefile.storage.SecureFileStorage
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.google.gson.Gson
@@ -19,6 +19,7 @@ class AttachmentListDataProvider(
     jsonAttachments: String?,
     val vaultItem: VaultItem<*>,
     private val dataSaver: DataSaver,
+    private val dataSync: DataSync,
     private val secureFileStorage: SecureFileStorage
 ) : BaseDataProvider<AttachmentListContract.Presenter>(),
     AttachmentListContract.DataProvider {
@@ -70,6 +71,6 @@ class AttachmentListDataProvider(
         }
         dataSaver.save(updated)
 
-        DataSync.sync(UsageLogCode134.Origin.SAVE)
+        dataSync.sync(Trigger.SAVE)
     }
 }

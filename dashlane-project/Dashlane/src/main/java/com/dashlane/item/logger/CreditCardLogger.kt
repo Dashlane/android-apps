@@ -1,21 +1,14 @@
 package com.dashlane.item.logger
 
 import com.dashlane.inapplogin.UsageLogCode35Action
-import com.dashlane.item.subview.edit.ItemEditSpaceSubView
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.useractivity.log.usage.UsageLogCode11
 import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogCode68
 import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.model.usageLogCode68Data2
-import com.dashlane.vault.util.TeamSpaceUtils
-import com.dashlane.xml.domain.SyncObject
-import com.dashlane.xml.domain.SyncObjectType
 
 class CreditCardLogger(
     private val teamspaceAccessor: TeamspaceAccessor,
@@ -25,38 +18,6 @@ class CreditCardLogger(
 ) : BaseLogger(teamspaceAccessor, dataCounter, sessionManager, bySessionUsageLogRepository) {
 
     var origin: String? = null
-
-    @Suppress("UNCHECKED_CAST")
-    override fun logItemAdded(
-        vaultItem: VaultItem<*>,
-        dataType: SyncObjectType,
-        categorizationMethod: ItemEditSpaceSubView.CategorizationMethod?
-    ) {
-        super.logItemAdded(vaultItem, dataType, categorizationMethod)
-        if (vaultItem.syncObject !is SyncObject.PaymentCreditCard) return
-        sendUsageLog68(vaultItem as VaultItem<SyncObject.PaymentCreditCard>, UsageLogCode68.Action.ADD)
-        origin = null
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun logItemModified(
-        vaultItem: VaultItem<*>,
-        dataType: SyncObjectType,
-        categorizationMethod: ItemEditSpaceSubView.CategorizationMethod?
-    ) {
-        super.logItemModified(vaultItem, dataType, categorizationMethod)
-        if (vaultItem.syncObject !is SyncObject.PaymentCreditCard) return
-        sendUsageLog68(vaultItem as VaultItem<SyncObject.PaymentCreditCard>, UsageLogCode68.Action.EDIT)
-        origin = null
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    override fun logItemDeleted(vaultItem: VaultItem<*>, dataType: SyncObjectType) {
-        super.logItemDeleted(vaultItem, dataType)
-        if (vaultItem.syncObject !is SyncObject.PaymentCreditCard) return
-        sendUsageLog68(vaultItem as VaultItem<SyncObject.PaymentCreditCard>, UsageLogCode68.Action.REMOVE)
-        origin = null
-    }
 
     fun logCopySecurityCode() {
         log(
@@ -100,22 +61,6 @@ class CreditCardLogger(
                 type = "nfcCreditCardPopup",
                 action = action,
                 subtype = subtype
-            )
-        )
-    }
-
-    private fun sendUsageLog68(item: VaultItem<SyncObject.PaymentCreditCard>, action: UsageLogCode68.Action) {
-        log(
-            UsageLogCode68(
-                spaceId = teamspaceAccessor.get(TeamSpaceUtils.getTeamSpaceId(item))?.anonTeamId,
-                action = action,
-                senderStr = if (origin == null) {
-                    UsageLogCode68.Sender.MANUAL.code
-                } else {
-                    "${UsageLogCode68.Sender.MANUAL.code}_$origin"
-                },
-                identifier = item.anonymousId,
-                data2 = item.syncObject.usageLogCode68Data2
             )
         )
     }

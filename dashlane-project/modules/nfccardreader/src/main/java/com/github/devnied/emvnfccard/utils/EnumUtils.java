@@ -1,14 +1,8 @@
-
-
 package com.github.devnied.emvnfccard.utils;
 
 import com.github.devnied.emvnfccard.model.enums.IKeyEnum;
 
-
-
 public final class EnumUtils {
-
-    
 
     @SuppressWarnings("unchecked")
     public static <T extends IKeyEnum> T getValue(final int pKey, final Class<T> pClass) {
@@ -19,8 +13,6 @@ public final class EnumUtils {
         }
         return null;
     }
-
-    
 
     private EnumUtils() {
     }

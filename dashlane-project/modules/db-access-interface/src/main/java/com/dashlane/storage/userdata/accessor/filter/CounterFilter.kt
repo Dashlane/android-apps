@@ -15,8 +15,6 @@ import com.dashlane.storage.userdata.accessor.filter.status.StatusFilter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 data class CounterFilter(
     override var dataTypeFilter: DataTypeFilter = AllDataTypeFilter,
     override var spaceFilter: SpaceFilter = NoSpaceFilter,

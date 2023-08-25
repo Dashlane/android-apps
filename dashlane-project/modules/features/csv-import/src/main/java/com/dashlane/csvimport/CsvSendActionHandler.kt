@@ -6,26 +6,33 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import com.dashlane.navigation.NavigationHelper.Destination
 import com.dashlane.navigation.NavigationUriBuilder
-import com.dashlane.session.SessionRetrieverComponent
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.getParcelableExtraCompat
-import java.io.File
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
+import javax.inject.Inject
 
-
-
+@AndroidEntryPoint
 class CsvSendActionHandler : DashlaneActivity() {
     override var requireUserUnlock = false
 
-    private val hasSession: Boolean
-        get() = SessionRetrieverComponent(this).sessionManager.session != null
+    @Inject
+    lateinit var sessionManager: SessionManager
+
+    private val hasSession: Boolean by lazy {
+        sessionManager.session != null
+    }
 
     private val uri: Uri
-        get() = requireNotNull(intent?.takeIf { it.action == Intent.ACTION_SEND }
-            ?.getParcelableExtraCompat(Intent.EXTRA_STREAM)) { "uri == null" }
+        get() = requireNotNull(
+            intent?.takeIf { it.action == Intent.ACTION_SEND }
+            ?.getParcelableExtraCompat(Intent.EXTRA_STREAM)
+        ) { "uri == null" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

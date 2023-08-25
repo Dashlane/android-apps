@@ -6,19 +6,20 @@ import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountServi
 import com.dashlane.autofill.api.createaccount.domain.CredentialInfo
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
 import com.dashlane.core.DataSync
+import com.dashlane.ext.application.KnownApplicationProvider
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.storage.userdata.EmailSuggestionProvider
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class AutofillCreateAccountServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val autoFillDataBaseAccess: AutoFillDataBaseAccess,
-    private val emailSuggestionProvider: EmailSuggestionProvider
+    private val emailSuggestionProvider: EmailSuggestionProvider,
+    private val dataSync: DataSync,
+    private val knownApplicationProvider: KnownApplicationProvider
 ) : AutofillCreateAccountService {
     override suspend fun saveNewAuthentifiant(credential: CredentialInfo): VaultItem<SyncObject.Authentifiant>? {
         val res = autoFillDataBaseAccess.createNewAuthentifiantFromAutofill(
@@ -30,7 +31,7 @@ class AutofillCreateAccountServiceImpl @Inject constructor(
             credential.packageName
         )
         
-        if (res != null) DataSync.sync(UsageLogCode134.Origin.SAVE)
+        if (res != null) dataSync.sync(Trigger.SAVE)
         return res
     }
 
@@ -39,4 +40,7 @@ class AutofillCreateAccountServiceImpl @Inject constructor(
     override fun getFamousWebsitesList(): List<String> {
         return context.resources.getStringArray(R.array.websites_suggestions).toList()
     }
+
+    override fun getWebsiteForPackage(packageName: String): String? =
+        knownApplicationProvider.getKnownApplication(packageName)?.mainDomain
 }

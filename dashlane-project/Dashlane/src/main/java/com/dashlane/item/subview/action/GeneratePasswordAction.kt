@@ -4,17 +4,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.R
 import com.dashlane.item.subview.Action
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorDialog
-import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 import com.dashlane.util.DeviceUtils
-import com.dashlane.vault.model.VaultItem
-import com.dashlane.xml.domain.SyncObject
-
-
 
 class GeneratePasswordAction(
     private val domain: String,
     private val origin: String,
-    private val passwordChosenAction: (VaultItem<SyncObject.GeneratedPassword>) -> Unit = {}
+    private val passwordChosenAction: (String?, String) -> Unit
 ) : Action {
 
     override val icon: Int = -1
@@ -26,28 +21,26 @@ class GeneratePasswordAction(
     override fun onClickAction(activity: AppCompatActivity) {
         DeviceUtils.hideKeyboard(activity)
         if (activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR) != null) return
-        NotificationDialogFragment.Builder()
-            .setPositiveButtonText(activity, R.string.use)
-            .setNegativeButtonText(activity, R.string.cancel)
-            .setClickNegativeOnCancel(true)
-            .build(setupDialog(activity))
+
+        
+        activity.supportFragmentManager.setFragmentResultListener(
+            PasswordGeneratorDialog.PASSWORD_GENERATOR_REQUEST_KEY,
+            activity
+        ) { _, bundle ->
+            val id = bundle.getString(PasswordGeneratorDialog.PASSWORD_GENERATOR_RESULT_ID)
+            val password = bundle.getString(PasswordGeneratorDialog.PASSWORD_GENERATOR_RESULT_PASSWORD, "")
+            passwordChosenAction.invoke(id, password)
+        }
+
+        
+        setupDialog(activity)
             .show(activity.supportFragmentManager, DIALOG_PASSWORD_GENERATOR)
     }
 
-    
-
-    fun setupDialog(activity: AppCompatActivity): PasswordGeneratorDialog {
+    private fun setupDialog(activity: AppCompatActivity): PasswordGeneratorDialog {
         
-        val dialog =
-            activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR) as? PasswordGeneratorDialog
-                ?: PasswordGeneratorDialog()
-        return dialog.apply {
-            setPasswordCallback { generatedPassword ->
-                passwordChosenAction.invoke(generatedPassword)
-            }
-            setOrigin(origin)
-            setDomainAsking(domain)
-        }
+        return activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR) as? PasswordGeneratorDialog
+            ?: PasswordGeneratorDialog.newInstance(activity, origin, domain)
     }
 
     companion object {

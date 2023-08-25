@@ -9,8 +9,6 @@ import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 
-
-
 class SettingsGeneralNotificationsList(
     private val context: Context,
     navigator: Navigator,
@@ -27,8 +25,8 @@ class SettingsGeneralNotificationsList(
         override val description =
             context.getString(R.string.general_notifications_settings_description)
 
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
         override fun onClick(context: Context) =
             navigator.goToManageDashlaneNotificationsSystem()
     }
@@ -38,8 +36,8 @@ class SettingsGeneralNotificationsList(
         override val header = autoLoginHeader
         override val title = getFollowUpSetting().title
         override val description = getFollowUpSetting().description
-        override fun isEnable(context: Context) = followUpNotificationSettings.isAvailable()
-        override fun isVisible(context: Context) = followUpNotificationSettings.isSupported()
+        override fun isEnable() = followUpNotificationSettings.isAvailable()
+        override fun isVisible() = followUpNotificationSettings.isSupported()
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
 
         override fun isChecked(context: Context): Boolean {

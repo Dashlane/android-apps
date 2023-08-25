@@ -7,15 +7,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 interface FrequentSearch {
-    
-
     suspend fun markedAsSearched(itemId: String, syncObjectType: SyncObjectType)
 
-    
-
     fun getFrequentlySearchedItems(max: Int = 10): List<SummaryObject>
-
-    
 
     fun getLastSearchedItems(max: Int = 10): List<SummaryObject>
 }

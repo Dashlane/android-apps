@@ -13,8 +13,6 @@ import static com.dashlane.ui.menu.item.MenuItemDef.IDataProvider;
 import static com.dashlane.ui.menu.item.MenuItemDef.IPresenter;
 import static com.dashlane.ui.menu.item.MenuItemDef.IView;
 
-
-
 public class MenuItemPresenter extends BaseItemPresenter<IDataProvider, IView>
         implements IPresenter {
 

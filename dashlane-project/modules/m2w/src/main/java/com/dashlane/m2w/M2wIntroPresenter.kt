@@ -6,7 +6,8 @@ import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.util.startActivityForResult
 import com.skocken.presentation.presenter.BasePresenter
 
-internal class M2wIntroPresenter : BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
+internal class M2wIntroPresenter :
+    BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
     IntroScreenContract.Presenter {
 
     var logger: M2wIntroLogger? = null

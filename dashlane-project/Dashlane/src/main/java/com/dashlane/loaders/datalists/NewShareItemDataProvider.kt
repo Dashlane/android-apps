@@ -7,7 +7,6 @@ import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
-import com.dashlane.vault.util.get
 import com.dashlane.vault.util.hasAttachments
 import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,8 +15,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
-
 
 class NewShareItemDataProvider @Inject constructor(
     private val mainDataAccessor: MainDataAccessor,
@@ -57,11 +54,9 @@ class NewShareItemDataProvider @Inject constructor(
         }.sortedWith(comparatorAlphabeticSecureNote())
     }
 
-    
-
     private fun match(vaultItem: SummaryObject, query: String?): Boolean {
         query ?: return true
-        return !vaultItem.hasAttachments() && FILTER_BY_DATA_TYPE[SyncObjectType[vaultItem]]?.invoke(
+        return !vaultItem.hasAttachments() && FILTER_BY_DATA_TYPE[vaultItem.syncObjectType]?.invoke(
             vaultItem,
             query
         ) ?: false
@@ -72,17 +67,21 @@ class NewShareItemDataProvider @Inject constructor(
             mapOf<SyncObjectType, (SummaryObject, String) -> (Boolean)>(
                 SyncObjectType.AUTHENTIFIANT to { item, query ->
                     item is SummaryObject.Authentifiant &&
-                            (query.match(item.title) ||
+                            (
+                                query.match(item.title) ||
                                     query.match(item.url) ||
                                     query.match(item.userSelectedUrl) ||
                                     query.match(item.login) ||
-                                    query.match(item.email))
+                                    query.match(item.email)
+                            )
                 },
                 SyncObjectType.SECURE_NOTE to { item, query ->
                     item is SummaryObject.SecureNote &&
-                            (query.match(item.title) ||
+                            (
+                                query.match(item.title) ||
                                     
-                                    (item.secured != true && query.match(item.content)))
+                                    (item.secured != true && query.match(item.content))
+                            )
                 }
             )
     }

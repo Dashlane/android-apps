@@ -17,9 +17,8 @@ import com.dashlane.ui.R
 import com.dashlane.ui.widgets.view.Infobox
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-
-
-class IntroScreenViewProxy : BaseViewProxy<IntroScreenContract.Presenter>,
+class IntroScreenViewProxy :
+    BaseViewProxy<IntroScreenContract.Presenter>,
     IntroScreenContract.ViewProxy {
 
     constructor(view: View) : super(view)

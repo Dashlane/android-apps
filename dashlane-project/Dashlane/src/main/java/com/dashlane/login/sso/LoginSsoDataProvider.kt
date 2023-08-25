@@ -9,6 +9,7 @@ import com.dashlane.authentication.login.AuthenticationSsoRepository.ValidateRes
 import com.dashlane.core.DataSync
 import com.dashlane.core.premium.PremiumStatusManager
 import com.dashlane.createaccount.AccountCreator
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.login.LoginMode
 import com.dashlane.login.LoginNewUserInitialization
 import com.dashlane.login.LoginSuccessIntentFactory
@@ -21,7 +22,6 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionResult
 import com.dashlane.session.Username
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.util.clearTask
 import com.dashlane.util.generateUniqueIdentifier
 import com.skocken.presentation.provider.BaseDataProvider
@@ -39,6 +39,7 @@ class LoginSsoDataProvider @Inject constructor(
     private val userAccountStorage: UserAccountStorage,
     private val premiumStatusManager: PremiumStatusManager,
     private val accountCreator: AccountCreator,
+    private val dataSync: DataSync,
     intent: Intent
 ) : BaseDataProvider<LoginSsoContract.Presenter>(),
     LoginSsoContract.DataProvider {
@@ -154,7 +155,7 @@ class LoginSsoDataProvider @Inject constructor(
         val intent = createMigrationToMasterPasswordUserIntent(result.authTicket) ?: if (shouldLaunchInitialSync) {
             successIntentFactory.createLoginSyncProgressIntent()
         } else {
-            DataSync.sync(UsageLogCode134.Origin.LOGIN)
+            dataSync.sync(Trigger.LOGIN)
             successIntentFactory.createApplicationHomeIntent()
         }
 

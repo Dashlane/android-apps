@@ -8,8 +8,6 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.skocken.presentation.definition.Base
 import kotlinx.coroutines.flow.StateFlow
 
-
-
 interface Vault {
     interface Presenter : Base.IPresenter {
         val filter: StateFlow<Filter>

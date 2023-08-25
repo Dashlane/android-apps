@@ -57,8 +57,6 @@ object TeamspaceMatcher {
     )
 }
 
-
-
 fun SummaryObject.matchForceDomains(domains: List<String>): Boolean {
     when (this) {
         is SummaryObject.Authentifiant -> {
@@ -70,7 +68,10 @@ fun SummaryObject.matchForceDomains(domains: List<String>): Boolean {
                 if (this.secondaryLogin?.contains(domain, ignoreCase = true) == true) return true
                 if (this.linkedServices?.associatedDomains?.any {
                         it.domain.contains(domain, ignoreCase = true)
-                    } == true) return true
+                    } == true
+                ) {
+                        return true
+                    }
             }
         }
         is SummaryObject.Email -> {

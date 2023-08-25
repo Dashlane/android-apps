@@ -8,8 +8,6 @@ import com.dashlane.autofill.api.totp.actions.StartTotpNotification
 import com.dashlane.autofill.api.totp.actions.UpdateTotpNotification
 import com.dashlane.xml.domain.SyncObject
 
-
-
 interface AutofillApiTotp {
     fun startTotpNotification(credential: SyncObject.Authentifiant): String?
     fun updateTotpNotification(totpNotificationId: String)

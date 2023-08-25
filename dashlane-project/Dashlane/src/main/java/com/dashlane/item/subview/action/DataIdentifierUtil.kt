@@ -8,12 +8,11 @@ import com.dashlane.attachment.ui.AttachmentListActivity
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
 import com.dashlane.ui.activities.DashlaneWrapperActivity
-import com.dashlane.useractivity.log.usage.UsageLogCode80
+import com.dashlane.ui.screens.sharing.SharingNewSharePeopleFragment
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
-import com.dashlane.vault.util.desktopId
 
 fun VaultItem<*>.showAttachments(activity: Activity, color: Int) {
     this.toSummary<SummaryObject>().showAttachments(activity, color)
@@ -31,7 +30,7 @@ fun SummaryObject.showAttachments(activity: Activity, color: Int) {
         putExtra(AttachmentListActivity.ITEM_ID, id)
         putExtra(
             AttachmentListActivity.ITEM_TYPE,
-            this@showAttachments.syncObjectType.desktopId
+            this@showAttachments.syncObjectType.xmlObjectName
         )
     }
     activity.startActivityForResult(
@@ -49,11 +48,11 @@ fun SummaryObject.showSharing(
         when (this@showSharing) {
             is SummaryObject.Authentifiant -> {
                 host(NavigationHelper.Destination.MainPath.PASSWORDS)
-                origin(UsageLogCode80.From.CREDENTIALS)
+                origin(SharingNewSharePeopleFragment.FROM_ITEM_VIEW)
             }
             is SummaryObject.SecureNote -> {
                 host(NavigationHelper.Destination.MainPath.NOTES)
-                origin(UsageLogCode80.From.SECURE_NOTES)
+                origin(SharingNewSharePeopleFragment.FROM_ITEM_VIEW)
             }
             else -> {
                 
@@ -66,9 +65,14 @@ fun SummaryObject.showSharing(
             appendPath(NavigationHelper.Destination.SecondaryPath.Items.SHARE_INFO)
         }
     }.build()
-    DashlaneWrapperActivity.startActivityForResult(requestCode, activity, uri, Bundle().apply {
-        if (!startNewShare) putBoolean(ShareDetailsAction.EXTRA_NOTIFY_UID_CHANGES, true)
-    })
+    DashlaneWrapperActivity.startActivityForResult(
+        requestCode,
+        activity,
+        uri,
+        Bundle().apply {
+            if (!startNewShare) putBoolean(ShareDetailsAction.EXTRA_NOTIFY_UID_CHANGES, true)
+        }
+    )
 }
 
 fun VaultItem<*>.showSharing(requestCode: Int, activity: Activity, startNewShare: Boolean = false) {

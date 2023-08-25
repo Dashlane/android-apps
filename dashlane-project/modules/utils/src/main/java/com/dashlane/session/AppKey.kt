@@ -9,8 +9,6 @@ import okio.Closeable
 import okio.use
 import kotlin.experimental.xor
 
-
-
 sealed class AppKey : Closeable, Cloneable {
 
     abstract val cryptographyKey: CryptographyKey
@@ -58,8 +56,6 @@ sealed class AppKey : Closeable, Cloneable {
             _cryptographyKey.hashCode()
 
         companion object {
-
-            
 
             fun create(
                 serverKey: ByteArray,
@@ -137,8 +133,6 @@ sealed class AppKey : Closeable, Cloneable {
         }
     }
 }
-
-
 
 val AppKey.userKeyBytes: ObfuscatedByteArray
     get() = if (this is AppKey.Password) passwordUtf8Bytes else cryptographyKeyBytes

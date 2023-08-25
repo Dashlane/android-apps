@@ -11,8 +11,6 @@ import com.dashlane.ui.fragments.BottomSheetListDialogFragment
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class CreditCardColorMenuAction(
     item: VaultItem<SyncObject.PaymentCreditCard>,
     private val colorSelectAction: (SyncObject.PaymentCreditCard.Color) -> Unit = {},

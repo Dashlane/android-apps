@@ -15,16 +15,15 @@ import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.ui.screens.fragments.search.util.SearchSorterProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.util.IdentityUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(val dataAccessor: MainDataAccessor, val userFeaturesChecker: UserFeaturesChecker) : ViewModel() {
+class SearchViewModel @Inject constructor(val dataAccessor: MainDataAccessor) : ViewModel() {
 
     private val frequentSearchLoader = FrequentSearchLoader(viewModelScope)
     private val recentSearch = RecentSearchLoader(viewModelScope)
@@ -35,7 +34,7 @@ class SearchViewModel @Inject constructor(val dataAccessor: MainDataAccessor, va
         val identityUtil = IdentityUtil(dataAccessor)
         val textResolver = DataIdentifierListTextResolver(identityUtil)
         searchLoader = SearchLoader(
-            SearchSorterProvider.getSearchSorter(textResolver, identityUtil, userFeaturesChecker),
+            SearchSorterProvider.getSearchSorter(textResolver, identityUtil),
             viewModelScope
         )
     }
@@ -63,9 +62,12 @@ class SearchViewModel @Inject constructor(val dataAccessor: MainDataAccessor, va
                 _latestSearchResult.value = when (request) {
                     is SearchRequest.FromQuery -> SearchResult(request, searchLoader.filterByQuery(request.query))
                     is SearchRequest.DefaultRequest.FromRecent -> {
-                        SearchResult(request, recentSearch.get()?.map {
+                        SearchResult(
+                            request,
+                            recentSearch.get()?.map {
                             MatchedSearchResult(it, Match(MatchPosition.ANYWHERE, LegacySearchField.ANY_FIELD))
-                        } ?: listOf())
+                        } ?: listOf()
+                        )
                     }
                 }
             }

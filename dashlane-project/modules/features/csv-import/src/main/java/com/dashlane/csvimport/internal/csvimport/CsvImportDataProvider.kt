@@ -8,6 +8,7 @@ import com.dashlane.csvimport.ImportAuthentifiantHelper
 import com.dashlane.csvimport.internal.CsvSchema
 import com.dashlane.csvimport.internal.csvLineSequence
 import com.dashlane.csvimport.internal.csvimport.CsvImportContract.State
+import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.useractivity.log.usage.UsageLogCode11
@@ -16,13 +17,13 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.provider.BaseDataProvider
-import java.io.InputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
+import java.io.InputStream
 
 @OptIn(ObsoleteCoroutinesApi::class)
 internal class CsvImportDataProvider(
@@ -32,6 +33,7 @@ internal class CsvImportDataProvider(
     private val mainDataAccessor: MainDataAccessor,
     private val authentifiantHelper: ImportAuthentifiantHelper,
     private val linkedServicesHelper: LinkedServicesHelper,
+    private val knownApplicationProvider: KnownApplicationProvider,
     private val inputStreamProvider: () -> InputStream,
 ) : BaseDataProvider<CsvImportContract.Presenter>(),
     CsvImportContract.DataProvider {
@@ -156,7 +158,15 @@ internal class CsvImportDataProvider(
         val foundAuthentifiants = inputStreamProvider().reader().use { reader ->
             reader.csvLineSequence(separator = schema.separator)
                 .drop(if (schema.hasHeader) 1 else 0)
-                .mapNotNull { newCsvAuthentifiant(linkedServicesHelper, it, schema.fieldTypes, appNameFromPackage) }
+                .mapNotNull {
+                    newCsvAuthentifiant(
+                        linkedServicesHelper,
+                        knownApplicationProvider,
+                        it,
+                        schema.fieldTypes,
+                        appNameFromPackage
+                    )
+                }
                 .toList()
         }
 

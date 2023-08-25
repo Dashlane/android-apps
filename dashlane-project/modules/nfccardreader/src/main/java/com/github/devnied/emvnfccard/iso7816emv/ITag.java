@@ -4,10 +4,6 @@ import com.github.devnied.emvnfccard.enums.TagTypeEnum;
 import com.github.devnied.emvnfccard.enums.TagValueTypeEnum;
 
 
-
-
-
-
 public interface ITag {
 
 	public enum Class {

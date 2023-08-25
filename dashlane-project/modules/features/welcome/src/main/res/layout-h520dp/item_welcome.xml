@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <FrameLayout
         android:id="@+id/animation_frame"
@@ -14,68 +12,72 @@
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="@+id/title"
-        app:layout_constraintStart_toStartOf="@+id/title"
+        app:layout_constraintEnd_toEndOf="@id/welcome_texts_scrollview"
+        app:layout_constraintStart_toStartOf="@id/welcome_texts_scrollview"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1"
-        >
+        app:layout_constraintVertical_bias="1">
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/background_animation"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:lottie_enableMergePathsForKitKatAndAbove="true"
-            />
+            app:lottie_enableMergePathsForKitKatAndAbove="true" />
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/main_animation"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:lottie_enableMergePathsForKitKatAndAbove="true"
-            />
+            app:lottie_enableMergePathsForKitKatAndAbove="true" />
 
     </FrameLayout>
 
-    <TextView
-        android:id="@+id/title"
+    <ScrollView
+        android:id="@+id/welcome_texts_scrollview"
         android:layout_width="@dimen/welcome_width"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:fillViewport="true"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:breakStrategy="high_quality"
-        android:gravity="center"
-        android:textAppearance="?textAppearanceHeadline1"
-        android:textColor="@color/text_inverse_catchy"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guideline"
-        tools:text="@string/welcome_trust_title"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/guideline">
 
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:breakStrategy="high_quality"
-        android:gravity="center"
-        android:textAppearance="?textAppearanceBody1"
-        android:textColor="@color/text_inverse_standard"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/title"
-        app:layout_constraintStart_toStartOf="@+id/title"
-        app:layout_constraintTop_toBottomOf="@+id/title"
-        app:layout_constraintVertical_bias="0"
-        tools:text="@string/welcome_trust_description"
-        />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/title"
+                style="@style/TextStyle.Dashlane.SpecialtyBrandMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:breakStrategy="high_quality"
+                android:gravity="center"
+                android:textColor="@color/text_inverse_catchy"
+                tools:text="@string/welcome_trust_title" />
+
+            <TextView
+                android:id="@+id/description"
+                style="@style/TextStyle.Dashlane.BodyStandardRegular"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:breakStrategy="high_quality"
+                android:gravity="center"
+                android:textColor="@color/text_inverse_standard"
+                tools:text="@string/welcome_trust_description" />
+        </LinearLayout>
+
+    </ScrollView>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.66"
-        />
+        app:layout_constraintGuide_percent="0.66" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

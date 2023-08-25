@@ -125,11 +125,15 @@ class VaultFabViewProxy(
     }
 
     private fun transitionMenuPayment() {
-        hideFabMenuItems(fabMenuHolder, true, object : LastMenuItemHiddenCallBack {
+        hideFabMenuItems(
+            fabMenuHolder,
+            true,
+            object : LastMenuItemHiddenCallBack {
             override fun onLastMenuItemHidden() {
                 configureViewPayment()
             }
-        })
+        }
+        )
         fabMenuItemNavigator.log(UsageLogConstant.FabSubType.layer1, UsageLogConstant.FabAction.payment, null)
     }
 
@@ -147,18 +151,23 @@ class VaultFabViewProxy(
     }
 
     private fun transitionMenuIDs() {
-        hideFabMenuItems(fabMenuHolder, true, object : LastMenuItemHiddenCallBack {
+        hideFabMenuItems(
+            fabMenuHolder,
+            true,
+            object : LastMenuItemHiddenCallBack {
             override fun onLastMenuItemHidden() {
                 configureViewIDs()
             }
-        })
+        }
+        )
         fabMenuItemNavigator.log(UsageLogConstant.FabSubType.layer1, UsageLogConstant.FabAction.ID, null)
     }
 
     private fun configureViewPayment() {
         fabMenuHolder.removeAllViews()
         val fabMenu = LayoutInflater.from(context).inflate(
-            R.layout.fab_menu_list_payments, fabMenuHolder,
+            R.layout.fab_menu_list_payments,
+            fabMenuHolder,
             false
         )
         fabMenuHolder.addView(fabMenu)
@@ -190,7 +199,8 @@ class VaultFabViewProxy(
     private fun configureViewPersonalInfo() {
         fabMenuHolder.removeAllViews()
         val fabMenu = LayoutInflater.from(context).inflate(
-            R.layout.fab_menu_list_personal_info, fabMenuHolder,
+            R.layout.fab_menu_list_personal_info,
+            fabMenuHolder,
             false
         )
         fabMenuHolder.addView(fabMenu)
@@ -234,7 +244,8 @@ class VaultFabViewProxy(
     private fun configureViewIDs() {
         fabMenuHolder.removeAllViews()
         val fabMenu = LayoutInflater.from(context).inflate(
-            R.layout.fab_menu_list_ids, fabMenuHolder,
+            R.layout.fab_menu_list_ids,
+            fabMenuHolder,
             false
         )
         fabMenuHolder.addView(fabMenu)

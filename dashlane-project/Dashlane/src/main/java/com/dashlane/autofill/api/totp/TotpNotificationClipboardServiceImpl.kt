@@ -3,12 +3,8 @@ package com.dashlane.autofill.api.totp
 import android.content.ClipData
 import android.content.ClipboardManager
 import com.dashlane.autofill.api.totp.services.TotpNotificationClipboardService
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import javax.inject.Inject
 import javax.inject.Provider
-
-
 
 internal class TotpNotificationClipboardServiceImpl @Inject constructor(
     private val clipboardManagerProvider: Provider<ClipboardManager>
@@ -21,8 +17,6 @@ internal class TotpNotificationClipboardServiceImpl @Inject constructor(
     private val clipboardManager
         get() = clipboardManagerProvider.get()
 
-    
-
     override fun copy(totpNotificationId: String?, code: String) {
         val clipCanonDescription = buildClipCanonDescription(totpNotificationId)
         try {
@@ -31,7 +25,6 @@ internal class TotpNotificationClipboardServiceImpl @Inject constructor(
                 clipboardManager.setPrimaryClip(clip)
             }
         } catch (e: Exception) {
-            Log.v(e)
         }
     }
 

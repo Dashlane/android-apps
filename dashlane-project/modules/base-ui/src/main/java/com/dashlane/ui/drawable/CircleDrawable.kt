@@ -12,8 +12,6 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.dashlane.ui.R
 
-
-
 object CircleDrawable {
     @JvmStatic
     fun with(
@@ -29,7 +27,6 @@ object CircleDrawable {
 
     @JvmStatic
     fun with(context: Context, @ColorRes backgroundColorRes: Int, drawable: Drawable?): Drawable {
-
         val circleBackground = ShapeDrawable(OvalShape()).apply {
             paint.isAntiAlias = true
             paint.style = Paint.Style.FILL

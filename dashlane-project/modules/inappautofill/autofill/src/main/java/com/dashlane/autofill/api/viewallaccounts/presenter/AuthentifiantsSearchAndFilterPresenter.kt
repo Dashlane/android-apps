@@ -9,8 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-
 class AuthentifiantsSearchAndFilterPresenter(
     private val dataProvider: AuthentifiantsSearchAndFilterDataProvider,
     private val mainCoroutineDispatcher: CoroutineDispatcher = Dispatchers.Main,

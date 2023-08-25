@@ -17,8 +17,6 @@ import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.setCurrentPageView
 
-
-
 class BottomSheetCreateAccountDialogFragment :
     NavigableBottomSheetFragment,
     NavigableBottomSheetDialogFragmentCanceledListener,
@@ -45,7 +43,8 @@ class BottomSheetCreateAccountDialogFragment :
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         setCurrentPageView(AnyPage.AUTOFILL_EXPLORE_PASSWORDS_CREATE, fromAutofill = true)
         val view = inflater.cloneInContext(activity).inflate(
-            R.layout.bottom_sheet_create_account_layout, container,
+            R.layout.bottom_sheet_create_account_layout,
+            container,
             false
         )
         val generateLogger = generatePasswordComponent.generatePasswordLogger
@@ -97,14 +96,10 @@ class BottomSheetCreateAccountDialogFragment :
         outState.putString(LAST_GENERATED_PASSWORD, presenter.lastGeneratedPassword)
     }
 
-    
-
     data class CreateAccountDomainInfo(
         val webDomain: String? = null,
         val packageName: String? = null
     ) {
-        
-
         constructor(summary: AutoFillHintSummary?) : this(
             summary?.webDomain?.takeIf { it.isNotSemanticallyNull() },
             summary?.packageName?.takeIf { summary.webDomain.isNullOrBlank() && it.isNotSemanticallyNull() }
@@ -115,8 +110,6 @@ class BottomSheetCreateAccountDialogFragment :
         private const val LAST_GENERATED_PASSWORD = "last_generated_password"
     }
 }
-
-
 
 internal fun AutoFillHintSummary?.getDomainInfoForCreateAccount():
         BottomSheetCreateAccountDialogFragment.CreateAccountDomainInfo =

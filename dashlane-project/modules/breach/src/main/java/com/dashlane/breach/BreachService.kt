@@ -2,8 +2,6 @@ package com.dashlane.breach
 
 import okhttp3.Call
 
-
-
 interface BreachService {
 
     suspend fun getBreaches(

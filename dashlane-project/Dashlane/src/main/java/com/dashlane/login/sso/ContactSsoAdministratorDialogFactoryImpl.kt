@@ -8,8 +8,7 @@ import javax.inject.Inject
 
 @Reusable
 class ContactSsoAdministratorDialogFactoryImpl @Inject constructor(
-    private val activity: Activity,
-    private val ssoLogger: LoginSsoLogger
+    private val activity: Activity
 ) : ContactSsoAdministratorDialogFactory {
     override fun show(onDismiss: (() -> Unit)?) = DialogHelper().builder(activity)
         .setMessage(R.string.sso_contact_administrator_message)
@@ -17,7 +16,6 @@ class ContactSsoAdministratorDialogFactoryImpl @Inject constructor(
         .setOnDismissListener { onDismiss?.invoke() }
         .create()
         .also {
-            ssoLogger.logNotProvisionedDisplay()
             it.show()
         }
 }

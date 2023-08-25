@@ -54,8 +54,6 @@ class SharingItemUpdater @Inject constructor(
 
     private val mutex = Mutex()
 
-    
-
     @Throws(NotLoggedInException::class)
     suspend fun update(request: SharingItemUpdaterRequest) {
         val session = sessionManager.session ?: throw NotLoggedInException("Unable to apply the sharing request")
@@ -217,11 +215,13 @@ class SharingItemUpdater @Inject constructor(
     ): Boolean {
         val itemId = item.itemId
         val itemKey = sharingCryptographyHelper.decryptItemKey(
-            item.itemKey, groupKey
+            item.itemKey,
+            groupKey
         ) ?: return false
 
         val extraData = sharingCryptographyHelper.decryptItemContent(
-            content, itemKey
+            content,
+            itemKey
         )
 
         if (extraData.isNullOrEmpty()) {
@@ -307,8 +307,6 @@ class SharingItemUpdater @Inject constructor(
         )
     }
 
-    
-
     private fun saveUserGroupsDownload(
         memory: SharingDaoMemoryDataAccess,
         groupVerification: GroupVerification,
@@ -318,8 +316,6 @@ class SharingItemUpdater @Inject constructor(
             groupVerification.isValid(userGroup)
         }.also { memory.saveUserGroups(it) }
     }
-
-    
 
     private fun saveItemGroups(
         memory: SharingDaoMemoryDataAccess,
@@ -331,8 +327,6 @@ class SharingItemUpdater @Inject constructor(
             groupVerification.isValid(itemGroup, myUserGroups)
         }.also { memory.saveItemGroups(it) }
     }
-
-    
 
     private fun getItemGroupsToUpdate(
         memory: SharingDaoMemoryDataAccess,
@@ -348,8 +342,6 @@ class SharingItemUpdater @Inject constructor(
         }
     }
 
-    
-
     private fun List<ItemGroup>.mergeWith(list: List<ItemGroup>): List<ItemGroup> {
         if (list.isEmpty()) {
             return this 
@@ -362,8 +354,6 @@ class SharingItemUpdater @Inject constructor(
         
         return plus(toAdd)
     }
-
-    
 
     private fun loadMyUserGroups(memory: SharingDaoMemoryDataAccess, userId: String): List<UserGroup> {
         return memory.loadUserGroupsAcceptedOrPending(userId)

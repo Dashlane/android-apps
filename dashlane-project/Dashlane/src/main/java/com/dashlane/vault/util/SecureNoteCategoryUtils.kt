@@ -16,12 +16,12 @@ import com.dashlane.xml.domain.SyncObjectType
 
 object SecureNoteCategoryUtils {
 
-    
-
     suspend fun createDefaultCategoriesIfNotExist(context: Context, mainDataAccessor: MainDataAccessor) {
-        val authCategories = mainDataAccessor.getGenericDataQuery().queryAll(genericFilter {
+        val authCategories = mainDataAccessor.getGenericDataQuery().queryAll(
+            genericFilter {
             specificDataType(SyncObjectType.SECURE_NOTE_CATEGORY)
-        })
+        }
+        )
         if (authCategories.isEmpty()) {
             generateAndSaveDefaultNoteCategories(context, mainDataAccessor.getDataSaver())
         }

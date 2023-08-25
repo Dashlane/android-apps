@@ -14,25 +14,20 @@ import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 
-
-
 fun String.toForegroundColorSpan(@ColorInt color: Int): CharSequence {
     return SpannableString(this).apply {
         setSpan(
             ForegroundColorSpan(color),
-            0, length,
+            0,
+            length,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
     }
 }
 
-
-
 fun String.toForegroundColorSpan(context: Context, @ColorRes colorResId: Int): CharSequence {
     return toForegroundColorSpan(ContextCompat.getColor(context, colorResId))
 }
-
-
 
 fun Context.getStringFormatted(@StringRes textResId: Int, vararg args: CharSequence): CharSequence {
     val placeholders = args.mapIndexed { index, _ ->
@@ -43,7 +38,6 @@ fun Context.getStringFormatted(@StringRes textResId: Int, vararg args: CharSeque
     val indexesPlaceholdersSorted = indexesPlaceholders.sorted()
 
     return SpannableStringBuilder().apply {
-
         var previousTextIndex = 0
         var indexInSortedIndexes = 0
         while (indexInSortedIndexes < indexesPlaceholdersSorted.size) {
@@ -59,8 +53,6 @@ fun Context.getStringFormatted(@StringRes textResId: Int, vararg args: CharSeque
         append(text.substring(previousTextIndex))
     }
 }
-
-
 
 fun Spannable.setOnFirst(token: String, span: Any, flags: Int = Spannable.SPAN_INCLUSIVE_EXCLUSIVE) {
     val start = toString().indexOf(token)
@@ -90,8 +82,6 @@ fun Spannable.toHighlightedSpannable(
     }
     return this
 }
-
-
 
 fun Spannable.setSpannableBoldColor(@ColorInt colorInt: Int, start: Int, end: Int) {
     setSpan(StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)

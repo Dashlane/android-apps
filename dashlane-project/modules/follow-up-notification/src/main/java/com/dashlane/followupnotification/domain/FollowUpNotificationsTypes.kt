@@ -7,8 +7,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.utils.Country
 
-
-
 enum class FollowUpNotificationsTypes(
     val syncObjectType: SyncObjectType,
     @DrawableRes val iconId: Int,

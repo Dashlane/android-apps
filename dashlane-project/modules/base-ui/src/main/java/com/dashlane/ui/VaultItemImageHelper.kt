@@ -14,8 +14,6 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 object VaultItemImageHelper {
     fun getIconDrawableFromSyncObject(
         context: Context,
@@ -40,23 +38,22 @@ object VaultItemImageHelper {
                     context,
                     summaryObject.type ?: SyncObject.SecureNoteType.NO_TYPE
                 )
-            is SummaryObject.PaymentCreditCard -> getCreditCardIcon(context, summaryObject)
+            is SummaryObject.PaymentCreditCard -> getCreditCardIcon(context, summaryObject.color)
             else -> getOtherTypeIcon(context, summaryObject.syncObjectType)
         }
     }
 
-    private fun getCreditCardIcon(
+    fun getCreditCardIcon(
         context: Context,
-        item: SummaryObject.PaymentCreditCard
+        color: SyncObject.PaymentCreditCard.Color?
     ): RoundRectDrawable {
-        val colorRes = item.color.getColorResource()
-        val color = ContextCompat.getColor(context, colorRes)
+        val colorRes = ContextCompat.getColor(context, color.getColorResource())
         return createRoundedImage(
             context,
             context.getThemeAttrColor(R.attr.colorPrimary),
             R.drawable.ico_list_card
         ).apply {
-            backgroundColor = color
+            backgroundColor = colorRes
         }
     }
 

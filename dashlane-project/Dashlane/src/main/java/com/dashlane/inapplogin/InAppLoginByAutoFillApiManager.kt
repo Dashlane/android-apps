@@ -9,8 +9,6 @@ import android.provider.Settings
 import android.view.autofill.AutofillManager
 import com.dashlane.util.tryOrNull
 
-
-
 class InAppLoginByAutoFillApiManager private constructor(private val context: Context) {
 
     private val autoFillManager: AutofillManager?

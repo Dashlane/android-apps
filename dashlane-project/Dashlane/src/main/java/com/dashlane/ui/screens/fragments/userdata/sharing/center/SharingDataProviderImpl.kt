@@ -29,6 +29,7 @@ import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.internal.builder.request.AcceptItemGroupRequestForUserBuilder
 import com.dashlane.sharing.internal.builder.request.AcceptUserGroupRequestBuilder
+import com.dashlane.sharing.util.AuditLogHelper
 import com.dashlane.storage.DataStorageProvider
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
@@ -37,6 +38,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@Suppress("LargeClass")
 class SharingDataProviderImpl @Inject constructor(
     private val dataStorageProvider: DataStorageProvider,
     private val sharingXmlConverter: DataIdentifierSharingXmlConverter,
@@ -53,7 +55,8 @@ class SharingDataProviderImpl @Inject constructor(
     private val acceptUserGroupService: AcceptUserGroupService,
     private val updateItemGroupMembersService: UpdateItemGroupMembersService,
     private val revokeItemGroupMembersService: RevokeItemGroupMembersService,
-    private val resendItemGroupInvitesService: ResendItemGroupInvitesService
+    private val resendItemGroupInvitesService: ResendItemGroupInvitesService,
+    private val auditLogHelper: AuditLogHelper
 ) : SharingDataProvider {
     private val sharingDao: SharingDao
         get() = dataStorageProvider.sharingDao
@@ -81,8 +84,11 @@ class SharingDataProviderImpl @Inject constructor(
             onConflict = {
                 if (!handleConflict) throw AcceptItemGroupException()
                 val itemGroupUpdated = sharingItemGroupDataProvider.getUpdatedItemGroup(itemGroup)
-                if (itemGroupUpdated == null) throw AcceptItemGroupException()
-                else acceptItemGroupInvite(itemGroupUpdated, summaryObject, false)
+                if (itemGroupUpdated == null) {
+                    throw AcceptItemGroupException()
+                } else {
+                    acceptItemGroupInvite(itemGroupUpdated, summaryObject, false)
+                }
             }
         )
     }
@@ -96,8 +102,11 @@ class SharingDataProviderImpl @Inject constructor(
             onConflict = {
                 if (!handleConflict) throw AcceptUserGroupException()
                 val userGroupUpdated = sharingItemGroupDataProvider.getUpdatedUserGroup(userGroup)
-                if (userGroupUpdated == null) throw AcceptUserGroupException()
-                else acceptUserGroupInvite(userGroupUpdated, false)
+                if (userGroupUpdated == null) {
+                    throw AcceptUserGroupException()
+                } else {
+                    acceptUserGroupInvite(userGroupUpdated, false)
+                }
             }
         )
     }
@@ -113,8 +122,11 @@ class SharingDataProviderImpl @Inject constructor(
             onConflict = {
                 if (!handleConflict) throw DeclineItemGroupException()
                 val itemGroupUpdated = sharingItemGroupDataProvider.getUpdatedItemGroup(itemGroup)
-                if (itemGroupUpdated == null) throw DeclineItemGroupException()
-                else declineItemGroupInvite(itemGroupUpdated, summaryObject, false, loggerAction)
+                if (itemGroupUpdated == null) {
+                    throw DeclineItemGroupException()
+                } else {
+                    declineItemGroupInvite(itemGroupUpdated, summaryObject, false, loggerAction)
+                }
             }
         )
     }
@@ -125,8 +137,11 @@ class SharingDataProviderImpl @Inject constructor(
             onConflict = {
                 if (!handleConflict) throw DeclineUserGroupException()
                 val userGroupUpdated = sharingItemGroupDataProvider.getUpdatedUserGroup(userGroup)
-                if (userGroupUpdated == null) throw DeclineUserGroupException()
-                else declineUserGroupInvite(userGroup, false)
+                if (userGroupUpdated == null) {
+                    throw DeclineUserGroupException()
+                } else {
+                    declineUserGroupInvite(userGroup, false)
+                }
             }
         )
     }
@@ -134,7 +149,8 @@ class SharingDataProviderImpl @Inject constructor(
     private suspend fun sendDeclineUserGroupRequest(userGroup: UserGroup): Response<SharingServerResponse> {
         val authorization = session?.authorization ?: throw DeclineUserGroupException()
         return refuseUserGroupService.execute(
-            authorization, RefuseUserGroupService.Request(
+            authorization,
+            RefuseUserGroupService.Request(
                 groupId = RefuseUserGroupService.Request.GroupId(userGroup.groupId),
                 provisioningMethod = ProvisioningMethod.USER,
                 revision = userGroup.revision
@@ -169,13 +185,13 @@ class SharingDataProviderImpl @Inject constructor(
     ): Response<SharingServerResponse> {
         val sharedVaultItemLite = summaryObject.toSharedVaultItemLite()
         val authorization = session?.authorization ?: throw DeclineItemGroupException()
-
         return refuseItemGroupService.execute(
             authorization,
             RefuseItemGroupService.Request(
                 groupId = RefuseItemGroupService.Request.GroupId(itemGroup.groupId),
                 itemsForEmailing = listOf(sharedVaultItemLite.toItemForEmailing()),
-                revision = itemGroup.revision
+                revision = itemGroup.revision,
+                auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup, summaryObject)
             )
         )
     }
@@ -190,7 +206,9 @@ class SharingDataProviderImpl @Inject constructor(
                     alias = UserInviteResend.Alias(it.alias),
                     userId = UserInviteResend.UserId(it.userId)
                 )
-            } else null
+            } else {
+                null
+            }
         }
 
         resendItemGroupInvitesService.execute(
@@ -210,7 +228,6 @@ class SharingDataProviderImpl @Inject constructor(
         handleConflict: Boolean
     ) {
         val authorization = session?.authorization ?: throw CancelInvitationException()
-
         runOnConflictItemGroupRevision(
             block = {
                 revokeItemGroupMembersService.execute(
@@ -223,20 +240,24 @@ class SharingDataProviderImpl @Inject constructor(
                         },
                         groups = userGroupIds?.map {
                             RevokeItemGroupMembersService.Request.Group(it)
-                        }
+                        },
+                        auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup)
                     )
                 )
             },
             onConflict = {
                 if (!handleConflict) throw CancelInvitationException()
                 val itemGroupUpdated = sharingItemGroupDataProvider.getUpdatedItemGroup(itemGroup)
-                if (itemGroupUpdated == null) throw CancelInvitationException()
-                else cancelInvitationUsersAndUserGroups(
-                    itemGroupUpdated,
-                    userIds,
-                    userGroupIds,
-                    false
-                )
+                if (itemGroupUpdated == null) {
+                    throw CancelInvitationException()
+                } else {
+                    cancelInvitationUsersAndUserGroups(
+                        itemGroupUpdated,
+                        userIds,
+                        userGroupIds,
+                        false
+                    )
+                }
             }
         )
     }
@@ -267,8 +288,11 @@ class SharingDataProviderImpl @Inject constructor(
             onConflict = {
                 if (!handleConflict) throw UpdateItemGroupException()
                 val itemGroupUpdated = sharingItemGroupDataProvider.getUpdatedItemGroup(itemGroup)
-                if (itemGroupUpdated == null) throw UpdateItemGroupException()
-                else updateItemGroupMember(itemGroupUpdated, newPermission, userId, false)
+                if (itemGroupUpdated == null) {
+                    throw UpdateItemGroupException()
+                } else {
+                    updateItemGroupMember(itemGroupUpdated, newPermission, userId, false)
+                }
             }
         )
     }
@@ -299,8 +323,11 @@ class SharingDataProviderImpl @Inject constructor(
             onConflict = {
                 if (!handleConflict) throw UpdateItemGroupException()
                 val itemGroupUpdated = sharingItemGroupDataProvider.getUpdatedItemGroup(itemGroup)
-                if (itemGroupUpdated == null) throw UpdateItemGroupException()
-                else updateItemGroupMember(itemGroupUpdated, newPermission, userGroupId, false)
+                if (itemGroupUpdated == null) {
+                    throw UpdateItemGroupException()
+                } else {
+                    updateItemGroupMember(itemGroupUpdated, newPermission, userGroupId, false)
+                }
             }
         )
     }

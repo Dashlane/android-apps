@@ -1,7 +1,5 @@
 package com.dashlane.m2w
 
-
-
 internal interface M2wConnectLogger {
     fun logLand()
     fun logBack()

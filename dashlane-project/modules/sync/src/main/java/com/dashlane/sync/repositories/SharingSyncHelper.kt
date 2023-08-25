@@ -18,8 +18,6 @@ import javax.inject.Inject
 import com.dashlane.cryptography.SharingKeys as CryptographySharingKeys
 import com.dashlane.server.api.endpoints.account.SharingKeys as ApiSharingKeys
 
-
-
 open class SharingSyncHelper @Inject constructor(
     private val sharingCryptography: SharingCryptography,
     private val sharingKeysHelper: SharingKeysHelper,

@@ -20,17 +20,6 @@ class CreateAccountEmailDataProvider @Inject constructor(
     private val preferencesManager: GlobalPreferencesManager
 ) : BaseDataProvider<CreateAccountEmailContract.Presenter>(),
     CreateAccountEmailContract.DataProvider {
-    override fun onShow() {
-        logger.logLand()
-    }
-
-    override fun onBack() = logger.logBack()
-    override fun confirmEmailShown() = logger.logShowConfirmEmail()
-    override fun confirmEmailCancelled() = logger.logCancelConfirmEmail()
-
-    override fun emailConfirmed(email: String, inEuropeanUnion: Boolean) {
-        logger.logConfirmEmail()
-    }
 
     override fun getTrackingInstallationId() = preferencesManager.installationTrackingId
 
@@ -38,11 +27,9 @@ class CreateAccountEmailDataProvider @Inject constructor(
         try {
             when (val result = accountCreationEmailRepository.validate(email)) {
                 is AccountCreationEmailRepository.Result.Success -> {
-                    logger.logValidEmail()
                     result.toPendingAccount()
                 }
                 is AccountCreationEmailRepository.Result.Warning -> {
-                    logger.logUnlikelyEmail()
                     result.success.toPendingAccount(emailLikelyInvalid = true)
                 }
             }
@@ -64,7 +51,6 @@ class CreateAccountEmailDataProvider @Inject constructor(
         } catch (e: AuthenticationExpiredVersionException) {
             throw CreateAccountEmailContract.ExpiredVersionException(e)
         } catch (e: AuthenticationException) {
-            logger.logNetworkError()
             throw CreateAccountBaseContract.NetworkException(e)
         }
 

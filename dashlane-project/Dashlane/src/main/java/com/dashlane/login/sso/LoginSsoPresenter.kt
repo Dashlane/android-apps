@@ -20,12 +20,12 @@ import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.inject.qualifiers.ActivityLifecycleCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainImmediateCoroutineDispatcher
 import com.skocken.presentation.presenter.BasePresenter
+import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class LoginSsoPresenter @Inject constructor(
     @ActivityLifecycleCoroutineScope
@@ -74,7 +74,6 @@ class LoginSsoPresenter @Inject constructor(
         if (requestCode != REQUEST_CODE_GET_USER_SSO_INFO) return
 
         if (resultCode == Activity.RESULT_CANCELED) {
-            logger.logGetUserSsoInfoCancel()
             activity?.finish()
             return
         }
@@ -83,12 +82,9 @@ class LoginSsoPresenter @Inject constructor(
             data?.getParcelableExtraCompat<GetSsoInfoResult>(LoginSsoActivity.KEY_RESULT)
 
         if (result !is GetSsoInfoResult.Success) {
-            logger.logGetUserSsoInfoCancel()
             activity?.finishWithResult(LoginSsoActivity.Result.Error.Unknown)
             return
         }
-
-        logger.logGetUserSsoInfoSuccess()
 
         handleUserSsoInfo(result.userSsoInfo)
     }
@@ -131,7 +127,6 @@ class LoginSsoPresenter @Inject constructor(
             }
             await(deferred)
         } else {
-            logger.logAccountCreationStart()
             view.showTerms()
         }
     }
@@ -148,7 +143,7 @@ class LoginSsoPresenter @Inject constructor(
                 notifySuccess(intent)
             } catch (_: CancellationException) {
                 
-            } catch (_: AuthenticationInvalidSsoException) {
+            } catch (e: AuthenticationInvalidSsoException) {
                 logger.logInvalidSso()
                 finishWithError(LoginSsoActivity.Result.Error.InvalidSso)
             } catch (_: AuthenticationOfflineException) {
@@ -157,10 +152,10 @@ class LoginSsoPresenter @Inject constructor(
                 finishWithError(LoginSsoActivity.Result.Error.Network)
             } catch (_: AuthenticationExpiredVersionException) {
                 finishWithError(LoginSsoActivity.Result.Error.ExpiredVersion)
-            } catch (_: AuthenticationUnknownException) {
+            } catch (e: AuthenticationUnknownException) {
                 logger.logErrorUnknown()
                 finishWithError(LoginSsoActivity.Result.Error.Unknown)
-            } catch (_: LoginSsoContract.CannotStartSessionException) {
+            } catch (e: LoginSsoContract.CannotStartSessionException) {
                 logger.logErrorUnknown()
                 finishWithError(LoginSsoActivity.Result.Error.Unknown)
             }
@@ -168,7 +163,6 @@ class LoginSsoPresenter @Inject constructor(
     }
 
     private fun notifySuccess(intent: Intent) {
-        logger.logLoginSuccess()
         activity?.run {
             startActivity(intent)
             finishWithResult(LoginSsoActivity.Result.Success)

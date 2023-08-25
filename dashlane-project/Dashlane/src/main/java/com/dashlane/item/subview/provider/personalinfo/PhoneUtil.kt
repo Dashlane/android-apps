@@ -7,8 +7,6 @@ import com.dashlane.vault.model.getPhoneNameAndNumber
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 @Suppress("UNCHECKED_CAST")
 fun MainDataAccessor.getPhoneList(context: Context, defaultLabel: String): List<Pair<String, String?>> {
     val phoneList = arrayListOf<Pair<String, String?>>()

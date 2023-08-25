@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting;
 import com.dashlane.network.BaseNetworkResponse;
 import com.dashlane.network.webservices.SpaceDeletedService;
 import com.dashlane.preference.UserPreferencesManager;
+import com.dashlane.session.Session;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,8 +16,6 @@ import javax.inject.Inject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-
 
 public class SpaceDeletedNotifier {
     private static final String PREF_SPACE_IDS = "notifyItemsDeletedSpaceIds";
@@ -36,7 +35,9 @@ public class SpaceDeletedNotifier {
         SPACE_IDS_SEND_IN_PROGRESS.clear();
     }
 
-    public void sendIfNeeded(String username, String uki) {
+    public void sendIfNeeded(Session session) {
+        String username = session.getUserId();
+        String uki = session.getUki();
         Set<String> spaceIds = mPreferencesManager.getStringSet(PREF_SPACE_IDS);
         if (spaceIds == null || spaceIds.isEmpty()) {
             return;

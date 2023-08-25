@@ -16,8 +16,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoField
 
-
-
 @SuppressLint("ParcelCreator")
 @Parcelize
 data class Breach(
@@ -70,8 +68,10 @@ data class Breach(
     fun hasCreditCardLeaked() = hasLeakedData(DATA_CREDIT_CARD)
 
     fun hasPrivateInformationLeaked() = hasLeakedData(DATA_USERNAME) ||
-            ((isDarkWebBreach() && !hasLeakedData(DATA_PASSWORD)) || 
-                    (!isDarkWebBreach() && !hasLeakedData(DATA_EMAIL))) || 
+            (
+                (isDarkWebBreach() && !hasLeakedData(DATA_PASSWORD)) || 
+                    (!isDarkWebBreach() && !hasLeakedData(DATA_EMAIL))
+            ) || 
             hasLeakedData(DATA_CREDIT_CARD) ||
             hasLeakedData(DATA_PHONE) ||
             hasLeakedData(DATA_ADDRESS) ||
@@ -152,15 +152,9 @@ data class Breach(
         const val DATA_PERSONAL_INFORMATION = "personalinfo"
         const val DATA_SOCIAL_NETWORK = "social"
 
-        
-
         const val STATUS_LIVE = "live"
 
-        
-
         const val STATUS_STAGING = "staging"
-
-        
 
         const val STATUS_LEGACY = "legacy"
 

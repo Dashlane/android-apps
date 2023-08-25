@@ -1,7 +1,8 @@
 package com.dashlane.login.lock
 
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.accountrecovery.AccountRecovery
+import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.debug.DaDaDa
 import com.dashlane.lock.LockHelper
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.pages.password.LoginPasswordPresenter
@@ -11,7 +12,6 @@ import com.dashlane.security.SecurityHelper
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.debug.DaDaDa
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.isNotSemanticallyNull
 import java.time.Duration
@@ -25,12 +25,10 @@ class LockTypeManagerImpl @Inject constructor(
     private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val biometricAuthModule: BiometricAuthModule,
     private val sessionManager: SessionManager,
-    private val accountRecovery: AccountRecovery,
+    private val biometricRecovery: BiometricRecovery,
     private val daDaDa: DaDaDa,
     private val userAccountStorage: UserAccountStorage
 ) : LockTypeManager {
-
-    
 
     private val lockoutDays = 14L
 
@@ -68,7 +66,7 @@ class LockTypeManagerImpl @Inject constructor(
 
     override fun setLockType(@LockTypeManager.LockType lockType: Int) {
         
-        accountRecovery.setFeatureEnabled(false, null)
+        biometricRecovery.setFeatureEnabled(false, null)
 
         var lock = lockType
         if (!securityHelper.allowedToUsePin()) {
@@ -110,13 +108,14 @@ class LockTypeManagerImpl @Inject constructor(
 
     override fun isItemUnlockableByPinOrFingerprint(): Boolean {
         return preferenceManager.getBoolean(
-            ConstantsPrefs.UNLOCK_ITEMS_WITH_PIN_OR_FP, true
+            ConstantsPrefs.UNLOCK_ITEMS_WITH_PIN_OR_FP,
+            true
         )
     }
 
     override fun shouldEnterMasterPassword(unlockReason: UnlockEvent.Reason?): Boolean {
         val askedAccountRecovery =
-            unlockReason is UnlockEvent.Reason.WithCode && unlockReason.requestCode == LoginPasswordPresenter.UNLOCK_FOR_ACCOUNT_RECOVERY
+            unlockReason is UnlockEvent.Reason.WithCode && unlockReason.requestCode == LoginPasswordPresenter.UNLOCK_FOR_BIOMETRIC_RECOVERY
         return when {
             askedAccountRecovery || getLockType() == LockTypeManager.LOCK_TYPE_MASTER_PASSWORD -> false
             daDaDa.isUserLockout -> true

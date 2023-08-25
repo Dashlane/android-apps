@@ -21,8 +21,6 @@ import com.dashlane.design.theme.color.darkColors
 import com.dashlane.design.theme.color.lightColors
 import com.dashlane.ui.R
 
-
-
 @Suppress("SpreadOperator")
 fun TextView.setTextWithLinks(resId: Int, resIdArgToLinks: List<Pair<Int, Uri>>) {
     val params = resIdArgToLinks.map { context.getString(it.first) to it.second }
@@ -30,8 +28,6 @@ fun TextView.setTextWithLinks(resId: Int, resIdArgToLinks: List<Pair<Int, Uri>>)
         SpannableString(context.getString(resId, *params.map { it.first }.toTypedArray()))
     setTextWithLinks(fullText, params)
 }
-
-
 
 fun TextView.setTextWithLinks(
     fullText: SpannableString,
@@ -60,8 +56,6 @@ fun TextView.setTextWithLinks(
     }
     text = fullText
 }
-
-
 
 fun Context.launchUrl(url: String) =
     launchUrl(Uri.parse(url))
@@ -95,8 +89,6 @@ fun CustomTabsIntent.Builder.applyAppTheme() = setColorScheme(CustomTabsIntent.C
             .build()
     )
 
-
-
 fun Intent.fallbackCustomTab(packageManager: PackageManager): Intent {
     return if (resolveActivity(packageManager) != null) {
         this
@@ -105,8 +97,6 @@ fun Intent.fallbackCustomTab(packageManager: PackageManager): Intent {
     }
 }
 
-
-
 fun Context.safelyStartBrowserActivity(intent: Intent) {
     try {
         startActivity(intent)
@@ -114,8 +104,6 @@ fun Context.safelyStartBrowserActivity(intent: Intent) {
         displayNoBrowserWarning(this)
     }
 }
-
-
 
 @Suppress("DEPRECATION")
 fun FragmentActivity.safelyStartBrowserActivityForResult(intent: Intent, requestCode: Int) {

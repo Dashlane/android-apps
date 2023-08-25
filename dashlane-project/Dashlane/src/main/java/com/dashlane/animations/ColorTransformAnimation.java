@@ -9,15 +9,11 @@ import com.dashlane.util.StatusBarUtils;
 
 import java.lang.ref.WeakReference;
 
-
-
 public class ColorTransformAnimation implements ValueAnimator.AnimatorUpdateListener {
 
     private final WeakReference<View> mRootView;
     private final WeakReference<Activity> mActivityRef;
     private final ValueAnimator mValueAnimator;
-
-    
 
     public ColorTransformAnimation(Activity activity, View rootView, int fromColor, int toColor,
                                    int duration) {

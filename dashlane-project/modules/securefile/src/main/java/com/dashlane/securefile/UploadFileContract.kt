@@ -7,8 +7,6 @@ import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.definition.Base
 import java.io.InputStream
 
-
-
 interface UploadFileContract {
     interface DataProvider : Base.IDataProvider {
         suspend fun createSecureFile(

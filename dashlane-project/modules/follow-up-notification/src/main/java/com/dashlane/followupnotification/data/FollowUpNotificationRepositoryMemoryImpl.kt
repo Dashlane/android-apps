@@ -3,8 +3,6 @@ package com.dashlane.followupnotification.data
 import com.dashlane.followupnotification.domain.FollowUpNotification
 import javax.inject.Inject
 
-
-
 class FollowUpNotificationRepositoryMemoryImpl @Inject constructor() : FollowUpNotificationRepository {
     private val mapFollowUpNotification = mutableMapOf<String, FollowUpNotification>()
 

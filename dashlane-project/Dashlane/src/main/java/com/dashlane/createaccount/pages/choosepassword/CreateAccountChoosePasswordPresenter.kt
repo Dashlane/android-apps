@@ -17,8 +17,6 @@ class CreateAccountChoosePasswordPresenter(val presenter: CreateAccountPresenter
     CreateAccountBasePresenter<CreateAccountChoosePasswordContract.DataProvider, CreateAccountChoosePasswordContract.ViewProxy>(),
     CreateAccountChoosePasswordContract.Presenter {
 
-    override fun onPasswordVisibilityToggle(passwordShown: Boolean) = provider.passwordVisibilityToggled(passwordShown)
-
     override val nextEnabled: Boolean = true
 
     override val rootView: ConstraintLayout
@@ -59,7 +57,6 @@ class CreateAccountChoosePasswordPresenter(val presenter: CreateAccountPresenter
     }
 
     override fun onShowTipsClicked() {
-        provider.logger.logShowPasswordTips()
         val tipsIntent = Intent(context, MasterPasswordTipsActivity::class.java).clearTop()
         context?.startActivity(tipsIntent)
     }

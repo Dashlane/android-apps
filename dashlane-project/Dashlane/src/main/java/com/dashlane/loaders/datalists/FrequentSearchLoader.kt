@@ -9,8 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlin.coroutines.CoroutineContext
 
-
-
 class FrequentSearchLoader(
     private val frequentSearch: FrequentSearch,
     private val coroutineScope: CoroutineScope,

@@ -5,8 +5,6 @@ import com.dashlane.sync.treat.SyncSummaryItem
 import com.dashlane.util.SecureException
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 @Keep
 class SyncTransactionException(
     val transaction: Transaction,

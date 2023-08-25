@@ -22,7 +22,6 @@ import com.dashlane.premium.offer.details.view.OfferDetailsFragmentArgs
 import com.dashlane.premium.offer.list.model.OfferOverview
 import com.dashlane.premium.offer.list.view.OfferListFragment.Companion.userLockedOut
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -30,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 internal class OfferDetailsViewModel @Inject constructor(
@@ -139,7 +139,8 @@ internal class OfferDetailsViewModel @Inject constructor(
     }
 
     private fun OffersState.containsIntroOffers(): Boolean = when (this) {
-        is OfferDetails -> monthlyProduct?.productDetails is ProductDetailsWrapper.IntroductoryOfferProduct ||
+        is OfferDetails ->
+            monthlyProduct?.productDetails is ProductDetailsWrapper.IntroductoryOfferProduct ||
             yearlyProduct?.productDetails is ProductDetailsWrapper.IntroductoryOfferProduct
 
         is Offers -> (monthlyOffers + yearlyOffers).any { it is OfferOverview.IntroductoryOffer }

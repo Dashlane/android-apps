@@ -36,8 +36,10 @@ class ItemScreenConfigurationPassportProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     @Suppress("UNCHECKED_CAST")
@@ -138,8 +140,10 @@ class ItemScreenConfigurationPassportProvider(
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace()) {
             subViewFactory.createSpaceSelector(
-                item.syncObject.spaceId, teamspaceAccessor,
-                null, VaultItem<*>::copyForUpdatedTeamspace
+                item.syncObject.spaceId,
+                teamspaceAccessor,
+                null,
+                VaultItem<*>::copyForUpdatedTeamspace
             )
         } else {
             null

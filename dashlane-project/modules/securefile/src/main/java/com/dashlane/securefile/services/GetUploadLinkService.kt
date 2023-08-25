@@ -13,8 +13,6 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 import java.io.IOException
 
-
-
 interface GetUploadLinkService {
 
     @POST("/1/securefile/getUploadLink")
@@ -39,8 +37,6 @@ interface GetUploadLinkService {
         @JsonAdapter(Content.TypeAdapterFactory::class)
         val content: Content?
     ) {
-        
-
         class Content(
             @SerializedName("url")
             val url: String,
@@ -55,8 +51,6 @@ interface GetUploadLinkService {
             val errorMessage: String?
         ) {
 
-            
-
             class TypeAdapterFactory : com.google.gson.TypeAdapterFactory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : Any?> create(gson: Gson, type: TypeToken<T>): com.google.gson.TypeAdapter<T> {
@@ -65,31 +59,33 @@ interface GetUploadLinkService {
                 }
             }
 
-            class TypeAdapter(val gson: Gson) : com.google.gson.TypeAdapter<GetUploadLinkService.Response.Content>() {
-                override fun read(reader: JsonReader): GetUploadLinkService.Response.Content {
+            class TypeAdapter(val gson: Gson) : com.google.gson.TypeAdapter<Content>() {
+                override fun read(reader: JsonReader): Content {
                     val token = reader.peek()
                     return when (token) {
                         JsonToken.BEGIN_OBJECT -> gson.fromJson(
                             reader,
-                            GetUploadLinkService.Response.Content::class.java
+                            Content::class.java
                         )
                         JsonToken.STRING -> {
                             val errorMessage = reader.nextString()
-                            return GetUploadLinkService.Response.Content(
-                                "", JsonObject(), "",
-                                Quota(0, 0), "", errorMessage
+                            return Content(
+                                "",
+                                JsonObject(),
+                                "",
+                                Quota(0, 0),
+                                "",
+                                errorMessage
                             )
                         }
                         else -> throw IOException("Unexpected token $token")
                     }
                 }
 
-                override fun write(writer: JsonWriter, value: GetUploadLinkService.Response.Content?) {
+                override fun write(writer: JsonWriter, value: Content?) {
                     throw UnsupportedOperationException()
                 }
             }
-
-            
 
             class Quota(
                 @SerializedName("remaining")

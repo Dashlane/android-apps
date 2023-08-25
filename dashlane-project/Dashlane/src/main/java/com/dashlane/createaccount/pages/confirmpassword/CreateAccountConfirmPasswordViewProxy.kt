@@ -6,7 +6,6 @@ import android.widget.EditText
 import androidx.annotation.StringRes
 import com.dashlane.R
 import com.dashlane.debug.DeveloperUtilities
-import com.dashlane.util.addOnFieldVisibilityToggleListener
 import com.dashlane.util.addTextChangedListener
 import com.google.android.material.textfield.TextInputLayout
 import com.skocken.presentation.viewproxy.BaseViewProxy
@@ -35,7 +34,6 @@ class CreateAccountConfirmPasswordViewProxy(rootView: View) :
                 false
             }
         }
-        passwordLayout.addOnFieldVisibilityToggleListener { presenter.onPasswordVisibilityToggle(it) }
         
         DeveloperUtilities.preFillPassword(passwordView)
     }

@@ -5,8 +5,6 @@ import android.widget.ProgressBar
 import androidx.annotation.ColorInt
 import com.dashlane.ui.R
 
-
-
 fun ProgressBar.tintProgressDrawable(
     @ColorInt
     foregroundTintColor: Int,

@@ -16,20 +16,14 @@ val EMAIL_ADDRESS_PATTERN: Pattern = Pattern.compile(
     Pattern.CASE_INSENSITIVE
 )
 
-
-
 fun isNullOrEmpty(s: String?) = s.isNullOrEmpty()
 
 fun CharSequence?.isNotSemanticallyNull() = !isSemanticallyNull()
 fun CharSequence?.isSemanticallyNull() = isNullOrEmpty() || isValueNull()
 fun CharSequence?.isValueNull() = this?.trim() == "null"
 
-
-
 @SuppressLint("DefaultLocale")
 fun String.toUpperCaseToDisplay(): String = uppercase(Locale.getDefault())
-
-
 
 @SuppressLint("DefaultLocale")
 fun String.capitalizeToDisplay(): String =
@@ -85,7 +79,5 @@ fun String?.matchDomain(domain: String?): Boolean {
     }
     return false
 }
-
-
 
 fun String.otpToDisplay() = this.chunked(size = 3).joinToString("\u205f")

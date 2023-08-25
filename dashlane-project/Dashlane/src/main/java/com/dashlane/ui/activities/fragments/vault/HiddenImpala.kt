@@ -11,8 +11,6 @@ import com.dashlane.util.SnackbarUtils
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
-
-
 class HiddenImpala(
     private val activity: Activity,
     private val logger: Vault.Logger

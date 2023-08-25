@@ -14,8 +14,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject.GeneratedPassword
 import javax.inject.Inject
 
-
-
 class PasswordGeneratorWrapperImpl @Inject constructor(
     private val strength: PasswordGeneratorAndStrength,
     preferencesManager: UserPreferencesManager,

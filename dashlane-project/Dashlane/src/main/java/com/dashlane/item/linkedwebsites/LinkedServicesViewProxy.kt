@@ -72,11 +72,9 @@ class LinkedServicesViewProxy(
         }
     }
 
-    
-
     fun createMenu(menu: Menu) {
         menu.clear()
-        if (!viewModel.fromViewOnly && viewModel.doneButtonActivated()) {
+        if (!viewModel.fromViewOnly) {
             menu.add(R.string.multi_domain_credentials_cta_done).apply {
                 setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
                 setOnMenuItemClickListener {
@@ -109,11 +107,13 @@ class LinkedServicesViewProxy(
     }
 
     private fun temporarySaveMutableServices() {
-        activity.setResult(Activity.RESULT_OK, Intent().apply {
-            if (viewModel.hasWebsitesToSave(websitesViewModel.getMutableWebsitesValue())) {
+        activity.setResult(
+            Activity.RESULT_OK,
+            Intent().apply {
+            if (viewModel.hasWebsitesToSave(websitesViewModel.getEditableWebsitesResult())) {
                 putExtra(
                     LinkedServicesActivity.RESULT_TEMPORARY_WEBSITES,
-                    websitesViewModel.getMutableWebsitesValue().toTypedArray()
+                    websitesViewModel.getEditableWebsitesResult().toTypedArray()
                 )
             }
             if (viewModel.hasAppsToSave(appsViewModel.getEditableAppsResult())) {
@@ -122,7 +122,8 @@ class LinkedServicesViewProxy(
                     appsViewModel.getEditableAppsResult().toTypedArray()
                 )
             }
-        })
+        }
+        )
     }
 
     private fun showDuplicateItem(duplicateUrl: String, itemName: String) {
@@ -157,7 +158,7 @@ class LinkedServicesViewProxy(
         if (viewModel.isEditMode) {
             if (hasDataToSave()) {
                 
-                if (backPressed && (viewModel.doneButtonActivated() || viewModel.fromViewOnly)) {
+                if (backPressed && viewModel.fromViewOnly) {
                     askForSave()
                 } else {
                     saveData()
@@ -173,10 +174,8 @@ class LinkedServicesViewProxy(
         finishActivity()
     }
 
-    
-
     private fun saveData() {
-        val duplicateWebsite = viewModel.hasOtherItemsDuplicate(websitesViewModel.getMutableWebsitesValue())
+        val duplicateWebsite = viewModel.hasOtherItemsDuplicate(websitesViewModel.getEditableWebsitesResult())
         if (duplicateWebsite != null) {
             showDuplicateItem(duplicateWebsite.second, duplicateWebsite.first)
         } else {
@@ -185,21 +184,19 @@ class LinkedServicesViewProxy(
     }
 
     private fun hasDataToSave() =
-        viewModel.hasWebsitesToSave(websitesViewModel.getMutableWebsitesValue()) ||
+        viewModel.hasWebsitesToSave(websitesViewModel.getEditableWebsitesResult()) ||
                 viewModel.hasAppsToSave(appsViewModel.getEditableAppsResult())
 
     private fun finishActivity() {
         activity.finish()
-        if (!viewModel.fromViewOnly && viewModel.doneButtonActivated()) {
+        if (!viewModel.fromViewOnly) {
             activity.overridePendingTransition(R.anim.no_animation, R.anim.slide_out_bottom)
         }
     }
 
-    
-
     private fun saveChange() {
         if (viewModel.fromViewOnly) {
-            viewModel.save(websitesViewModel.getMutableWebsitesValue(), appsViewModel.getEditableAppsResult())
+            viewModel.save(websitesViewModel.getEditableWebsitesResult(), appsViewModel.getEditableAppsResult())
         } else {
             temporarySaveMutableServices()
             finishActivity()

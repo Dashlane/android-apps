@@ -6,8 +6,6 @@ import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 interface ListItemAction {
 
     @get:DrawableRes

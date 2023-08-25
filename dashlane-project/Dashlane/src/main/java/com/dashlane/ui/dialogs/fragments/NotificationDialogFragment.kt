@@ -77,8 +77,6 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
         return dialog
     }
 
-    
-
     private fun useDialogTitle(customViewResId: Int): Boolean = when (customViewResId) {
         R.layout.include_dialog_image_text -> false
         else -> true
@@ -119,8 +117,6 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
         
         announcementCenter.restorePreviousStateIfDisabled()
     }
-
-    
 
     fun setButtonEnable(buttonId: Int, enable: Boolean) {
         val dialog = dialog

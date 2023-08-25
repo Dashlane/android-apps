@@ -3,8 +3,6 @@ package com.dashlane.lock
 import androidx.annotation.IntDef
 import java.time.Duration
 
-
-
 interface LockHelper : LockNavigationHelper, LockWatcher {
     companion object {
         const val PROMPT_LOCK_REGULAR = 0

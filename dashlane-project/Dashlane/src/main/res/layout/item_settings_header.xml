@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/TextStyle.Dashlane.TitleSupportingSmall"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="bottom|left"
+    android:gravity="bottom|start"
     android:maxLines="1"
-    android:minHeight="@dimen/fragment_setting_section_header_min_height"
-    android:paddingLeft="@dimen/spacing_normal"
-    android:paddingRight="@dimen/spacing_normal"
-    android:paddingBottom="@dimen/fragment_setting_section_header_padding_bottom"
-    android:textAppearance="?textAppearanceBody2"
+    android:paddingVertical="@dimen/spacing_small"
+    android:paddingHorizontal="@dimen/spacing_normal"
     android:textColor="@color/text_neutral_quiet"
     />

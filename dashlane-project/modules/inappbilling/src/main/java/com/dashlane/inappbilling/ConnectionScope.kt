@@ -5,11 +5,7 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.ProductDetails
 import kotlinx.coroutines.CoroutineDispatcher
 
-
-
 interface ConnectionScope {
-    
-
     suspend fun startPurchaseFlow(
         activity: Activity,
         productDetails: ProductDetails,
@@ -17,19 +13,11 @@ interface ConnectionScope {
         updateReference: UpdateReference? = null
     ): ServiceResult
 
-    
-
     suspend fun consume(purchaseToken: String): ServiceResult
-
-    
 
     suspend fun acknowledge(purchaseToken: String): ServiceResult
 
-    
-
     suspend fun queryPurchases(ioDispatcher: CoroutineDispatcher): ServiceResult
-
-    
 
     suspend fun queryProductDetails(
         productList: List<String>,

@@ -13,8 +13,6 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 
-
-
 public abstract class AbstractSpinnerAdapterWithDefaultValue<T> extends ArrayAdapter<T> implements SpinnerAdapter {
 
     private boolean isFirstTime;

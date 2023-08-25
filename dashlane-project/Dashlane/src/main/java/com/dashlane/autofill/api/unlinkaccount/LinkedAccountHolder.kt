@@ -6,8 +6,6 @@ import android.widget.TextView
 import com.dashlane.autofill.api.R
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class LinkedAccountHolder(v: View) : EfficientViewHolder<LinkedAccountViewTypeProviderFactoryImpl.Wrapper>(v) {
     private var authentifiantTitle: TextView = v.findViewById(R.id.item_title)
     private var authentifiantSubtitle: TextView = v.findViewById(R.id.item_subtitle)

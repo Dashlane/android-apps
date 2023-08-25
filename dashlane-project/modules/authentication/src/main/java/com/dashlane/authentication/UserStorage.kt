@@ -1,7 +1,5 @@
 package com.dashlane.authentication
 
-
-
 interface UserStorage {
     fun getUser(login: String): UserDevice?
     suspend fun clearUser(login: String, reason: String)

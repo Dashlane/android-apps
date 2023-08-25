@@ -22,7 +22,7 @@ import com.dashlane.url.assetlinks.getAssetLinksOrNull
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -42,12 +42,10 @@ import okio.ByteString
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class AuthentifiantAppLinkDownloader @Inject constructor(
-    @GlobalCoroutineScope
-    globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    applicationCoroutineScope: CoroutineScope,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     private val assetLinkService: UrlDomainAssetLinkService,
@@ -67,7 +65,7 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
     private val clock = Clock.systemUTC()
 
     @Suppress("EXPERIMENTAL_API_USAGE")
-    private val actor = globalCoroutineScope.actor<Fetch>(capacity = Channel.UNLIMITED) {
+    private val actor = applicationCoroutineScope.actor<Fetch>(capacity = Channel.UNLIMITED) {
         
         val fetched = mutableSetOf<UrlDomain>()
         for (command in this) {

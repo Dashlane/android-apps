@@ -6,27 +6,24 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.server.api.endpoints.abtesting.AbTestingOfflineExperimentReportingService
 import com.dashlane.server.api.time.toInstantEpochSecond
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
-import com.dashlane.util.logD
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import java.time.Instant
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
-import java.time.Instant
-import javax.inject.Inject
-
-
 
 class OfflineExperimentReporter @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     private val localAbTest: LocalAbTestManager,
     private val sessionManager: SessionManager,
     private val userPreferencesManager: UserPreferencesManager,
     private val service: AbTestingOfflineExperimentReportingService
 ) {
     @Suppress("EXPERIMENTAL_API_USAGE")
-    private val refreshActor = globalCoroutineScope.actor<Unit>(capacity = Channel.CONFLATED) {
+    private val refreshActor = applicationCoroutineScope.actor<Unit>(capacity = Channel.CONFLATED) {
         consumeEach {
             reportIfNeeded()
         }
@@ -48,7 +45,6 @@ class OfflineExperimentReporter @Inject constructor(
             service.execute(session.authorization, request)
             setReportingSuccessful()
         } catch (t: Throwable) {
-            logD { "Could not reportIfNeeded Local AbTest" }
         }
     }
 

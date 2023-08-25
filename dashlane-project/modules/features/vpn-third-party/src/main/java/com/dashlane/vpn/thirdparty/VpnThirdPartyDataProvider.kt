@@ -51,20 +51,28 @@ class VpnThirdPartyDataProvider(
     override val installIntent = Intent(ACTION_VIEW).apply { data = INSTALL_URL.toUri() }
 
     override suspend fun getHotspotShieldAccount(): Account? {
-        val accountsByDomain = credentialDataQuery.queryAll(credentialFilter {
+        val accountsByDomain = credentialDataQuery.queryAll(
+            credentialFilter {
             forDomain(HOTSPOT_SHIELD_DOMAIN)
-        })
-        val accountsByPackageName = credentialDataQuery.queryAll(credentialFilter {
+        }
+        )
+        val accountsByPackageName = credentialDataQuery.queryAll(
+            credentialFilter {
             packageName = HOTSPOT_SHIELD_PACKAGE_NAME
-        })
+        }
+        )
         val latestAccount = (accountsByDomain + accountsByPackageName).filter {
             it.urlForGoToWebsite?.contains(HOTSPOT_SHIELD_DOMAIN) == true
         }.maxByOrNull { it.creationDatetime ?: Instant.EPOCH } ?: return null
         val login = latestAccount.loginForUi ?: return null
-        val password = (vaultDataQuery.query(vaultFilter {
+        val password = (
+            vaultDataQuery.query(
+                vaultFilter {
             specificDataType(SyncObjectType.AUTHENTIFIANT)
             specificUid(latestAccount.id)
-        })?.syncObject as? SyncObject.Authentifiant)?.password?.toString() ?: return null
+        }
+            )?.syncObject as? SyncObject.Authentifiant
+        )?.password?.toString() ?: return null
         return Account(
             login,
             password,

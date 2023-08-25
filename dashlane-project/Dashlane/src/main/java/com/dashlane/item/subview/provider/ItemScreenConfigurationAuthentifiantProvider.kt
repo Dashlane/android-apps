@@ -5,7 +5,9 @@ import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.Gravity
+import androidx.compose.runtime.mutableStateOf
 import com.dashlane.R
+import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.otp
 import com.dashlane.autofill.LinkedServicesHelper
@@ -19,6 +21,7 @@ import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
 import com.dashlane.item.logger.AuthentifiantLogger
+import com.dashlane.item.subview.ItemCollectionListSubView
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
@@ -47,8 +50,10 @@ import com.dashlane.session.SessionManager
 import com.dashlane.similarpassword.SimilarPassword
 import com.dashlane.storage.userdata.EmailSuggestionProvider
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
 import com.dashlane.storage.userdata.accessor.filter.DataChangeHistoryFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.ui.VaultItemImageHelper
@@ -58,7 +63,6 @@ import com.dashlane.url.UrlDomain
 import com.dashlane.url.name
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
-import com.dashlane.useractivity.log.usage.UsageLogCode57
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.isNotSemanticallyNull
@@ -77,10 +81,12 @@ import com.dashlane.vault.model.isSpaceItem
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.navigationUrl
 import com.dashlane.vault.model.titleForListNormalized
+import com.dashlane.vault.model.toCollectionDataType
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.model.urlForUsageLog
+import com.dashlane.vault.summary.CollectionVaultItems
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.SecurityBreachUtil.isCompromised
@@ -89,13 +95,10 @@ import com.dashlane.xml.domain.SyncObjectType
 import java.time.Duration
 import java.time.Instant
 
-
-
 class ItemScreenConfigurationAuthentifiantProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
     private val sharingPolicy: SharingPolicyDataProvider,
-    sender: UsageLogCode57.Sender?,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     sessionManager: SessionManager,
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
@@ -103,8 +106,9 @@ class ItemScreenConfigurationAuthentifiantProvider(
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val scannedOtp: Otp?,
+    private val linkedServicesHelper: LinkedServicesHelper,
     private val userFeaturesChecker: UserFeaturesChecker,
-    private val linkedServicesHelper: LinkedServicesHelper
+    private val authenticatorLogger: AuthenticatorLogger
 ) : ItemScreenConfigurationProvider(
     teamspaceAccessor,
     mainDataAccessor.getDataCounter(),
@@ -124,7 +128,6 @@ class ItemScreenConfigurationAuthentifiantProvider(
     override val logger = AuthentifiantLogger(
         teamspaceAccessor,
         mainDataAccessor.getDataCounter(),
-        sender ?: UsageLogCode57.Sender.MANUAL,
         sessionManager,
         bySessionUsageLogRepository
     )
@@ -151,9 +154,11 @@ class ItemScreenConfigurationAuthentifiantProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         check(itemToSave.syncObject is SyncObject.Authentifiant) { "Unexpected item $itemToSave isn't an Authentifiant" }
         val authentifiant = itemToSave.syncObject as SyncObject.Authentifiant
-        return (authentifiant.urlForUI().isNotSemanticallyNull() ||
-                authentifiant.title.isNotSemanticallyNull()) &&
-                authentifiant.loginForUi.isNotSemanticallyNull()
+        return (
+            authentifiant.urlForUI().isNotSemanticallyNull() ||
+            authentifiant.title.isNotSemanticallyNull()
+        ) &&
+            authentifiant.loginForUi.isNotSemanticallyNull()
     }
 
     override fun saveAdditionalData(): Bundle = Bundle().also { bundle ->
@@ -217,8 +222,13 @@ class ItemScreenConfigurationAuthentifiantProvider(
         val isNew = !item.hasBeenSaved
 
         val passwordView: ItemSubView<*>? = createPasswordField(
-            editMode, subViewFactory,
-            context, item, isNew, listener, domain
+            editMode,
+            subViewFactory,
+            context,
+            item,
+            isNew,
+            listener,
+            domain
         )
 
         val suggestions = emailSuggestionProvider.getAllEmails()
@@ -252,6 +262,13 @@ class ItemScreenConfigurationAuthentifiantProvider(
         )
         val websiteView = createWebsiteField(editMode, item, subViewFactory, context)
 
+        val teamspaceView = createTeamspaceField(
+            editMode = editMode,
+            subViewFactory = subViewFactory,
+            item = item,
+            views = listOfNotNull(loginView, secondaryLoginView, emailView, websiteView)
+        )
+
         return listOfNotNull(
             
             createChangePasswordInfobox(domain, editMode, context, item, listener),
@@ -278,20 +295,13 @@ class ItemScreenConfigurationAuthentifiantProvider(
             
             createEditNoteField(editMode, subViewFactory, context, item),
             
-            createTeamspaceField(
-                editMode,
-                subViewFactory,
-                item,
-                listOfNotNull(loginView, secondaryLoginView, emailView, websiteView)
-            ),
+            teamspaceView,
             
             createReadOnlyNoteField(editMode, item, subViewFactory, context),
             
             createSharingField(item, context, subViewFactory),
             
             subViewFactory.createSubviewAttachmentDetails(context, item),
-            
-            createLinkedDomainsExpandableList(context, item, subViewFactory),
             
             dateTimeFieldFactory.createCreationDateField(
                 editMode = editMode,
@@ -306,8 +316,48 @@ class ItemScreenConfigurationAuthentifiantProvider(
                 item = item
             ),
             
+            createCollectionField(
+                editMode = editMode,
+                item = item,
+                context = context,
+                listener = listener,
+                teamspaceView = teamspaceView as? ItemSubView<Teamspace>
+            ),
+            
             createDeleteButton(canDelete, context, subViewFactory, listener)
         )
+    }
+
+    private fun createCollectionField(
+        editMode: Boolean,
+        item: VaultItem<SyncObject.Authentifiant>,
+        context: Context,
+        listener: ItemEditViewContract.View.UiUpdateListener,
+        teamspaceView: ItemSubView<Teamspace>?
+    ): ItemSubView<*>? {
+        if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.VAULT_COLLECTION_LABELLING)) {
+            val collections = mainDataAccessor.getCollectionDataQuery()
+                .queryAll(
+                    CollectionFilter().apply {
+                    withVaultItem = CollectionVaultItems(item.toCollectionDataType(), item.uid)
+                    specificSpace(
+                        teamspaceAccessor.getOrDefault(item.syncObject.spaceId)
+                    )
+                }
+                )
+                .mapNotNull { it.name }
+                .sorted()
+            return ItemCollectionListSubView(
+                value = mutableStateOf(collections.toList()),
+                editMode = editMode,
+                itemId = item.uid,
+                header = context.getString(R.string.collections_header_item_edit),
+                listener = listener,
+                teamspaceView = teamspaceView
+            )
+        } else {
+            return null
+        }
     }
 
     private fun createEditNoteField(
@@ -387,8 +437,6 @@ class ItemScreenConfigurationAuthentifiantProvider(
         }
     }
 
-    
-
     private fun getLinkedWebsites(item: VaultItem<SyncObject.Authentifiant>, editMode: Boolean): List<String> {
         return if (temporaryLinkedWebsites != null && editMode) {
             temporaryLinkedWebsites!!
@@ -403,31 +451,28 @@ class ItemScreenConfigurationAuthentifiantProvider(
         listener: ItemEditViewContract.View.UiUpdateListener,
         item: VaultItem<SyncObject.Authentifiant>
     ): ItemSubView<*>? {
-        if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES)) {
-            return if (editMode) {
-                ItemClickActionSubView(
-                    context.getString(R.string.multi_domain_credentials_add_service),
-                    mood = Mood.Neutral,
-                    intensity = Intensity.Quiet,
-                    iconResId = R.drawable.ic_add,
-                    gravity = Gravity.START,
-                ) {
-                    listener.openLinkedServices(
-                        item.uid,
-                        fromViewOnly = false,
-                        addNew = true,
-                        temporaryWebsites = getLinkedWebsites(item = item, editMode = true),
-                        temporaryApps = temporaryLinkedApps,
-                        urlDomain = item.syncObject.urlDomain
-                    )
-                }.apply {
-                    topMargin = R.dimen.spacing_empty
-                }
-            } else {
-                null
+        return if (editMode) {
+            ItemClickActionSubView(
+                context.getString(R.string.multi_domain_credentials_add_service),
+                mood = Mood.Neutral,
+                intensity = Intensity.Quiet,
+                iconResId = R.drawable.ic_add,
+                gravity = Gravity.START,
+            ) {
+                listener.openLinkedServices(
+                    item.uid,
+                    fromViewOnly = false,
+                    addNew = true,
+                    temporaryWebsites = getLinkedWebsites(item = item, editMode = true),
+                    temporaryApps = temporaryLinkedApps,
+                    urlDomain = item.syncObject.urlDomain
+                )
+            }.apply {
+                topMargin = R.dimen.spacing_empty
             }
+        } else {
+            return null
         }
-        return null
     }
 
     private fun createLinkedServicesButton(
@@ -435,45 +480,42 @@ class ItemScreenConfigurationAuthentifiantProvider(
         context: Context,
         listener: ItemEditViewContract.View.UiUpdateListener,
         item: VaultItem<SyncObject.Authentifiant>
-    ): ItemSubView<*>? {
-        if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES)) {
-            val linkedWebsites = temporaryLinkedWebsites?.let {
-                linkedServicesHelper.replaceAllLinkedDomains(item.syncObject.linkedServices, it).associatedDomains
-            } ?: item.syncObject.linkedServices?.associatedDomains
-            val linkedApps = temporaryLinkedApps?.let {
-                linkedServicesHelper.replaceAllLinkedAppsByUser(
-                    item.syncObject.linkedServices,
-                    it
-                ).associatedAndroidApps
-            } ?: item.syncObject.linkedServices?.associatedAndroidApps
-            val autoFillNumber = (linkedWebsites?.size ?: 0) +
-                    (KnownLinkedDomains.getMatchingLinkedDomainSet(item.syncObject.urlDomain)?.size ?: 0) +
-                    (linkedApps?.size ?: 0)
-            return if (autoFillNumber > 0) {
-                ItemLinkedServicesSubView(
-                    linkedWebsites,
-                    linkedApps,
-                    OpenLinkedWebsitesAction(
-                        listener,
-                        item.uid,
-                        editMode,
-                        getLinkedWebsites(item, editMode),
-                        temporaryLinkedApps,
-                        item.syncObject.urlDomain
-                    ),
-                    context.resources.getQuantityString(
-                        R.plurals.multi_domain_credentials_autofill_plurals,
-                        autoFillNumber,
-                        autoFillNumber
-                    )
-                ).apply {
-                    topMargin = R.dimen.spacing_empty
-                }
-            } else {
-                EmptyLinkedServicesSubView()
+    ): ItemSubView<*> {
+        val linkedWebsites = temporaryLinkedWebsites?.let {
+            linkedServicesHelper.replaceAllLinkedDomains(item.syncObject.linkedServices, it).associatedDomains
+        } ?: item.syncObject.linkedServices?.associatedDomains
+        val linkedApps = temporaryLinkedApps?.let {
+            linkedServicesHelper.replaceAllLinkedAppsByUser(
+                item.syncObject.linkedServices,
+                it
+            ).associatedAndroidApps
+        } ?: item.syncObject.linkedServices?.associatedAndroidApps
+        val autoFillNumber = (linkedWebsites?.size ?: 0) +
+            (KnownLinkedDomains.getMatchingLinkedDomainSet(item.syncObject.urlDomain)?.size ?: 0) +
+            (linkedApps?.size ?: 0)
+        return if (autoFillNumber > 0) {
+            ItemLinkedServicesSubView(
+                linkedWebsites,
+                linkedApps,
+                OpenLinkedWebsitesAction(
+                    listener,
+                    item.uid,
+                    editMode,
+                    getLinkedWebsites(item, editMode),
+                    temporaryLinkedApps,
+                    item.syncObject.urlDomain
+                ),
+                context.resources.getQuantityString(
+                    R.plurals.multi_domain_credentials_autofill_plurals,
+                    autoFillNumber,
+                    autoFillNumber
+                )
+            ).apply {
+                topMargin = R.dimen.spacing_empty
             }
+        } else {
+            EmptyLinkedServicesSubView()
         }
-        return null
     }
 
     private fun createWebsiteField(
@@ -482,7 +524,6 @@ class ItemScreenConfigurationAuthentifiantProvider(
         subViewFactory: SubViewFactory,
         context: Context
     ): ItemSubView<String>? {
-
         val loginAction = if (editMode) {
             
             null
@@ -538,11 +579,13 @@ class ItemScreenConfigurationAuthentifiantProvider(
         listener: ItemEditViewContract.View.UiUpdateListener
     ) = if (editMode) {
         null
-    } else createSubViewPasswordSafety(
+    } else {
+        createSubViewPasswordSafety(
         context.getString(R.string.password_safety_label),
         item.syncObject.password?.toString().orEmpty(),
         listener = listener
     )
+    }
 
     private fun createAuthenticatorField(
         editMode: Boolean,
@@ -567,10 +610,11 @@ class ItemScreenConfigurationAuthentifiantProvider(
                 ).let {
                     ItemSubViewWithActionWrapper(
                         it,
-                        ActivateRemoveAuthenticatorAction(it, listener)
+                        ActivateRemoveAuthenticatorAction(it, listener, authenticatorLogger)
                     )
                 }
             }
+
             otp?.secret.isNotSemanticallyNull() -> {
                 val title = if (otp?.secret.isSemanticallyNull()) {
                     context.getString(R.string.authenticator_item_edit_activate_title)
@@ -592,6 +636,7 @@ class ItemScreenConfigurationAuthentifiantProvider(
                     ItemSubViewWithActionWrapper(subView, action)
                 }
             }
+
             else -> null
         }
     }
@@ -622,7 +667,8 @@ class ItemScreenConfigurationAuthentifiantProvider(
         val passwordUpdate = ::copyForUpdatedPassword
         val subview = ItemEditPasswordWithStrengthSubView(
             context.getString(R.string.authentifiant_hint_password),
-            item.syncObject.password?.toString().orEmpty(), passwordUpdate,
+            item.syncObject.password?.toString().orEmpty(),
+            passwordUpdate,
             protectedStateListener = { passwordShown ->
                 if (passwordShown) logPasswordReveal(item)
             }
@@ -634,15 +680,18 @@ class ItemScreenConfigurationAuthentifiantProvider(
             })
         }
         val origin = if (isNew) {
-            PasswordGeneratorDialog.Origin.CREATION_VIEW
+            PasswordGeneratorDialog.CREATION_VIEW
         } else {
-            PasswordGeneratorDialog.Origin.EDIT_VIEW
+            PasswordGeneratorDialog.EDIT_VIEW
         }
-        return ItemSubViewWithActionWrapper(subview, GeneratePasswordAction(domain, origin) {
+        return ItemSubViewWithActionWrapper(
+            subview,
+            GeneratePasswordAction(domain, origin) { id, password ->
             
-            subview.notifyValueChanged(it.syncObject.password?.toString().orEmpty())
-            lastGeneratedPasswordId = it.syncObject.id
-        })
+            subview.notifyValueChanged(password)
+            lastGeneratedPasswordId = id
+        }
+        )
     }
 
     private fun createPasswordFieldReadOnly(
@@ -788,22 +837,6 @@ class ItemScreenConfigurationAuthentifiantProvider(
     ): ItemSubView<*>? =
         subViewFactory.createSubviewDelete(context, listener, canDelete, context.getString(R.string.delete_password))
 
-    private fun createLinkedDomainsExpandableList(
-        context: Context,
-        item: VaultItem<SyncObject.Authentifiant>,
-        subViewFactory: SubViewFactory
-    ): ItemSubView<*>? {
-        return if (!userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES)) {
-            val urlDomainToLog = item.syncObject.urlForUsageLog.toUrlDomainOrNull()?.value ?: ""
-
-            subViewFactory.createSubviewLinkedDomains(context, item) {
-                logger.logExpandLinkedDomains(urlDomainToLog, it)
-            }
-        } else {
-            null
-        }
-    }
-
     private fun logPasswordReveal(item: VaultItem<SyncObject.Authentifiant>) {
         logger.logRevealPassword(item.syncObject.urlForUsageLog)
         vaultItemLogger.logRevealField(Field.PASSWORD, item.uid, ItemType.CREDENTIAL, item.syncObject.urlForUsageLog)
@@ -842,6 +875,7 @@ class ItemScreenConfigurationAuthentifiantProvider(
                     )
                 }
             }
+
             else -> {
                 val changeDate = item.getPreviousPassword(item.syncObject.password?.toString(), mainDataAccessor)?.first
                 if (changeDate?.plus(Duration.ofDays(2))?.isAfter(Instant.now()) == true) {
@@ -913,16 +947,17 @@ private fun ItemScreenConfigurationAuthentifiantProvider.copyForUpdatedNote(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun ItemScreenConfigurationAuthentifiantProvider.copyForUpdatedTeamspace(
+private fun copyForUpdatedTeamspace(
     item: VaultItem<*>,
     value: Teamspace
 ): VaultItem<SyncObject.Authentifiant> {
     item as VaultItem<SyncObject.Authentifiant>
     val authentifiant = item.syncObject
-    return if (value.teamId == authentifiant.spaceId) {
+    val spaceId = authentifiant.spaceId ?: PersonalTeamspace.teamId
+    return if (value.teamId == spaceId) {
         item
     } else {
-        item.copySyncObject { spaceId = value.teamId }
+        item.copySyncObject { this.spaceId = value.teamId }
     }
 }
 
@@ -1061,6 +1096,7 @@ private fun ItemScreenConfigurationAuthentifiantProvider.copyForUpdatedEmail(
             editedFields += Field.EMAIL
             item.copySyncObject { email = value }
         }
+
         else -> {
             editedFields += Field.EMAIL
             item.copySyncObject { email = null }

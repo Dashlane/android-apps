@@ -47,8 +47,6 @@ import com.dashlane.session.Username
 import com.dashlane.util.MD5Hash
 import java.time.Instant
 
-
-
 abstract class UserPreferencesManager(
     private val context: Context,
     val sessionManager: SessionManager? = null
@@ -166,16 +164,24 @@ abstract class UserPreferencesManager(
 
     var cryptoMigrationAttemptDate: Instant?
         get() =
-            if (exist(CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP)) Instant.ofEpochMilli(
+            if (exist(CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP)) {
+                Instant.ofEpochMilli(
                 getLong(
                     CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP
                 )
-            ) else null
+            )
+            } else {
+                null
+            }
         set(value) {
-            if (value == null) remove(CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP) else putLong(
+            if (value == null) {
+                remove(CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP)
+            } else {
+                putLong(
                 CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP,
                 value.toEpochMilli()
             )
+            }
         }
 
     var biometricSealPaddingMigrationAttempt by booleanPreference(

@@ -8,7 +8,7 @@ import com.dashlane.hermes.generated.events.user.FirstLaunch
 import com.dashlane.hermes.generated.events.user.PasswordManagerLaunch
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.util.getPackageInfoCompat
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import dagger.Reusable
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @Reusable
 class LaunchLogger @Inject constructor(
     @ApplicationContext private val context: Context,
-    @GlobalCoroutineScope private val coroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
     @IoCoroutineDispatcher private val dispatcher: CoroutineDispatcher,
     private val logRepository: LogRepository,
     private val preferencesManager: GlobalPreferencesManager,

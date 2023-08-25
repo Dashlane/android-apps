@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.parser.impl;
 
 import com.github.devnied.emvnfccard.enums.CommandEnum;
@@ -9,16 +7,10 @@ import com.github.devnied.emvnfccard.parser.IProvider;
 import com.github.devnied.emvnfccard.utils.CommandApdu;
 import com.github.devnied.emvnfccard.utils.ResponseUtils;
 
-
-
 public class ProviderWrapper implements IProvider{
 	
-	
-
 	private IProvider provider;
 	
-	
-
 	public ProviderWrapper(IProvider pProvider) {
 		provider = pProvider;
 	}

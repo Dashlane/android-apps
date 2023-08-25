@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.iso7816emv;
 
 import com.github.devnied.emvnfccard.enums.TagValueTypeEnum;
@@ -7,8 +5,6 @@ import com.github.devnied.emvnfccard.iso7816emv.impl.TagImpl;
 
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
-
-
 
 public final class EmvTags {
 
@@ -352,8 +348,6 @@ public final class EmvTags {
 
 	
 
-	
-
 	public static ITag getNotNull(final byte[] tagBytes) {
 		ITag tag = find(tagBytes);
 		if (tag == null) {
@@ -365,8 +359,6 @@ public final class EmvTags {
 	public static ITag createUnknownTag(final byte[] tagBytes) {
 		return new TagImpl(tagBytes, TagValueTypeEnum.BINARY, "[UNKNOWN TAG]", "");
 	}
-
-	
 
 	public static ITag find(final byte[] tagBytes) {
 		return tags.get(ByteArrayWrapper.wrapperAround(tagBytes));
@@ -396,8 +388,6 @@ public final class EmvTags {
 			}
 		}
 	}
-
-	
 
 	private EmvTags() {
 	}

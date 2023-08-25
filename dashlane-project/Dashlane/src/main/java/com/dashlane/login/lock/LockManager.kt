@@ -11,7 +11,6 @@ import com.dashlane.lock.LockSelfChecker
 import com.dashlane.lock.LockWatcher
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.lock.LockTimeManager.Companion.DEFAULT_AUTO_LOCK_GRACE_PERIOD
-import com.dashlane.performancelogger.TimeToUnlockLogger
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
@@ -38,8 +37,7 @@ class LockManager @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockValidator: LockValidator,
     private val lockSelfChecker: LockSelfCheckerImpl,
-    private val appEvents: AppEvents,
-    private val performanceLogger: TimeToUnlockLogger
+    private val appEvents: AppEvents
 ) :
     AutofillAnalyzerDef.ILockManager,
     LockHelper,
@@ -71,7 +69,8 @@ class LockManager @Inject constructor(
 
     fun setItemUnlockableByPinOrFingerprint(enable: Boolean) {
         userPreferencesManager.putBoolean(
-            ConstantsPrefs.UNLOCK_ITEMS_WITH_PIN_OR_FP, enable
+            ConstantsPrefs.UNLOCK_ITEMS_WITH_PIN_OR_FP,
+            enable
         )
     }
 
@@ -88,23 +87,14 @@ class LockManager @Inject constructor(
     }
 
     fun unlock(pass: LockPass): Boolean {
-        val logType = when (pass) {
-            is LockPass.BiometricPass -> TimeToUnlockLogger.TYPE_BIOMETRIC
-            is LockPass.PinPass -> TimeToUnlockLogger.TYPE_PIN
-            is LockPass.PasswordPass -> TimeToUnlockLogger.TYPE_MP
-        }
-        performanceLogger.logStart(logType)
-
         return if (lockValidator.check(pass)) {
             unlockAndMarkTimestamp()
             if (pass is LockPass.PasswordPass) {
                 
                 userPreferencesManager.credentialsSaveDate = Instant.now()
             }
-            performanceLogger.logStop()
             true
         } else {
-            performanceLogger.clear()
             false
         }
     }
@@ -160,8 +150,6 @@ class LockManager @Inject constructor(
         }
     }
 
-    
-
     fun needUnlock(item: SummaryObject): Boolean {
         return isMasterPasswordRequiredForItem(item) || item is SummaryObject.SecureNote && item.secured ?: false
     }
@@ -172,8 +160,6 @@ class LockManager @Inject constructor(
         return itemSecuredByLock && accessAllowanceExpired
     }
 
-    
-
     fun resetAttemptsToUnlockCount() {
         setAttemptsToUnlockCount(0)
     }
@@ -182,14 +168,10 @@ class LockManager @Inject constructor(
         userPreferencesManager.pinCodeTryCount = count
     }
 
-    
-
     fun onAppInBackground() {
         setLastActionTimestampToNow()
         onUserLeft()
     }
-
-    
 
     private fun onUserLeft() {
         if (isLockOnExit() && !isInAutoLockGracePeriod()) {
@@ -205,18 +187,12 @@ class LockManager @Inject constructor(
         )
     }
 
-    
-
     fun addFailUnlockAttempt() {
         setAttemptsToUnlockCount(getFailUnlockAttemptCount() + 1)
     }
 
-    
-
     fun getFailUnlockAttemptCount(): Int =
         max(0, userPreferencesManager.pinCodeTryCount)
-
-    
 
     fun hasFailedUnlockTooManyTimes(): Boolean =
         getFailUnlockAttemptCount() >= Constants.WORKMODE.MAXIMUM_UNLOCK_TRIES

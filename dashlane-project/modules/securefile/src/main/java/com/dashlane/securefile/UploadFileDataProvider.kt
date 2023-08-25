@@ -9,14 +9,17 @@ import com.dashlane.network.webservices.UploadFileService
 import com.dashlane.securefile.services.CommitService
 import com.dashlane.securefile.services.GetUploadLinkService
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.provider.BaseDataProvider
 import java.io.InputStream
-import kotlinx.coroutines.DelicateCoroutinesApi
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
@@ -28,11 +31,10 @@ import okio.BufferedSink
 import okio.Source
 import okio.buffer
 import okio.source
-import javax.inject.Inject
-
-
 
 class UploadFileDataProvider @Inject constructor(
+    @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @MainCoroutineDispatcher private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val uploadLinkService: GetUploadLinkService,
     private val uploadFileService: UploadFileService,
     private val commitService: CommitService,
@@ -143,6 +145,7 @@ class UploadFileDataProvider @Inject constructor(
                         onLinkAndUploadFailure(secureFile, secureFileInfo)
                     }
                 }
+
                 403 -> {
                     handleSpaceFullError(secureFile.encryptedFile, getLink, secureFile, secureFileInfo)
                     return
@@ -175,6 +178,7 @@ class UploadFileDataProvider @Inject constructor(
                 getLink.code,
                 getLink.message
             )
+
             else -> onLinkAndUploadFailure(secureFile, secureFileInfo)
         }
     }
@@ -204,7 +208,7 @@ class UploadFileDataProvider @Inject constructor(
         fields.entrySet().forEach {
             formParts[it.key] = it.value.asString.toRequestBody(null)
         }
-        val requestFile = ProgressRequestBody(presenter, secureFile.encryptedFile!!)
+        val requestFile = ProgressRequestBody(presenter, secureFile.encryptedFile!!, applicationCoroutineScope, mainCoroutineDispatcher)
         val filePart = MultipartBody.Part.createFormData("file", null, requestFile)
 
         
@@ -216,11 +220,11 @@ class UploadFileDataProvider @Inject constructor(
         return upload.isSuccessful
     }
 
-    
-
     class ProgressRequestBody(
         val presenter: UploadFileContract.Presenter,
-        val encryptedFile: EncryptedFile
+        val encryptedFile: EncryptedFile,
+        val applicationCoroutineScope: CoroutineScope,
+        val mainCoroutineDispatcher: CoroutineDispatcher
     ) : RequestBody() {
 
         val file
@@ -232,9 +236,11 @@ class UploadFileDataProvider @Inject constructor(
 
         override fun writeTo(sink: BufferedSink) {
             UploadProgressSource(
-                presenter,
-                file.source(),
-                file.length()
+                presenter = presenter,
+                source = file.source(),
+                contentLength = file.length(),
+                applicationCoroutineScope = applicationCoroutineScope,
+                mainCoroutineDispatcher = mainCoroutineDispatcher
             ).use { source ->
                 sink.writeAll(source)
             }
@@ -244,22 +250,21 @@ class UploadFileDataProvider @Inject constructor(
             file.length()
     }
 
-    
-
     class UploadProgressSource(
         val presenter: UploadFileContract.Presenter,
         val source: Source,
-        val contentLength: Long
+        val contentLength: Long,
+        val applicationCoroutineScope: CoroutineScope,
+        val mainCoroutineDispatcher: CoroutineDispatcher
     ) : Source by source {
         var totalBytesUploaded = 0L
 
-        @OptIn(DelicateCoroutinesApi::class)
         override fun read(sink: Buffer, byteCount: Long): Long {
             val readBytes = source.read(sink, byteCount)
             if (readBytes != -1L) {
                 totalBytesUploaded += readBytes
             }
-            GlobalScope.launch(Dispatchers.Main) {
+            applicationCoroutineScope.launch(mainCoroutineDispatcher) {
                 
                 presenter.notifyFileUploadProgress(totalBytesUploaded, contentLength)
             }

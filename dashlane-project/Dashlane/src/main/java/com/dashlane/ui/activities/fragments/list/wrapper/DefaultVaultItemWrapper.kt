@@ -19,8 +19,6 @@ import com.dashlane.vault.util.hasAttachments
 import com.dashlane.vault.util.valueOfFromDataIdentifier
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 open class DefaultVaultItemWrapper<D : SummaryObject> constructor(
     override val itemObject: D,
     override val itemListContext: ItemListContext

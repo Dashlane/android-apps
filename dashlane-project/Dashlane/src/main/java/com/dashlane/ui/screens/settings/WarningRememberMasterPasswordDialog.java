@@ -4,15 +4,12 @@ import android.content.Context;
 
 import com.dashlane.R;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.logger.ExceptionLog;
 import com.dashlane.login.lock.LockTypeManager;
 import com.dashlane.security.SecurityHelper;
 import com.dashlane.session.Session;
 import com.dashlane.useractivity.log.usage.UsageLogConstant;
 
 import androidx.appcompat.app.AlertDialog;
-
-
 
 public class WarningRememberMasterPasswordDialog {
 
@@ -70,7 +67,6 @@ public class WarningRememberMasterPasswordDialog {
                    try {
                        SingletonProvider.getComponent().getSessionCredentialsSaver().saveCredentials(session);
                    } catch (Exception e) {
-                       ExceptionLog.v(e);
                    }
                    listener.onMasterPasswordRememberedIfPossible();
                });

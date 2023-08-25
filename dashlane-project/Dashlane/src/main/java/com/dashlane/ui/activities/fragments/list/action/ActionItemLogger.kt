@@ -15,8 +15,6 @@ import com.dashlane.vault.model.navigationUrl
 import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
 
-
-
 class ActionItemLogger @Inject constructor(
     val sessionManager: SessionManager,
     val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>

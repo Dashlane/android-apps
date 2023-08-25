@@ -13,8 +13,6 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
-
-
 class BreachLoader @Inject constructor(
     private val jsonConverter: JsonSerialization,
     private val mainDataAccessor: MainDataAccessor
@@ -45,7 +43,6 @@ class BreachLoader @Inject constructor(
         authentifiants: List<SyncObject.Authentifiant>,
         limit: Int? = null
     ): List<BreachWrapper> {
-
         val securityBreaches = getSecurityBreachWithPublicBreach(distinct(breaches.map { it.toAnalyzedBreach() }))
         val similarPassword = SimilarPassword()
 

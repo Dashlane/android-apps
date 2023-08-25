@@ -2,7 +2,6 @@ package com.dashlane.sync.treat
 
 import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.server.api.endpoints.sync.SyncDownloadService
-import com.dashlane.server.api.endpoints.sync.SyncDownloadTransaction
 import com.dashlane.server.api.endpoints.sync.SyncUploadService
 import com.dashlane.server.api.endpoints.sync.SyncUploadTransaction
 import com.dashlane.server.api.time.toInstant
@@ -15,8 +14,6 @@ import com.dashlane.sync.repositories.strategies.SyncServices
 import com.dashlane.sync.repositories.toSharedIds
 import com.dashlane.sync.util.SyncLogs
 import com.dashlane.sync.vault.SyncVault
-import com.dashlane.util.logV
-import com.dashlane.util.logW
 import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import javax.inject.Inject
@@ -52,7 +49,7 @@ class TreatProblemManagerImpl @Inject constructor(
                 downloadRequest,
                 cryptographyEngineFactory,
                 syncVault,
-                uuidsToDownload
+                uuidsToDownload = uuidsToDownload
             )
         } else {
             emptyList()
@@ -64,8 +61,7 @@ class TreatProblemManagerImpl @Inject constructor(
                 serverCredentials,
                 cryptographyEngineFactory,
                 syncVault,
-                uuidsToDownload,
-                itemsToUpload,
+                itemsToUpload = itemsToUpload,
                 timestamp
             )
         }
@@ -103,33 +99,50 @@ class TreatProblemManagerImpl @Inject constructor(
         syncLogs.onTreatProblemSummaryBegin(localSummary.size, serverSummary.size)
 
         val upToDateObjects = localSummary.intersect(serverSummary)
-        upToDateObjects.forEach {
-            syncLogs.onTreatProblemSummaryUpToDate(
-                it.syncObjectType,
-                it.objectId,
-                it.lastUpdateTime
-            )
-        }
+        syncLogs.onTreatProblemSummaryUpToDate(upToDateObjects.toList())
+
         val serverObjectById = (serverSummary - upToDateObjects).associateBy(SyncSummaryItem::objectId)
         val localSummaryById = (localSummary - upToDateObjects).associateBy(SyncSummaryItem::objectId)
 
         
+        val uploadMissing = mutableListOf<SyncSummaryItem>()
+        val uploadOutOfDate = mutableListOf<SyncSummaryItem>()
         val itemsToUpload = localSummaryById.values.filter { localObject ->
-            shouldUpload(localObject, serverObjectById[localObject.objectId])
+            shouldUpload(
+                uploadMissing = uploadMissing,
+                uploadOutOfDate = uploadOutOfDate,
+                localObject,
+                serverObjectById[localObject.objectId]
+            )
+        }
+        syncLogs.apply {
+            onTreatProblemSummaryUploadMissing(uploadMissing)
+            onTreatProblemSummaryUploadOutOfDate(uploadOutOfDate)
         }
 
         
+        val downloadMissing = mutableListOf<SyncSummaryItem>()
+        val downloadOutOfDate = mutableListOf<SyncSummaryItem>()
         val uuidsToDownload = serverObjectById.values
             .asSequence()
-            .filter { shouldDownload(it, localSummaryById[it.objectId]) }
+            .filter {
+                shouldDownload(
+                downloadMissing = downloadMissing,
+                downloadOutOfDate = downloadOutOfDate,
+                it,
+                localSummaryById[it.objectId]
+            )
+            }
             .map(SyncSummaryItem::objectId)
             .toSet()
+        syncLogs.apply {
+            onTreatProblemSummaryDownloadMissing(downloadMissing)
+            onTreatProblemSummaryDownloadOutOfDate(downloadOutOfDate)
+        }
 
         syncLogs.onTreatProblemSummaryDone()
         return Pair(itemsToUpload, uuidsToDownload)
     }
-
-    
 
     private suspend fun cleanupDuplicateIdsBug(
         syncVault: SyncVault,
@@ -144,7 +157,7 @@ class TreatProblemManagerImpl @Inject constructor(
             val item = map.put(key, it)
             if (item != null) {
                 val isAnyDataChangeHistory = item.syncObjectType == SyncObjectType.DATA_CHANGE_HISTORY ||
-                        it.syncObjectType == SyncObjectType.DATA_CHANGE_HISTORY
+                    it.syncObjectType == SyncObjectType.DATA_CHANGE_HISTORY
                 if (isAnyDataChangeHistory) {
                     ids += key
                 }
@@ -171,7 +184,7 @@ class TreatProblemManagerImpl @Inject constructor(
         syncVault: SyncVault,
         uuidsToDownload: Set<String>
     ): List<Throwable> {
-        syncLogs.onTreatProblemUpload(uuidsToDownload.size, 0)
+        syncLogs.onTreatProblemDownload(uuidsToDownload.size)
 
         val downloadData = syncServices.download(serverCredentials, downloadRequest)
 
@@ -182,11 +195,10 @@ class TreatProblemManagerImpl @Inject constructor(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
         syncVault: SyncVault,
-        uuidsToDownload: Set<String>,
         itemsToUpload: List<SyncSummaryItem>,
         timestamp: Instant
     ) {
-        syncLogs.onTreatProblemUpload(uuidsToDownload.size, itemsToUpload.size)
+        syncLogs.onTreatProblemUpload(itemsToUpload.size)
 
         val outgoingTransactions = createUploadTransactions(cryptographyEngineFactory, syncVault, itemsToUpload)
         val uploadRequest = SyncUploadService.Request(
@@ -218,7 +230,6 @@ class TreatProblemManagerImpl @Inject constructor(
         syncVault: SyncVault,
         itemsToUpload: List<SyncSummaryItem>
     ) {
-        logV { "Upload $uploaded" }
 
         val latestTimestamp = uploaded.timestamp.toInstant()
         syncVault.lastSyncTime = latestTimestamp
@@ -239,76 +250,72 @@ class TreatProblemManagerImpl @Inject constructor(
         val usefulTransactions =
             transactionList.filter { uuidsToDownload.contains(it.identifier) } 
         if (usefulTransactions.size < uuidsToDownload.size) {
-            logW {
-                "Server didn't return requested transactions: " +
-                        (uuidsToDownload - usefulTransactions.map(SyncDownloadTransaction::identifier)).toString()
-            }
+            syncLogs.onTreatProblemDownloadMissed()
         }
 
-        if (transactionList.isEmpty()) return emptyList()
+        if (transactionList.isEmpty()) {
+            syncLogs.onTreatProblemDownloadEmpty()
+            return emptyList()
+        }
         val (incomingTransactions, ignoredErrors) = transactionCipher.decipherIncomingTransactions(
             transactionList,
             cryptographyEngineFactory,
             sharing.toSharedIds()
         )
+        runCatching {
+            
+            syncVault.inTransaction {
+                for (incomingTransaction in incomingTransactions) {
+                    when (incomingTransaction) {
+                        is IncomingTransaction.Update -> insertOrUpdateForSync(
+                            incomingTransaction.identifier,
+                            incomingTransaction.syncObject,
+                            incomingTransaction.date.toEpochMilli()
+                        )
 
-        
-        syncVault.inTransaction {
-            for (incomingTransaction in incomingTransactions) {
-                when (incomingTransaction) {
-                    is IncomingTransaction.Update -> insertOrUpdateForSync(
-                        incomingTransaction.identifier,
-                        incomingTransaction.syncObject,
-                        incomingTransaction.date.toEpochMilli()
-                    )
-                    is IncomingTransaction.Delete -> deleteForSync(
-                        incomingTransaction.syncObjectType.kClass,
-                        incomingTransaction.identifier
-                    )
+                        is IncomingTransaction.Delete -> deleteForSync(
+                            incomingTransaction.syncObjectType.kClass,
+                            incomingTransaction.identifier
+                        )
+                    }
                 }
             }
+        }.onFailure {
+            syncLogs.onTreatProblemApplyDownloadedTransactionsLocally(it)
         }
 
         return ignoredErrors
     }
 
-    private fun shouldUpload(localObject: SyncSummaryItem, serverObject: SyncSummaryItem?): Boolean {
+    private fun shouldUpload(
+        uploadMissing: MutableList<SyncSummaryItem>,
+        uploadOutOfDate: MutableList<SyncSummaryItem>,
+        localObject: SyncSummaryItem,
+        serverObject: SyncSummaryItem?
+    ): Boolean {
         if (serverObject == null) {
-            syncLogs.onTreatProblemSummaryUploadMissing(
-                localObject.syncObjectType,
-                localObject.objectId,
-                localObject.lastUpdateTime
-            )
+            uploadMissing.add(localObject)
             return true
         }
         if (serverObject.lastUpdateTime < localObject.lastUpdateTime) {
-            syncLogs.onTreatProblemSummaryUploadOutOfDate(
-                localObject.syncObjectType,
-                localObject.objectId,
-                localObject.lastUpdateTime,
-                serverObject.lastUpdateTime
-            )
+            uploadOutOfDate.add(localObject)
             return true
         }
         return false
     }
 
-    private fun shouldDownload(serverObject: SyncSummaryItem, localObject: SyncSummaryItem?): Boolean {
+    private fun shouldDownload(
+        downloadMissing: MutableList<SyncSummaryItem>,
+        downloadOutOfDate: MutableList<SyncSummaryItem>,
+        serverObject: SyncSummaryItem,
+        localObject: SyncSummaryItem?
+    ): Boolean {
         if (localObject == null) {
-            syncLogs.onTreatProblemSummaryDownloadMissing(
-                serverObject.syncObjectType,
-                serverObject.objectId,
-                serverObject.lastUpdateTime
-            )
+            downloadMissing.add(serverObject)
             return true
         }
         if (localObject.lastUpdateTime < serverObject.lastUpdateTime) {
-            syncLogs.onTreatProblemSummaryDownloadOutOfDate(
-                serverObject.syncObjectType,
-                serverObject.objectId,
-                serverObject.lastUpdateTime,
-                localObject.lastUpdateTime
-            )
+            downloadOutOfDate.add(serverObject)
             return true
         }
         return false

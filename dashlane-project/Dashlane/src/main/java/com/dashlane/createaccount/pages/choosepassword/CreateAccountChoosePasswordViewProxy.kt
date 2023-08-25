@@ -14,7 +14,6 @@ import com.dashlane.createaccount.pages.choosepassword.validator.PasswordValidat
 import com.dashlane.createaccount.pages.choosepassword.validator.zxcvbn.PasswordValidationResultByZxcvbnViewProxy
 import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.passwordstrength.PasswordStrength
-import com.dashlane.util.addOnFieldVisibilityToggleListener
 import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.getRelativePosition
 import com.google.android.material.textfield.TextInputLayout
@@ -73,8 +72,6 @@ class CreateAccountChoosePasswordViewProxy(rootView: View, private val scope: Co
         passwordLayout.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             tipsView?.let { constrainTipsView() }
         }
-
-        passwordLayout.addOnFieldVisibilityToggleListener { presenter.onPasswordVisibilityToggle(it) }
 
         
         DeveloperUtilities.preFillPassword(passwordView)
@@ -138,8 +135,6 @@ class CreateAccountChoosePasswordViewProxy(rootView: View, private val scope: Co
             it.animate().alpha(0.0f).withEndAction { rootView.removeView(it) }
         }
     }
-
-    
 
     private fun constrainTipsView() {
         val rootView = this.rootView

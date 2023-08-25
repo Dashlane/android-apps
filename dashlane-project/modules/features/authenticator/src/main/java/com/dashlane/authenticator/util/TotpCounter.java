@@ -1,17 +1,9 @@
 
-
-
 package com.dashlane.authenticator.util;
-
-
 
 public class TotpCounter {
 
-    
-
     private final long mTimeStep;
-
-    
 
     public TotpCounter(long timeStep) {
         if (timeStep < 1) {
@@ -19,8 +11,6 @@ public class TotpCounter {
         }
         mTimeStep = timeStep;
     }
-
-    
 
     public long getValueAtTime(long time) {
         assertValidTime(time);

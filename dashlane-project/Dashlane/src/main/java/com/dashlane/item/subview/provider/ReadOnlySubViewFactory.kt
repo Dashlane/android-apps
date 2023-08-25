@@ -14,8 +14,6 @@ import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 
-
-
 class ReadOnlySubViewFactory(userFeaturesChecker: UserFeaturesChecker) : BaseSubViewFactory(userFeaturesChecker) {
 
     override fun createSubViewString(

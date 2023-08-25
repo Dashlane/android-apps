@@ -1,7 +1,5 @@
 package com.dashlane.autofill.api.rememberaccount.services
 
-
-
 interface FormSourceAuthentifiantLinker {
     suspend fun isLinked(formSourceIdentifier: String, authentifiantId: String): Boolean
     suspend fun link(formSourceIdentifier: String, authentifiantId: String): Boolean

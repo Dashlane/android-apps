@@ -3,8 +3,9 @@ package com.dashlane.ui.screens.settings.list.security
 import android.content.Context
 import com.dashlane.R
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.accountrecovery.AccountRecovery
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
 import com.dashlane.activatetotp.ActivateTotpLogger
+import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.login.lock.LockManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
@@ -32,8 +33,6 @@ import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import retrofit2.Retrofit
 
-
-
 @Suppress("UseDataClass")
 class RootSettingsSecurityList(
     private val context: Context,
@@ -54,29 +53,32 @@ class RootSettingsSecurityList(
     rootHeader: SettingHeader,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     masterPasswordFeatureAccessChecker: ChangeMasterPasswordFeatureAccessChecker,
-    accountRecovery: AccountRecovery,
+    biometricRecovery: BiometricRecovery,
     toaster: Toaster,
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     use2faSettingStateHolder: Use2faSettingStateHolder,
     activateTotpLogger: ActivateTotpLogger,
-    userFeaturesChecker: UserFeaturesChecker
+    userFeaturesChecker: UserFeaturesChecker,
+    accountRecoveryKeyRepository: AccountRecoveryKeyRepository
 ) {
 
     private val settingsSecurityApplicationLockList = SettingsSecurityApplicationLockList(
-        context,
-        lockManager,
-        securityHelper,
-        biometricAuthModule,
-        teamspaceAccessorProvider,
-        sessionManager,
-        userAccountStorage,
-        dialogHelper,
-        sensibleSettingsClickHelper,
-        accountRecovery,
-        bySessionUsageLogRepository,
-        use2faSettingStateHolder,
-        activateTotpLogger,
-        sessionCredentialsSaver
+        context = context,
+        lockManager = lockManager,
+        securityHelper = securityHelper,
+        biometricAuthModule = biometricAuthModule,
+        teamspaceAccessorProvider = teamspaceAccessorProvider,
+        sessionManager = sessionManager,
+        userAccountStorage = userAccountStorage,
+        dialogHelper = dialogHelper,
+        sensibleSettingsClickHelper = sensibleSettingsClickHelper,
+        biometricRecovery = biometricRecovery,
+        bySessionUsageLogRepository = bySessionUsageLogRepository,
+        use2faSettingStateHolder = use2faSettingStateHolder,
+        activateTotpLogger = activateTotpLogger,
+        sessionCredentialsSaver = sessionCredentialsSaver,
+        accountRecoveryKeyRepository = accountRecoveryKeyRepository,
+        navigator = navigator
     )
 
     private val settingsSecurityMiscList = SettingsSecurityMiscList(
@@ -105,8 +107,8 @@ class RootSettingsSecurityList(
             override val header = rootHeader
             override val title = context.getString(R.string.settings_category_security)
             override val description = context.getString(R.string.settings_category_security_description)
-            override fun isEnable(context: Context) = true
-            override fun isVisible(context: Context) = true
+            override fun isEnable() = true
+            override fun isVisible() = true
             override fun onClick(context: Context) = Unit
         },
         listOf(

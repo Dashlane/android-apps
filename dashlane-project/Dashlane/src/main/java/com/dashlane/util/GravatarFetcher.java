@@ -2,8 +2,6 @@ package com.dashlane.util;
 
 import androidx.annotation.Nullable;
 
-
-
 public class GravatarFetcher {
 
     private static final String GRAVATAR_HEADER = "https://www.gravatar.com/avatar/";

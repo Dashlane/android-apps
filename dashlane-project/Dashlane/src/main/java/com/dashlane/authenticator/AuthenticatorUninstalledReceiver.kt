@@ -10,7 +10,7 @@ import com.dashlane.server.api.endpoints.authenticator.exceptions.AuthenticatorD
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +29,7 @@ class AuthenticatorUninstalledReceiver : BroadcastReceiver() {
     lateinit var unSetAuthenticatorService: UnSetAuthenticatorService
 
     @Inject
-    @GlobalCoroutineScope
+    @ApplicationCoroutineScope
     lateinit var coroutineScope: CoroutineScope
 
     companion object {

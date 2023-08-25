@@ -37,8 +37,6 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.hasAttachments
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class ItemScreenConfigurationSecureNoteProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     dataCounter: DataCounter,
@@ -49,8 +47,10 @@ class ItemScreenConfigurationSecureNoteProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, dataCounter,
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    dataCounter,
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     override val logger = BaseLogger(
@@ -250,13 +250,15 @@ class ItemScreenConfigurationSecureNoteProvider(
         val content = item.syncObject.content ?: ""
         return if (canEdit) {
             ItemEditValueRawSubView(
-                context.getString(R.string.secure_note_hint_content), content,
+                context.getString(R.string.secure_note_hint_content),
+                content,
                 context.resources.getDimension(R.dimen.dashlane_font_size_medium),
                 VaultItem<*>::copyForUpdatedContent
             )
         } else {
             ItemReadValueRawSubView(
-                context.getString(R.string.secure_note_hint_content), content,
+                context.getString(R.string.secure_note_hint_content),
+                content,
                 context.resources.getDimension(R.dimen.dashlane_font_size_medium)
             )
         }
@@ -270,20 +272,22 @@ class ItemScreenConfigurationSecureNoteProvider(
         val title = item.syncObject.title ?: ""
         return if (canEdit) {
             ItemEditValueRawSubView(
-                context.getString(R.string.secure_note_hint_title), title,
+                context.getString(R.string.secure_note_hint_title),
+                title,
                 context.resources.getDimension(R.dimen.dashlane_font_size_huge),
                 VaultItem<*>::copyForUpdatedTitle
             )
         } else {
             ItemReadValueRawSubView(
-                context.getString(R.string.secure_note_hint_title), title,
+                context.getString(R.string.secure_note_hint_title),
+                title,
                 context.resources.getDimension(R.dimen.dashlane_font_size_huge)
             )
         }
     }
 
     private fun canEdit(item: VaultItem<SyncObject.SecureNote>) =
-        !secureNoteDisabled && sharingPolicy.canEditItem(item.toSummary(), item.hasBeenSaved)
+        !secureNoteDisabled && sharingPolicy.canEditItem(item.toSummary(), !item.hasBeenSaved)
 
     private fun canShare(item: VaultItem<SyncObject.SecureNote>) = !secureNoteDisabled && item
         .hasBeenSaved &&

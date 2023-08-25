@@ -17,8 +17,6 @@ import javax.inject.Singleton
 import okio.buffer
 import okio.sink
 
-
-
 @Singleton
 class DeviceInfoRepositoryImpl @Inject constructor(
     @ApplicationContext
@@ -48,19 +46,21 @@ class DeviceInfoRepositoryImpl @Inject constructor(
     override val deviceCountryRefreshTimestamp: Long
         get() = globalPreferencesManager.getDeviceCountryRefreshTimestamp()
 
-    override val deviceId
-            by lazy { readDeviceId(DEVICEID_FILENAME) }
+    override val deviceId: String?
+        by lazy { readDeviceId(DEVICEID_FILENAME) }
 
-    override val anonymousDeviceId
-            by lazy { readDeviceId(ANONYMOUS_DEVICEID_FILENAME) }
+    override val anonymousDeviceId: String?
+        by lazy { readDeviceId(ANONYMOUS_DEVICEID_FILENAME) }
 
     override val deviceName: String
         get() = createDeviceName()
 
-    private fun readDeviceId(filename: String): String {
+    @Synchronized
+    private fun readDeviceId(filename: String): String? {
         val filesDir = context.filesDir
-        if (!filesDir.exists()) {
-            filesDir.mkdirs()
+        if (!filesDir.exists() && !filesDir.mkdirs()) {
+            
+            return null
         }
         val file = File(filesDir, filename)
         if (file.exists()) {
@@ -80,7 +80,7 @@ class DeviceInfoRepositoryImpl @Inject constructor(
     }
 
     private fun installDeviceId(file: File): String {
-        var deviceId = MD5Hash.hash(generateUniqueIdentifier())
+        val deviceId = MD5Hash.hash(generateUniqueIdentifier())
         file.sink().buffer().use { it.writeUtf8(deviceId) }
         return deviceId
     }
@@ -89,21 +89,13 @@ class DeviceInfoRepositoryImpl @Inject constructor(
         val manufacturer = Build.MANUFACTURER
         val model = Build.MODEL
         return if (model.startsWith(manufacturer)) {
-            capitalize(model)
+            model.capitalize()
         } else {
-            capitalize(manufacturer) + " " + model
+            manufacturer.capitalize() + " " + model
         }
     }
 
-    private fun capitalize(s: String?): String {
-        if (s == null || s.isEmpty()) {
-            return ""
-        }
-        val first = s[0]
-        return if (Character.isUpperCase(first)) {
-            s
-        } else {
-            Character.toUpperCase(first) + s.substring(1)
-        }
+    private fun String.capitalize(): String {
+        return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
     }
 }

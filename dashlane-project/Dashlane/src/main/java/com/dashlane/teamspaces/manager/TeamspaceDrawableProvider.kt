@@ -8,8 +8,6 @@ import com.dashlane.R
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.ui.drawable.TeamspaceIconDrawable
 
-
-
 object TeamspaceDrawableProvider {
     @JvmStatic
     fun getIcon(context: Context, teamspace: Teamspace): Drawable? {

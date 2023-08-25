@@ -162,11 +162,13 @@ internal class EnableTotpAddPhoneFragment : Fragment() {
         Country.values()
     ) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup) =
-            (super.getView(
+            (
+                super.getView(
                 position,
                 convertView,
                 parent
-            ) as TextView).apply { setTextColor(Color.TRANSPARENT) }
+            ) as TextView
+            ).apply { setTextColor(Color.TRANSPARENT) }
 
         override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup) =
             (super.getView(position, convertView, parent) as TextView).apply {

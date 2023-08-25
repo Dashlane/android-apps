@@ -19,21 +19,25 @@ internal suspend fun updateOtp(
     logger: AuthenticatorLogger,
     updateModificationDate: Boolean = false
 ) {
-    (vaultDataQuery.query(
+    (
+        vaultDataQuery.query(
         vaultFilter {
             ignoreUserLock()
             specificDataType(SyncObjectType.AUTHENTIFIANT)
             specificUid(itemId)
         }
-    ) as? VaultItem<SyncObject.Authentifiant>)?.let { item ->
-        val updatedItem = item.copy(syncObject = item.syncObject.copy {
+    ) as? VaultItem<SyncObject.Authentifiant>
+    )?.let { item ->
+        val updatedItem = item.copy(
+            syncObject = item.syncObject.copy {
             otpUrl = otp?.url?.toSyncObfuscatedValue()
             otpSecret = if (otp?.isStandardOtp() == true) {
                 otp.secret?.toSyncObfuscatedValue()
             } else {
                 null
             }
-        }).copyWithAttrs {
+        }
+        ).copyWithAttrs {
             syncState = SyncState.MODIFIED
             if (updateModificationDate) userModificationDate = Instant.now()
         }

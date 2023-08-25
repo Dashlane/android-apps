@@ -4,8 +4,6 @@ import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.preference.ConstantsPrefs;
 import com.dashlane.preference.GlobalPreferencesManager;
 
-
-
 public class ReferrerManager {
 
     private static ReferrerManager sInstance;

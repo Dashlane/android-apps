@@ -18,8 +18,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-
 class SharingItemsDataProvider @Inject constructor(
     private val dataStorageProvider: DataStorageProvider,
     private val sessionManager: SessionManager,

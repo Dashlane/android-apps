@@ -2,8 +2,6 @@ package com.dashlane.item.subview
 
 import androidx.annotation.DimenRes
 
-
-
 interface ItemSubView<T> {
 
     var value: T

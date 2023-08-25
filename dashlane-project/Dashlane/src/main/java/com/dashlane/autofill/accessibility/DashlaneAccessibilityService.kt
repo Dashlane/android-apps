@@ -11,16 +11,15 @@ import com.dashlane.autofill.accessibility.alwayson.AlwaysOnEventHandler
 import com.dashlane.autofill.accessibility.alwayson.AlwaysOnUiManager
 import com.dashlane.autofill.accessibility.filler.LoginFormFiller
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
+import com.dashlane.autofill.core.AutofillUsageLog
 import com.dashlane.autofill.formdetector.BrowserDetectionHelper
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
+import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.resolveActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
-
-
 
 @AndroidEntryPoint
 class DashlaneAccessibilityService : AccessibilityService() {
@@ -39,26 +38,25 @@ class DashlaneAccessibilityService : AccessibilityService() {
     @Inject
     lateinit var linkedServicesHelper: LinkedServicesHelper
 
+    @Inject
+    lateinit var databaseAccess: AutoFillDataBaseAccess
+
+    @Inject
+    lateinit var autofillUsageLog: AutofillUsageLog
+
+    @Inject
+    lateinit var packageNameSignatureHelper: PackageNameSignatureHelper
+
+    @Inject
+    lateinit var notificationHelper: NotificationHelper
+
     override fun onCreate() {
         super.onCreate()
         homePackage = getMainHomeActivityPackageName(this)
         powerManager = getSystemService(POWER_SERVICE) as PowerManager
 
-        val analysisResultFiller = LoginFormFiller(SingletonProvider.getComponent().autofillUsageLog)
+        val analysisResultFiller = LoginFormFiller(autofillUsageLog)
         val autoFillBlackList = AutoFillBlackListImpl(arrayOf(homePackage))
-
-        val mainDataAccessor = SingletonProvider.getMainDataAccessor()
-        val sessionProvider = SingletonProvider.getSessionManager()
-        val databaseAccess = AutoFillDataBaseAccess(
-            this,
-            sessionProvider,
-            mainDataAccessor,
-            Dispatchers.IO,
-            teamspaceForceCategorizationManager,
-            linkedServicesHelper
-        )
-        val notificationHelper = SingletonProvider.getNotificationHelper()
-        val autofillUsageLog = SingletonProvider.getComponent().autofillUsageLog
 
         val alwaysOnUiManager =
             AlwaysOnUiManager(this, analysisResultFiller, notificationHelper, autofillUsageLog, databaseAccess)

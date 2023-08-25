@@ -35,8 +35,6 @@ internal class M2wConnectViewModel @Inject constructor(
         showConfirmPopupFlow.tryEmit(false)
     }
 
-    
-
     fun finishM2w(success: Boolean) {
         if (!success) {
             logger.logExit()

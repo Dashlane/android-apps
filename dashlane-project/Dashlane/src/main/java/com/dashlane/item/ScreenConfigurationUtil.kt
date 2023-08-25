@@ -3,10 +3,12 @@
 package com.dashlane.item
 
 import android.os.Bundle
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.Totp
 import com.dashlane.authenticator.UriParser
+import com.dashlane.item.subview.ItemCollectionListSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.ItemEditMenuAction
 import com.dashlane.item.subview.action.note.SecureNoteCategoryMenuAction
@@ -24,37 +26,34 @@ import com.dashlane.item.subview.edit.ItemEditValueTextSubView
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.util.isValueNull
-import com.dashlane.util.logE
 import com.dashlane.util.tryOrNull
 import com.dashlane.xml.SyncObjectEnum
 import com.dashlane.xml.domain.SyncObject
 import java.time.LocalDate
-
-
 
 fun ScreenConfiguration.restoreState(bundle: Bundle, teamspaceAccessor: TeamspaceAccessor) {
     bundle.getStringArray("itemMenuActions")?.let {
         restoreMenuActions(it)
     }
     bundle.getStringArray("itemSubviews")?.let {
-        restoreSubViews(it, teamspaceAccessor)
+        restoreSubViews(it, teamspaceAccessor, bundle.getStringArray("itemCollections"))
     }
 }
 
-
-
 fun ScreenConfiguration.toBundle(): Bundle {
-
     val bundle = Bundle()
     itemHeader?.menuActions?.filterIsInstance<ItemEditMenuAction>()?.let { list ->
-        bundle.putStringArray("itemMenuActions", list.map {
+        bundle.putStringArray(
+            "itemMenuActions",
+            list.map {
             when (it) {
                 is SecureNoteCategoryMenuAction -> it.selectedCategory ?: "null"
                 is SecureNoteColorMenuAction -> it.selectedType.name
                 is CreditCardColorMenuAction -> it.selectedColor.value
                 else -> "null"
             }
-        }.toTypedArray())
+        }.toTypedArray()
+        )
     }
 
     val subviewValues = itemSubViews.map {
@@ -72,14 +71,19 @@ fun ScreenConfiguration.toBundle(): Bundle {
     }.toTypedArray()
 
     bundle.putStringArray("itemSubviews", subviewValues)
-
+    itemSubViews.filterIsInstance<ItemCollectionListSubView>().firstOrNull()?.let { collectionSubview ->
+        bundle.putStringArray("itemCollections", collectionSubview.value.value.toTypedArray())
+    }
     return bundle
 }
 
-private fun ScreenConfiguration.restoreSubViews(valuesToRestore: Array<String>, teamspaceAccessor: TeamspaceAccessor) {
+private fun ScreenConfiguration.restoreSubViews(
+    valuesToRestore: Array<String>,
+    teamspaceAccessor: TeamspaceAccessor,
+    collectionsToRestore: Array<String>?
+) {
     if (valuesToRestore.size != itemSubViews.size) {
         
-        logE { "Saved ItemSubViews values can't be restored, subViews count has changed" }
         return
     }
     for (i in 0..valuesToRestore.lastIndex) {
@@ -103,6 +107,7 @@ private fun ScreenConfiguration.restoreSubViews(valuesToRestore: Array<String>, 
                     subview.notifyValueChanged(it)
                 }
             }
+
             is ItemEditValueRawSubView -> subview.notifyValueChanged(value)
             is ItemAuthenticatorEditSubView -> {
                 val otp = tryOrNull { UriParser.parse(value.toUri()) }
@@ -112,7 +117,15 @@ private fun ScreenConfiguration.restoreSubViews(valuesToRestore: Array<String>, 
                     subview.notifyValueChanged(Totp(secret = value))
                 }
             }
-            else -> logE { "Can't restore item type: ${subview::class.java}" }
+            is ItemCollectionListSubView -> {
+                collectionsToRestore?.let { names ->
+                    subview.notifyValueChanged(
+                        mutableStateOf(names.toList())
+                    )
+                }
+            }
+            else -> {
+            }
         }
     }
 }
@@ -125,15 +138,17 @@ private fun ScreenConfiguration.restoreMenuActions(menuActionsValuesToRestore: A
             if (value.isValueNull()) continue
             when (val menuAction = menuActions[i]) {
                 is SecureNoteCategoryMenuAction -> menuAction.selectedCategory = value
-                is SecureNoteColorMenuAction -> menuAction.selectedType =
+                is SecureNoteColorMenuAction ->
+                    menuAction.selectedType =
                     SyncObjectEnum.getEnumForValue(value) ?: SyncObject.SecureNoteType.NO_TYPE
-                is CreditCardColorMenuAction -> menuAction.selectedColor =
+
+                is CreditCardColorMenuAction ->
+                    menuAction.selectedColor =
                     SyncObjectEnum.getEnumForValue(value) ?: SyncObject.PaymentCreditCard.Color.NO_TYPE
-                else -> logE { "Can't restore ItemEditMenuAction type: ${menuAction::class.java}" }
+
             }
         }
     } else {
         
-        logE { "Saved ItemEditMenuAction values can't be restored, ItemEditMenuAction count has changed" }
     }
 }

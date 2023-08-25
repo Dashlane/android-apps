@@ -2,6 +2,7 @@ package com.dashlane.ui.activities.fragments.vault.list
 
 import android.content.Context
 import com.dashlane.core.DataSync
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.activities.fragments.vault.provider.CategoryHeaderProvider
@@ -15,23 +16,20 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.ItemListContext.Container
 import com.dashlane.ui.adapter.ItemListContext.Section
 import com.dashlane.ui.adapters.text.factory.DataIdentifierTypeTextFactory
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.vault.model.getTableName
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.mostRecentAccessTime
 import com.dashlane.vault.util.comparatorAlphabeticAllVisibleItems
 import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
-import com.dashlane.vault.util.desktopId
-import com.dashlane.vault.util.get
 import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class VaultListDataProvider @Inject constructor(
-    val userFeaturesChecker: UserFeaturesChecker
+    val userFeaturesChecker: UserFeaturesChecker,
+    private val dataSync: DataSync
 ) : VaultList.DataProvider {
 
     private val recentComparator = compareByDescending<SummaryObject> { it.mostRecentAccessTime }
@@ -48,7 +46,7 @@ class VaultListDataProvider @Inject constructor(
     }
 
     override fun syncData() {
-        DataSync.sync(UsageLogCode134.Origin.MANUAL)
+        dataSync.sync(Trigger.MANUAL)
     }
 
     override suspend fun generateViewTypeProviderList(
@@ -130,8 +128,6 @@ class VaultListDataProvider @Inject constructor(
         }
     }
 
-    
-
     private fun List<SummaryObject>.getSuggestedList(limit: Int): List<SummaryObject> {
         val mostUsed = filter { it.locallyUsedCount > 0 }.sortedByDescending { it.locallyUsedCount }
         val mostRecent = sortedWith(recentComparator)
@@ -144,12 +140,8 @@ class VaultListDataProvider @Inject constructor(
         return suggestedList.filterByLocalUsage(limit)
     }
 
-    
-
     private fun List<SummaryObject>.getRecentList(limit: Int): List<SummaryObject> =
         sortedWith(recentComparator).take(limit).filterByLocalUsage(limit)
-
-    
 
     private fun List<SummaryObject>.filterByLocalUsage(limit: Int): List<SummaryObject> {
         
@@ -169,8 +161,6 @@ class VaultListDataProvider @Inject constructor(
         
         return (localUpdatedDateRecent + this).toSet().take(limit)
     }
-
-    
 
     private fun summaryToViewTypeProvider(
         items: List<SummaryObject>,
@@ -213,13 +203,13 @@ class VaultListDataProvider @Inject constructor(
             BoundedListSortMode.MOST_RECENT -> RecentHeaderProvider
         }
 
-    private fun loadCategoriesFor(list: List<SummaryObject>, context: Context): Map<String, String?> {
+    private fun loadCategoriesFor(list: List<SummaryObject>, context: Context): Map<SyncObjectType, String?> {
         
-        return list.mapNotNull { SyncObjectType[it] }
+        return list.map { it.syncObjectType }
             .distinct()
-            .associate {
-                it.getTableName()!! to context.getString(
-                    DataIdentifierTypeTextFactory.getStringResId(it.desktopId)
+            .associateWith {
+                context.getString(
+                    DataIdentifierTypeTextFactory.getStringResId(it)
                 )
             }
     }

@@ -16,14 +16,10 @@ import com.dashlane.util.CurrentPageViewLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
-
-
 abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPageViewLogger.Owner {
 
     override val coroutineContext: CoroutineContext
         get() = lifecycleScope.coroutineContext
-
-    
 
     open var requireUserUnlock: Boolean = true
 
@@ -83,8 +79,6 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         uiPartComponent.permissionsManager.onRequestPermissionResult(this, permissions, requestCode, grantResults)
     }
-
-    
 
     open fun onApplicationUnlocked() {
         

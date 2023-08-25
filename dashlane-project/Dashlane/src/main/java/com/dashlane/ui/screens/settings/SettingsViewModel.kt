@@ -21,8 +21,6 @@ import javax.inject.Inject
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-
-
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     appEvents: AppEvents,

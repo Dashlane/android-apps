@@ -18,6 +18,7 @@ import com.dashlane.url.toUrl
 import com.dashlane.util.Toaster
 import com.dashlane.util.applyAppTheme
 import com.dashlane.util.fallbackCustomTab
+import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -76,8 +77,7 @@ internal class OnboardingGuidedPasswordChangePresenter(
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (OnboardingGuidedPasswordChangeActivity.itemUpdated && requestCode == CUSTOM_TAB_REQUEST_CODE) {
-            
-            navigator.goToItem(itemUid, 2)
+            navigator.goToItem(itemUid, SyncObjectType.AUTHENTIFIANT.xmlObjectName)
             activity?.apply {
                 toaster.show(getString(R.string.guided_password_change_success, domain), Toast.LENGTH_LONG)
                 finish()

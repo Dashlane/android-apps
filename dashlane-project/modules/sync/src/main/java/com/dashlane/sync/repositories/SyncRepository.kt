@@ -5,11 +5,7 @@ import com.dashlane.sync.vault.SyncVault
 import java.time.Duration
 import java.time.Instant
 
-
-
 interface SyncRepository {
-
-    
 
     @Throws(SyncException::class)
     suspend fun sync(
@@ -57,8 +53,6 @@ interface SyncRepository {
                 val updateCount: Int,
                 val deleteCount: Int
             )
-
-            
 
             data class Incoming(
                 val updateCount: Int,

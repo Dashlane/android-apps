@@ -5,8 +5,6 @@ import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import kotlinx.coroutines.CoroutineScope
 
-
-
 internal abstract class SaveRequest(
     val summary: AutoFillHintSummary,
     val usageLog: AutofillAnalyzerDef.IAutofillUsageLog,

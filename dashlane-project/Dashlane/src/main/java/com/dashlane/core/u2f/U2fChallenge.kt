@@ -4,8 +4,6 @@ import com.dashlane.cryptography.decodeBase64ToByteArray
 import com.dashlane.util.tryOrNull
 import org.json.JSONObject
 
-
-
 data class U2fChallenge(
     val version: String,
     val origin: String,

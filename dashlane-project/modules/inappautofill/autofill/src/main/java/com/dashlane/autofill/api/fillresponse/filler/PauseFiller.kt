@@ -4,8 +4,6 @@ import com.dashlane.autofill.api.fillresponse.DatasetWrapperBuilder
 import com.dashlane.autofill.api.util.AutofillValueFactory
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 
-
-
 internal class PauseFiller(private val autofillValueFactory: AutofillValueFactory) {
 
     fun fill(

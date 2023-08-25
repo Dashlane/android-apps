@@ -16,8 +16,6 @@ import androidx.core.view.WindowInsetsCompat;
 import static com.dashlane.ui.menu.header.MenuHeaderDef.IPresenter;
 import static com.dashlane.ui.menu.header.MenuHeaderDef.IView;
 
-
-
 public class MenuHeaderViewHolder extends PresenterViewHolder<MenuDef.Item, IPresenter>
         implements IView {
 
@@ -93,8 +91,6 @@ public class MenuHeaderViewHolder extends PresenterViewHolder<MenuDef.Item, IPre
     protected Class<? extends IPresenter> getPresenterClass() {
         return MenuHeaderPresenter.class;
     }
-
-    
 
     private static class AutoAdjustPaddingTopListener implements OnApplyWindowInsetsListener {
 

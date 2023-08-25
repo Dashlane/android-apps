@@ -5,8 +5,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-
-
 interface VerifyReceiptService {
     companion object {
         private const val PLAY_STORE_ORIGIN_HTTP = "playstore"
@@ -23,8 +21,6 @@ interface VerifyReceiptService {
         @Field("currency") currency: String? = null,
         @Field("amount") amount: String? = null
     ): VerifyReceiptResponse
-
-    
 
     data class VerifyReceiptResponse(
         @SerializedName("success")

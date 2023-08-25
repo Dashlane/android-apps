@@ -20,8 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class DarkWebSetupMailViewModel @Inject constructor(
     private val emailSuggestionProvider: EmailSuggestionProvider,
-    private val darkWebMonitoringManager: DarkWebMonitoringManager,
-    private val logger: DarkWebSetupMailLogger
+    private val darkWebMonitoringManager: DarkWebMonitoringManager
 ) : ViewModel(), DarkWebSetupMailViewModelContract {
     private val command = Channel<Command>()
 
@@ -32,7 +31,6 @@ internal class DarkWebSetupMailViewModel @Inject constructor(
         .flatMapLatest { command ->
             when (command) {
                 Command.Cancel -> {
-                    logger.logCancel()
                     flowOf(DarkWebSetupMailState.Canceled)
                 }
                 Command.Clear -> flowOf(DarkWebSetupMailState.Idle)
@@ -43,28 +41,22 @@ internal class DarkWebSetupMailViewModel @Inject constructor(
                     emit(
                         when {
                             mail.isBlank() -> {
-                                logger.logEmptyMail()
                                 DarkWebSetupMailState.Failed.EmptyMail(mail)
                             }
                             !mail.isValidEmail() -> {
-                                logger.logInvalidMailLocal()
                                 DarkWebSetupMailState.Failed.InvalidMail(mail)
                             }
                             else -> when (darkWebMonitoringManager.optIn(mail)) {
                                 "OK" -> {
-                                    logger.logNext()
                                     DarkWebSetupMailState.Succeed(mail)
                                 }
                                 "EMAIL_IS_INVALID" -> {
-                                    logger.logInvalidMailServer()
                                     DarkWebSetupMailState.Failed.InvalidMail(mail)
                                 }
                                 "USER_HAS_TOO_MANY_SUBSCRIPTIONS" -> {
-                                    logger.logLimitReached()
                                     DarkWebSetupMailState.Failed.LimitReached(mail)
                                 }
                                 "USER_HAS_ALREADY_AN_ACTIVE_SUBSCRIPTION" -> {
-                                    logger.logAlreadyValidatedMail()
                                     DarkWebSetupMailState.Succeed(mail)
                                 }
                                 else -> DarkWebSetupMailState.Failed.Unknown(mail)
@@ -75,10 +67,6 @@ internal class DarkWebSetupMailViewModel @Inject constructor(
             }
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DarkWebSetupMailState.Idle)
-
-    init {
-        logger.logShow()
-    }
 
     override fun onOptInClicked(mail: String) {
         command.trySend(Command.OptIn(mail.lowercase()))

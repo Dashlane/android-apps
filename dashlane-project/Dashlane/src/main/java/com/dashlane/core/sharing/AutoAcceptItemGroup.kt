@@ -11,8 +11,6 @@ import com.dashlane.sharing.model.getUserGroupMember
 import com.dashlane.sharing.model.isPending
 import javax.inject.Inject
 
-
-
 class AutoAcceptItemGroup @Inject constructor(
     private val acceptItemGroupService: AcceptItemGroupService,
     private val acceptItemGroupRequestBuilder: AcceptItemGroupRequestForUserBuilder
@@ -25,7 +23,6 @@ class AutoAcceptItemGroup @Inject constructor(
         val items = myUserGroups
             .filter { itemGroup.getUserGroupMember(it.groupId)?.isPending == true }
             .map { userGroup ->
-
                 val authorization = session.authorization
                 val request = acceptItemGroupRequestBuilder.buildForUserGroup(
                     itemGroup,

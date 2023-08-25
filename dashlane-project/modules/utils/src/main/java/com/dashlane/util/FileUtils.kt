@@ -22,8 +22,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 object FileUtils {
-    
-
     suspend fun writeFileToPublicFolder(
         context: Context,
         name: String,
@@ -75,8 +73,6 @@ object FileUtils {
         }
         downloadManager.getUriForDownloadedFile(id)
     }
-
-    
 
     private fun createUniqueFile(directory: File, name: String) =
         generateSequence(0L, Long::inc)
@@ -156,8 +152,6 @@ object FileUtils {
         resolver.update(uri, values, null, null)
     }
 }
-
-
 
 fun File.deleteFolder(): Boolean =
     listFiles()?.all { if (it.isDirectory) it.deleteFolder() else it.delete() } != false && delete()

@@ -14,11 +14,9 @@ import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProv
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
-import com.dashlane.vault.util.SyncObjectTypeUtils
 import com.dashlane.xml.domain.SyncObject
+import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
 import javax.inject.Inject
-
-
 
 class SharingPolicyDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
@@ -37,7 +35,7 @@ class SharingPolicyDataProvider @Inject constructor(
     }
 
     fun canShareItem(summaryObject: SummaryObject): Boolean {
-        if (summaryObject.syncObjectType !in SyncObjectTypeUtils.SHAREABLE) return false
+        if (summaryObject.syncObjectType !in SHAREABLE) return false
         val permission = getSharingPolicy(summaryObject)
         return permission == null || permission == Permission.ADMIN
     }
@@ -48,8 +46,6 @@ class SharingPolicyDataProvider @Inject constructor(
 
     private val Permission?.canEdit: Boolean
         get() = this == null || this == Permission.ADMIN
-
-    
 
     fun getSharingCount(uid: String): Pair<Int, Int> {
         val itemGroup: ItemGroup = sharingDao.loadItemGroupForItem(uid) ?: return 0 to 0

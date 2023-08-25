@@ -19,6 +19,7 @@ class LockValidator @Inject constructor(
             is LockPass.PinPass -> checkPin(pass)
             is LockPass.BiometricPass -> checkBiometric(pass)
             is LockPass.PasswordPass -> checkPassword(pass)
+            is LockPass.WeakBiometricPass -> true
         }
     }
 
@@ -28,11 +29,10 @@ class LockValidator @Inject constructor(
         sessionManager.session?.appKey?.userKeyBytes == pass.appKey.userKeyBytes
 
     private fun checkBiometric(pass: LockPass.BiometricPass): Boolean {
-        pass.cryptoObject?.cipher?.let {
-            cryptoObjectHelper.challengeAuthentication(it)
-        }
-        
-        return true
+        return pass.cryptoObject.cipher
+            ?.let { cryptoObjectHelper.challengeAuthentication(it) }
+            ?.let { it is CryptoObjectHelper.CryptoChallengeResult.Success }
+            ?: false
     }
 
     private fun isInputValid(userInput: String): Boolean {

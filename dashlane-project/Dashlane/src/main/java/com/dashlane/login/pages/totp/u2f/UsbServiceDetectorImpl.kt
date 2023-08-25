@@ -6,8 +6,6 @@ import android.hardware.usb.UsbManager
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 
-
-
 class UsbServiceDetectorImpl @Inject constructor(private val manager: UsbManager?) : UsbServiceDetector {
 
     private val blacklistedDevices = mutableListOf<UsbDevice>()

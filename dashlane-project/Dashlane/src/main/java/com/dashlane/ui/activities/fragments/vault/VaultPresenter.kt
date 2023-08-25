@@ -18,7 +18,6 @@ import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.vault.model.urlForUsageLog
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.desktopId
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,7 +38,8 @@ class VaultPresenter @Inject constructor(
     private val navigator: Navigator,
     private val vaultViewModel: VaultViewModel,
     private val inAppLoginManager: InAppLoginManager,
-) : BasePresenter<Vault.DataProvider, Vault.View>(), Vault.Presenter,
+) : BasePresenter<Vault.DataProvider, Vault.View>(),
+Vault.Presenter,
     EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider> {
 
     override val filter = MutableStateFlow(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
@@ -121,7 +121,7 @@ class VaultPresenter @Inject constructor(
         if (item is VaultItemViewTypeProvider) {
             val website: String? = (item.summaryObject as? SummaryObject.Authentifiant)?.urlForUsageLog
             logger.logClickOpenItem(item.itemListContext, website, filter.value)
-            navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.desktopId)
+            navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.xmlObjectName)
         }
     }
 

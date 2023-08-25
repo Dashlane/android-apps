@@ -157,6 +157,7 @@ data class LinkedAppsItem(
                         item.openAppListener.invoke(item)
                     }
                     contentDescription = context.getString(R.string.and_accessibility_open_linked_app)
+                    isEnabled = !item.isPageEditMode
                 }
             }
         }

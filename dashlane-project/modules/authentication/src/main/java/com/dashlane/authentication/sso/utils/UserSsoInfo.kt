@@ -12,8 +12,6 @@ data class UserSsoInfo internal constructor(
     val exists: Boolean
 ) : Parcelable
 
-
-
 internal fun Uri.toUserSsoInfo(): UserSsoInfo? {
     val key = getQueryParameter("key") ?: return null
     val login = getQueryParameter("login") ?: return null

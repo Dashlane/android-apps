@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.parser.impl;
 
 import com.github.devnied.emvnfccard.enums.CommandEnum;
@@ -26,18 +24,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Pattern;
 
-
-
 public class EmvParser extends AbstractParser {
 
-    
-
     private static final Pattern PATTERN = Pattern.compile(".*");
-
-    
 
     public EmvParser(EmvTemplate pTemplate) {
         super(pTemplate);
@@ -49,13 +42,11 @@ public class EmvParser extends AbstractParser {
     }
 
     @Override
-    public boolean parse(Application pApplication) throws CommunicationException {
-        return extractPublicData(pApplication);
+    public boolean parse(Application pApplication, Calendar pNow) throws CommunicationException {
+        return extractPublicData(pApplication, pNow);
     }
 
-    
-
-    protected boolean extractPublicData(final Application pApplication) throws CommunicationException {
+    protected boolean extractPublicData(final Application pApplication, final Calendar pNow) throws CommunicationException {
         boolean ret = false;
         
         byte[] data = selectAID(pApplication.getAid());
@@ -65,7 +56,7 @@ public class EmvParser extends AbstractParser {
             
             pApplication.setReadingStep(ApplicationStepEnum.SELECTED);
             
-            ret = parse(data, pApplication);
+            ret = parse(data, pApplication, pNow);
             if (ret) {
                 
                 String aid = BytesUtils.bytesToStringNoSpace(TlvUtil.getValue(data, EmvTags.DEDICATED_FILE_NAME));
@@ -84,8 +75,6 @@ public class EmvParser extends AbstractParser {
         return ret;
     }
 
-    
-
     protected EmvCardScheme findCardScheme(final String pAid, final String pCardNumber) {
         EmvCardScheme type = EmvCardScheme.getCardTypeByAid(pAid);
         
@@ -96,9 +85,7 @@ public class EmvParser extends AbstractParser {
     }
 
 
-    
-
-    protected boolean parse(final byte[] pSelectResponse, final Application pApplication)
+    protected boolean parse(final byte[] pSelectResponse, final Application pApplication, Calendar pNow)
             throws CommunicationException {
         boolean ret = false;
         
@@ -132,14 +119,12 @@ public class EmvParser extends AbstractParser {
         
         if (extractCommonsCardData(gpo)) {
             
-            pApplication.setListTransactions(extractLogEntry(logEntry));
+            pApplication.setListTransactions(extractLogEntry(logEntry, pNow));
             ret = true;
         }
 
         return ret;
     }
-
-    
 
     protected boolean extractCommonsCardData(final byte[] pGpo) throws CommunicationException {
         boolean ret = false;
@@ -181,8 +166,6 @@ public class EmvParser extends AbstractParser {
     }
 
 
-    
-
     protected List<Afl> extractAfl(final byte[] pAfl) {
         List<Afl> list = new ArrayList<Afl>();
         ByteArrayInputStream bai = new ByteArrayInputStream(pAfl);
@@ -196,8 +179,6 @@ public class EmvParser extends AbstractParser {
         }
         return list;
     }
-
-    
 
     protected byte[] getGetProcessingOptions(final byte[] pPdol) throws CommunicationException {
         
@@ -218,8 +199,6 @@ public class EmvParser extends AbstractParser {
         return template.get().getProvider()
                        .transceive(new CommandApdu(CommandEnum.GPO, out.toByteArray(), 0).toBytes());
     }
-
-    
 
     protected boolean extractTrackData(final EmvCard pEmvCard, final byte[] pData) {
         template.get().getCard().setTrack1(TrackUtils.extractTrack1Data(TlvUtil.getValue(pData, EmvTags.TRACK1_DATA)));

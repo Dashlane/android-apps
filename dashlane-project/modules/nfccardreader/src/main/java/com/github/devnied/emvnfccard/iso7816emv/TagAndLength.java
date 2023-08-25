@@ -1,13 +1,7 @@
-
-
 package com.github.devnied.emvnfccard.iso7816emv;
 
 
-
-
 import java.util.Arrays;
-
-
 
 public class TagAndLength {
 	private ITag tag;

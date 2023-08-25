@@ -19,8 +19,6 @@ import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
 import javax.inject.Inject
 
-
-
 interface UserCryptographyRepository {
 
     fun getCryptographyMarker(session: Session): CryptographyMarker?
@@ -124,8 +122,6 @@ private class CryptographySettingsImpl(
         settingsManager.updateSettings(settings.copy(builder))
     }
 }
-
-
 
 val SyncObject.Settings.cryptographyMarker: CryptographyMarker?
     get() = cryptoUserPayload?.toCryptographyMarkerOrNull()

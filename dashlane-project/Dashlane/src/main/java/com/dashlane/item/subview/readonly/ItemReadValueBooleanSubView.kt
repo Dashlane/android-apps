@@ -1,7 +1,5 @@
 package com.dashlane.item.subview.readonly
 
-
-
 class ItemReadValueBooleanSubView(
     val header: String,
     val description: String?,

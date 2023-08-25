@@ -36,7 +36,6 @@
         />
 
     
-
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -75,9 +74,7 @@
                 />
             
 
-
             
-
             <TextView
                 android:id="@+id/error_text_view"
                 android:layout_width="match_parent"
@@ -88,6 +85,8 @@
                 android:textAppearance="?textAppearanceBody2"
                 android:textColor="?colorError"
                 android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="Error"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 

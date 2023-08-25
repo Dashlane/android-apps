@@ -38,7 +38,6 @@
 
     
 
-
     <FrameLayout
         android:id="@+id/frame_login_totp"
         android:layout_width="0dp"
@@ -93,13 +92,11 @@
                 tools:ignore="HardcodedText"
                 />
             
-
         </com.google.android.material.textfield.TextInputLayout>
 
     </FrameLayout>
 
     
-
     <TextView
         android:id="@+id/error_text_view"
         android:layout_width="0dp"

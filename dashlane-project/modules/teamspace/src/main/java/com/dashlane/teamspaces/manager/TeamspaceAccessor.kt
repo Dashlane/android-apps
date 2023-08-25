@@ -1,29 +1,23 @@
 package com.dashlane.teamspaces.manager
 
 import androidx.fragment.app.FragmentActivity
+import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.model.Teamspace
 
 private const val ENFORCEMENT_DISABLED = "disabled"
 
-
-
 interface TeamspaceAccessor {
     var current: Teamspace?
-    val combinedTeamspace: Teamspace
     val all: List<Teamspace>
     val revokedAndDeclinedSpaces: List<Teamspace>
     fun isCurrent(id: String): Boolean
     fun get(id: String): Teamspace?
 
-    
+    fun getOrDefault(id: String?, default: Teamspace = PersonalTeamspace): Teamspace = id?.let { get(it) } ?: default
 
     fun canChangeTeamspace(): Boolean
 
-    
-
     fun isFeatureEnabled(@Teamspace.Feature featureCheck: String): Boolean
-
-    
 
     fun getFeatureValue(@Teamspace.Feature featureCheck: String): String?
 
@@ -37,8 +31,6 @@ interface TeamspaceAccessor {
         fun startFeature()
     }
 }
-
-
 
 val TeamspaceAccessor.isSsoUser: Boolean
     get() = all.any { it.status == Teamspace.Status.ACCEPTED && it.isSsoUser }

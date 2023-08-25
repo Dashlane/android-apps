@@ -4,7 +4,9 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.dashlane.xml.domain.SyncObjectType
 
-enum class Filter(syncObjectTypes: Set<SyncObjectType>) : Set<SyncObjectType> by syncObjectTypes, Parcelable {
+enum class Filter(
+    val syncObjectTypes: Set<SyncObjectType>
+) : Set<SyncObjectType> by syncObjectTypes, Parcelable {
     ALL_VISIBLE_VAULT_ITEM_TYPES(
         SyncObjectType.ADDRESS,
         SyncObjectType.AUTHENTIFIANT,

@@ -2,8 +2,6 @@ package com.dashlane.vault.model
 
 import com.dashlane.xml.domain.SyncObject
 
-
-
 fun createSecureFileInfo(
     dataIdentifier: CommonDataIdentifierAttrs,
     mimeType: String? = null,
@@ -27,7 +25,8 @@ fun createSecureFileInfo(
             this.version = version
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.SecureFileInfo>.copySyncObject(builder: SyncObject.SecureFileInfo.Builder.() -> Unit = {}):

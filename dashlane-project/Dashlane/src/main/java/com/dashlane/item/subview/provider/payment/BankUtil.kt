@@ -4,8 +4,6 @@ import com.dashlane.util.BankDataProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.utils.Country
 
-
-
 fun BankDataProvider.getBankName(bankDescriptor: String, defaultName: String): String {
     return if (bankDescriptor.endsWith("-NO_TYPE")) {
         defaultName
@@ -13,8 +11,6 @@ fun BankDataProvider.getBankName(bankDescriptor: String, defaultName: String): S
         getBankConfiguration(bankDescriptor).displayName
     }
 }
-
-
 
 fun BankDataProvider.getCreditCardBankListCurrentCountry(
     item: VaultItem<*>,
@@ -26,8 +22,6 @@ fun BankDataProvider.getCreditCardBankListCurrentCountry(
         defaultName = defaultName
     )
 }
-
-
 
 fun BankDataProvider.getCreditCardBankList(
     country: Country,

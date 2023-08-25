@@ -5,22 +5,12 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 interface VaultItemClipboard {
-    
-
     fun handleCopy(notificationId: String, content: String, copyField: CopyField): Boolean
-
-    
 
     fun handleCopy(itemId: String, copyField: CopyField, syncObjectType: SyncObjectType): Boolean
 
-    
-
     fun handleCopy(vaultItem: VaultItem<*>, copyField: CopyField): Boolean
-
-    
 
     fun handleCopy(
         item: SummaryObject,
@@ -31,8 +21,6 @@ interface VaultItemClipboard {
         index: Double? = null,
         totalCount: Int? = null
     ): Boolean
-
-    
 
     fun hasContent(item: SummaryObject, copyField: CopyField): Boolean
 }

@@ -9,8 +9,6 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 open class NewShareAction(private val summaryObject: SummaryObject) : Action {
     override val text: Int = R.string.share_from_services_menu_title
 

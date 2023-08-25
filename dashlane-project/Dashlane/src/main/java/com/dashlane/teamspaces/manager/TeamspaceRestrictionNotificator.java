@@ -3,27 +3,13 @@ package com.dashlane.teamspaces.manager;
 import com.dashlane.R;
 import com.dashlane.teamspaces.model.Teamspace;
 import com.dashlane.ui.widgets.Notificator;
-import com.dashlane.useractivity.log.usage.UsageLogRepository;
-import com.dashlane.useractivity.log.inject.UserActivityComponent;
-import com.dashlane.useractivity.log.usage.UsageLogCode33;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.FragmentActivity;
 
-
-
 public class TeamspaceRestrictionNotificator {
 
     public void notifyFeatureRestricted(FragmentActivity activity, @Teamspace.Feature String feature) {
-        UsageLogRepository usageLogRepository =
-                UserActivityComponent.Companion.invoke(activity).getCurrentSessionUsageLogRepository();
-        notifyFeatureRestricted(activity, usageLogRepository, feature);
-    }
-
-    @VisibleForTesting
-    void notifyFeatureRestricted(FragmentActivity activity,
-                                 UsageLogRepository usageLogRepository,
-                                 @Teamspace.Feature String feature) {
         int titleResId;
         int descriptionResId;
         switch (feature) {
@@ -48,24 +34,14 @@ public class TeamspaceRestrictionNotificator {
                 descriptionResId = R.string.teamspace_restrictions_generic_description;
                 break;
         }
-        String usageLogType = getUsageLogType(feature);
-        if (usageLogRepository != null) {
-            usageLogRepository.enqueue(TeamspaceRestrictionLogHelper.getLog(usageLogType, "display"), false);
-        }
-
         String title = activity.getString(titleResId);
         String description = activity.getString(descriptionResId);
-        showDialog(activity, title, description, usageLogRepository,
-                   TeamspaceRestrictionLogHelper.getLog(usageLogType, "ok"));
+        showDialog(activity, title, description);
     }
 
     @VisibleForTesting
-    void showDialog(FragmentActivity activity, String title, String description,
-                    UsageLogRepository usageLogRepository,
-                    UsageLogCode33 positiveButtonUsageLog) {
-        Notificator.customErrorDialogMessage(activity, title, description, false,
-                                             usageLogRepository,
-                                             positiveButtonUsageLog);
+    void showDialog(FragmentActivity activity, String title, String description) {
+        Notificator.customErrorDialogMessage(activity, title, description, false);
     }
 
     @VisibleForTesting

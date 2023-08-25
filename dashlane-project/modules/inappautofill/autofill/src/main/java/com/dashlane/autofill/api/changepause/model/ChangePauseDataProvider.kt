@@ -2,33 +2,29 @@ package com.dashlane.autofill.api.changepause.model
 
 import com.dashlane.autofill.api.changepause.AutofillApiChangePauseLogger
 import com.dashlane.autofill.api.changepause.ChangePauseContract
-import com.dashlane.autofill.api.changepause.dagger.Data
-import com.dashlane.autofill.api.changepause.dagger.ViewModel
 import com.dashlane.autofill.api.changepause.services.ChangePauseStrings
 import com.dashlane.autofill.api.pause.model.PausedFormSource
 import com.dashlane.autofill.api.pause.services.RemovePauseContract
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
+import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
-
-
 
 class ChangePauseDataProvider @Inject constructor(
-    private val autoFillFormSource: AutoFillFormSource,
     private val removePauseContract: RemovePauseContract,
     private val changePauseStrings: ChangePauseStrings,
     private val autofillApiChangePauseLogger: AutofillApiChangePauseLogger,
-    @ViewModel
+    @FragmentLifecycleCoroutineScope
     private val viewModelScope: CoroutineScope,
-    @Data
-    private val coroutineContext: CoroutineContext = Dispatchers.IO
+    @IoCoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher
 ) : ChangePauseContract.DataProvider {
     private val mutex = Mutex()
     private var lastState: ChangePauseModel? = null
@@ -42,15 +38,15 @@ class ChangePauseDataProvider @Inject constructor(
         return lastState
     }
 
-    override fun loadPause() {
-        viewModelScope.launch(coroutineContext) {
+    override fun loadPause(autoFillFormSource: AutoFillFormSource) {
+        viewModelScope.launch(ioDispatcher) {
             mutex.withLock {
                 var loadFormSourcesState = lastState?.copy(processing = true)
-                    ?: buildNoPaused(true)
+                    ?: buildNoPaused(true, autoFillFormSource)
                 try {
                     lastState = loadFormSourcesState
                     loadFormSourcesState = getPausedFormSource(loadFormSourcesState.autoFillFormSource)
-                        .toChangeModel(processing = false)
+                        .toChangeModel(processing = false, autoFillFormSource)
                     lastState = loadFormSourcesState
                     responses?.updatePause(loadFormSourcesState)
                 } catch (e: Exception) {
@@ -62,22 +58,23 @@ class ChangePauseDataProvider @Inject constructor(
         }
     }
 
-    override fun togglePause() {
+    override fun togglePause(autoFillFormSource: AutoFillFormSource) {
         if (!mutex.isLocked) {
-            viewModelScope.launch(coroutineContext) {
+            viewModelScope.launch(ioDispatcher) {
                 mutex.withLock {
                     try {
                         var workingState = lastState?.copy(processing = true)
                             ?: throw IllegalStateException("toggle over invalid state")
 
-                        val currentState = getPausedFormSource(workingState.autoFillFormSource).toChangeModel()
+                        val currentState = getPausedFormSource(workingState.autoFillFormSource)
+                            .toChangeModel(autoFillFormSource = autoFillFormSource)
 
                         val syncState = workingState.pauseUntil == currentState.pauseUntil
 
                         if (syncState) {
                             if (workingState.isPaused) {
                                 removePauseContract.removePause(workingState.autoFillFormSource)
-                                workingState = buildNoPaused(false)
+                                workingState = buildNoPaused(false, autoFillFormSource)
                                 lastState = workingState
                                 autofillApiChangePauseLogger.resumeFormSource(workingState.autoFillFormSource)
                                 responses?.resumedPause(workingState)
@@ -103,8 +100,8 @@ class ChangePauseDataProvider @Inject constructor(
         return removePauseContract.getPausedFormSource(autoFillFormSource)
     }
 
-    private fun PausedFormSource?.toChangeModel(processing: Boolean = false): ChangePauseModel {
-        val pausedFormSource = this ?: return buildNoPaused(processing)
+    private fun PausedFormSource?.toChangeModel(processing: Boolean = false, autoFillFormSource: AutoFillFormSource): ChangePauseModel {
+        val pausedFormSource = this ?: return buildNoPaused(processing, autoFillFormSource)
         val formSource = pausedFormSource.autoFillFormSource
         val formSourceTitle = changePauseStrings.getAutofillFromSourceTitle(formSource)
         val pauseTitle = changePauseStrings.getPauseTitle(formSource)
@@ -113,14 +110,14 @@ class ChangePauseDataProvider @Inject constructor(
         return ChangePauseModel(processing, formSource, pauseUntil, formSourceTitle, pauseTitle, pauseSubtitle)
     }
 
-    private fun buildNoPaused(processing: Boolean = false): ChangePauseModel {
-        val formSourceTitle = changePauseStrings.getAutofillFromSourceTitle(this.autoFillFormSource)
-        val pauseTitle = changePauseStrings.getPauseTitle(this.autoFillFormSource)
-        val pauseSubtitle = changePauseStrings.getNotPausedMessage(this.autoFillFormSource)
+    private fun buildNoPaused(processing: Boolean = false, autoFillFormSource: AutoFillFormSource): ChangePauseModel {
+        val formSourceTitle = changePauseStrings.getAutofillFromSourceTitle(autoFillFormSource)
+        val pauseTitle = changePauseStrings.getPauseTitle(autoFillFormSource)
+        val pauseSubtitle = changePauseStrings.getNotPausedMessage(autoFillFormSource)
 
         return ChangePauseModel(
             processing,
-            this.autoFillFormSource,
+            autoFillFormSource,
             null,
             formSourceTitle,
             pauseTitle,

@@ -4,18 +4,15 @@ import android.os.Parcelable
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemForEmailing
 import com.dashlane.url.root
 import com.dashlane.url.toUrlOrNull
-import com.dashlane.vault.model.DataIdentifierId
 import com.dashlane.vault.model.navigationUrl
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.desktopId
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class SharedVaultItemLite(
     val uid: String,
     val anonymousId: String,
-    @DataIdentifierId.Def
-    val desktopId: Int,
+    val xmlObjectName: String,
     val website: String?,
     val title: String,
     val itemType: ItemForEmailing.Type
@@ -23,7 +20,7 @@ data class SharedVaultItemLite(
     constructor(summaryObject: SummaryObject) : this(
         summaryObject.id,
         summaryObject.anonymousId ?: "",
-        summaryObject.syncObjectType.desktopId,
+        summaryObject.syncObjectType.xmlObjectName,
         summaryObject.let {
             if (it is SummaryObject.Authentifiant) {
                 it.navigationUrl?.toUrlOrNull()?.root
@@ -48,8 +45,6 @@ data class SharedVaultItemLite(
     )
 }
 
-fun SummaryObject.toSharedVaultItemLite(): SharedVaultItemLite {
-    return SharedVaultItemLite(this)
-}
+fun SummaryObject.toSharedVaultItemLite() = SharedVaultItemLite(this)
 
 fun SharedVaultItemLite.toItemForEmailing(): ItemForEmailing = ItemForEmailing(title, itemType)

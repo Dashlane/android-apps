@@ -21,7 +21,6 @@
         />
 
     
-
     <FrameLayout
         android:id="@+id/view_login_email_header_layout"
         android:layout_width="0dp"
@@ -37,7 +36,6 @@
         >
 
         
-
         <EditText
             android:id="@+id/view_login_email_header"
             android:layout_width="wrap_content"
@@ -85,9 +83,7 @@
 
     
 
-
     
-
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier"
         android:layout_width="wrap_content"

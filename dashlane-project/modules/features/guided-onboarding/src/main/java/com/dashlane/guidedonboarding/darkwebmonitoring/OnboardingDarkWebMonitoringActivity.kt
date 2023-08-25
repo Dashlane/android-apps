@@ -14,26 +14,29 @@ import com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitori
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.useractivity.log.inject.UserActivityComponent
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
-class OnboardingDarkWebMonitoringActivity : DashlaneActivity(),
+class OnboardingDarkWebMonitoringActivity :
+    DashlaneActivity(),
     OnboardingDarkWebMonitoringErrorFragment.Listener {
     @Inject
     lateinit var globalPreferencesManager: GlobalPreferencesManager
 
     @Inject
     lateinit var darkWebMonitoringManager: DarkWebMonitoringManager
+
+    @Inject
+    @ApplicationCoroutineScope
+    lateinit var applicationCoroutineScope: CoroutineScope
 
     private val navController: NavController
         get() = findNavController(R.id.nav_host_onboarding_dark_web)
@@ -89,8 +92,7 @@ class OnboardingDarkWebMonitoringActivity : DashlaneActivity(),
         finish()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun checkDarkWebStatus() = GlobalScope.launch(Dispatchers.Main.immediate) {
+    private fun checkDarkWebStatus() = applicationCoroutineScope.launch(Dispatchers.Main.immediate) {
         val startTime = Instant.now()
         checkingDone = false
         darkWebMonitoringManager.invalidateCache()
@@ -109,6 +111,7 @@ class OnboardingDarkWebMonitoringActivity : DashlaneActivity(),
                 updateActivityResult(RESULT_OK, hasAlerts)
                 showSuccess(hasAlerts)
             }
+
             else -> showError()
         }
         checkingDone = true

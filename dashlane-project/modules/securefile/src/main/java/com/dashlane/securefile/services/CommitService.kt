@@ -5,8 +5,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-
-
 interface CommitService {
 
     @POST("/1/securefile/commit")
@@ -30,16 +28,12 @@ interface CommitService {
         @SerializedName("content")
         val content: Content?
     ) {
-        
-
         data class Content(
             @SerializedName("success")
             val success: Boolean,
             @SerializedName("quota")
             val quota: Quota
         ) {
-
-            
 
             data class Quota(
                 @SerializedName("remaining")

@@ -1,7 +1,5 @@
 package com.dashlane.autofill.api.changepassword
 
-
-
 data class AutoFillChangePasswordConfiguration(
     val filterOnDomain: String? = null,
     val filterOnUsername: String? = null,

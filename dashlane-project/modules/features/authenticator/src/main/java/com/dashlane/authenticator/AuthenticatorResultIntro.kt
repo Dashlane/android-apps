@@ -9,8 +9,6 @@ import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.util.getParcelableExtraCompat
 import com.skocken.presentation.presenter.BasePresenter
 
-
-
 class AuthenticatorResultIntro : DashlaneActivity() {
 
     private lateinit var presenter: IntroScreenContract.Presenter
@@ -43,9 +41,12 @@ class AuthenticatorResultIntro : DashlaneActivity() {
 
         override fun onClickPositiveButton() {
             activity?.apply {
-                setResult(RESULT_OK, Intent().apply {
+                setResult(
+                    RESULT_OK,
+                    Intent().apply {
                     putExtra(RESULT_INPUT, intent.getParcelableExtraCompat<Input>(EXTRA_INPUT))
-                })
+                }
+                )
                 finish()
             }
         }

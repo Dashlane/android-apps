@@ -6,8 +6,6 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.debug.DaDaDa
 import javax.inject.Inject
 
-
-
 class ScreenshotPolicyImpl @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val globalPreferencesManager: GlobalPreferencesManager,

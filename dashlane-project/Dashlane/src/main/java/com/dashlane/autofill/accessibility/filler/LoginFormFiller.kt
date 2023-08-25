@@ -16,11 +16,7 @@ import com.dashlane.vault.model.urlDomain
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.hermes.generated.definitions.AutofillOrigin as HermesAutofillOrigin
 
-
-
 class LoginFormFiller(private val autofillUsageLog: AutofillAnalyzerDef.IAutofillUsageLog) {
-
-    
 
     fun getFocusOn(loginForm: AccessibilityLoginForm): Boolean {
         return try {
@@ -33,8 +29,6 @@ class LoginFormFiller(private val autofillUsageLog: AutofillAnalyzerDef.IAutofil
             false
         }
     }
-
-    
 
     fun fill(loginForm: AccessibilityLoginForm, authentifiant: SyncObject.Authentifiant): Boolean {
         try {

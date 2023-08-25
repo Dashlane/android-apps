@@ -3,27 +3,21 @@ package com.dashlane
 import android.content.Context
 import com.braze.push.BrazeFirebaseMessagingService
 import com.dashlane.crashreport.CrashReporter
+import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DarkWebSetupCompleteEvent
-import com.dashlane.logger.Log
 import com.dashlane.logger.utils.LogsSender
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
 import com.dashlane.notification.FcmMessage
-import com.dashlane.notification.getLogName
 import com.dashlane.notification.model.DarkWebAlertNotificationHandler
 import com.dashlane.notification.model.PublicBreachAlertNotificationHandler
 import com.dashlane.notification.model.SyncNotificationHandler
 import com.dashlane.notification.model.TokenNotificationHandler
-import com.dashlane.useractivity.log.install.InstallLogRepository
-import com.dashlane.usersupportreporter.UserSupportFileLogger
-import com.dashlane.util.Constants
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-
-
 
 @AndroidEntryPoint
 class DashlaneFcmService : FirebaseMessagingService() {
@@ -35,15 +29,10 @@ class DashlaneFcmService : FirebaseMessagingService() {
     lateinit var appEvents: AppEvents
 
     @Inject
-    lateinit var installLogRepository: InstallLogRepository
-
-    @Inject
-    lateinit var userSupportFileLogger: UserSupportFileLogger
-
-    @Inject
     lateinit var crashReporter: CrashReporter
 
-    
+    @Inject
+    lateinit var logsSender: LogsSender
 
     override fun onNewToken(token: String) {
         fcmHelper.apply {
@@ -53,8 +42,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        Log.v("CLOUD_MESSAGING", "Received message: ${message.data}")
-        if (Constants.GCM.GCM_OFF) return
+        if (DeveloperUtilities.isEmulator) return
         val data = message.data
 
         
@@ -75,12 +63,10 @@ class DashlaneFcmService : FirebaseMessagingService() {
             code = fcmCode,
             message = data["message"]
         )
-        fcmHelper.logReceive(fcmCode.getLogName())
         processMessage(applicationContext, fcmMessage)
     }
 
     private fun processMessage(context: Context, fcmMessage: FcmMessage) {
-        userSupportFileLogger.add("Push: ${fcmMessage.code}")
         when (fcmMessage.code) {
             FcmCode.SYNC ->
                 SyncNotificationHandler(context, fcmMessage).handlePushNotification()
@@ -91,10 +77,10 @@ class DashlaneFcmService : FirebaseMessagingService() {
             }
 
             FcmCode.TOKEN ->
-                TokenNotificationHandler(context, fcmMessage, installLogRepository).handlePushNotification()
+                TokenNotificationHandler(context, fcmMessage).handlePushNotification()
 
             FcmCode.USAGE_LOG -> {
-                LogsSender.flushLogs()
+                logsSender.flushLogs()
             }
 
             FcmCode.DARK_WEB_ALERT ->

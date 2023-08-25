@@ -8,8 +8,6 @@ import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlin.properties.Delegates
 
-
-
 abstract class LoginBasePresenter<P : LoginBaseContract.DataProvider, V : LoginBaseContract.View>(
     val rootPresenter: LoginPresenter,
     val coroutineScope: CoroutineScope
@@ -17,8 +15,6 @@ abstract class LoginBasePresenter<P : LoginBaseContract.DataProvider, V : LoginB
     protected var savedInstanceState: Bundle? = null
     protected var isCreated = false
         private set
-
-    
 
     override fun getViewOrNull(): V? {
         return super.getViewOrNull()
@@ -82,10 +78,7 @@ abstract class LoginBasePresenter<P : LoginBaseContract.DataProvider, V : LoginB
         this.savedInstanceState = outState
     }
 
-    final override fun onShow() = provider.onShow()
-
     override fun onBackPressed(): Boolean {
-        provider.onBack()
         return false
     }
 

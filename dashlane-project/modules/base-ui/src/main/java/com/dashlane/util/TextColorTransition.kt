@@ -7,8 +7,6 @@ import android.widget.TextView
 import androidx.transition.Transition
 import androidx.transition.TransitionValues
 
-
-
 class TextColorTransition : Transition() {
 
     override fun captureStartValues(transitionValues: TransitionValues) {

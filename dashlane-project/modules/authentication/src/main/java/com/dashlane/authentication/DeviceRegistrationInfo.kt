@@ -1,7 +1,5 @@
 package com.dashlane.authentication
 
-
-
 interface DeviceRegistrationInfo {
     val appVersion: String
     val deviceName: String

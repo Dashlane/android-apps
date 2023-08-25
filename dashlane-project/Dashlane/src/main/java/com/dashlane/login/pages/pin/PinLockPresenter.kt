@@ -29,7 +29,8 @@ class PinLockPresenter(
     rootPresenter,
     coroutineScope,
     lockManager
-), PinLockContract.Presenter {
+),
+PinLockContract.Presenter {
 
     override val lockTypeName: String = UsageLogConstant.LockType.pin
 
@@ -57,7 +58,6 @@ class PinLockPresenter(
 
     
     private val onUseMasterPasswordClicked = View.OnClickListener {
-        SingletonProvider.getUserSupportFileLogger().add("PinLock action use Master Password")
         rootPresenter.onUseMasterPasswordClicked()
     }
 
@@ -92,7 +92,8 @@ class PinLockPresenter(
         val animationDuration = view.animateSuccess(disableAnimationEffect)
         endAnimationExpectedTimestamp = System.currentTimeMillis() + animationDuration
         
-        WarningRememberMasterPasswordDialog().showIfNecessary(context,
+        WarningRememberMasterPasswordDialog().showIfNecessary(
+            context,
             LockTypeManager.LOCK_TYPE_PIN_CODE,
             object : WarningRememberMasterPasswordDialog.ConfirmRememberMasterPasswordListener {
                 override fun onMasterPasswordRememberedIfPossible() {
@@ -102,7 +103,8 @@ class PinLockPresenter(
                 override fun onRememberMasterPasswordDeclined() {
                     activity?.finish()
                 }
-            })
+            }
+        )
     }
 
     private fun onNewPinConfirmedAndMasterPasswordStored() {
@@ -150,7 +152,8 @@ class PinLockPresenter(
         view.setTextError(
             resources!!.getQuantityString(
                 R.plurals.failed_attempt,
-                failedAttempts, failedAttempts
+                failedAttempts,
+                failedAttempts
             )
         )
         clearInput()
@@ -230,7 +233,8 @@ class PinLockPresenter(
             view.setTextError(
                 resources!!.getQuantityString(
                     R.plurals.failed_attempt,
-                    failedAttempts, failedAttempts
+                    failedAttempts,
+                    failedAttempts
                 )
             )
         }

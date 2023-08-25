@@ -27,16 +27,6 @@ class VpnIntro(private val premiumStatus: FormattedPremiumStatusManager) : Paywa
     override fun provideDetailsView(context: Context) = LayoutInflater.from(context)
         .inflate(R.layout.include_vpn_third_party_intro_details, null)
 
-    override fun onShowPaywall() {
-        
-    }
-
-    override fun onClickSeeAllOptions() = Unit
-
-    override fun onClickClose() = Unit
-
-    override fun onClickUpgrade() = Unit
-
     private fun isUserInTrial(): Boolean =
         premiumStatus.getFormattedStatus().type == UserBenefitStatus.Type.Trial
 }

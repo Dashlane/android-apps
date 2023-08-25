@@ -8,8 +8,6 @@ import com.dashlane.util.clipboard.vault.VaultItemClipboard
 import com.dashlane.util.tryOrNull
 import javax.inject.Inject
 
-
-
 class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
     private val vaultItemClipboard: VaultItemClipboard,
     private val followUpNotificationLogger: FollowUpNotificationLogger,
@@ -82,7 +80,9 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
             followUpNotification.itemDomain
         )
         discoveryService.updateLastNotificationItem(
-            followUpNotification.vaultItemId, followUpNotification.id, true
+            followUpNotification.vaultItemId,
+            followUpNotification.id,
+            true
         )
     }
 }

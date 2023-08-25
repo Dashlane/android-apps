@@ -20,8 +20,4 @@ interface PaywallIntro {
     val page: AnyPage
 
     fun provideDetailsView(context: Context): View? = null
-    fun onShowPaywall()
-    fun onClickSeeAllOptions()
-    fun onClickUpgrade()
-    fun onClickClose()
 }

@@ -16,8 +16,6 @@ private const val USER_SELECTED_URL = "UserSelectedUrl"
 private const val OTP_SECRET = "OtpSecret"
 private const val OTP_URL = "OtpUrl"
 
-
-
 fun VaultItem<SyncObject.Authentifiant>.toChangeSet(
     oldAuthentifiant: SyncObject.Authentifiant? = null,
     userName: String,

@@ -11,8 +11,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-
 class PasswordGeneratorAndStrength @Inject constructor(
     private val passwordGenerator: PasswordGenerator,
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator,

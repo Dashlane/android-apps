@@ -3,8 +3,6 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.center
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.flow.Flow
 
-
-
 interface SharingCenterViewModelContract {
     val uiState: Flow<UIState>
     fun onClickNewShare(activity: Fragment)
@@ -15,11 +13,7 @@ interface SharingCenterViewModelContract {
     fun declineUserGroup(userGroupId: String)
     fun acceptUserGroup(invite: SharingContact.UserGroupInvite)
 
-    
-
     fun reloadData()
-
-    
 
     fun refresh()
 

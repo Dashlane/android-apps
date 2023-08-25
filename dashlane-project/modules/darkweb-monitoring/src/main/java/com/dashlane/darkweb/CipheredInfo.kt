@@ -2,8 +2,6 @@ package com.dashlane.darkweb
 
 import com.google.gson.annotations.SerializedName
 
-
-
 internal data class CipheredInfo(
     @SerializedName("breachId")
     val breachId: String? = null,

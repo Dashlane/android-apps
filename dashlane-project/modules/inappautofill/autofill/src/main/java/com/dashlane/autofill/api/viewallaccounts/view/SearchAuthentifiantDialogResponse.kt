@@ -6,8 +6,6 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 
-
-
 interface SearchAuthentifiantDialogResponse {
     fun onResultsLoaded()
     fun onNavigateToCreateAuthentifiant(autofillBottomSheetNavigator: AutofillBottomSheetNavigator)

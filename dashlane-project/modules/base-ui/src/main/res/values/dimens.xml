@@ -13,11 +13,9 @@
     <dimen name="spacing_ultra_huge">48dp</dimen>
 
     
-
     <dimen name="spacing_normal_for_button">10dp</dimen>
 
     
-
     <dimen name="size_480dp">480dp</dimen>
     <dimen name="size_600dp">600dp</dimen>
     <dimen name="size_720dp" tools:ignore="UnusedResources">720dp</dimen>

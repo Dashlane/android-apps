@@ -16,8 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
-
-
 public class WaiterDialogFragment extends DialogFragment {
 
     public static final String TAG = WaiterDialogFragment.class.getName();
@@ -40,8 +38,6 @@ public class WaiterDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    
-
     public static void showWaiter(boolean cancelable, String title, String question,
                                   FragmentManager fm) {
         WaiterDialogFragment dialog = (WaiterDialogFragment) fm.findFragmentByTag(WaiterDialogFragment.TAG);
@@ -52,8 +48,6 @@ public class WaiterDialogFragment extends DialogFragment {
             sLastDialog = new WeakReference<>(dialog);
         }
     }
-
-    
 
     public static void dismissWaiter(FragmentManager fm) {
         if (fm == null) {

@@ -16,11 +16,11 @@ import com.dashlane.R;
 import com.dashlane.attachment.AttachmentListContract;
 import com.dashlane.attachment.AttachmentListDataProvider;
 import com.dashlane.attachment.VaultItemLogAttachmentHelper;
+import com.dashlane.core.DataSync;
 import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.lock.LockHelper;
 import com.dashlane.securefile.DeleteFileManager;
 import com.dashlane.securefile.DownloadFileContract;
-import com.dashlane.securefile.SecureFileLogger;
 import com.dashlane.securefile.UploadFileContract;
 import com.dashlane.securefile.storage.SecureFileStorage;
 import com.dashlane.session.SessionManager;
@@ -30,7 +30,6 @@ import com.dashlane.ui.activities.DashlaneActivity;
 import com.dashlane.util.usagelogs.ViewLogger;
 import com.dashlane.vault.VaultItemLogger;
 import com.dashlane.vault.model.VaultItem;
-import com.dashlane.vault.util.SyncObjectTypeUtils;
 import com.dashlane.xml.domain.SyncObjectType;
 import com.google.gson.Gson;
 
@@ -56,8 +55,9 @@ public class AttachmentListActivity extends DashlaneActivity {
     SessionManager mSessionManager;
     @Inject
     MainDataAccessor mMainDataAccessor;
+
     @Inject
-    SecureFileLogger mSecureFileLogger;
+    DataSync mDataSync;
 
     @Inject
     UploadFileContract.DataProvider mUploadFileDataProvider;
@@ -72,6 +72,8 @@ public class AttachmentListActivity extends DashlaneActivity {
     @Inject
     DeleteFileManager deleteFileManager;
 
+    @Inject
+    ViewLogger mViewLogger;
     AttachmentListContract.DataProvider mAttachmentListProvider;
 
     private AttachmentListPresenter mAttachmentListPresenter;
@@ -119,7 +121,7 @@ public class AttachmentListActivity extends DashlaneActivity {
             finish();
             return;
         }
-        SyncObjectType itemType = SyncObjectTypeUtils.valueFromDesktopIdIfExist(extras.getInt(ITEM_TYPE, -1));
+        SyncObjectType itemType = SyncObjectType.Companion.forXmlNameOrNull(extras.getString(ITEM_TYPE));
         String itemId = extras.getString(ITEM_ID);
         VaultItem vaultItem = null;
         if (itemType != null && itemId != null) {
@@ -145,12 +147,13 @@ public class AttachmentListActivity extends DashlaneActivity {
                 new AttachmentListDataProvider(attachments,
                         vaultItem,
                         mMainDataAccessor.getDataSaver(),
+                        mDataSync,
                         mSecureFileStorage);
 
         ActivityResultLauncher<Unit> openDocumentResultLauncher =
                 registerForActivityResult(new OpenDocumentResultContract(), this::onOpenDocumentResult);
         mUploadAttachmentsPresenter =
-                new UploadAttachmentsPresenter(SingletonProvider.getUserFeatureChecker(), mSecureFileLogger, lockHelper,
+                new UploadAttachmentsPresenter(SingletonProvider.getUserFeatureChecker(), lockHelper,
                         LifecycleOwnerKt.getLifecycleScope(this),
                         mSessionManager,
                         vaultItemLogAttachmentHelper,
@@ -160,8 +163,6 @@ public class AttachmentListActivity extends DashlaneActivity {
 
         DownloadAttachmentsPresenter downloadPresenter = new DownloadAttachmentsPresenter(
                 LifecycleOwnerKt.getLifecycleScope(this),
-                mMainDataAccessor.getVaultDataQuery(),
-                mSecureFileLogger,
                 vaultItemLogAttachmentHelper);
         downloadPresenter.setProvider(mDownloadFileDataProvider);
         downloadPresenter.setView(new DownloadAttachmentsViewProxy(this));
@@ -185,7 +186,7 @@ public class AttachmentListActivity extends DashlaneActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        new ViewLogger().log("AttachmentListActivity");
+        mViewLogger.log("AttachmentListActivity");
 
         if (!getApplicationLocked()) {
             mAttachmentListPresenter.onResume();

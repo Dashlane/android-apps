@@ -9,8 +9,6 @@ import androidx.fragment.app.Fragment
 import com.dashlane.vpn.thirdparty.R
 import com.dashlane.vpn.thirdparty.activate.VpnThirdPartyActivateAccountErrorListener.Companion.ERROR_TYPE_UNKNOWN
 
-
-
 class VpnThirdPartyActivateAccountErrorFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,

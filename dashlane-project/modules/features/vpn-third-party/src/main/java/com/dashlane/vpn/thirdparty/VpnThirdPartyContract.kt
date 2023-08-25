@@ -24,8 +24,6 @@ interface VpnThirdPartyContract {
         val installIntent: Intent
         val signInIntent: Intent
 
-        
-
         suspend fun getHotspotShieldAccount(): Account?
 
         data class Account(val login: String, val password: String, val itemId: String, val domain: String)

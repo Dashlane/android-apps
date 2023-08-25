@@ -7,8 +7,6 @@ import android.widget.ViewAnimator
 import com.dashlane.ui.R
 import com.dashlane.util.onLifecycleEvent
 
-
-
 class ViewAnimatorPager : ViewAnimator {
 
     private val lastChildView: View

@@ -5,41 +5,26 @@ import androidx.annotation.StringRes
 import com.dashlane.createaccount.pages.CreateAccountBaseContract
 import com.skocken.presentation.definition.Base
 
-
-
 interface CreateAccountEmailContract {
 
     interface ViewProxy : Base.IView {
 
-        
-
         var emailText: String
-
-        
 
         fun showConfirmEmailPopup(
             email: String,
             inEuropeanUnion: Boolean,
             country: String?,
             loginSsoIntent: Intent?,
-            callback: () -> Unit
+            callback: () -> Unit = {}
         )
 
-        
-
         fun showError(@StringRes errorResId: Int)
-
-        
 
         fun exposeTrackingInstallationId(id: String?)
     }
 
     interface Presenter : CreateAccountBaseContract.Presenter {
-        
-
-        fun onCancelConfirmEmail()
-
-        
 
         fun onConfirmEmail(
             email: String,
@@ -50,23 +35,7 @@ interface CreateAccountEmailContract {
     }
 
     interface DataProvider : CreateAccountBaseContract.DataProvider {
-        
-
         suspend fun validateEmail(email: String): PendingAccount
-
-        
-
-        fun confirmEmailShown()
-
-        
-
-        fun confirmEmailCancelled()
-
-        
-
-        fun emailConfirmed(email: String, inEuropeanUnion: Boolean)
-
-        
 
         fun getTrackingInstallationId(): String
     }

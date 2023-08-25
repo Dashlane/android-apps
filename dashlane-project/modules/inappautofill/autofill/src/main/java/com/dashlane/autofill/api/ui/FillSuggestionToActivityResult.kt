@@ -6,8 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 
-
-
 internal class FillSuggestionToActivityResult(
     private val fillRequestHandler: FillRequestHandler,
     private val coroutineScope: CoroutineScope

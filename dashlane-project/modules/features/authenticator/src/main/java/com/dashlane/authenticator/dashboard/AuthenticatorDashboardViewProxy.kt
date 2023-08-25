@@ -18,6 +18,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.Companion.DEFAULT_ITEMS_SHOWN
+import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.R
 import com.dashlane.authenticator.dashboard.AuthenticatorDashboardCredentialItemAdapter.Listener
@@ -40,6 +41,7 @@ class AuthenticatorDashboardViewProxy(
     view: View,
     private val viewModel: AuthenticatorDashboardViewModelContract,
     private val editBackCallback: OnBackPressedCallback,
+    private val authenticatorLogger: AuthenticatorLogger,
     copyCallback: String.() -> Unit
 ) {
     private val title = view.findViewById<TextView>(R.id.authenticator_dashboard_title)
@@ -81,7 +83,8 @@ class AuthenticatorDashboardViewProxy(
                     item.title,
                     item.domain,
                     professional = item.professional,
-                    issuer = issuer
+                    issuer = issuer,
+                    authenticatorLogger = authenticatorLogger
                 ) {
                     
                     viewModel.onOtpRemoved(item.id)
@@ -125,10 +128,12 @@ class AuthenticatorDashboardViewProxy(
                             exploreButton.isVisible = false
                             setupButton.isVisible = false
                         }
+
                         is NoOtp -> {
                             editBackCallback.handleOnBackPressed()
                             navigator.goToAuthenticatorSuggestions(false)
                         }
+
                         is HasLogins -> {
                             val currentAdapter =
                                 recyclerView.adapter as? AuthenticatorDashboardCredentialItemAdapter
@@ -158,6 +163,7 @@ class AuthenticatorDashboardViewProxy(
                                 viewModel.onOnboardingDisplayed()
                             }
                         }
+
                         is HandleUri -> viewModel.onSetupAuthenticatorFromUri(
                             state.otpUri,
                             setupAuthenticatorResultContract
@@ -191,6 +197,7 @@ class AuthenticatorDashboardViewProxy(
                             listContainer.background = null
                             editBackCallback.isEnabled = true
                         }
+
                         is AuthenticatorDashboardEditState.ViewLogins -> {
                             exploreButton.isVisible = true
                             setupButton.isVisible = true

@@ -9,8 +9,6 @@ import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.vault.clipboard.VaultItemCopyUtil
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 open class CopyAction(
     private val summaryObject: SummaryObject,
     private val copyField: CopyField,

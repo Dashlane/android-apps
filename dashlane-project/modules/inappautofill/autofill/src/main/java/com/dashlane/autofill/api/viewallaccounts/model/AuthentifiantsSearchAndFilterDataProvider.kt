@@ -8,8 +8,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class AuthentifiantsSearchAndFilterDataProvider(
     private val autofillSearch: AutofillSearch
 ) : AutofillApiViewAllAccountsContract.DataProvider {

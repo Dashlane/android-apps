@@ -5,43 +5,25 @@ import com.dashlane.createaccount.pages.CreateAccountBaseContract
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.skocken.presentation.definition.Base
 
-
-
 interface CreateAccountConfirmPasswordContract {
 
     interface ViewProxy : Base.IView {
 
-        
-
         val passwordText: CharSequence
-
-        
 
         fun showError(@StringRes errorResId: Int)
         fun setRecapPassword(password: String)
     }
 
-    interface Presenter : CreateAccountBaseContract.Presenter {
-        
-
-        fun onPasswordVisibilityToggle(passwordShown: Boolean)
-    }
+    interface Presenter : CreateAccountBaseContract.Presenter
 
     interface DataProvider : CreateAccountBaseContract.DataProvider {
 
         val biometricAvailable: Boolean
 
-        
-
         val requiresTosApproval: Boolean
 
         val clearPassword: String
-
-        
-
-        fun passwordVisibilityToggled(passwordShown: Boolean)
-
-        
 
         suspend fun validatePassword(password: CharSequence): PasswordSuccess
     }

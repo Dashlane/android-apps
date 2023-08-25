@@ -1,6 +1,7 @@
 package com.dashlane.teamspaces.db
 
 import androidx.annotation.WorkerThread
+import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
@@ -23,7 +24,8 @@ import com.dashlane.useractivity.log.usage.UsageLogCode11
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.useractivity.log.usage.getUsageLogNameFromType
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.urlForUsageLog
@@ -38,18 +40,18 @@ import kotlinx.coroutines.channels.consumeEach
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
+@Suppress("LargeClass")
 @Singleton
 class TeamspaceForceCategorizationManager @Inject constructor(
-    @GlobalCoroutineScope
+    @ApplicationCoroutineScope
     coroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val mainDataAccessor: MainDataAccessor,
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
     private val spaceDeletedNotifier: SpaceDeletedNotifier,
-    private val teamspaceForceDeletionSharingWorker: TeamspaceForceDeletionSharingWorker
+    private val teamspaceForceDeletionSharingWorker: TeamspaceForceDeletionSharingWorker,
+    private val activityLogger: VaultActivityLogger
 ) {
     private val dataSaver: DataSaver
         get() = mainDataAccessor.getDataSaver()
@@ -92,6 +94,12 @@ class TeamspaceForceCategorizationManager @Inject constructor(
             sendUsageLog11ForcedItems(this, result.itemsForced, teamspaces, dataCount)
             sendUsageLog11DeletedItems(this, result.itemsDeleted, teamspaces, dataCount)
         }
+        result.itemsDeleted.forEach {
+            activityLogger.sendActivityLog(vaultItem = it, action = Action.DELETE)
+        }
+        result.itemsForced.forEach {
+            activityLogger.sendActivityLog(vaultItem = it, action = Action.ADD)
+        }
 
         teamspaceForceDeletionSharingWorker.revokeAll(result.idsSharedToRevoked)
 
@@ -123,7 +131,7 @@ class TeamspaceForceCategorizationManager @Inject constructor(
         itemsDeleted: MutableList<VaultItem<SyncObject>>,
         idsSharedToRevoked: MutableList<String>
     ) {
-        val teamId: String = teamspace.teamId
+        val teamId: String = teamspace.teamId ?: return
         val domains: List<String> = teamspace.domains
         val teamspaceStatus = teamspace.status
         val dataTypes = TeamspaceMatcher.DATA_TYPE_TO_MATCH
@@ -189,16 +197,25 @@ class TeamspaceForceCategorizationManager @Inject constructor(
                 .setType(getUsageLogNameFromType(item.syncObjectType))
                 .setItemId(item.anonymousId)
                 .setFrom(
-                    if (isDeleted) UsageLogCode11.From.REMOTE_DELETE.code
-                    else UsageLogCode11.From.FORCED_CATEGORIZATION.code
+                    if (isDeleted) {
+                        UsageLogCode11.From.REMOTE_DELETE.code
+                    } else {
+                        UsageLogCode11.From.FORCED_CATEGORIZATION.code
+                    }
                 )
                 .setAction(
-                    if (isDeleted) UsageLogCode11.Action.REMOVE
-                    else UsageLogCode11.Action.EDIT
+                    if (isDeleted) {
+                        UsageLogCode11.Action.REMOVE
+                    } else {
+                        UsageLogCode11.Action.EDIT
+                    }
                 )
                 .setCounter(
-                    if (isDeleted) dataCount[item.syncObjectType] 
-                    else null
+                    if (isDeleted) {
+                        dataCount[item.syncObjectType] 
+                    } else {
+                        null
+                    }
                 )
 
             if (item.syncObjectType == SyncObjectType.AUTHENTIFIANT) {
@@ -212,7 +229,9 @@ class TeamspaceForceCategorizationManager @Inject constructor(
         return itemsShouldForced.mapNotNull {
             if (it.isShared) {
                 it.id
-            } else null
+            } else {
+                null
+            }
         }
     }
 

@@ -1,10 +1,9 @@
 package com.dashlane.dagger.singleton
 
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.account.UserAccountStorage.DataLossTrackingListener
 import com.dashlane.account.UserAccountStorageImpl
-import com.dashlane.accountrecovery.AccountRecoveryLogger
-import com.dashlane.accountrecovery.AccountRecoveryLoggerImpl
+import com.dashlane.biometricrecovery.BiometricRecoveryLogger
+import com.dashlane.biometricrecovery.BiometricRecoveryLoggerImpl
 import com.dashlane.autofill.announcement.KeyboardAutofillService
 import com.dashlane.autofill.api.AutofillCreateAccountServiceImpl
 import com.dashlane.autofill.api.AutofillGeneratePasswordServiceImpl
@@ -44,10 +43,8 @@ import com.dashlane.csvimport.CsvImportViewTypeProvider
 import com.dashlane.csvimport.ImportAuthentifiantHelper
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.device.DeviceInfoRepositoryImpl
-import com.dashlane.endoflife.EndOfLifeObserver
 import com.dashlane.help.HelpCenterCoordinator
 import com.dashlane.help.HelpCenterCoordinatorImpl
-import com.dashlane.login.AccountDataLossTrackingListener
 import com.dashlane.masterpassword.MasterPasswordChanger
 import com.dashlane.masterpassword.MasterPasswordChangerImpl
 import com.dashlane.navigation.Navigator
@@ -75,7 +72,6 @@ import com.dashlane.storage.securestorage.CryptographyMigrationLoggerImpl
 import com.dashlane.ui.M2xIntentFactory
 import com.dashlane.ui.M2xIntentFactoryImpl
 import com.dashlane.ui.adapter.CsvImportViewTypeProviderImpl
-import com.dashlane.ui.endoflife.EndOfLife
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
 import com.dashlane.ui.util.PasswordGeneratorWrapperImpl
 import com.dashlane.useractivity.DashlaneDeviceExtraData
@@ -88,8 +84,6 @@ import com.dashlane.vpn.thirdparty.VpnThirdPartyAuthentifiantHelper
 import dagger.Binds
 import dagger.Module
 import javax.inject.Singleton
-
-
 
 @Module
 interface SingletonAbstractModule {
@@ -104,9 +98,6 @@ interface SingletonAbstractModule {
 
     @Binds
     fun bindUserAccountStorage(impl: UserAccountStorageImpl): UserAccountStorage
-
-    @Binds
-    fun bindDataLossTrackingListener(listener: AccountDataLossTrackingListener): DataLossTrackingListener
 
     @Binds
     fun bindM2xIntentFactory(impl: M2xIntentFactoryImpl): M2xIntentFactory
@@ -127,7 +118,7 @@ interface SingletonAbstractModule {
     fun bindBackupIntentCoordinator(impl: BackupCoordinatorImpl): BackupCoordinator
 
     @Binds
-    fun bindAccountRecoveryLogger(impl: AccountRecoveryLoggerImpl): AccountRecoveryLogger
+    fun bindAccountRecoveryLogger(impl: BiometricRecoveryLoggerImpl): BiometricRecoveryLogger
 
     @Binds
     fun bindAGeneratePassword(impl: AutofillGeneratePasswordServiceImpl): AutofillGeneratePasswordService
@@ -213,9 +204,6 @@ interface SingletonAbstractModule {
 
     @Binds
     fun bindConflictingBillingPlatformProvider(impl: ConflictingBillingPlatformProviderImpl): ConflictingBillingPlatformProvider
-
-    @Binds
-    fun bindEndOfLife(impl: EndOfLifeObserver): EndOfLife
 
     @Binds
     fun bindRacletteLogger(impl: RacletteLoggerImpl): RacletteLogger

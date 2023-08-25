@@ -10,18 +10,14 @@ import com.dashlane.attachment.VaultItemLogAttachmentHelper
 import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.lock.LockHelper
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.securefile.FileSecurity
 import com.dashlane.securefile.SecureFile
-import com.dashlane.securefile.SecureFileLogger
 import com.dashlane.securefile.UploadFileContract
 import com.dashlane.securefile.extensions.getFileName
 import com.dashlane.securefile.extensions.getFileSize
 import com.dashlane.securefile.extensions.getFileType
 import com.dashlane.securefile.extensions.toSecureFileInfo
 import com.dashlane.session.SessionManager
-import com.dashlane.useractivity.log.usage.UsageLogCode123
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -34,11 +30,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.Duration
 
-
-
 class UploadAttachmentsPresenter(
     private val userFeaturesChecker: UserFeaturesChecker,
-    private val logger: SecureFileLogger,
     private val lockHelper: LockHelper,
     private val coroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
@@ -55,13 +48,6 @@ class UploadAttachmentsPresenter(
 
     override fun notifyFileUploaded(secureFile: SecureFile, secureFileInfo: VaultItem<SyncObject.SecureFileInfo>) {
         view.showUploadedFile(secureFile, secureFileInfo)
-        logger.logUploadSuccess(secureFileInfo.anonymousId)
-        logger.logFileDetails(
-            UsageLogCode123.Action.ADD, secureFileInfo.syncObject.type ?: "",
-            secureFileInfo.syncObject.localSize ?: -1L,
-            secureFileInfo.syncObject.remoteSize ?: -1L,
-            secureFileInfo.anonymousId
-        )
         vaultItemLogAttachmentHelper.logUpdate(Action.ADD)
     }
 
@@ -81,7 +67,6 @@ class UploadAttachmentsPresenter(
     ) {
         
         context?.apply { view.showError(getString(R.string.upload_file_no_space)) }
-        logger.logUploadError("upload_quotaReached", secureFileInfo.anonymousId)
     }
 
     override fun notifyFileUploadFailed(
@@ -90,7 +75,6 @@ class UploadAttachmentsPresenter(
     ) {
         
         context?.apply { view.showError(getString(R.string.upload_file_error)) }
-        logger.logUploadError("upload_failed", secureFileInfo.anonymousId)
     }
 
     override fun notifyFileSizeLimitExceeded(
@@ -100,23 +84,21 @@ class UploadAttachmentsPresenter(
         val context = context ?: return
         
         val maxSize = Formatter.formatShortFileSize(
-            context, userFeaturesChecker
+            context,
+            userFeaturesChecker
                 .getFeatureInfo(UserFeaturesChecker.Capability.SECURE_FILES_UPLOAD)
                 .optLong("maxFileSize")
         )
         view.showError(context.getString(R.string.file_too_big_error, maxSize))
-        logger.logUploadError("upload_fileTooBig", secureFileInfo.anonymousId)
     }
 
     override fun performFileSearch() {
         
         lockHelper.startAutoLockGracePeriod(Duration.ofMinutes(2))
-        logger.logChoose()
         try {
             openDocumentResultLauncher.launch()
         } catch (e: ActivityNotFoundException) {
             
-            Log.v(e)
         }
     }
 
@@ -161,13 +143,11 @@ class UploadAttachmentsPresenter(
                 }
                 
                 provider.uploadSecureFile(username, uki, secureFile, secureFileInfo)
-                logger.logUploadStart(secureFileInfo.anonymousId)
             } catch (e: Exception) {
                 
                 
                 
                 
-                Log.v(AttachmentListActivity.LOG_TAG, "Exception raised when starting file upload", e)
                 view.showError(currentContext.getString(R.string.upload_file_error))
             }
         }

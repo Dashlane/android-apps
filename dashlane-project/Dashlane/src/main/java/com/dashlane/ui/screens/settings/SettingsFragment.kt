@@ -11,8 +11,6 @@ import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
 
-
-
 @AndroidEntryPoint
 class SettingsFragment : AbstractContentFragment() {
     private val viewModel by viewModels<SettingsViewModel>()

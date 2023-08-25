@@ -7,8 +7,6 @@ import com.dashlane.authenticator.UriParser.DEFAULT_COUNTER
 import com.dashlane.authenticator.UriParser.DEFAULT_DIGITS
 import kotlinx.parcelize.Parcelize
 
-
-
 @Keep
 @Parcelize
 data class Hotp(

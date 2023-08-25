@@ -43,8 +43,10 @@ class ItemScreenConfigurationFiscalStatementProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, dataCounter,
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    dataCounter,
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     @Suppress("UNCHECKED_CAST")
@@ -127,7 +129,9 @@ class ItemScreenConfigurationFiscalStatementProvider(
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace()) {
             subViewFactory.createSpaceSelector(
-                item.syncObject.spaceId, teamspaceAccessor, null,
+                item.syncObject.spaceId,
+                teamspaceAccessor,
+                null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
         } else {

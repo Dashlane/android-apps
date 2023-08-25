@@ -9,8 +9,6 @@ import com.dashlane.util.DeviceUtils;
 
 import wei.mark.standout.ui.Window;
 
-
-
 public class DashlaneSubwindowPositionUtils {
 
     public static final int OPTIMAL_POSITION_TOP = 0;

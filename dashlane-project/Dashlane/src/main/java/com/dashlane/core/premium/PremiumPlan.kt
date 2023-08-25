@@ -2,8 +2,6 @@ package com.dashlane.core.premium
 
 import org.json.JSONObject
 
-
-
 data class PremiumPlan constructor(
     val name: String? = null,
     val type: String? = null,

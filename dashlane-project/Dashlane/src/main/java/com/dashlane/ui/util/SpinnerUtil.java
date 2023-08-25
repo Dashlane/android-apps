@@ -9,8 +9,6 @@ import com.dashlane.R;
 import com.dashlane.util.ContextUtilsKt;
 import com.dashlane.util.DeviceUtils;
 
-
-
 public class SpinnerUtil {
 
     @SuppressWarnings("ClickableViewAccessibility")

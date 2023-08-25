@@ -8,8 +8,6 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.dashlane.guidedonboarding.R
 
-
-
 class OnboardingDarkWebMonitoringErrorFragment : Fragment() {
     interface Listener {
         fun onTryAgain()

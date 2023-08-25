@@ -4,22 +4,12 @@ import android.net.Uri
 import com.dashlane.util.isSemanticallyNull
 import java.util.Locale
 
-
-
 object UriParser {
-    
-
     private const val OTP_SCHEME = "otpauth"
-
-    
 
     private const val TOTP = "totp"
 
-    
-
     private const val HOTP = "hotp"
-
-    
 
     private const val SECRET_PARAM = "secret"
     private const val COUNTER_PARAM = "counter"
@@ -28,14 +18,10 @@ object UriParser {
     private const val ISSUER_PARAM = "issuer"
     private const val ALGORITHM_PARAM = "algorithm"
 
-    
-
     const val DEFAULT_ALGORITHM = "SHA1"
     const val DEFAULT_DIGITS = 6
     const val DEFAULT_PERIOD = 30
     const val DEFAULT_COUNTER = 0L
-
-    
 
     fun parse(uri: Uri): Otp? {
         val scheme = uri.scheme
@@ -77,13 +63,14 @@ object UriParser {
         user: String,
         issuer: String?,
         secret: String?
-    ): Hotp? {
+    ): Hotp {
         val counter = uri.getQueryParameter(COUNTER_PARAM)?.let {
             
-            it.toIntOrNull() ?: return null
+            
+            it.toDoubleOrNull()?.toLong()
         }
         return Hotp(
-            counter = counter?.toLong() ?: DEFAULT_COUNTER,
+            counter = counter ?: DEFAULT_COUNTER,
             digits = digits ?: DEFAULT_DIGITS,
             algorithm = algorithm ?: DEFAULT_ALGORITHM,
             user = user,
@@ -100,10 +87,11 @@ object UriParser {
         user: String,
         issuer: String?,
         secret: String?
-    ): Totp? {
+    ): Totp {
         val period = uri.getQueryParameter(PERIOD_PARAM)?.let {
             
-            it.toIntOrNull() ?: return null
+            
+            it.toDoubleOrNull()?.toInt()
         }
         return Totp(
             period = period ?: DEFAULT_PERIOD,
@@ -138,11 +126,13 @@ object UriParser {
         originalIssuer: String?,
         separator: String
     ): Pair<String, String>? {
-        val foundIssuer = (if (separator == "@") {
+        val foundIssuer = (
+            if (separator == "@") {
             user.substring(user.indexOf(separator) + 1, user.length)
         } else {
             user.substring(0, user.indexOf(separator))
-        }).sanitizeIssuer()
+        }
+        ).sanitizeIssuer()
         if (originalIssuer == null || originalIssuer == foundIssuer) {
             if (separator == "@") {
                 return user.substring(0, user.indexOf(separator)) to foundIssuer

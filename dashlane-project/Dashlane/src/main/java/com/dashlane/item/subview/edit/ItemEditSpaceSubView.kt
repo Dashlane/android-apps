@@ -7,8 +7,6 @@ import com.dashlane.teamspaces.manager.firstOrNullMatchingDefinedDomain
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.vault.model.VaultItem
 
-
-
 class ItemEditSpaceSubView(
     override var value: Teamspace,
     val values: List<Teamspace>,
@@ -86,9 +84,11 @@ class ItemEditSpaceSubView(
         val allViewValues = (views?.map { it.value } ?: emptyList()) + linkedWebsites
 
         
-        return (values.firstOrNullMatchingDefinedDomain(allViewValues.toTypedArray())
+        return (
+            values.firstOrNullMatchingDefinedDomain(allViewValues.toTypedArray())
         
-            ?: initialValue.takeIf { allowSuggestionAutoChange })
+            ?: initialValue.takeIf { allowSuggestionAutoChange }
+        )
     }
 
     private fun shouldAssignToSuggestedTeamspace(suggestedTeamspace: Teamspace?) =

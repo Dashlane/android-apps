@@ -5,8 +5,6 @@ import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class TokenJsonProvider @Inject constructor() {
     private var _json: ObfuscatedByteArray? = null

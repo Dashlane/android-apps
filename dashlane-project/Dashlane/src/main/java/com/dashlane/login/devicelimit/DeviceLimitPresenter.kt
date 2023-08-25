@@ -14,7 +14,7 @@ import com.dashlane.session.SessionManager
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
 import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.util.startActivity
@@ -27,8 +27,8 @@ import kotlinx.coroutines.launch
 import com.dashlane.hermes.generated.events.user.CallToAction as UserCallToAction
 
 class DeviceLimitPresenter @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val activity: Activity,
@@ -42,7 +42,7 @@ class DeviceLimitPresenter @Inject constructor(
 
     init {
         
-        storeOffersCache.prefetchProductsForCurrentUser(globalCoroutineScope)
+        storeOffersCache.prefetchProductsForCurrentUser(applicationCoroutineScope)
     }
 
     override fun onStart() {
@@ -73,7 +73,7 @@ class DeviceLimitPresenter @Inject constructor(
     override fun onLogOut() {
         sendUsageLog("logout")
         logUserAction(chosenAction = null)
-        globalCoroutineScope.launch(mainCoroutineDispatcher) {
+        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             userPreferencesManager.isOnLoginPaywall = false
             sessionManager.session?.let { session ->
                 sessionManager.destroySession(session, false)

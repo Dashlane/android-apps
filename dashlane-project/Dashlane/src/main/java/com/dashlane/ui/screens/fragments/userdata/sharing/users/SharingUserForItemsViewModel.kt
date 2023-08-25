@@ -6,12 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.core.DataSync
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -23,7 +23,8 @@ class SharingUserForItemsViewModel @Inject constructor(
     private val sharingDataProvider: SharingDataProvider,
     appEvents: AppEvents,
     private val sharingUsersDataProvider: SharingUsersDataProvider,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val dataSync: DataSync
 ) : ViewModel(), SharingUsersForItemViewModelContract {
     override val itemId =
         SharingUserForItemsFragmentArgs.fromSavedStateHandle(savedStateHandle).argsItemUid
@@ -60,7 +61,7 @@ class SharingUserForItemsViewModel @Inject constructor(
         }
     }
 
-    override fun pullToRefresh() = DataSync.sync(UsageLogCode134.Origin.MANUAL)
+    override fun pullToRefresh() = dataSync.sync(Trigger.MANUAL)
 
     override fun onResendInvite(itemGroup: ItemGroup, memberLogin: String) {
         uiState.tryEmit(SharingUsersForItemViewModelContract.UIState.RequestLoading)

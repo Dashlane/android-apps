@@ -16,8 +16,6 @@ class CreateAccountSuccessIntentFactory @Inject constructor(
     private val coordinator: PostAccountCreationCoordinator,
     private val daDaDa: DaDaDa
 ) {
-    
-
     fun createIntent(): Intent {
         return if (daDaDa.isSkipOnboardingPostAccountCreation) {
             coordinator.newHomeIntent(activity)

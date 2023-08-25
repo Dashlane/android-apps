@@ -40,13 +40,17 @@ class ItemScreenConfigurationSocialSecurityProvider(
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     override val logger = SocialSecurityLogger(
-        teamspaceAccessor, mainDataAccessor.getDataCounter(),
-        sessionManager, bySessionUsageLogRepository
+        teamspaceAccessor,
+        mainDataAccessor.getDataCounter(),
+        sessionManager,
+        bySessionUsageLogRepository
     )
 
     @Suppress("UNCHECKED_CAST")

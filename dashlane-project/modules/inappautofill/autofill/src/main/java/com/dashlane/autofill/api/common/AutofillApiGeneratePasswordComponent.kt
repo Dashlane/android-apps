@@ -4,8 +4,6 @@ import android.content.Context
 import com.dashlane.autofill.api.common.domain.AutofillGeneratePasswordService
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 
-
-
 interface AutofillApiGeneratePasswordComponent {
     val generatePasswordService: AutofillGeneratePasswordService
     val generatePasswordLogger: AutofillGeneratePasswordLogger

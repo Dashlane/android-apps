@@ -9,25 +9,40 @@ import com.android.billingclient.api.Purchase
 import com.dashlane.PurchaseCheckingNavigationDirections.Companion.goToPurchaseOfferError
 import com.dashlane.PurchaseCheckingNavigationDirections.Companion.goToPurchaseOfferSuccess
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.announcements.AnnouncementCenter
+import com.dashlane.events.AppEvents
 import com.dashlane.events.PremiumStatusChangedEvent
 import com.dashlane.events.clearLastEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
+import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.ui.premium.inappbilling.BillingVerification
+import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
 import com.dashlane.util.usagelogs.ViewLogger
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-
+@AndroidEntryPoint
 open class PurchaseCheckingActivity : DashlaneActivity() {
 
-    private val appEvent = SingletonProvider.getAppEvents()
-    private val logger = SingletonProvider.getOffersLogger()
-    private val announcementCenter = SingletonProvider.getAnnouncementCenter()
-    private val billingVerification = SingletonProvider.getBillingVerificator()
+    @Inject
+    lateinit var appEvent: AppEvents
+
+    @Inject
+    lateinit var logger: OffersLogger
+
+    @Inject
+    lateinit var announcementCenter: AnnouncementCenter
+
+    @Inject
+    lateinit var billingVerification: BillingVerification
+
+    @Inject
+    lateinit var storeOffersCache: StoreOffersCache
 
     private val navController: NavController
         get() = findNavController(R.id.nav_host_fragment_purchase_checking)
@@ -35,6 +50,10 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
     private var checkingDone = false
     private lateinit var planId: String
     private lateinit var purchase: Purchase
+
+    @Inject
+    lateinit var viewLogger: ViewLogger
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_purchase_checking)
@@ -48,7 +67,7 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
         if (!checkingDone) {
             processPurchase()
         }
-        ViewLogger().log("PurchaseConfirmation")
+        viewLogger.log("PurchaseConfirmation")
     }
 
     override fun onPause() {
@@ -75,8 +94,6 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
         }
     }
 
-    
-
     private fun onPremiumStatusChanged(event: PremiumStatusChangedEvent) {
         appEvent.clearLastEvent<PremiumStatusChangedEvent>()
         
@@ -100,7 +117,7 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
 
         logger.logPurchaseComplete(planId)
         navController.navigate(goToPurchaseOfferSuccess(planName, familyUser))
-        SingletonProvider.getAccessibleOffersCache().flushCache()
+        storeOffersCache.flushCache()
     }
 
     private fun onPurchaseCheckFailed() {
@@ -110,10 +127,8 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
         logger.logVerifyingReceiptError(planId)
         checkingDone = true
         navController.navigate(goToPurchaseOfferError())
-        SingletonProvider.getAccessibleOffersCache().flushCache()
+        storeOffersCache.flushCache()
     }
-
-    
 
     private fun processPurchase() {
         

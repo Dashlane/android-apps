@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.enums;
 
 import com.github.devnied.emvnfccard.utils.BytesUtils;
@@ -7,8 +5,6 @@ import com.github.devnied.emvnfccard.utils.BytesUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Pattern;
-
-
 
 public enum EmvCardScheme {
 
@@ -40,23 +36,13 @@ public enum EmvCardScheme {
     GOOGLE("Google", null, "A0 00 00 04 76 6C"), 
     INTER_SWITCH("InterSwitch", null, "A0 00 00 03 71 00 01");
 
-    
-
     private final String[] aids;
-
-    
 
     private final byte[][] aidsByte;
 
-    
-
     private final String name;
 
-    
-
     private final Pattern pattern;
-
-    
 
     private EmvCardScheme(final String pScheme, final String pRegex, final String... pAids) {
         aids = pAids;
@@ -72,19 +58,13 @@ public enum EmvCardScheme {
         }
     }
 
-    
-
     public String[] getAid() {
         return aids;
     }
 
-    
-
     public String getName() {
         return name;
     }
-
-    
 
     public static EmvCardScheme getCardTypeByAid(final String pAid) {
         EmvCardScheme ret = null;
@@ -102,8 +82,6 @@ public enum EmvCardScheme {
         return ret;
     }
 
-    
-
     public static EmvCardScheme getCardTypeByCardNumber(final String pCardNumber) {
         EmvCardScheme ret = null;
         if (pCardNumber != null) {
@@ -116,8 +94,6 @@ public enum EmvCardScheme {
         }
         return ret;
     }
-
-    
 
     public byte[][] getAidByte() {
         return aidsByte;

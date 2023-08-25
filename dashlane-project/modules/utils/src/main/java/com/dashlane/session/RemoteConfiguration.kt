@@ -2,8 +2,6 @@ package com.dashlane.session
 
 interface RemoteConfiguration {
 
-    
-
     suspend fun initAndRefresh() {
         val loadResult = load()
         if (loadResult == LoadResult.Success) {
@@ -13,15 +11,9 @@ interface RemoteConfiguration {
         }
     }
 
-    
-
     fun load(): LoadResult
 
-    
-
     fun launchRefreshIfNeeded()
-
-    
 
     suspend fun refreshIfNeeded()
 

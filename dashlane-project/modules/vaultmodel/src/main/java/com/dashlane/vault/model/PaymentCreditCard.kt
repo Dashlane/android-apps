@@ -1,8 +1,6 @@
 package com.dashlane.vault.model
 
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
-import com.dashlane.util.time.isExpired
-import com.dashlane.util.time.isExpiringSoon
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
@@ -43,18 +41,9 @@ fun createPaymentCreditCard(
             this.linkedBillingAddress = billingAddress
             this.bank = bank?.bankDescriptor
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
-}
-
-val SyncObject.PaymentCreditCard.usageLogCode68Data2: Int
-    get() {
-        val date = expireDate
-        return when {
-            date?.isExpired() == true -> 0
-            date?.isExpiringSoon() == true -> 1
-            else -> if (date != null) 2 else 3
         }
-    }
+    )
+}
 
 val SummaryObject.PaymentCreditCard.expireDate: YearMonth?
     get() {

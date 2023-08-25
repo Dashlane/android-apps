@@ -42,10 +42,12 @@ class BreachAlertDetailDataProvider @Inject constructor(
         }
 
     override suspend fun getCredential(itemId: String): SummaryObject.Authentifiant? {
-        val vaultItem = genericDataQuery.queryFirst(vaultFilter {
+        val vaultItem = genericDataQuery.queryFirst(
+            vaultFilter {
             specificDataType(SyncObjectType.AUTHENTIFIANT)
             specificUid(itemId)
-        }) ?: return null
+        }
+        ) ?: return null
         return vaultItem as SummaryObject.Authentifiant
     }
 }

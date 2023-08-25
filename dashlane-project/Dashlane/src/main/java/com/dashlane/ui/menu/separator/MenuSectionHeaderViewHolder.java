@@ -7,8 +7,6 @@ import android.widget.TextView;
 import com.dashlane.ui.menu.MenuDef;
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder;
 
-
-
 public class MenuSectionHeaderViewHolder extends EfficientViewHolder<MenuDef.Item> {
 
     public MenuSectionHeaderViewHolder(View itemView) {

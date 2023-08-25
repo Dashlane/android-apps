@@ -13,29 +13,23 @@ import android.view.autofill.AutofillId
 import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
 import androidx.autofill.inline.UiVersions
+import androidx.compose.ui.platform.AndroidUiDispatcher.Companion.Main
 import com.dashlane.autofill.AutoFillBlackListImpl
-import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.accessibility.AccessibilityApiServiceDetector
 import com.dashlane.autofill.accessibility.AccessibilityApiServiceDetectorImpl
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.dagger.AutofillApiInternalComponent
 import com.dashlane.autofill.api.internal.AutofillApiComponent
 import com.dashlane.autofill.api.internal.AutofillLimiter
-import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
 import com.dashlane.autofill.api.request.save.SaveRequestActivity
 import com.dashlane.autofill.api.util.AutofillValueFactoryAndroidImpl
 import com.dashlane.autofill.formdetector.AutoFillHintsExtractor
 import com.dashlane.autofill.formdetector.AutofillPackageNameAcceptor
 import com.dashlane.autofill.formdetector.BrowserDetectionHelper
-import com.dashlane.performancelogger.TimeToAutofillLogger
-import com.dashlane.session.SessionManager
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
-
-
 
 class AutoFillAPIService : AutofillService(), CoroutineScope {
 
@@ -46,12 +40,6 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
     private val componentInternal: AutofillApiInternalComponent by lazy(LazyThreadSafetyMode.NONE) {
         AutofillApiInternalComponent(this)
     }
-
-    private val autoFillApiUsageLog: AutofillAnalyzerDef.IAutofillUsageLog
-        get() = component.autoFillApiUsageLog
-
-    private val sessionManager: SessionManager
-        get() = component.sessionManager
 
     private val autofillLimiter: AutofillLimiter
         get() = component.autofillLimiter
@@ -92,16 +80,12 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
         cancellationSignal: CancellationSignal,
         callback: FillCallback
     ) {
-        val timeToAutofillLogger = component.timeToAutofillLogger
-        timeToAutofillLogger.logStart()
-
         val inlineSpecs: List<InlinePresentationSpec>? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && canUseInlineAutofill(request)) {
                 request.inlineSuggestionsRequest!!.inlinePresentationSpecs
             } else {
                 null
             }
-        logIfManualRequest(request, inlineSpecs?.isNotEmpty() ?: false)
 
         val mBlacklistPackages = AutoFillBlackListImpl()
         val autofillValueFactory = AutofillValueFactoryAndroidImpl()
@@ -118,11 +102,10 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
                     autoFillHintsExtractor,
                     callback,
                     inlineSpecs,
-                    timeToAutofillLogger,
                     request.getFocusAutofillId()
                 )
             } catch (e: Exception) {
-                respondSuccess(callback, timeToAutofillLogger = timeToAutofillLogger)
+                respondSuccess(callback)
             }
         }
     }
@@ -142,11 +125,8 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
 
     private fun respondSuccess(
         callback: FillCallback,
-        response: FillResponse? = null,
-        timeToAutofillLogger: TimeToAutofillLogger
+        response: FillResponse? = null
     ) {
-        component.timeToLoadLocalLogger.logStop()
-        timeToAutofillLogger.logStop()
         runCatching {
             callback.onSuccess(response)
         }
@@ -157,7 +137,6 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
         autoFillHintsExtractor: AutoFillHintsExtractor,
         callback: FillCallback,
         inlineSpecs: List<InlinePresentationSpec>?,
-        timeToAutofillLogger: TimeToAutofillLogger,
         focusedAutofillId: AutofillId? = null
     ) {
         
@@ -177,12 +156,11 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
                 request.clientState,
                 summary,
                 inlineSpecs,
-                timeToAutofillLogger,
                 focusedAutofillId
             )
         }
 
-        respondSuccess(callback, fillResponse, timeToAutofillLogger)
+        respondSuccess(callback, fillResponse)
     }
 
     override fun onSaveRequest(
@@ -229,22 +207,6 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
         } else {
             callback.onError(SavedDatasetsInfoCallback.ERROR_OTHER)
         }
-    }
-
-    private fun logIfManualRequest(
-        request: FillRequest,
-        forKeyboard: Boolean
-    ) {
-        
-        if (sessionManager.session == null) return
-        
-        if (!request.isManualRequest()) return
-
-        val packageName =
-            request.fillContexts.lastOrNull()?.structure?.activityComponent?.packageName
-                ?: return 
-
-        autoFillApiUsageLog.onManualRequestAsked(getAutofillApiOrigin(forKeyboard), packageName)
     }
 
     private fun FillRequest.isManualRequest(): Boolean =

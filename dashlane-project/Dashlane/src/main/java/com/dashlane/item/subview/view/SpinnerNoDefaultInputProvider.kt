@@ -17,8 +17,6 @@ import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrDrawable
 
-
-
 object SpinnerNoDefaultInputProvider {
     fun create(
         context: Context,
@@ -116,7 +114,8 @@ object SpinnerNoDefaultInputProvider {
             }
         }
         layout.apply {
-            addView(spinner.apply {
+            addView(
+                spinner.apply {
                 layoutParams = FrameLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -124,13 +123,16 @@ object SpinnerNoDefaultInputProvider {
                     setMargins(0, context.dpToPx(16f).toInt(), 0, 0)
                 }
                 SpinnerUtil.disableSpinner(this)
-            })
-            addView(textInputLayout.apply {
+            }
+            )
+            addView(
+                textInputLayout.apply {
                 layoutParams = FrameLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
-            })
+            }
+            )
         }
 
         return layout

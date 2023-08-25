@@ -36,8 +36,10 @@ class ItemScreenConfigurationDriverLicenseProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     @Suppress("UNCHECKED_CAST")
@@ -165,7 +167,8 @@ class ItemScreenConfigurationDriverLicenseProvider(
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace()) {
             return subViewFactory.createSpaceSelector(
-                item.syncObject.spaceId, teamspaceAccessor,
+                item.syncObject.spaceId,
+                teamspaceAccessor,
                 null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )

@@ -10,8 +10,6 @@ import com.dashlane.search.SearchableSettingItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 class RankingSearchSorter(context: Context, fieldMatcher: SearchImprovementsUtils) : SearchSorter {
     private val filter = fieldMatcher.getFilter(context)
 
@@ -36,14 +34,12 @@ class RankingSearchSorter(context: Context, fieldMatcher: SearchImprovementsUtil
     override fun match(item: Any, query: Query): Boolean = findMatch(item, query.queryString, filter) != null
 
     private fun findMatches(all: List<Any>, query: String): List<MatchedSearchResult> {
-
         return all.mapNotNull {
             findMatch(it, query, filter)
         }
     }
 
     private fun findMatch(item: Any, query: String, filter: Map<Any, List<(Any, String) -> Match?>>): MatchedSearchResult? {
-
         val match = when (item) {
             is SummaryObject -> {
                 filter[item.syncObjectType.toSearchItemType()]?.firstNotNullOfOrNull { field ->

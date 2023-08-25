@@ -5,12 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.loaders.datalists.NewShareItemDataProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.useractivity.log.forCode
 import com.dashlane.useractivity.log.usage.UsageLogCode80
-import com.dashlane.useractivity.log.usage.UsageLogCode86
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -22,12 +18,8 @@ import javax.inject.Inject
 class NewShareItemViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dataProvider: NewShareItemDataProvider,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val sessionManager: SessionManager,
     private val navigator: Navigator
 ) : ViewModel(), NewShareItemViewModelContract {
-    private val usageLogRepository: UsageLogRepository?
-        get() = bySessionUsageLogRepository[sessionManager.session]
 
     private val args = SharingItemSelectionTabFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private val from = args.argsUsageLogFrom
@@ -38,7 +30,8 @@ class NewShareItemViewModel @Inject constructor(
 
     override val selectionState = MutableStateFlow(
         NewShareItemViewModelContract.SelectionState(
-            emptyList(), emptyList()
+            emptyList(),
+            emptyList()
         )
     )
 
@@ -56,16 +49,6 @@ class NewShareItemViewModel @Inject constructor(
     }
 
     override fun onClickNewShare() {
-        usageLogRepository
-            ?.enqueue(
-                UsageLogCode80(
-                    type = UsageLogCode80.Type.NEW_SHARE1,
-                    from = ulFrom,
-                    nbCredentials = selectionState.value.accountsToShare.size,
-                    nbSecureNotes = selectionState.value.secureNotesToShare.size,
-                    action = UsageLogCode80.Action.NEXT
-                )
-            )
         navigator.goToPeopleSelectionFromNewShare(
             selectionState.value.accountsToShare.toTypedArray(),
             selectionState.value.secureNotesToShare.toTypedArray()
@@ -90,25 +73,6 @@ class NewShareItemViewModel @Inject constructor(
             current.copy(secureNotesToShare = current.secureNotesToShare - uid)
         }
         selectionState.tryEmit(new)
-    }
-
-    override fun onBackPressed() {
-        usageLogRepository?.enqueue(
-            UsageLogCode86(
-                type = UsageLogCode86.Type.ITEM_SELECT,
-                action = UsageLogCode86.Action.BACK
-            )
-        )
-    }
-
-    override fun onCreated() {
-        usageLogRepository?.enqueue(
-            UsageLogCode80(
-                type = UsageLogCode80.Type.NEW_SHARE1,
-                action = UsageLogCode80.Action.OPEN,
-                from = ulFrom
-            )
-        )
     }
 
     fun query(query: String? = null) {

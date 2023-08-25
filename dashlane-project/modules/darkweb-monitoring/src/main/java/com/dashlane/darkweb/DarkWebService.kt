@@ -8,8 +8,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-
-
 interface DarkWebService {
 
     @POST("/1/dataleak/optin")
@@ -49,8 +47,10 @@ interface DarkWebService {
     class BreachStatusContent {
         @SerializedName("leaks")
         var breaches: List<JsonObject>? = null
+
         @SerializedName("details")
         var details: Detail? = null
+
         @SerializedName("lastUpdateDate")
         var lastUpdateDate: Long = 0
 

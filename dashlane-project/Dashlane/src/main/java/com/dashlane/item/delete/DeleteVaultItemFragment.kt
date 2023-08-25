@@ -60,7 +60,8 @@ class DeleteVaultItemFragment : DialogFragment() {
                     resources.getString(R.string.sharing_confirmation_popup_btn_confirm_delete_from_service)
                 } else {
                     resources.getString(R.string.delete)
-                }, null
+                },
+                null
             )
             .setNegativeButton(
                 if (isShared) {
@@ -75,8 +76,6 @@ class DeleteVaultItemFragment : DialogFragment() {
         }
         return dialog
     }
-
-    
 
     private fun onDialogShown(dialog: AlertDialog) {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {

@@ -3,8 +3,6 @@ package com.dashlane.util.clipboard
 import android.content.Context
 import com.dashlane.util.clipboard.vault.VaultItemClipboard
 
-
-
 interface CopyComponent {
     val clipboardCopy: ClipboardCopy
     val vaultItemClipboard: VaultItemClipboard

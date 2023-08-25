@@ -14,8 +14,6 @@ import com.dashlane.session.repository.UserCryptographyRepository
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-
-
 class BackupTokenObserver(
     private val api: DashlaneApi,
     private val userAccountStorage: UserAccountStorage,

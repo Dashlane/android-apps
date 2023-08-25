@@ -6,7 +6,9 @@ import com.dashlane.R
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-abstract class FabViewProxy(rootView: View) : BaseViewProxy<FabDef.IPresenter>(rootView), FabDef.IView,
+abstract class FabViewProxy(rootView: View) :
+    BaseViewProxy<FabDef.IPresenter>(rootView),
+    FabDef.IView,
     View.OnClickListener {
     val fabMenuHolder: FrameLayout = rootView.findViewById<FrameLayout>(R.id.fab_menu_holder).apply {
         setOnClickListener { hideFABMenu(true) }

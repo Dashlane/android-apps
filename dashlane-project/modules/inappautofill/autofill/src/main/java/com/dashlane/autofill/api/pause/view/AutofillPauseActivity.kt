@@ -12,19 +12,17 @@ import android.widget.RemoteViews
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.api.pause.AutofillApiPauseComponent
-import com.dashlane.autofill.api.pause.AutofillApiPauseLogger
 import com.dashlane.autofill.api.pause.model.PauseDurations
 import com.dashlane.autofill.api.ui.AutoFillResponseActivity
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-
-
+@AndroidEntryPoint
 class AutofillPauseActivity :
     CoroutineScope,
     AskPauseDialogContract,
@@ -35,12 +33,6 @@ class AutofillPauseActivity :
 
     private lateinit var summaryPackageName: String
     private lateinit var summaryWebDomain: String
-
-    private val pauseComponent: AutofillApiPauseComponent
-        get() = AutofillApiPauseComponent(this)
-
-    private val autofillApiPauseLogger: AutofillApiPauseLogger
-        get() = pauseComponent.autofillApiPauseLogger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,13 +47,6 @@ class AutofillPauseActivity :
             finish()
             return
         }
-
-        autofillApiPauseLogger.onClickPauseSuggestion(
-            summaryPackageName,
-            summaryWebDomain,
-            intent.getBooleanExtra(EXTRA_HAD_CREDENTIALS, false),
-            isLoggedIn
-        )
 
         openBottomSheetAuthentifiantsListDialog()
     }
@@ -81,38 +66,8 @@ class AutofillPauseActivity :
 
     override fun onPauseFormSourceDialogResponse(pauseDurations: PauseDurations?) {
         pauseDurations?.let {
-            logOnClickPauseOption(it)
             finishWithPauseResponse()
         } ?: finishWithAutoFillSuggestions()
-    }
-
-    private fun logOnClickPauseOption(pauseDurations: PauseDurations) {
-        when (pauseDurations) {
-            PauseDurations.ONE_HOUR -> {
-                autofillApiPauseLogger.onClickShortPause(
-                    summaryPackageName,
-                    summaryWebDomain,
-                    intent.getBooleanExtra(EXTRA_HAD_CREDENTIALS, false),
-                    isLoggedIn
-                )
-            }
-            PauseDurations.ONE_DAY -> {
-                autofillApiPauseLogger.onClickLongPause(
-                    summaryPackageName,
-                    summaryWebDomain,
-                    intent.getBooleanExtra(EXTRA_HAD_CREDENTIALS, false),
-                    isLoggedIn
-                )
-            }
-            PauseDurations.PERMANENT -> {
-                autofillApiPauseLogger.onClickDefinitePause(
-                    summaryPackageName,
-                    summaryWebDomain,
-                    intent.getBooleanExtra(EXTRA_HAD_CREDENTIALS, false),
-                    isLoggedIn
-                )
-            }
-        }
     }
 
     private fun finishWithPauseResponse() {

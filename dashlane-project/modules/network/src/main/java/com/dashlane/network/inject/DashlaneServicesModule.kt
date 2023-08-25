@@ -2,7 +2,6 @@ package com.dashlane.network.inject
 
 import com.dashlane.network.webservices.CrashReportUploadService
 import com.dashlane.network.webservices.DownloadFileService
-import com.dashlane.network.webservices.FeatureFlipService
 import com.dashlane.network.webservices.GetCountryService
 import com.dashlane.network.webservices.GetDevicesNumberService
 import com.dashlane.network.webservices.GetSharingLinkService
@@ -18,16 +17,11 @@ import dagger.Provides
 import retrofit2.Retrofit
 import retrofit2.create
 
-
-
 @Module(includes = [DashlaneApiEndpointsModule::class])
 class DashlaneServicesModule {
 
     @Provides
     fun getGetCountryService(@LegacyWebservicesApi retrofit: Retrofit): GetCountryService = retrofit.create()
-
-    @Provides
-    fun getUserFeatureService(@LegacyWebservicesApi retrofit: Retrofit): FeatureFlipService = retrofit.create()
 
     @Provides
     fun getPushNotificationService(@LegacyWebservicesApi retrofit: Retrofit): PushNotificationService =

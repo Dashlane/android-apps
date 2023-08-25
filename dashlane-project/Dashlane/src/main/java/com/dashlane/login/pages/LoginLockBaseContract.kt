@@ -4,8 +4,6 @@ import android.content.Intent
 import com.dashlane.login.lock.LockSetting
 import com.dashlane.useractivity.log.usage.UsageLog
 
-
-
 interface LoginLockBaseContract {
 
     interface ViewProxy : LoginBaseContract.View

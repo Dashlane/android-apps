@@ -10,8 +10,6 @@ import com.dashlane.attachment.ui.AttachmentItem
 import com.skocken.presentation.definition.Base
 import java.io.File
 
-
-
 interface AttachmentListContract {
 
     interface ViewProxy : Base.IView {

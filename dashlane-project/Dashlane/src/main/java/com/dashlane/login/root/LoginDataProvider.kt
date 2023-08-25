@@ -99,12 +99,14 @@ class LoginDataProvider @Inject constructor(
 
     override fun createPasswordDataProvider(
         registeredUserDevice: RegisteredUserDevice,
+        authTicket: String?,
         migrationToSsoMemberInfo: MigrationToSsoMemberInfo?,
         topicLock: String?,
         allowBypass: Boolean
     ): LoginPasswordContract.DataProvider =
         passwordDataProvider.get().also {
             it.registeredUserDevice = registeredUserDevice
+            it.authTicket = authTicket
             it.migrationToSsoMemberInfoProvider =
                 { migrationToSsoMemberInfo ?: pendingMigrationToSsoMemberInfo }
             topicLock?.let { topic ->

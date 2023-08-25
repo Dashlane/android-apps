@@ -8,8 +8,6 @@ import com.dashlane.authentication.AuthenticationInvalidEmailException
 import com.dashlane.authentication.AuthenticationNetworkException
 import com.dashlane.authentication.AuthenticationUnknownException
 
-
-
 interface AccountCreationEmailRepository {
     @Throws(
         AuthenticationEmptyEmailException::class,

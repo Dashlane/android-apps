@@ -1,13 +1,9 @@
 package com.dashlane.navigation
 
-
-
 object NavigationHelper {
 
     object Destination {
         const val SCHEME = "dashlane"
-
-        
 
         object MainPath {
             
@@ -34,6 +30,9 @@ object NavigationHelper {
             const val ITEMS = "items"
 
             
+            const val PASSWORD_GENERATOR = "password-generator"
+            const val PASSWORD_HEALTH = "password-health"
+            const val SHARING_CENTER = "sharing"
             const val VPN = "vpn"
             const val LOGIN = "login"
             const val IN_APP_LOGIN = "in-app-login"
@@ -41,6 +40,7 @@ object NavigationHelper {
             const val DARK_WEB_MONITORING = "dark-web-monitoring"
             const val DARK_WEB_MONITORING_PREMIUM_PROMPT = "dark-web-monitoring-premium-prompt"
             const val AUTHENTICATOR_TOOL = "authenticator"
+            const val SECRET_TRANSFER = "mplesslogin"
 
             
             const val PAYMENTS = "payments"

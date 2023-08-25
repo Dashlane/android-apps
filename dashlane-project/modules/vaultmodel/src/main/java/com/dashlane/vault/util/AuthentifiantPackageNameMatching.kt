@@ -2,18 +2,23 @@ package com.dashlane.vault.util
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.PackageUtilities
 import com.dashlane.vault.model.urls
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 
-
-
-fun SyncObject.Authentifiant.matchPackageName(context: Context, packageName: String): Boolean {
-    return (matchByPackageNameInVault(packageName) ||
-            matchByPackageNameKeywords(context, packageName)) &&
-            isNotIncorrectApplicationSignatureWith(context, packageName)
+fun SyncObject.Authentifiant.matchPackageName(
+    packageNameSignatureHelper: PackageNameSignatureHelper,
+    context: Context,
+    packageName: String
+): Boolean {
+    return (
+        matchByPackageNameInVault(packageName) ||
+            matchByPackageNameKeywords(context, packageName)
+    ) &&
+            isNotIncorrectApplicationSignatureWith(packageNameSignatureHelper, packageName)
 }
 
 private fun SyncObject.Authentifiant.matchByPackageNameInVault(packageName: String) =
@@ -32,10 +37,16 @@ fun SyncObject.Authentifiant.matchKeywords(keywords: Collection<String>): Boolea
     }
 }
 
-fun SummaryObject.Authentifiant.matchPackageName(context: Context, packageName: String): Boolean {
-    return (matchByPackageNameInVault(packageName) ||
-            matchByPackageNameKeywords(context, packageName)) &&
-            isNotIncorrectApplicationSignatureWith(context, packageName)
+fun SummaryObject.Authentifiant.matchPackageName(
+    packageNameSignatureHelper: PackageNameSignatureHelper,
+    context: Context,
+    packageName: String
+): Boolean {
+    return (
+        matchByPackageNameInVault(packageName) ||
+            matchByPackageNameKeywords(context, packageName)
+    ) &&
+            isNotIncorrectApplicationSignatureWith(packageNameSignatureHelper, packageName)
 }
 
 private fun SummaryObject.Authentifiant.matchByPackageNameInVault(packageName: String) =

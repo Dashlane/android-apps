@@ -64,8 +64,6 @@ class SyncRepositoryImpl @Inject constructor(
         }
     }
 
-    
-
     private suspend fun syncVault(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,

@@ -71,8 +71,10 @@ class ItemScreenConfigurationCreditCardProvider(
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     override val logger = CreditCardLogger(
@@ -354,7 +356,8 @@ class ItemScreenConfigurationCreditCardProvider(
                 editMode -> ItemEditValueListSubView(
                     address,
                     selectedAddress,
-                    addressList.map { it.first }) { it, value -> it.copyForUpdatedBillingAddress(addressList, value) }
+                    addressList.map { it.first }
+                ) { it, value -> it.copyForUpdatedBillingAddress(addressList, value) }
                 else -> ItemReadValueListSubView(address, selectedAddress, addressList.map { it.first })
             }
         } else {
@@ -630,10 +633,14 @@ class ItemScreenConfigurationCreditCardProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 cardNumberView,
-                CopyAction(item.toSummary(), CopyField.PaymentsNumber, action = {
+                CopyAction(
+                    item.toSummary(),
+                    CopyField.PaymentsNumber,
+                    action = {
                     logger.logCopyCardNumber()
                 }
-                ))
+                )
+            )
         }
     }
 
@@ -654,8 +661,6 @@ class ItemScreenConfigurationCreditCardProvider(
         )
     }
 
-    
-
     @Suppress("UNCHECKED_CAST")
     private fun initializeAddressList(defaultLabel: String): List<Pair<String, String?>> {
         val addressList = arrayListOf<Pair<String, String?>>()
@@ -672,8 +677,6 @@ class ItemScreenConfigurationCreditCardProvider(
         }
         return addressList
     }
-
-    
 
     private fun mayAskForNfc(
         context: Context,
@@ -725,8 +728,6 @@ class ItemScreenConfigurationCreditCardProvider(
         )
     }
 }
-
-
 
 private fun YearMonth.formatToShortDate() =
     "%02d - %02d".format(monthValue, year % 100)

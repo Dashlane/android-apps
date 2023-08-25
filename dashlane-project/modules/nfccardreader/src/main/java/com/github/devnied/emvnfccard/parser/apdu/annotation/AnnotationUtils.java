@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.parser.apdu.annotation;
 
 import com.github.devnied.emvnfccard.iso7816emv.ITag;
@@ -13,39 +11,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-
-
 public final class AnnotationUtils {
-
-	
 
 	@SuppressWarnings("unchecked")
 	private static final Class<? extends IFile>[] LISTE_CLASS = new Class[] { EmvTransactionRecord.class, CPLC.class };
 
-	
-
 	private static final AnnotationUtils INSTANCE = new AnnotationUtils();
-
-	
 
 	public static AnnotationUtils getInstance() {
 		return INSTANCE;
 	}
 
-	
-
 	private final Map<String, Map<ITag, AnnotationData>> map;
 	private final Map<String, Set<AnnotationData>> mapSet;
-
-	
 
 	private AnnotationUtils() {
 		map = new HashMap<String, Map<ITag, AnnotationData>>();
 		mapSet = new HashMap<String, Set<AnnotationData>>();
 		extractAnnotation();
 	}
-
-	
 
 	private void extractAnnotation() {
 		for (Class<? extends IFile> clazz : LISTE_CLASS) {
@@ -74,13 +58,9 @@ public final class AnnotationUtils {
 		}
 	}
 
-	
-
 	public Map<String, Set<AnnotationData>> getMapSet() {
 		return mapSet;
 	}
-
-	
 
 	public Map<String, Map<ITag, AnnotationData>> getMap() {
 		return map;

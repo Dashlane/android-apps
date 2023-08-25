@@ -3,37 +3,22 @@ package com.dashlane.abtesting
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.VisibleForTesting
-import com.dashlane.useractivity.log.install.InstallLogCode75
-import com.dashlane.useractivity.log.install.InstallLogRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.security.SecureRandom
 import java.util.Random
 import javax.inject.Inject
 
-
-
 class LocalAbTestManager constructor(
     private val sharedPreferences: SharedPreferences,
-    private val installLogCodeRepository: InstallLogRepository,
     private val random: Random = SecureRandom()
 ) {
 
     @Inject
-    constructor(
-        @ApplicationContext context: Context,
-        installLogCodeRepository: InstallLogRepository
-    ) : this(
-        context.getSharedPreferences(SHARED_PREFERENCES_PREFIX, Context.MODE_PRIVATE),
-        installLogCodeRepository
-    )
-
-    
+    constructor(@ApplicationContext context: Context) : this(context.getSharedPreferences(SHARED_PREFERENCES_PREFIX, Context.MODE_PRIVATE))
 
     fun getVariant(localAbTest: LocalAbTest): Variant {
         return getVariant(localAbTest.testName, localAbTest.variants)
     }
-
-    
 
     fun getStoredVariant(localAbTest: LocalAbTest): Variant? {
         return getStoredVariant(localAbTest.testName, localAbTest.variants)
@@ -49,23 +34,6 @@ class LocalAbTestManager constructor(
 
     fun getSelectionDate(test: LocalAbTest): Long? {
         return sharedPreferences.getLong("${test.testName}$SELECTION_DATE_SUFFIX", System.currentTimeMillis())
-    }
-
-    
-
-    fun assignAndLogExperiment(abTest: LocalAbTest) {
-        val variant = getVariant(abTest)
-        logExperiment(abTest, variant)
-    }
-
-    private fun logExperiment(abTest: LocalAbTest, variant: Variant) {
-        installLogCodeRepository.enqueue(
-            InstallLogCode75(
-                experimentId = abTest.testName.lowercase(),
-                variantId = variant.name
-            ),
-            true
-        )
     }
 
     @Suppress("SharedPreferencesSecurity")

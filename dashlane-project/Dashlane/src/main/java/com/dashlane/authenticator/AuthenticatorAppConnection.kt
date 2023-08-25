@@ -42,16 +42,12 @@ class AuthenticatorAppConnection @Inject constructor(
             )
         }
 
-    
-
     val otpLogin
         get() = otpsForBackup.mapNotNull { it.user }
             .filter { CreateAccountService.Request.Login.regex.matches(it) }
             .toSet()
             .takeIf { it.size == 1 }
             ?.first()
-
-    
 
     fun loadOtpsForBackup() {
         _otpsForBackup.value = emptyList()

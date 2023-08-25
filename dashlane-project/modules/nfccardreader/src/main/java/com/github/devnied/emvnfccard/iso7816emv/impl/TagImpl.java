@@ -1,16 +1,12 @@
 package com.github.devnied.emvnfccard.iso7816emv.impl;
 
 
-
-
 import com.github.devnied.emvnfccard.enums.TagTypeEnum;
 import com.github.devnied.emvnfccard.enums.TagValueTypeEnum;
 import com.github.devnied.emvnfccard.iso7816emv.ITag;
 import com.github.devnied.emvnfccard.utils.BytesUtils;
 
 import java.util.Arrays;
-
-
 
 public final class TagImpl implements ITag {
 

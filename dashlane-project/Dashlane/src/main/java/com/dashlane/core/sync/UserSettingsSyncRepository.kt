@@ -11,8 +11,6 @@ import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import javax.inject.Inject
 
-
-
 class UserSettingsSyncRepository @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val sessionManager: SessionManager,

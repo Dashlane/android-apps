@@ -1,7 +1,6 @@
 package com.dashlane.dagger.singleton
 
 import com.dashlane.autofill.api.dagger.AutofillApiActionsSourcesComponentModule
-import com.dashlane.autofill.api.dagger.AutofillApiChangePauseComponentModule
 import com.dashlane.autofill.api.dagger.AutofillApiComponentBindModule
 import com.dashlane.autofill.api.dagger.AutofillApiComponentModule
 import com.dashlane.autofill.api.dagger.AutofillApiPauseComponentModule
@@ -9,7 +8,6 @@ import com.dashlane.autofill.api.dagger.AutofillApiRememberAccountComponentModul
 import com.dashlane.autofill.api.dagger.AutofillApiTotpComponentModule
 import com.dashlane.autofill.api.dagger.AutofillApiUnlinkAccountsComponentModule
 import com.dashlane.autofill.api.dagger.AutofillApiViewAllAccountsComponentModule
-import com.dashlane.autofill.api.dagger.MonitorAutofillIssuesComponentModule
 import com.dashlane.autofill.api.followup.FollowUpNotificationComponentExternalModule
 import com.dashlane.followupnotification.FollowUpNotificationComponentModule
 import com.dashlane.masterpassword.dagger.ChangeMasterPasswordModule
@@ -50,9 +48,7 @@ import dagger.hilt.components.SingletonComponent
         AutofillApiTotpComponentModule::class,
         AutofillApiRememberAccountComponentModule::class,
         AutofillApiActionsSourcesComponentModule::class,
-        AutofillApiChangePauseComponentModule::class,
         AutofillApiUnlinkAccountsComponentModule::class,
-        MonitorAutofillIssuesComponentModule::class,
         UserActivityModule::class,
         OffersModule::class,
         MenuModule::class,

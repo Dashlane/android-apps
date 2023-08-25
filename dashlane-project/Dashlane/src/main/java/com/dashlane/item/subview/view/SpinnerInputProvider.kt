@@ -15,8 +15,6 @@ import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId
 
-
-
 object SpinnerInputProvider {
     fun create(
         context: Context,
@@ -27,7 +25,6 @@ object SpinnerInputProvider {
         currentValueChangeManager: ValueChangeManager<String>? = null,
         selectionAction: (Int) -> Unit = { _ -> }
     ): LinearLayout {
-
         val adapter = SpinnerAdapterDefaultValueString(
             context,
             R.layout.spinner_item_dropdown,
@@ -61,7 +58,6 @@ object SpinnerInputProvider {
         selectionAction: ((Int) -> Unit)? = null
     ): Spinner {
         return Spinner(context).apply {
-
             id = R.id.item_subview_spinner
             this.adapter = adapter
             var indexItem = indexOf(defaultValue)
@@ -124,7 +120,8 @@ object SpinnerInputProvider {
             enableStateValueChangeManager, selectionAction
         )
 
-        layout.addView(TextView(context).apply {
+        layout.addView(
+            TextView(context).apply {
             text = title
             id = R.id.item_subview_title
             setTextAppearance(context.getThemeAttrResourceId(R.attr.textAppearanceBody2))
@@ -135,13 +132,16 @@ object SpinnerInputProvider {
             ).apply {
                 marginStart = context.dpToPx(4f).toInt()
             }
-        })
-        layout.addView(spinner.apply {
+        }
+        )
+        layout.addView(
+            spinner.apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-        })
+        }
+        )
         return layout
     }
 

@@ -11,8 +11,6 @@ import com.dashlane.autofill.api.unlinkaccount.dagger.DaggerUnlinkAccountsViewMo
 import com.dashlane.autofill.api.unlinkaccount.dagger.UnlinkAccountsViewModelComponent
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 
-
-
 class UnlinkAccountsViewModel(application: Application, autoFillFormSource: AutoFillFormSource) : ViewModel() {
     val component: UnlinkAccountsViewModelComponent = DaggerUnlinkAccountsViewModelComponent.factory()
         .create(

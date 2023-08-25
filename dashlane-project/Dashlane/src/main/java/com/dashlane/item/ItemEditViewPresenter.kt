@@ -9,7 +9,9 @@ import android.widget.Toast
 import com.dashlane.R
 import com.dashlane.attachment.ui.AttachmentListActivity
 import com.dashlane.authenticator.Otp
+import com.dashlane.item.collection.CollectionSelectorActivity
 import com.dashlane.item.linkedwebsites.LinkedServicesActivity
+import com.dashlane.item.subview.ItemCollectionListSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.item.subview.action.NewShareAction
@@ -38,7 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, ItemEditViewContract.View>(),
+class ItemEditViewPresenter :
+    BasePresenter<ItemEditViewContract.DataProvider, ItemEditViewContract.View>(),
     ItemEditViewContract.Presenter {
 
     override val isSecureNote: Boolean
@@ -91,7 +94,8 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
                 allMenus.add(NewShareMenuAction(vaultItem))
             }
             if (provider.isEditMode) {
-                allMenus.add(MenuAction(
+                allMenus.add(
+                    MenuAction(
                     R.string.dashlane_save,
                     R.drawable.save,
                     MenuItem.SHOW_AS_ACTION_ALWAYS
@@ -101,15 +105,18 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
                             handleSuccess(vaultItem)
                         }
                     }
-                })
+                }
+                )
             } else if (sharingPolicyDataProvider.canEditItem(vaultItem.toSummary(), isNewItem(vaultItem))) {
-                allMenus.add(MenuAction(
+                allMenus.add(
+                    MenuAction(
                     R.string.edit,
                     R.drawable.edit,
                     MenuItem.SHOW_AS_ACTION_ALWAYS
                 ) {
                     setupEditMode()
-                })
+                }
+                )
             }
         }
         view.setMenus(allMenus, menu)
@@ -154,6 +161,17 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
         }
     }
 
+    private fun addCollections(collections: List<String>) {
+        val subviews = provider.getScreenConfiguration().itemSubViews
+        subviews.forEach { subview ->
+            when (subview) {
+                is ItemCollectionListSubView -> {
+                    subview.value.value = (subview.value.value.toMutableList() + collections).sorted()
+                }
+            }
+        }
+    }
+
     override fun onBackPressed() {
         DeviceUtils.hideKeyboard(activity)
         askForSaveOrExit()
@@ -175,13 +193,7 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             ShareDetailsAction.SHOW_SHARING_DETAILS_REQUEST_CODE -> {
-                if (data == null || !data.getBooleanExtra(ShareDetailsAction.EXTRA_UID_CHANGED, false)) {
-                    
-                    setup(context!!, currentOptions)
-                } else {
-                    
-                    activity!!.finish()
-                }
+                handleSharingDetailsResult(data)
             }
             NewShareAction.NEW_SHARE_REQUEST_CODE,
             ItemScreenConfigurationAuthentifiantProvider.GUIDED_PASSWORD_CHANGE_REQUEST_CODE -> {
@@ -189,48 +201,82 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
                 setup(context!!, currentOptions)
             }
             AttachmentListActivity.REQUEST_CODE_ATTACHMENT_LIST -> {
-                if (resultCode != Activity.RESULT_OK || data == null) return
-
-                val hasAttachmentChanged =
-                    data.getBooleanExtra(AttachmentListActivity.EXTRA_HAVE_ATTACHMENTS_CHANGED, false)
-                if (hasAttachmentChanged) {
-                    
-                    val newAttachments = data.getStringExtra(AttachmentListActivity.EXTRA_ATTACHMENTS_STRING)
-                    coroutineScope.launch(Dispatchers.Main) {
-                        
-                        
-                        setupJob?.join()
-                        provider.save(context!!, provider.getScreenConfiguration().itemSubViews, newAttachments)
-                        
-                        setup(context!!, currentOptions)
-                    }
-                }
+                handleAttachmentListResult(resultCode, data)
             }
             LinkedServicesActivity.SHOW_LINKED_SERVICES -> {
-                
-                val linkedWebsites =
-                    data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_WEBSITES)?.toList()
-                val linkedApps = data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_APPS)?.toList()
-                if (linkedWebsites != null || linkedApps != null) {
-                    provider.setTemporaryLinkedServices(context!!, view.listener, linkedWebsites, linkedApps)
-                    coroutineScope.launch(Dispatchers.Main) {
-                        setupJob?.join()
-                        refreshUi(toolbarCollapsed = currentOptions.toolbarCollapsed)
-                    }
-                }
-
-                if (resultCode == LinkedServicesActivity.RESULT_DATA_SAVED) {
-                    
-                    view.showSaveConfirmation()
-
-                    coroutineScope.launch(Dispatchers.Main) {
-                        setupJob?.join()
-                        
-                        setup(context!!, currentOptions.copy(forceEdit = provider.isEditMode))
-                    }
-                }
+                handleLinkedServicesResult(data, resultCode)
+            }
+            CollectionSelectorActivity.SHOW_COLLECTION_SELECTOR -> {
+                handleCollectionSelectorResult(data)
             }
             else -> view.listener.notifyPotentialBarCodeScan(requestCode, resultCode, data)
+        }
+    }
+
+    private fun handleAttachmentListResult(resultCode: Int, data: Intent?) {
+        if (resultCode != Activity.RESULT_OK || data == null) return
+
+        val hasAttachmentChanged =
+            data.getBooleanExtra(AttachmentListActivity.EXTRA_HAVE_ATTACHMENTS_CHANGED, false)
+        if (hasAttachmentChanged) {
+            
+            val newAttachments = data.getStringExtra(AttachmentListActivity.EXTRA_ATTACHMENTS_STRING)
+            coroutineScope.launch(Dispatchers.Main) {
+                
+                
+                setupJob?.join()
+                provider.save(context!!, provider.getScreenConfiguration().itemSubViews, newAttachments)
+                
+                setup(context!!, currentOptions)
+            }
+        }
+    }
+
+    private fun handleSharingDetailsResult(data: Intent?) {
+        if (data == null || !data.getBooleanExtra(ShareDetailsAction.EXTRA_UID_CHANGED, false)) {
+            
+            setup(context!!, currentOptions)
+        } else {
+            
+            activity!!.finish()
+        }
+    }
+
+    private fun handleLinkedServicesResult(data: Intent?, resultCode: Int) {
+        
+        val linkedWebsites =
+            data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_WEBSITES)?.toList()
+        val linkedApps = data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_APPS)?.toList()
+        if (linkedWebsites != null || linkedApps != null) {
+            provider.setTemporaryLinkedServices(context!!, view.listener, linkedWebsites, linkedApps)
+            coroutineScope.launch(Dispatchers.Main) {
+                setupJob?.join()
+                refreshUi(toolbarCollapsed = currentOptions.toolbarCollapsed)
+            }
+        }
+
+        if (resultCode == LinkedServicesActivity.RESULT_DATA_SAVED) {
+            
+            view.showSaveConfirmation()
+
+            coroutineScope.launch(Dispatchers.Main) {
+                setupJob?.join()
+                
+                setup(context!!, currentOptions.copy(forceEdit = provider.isEditMode))
+            }
+        }
+    }
+
+    private fun handleCollectionSelectorResult(data: Intent?) {
+        coroutineScope.launch(Dispatchers.Main) {
+            setupJob?.join()
+            val selectedCollections =
+                data?.getStringArrayExtra(CollectionSelectorActivity.RESULT_TEMPORARY_COLLECTIONS)?.toList()
+            selectedCollections?.let { addCollections(it) }
+
+            if (!provider.isEditMode) {
+                provider.save(context!!, provider.getScreenConfiguration().itemSubViews)
+            }
         }
     }
 
@@ -242,13 +288,9 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
         return view.isToolbarCollapsed
     }
 
-    
-
     private fun refreshUi(toolbarCollapsed: Boolean, isChangingMode: Boolean = false) {
         view.setConfiguration(provider.getScreenConfiguration(), provider.isEditMode, toolbarCollapsed, isChangingMode)
     }
-
-    
 
     private fun setupViewMode(item: VaultItem<*>) {
         if (item.syncObject is SyncObject.SecureNote) {
@@ -266,8 +308,6 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
             refreshUi(toolbarCollapsed = false, isChangingMode = true)
         }
     }
-
-    
 
     private fun setupEditMode() {
         provider.changeMode(context!!, true, view.listener)
@@ -291,8 +331,6 @@ class ItemEditViewPresenter : BasePresenter<ItemEditViewContract.DataProvider, I
             }
         }
     }
-
-    
 
     private fun askForSaveOrExit() {
         if (!provider.isSetup || !provider.isEditMode) {

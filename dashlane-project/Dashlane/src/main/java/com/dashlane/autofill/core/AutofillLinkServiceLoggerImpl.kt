@@ -34,13 +34,17 @@ class AutofillLinkServiceLoggerImpl @Inject constructor(
         itemUrl: String?,
         autoFillFormSource: AutoFillFormSource
     ) {
+        val fieldEdited = when (autoFillFormSource) {
+            is ApplicationFormSource -> Field.ASSOCIATED_APPS_LIST
+            is WebDomainFormSource -> Field.ASSOCIATED_WEBSITES_LIST
+        }
         logRepository.queueEvent(
             CallToAction(false, listOf(LINK_WEBSITE, DO_NOT_LINK_WEBSITE), LINK_WEBSITE)
         )
         logRepository.queueEvent(
             UpdateVaultItem(
                 action = Action.EDIT,
-                fieldsEdited = listOf(Field.ASSOCIATED_WEBSITES_LIST),
+                fieldsEdited = listOf(fieldEdited),
                 itemId = ItemId(id = itemId),
                 itemType = ItemType.CREDENTIAL,
                 space = space
@@ -55,7 +59,7 @@ class AutofillLinkServiceLoggerImpl @Inject constructor(
         logRepository.queueEvent(
             UpdateCredentialAnonymous(
                 action = Action.EDIT,
-                fieldList = listOf(Field.ASSOCIATED_WEBSITES_LIST),
+                fieldList = listOf(fieldEdited),
                 domain = TrackingLogUtils.createWebDomainForLog(itemUrl.orEmpty()),
                 space = space,
                 associatedWebsitesAddedList = linkedWebsite?.let { listOf(Sha256Hash.of(it)) },

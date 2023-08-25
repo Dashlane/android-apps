@@ -2,8 +2,6 @@ package com.dashlane.lock
 
 import android.app.Activity
 
-
-
 interface LockWatcher {
 
     interface Listener : UnlockListener {
@@ -14,23 +12,13 @@ interface LockWatcher {
         fun onUnlockEvent(unlockEvent: UnlockEvent)
     }
 
-    
-
     fun sendLockEvent()
-
-    
 
     fun sendUnlockEvent(unlockEvent: UnlockEvent)
 
-    
-
     fun register(listener: Listener)
 
-    
-
     fun unregister(listener: Listener)
-
-    
 
     suspend fun waitUnlock()
 

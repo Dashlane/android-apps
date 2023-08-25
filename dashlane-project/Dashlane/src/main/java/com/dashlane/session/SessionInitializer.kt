@@ -3,11 +3,7 @@ package com.dashlane.session
 import com.dashlane.login.LoginMode
 import com.dashlane.xml.domain.SyncObject
 
-
-
 interface SessionInitializer {
-
-    
 
     suspend fun createSession(
         username: Username,

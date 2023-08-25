@@ -7,19 +7,16 @@ import com.dashlane.authentication.accountsmanager.AccountsManager
 import com.dashlane.util.Toaster
 import javax.inject.Inject
 
-
-
 internal class DebugCategoryAccountsManager @Inject constructor(
     debugActivity: Activity,
-    val accountsManager: AccountsManager,
-    val toaster: Toaster
+    private val accountsManager: AccountsManager,
+    private val toaster: Toaster
 ) : AbstractDebugCategory(debugActivity) {
 
-    internal override fun getName(): String {
-        return "Accounts Manager"
-    }
+    override val name: String
+        get() = "Accounts Manager"
 
-    internal override fun addSubItems(group: PreferenceGroup) {
+    override fun addSubItems(group: PreferenceGroup) {
         addPreferenceButton(group, "Clear", "Remove all accounts in AccountsManager") {
             accountsManager.clearAllAccounts()
             toaster.show("Accounts cleared", Toast.LENGTH_SHORT)

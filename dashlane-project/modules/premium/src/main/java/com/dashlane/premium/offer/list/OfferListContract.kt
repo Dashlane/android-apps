@@ -5,12 +5,8 @@ import com.dashlane.premium.offer.common.model.Offers
 import com.dashlane.premium.offer.common.model.OffersState
 import com.skocken.presentation.definition.Base
 
-
-
 internal interface OfferListContract {
     interface ViewProxy : Base.IView {
-        
-
         fun showAvailableOffers(offers: Offers)
 
         fun showEmptyState()
@@ -21,8 +17,6 @@ internal interface OfferListContract {
     }
 
     interface DataProvider : Base.IDataProvider {
-        
-
         suspend fun getOffers(): OffersState
     }
 

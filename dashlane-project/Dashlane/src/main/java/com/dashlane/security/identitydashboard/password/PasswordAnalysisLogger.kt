@@ -8,8 +8,6 @@ import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.inject.OptionalProvider
 import kotlin.math.roundToInt
 
-
-
 class PasswordAnalysisLogger(
     private val sessionManager: SessionManager,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,

@@ -7,7 +7,6 @@ import com.dashlane.darkweb.ui.setup.DarkWebSetupMailActivity
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
-import com.dashlane.useractivity.log.inject.UserActivityComponent
 import com.skocken.presentation.presenter.BasePresenter
 
 class DarkWebSetupIntroActivity : DashlaneActivity() {
@@ -15,28 +14,16 @@ class DarkWebSetupIntroActivity : DashlaneActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val origin = intent?.getStringExtra(ORIGIN_KEY)
 
         setContentView(R.layout.activity_intro)
         presenter = Presenter()
 
-        val usageLogRepository = UserActivityComponent(this).currentSessionUsageLogRepository
-        val logger: DarkWebSetupIntroLogger = DarkWebSetupIntroLoggerImpl(usageLogRepository)
-        presenter.logger = logger
         presenter.setView(IntroScreenViewProxy(this))
-
-        logger.takeIf { savedInstanceState == null }?.logShow(origin)
     }
 
-    companion object {
-
-        const val ORIGIN_KEY = "origin"
-    }
-
-    private class Presenter : BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
+    private class Presenter :
+        BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
         IntroScreenContract.Presenter {
-
-        lateinit var logger: DarkWebSetupIntroLogger
 
         override fun onViewChanged() {
             super.onViewChanged()
@@ -52,13 +39,11 @@ class DarkWebSetupIntroActivity : DashlaneActivity() {
         override fun onClickPositiveButton() {
             val activity = activity ?: return
             val intent = Intent(activity, DarkWebSetupMailActivity::class.java)
-            logger.logNext()
             activity.startActivity(intent)
             activity.finish()
         }
 
         override fun onClickNegativeButton() {
-            logger.logCancel()
             activity?.finish()
         }
 

@@ -11,11 +11,7 @@ import com.dashlane.navigation.NavigationHelper.Destination.SecondaryPath
 import com.dashlane.navigation.NavigationHelper.Destination.SecondaryPath.GetPremium
 import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.premium.paywall.common.PaywallIntroType
-import com.dashlane.util.logE
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObjectType
-
-
 
 class NavDeepLinkHelper(
     private val navigator: Navigator
@@ -104,7 +100,7 @@ class NavDeepLinkHelper(
                         navigator.goToCredentialAddStep1(origin)
                     }
                     else -> {
-                        navigator.goToCreateItem(dataType.desktopId)
+                        navigator.goToCreateItem(dataType.xmlObjectName)
                     }
                 }
             }
@@ -112,9 +108,8 @@ class NavDeepLinkHelper(
                 handleSharingItemDeepLink(uid, path, dataType, origin)
             else -> {
                 if (uid == null) {
-                    logE { "Deeplink to item don't have any id provided" }
                 } else {
-                    navigator.goToItem(uid, dataType.desktopId)
+                    navigator.goToItem(uid, dataType.xmlObjectName)
                 }
             }
         }

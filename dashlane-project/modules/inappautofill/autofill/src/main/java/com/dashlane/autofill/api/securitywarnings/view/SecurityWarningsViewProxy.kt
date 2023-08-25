@@ -7,6 +7,9 @@ import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.internal.AutofillFormSourcesStrings
 import com.dashlane.autofill.api.securitywarnings.AutofillSecurityWarningsLogger
+import com.dashlane.autofill.api.securitywarnings.data.SecurityWarningAction
+import com.dashlane.autofill.api.securitywarnings.data.SecurityWarningType
+import com.dashlane.autofill.api.securitywarnings.data.getDomain
 import com.dashlane.autofill.api.securitywarnings.model.RememberSecurityWarningsService
 import com.dashlane.autofill.api.securitywarnings.model.SecurityWarningsProcessor
 import com.dashlane.autofill.api.securitywarnings.model.SecurityWarningsView
@@ -14,17 +17,11 @@ import com.dashlane.autofill.api.ui.AutoFillResponseActivity
 import com.dashlane.autofill.api.ui.AutofillFeature
 import com.dashlane.autofill.api.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
-import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.autofill.formdetector.model.WebDomainFormSource
-import com.dashlane.hermes.Sha256Hash
-import com.dashlane.hermes.generated.definitions.Domain
-import com.dashlane.hermes.generated.definitions.DomainType
 import com.dashlane.hermes.generated.definitions.MatchType
-import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.Toaster
+import com.dashlane.util.getParcelableCompat
+import com.dashlane.util.getSerializableCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
-
-
 
 internal open class SecurityWarningsViewProxy(
     private val autoFillResponseActivity: AutoFillResponseActivity,
@@ -36,10 +33,7 @@ internal open class SecurityWarningsViewProxy(
     private val autofillFormSourcesStrings: AutofillFormSourcesStrings,
     protected val toaster: Toaster,
     private val matchType: MatchType
-) : SecurityWarningsView,
-    BottomSheetMismatchSecurityWarningDialogFragment.Actions,
-    BottomSheetUnknownSecurityWarningDialogFragment.Actions,
-    IncorrectSecurityWarningDialogFragment.Actions {
+) : SecurityWarningsView {
 
     private val securityWarningsProcessor: SecurityWarningsProcessor by lazy(LazyThreadSafetyMode.NONE) {
         SecurityWarningsProcessor(
@@ -49,6 +43,62 @@ internal open class SecurityWarningsViewProxy(
             securityWarningsLogger,
             rememberSecurityWarningsService
         )
+    }
+
+    init {
+        autoFillResponseActivity.supportFragmentManager.setFragmentResultListener(
+            SECURITY_WARNING_ACTION_RESULT,
+            autoFillResponseActivity
+        ) { _, bundle ->
+            val securityWarningType = bundle.getParcelableCompat<SecurityWarningType>(PARAMS_WARNING_TYPE)!!
+            val action = bundle.getSerializableCompat<SecurityWarningAction>(PARAMS_ACTION)!!
+            when (securityWarningType) {
+                is SecurityWarningType.Incorrect -> incorrectAction(securityWarningType, action)
+                is SecurityWarningType.Mismatch -> mismatchAction(securityWarningType, action)
+                is SecurityWarningType.Unknown -> unknownAction(securityWarningType, action)
+            }
+        }
+    }
+
+    private fun incorrectAction(securityWarningType: SecurityWarningType, action: SecurityWarningAction) {
+        when (action) {
+            SecurityWarningAction.POSITIVE -> securityWarningsProcessor.incorrectWarningPositiveClick(
+                securityWarningType.doNotShowAgainChecked,
+                securityWarningType.formSource.getDomain()
+            )
+            SecurityWarningAction.NEGATIVE -> securityWarningsProcessor.incorrectWarningNegativeClick(
+                securityWarningType.formSource.getDomain()
+            )
+            SecurityWarningAction.CANCEL -> securityWarningsProcessor.incorrectWarningCancelClick(
+                securityWarningType.formSource.getDomain()
+            )
+        }
+    }
+
+    private fun mismatchAction(securityWarningType: SecurityWarningType, action: SecurityWarningAction) {
+        when (action) {
+            SecurityWarningAction.POSITIVE -> securityWarningsProcessor.mismatchWarningPositiveClick(
+                securityWarningType.doNotShowAgainChecked,
+                securityWarningType.formSource.getDomain()
+            )
+            SecurityWarningAction.NEGATIVE -> securityWarningsProcessor.onCloseSecurityWarningWithDeny(
+                securityWarningType.formSource.getDomain()
+            )
+            SecurityWarningAction.CANCEL -> securityWarningsProcessor.mismatchWarningCancelClick(
+                securityWarningType.formSource.getDomain()
+            )
+        }
+    }
+
+    private fun unknownAction(securityWarningType: SecurityWarningType, action: SecurityWarningAction) {
+        when (action) {
+            SecurityWarningAction.POSITIVE -> securityWarningsProcessor.unknownWarningPositiveClick(
+                securityWarningType.formSource.getDomain()
+            )
+            SecurityWarningAction.NEGATIVE, SecurityWarningAction.CANCEL -> securityWarningsProcessor.onCloseSecurityWarningWithDeny(
+                securityWarningType.formSource.getDomain()
+            )
+        }
     }
 
     fun dealWithSecurityBeforeFill(unlockedAuthentifiant: UnlockedAuthentifiant) {
@@ -116,41 +166,9 @@ internal open class SecurityWarningsViewProxy(
         }
     }
 
-    override fun mismatchDialogPositiveAction(doNotShowAgainChecked: Boolean, domain: Domain) =
-        securityWarningsProcessor.mismatchWarningPositiveClick(doNotShowAgainChecked, domain)
-
-    override fun mismatchDialogNegativeAction(domain: Domain) =
-        securityWarningsProcessor.onCloseSecurityWarningWithDeny(domain)
-
-    override fun mismatchDialogCancelAction(domain: Domain) =
-        securityWarningsProcessor.mismatchWarningCancelClick(domain)
-
-    override fun unknownDialogPositiveAction(domain: Domain) =
-        securityWarningsProcessor.unknownWarningPositiveClick(domain)
-
-    override fun unknownDialogNegativeAction(domain: Domain) =
-        securityWarningsProcessor.onCloseSecurityWarningWithDeny(domain)
-
-    override fun unknownDialogCancelAction(domain: Domain) =
-        securityWarningsProcessor.onCloseSecurityWarningWithDeny(domain)
-
-    override fun incorrectDialogPositiveAction(doNotShowAgainChecked: Boolean, domain: Domain) =
-        securityWarningsProcessor.incorrectWarningPositiveClick(doNotShowAgainChecked, domain)
-
-    override fun incorrectDialogNegativeAction(domain: Domain) =
-        securityWarningsProcessor.incorrectWarningNegativeClick(domain)
-
-    override fun incorrectDialogCancelAction(domain: Domain) =
-        securityWarningsProcessor.incorrectWarningCancelClick(domain)
-}
-
-internal fun AutoFillFormSource?.getDomain(): Domain = when (this) {
-    is ApplicationFormSource -> Domain(Sha256Hash.of(packageName), DomainType.APP)
-    is WebDomainFormSource -> Domain(
-        id = webDomain.toUrlDomainOrNull()?.root?.value?.let {
-            Sha256Hash.of(it)
-        },
-        type = DomainType.WEB
-    )
-    else -> Domain(type = DomainType.APP)
+    companion object {
+        const val SECURITY_WARNING_ACTION_RESULT = "security_warning_action_result"
+        const val PARAMS_ACTION = "params_action"
+        const val PARAMS_WARNING_TYPE = "params_warning_type"
+    }
 }

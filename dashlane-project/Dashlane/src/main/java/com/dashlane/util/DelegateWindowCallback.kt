@@ -11,8 +11,6 @@ import android.view.Window
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 
-
-
 abstract class DelegateWindowCallback(private val originalCallback: Window.Callback?) : Window.Callback {
 
     override fun onActionModeFinished(mode: ActionMode?) {

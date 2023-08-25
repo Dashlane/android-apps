@@ -14,10 +14,6 @@ class LoginDashlaneAuthenticatorProvider @Inject constructor(
     override val username: String
         get() = secondFactor.login
 
-    override fun onShow() = Unit
-
-    override fun onBack() = Unit
-
     override suspend fun executeAuthenticatorAuthentication() = secondFactoryRepository.validate(
         checkNotNull(secondFactor.authenticator) {
             "AuthenticationSecondFactor's authenticator must not be null here"

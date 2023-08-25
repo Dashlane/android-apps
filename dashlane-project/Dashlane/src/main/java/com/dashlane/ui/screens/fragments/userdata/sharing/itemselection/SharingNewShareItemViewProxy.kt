@@ -71,7 +71,8 @@ class SharingNewShareItemViewProxy(
             clear()
             add(
                 SharingItemSelectionEmptyScreen.newInstance(
-                    context, dataType,
+                    context,
+                    dataType,
                     query.isNotSemanticallyNull()
                 )
             )

@@ -31,11 +31,13 @@ class RememberToLinkedAppsMigration @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     suspend fun migrate() {
         getAllRemembered().forEach { rememberedFormSource ->
-            vaultDataQuery.query(VaultFilter().apply {
+            vaultDataQuery.query(
+                VaultFilter().apply {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)
                 specificUid(rememberedFormSource.authentifiantId)
-            })?.let { vaultItem ->
+            }
+            )?.let { vaultItem ->
                 vaultItem as VaultItem<SyncObject.Authentifiant>
                 val toSaveVaultItem = vaultItem.copySyncObject {
                     this.linkedServices = createAndMergeLinkedService(
@@ -45,19 +47,28 @@ class RememberToLinkedAppsMigration @Inject constructor(
                 }.copyWithAttrs {
                     syncState = SyncState.MODIFIED
                 }
-                runCatching { dataSaver.save(toSaveVaultItem) }.getOrElse { false }.let {
-                    
-                    
-
-                }
+                runCatching { dataSaver.save(toSaveVaultItem) }
+                    .getOrElse { false }
+                    .takeIf { it }
+                    ?.let {
+                        unlinkRemember(rememberedFormSource)
+                    }
             }
         }
     }
 
-    
-
-    
-
+    private suspend fun unlinkRemember(rememberedFormSource: RememberedFormSource) {
+        when (rememberedFormSource.autoFillFormSource) {
+            is ApplicationFormSource -> applicationFormSourceAuthentifiantLinker.unlink(
+                rememberedFormSource.autoFillFormSource.packageName,
+                rememberedFormSource.authentifiantId
+            )
+            is WebDomainFormSource -> webDomainFormSourceAuthentifiantLinker.unlink(
+                rememberedFormSource.autoFillFormSource.webDomain,
+                rememberedFormSource.authentifiantId
+            )
+        }
+    }
 
     private suspend fun getAllRemembered(): List<RememberedFormSource> {
         val app = applicationFormSourceAuthentifiantLinker.allLinked()

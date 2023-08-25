@@ -5,8 +5,6 @@ import com.dashlane.sync.domain.OutgoingTransaction
 
 interface SyncMerger {
 
-    
-
     fun mergeRemoteAndLocalData(
         incomingTransactions: List<IncomingTransaction>,
         outgoingTransactions: List<OutgoingTransaction>

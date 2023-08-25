@@ -23,3 +23,9 @@ fun vaultFilter(init: VaultFilter.() -> Unit): VaultFilter {
     filter.init()
     return filter
 }
+
+fun collectionFilter(init: CollectionFilter.() -> Unit): CollectionFilter {
+    val filter = CollectionFilter()
+    filter.init()
+    return filter
+}

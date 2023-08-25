@@ -3,8 +3,6 @@ package com.dashlane.teamspaces.manager
 import com.dashlane.teamspaces.model.Teamspace
 import java.lang.ref.WeakReference
 
-
-
 class TeamspaceManagerWeakListener constructor(subListener: TeamspaceManager.Listener) : TeamspaceManager.Listener {
 
     private val subListenerRef: WeakReference<TeamspaceManager.Listener> = WeakReference(subListener)
@@ -20,7 +18,7 @@ class TeamspaceManagerWeakListener constructor(subListener: TeamspaceManager.Lis
         newTeamspaceManager?.subscribeListener(this)
     }
 
-    override fun onChange(teamspace: Teamspace) {
+    override fun onChange(teamspace: Teamspace?) {
         getListenerOrUnsubscribe()?.onChange(teamspace)
     }
 

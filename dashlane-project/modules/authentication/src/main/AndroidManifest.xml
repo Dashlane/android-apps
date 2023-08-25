@@ -6,6 +6,7 @@
         <activity
             android:name=".sso.GetUserSsoInfoActivity"
             android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
     </application>

@@ -16,7 +16,6 @@ import com.dashlane.securearchive.databinding.ActivityBackupBinding
 import com.dashlane.util.UriUtils
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setCurrentPageView
-import kotlinx.coroutines.flow.collect
 import java.io.File
 
 internal class BackupViewProxy(
@@ -110,9 +109,13 @@ internal class BackupViewProxy(
     private fun showProgress(shown: Boolean) {
         binding.primaryCta.isEnabled = !shown
         binding.primaryCta.setTextColor(
-            if (shown) Color.TRANSPARENT else activity.getThemeAttrColor(
+            if (shown) {
+                Color.TRANSPARENT
+            } else {
+                activity.getThemeAttrColor(
                 R.attr.colorOnSecondary
             )
+            }
         )
         binding.editText.isEnabled = !shown
         binding.progress.visibility = if (shown) View.VISIBLE else View.GONE

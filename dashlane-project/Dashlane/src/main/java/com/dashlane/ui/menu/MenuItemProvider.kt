@@ -14,8 +14,6 @@ import com.dashlane.ui.menu.separator.MenuSeparatorViewHolder
 import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability.DATA_LEAK
 import java.util.Collections
 
-
-
 class MenuItemProvider(private val navigator: Navigator) {
     private val menuItemPasswordHealth = MenuItem(
         R.drawable.ic_drawer_password_health,
@@ -79,7 +77,8 @@ class MenuItemProvider(private val navigator: Navigator) {
         val list: MutableList<MenuDef.Item> = ArrayList()
         addItem(list, menuItemPersonalPlan)
         addItem(
-            list, MenuItem(
+            list,
+            MenuItem(
                 R.drawable.ic_drawer_home,
                 R.drawable.ic_drawer_home_selected,
                 R.string.menu_v2_home,
@@ -90,8 +89,10 @@ class MenuItemProvider(private val navigator: Navigator) {
         )
         addItem(list, menuItemActionCenter)
         addItem(
-            list, MenuItem(
-                R.drawable.ic_drawer_password_generator, R.drawable.ic_drawer_password_generator_selected,
+            list,
+            MenuItem(
+                R.drawable.ic_drawer_password_generator,
+                R.drawable.ic_drawer_password_generator_selected,
                 R.string.generated_password,
                 arrayOf(R.id.nav_password_generator)
             ) {
@@ -122,8 +123,10 @@ class MenuItemProvider(private val navigator: Navigator) {
         
         addHeader(list, R.string.menu_v3_header_manage_account)
         addItem(
-            list, MenuItem(
-                R.drawable.ic_drawer_settings, R.drawable.ic_drawer_settings_selected,
+            list,
+            MenuItem(
+                R.drawable.ic_drawer_settings,
+                R.drawable.ic_drawer_settings_selected,
                 R.string.menu_v2_settings_button,
                 arrayOf(R.id.nav_settings)
             ) {

@@ -3,8 +3,6 @@ package com.dashlane.item.subview.edit
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.vault.model.VaultItem
 
-
-
 open class ItemEditValueNumberSubView(
     val hint: String,
     override var value: String,

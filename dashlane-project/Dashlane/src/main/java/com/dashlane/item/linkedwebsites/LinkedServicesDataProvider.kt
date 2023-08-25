@@ -6,11 +6,12 @@ import com.dashlane.ext.application.KnownLinkedDomains
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.util.matchDomain
+import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
@@ -28,8 +29,10 @@ import javax.inject.Inject
 class LinkedServicesDataProvider @Inject constructor(
     private val mainDataAccessor: MainDataAccessor,
     private val vaultItemLogger: VaultItemLogger,
+    private val activityLogger: VaultActivityLogger,
     private val teamspaceForceCategorizationManager: TeamspaceForceCategorizationManager,
-    private val linkedServicesHelper: LinkedServicesHelper
+    private val linkedServicesHelper: LinkedServicesHelper,
+    private val dataSync: DataSync
 ) : LinkedServicesContract.DataProvider {
 
     private val dataSaver = mainDataAccessor.getDataSaver()
@@ -62,9 +65,14 @@ class LinkedServicesDataProvider @Inject constructor(
         val isSaved = runCatching { dataSaver.save(toSaveItem) }.getOrElse { false }
         val updatedLinkedWebsites = toSaveItem.getUpdatedLinkedWebsites(vaultItem)
         val removedApps = toSaveItem.getRemovedLinkedApps(vaultItem)
+        val action = Action.EDIT
         vaultItemLogger.logUpdate(
-            Action.EDIT,
-            listOf(Field.ASSOCIATED_WEBSITES_LIST),
+            action,
+            getEditedField(
+                updatedLinkedWebsites?.first,
+                updatedLinkedWebsites?.second,
+                removedApps
+            ),
             vaultItem.uid,
             ItemType.CREDENTIAL,
             space = vaultItem.getTeamSpaceLog(),
@@ -73,14 +81,30 @@ class LinkedServicesDataProvider @Inject constructor(
             removedWebsites = updatedLinkedWebsites?.second,
             removedApps = removedApps
         )
+        activityLogger.sendActivityLog(vaultItem = vaultItem, action = action)
 
         
         teamspaceForceCategorizationManager.executeSync()
 
         
-        DataSync.sync(UsageLogCode134.Origin.SAVE)
+        dataSync.sync(Trigger.SAVE)
 
         return isSaved
+    }
+
+    private fun getEditedField(
+        addedWebsites: List<String>?,
+        removedWebsites: List<String>?,
+        removedApps: List<String>?
+    ): List<Field> {
+        return mutableListOf<Field>().apply {
+            if (!addedWebsites.isNullOrEmpty() || !removedWebsites.isNullOrEmpty()) {
+                add(Field.ASSOCIATED_WEBSITES_LIST)
+            }
+            if (!removedApps.isNullOrEmpty()) {
+                add(Field.ASSOCIATED_APPS_LIST)
+            }
+        }
     }
 
     override fun getDuplicateWebsitesItem(
@@ -98,8 +122,6 @@ class LinkedServicesDataProvider @Inject constructor(
         }
         return checkSelfDuplicate(addedWebsites, vaultItem?.syncObject)
     }
-
-    
 
     private fun checkOtherCredentialsDuplicate(
         addedWebsites: List<String>,
@@ -122,8 +144,6 @@ class LinkedServicesDataProvider @Inject constructor(
         return null
     }
 
-    
-
     private fun checkSelfDuplicate(
         addedWebsites: List<String>,
         syncObject: SyncObject.Authentifiant?
@@ -141,8 +161,6 @@ class LinkedServicesDataProvider @Inject constructor(
         }
         return null
     }
-
-    
 
     private fun credentialHasWebsite(credential: SummaryObject.Authentifiant, website: String) =
         credential.urlForUI()?.matchDomain(website) == true ||

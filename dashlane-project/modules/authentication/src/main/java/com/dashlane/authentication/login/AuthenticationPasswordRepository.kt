@@ -14,8 +14,6 @@ import com.dashlane.session.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import java.time.Instant
 
-
-
 interface AuthenticationPasswordRepository {
     @Throws(
         AuthenticationEmptyPasswordException::class,

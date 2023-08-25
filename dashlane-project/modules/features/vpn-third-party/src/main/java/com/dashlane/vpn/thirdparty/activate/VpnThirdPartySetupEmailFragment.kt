@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.dashlane.help.HelpCenterCoordinator
+import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.hermes.inject.HermesComponent
 import com.dashlane.server.api.endpoints.vpn.VpnGetCredentialsService
 import com.dashlane.session.SessionManager
 import com.dashlane.util.setCurrentPageView
@@ -17,19 +17,23 @@ import com.dashlane.vpn.thirdparty.VpnThirdPartyLogger
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class VpnThirdPartySetupEmailFragment : Fragment() {
 
     @Inject
     lateinit var helpCenterCoordinator: HelpCenterCoordinator
+
     @Inject
     lateinit var getVpnCredentialsService: VpnGetCredentialsService
+
     @Inject
     lateinit var sessionManager: SessionManager
+
     @Inject
     lateinit var authentifiantHelper: VpnThirdPartyAuthentifiantHelper
+
+    @Inject
+    lateinit var logRepository: LogRepository
 
     interface Listener {
         fun onPresenterReady(presenter: VpnThirdPartyActivateAccountPresenter)
@@ -46,7 +50,7 @@ class VpnThirdPartySetupEmailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setCurrentPageView(AnyPage.TOOLS_VPN_PRIVACY_CONSENT)
-        val logger = VpnThirdPartyLogger(HermesComponent(requireActivity()).logRepository)
+        val logger = VpnThirdPartyLogger(logRepository)
         val presenter =
             VpnThirdPartyActivateAccountPresenter(helpCenterCoordinator, logger)
         val defaultEmail = activity?.intent?.getStringExtra("email")

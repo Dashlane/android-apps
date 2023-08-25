@@ -24,11 +24,7 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.utils.Country
 import java.time.Instant
 
-
-
 fun SummaryObject.hasAttachments(): Boolean = attachmentsCount() > 0
-
-
 
 fun SummaryObject.attachmentsCount(): Int = AttachmentsParser().parse(attachments).size
 
@@ -52,6 +48,9 @@ fun VaultItem<*>.copyWithDefaultValue(context: Context, session: Session?): Vaul
         is SyncObject.BankStatement -> copyBankStatementWithDefaultValue(
             this as VaultItem<SyncObject.BankStatement>,
             context
+        )
+        is SyncObject.Collection -> copyCollectionWithDefaultValue(
+            this as VaultItem<SyncObject.Collection>
         )
         is SyncObject.Company -> copyCompanyWithDefaultValue(
             this as VaultItem<SyncObject.Company>,
@@ -112,7 +111,7 @@ private fun copyAuthentifiantWithDefaultValue(
     authentifiant: VaultItem<SyncObject.Authentifiant>,
     context: Context,
     session: Session?
-): VaultItem<SyncObject.Authentifiant>? {
+): VaultItem<SyncObject.Authentifiant> {
     if (!authentifiant.syncObject.title.isSemanticallyNull() && !authentifiant.syncObject.loginForUi.isSemanticallyNull()) return authentifiant
 
     var newAuthentifiant = authentifiant
@@ -222,8 +221,9 @@ private fun copyEmailWithDefaultValue(
 private fun copyPaymentCreditCardWithDefaultValue(creditCard: VaultItem<SyncObject.PaymentCreditCard>):
         VaultItem<SyncObject.PaymentCreditCard> {
     if (creditCard.syncObject.bank != null && creditCard.syncObject.localeFormat != null
-    )
+    ) {
         return creditCard
+    }
 
     val mBank = if (creditCard.syncObject.bank == null) {
         CreditCardBank(US_NO_TYPE).bankDescriptor
@@ -283,8 +283,9 @@ private fun copySecureNoteWithDefaultValue(
 ):
         VaultItem<SyncObject.SecureNote> {
     
-    if (!vaultItem.syncObject.title.isSemanticallyNull() && !vaultItem.syncObject.content.isSemanticallyNull())
+    if (!vaultItem.syncObject.title.isSemanticallyNull() && !vaultItem.syncObject.content.isSemanticallyNull()) {
         return vaultItem
+    }
 
     val mTitle = if (vaultItem.syncObject.title.isSemanticallyNull()) {
         context.getString(R.string.securenote_name)
@@ -313,4 +314,12 @@ private fun copySecureNoteCategoryWithDefaultValue(
     } else {
         vaultItem
     }
+}
+
+private fun copyCollectionWithDefaultValue(
+    vaultItem: VaultItem<SyncObject.Collection>
+): VaultItem<SyncObject.Collection> = if (vaultItem.syncObject.name.isSemanticallyNull()) {
+    vaultItem.copySyncObject { name = "" }
+} else {
+    vaultItem
 }

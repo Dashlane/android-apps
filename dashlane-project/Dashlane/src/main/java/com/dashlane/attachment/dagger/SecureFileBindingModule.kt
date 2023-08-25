@@ -11,8 +11,6 @@ import com.dashlane.securefile.storage.SecureFileStorage
 import dagger.Binds
 import dagger.Module
 
-
-
 @Module
 @InstallIn(SingletonComponent::class)
 interface SecureFileBindingModule {

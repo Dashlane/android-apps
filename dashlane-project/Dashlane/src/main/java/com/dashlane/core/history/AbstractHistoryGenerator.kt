@@ -1,17 +1,12 @@
 package com.dashlane.core.history
 
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.storage.userdata.accessor.DataChangeHistoryQuery
 import com.dashlane.storage.userdata.accessor.filter.DataChangeHistoryFilter
 import com.dashlane.vault.history.title
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.util.get
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-
-
 
 abstract class AbstractHistoryGenerator<T : SyncObject> {
     abstract val query: DataChangeHistoryQuery
@@ -21,7 +16,7 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
         new: VaultItem<T>
     ): VaultItem<SyncObject.DataChangeHistory>? {
         try {
-            val dataType = SyncObjectType[new] ?: return null
+            val dataType = new.syncObjectType
             val itemUid = new.uid
             var objectHistory = createOrGetDataChangeHistory(dataType, itemUid)
 
@@ -31,14 +26,15 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
             val newChangeSet = newChangeSet(old, new).copy { removed = new.isDeleted() }
             if (newChangeSet.changedProperties?.isNotEmpty() == true || new.isDeleted()) {
                 return objectHistory
-                    .copy(syncObject = objectHistory.syncObject.copy {
+                    .copy(
+                        syncObject = objectHistory.syncObject.copy {
                         objectTitle = newChangeSet.title
                         changeSets = addChangeSet(objectHistory.syncObject.changeSets, newChangeSet)
-                    })
+                    }
+                    )
                     .copyWithAttrs { syncState = SyncState.MODIFIED }
             }
         } catch (e: Exception) {
-            Log.v(e)
         }
         return null
     }
@@ -51,10 +47,8 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
         return list + element
     }
 
-    
-
     private fun createOrGetDataChangeHistory(objectType: SyncObjectType, objectUid: String):
-            VaultItem<SyncObject.DataChangeHistory> {
+        VaultItem<SyncObject.DataChangeHistory> {
         val filter = DataChangeHistoryFilter(
             objectUid = objectUid,
             objectType = objectType
@@ -65,14 +59,14 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
     }
 
     private fun createDataChangeHistory(objectType: SyncObjectType, objectUid: String):
-            VaultItem<SyncObject.DataChangeHistory> {
-        return VaultItem(syncObject = SyncObject.DataChangeHistory {
+        VaultItem<SyncObject.DataChangeHistory> {
+        return VaultItem(
+            syncObject = SyncObject.DataChangeHistory {
             this.objectType = objectType.transactionType
             this.objectId = objectUid
-        })
+        }
+        )
     }
-
-    
 
     abstract fun newChangeSet(oldItem: VaultItem<T>?, newItem: VaultItem<T>): SyncObject.DataChangeHistory.ChangeSet
 }

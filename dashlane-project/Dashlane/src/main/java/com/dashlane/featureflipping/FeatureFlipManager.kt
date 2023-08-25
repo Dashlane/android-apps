@@ -1,7 +1,8 @@
 package com.dashlane.featureflipping
 
 import com.dashlane.debug.DaDaDa
-import com.dashlane.network.webservices.FeatureFlipService
+import com.dashlane.network.tools.authorization
+import com.dashlane.server.api.endpoints.features.FeatureFlipGetAndEvaluateForUserService
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.RemoteConfiguration
 import com.dashlane.session.SessionManager
@@ -9,46 +10,39 @@ import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.useractivity.log.usage.UsageLogCode111
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.UserChangedDetector
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.isSemanticallyNull
 import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class FeatureFlipManager @Inject constructor(
     private val sessionManager: SessionManager,
-    private val service: FeatureFlipService,
+    private val service: FeatureFlipGetAndEvaluateForUserService,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val dadada: DaDaDa,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    @GlobalCoroutineScope private val coroutineScope: CoroutineScope
+    @ApplicationCoroutineScope private val coroutineScope: CoroutineScope
 ) : RemoteConfiguration {
 
-    var featureFlips: JsonObject? = null
+    var featureFlips: List<String>? = null
         get() {
             resetIfUserChanged()
             return field
         }
         private set
 
-    private var currentJson
-        get() = currentValue?.let { runCatching { parseJson(it) }.getOrNull() }
-        set(value) {
-            currentValue = value?.toString()
-        }
-
-    private var currentValue
+    private var currentValue: String?
         get() = sessionManager.session?.let(userSecureStorageManager::readUserFeature)
         set(value) {
-            sessionManager.session?.let { userSecureStorageManager.storeUserFeature(it, value ?: "") }
+            sessionManager.session?.let {
+                userSecureStorageManager.storeUserFeature(it, value ?: "")
+            }
         }
 
     private val userChangedDetector = UserChangedDetector(sessionManager)
@@ -72,8 +66,6 @@ class FeatureFlipManager @Inject constructor(
         }
     }
 
-    
-
     override suspend fun refreshIfNeeded() {
         if (shouldSkipRefresh()) {
             return
@@ -81,15 +73,17 @@ class FeatureFlipManager @Inject constructor(
 
         val session = sessionManager.session ?: return
         val login = session.userId
-        val uki = session.uki
-        val content = try {
-            val features = UserFeaturesChecker.FeatureFlip.values().map { it.value }
-            service.execute(login, uki, JSONArray(features).toString()).takeIf { it.isSuccess() }?.content ?: return
-        } catch (t: Throwable) {
-            return
-        }
+        val request = FeatureFlipGetAndEvaluateForUserService.Request(
+            UserFeaturesChecker.FeatureFlip.values().map { it.value }
+        )
+        runCatching {
+            val enabledFeatures = service.execute(
+                session.authorization,
+                request
+            ).data.enabledFeatures.toFeatureFlipString()
 
-        setUserFeatureData(login, content)
+            setUserFeatureData(login, enabledFeatures)
+        }
     }
 
     private fun shouldSkipRefresh(): Boolean {
@@ -102,7 +96,7 @@ class FeatureFlipManager @Inject constructor(
         load()
     }
 
-    private fun setUserFeatureData(login: String, json: JsonObject) {
+    private fun setUserFeatureData(login: String, json: String) {
         resetIfUserChanged()
         val currentLogin = userChangedDetector.lastUsername
         if (currentLogin == null || login != currentLogin) {
@@ -120,44 +114,36 @@ class FeatureFlipManager @Inject constructor(
         reset()
     }
 
-    private fun save(json: JsonObject) {
-        val currentJson = this.currentJson
-        if (json == currentJson) {
+    private fun save(json: String) {
+        if (json == currentValue) {
             
             return
         }
-        logDifferences(currentJson ?: JsonObject(), json)
-        this.currentJson = json
+        logDifferences(currentValue?.toFeatureFlips() ?: emptyList(), json.toFeatureFlips())
+        this.currentValue = json
     }
 
     override fun load(): RemoteConfiguration.LoadResult {
         userChangedDetector.refresh()
         val login = userChangedDetector.lastUsername
         if (login != null) {
-            load(currentJson)
+            load(currentValue)
         } else {
             load(null)
         }
         return if (featureFlips != null) RemoteConfiguration.LoadResult.Success else RemoteConfiguration.LoadResult.Failure
     }
 
-    private fun load(json: JsonObject?) {
-        val overriddenJson = dadada.featureFlippingJson?.let { parseJson(it) } ?: json ?: return
+    private fun load(json: String?) {
+        val overriddenJson = dadada.featureFlippingString ?: json?.toFeatureFlips() ?: return
         featureFlips = overriddenJson
     }
 
-    private fun logDifferences(currentData: JsonObject, newData: JsonObject) {
-        val currentKeys = currentData.keySet()
-        val allKeys = currentKeys + newData.keySet()
-
-        for (key in allKeys) {
-            val oldValue = currentData[key]?.asBoolean ?: false
-            val newValue = newData[key]?.asBoolean ?: false
-
-            if (oldValue != newValue) {
-                trackValueChanged(key, newValue)
-            }
-        }
+    private fun logDifferences(currentData: List<String>, newData: List<String>) {
+        val newEnables = newData - currentData.toSet()
+        val newDisables = currentData - newData.toSet()
+        newEnables.forEach { trackValueChanged(it, true) }
+        newDisables.forEach { trackValueChanged(it, false) }
     }
 
     private fun trackValueChanged(key: String, value: Boolean) {
@@ -172,8 +158,14 @@ class FeatureFlipManager @Inject constructor(
 
     companion object {
         private val MIN_INTERVAL_REFRESH = TimeUnit.MINUTES.toMillis(10)
+        private val gson = Gson()
+        fun String.toFeatureFlips(): List<String> =
+            if (isSemanticallyNull()) {
+                emptyList()
+            } else {
+                gson.fromJson(this, Array<String>::class.java).toList()
+            }
 
-        fun parseJson(json: String) =
-            runCatching { JsonParser.parseString(json) as JsonObject }.getOrNull()
+        fun List<String>.toFeatureFlipString(): String = gson.toJson(this)
     }
 }

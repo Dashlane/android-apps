@@ -9,12 +9,9 @@ import com.dashlane.R
 import com.dashlane.util.dpToPx
 import com.google.android.material.textfield.TextInputLayout
 
-
-
 object PasswordWithStrengthViewProvider {
 
     fun create(context: Context, textInputLayout: TextInputLayout): LinearLayout {
-
         val layout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             

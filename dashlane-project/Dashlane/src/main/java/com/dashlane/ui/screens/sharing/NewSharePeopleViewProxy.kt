@@ -110,13 +110,11 @@ class NewSharePeopleViewProxy(
         viewModel.onClickShare(emailAddresses.objects)
     }
 
-    fun onBackPressed() {
-        viewModel.onBackPressed(emailAddresses.objects)
-    }
-
     private fun setup(data: List<SharingContact>) {
         val adapter = SharingContactFilteredArrayAdapter(
-            context, R.layout.list_item_sharing_contact_chips, data
+            context,
+            R.layout.list_item_sharing_contact_chips,
+            data
         )
         emailAddresses.setAdapter(adapter)
     }

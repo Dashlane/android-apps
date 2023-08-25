@@ -12,8 +12,6 @@ import com.dashlane.util.GravatarFetcher;
 
 import java.util.Objects;
 
-
-
 public class ContactDrawable extends Drawable implements RemoteAvatarDownloader.RemoteImageReady {
 
     private String mEmail;

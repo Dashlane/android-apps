@@ -2,8 +2,6 @@ package com.dashlane.similarpassword
 
 import javax.inject.Inject
 
-
-
 data class SimilarPassword constructor(
     private val minCharsBeforeCheckSimilarity: Int,
     private val similarLevenshteinThreshold: Int

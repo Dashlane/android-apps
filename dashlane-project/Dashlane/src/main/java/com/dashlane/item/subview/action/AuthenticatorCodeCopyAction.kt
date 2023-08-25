@@ -5,8 +5,6 @@ import com.dashlane.R
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class AuthenticatorCodeCopyAction(
     summaryObject: SummaryObject,
     action: (Activity) -> Unit = {},

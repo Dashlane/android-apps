@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
 
-
-
 public class DecipheringAnimation {
 
     private final DecipheringTextAnimation mButtonTextAnimation;

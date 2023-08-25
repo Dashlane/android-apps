@@ -6,8 +6,6 @@ import com.dashlane.server.api.endpoints.sync.SyncDownloadService
 import com.dashlane.sync.treat.SyncSummaryItem
 import com.dashlane.sync.vault.SyncVault
 
-
-
 interface ChronologicalSync {
 
     suspend fun sync(

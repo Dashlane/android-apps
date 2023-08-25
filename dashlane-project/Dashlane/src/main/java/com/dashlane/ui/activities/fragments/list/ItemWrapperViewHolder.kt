@@ -29,8 +29,6 @@ import com.dashlane.vault.util.TeamSpaceUtils.getTeamSpaceId
 import com.dashlane.vault.util.isProtected
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItemWrapper<out SummaryObject>>(itemView) {
 
     public override fun updateView(context: Context, item: VaultItemWrapper<out SummaryObject>?) {
@@ -142,7 +140,9 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
                 }
                 val teamspace = teamManager[teamspaceId] ?: return null
                 return TeamspaceDrawableProvider.getIcon(
-                    context, teamspace, R.dimen.teamspace_icon_size_small
+                    context,
+                    teamspace,
+                    R.dimen.teamspace_icon_size_small
                 )
             }
         }

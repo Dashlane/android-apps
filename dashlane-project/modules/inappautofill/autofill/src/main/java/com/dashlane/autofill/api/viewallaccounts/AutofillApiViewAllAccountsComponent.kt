@@ -6,8 +6,6 @@ import com.dashlane.autofill.api.viewallaccounts.services.ViewAllAccountSelectio
 import com.dashlane.autofill.api.viewallaccounts.view.AuthentifiantSearchViewTypeProviderFactory
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 
-
-
 interface AutofillApiViewAllAccountsComponent {
     val autofillSearch: AutofillSearch
     val authentifiantSearchViewTypeProviderFactory: AuthentifiantSearchViewTypeProviderFactory

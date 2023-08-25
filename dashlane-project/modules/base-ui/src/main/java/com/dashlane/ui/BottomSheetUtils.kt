@@ -12,14 +12,10 @@ val BottomSheetDialogFragment.bottomSheetDialog get() = dialog as BottomSheetDia
 
 val BottomSheetDialog.contentView get() = findViewById<FrameLayout>(R.id.design_bottom_sheet)!!
 
-
-
 data class BottomSheetHeightConfig(
     @FloatRange(from = 0.0, to = 1.0) val peekHeightRatio: Float = 0.33f,
     @FloatRange(from = 0.0, to = 1.0) val expandedHeightRatio: Float = 0.9f
 )
-
-
 
 fun BottomSheetDialog.configureBottomSheet(
     config: BottomSheetHeightConfig? = null,

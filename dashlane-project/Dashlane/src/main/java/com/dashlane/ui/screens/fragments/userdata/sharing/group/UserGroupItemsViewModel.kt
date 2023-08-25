@@ -6,13 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.core.DataSync
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.useractivity.log.usage.UsageLogCode134
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +24,8 @@ class UserGroupItemsViewModel @Inject constructor(
     private val dataProvider: UserGroupDataProvider,
     private val sharingDataProvider: SharingDataProvider,
     appEvents: AppEvents,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val dataSync: DataSync
 ) : ViewModel(), UserGroupItemsViewModelContract {
 
     override val userGroupId = savedStateHandle.get<String>(UserGroupItemsFragment.ARGS_GROUP_ID)!!
@@ -63,9 +63,9 @@ class UserGroupItemsViewModel @Inject constructor(
     }
 
     override fun onItemClicked(itemId: String, dataType: SyncObjectType) =
-        navigator.goToItem(itemId, dataType.desktopId)
+        navigator.goToItem(itemId, dataType.xmlObjectName)
 
-    override fun pullToRefresh() = DataSync.sync(UsageLogCode134.Origin.MANUAL)
+    override fun pullToRefresh() = dataSync.sync(Trigger.MANUAL)
 
     override fun onRevokeUserGroup(itemGroupId: String) {
         val itemGroup = dataList.find { it.itemGroup.groupId == itemGroupId }?.itemGroup ?: return

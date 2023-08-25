@@ -11,7 +11,7 @@ import com.dashlane.network.tools.authorization
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.Session
 import com.dashlane.session.repository.UserDataRepository
-import com.dashlane.sync.SyncComponent
+import com.dashlane.sync.cryptochanger.SyncCryptoChanger
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerCryptographyException
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerDownloadException
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerUploadException
@@ -19,9 +19,10 @@ import com.dashlane.useractivity.DeveloperInfoLogger
 import com.dashlane.util.stackTraceToSafeString
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
-class LegacyCryptoMigrationHelper(
-    private val syncComponent: SyncComponent,
+class LegacyCryptoMigrationHelper @Inject constructor(
+    private val syncCryptoChanger: SyncCryptoChanger,
     private val userDataRepository: UserDataRepository,
     private val userPreferencesManager: UserPreferencesManager,
     private val logRepository: LogRepository,
@@ -50,7 +51,7 @@ class LegacyCryptoMigrationHelper(
 
     private suspend fun migrateCrypto(session: Session): CryptoMigrationStatus =
         try {
-            syncComponent.syncCryptoChanger.updateCryptography(
+            syncCryptoChanger.updateCryptography(
                 session.authorization,
                 session.userKeys,
                 CryptographyMarker.Flexible.Defaults.argon2d 
@@ -91,8 +92,6 @@ class LegacyCryptoMigrationHelper(
     }
 
     companion object {
-        
-
         private const val CRYPTO_MIGRATION_PERIOD_DAYS = 1L
     }
 }

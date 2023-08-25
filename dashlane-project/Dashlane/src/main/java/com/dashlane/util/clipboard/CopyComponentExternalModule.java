@@ -14,8 +14,6 @@ import java.util.List;
 import dagger.Module;
 import dagger.Provides;
 
-
-
 @Module
 public class CopyComponentExternalModule {
 

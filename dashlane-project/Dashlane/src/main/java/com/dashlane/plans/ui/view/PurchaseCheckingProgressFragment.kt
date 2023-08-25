@@ -12,8 +12,6 @@ import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import com.dashlane.R
 
-
-
 class PurchaseCheckingProgressFragment : Fragment() {
 
     override fun onCreateView(

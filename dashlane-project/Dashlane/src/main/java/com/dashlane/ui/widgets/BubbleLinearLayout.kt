@@ -10,8 +10,6 @@ import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrColor
 import kotlin.math.roundToInt
 
-
-
 class BubbleLinearLayout : LinearLayout {
 
     private val drawable = ShapeDrawable(TooltipPointShape(context.getThemeAttrColor(R.attr.colorSurface)))

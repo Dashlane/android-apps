@@ -3,7 +3,6 @@ package com.dashlane.ui.activities
 import android.app.Activity
 import android.content.Intent
 import com.dashlane.authenticator.AuthenticatorAppConnection
-import com.dashlane.core.DataSync
 import com.dashlane.createaccount.CreateAccountActivity
 import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.login.LoginIntents
@@ -12,15 +11,8 @@ import com.dashlane.navigation.NavigationConstants
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.session.isServerKeyNotNull
-import com.dashlane.useractivity.log.install.InstallLogCode69
-import com.dashlane.useractivity.log.install.InstallLogRepository
-import com.dashlane.useractivity.log.usage.UsageLogCode2
-import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.useractivity.log.usage.getUsageLogCode2SenderFromOrigin
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.welcome.WelcomeActivity
 import java.util.UUID
@@ -29,25 +21,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-
-
 class SplashScreenIntentFactory(
     private val activity: Activity,
     private val preferencesManager: GlobalPreferencesManager,
     private val userPreferencesManager: UserPreferencesManager,
     private val sessionManager: SessionManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val installLogRepository: InstallLogRepository,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val authenticatorAppConnection: AuthenticatorAppConnection
+    private val authenticatorAppConnection: AuthenticatorAppConnection,
 ) {
-
-    
 
     @OptIn(DelicateCoroutinesApi::class)
     fun createIntent(): Intent {
         val currentIntent = activity.intent
-        SingletonProvider.getFcmHelper().logOpenIfNeeded(currentIntent)
         val session = if (sessionManager.session != null &&
             (userPreferencesManager.isOnLoginPaywall || userPreferencesManager.isMpResetRecoveryStarted)
         ) {
@@ -73,28 +58,6 @@ class SplashScreenIntentFactory(
 
         return if (preferencesManager.getDefaultUsername() != null || isTokenIntent(currentIntent)) {
             if (session != null) {
-                bySessionUsageLogRepository[session]
-                    ?.enqueue(
-                        UsageLogCode2(
-                            otp = false,
-                            sender = getUsageLogCode2SenderFromOrigin(currentIntent),
-                            loadDuration = DataSync.getLastSyncDuration().toLong(),
-                            keyboardActive = false
-                        )
-                    )
-
-                if (session.appKey.isServerKeyNotNull) {
-                    
-                    installLogRepository.enqueue(
-                        InstallLogCode69(
-                            type = InstallLogCode69.Type.LOGIN,
-                            subType = "totp_deactivated_for_this_device",
-                            action = "hide_totp_screen",
-                            subAction = "success"
-                        )
-                    )
-                }
-
                 sessionCredentialsSaver.saveCredentialsIfNecessary(session)
                 LoginIntents.createHomeActivityIntent(activity)
             } else {
@@ -135,8 +98,6 @@ class SplashScreenIntentFactory(
             val preferencesManager = SingletonProvider.getGlobalPreferencesManager()
             val userPreferencesManager = SingletonProvider.getUserPreferencesManager()
             val sessionManager = SingletonProvider.getSessionManager()
-            val bySessionUsageLogRepository = SingletonProvider.getComponent().bySessionUsageLogRepository
-            val installLogRepository = SingletonProvider.getComponent().installLogRepository
             val sessionCredentialsSaver = SingletonProvider.getComponent().sessionCredentialsSaver
             val authenticatorAppConnection = SingletonProvider.getComponent().authenticatorAppConnection
             return SplashScreenIntentFactory(
@@ -144,8 +105,6 @@ class SplashScreenIntentFactory(
                 preferencesManager,
                 userPreferencesManager,
                 sessionManager,
-                bySessionUsageLogRepository,
-                installLogRepository,
                 sessionCredentialsSaver,
                 authenticatorAppConnection
             )

@@ -13,8 +13,6 @@ import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.activities.fragments.checklist.ChecklistHelper
 
 object NavControllerUtils {
-    
-
     val TOP_LEVEL_DESTINATIONS = setOf(
         R.id.nav_home,
         R.id.nav_personal_plan,

@@ -2,8 +2,6 @@ package com.dashlane.storage.userdata.accessor.filter.space
 
 import com.dashlane.teamspaces.model.Teamspace
 
-
-
 interface EditableSpaceFilter : SpaceFilter {
 
     var spaceFilter: SpaceFilter

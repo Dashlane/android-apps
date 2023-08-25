@@ -11,8 +11,6 @@ import com.dashlane.ui.drawable.ContactDrawable
 import com.dashlane.util.isValidEmail
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 abstract class SharingContactItem(
     val context: Context,
     val line1: String,

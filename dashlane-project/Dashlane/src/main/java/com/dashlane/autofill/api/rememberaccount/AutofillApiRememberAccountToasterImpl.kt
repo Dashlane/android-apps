@@ -5,8 +5,6 @@ import com.dashlane.R
 import com.dashlane.util.Toaster
 import javax.inject.Inject
 
-
-
 class AutofillApiRememberAccountToasterImpl @Inject constructor(
     val toaster: Toaster
 ) : AutofillApiRememberedAccountToaster {

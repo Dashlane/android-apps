@@ -14,8 +14,6 @@ import com.dashlane.util.DeviceUtils;
 
 import wei.mark.standout.ui.Window;
 
-
-
 public class DashlaneBubbleAnimatePositionController implements DashlaneBubblePositionController {
 
 

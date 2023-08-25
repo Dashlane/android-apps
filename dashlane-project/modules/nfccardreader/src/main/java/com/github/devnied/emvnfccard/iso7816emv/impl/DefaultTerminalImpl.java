@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.iso7816emv.impl;
 
 import android.annotation.SuppressLint;
@@ -20,19 +18,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-
-
 public final class DefaultTerminalImpl implements ITerminal {
-
-    
 
     private static final SecureRandom random = new SecureRandom();
 
-    
-
     private CountryCodeEnum countryCode = CountryCodeEnum.FR;
-
-    
 
     @SuppressLint("JavaUtilDateUsage")
     @Override
@@ -89,8 +79,6 @@ public final class DefaultTerminalImpl implements ITerminal {
         }
         return ret;
     }
-
-    
 
     public void setCountryCode(final CountryCodeEnum countryCode) {
         if (countryCode != null) {

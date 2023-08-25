@@ -3,8 +3,6 @@ package com.dashlane.login.lock
 import com.dashlane.lock.LockHelper
 import kotlinx.coroutines.delay
 
-
-
 class LockWaiter {
 
     private var lockHelper: LockHelper? = null

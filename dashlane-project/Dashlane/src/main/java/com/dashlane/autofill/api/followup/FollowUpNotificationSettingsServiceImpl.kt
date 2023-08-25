@@ -5,8 +5,6 @@ import com.dashlane.followupnotification.services.FollowUpNotificationSettingsSe
 import com.dashlane.preference.UserPreferencesManager
 import javax.inject.Inject
 
-
-
 class FollowUpNotificationSettingsServiceImpl @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val followUpNotificationLogger: FollowUpNotificationLogger

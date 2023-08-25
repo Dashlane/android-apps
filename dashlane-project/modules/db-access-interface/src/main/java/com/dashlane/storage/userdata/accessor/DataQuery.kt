@@ -5,24 +5,14 @@ import com.dashlane.vault.summary.SummaryObject
 
 interface DataQuery<T : SummaryObject, F : BaseFilter> {
 
-    
-
     fun createFilter(): F
-
-    
 
     fun queryFirst(filter: F = createFilter()): T?
 
-    
-
     fun queryAll(filter: F = createFilter()): List<T>
-
-    
 
     fun count(filter: F = createFilter()): Int
 }
-
-
 
 
 inline fun <T : SummaryObject, F : BaseFilter> DataQuery<T, F>.queryFirst(filterConfiguration: F.() -> Unit = {}) =

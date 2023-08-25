@@ -14,8 +14,6 @@ import com.dashlane.authenticator.util.SetUpAuthenticatorResultContract.SuccessR
 import com.dashlane.ui.activities.DashlaneActivity
 import dagger.hilt.android.AndroidEntryPoint
 
-
-
 @AndroidEntryPoint
 class AuthenticatorMultipleMatchesResult : DashlaneActivity() {
 
@@ -41,17 +39,22 @@ class AuthenticatorMultipleMatchesResult : DashlaneActivity() {
             layoutManager = LinearLayoutManager(context)
             hasFixedSize()
             adapter = AuthenticatorSuggestionsCredentialItemAdapter().apply {
-                addAll(inputs.map {
+                addAll(
+                    inputs.map {
                     CredentialItem(it.itemId!!, it.itemTitle, it.domain, it.itemUsername).apply {
                         layout = R.layout.authenticator_credential_multiple_matches_item
                     }
-                })
+                }
+                )
                 setOnItemClickListener { _, _, _, position ->
                     val input = inputs[position]
                     
-                    setResult(RESULT_OK, Intent().apply {
+                    setResult(
+                        RESULT_OK,
+                        Intent().apply {
                         putExtra(RESULT_INPUT, input)
-                    })
+                    }
+                    )
                     
                     startActivity(
                         Intent(

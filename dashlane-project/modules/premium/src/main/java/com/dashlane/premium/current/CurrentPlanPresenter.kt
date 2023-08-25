@@ -160,16 +160,20 @@ internal class CurrentPlanPresenter(
             ) to buildCta(secondaryCta = PREMIUM)
         }
         LEGACY -> {
-            (CurrentPlan.Suggestion(
+            (
+                CurrentPlan.Suggestion(
                 title = TextResource.StringText(R.string.current_plan_suggestion_upgrade_to_premium_title),
                 text = TextResource.StringText(R.string.current_plan_suggestion_upgrade_to_premium_from_legacy_text)
-            ) to buildCta(secondaryCta = PREMIUM)).takeIf { vpnAllowed } ?: (null to buildCta(null))
+            ) to buildCta(secondaryCta = PREMIUM)
+            ).takeIf { vpnAllowed } ?: (null to buildCta(null))
         }
         PREMIUM_FREE_OF_CHARGE -> {
-            (CurrentPlan.Suggestion(
+            (
+                CurrentPlan.Suggestion(
                 title = TextResource.StringText(R.string.current_plan_suggestion_upgrade_to_paid_premium_title),
                 text = TextResource.StringText(R.string.current_plan_suggestion_upgrade_to_paid_premium_text)
-            ) to buildCta(secondaryCta = PREMIUM)).takeIf { vpnAllowed } ?: (null to buildCta(null))
+            ) to buildCta(secondaryCta = PREMIUM)
+            ).takeIf { vpnAllowed } ?: (null to buildCta(null))
         }
         CurrentPlanType.PREMIUM -> {
             CurrentPlan.Suggestion(

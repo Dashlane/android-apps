@@ -9,8 +9,6 @@ import com.dashlane.url.toUrlOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class AutofillFormSourcesStringsFromContext @Inject constructor(
     @ApplicationContext
     private val context: Context

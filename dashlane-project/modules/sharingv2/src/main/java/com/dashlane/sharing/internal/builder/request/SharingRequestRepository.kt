@@ -1,5 +1,6 @@
 package com.dashlane.sharing.internal.builder.request
 
+import com.dashlane.server.api.endpoints.sharinguserdevice.AuditLogDetails
 import com.dashlane.server.api.endpoints.sharinguserdevice.CreateItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.InviteItemGroupMembersService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemForEmailing
@@ -23,9 +24,16 @@ class SharingRequestRepository @Inject constructor(
         users: List<UserToInvite>,
         groups: List<GroupToInvite>,
         item: ItemToShare,
-        itemForEmailing: ItemForEmailing
+        itemForEmailing: ItemForEmailing,
+        auditLogs: AuditLogDetails?
     ): CreateItemGroupService.Request {
-        return createItemGroupRequestBuilder.create(users, groups, item, itemForEmailing)
+        return createItemGroupRequestBuilder.create(
+            users,
+            groups,
+            item,
+            itemForEmailing,
+            auditLogs
+        )
     }
 
     @Throws(RequestBuilderException::class)
@@ -34,14 +42,16 @@ class SharingRequestRepository @Inject constructor(
         itemsForEmailing: List<ItemForEmailing>,
         usersUpload: List<UserToInvite>,
         userGroupsUpload: List<GroupToInvite>,
-        myUserGroupsAcceptedOrPending: List<UserGroup>
+        myUserGroupsAcceptedOrPending: List<UserGroup>,
+        auditLogs: AuditLogDetails?
     ): InviteItemGroupMembersService.Request {
         return inviteItemGroupMembersRequestBuilder.create(
             itemGroup,
             itemsForEmailing,
             usersUpload,
             userGroupsUpload,
-            myUserGroupsAcceptedOrPending
+            myUserGroupsAcceptedOrPending,
+            auditLogs
         )
     }
 }

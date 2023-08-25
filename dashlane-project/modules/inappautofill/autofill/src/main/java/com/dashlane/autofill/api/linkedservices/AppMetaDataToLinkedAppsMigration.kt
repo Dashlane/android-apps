@@ -1,7 +1,6 @@
 package com.dashlane.autofill.api.linkedservices
 
 import android.content.pm.PackageManager
-import com.dashlane.logger.Log
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.GenericFilter
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
@@ -25,10 +24,11 @@ class AppMetaDataToLinkedAppsMigration @Inject constructor(
 
     @Suppress("UNCHECKED_CAST")
     suspend fun migrate() {
-        Log.d(TAG, "Start migration script")
-        genericDataQuery.queryAll(GenericFilter().apply {
+        genericDataQuery.queryAll(
+            GenericFilter().apply {
             specificDataType(SyncObjectType.AUTHENTIFIANT)
-        }).forEach { summary ->
+        }
+        ).forEach { summary ->
             
             val linkedApps = (summary as SummaryObject.Authentifiant).appMetaData?.let { appMetaData ->
                 getLinkedAppsFromAppMetaData(appMetaData)
@@ -37,7 +37,6 @@ class AppMetaDataToLinkedAppsMigration @Inject constructor(
             
             checkAppToMigrate(linkedApps, summary)
         }
-        Log.d(TAG, "Migration finished")
     }
 
     private suspend fun checkAppToMigrate(
@@ -45,21 +44,20 @@ class AppMetaDataToLinkedAppsMigration @Inject constructor(
         summary: SummaryObject.Authentifiant
     ) {
         if (!linkedApps.isNullOrEmpty()) {
-            vaultDataQuery.query(VaultFilter().apply {
+            vaultDataQuery.query(
+                VaultFilter().apply {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)
                 specificUid(summary.id)
-            })?.let { vaultItem ->
+            }
+            )?.let { vaultItem ->
                 vaultItem as VaultItem<SyncObject.Authentifiant>
                 val toSaveVaultItem = getVaultItemToSave(vaultItem, linkedApps)
                 runCatching { dataSaver.save(toSaveVaultItem) }.getOrElse { false }.let {
-                    Log.d(TAG, "Migrate vault item ${vaultItem.syncObject.urlForGoToWebsite}. Success ? $it")
                 }
             }
         }
     }
-
-    
 
     fun getVaultItemToSave(
         vaultItem: VaultItem<SyncObject.Authentifiant>,
@@ -78,8 +76,6 @@ class AppMetaDataToLinkedAppsMigration @Inject constructor(
             }
     }
 
-    
-
     fun getLinkedAppsFromAppMetaData(appMetaData: SummaryObject.AppMetaData): List<SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps> {
         return appMetaData.androidLinkedApplications?.map { linkedApp ->
             val name = linkedApp.packageName?.let {
@@ -94,8 +90,6 @@ class AppMetaDataToLinkedAppsMigration @Inject constructor(
             )
         } ?: emptyList()
     }
-
-    
 
     private fun mergeLinkedApps(
         originalLinkedApps: List<SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps>?,

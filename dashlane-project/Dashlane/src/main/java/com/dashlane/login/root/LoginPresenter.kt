@@ -45,15 +45,13 @@ import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setCurrentPageView
 import com.skocken.presentation.presenter.BasePresenter
+import java.util.Deque
+import java.util.LinkedList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import java.util.Deque
-import java.util.LinkedList
-
-
 
 @Suppress("LargeClass")
 class LoginPresenter(
@@ -112,11 +110,12 @@ class LoginPresenter(
                 }
                 else -> {
                     showPrimaryFactorStep(
-                        RegisteredUserDevice.Local(
+                        registeredUserDevice = RegisteredUserDevice.Local(
                             login = credentials.username,
                             securityFeatures = credentials.securitySettings.toSecurityFeatures(),
                             accessKey = credentials.accessKey
-                        )
+                        ),
+                        authTicket = null
                     )
                 }
             }
@@ -221,6 +220,10 @@ class LoginPresenter(
         loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.AUTHENTICATOR_APP))
     }
 
+    fun showSecretTransferQRPage() {
+        view.transitionToCompose()
+    }
+
     private fun createDashlaneAuthenticatorPresenter(secondFactor: AuthenticationSecondFactor): LoginDashlaneAuthenticatorPresenter {
         val dataProvider = provider.createAuthenticatorProvider(secondFactor)
         return LoginDashlaneAuthenticatorPresenter(
@@ -253,9 +256,10 @@ class LoginPresenter(
         }
     }
 
-    suspend fun onTotpSuccess(registeredUserDevice: RegisteredUserDevice) {
+    @Suppress("kotlin:S6313") 
+    suspend fun onTotpSuccess(registeredUserDevice: RegisteredUserDevice, authTicket: String?) {
         provider.initializeStoredSession(registeredUserDevice.login, registeredUserDevice.serverKey)
-        showPrimaryFactorStep(registeredUserDevice)
+        showPrimaryFactorStep(registeredUserDevice, authTicket)
     }
 
     override fun onPrimaryFactorCancelOrLogout() {
@@ -265,8 +269,6 @@ class LoginPresenter(
             NavigationUtils.logoutAndCallLoginScreen(context!!)
         }
     }
-
-    
 
     private fun cancelUnlock(shouldFinish: Boolean = true) {
         lockManager.sendUnLock(UnlockEvent.Reason.Unknown(), false)
@@ -304,21 +306,23 @@ class LoginPresenter(
         NavigationUtils.logoutAndCallLoginScreen(context!!, allowSkipEmail = true)
     }
 
-    fun showPrimaryFactorStep(registeredUserDevice: RegisteredUserDevice) {
+    fun showPrimaryFactorStep(registeredUserDevice: RegisteredUserDevice, authTicket: String?) {
         if (provider.isAlreadyLoggedIn()) {
             showLockPage()
         } else {
             
-            showPasswordPage(registeredUserDevice)
+            showPasswordPage(registeredUserDevice, authTicket)
         }
     }
 
     fun showPasswordPage(
         registeredUserDevice: RegisteredUserDevice,
+        authTicket: String? = null,
         showForRemember: Boolean = false
     ) {
         val presenter = createPasswordPresenter(
-            registeredUserDevice,
+            registeredUserDevice = registeredUserDevice,
+            authTicket = authTicket,
             clearPreviousState = true,
             topicLock = if (showForRemember) context!!.getString(R.string.login_enter_mp_remember_title) else null,
             allowBypass = showForRemember && provider.canDelayMasterPasswordUnlock()
@@ -351,12 +355,14 @@ class LoginPresenter(
 
     private fun createPasswordPresenter(
         registeredUserDevice: RegisteredUserDevice,
+        authTicket: String?,
         clearPreviousState: Boolean = false,
         topicLock: String? = null,
         allowBypass: Boolean = false
     ): LoginPasswordPresenter {
         val dataProvider = provider.createPasswordDataProvider(
             registeredUserDevice,
+            authTicket,
             migrationToSsoMemberInfo,
             topicLock = topicLock,
             allowBypass = allowBypass
@@ -366,8 +372,6 @@ class LoginPresenter(
                 VIEW_MODEL_PASSWORD_VALIDATION
             )
         if (clearPreviousState) {
-            
-
             passwordValidationHolder.deferred = null
         }
         return LoginPasswordPresenter(
@@ -391,12 +395,13 @@ class LoginPresenter(
             showSsoLockPage()
         } else {
             showPasswordPage(
-                RegisteredUserDevice.Local(
+                registeredUserDevice = RegisteredUserDevice.Local(
                     login = userInfo.username,
                     securityFeatures = userInfo.securitySettings.toSecurityFeatures(),
                     accessKey = userInfo.accessKey
                 ),
-                showForRemember
+                authTicket = null,
+                showForRemember = showForRemember
             )
         }
     }
@@ -484,8 +489,6 @@ class LoginPresenter(
         }
     }
 
-    
-
     private inner class PagesStateHelper {
 
         val currentPresenter
@@ -496,8 +499,6 @@ class LoginPresenter(
 
         val hasPrevious
             get() = pageStates.size > 1
-
-        
 
         fun addedPage(
             presenter: LoginBaseContract.Presenter,
@@ -512,21 +513,15 @@ class LoginPresenter(
             pageStates.add(presenter to state)
             view.transition(previous, presenter)
             onCreatePresenter(presenter, null)
-            presenter.onShow()
             updateCurrentPageView()
         }
-
-        
 
         fun removedLastPage() {
             val from = pageStates.removeLast().first.apply { coroutineContext.cancel() }
             val lastPresenter = pageStates.last().first
             view.transition(from, lastPresenter)
-            lastPresenter.onShow()
             updateCurrentPageView()
         }
-
-        
 
         fun writeState(bundle: Bundle) {
             pageStates.forEach { it.first.onSaveInstanceState(bundle) }
@@ -535,8 +530,6 @@ class LoginPresenter(
             bundle.putStringArray(STATE_PAGE_NAMES, pageNames.toTypedArray())
             bundle.putParcelableArray(STATE_PAGE_STATES, pageStates.toTypedArray())
         }
-
-        
 
         fun readState(bundle: Bundle) {
             val pageNames = bundle.getStringArray(STATE_PAGE_NAMES)!!
@@ -547,7 +540,7 @@ class LoginPresenter(
                     LoginEmailPresenter::class.java.name -> createEmailPresenter()
                     LoginTokenPresenter::class.java.name -> createTokenPresenter(state as AuthenticationSecondFactor.EmailToken)
                     LoginTotpPresenter::class.java.name -> createTotpPresenter(state as AuthenticationSecondFactor.Totp)
-                    LoginPasswordPresenter::class.java.name -> createPasswordPresenter(state as RegisteredUserDevice)
+                    LoginPasswordPresenter::class.java.name -> createPasswordPresenter(state as RegisteredUserDevice, null)
                     BiometricPresenter::class.java.name -> createBiometricPresenter()
                     PinLockPresenter::class.java.name -> createPinLockPresenter()
                     SsoLockPresenter::class.java.name -> createSsoLockPresenter()
@@ -559,7 +552,9 @@ class LoginPresenter(
                 this.pageStates.add(presenter to state)
                 onCreatePresenter(presenter, bundle)
             }
-            val lastPresenter = this.pageStates.last().first
+            
+            
+            val lastPresenter = this.pageStates.lastOrNull()?.first ?: createEmailPresenter()
             view.transitionTo(lastPresenter)
         }
 

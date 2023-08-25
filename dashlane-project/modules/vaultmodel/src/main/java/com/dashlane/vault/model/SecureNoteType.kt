@@ -47,8 +47,6 @@ fun SyncObject.SecureNoteType.getUsageLogLabel(): String {
     }
 }
 
-
-
 fun getSecureNoteTypeDeprecatedDatabaseOrder(): List<SyncObject.SecureNoteType> {
     return listOf(
         SyncObject.SecureNoteType.NO_TYPE,

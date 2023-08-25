@@ -1,7 +1,6 @@
 package com.dashlane.ui;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,15 +11,11 @@ import android.widget.FrameLayout;
 
 import com.dashlane.R;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.useractivity.log.install.InstallLogRepository;
-import com.dashlane.useractivity.log.inject.UserActivityComponent;
 import com.dashlane.util.DeviceUtils;
 
 import wei.mark.standout.StandOutWindow;
 import wei.mark.standout.constants.StandOutFlags;
 import wei.mark.standout.ui.Window;
-
-
 
 public class DashlaneInAppLoggedOut extends AbstractDashlaneSubwindow implements View.OnClickListener {
 
@@ -28,7 +23,6 @@ public class DashlaneInAppLoggedOut extends AbstractDashlaneSubwindow implements
     public static final String DATA_PACKAGE_NAME = "data_package_name";
 
     private LayoutInflater mLayoutInflater;
-    private DashlaneInAppLoggedOutLogger mDashlaneInAppLoggedOutLogger;
 
     public static int[] getWindowDimensions(Context context) {
         int[] screenSize = DeviceUtils.getScreenSize(context);
@@ -46,9 +40,6 @@ public class DashlaneInAppLoggedOut extends AbstractDashlaneSubwindow implements
     public void onCreate() {
         super.onCreate();
         mLayoutInflater = LayoutInflater.from(this);
-        InstallLogRepository installLogRepository =
-                UserActivityComponent.Companion.invoke(this).getInstallLogRepository();
-        mDashlaneInAppLoggedOutLogger = new DashlaneInAppLoggedOutLogger(installLogRepository);
     }
 
     @Override
@@ -95,15 +86,6 @@ public class DashlaneInAppLoggedOut extends AbstractDashlaneSubwindow implements
     }
 
     @Override
-    public void onReceiveData(int id, int requestCode, Bundle data, Class<? extends StandOutWindow> fromCls, int
-            fromId) {
-        super.onReceiveData(id, requestCode, data, fromCls, fromId);
-        if (data.containsKey(DATA_PACKAGE_NAME)) {
-            mDashlaneInAppLoggedOutLogger.setPackageName(data.getString(DATA_PACKAGE_NAME));
-        }
-    }
-
-    @Override
     public Animation getShowAnimation(int id) {
         return AnimationUtils.loadAnimation(this, R.anim.grow_from_topright_to_bottomleft);
     }
@@ -116,11 +98,8 @@ public class DashlaneInAppLoggedOut extends AbstractDashlaneSubwindow implements
     @Override
     public void onClick(View v) {
         if (R.id.log_in_with_dashlane_yes == v.getId()) {
-            mDashlaneInAppLoggedOutLogger.onClickLogin();
             SingletonProvider.getComponent().getLockHelper().logoutAndCallLoginScreenForInAppLogin(this);
             new Handler().postDelayed(() -> StandOutWindow.closeAll(DashlaneInAppLoggedOut.this, DashlaneBubble.class), 750);
-        } else if (R.id.log_in_with_dashlane_no == v.getId()) {
-            mDashlaneInAppLoggedOutLogger.onClickNotLogin();
         }
         StandOutWindow.closeAll(this, DashlaneInAppLoggedOut.class);
     }

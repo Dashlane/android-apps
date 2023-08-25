@@ -14,8 +14,6 @@ import com.dashlane.premium.offer.details.OfferDetailsViewProxy
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class OfferDetailsFragment : Fragment() {
 

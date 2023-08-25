@@ -24,6 +24,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorIntro.Companion.RESULT_OTP
+import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.item.AuthenticatorViewProxy
 import com.dashlane.dagger.singleton.SingletonProvider
@@ -39,7 +40,6 @@ import com.dashlane.item.subview.Action
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.ViewFactory
-import com.dashlane.item.subview.action.GeneratePasswordAction
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.item.subview.action.authenticator.ActivateRemoveAuthenticatorAction
 import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
@@ -82,18 +82,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-
-
 class ItemEditViewViewProxy(
     val activity: AppCompatActivity,
     private val viewFactory: ViewFactory,
     private val lifecycleOwner: LifecycleOwner,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val authenticatorLogger: AuthenticatorLogger
 ) :
     BaseViewProxy<ItemEditViewContract.Presenter>(activity),
     ItemEditViewContract.View {
-
-    
 
     private val allDialogsTags = listOf(
         DatePickerInputProvider.DATE_PICKER_DIALOG_TAG,
@@ -134,21 +131,25 @@ class ItemEditViewViewProxy(
                         itemSubView,
                         view
                     )
+
                     is ItemReadValueTextSubView -> configureReadValueTextSubView(itemSubView, view)
                     is ItemEditValueTextSubView -> configureEditValueTextSubView(itemSubView, view)
                     is ItemReadValueNumberSubView -> configureReadValueNumberSubView(
                         itemSubView,
                         view
                     )
+
                     is ItemEditValueNumberSubView -> configureEditValueNumberSubView(
                         itemSubView,
                         view
                     )
+
                     is ItemPasswordSafetySubView -> passwordSafety?.setPassword(itemSubView.value)
                     is ItemEditValueListSubView -> configureValueListSubView(
                         itemSubView,
                         view as LinearLayout
                     )
+
                     is ItemAuthenticatorEditSubView -> configureAuthenticatorSubview(
                         itemSubView,
                         view
@@ -363,7 +364,8 @@ class ItemEditViewViewProxy(
                     ).apply {
                         
                         topMargin = context.resources.getDimensionPixelSize(it.topMargin)
-                    })
+                    }
+                )
             }
         }
         setDominantColor(headerColor)
@@ -384,6 +386,7 @@ class ItemEditViewViewProxy(
                         strengthLevelUpdater = StrengthLevelUpdater(lifecycleOwner.lifecycleScope)
                         configurePasswordWithStrengthSubView(itemSubView, it)
                     }
+
                     is ItemEditValueTextSubView -> configureEditValueTextSubView(itemSubView, it)
                     is ItemReadValueTextSubView -> configureReadValueTextSubView(itemSubView, it)
                     is ItemPasswordSafetySubView -> {
@@ -393,11 +396,13 @@ class ItemEditViewViewProxy(
                         )
                         configurePasswordSafetySubView(itemSubView, isEditMode)
                     }
+
                     is ItemEditValueDateSubView -> configureDateSubView(itemSubView, it)
                     is ItemEditValueListSubView -> configureValueListSubView(
                         itemSubView,
                         it as LinearLayout
                     )
+
                     is ItemAuthenticatorEditSubView,
                     is ItemAuthenticatorReadSubView -> setupAuthenticatorSubview(itemSubView, it)
                 }
@@ -410,7 +415,8 @@ class ItemEditViewViewProxy(
     private fun createSubViewWithAction(wrapper: ItemSubViewWithActionWrapper<*>): View {
         val subview = createView(wrapper.itemSubView)
         val layout = LayoutInflater.from(context).inflate(
-            R.layout.subview_with_action, subview as ViewGroup,
+            R.layout.subview_with_action,
+            subview as ViewGroup,
             false
         )
         layout.findViewById<FrameLayout>(R.id.view_container).addView(subview)
@@ -439,10 +445,6 @@ class ItemEditViewViewProxy(
             )
             layout.findViewById<FrameLayout>(R.id.view_action_container)
                 .addView(button, layoutParams)
-
-            if (this is GeneratePasswordAction) {
-                setupDialog(activity)
-            }
         }
 
         return layout
@@ -557,7 +559,8 @@ class ItemEditViewViewProxy(
         val inputLayout = view as? TextInputLayout ?: return
         inputLayout.editText?.setText(item.formattedDate, TextView.BufferType.EDITABLE)
         DatePickerInputProvider.setClickListener(
-            activity, inputLayout,
+            activity,
+            inputLayout,
             item.value
         ) { newDate -> item.notifyValueChanged(newDate) }
         if (item.invisible) {
@@ -569,7 +572,6 @@ class ItemEditViewViewProxy(
 
     private fun configureValueListSubView(item: ItemEditValueListSubView, view: LinearLayout) {
         view.let {
-
             val newAdapter = SpinnerAdapterDefaultValueString(
                 context,
                 R.layout.spinner_item_dropdown,
@@ -580,8 +582,14 @@ class ItemEditViewViewProxy(
             val promptText = context.getString(R.string.choose)
 
             val newSpinner = SpinnerInputProvider.createSpinner(
-                context, item.value,
-                true, promptText, newAdapter, null, null, null
+                context,
+                item.value,
+                true,
+                promptText,
+                newAdapter,
+                null,
+                null,
+                null
             ) { selectedIndex ->
                 val newValue = item.values[selectedIndex]
                 item.notifyValueChanged(newValue)
@@ -631,7 +639,7 @@ class ItemEditViewViewProxy(
             createView(
                 ItemSubViewWithActionWrapper(
                     item,
-                    ActivateRemoveAuthenticatorAction(item, listener)
+                    ActivateRemoveAuthenticatorAction(item, listener, authenticatorLogger)
                 )
             )
         )

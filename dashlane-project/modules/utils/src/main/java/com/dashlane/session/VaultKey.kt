@@ -5,8 +5,6 @@ import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.session.VaultKey.RemoteKey
 import okio.Closeable
 
-
-
 sealed class VaultKey : Closeable, Cloneable {
 
     abstract val cryptographyKey: CryptographyKey

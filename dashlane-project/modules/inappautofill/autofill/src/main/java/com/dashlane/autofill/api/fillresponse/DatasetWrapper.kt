@@ -8,8 +8,6 @@ import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
 
-
-
 class DatasetWrapper(
     private var remoteViews: RemoteViews?,
     private var authentication: IntentSender?,

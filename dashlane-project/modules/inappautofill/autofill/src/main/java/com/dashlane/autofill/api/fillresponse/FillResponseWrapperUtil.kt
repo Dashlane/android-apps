@@ -72,7 +72,7 @@ internal fun FillResponseWrapper.Builder.buildResults(
     val vaultItemDataSet = result?.map { itemToFill ->
         dataSetCreator.create(
             summary = updatedEntriesSummary,
-            item = itemToFill,
+            itemToFill = itemToFill,
             requireLock = true,
             isChangePassword = isChangePassword,
             inlineSpec = inlineSpecs?.popOrLast()

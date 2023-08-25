@@ -9,22 +9,14 @@ import java.util.Locale
 fun Context.getDefaultCountry(): Country =
     Country.forIsoCodeOrNull(DeviceUtils.getDeviceCountry(this)) ?: Country.UnitedStates
 
-
-
 fun Country.Companion.labels(context: Context) =
     values().map { it.getLabel(context) }.sortedWith(Collator.getInstance())
-
-
 
 fun Country.Companion.forLabelOrDefault(context: Context, label: String, default: Country = UnitedStates) =
     forLabelOrNull(context, label) ?: default
 
-
-
 fun Country.Companion.forLabelOrNull(context: Context, label: String) =
     values().firstOrNull { it.getLabel(context) == label }
-
-
 
 fun Country.getLabel(context: Context): String =
     getLabel(buildAppLanguageLocale(context))

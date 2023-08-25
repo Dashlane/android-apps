@@ -7,8 +7,6 @@ import com.dashlane.autofill.api.pause.view.AutofillPauseActivity
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import javax.inject.Inject
 
-
-
 class AutofillPauseActivityIntentProvider @Inject constructor() : PauseActionIntentProvider {
 
     override fun getPauseIntentSender(

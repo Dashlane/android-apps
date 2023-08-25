@@ -2,8 +2,6 @@
 
 package com.dashlane.navigation
 
-
-
 object NavigationConstants {
     const val USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION_ALREADY_LOGGED_IN =
         "userComeFromExternalPushTokenNotificationAlreadyLoggedIn"

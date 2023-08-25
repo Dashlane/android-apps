@@ -15,7 +15,6 @@ import com.dashlane.util.getFormattedSpannable
 import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.vault.model.urlDomain
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.presenter.BasePresenter
@@ -119,8 +118,6 @@ class BreachAlertDetailPresenter @Inject constructor(
         }
     }
 
-    
-
     private fun setupAdvices() {
         
         if (breachWrapper.localBreach.solved) {
@@ -160,7 +157,8 @@ class BreachAlertDetailPresenter @Inject constructor(
             when {
                 breachWrapper.linkedAuthentifiant.size > 1 -> {
                     passwordAdvice = view.resources.getString(
-                        R.string.dwm_alert_detail_advice_password_multiple, breachWrapper.linkedAuthentifiant.size
+                        R.string.dwm_alert_detail_advice_password_multiple,
+                        breachWrapper.linkedAuthentifiant.size
                     )
                     passwordAdviceButton = view.resources.getString(R.string.dwm_alert_detail_view_accounts_cta)
                     passwordAdviceButtonAction = {
@@ -229,11 +227,10 @@ class BreachAlertDetailPresenter @Inject constructor(
             )
         } else {
             
-            navigator.goToItem(itemId, SyncObjectType.AUTHENTIFIANT.desktopId)
+            navigator.goToItem(itemId, SyncObjectType.AUTHENTIFIANT.xmlObjectName)
         }
 
     private fun viewAffectedAccounts() {
-        logger.logCheckCredentials()
         navigator.goToPasswordAnalysisFromBreach(
             breachWrapper.publicBreach.id,
             "tray_security_dashboard"

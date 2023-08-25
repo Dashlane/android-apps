@@ -13,8 +13,6 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class AppEvents @Inject constructor(
     private val sessionManager: SessionManager,
@@ -22,12 +20,8 @@ class AppEvents @Inject constructor(
     @MainCoroutineDispatcher
     private val mainDispatcher: CoroutineDispatcher
 ) {
-    
-
     private val listenersMapByEventClassName = ConcurrentHashMap<String, MutableMap<Any, (AppEvent) -> Unit>>()
     private val lastEventByEventClassName = ConcurrentHashMap<String, AppEvent>()
-
-    
 
     @Suppress("UNCHECKED_CAST")
     @Throws(IllegalStateException::class)
@@ -47,8 +41,6 @@ class AppEvents @Inject constructor(
         if (deliverLastEvent) deliverLastEvent(subscriber, clazz)
     }
 
-    
-
     @Throws(IllegalStateException::class)
     fun <T : AppEvent> unregister(subscriber: Any, clazz: Class<T>) {
         val listenerBySubscriberClassName = listenersMapByEventClassName[clazz.name]
@@ -56,11 +48,7 @@ class AppEvents @Inject constructor(
         listenerBySubscriberClassName.remove(subscriber)
     }
 
-    
-
     fun unregisterAll() = listenersMapByEventClassName.clear()
-
-    
 
     fun <T : AppEvent> post(event: T) {
         val session = sessionManager.session ?: return
@@ -74,18 +62,12 @@ class AppEvents @Inject constructor(
         }
     }
 
-    
-
     fun <T : AppEvent> clearLastEvent(clazz: Class<T>) {
         lastEventByEventClassName.remove(clazz.name)
     }
 
-    
-
     @Suppress("UNCHECKED_CAST")
     fun <T : AppEvent> getLastEvent(clazz: Class<T>) = lastEventByEventClassName[clazz.name] as? T
-
-    
 
     private fun <T : AppEvent> deliverLastEvent(subscriber: Any, clazz: Class<T>) {
         val session = sessionManager.session ?: return

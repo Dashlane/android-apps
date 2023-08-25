@@ -2,25 +2,15 @@ package com.dashlane.util
 
 import android.view.animation.Animation
 
-
-
 val Animation.onLifecycleEvent: AnimationListenerDsl
     get() = AnimationListener().also { setAnimationListener(it) }
-
-
 
 fun Animation.onLifecycleEvent(block: AnimationListenerDsl.() -> Unit) = onLifecycleEvent.apply(block)
 
 interface AnimationListenerDsl {
-    
-
     fun start(onAnimationStart: () -> Unit)
 
-    
-
     fun end(onAnimationEnd: () -> Unit)
-
-    
 
     fun repeat(onAnimationRepeat: () -> Unit)
 }

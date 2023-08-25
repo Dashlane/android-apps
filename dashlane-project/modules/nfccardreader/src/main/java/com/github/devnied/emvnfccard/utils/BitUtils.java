@@ -8,39 +8,19 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
-
-
 public final class BitUtils {
-    
-
     public static final int BYTE_SIZE = Byte.SIZE;
-    
-
     public static final float BYTE_SIZE_F = Byte.SIZE;
-    
-
     private static final int DEFAULT_VALUE = 0xFF;
-    
-
     private static final Charset DEFAULT_CHARSET = Charset.forName("ASCII");
-
-    
 
     public static final String DATE_FORMAT = "yyyyMMdd";
 
-    
-
     private final byte[] byteTab;
-
-    
 
     private int currentBitIndex;
 
-    
-
     private final int size;
-
-    
 
     public BitUtils(final byte pByte[]) {
         byteTab = new byte[pByte.length];
@@ -48,14 +28,10 @@ public final class BitUtils {
         size = pByte.length * BYTE_SIZE;
     }
 
-    
-
     public BitUtils(final int pSize) {
         byteTab = new byte[(int) Math.ceil(pSize / BYTE_SIZE_F)];
         size = pSize;
     }
-
-    
 
     public void addCurrentBitIndex(final int pIndex) {
         currentBitIndex += pIndex;
@@ -64,21 +40,15 @@ public final class BitUtils {
         }
     }
 
-    
-
     public int getCurrentBitIndex() {
         return currentBitIndex;
     }
-
-    
 
     public byte[] getData() {
         byte[] ret = new byte[byteTab.length];
         System.arraycopy(byteTab, 0, ret, 0, byteTab.length);
         return ret;
     }
-
-    
 
     public byte getMask(final int pIndex, final int pLength) {
         byte ret = (byte) DEFAULT_VALUE;
@@ -94,8 +64,6 @@ public final class BitUtils {
         return ret;
     }
 
-    
-
     public boolean getNextBoolean() {
         boolean ret = false;
         if (getNextInteger(1) == 1) {
@@ -104,13 +72,9 @@ public final class BitUtils {
         return ret;
     }
 
-    
-
     public byte[] getNextByte(final int pSize) {
         return getNextByte(pSize, true);
     }
-
-    
 
     
     @SuppressWarnings("squid:S3776")
@@ -152,13 +116,9 @@ public final class BitUtils {
         return tab;
     }
 
-    
-
     public Date getNextDate(final int pSize, final String pPattern) {
         return getNextDate(pSize, pPattern, false);
     }
-
-    
 
     public Date getNextDate(final int pSize, final String pPattern, final boolean pUseBcd) {
         Date date = null;
@@ -180,13 +140,9 @@ public final class BitUtils {
         return date;
     }
 
-    
-
     public String getNextHexaString(final int pSize) {
         return BytesUtils.bytesToStringNoSpace(getNextByte(pSize, true));
     }
-
-    
 
     public long getNextLongSigned(final int pLength) {
         if (pLength > Long.SIZE) {
@@ -201,16 +157,12 @@ public final class BitUtils {
         return decimal;
     }
 
-    
-
     public int getNextIntegerSigned(final int pLength) {
         if (pLength > Integer.SIZE) {
             throw new IllegalArgumentException("Integer overflow with length > 32");
         }
         return (int) getNextLongSigned(pLength);
     }
-
-    
 
     public long getNextLong(final int pLength) {
         
@@ -245,44 +197,30 @@ public final class BitUtils {
         return buffer.getLong();
     }
 
-    
-
     public int getNextInteger(final int pLength) {
         return (int) (getNextLong(pLength));
     }
-
-    
 
     public String getNextString(final int pSize) {
         return getNextString(pSize, DEFAULT_CHARSET);
     }
 
-    
-
     public String getNextString(final int pSize, final Charset pCharset) {
         return new String(getNextByte(pSize, true), pCharset);
     }
-
-    
 
     public int getSize() {
         return size;
     }
 
-    
-
     public void reset() {
         setCurrentBitIndex(0);
     }
-
-    
 
     public void clear() {
         Arrays.fill(byteTab, (byte) 0);
         reset();
     }
-
-    
 
     public void resetNextBits(final int pLength) {
         int max = currentBitIndex + pLength;
@@ -294,13 +232,9 @@ public final class BitUtils {
         }
     }
 
-    
-
     public void setCurrentBitIndex(final int pCurrentBitIndex) {
         currentBitIndex = pCurrentBitIndex;
     }
-
-    
 
     public void setNextBoolean(final boolean pBoolean) {
         if (pBoolean) {
@@ -310,13 +244,9 @@ public final class BitUtils {
         }
     }
 
-    
-
     public void setNextByte(final byte[] pValue, final int pLength) {
         setNextByte(pValue, pLength, true);
     }
-
-    
 
     public void setNextByte(final byte[] pValue, final int pLength, final boolean pPadBefore) {
         int totalSize = (int) Math.ceil(pLength / BYTE_SIZE_F);
@@ -358,13 +288,9 @@ public final class BitUtils {
         }
     }
 
-    
-
     public void setNextDate(final Date pValue, final String pPattern) {
         setNextDate(pValue, pPattern, false);
     }
-
-    
 
     public void setNextDate(final Date pValue, final String pPattern, final boolean pUseBcd) {
         
@@ -378,13 +304,9 @@ public final class BitUtils {
         }
     }
 
-    
-
     public void setNextHexaString(final String pValue, final int pLength) {
         setNextByte(BytesUtils.fromString(pValue), pLength);
     }
-
-    
 
     public void setNextLong(final long pValue, final int pLength) {
 
@@ -394,8 +316,6 @@ public final class BitUtils {
 
         setNextValue(pValue, pLength, Long.SIZE - 1);
     }
-
-    
 
     protected void setNextValue(final long pValue, final int pLength, final int pMaxSize) {
         long value = pValue;
@@ -425,8 +345,6 @@ public final class BitUtils {
         }
     }
 
-    
-
     public void setNextInteger(final int pValue, final int pLength) {
 
         if (pLength > Integer.SIZE) {
@@ -436,13 +354,9 @@ public final class BitUtils {
         setNextValue(pValue, pLength, Integer.SIZE - 1);
     }
 
-    
-
     public void setNextString(final String pValue, final int pLength) {
         setNextString(pValue, pLength, true);
     }
-
-    
 
     public void setNextString(final String pValue, final int pLength, final boolean pPaddedBefore) {
         setNextByte(pValue.getBytes(Charset.defaultCharset()), pLength, pPaddedBefore);

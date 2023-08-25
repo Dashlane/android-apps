@@ -1,11 +1,9 @@
 package com.dashlane.sync.treat
 
-import com.dashlane.sync.SyncScope
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
-
-@SyncScope
+@Singleton
 class TransactionFailureRegistry @Inject constructor() {
 
     private val summaryItems = mutableSetOf<SyncSummaryItem>()

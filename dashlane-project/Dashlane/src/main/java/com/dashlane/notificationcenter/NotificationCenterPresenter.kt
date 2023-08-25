@@ -4,8 +4,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.dashlane.accountrecovery.AccountRecoveryBiometricIntroActivity
-import com.dashlane.accountrecovery.AccountRecoveryIntroActivity
+import com.dashlane.biometricrecovery.BiometricRecoveryIntroActivity
+import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
 import com.dashlane.events.AppEvents
 import com.dashlane.events.BreachStatusChangedEvent
 import com.dashlane.lock.LockHelper
@@ -17,7 +17,6 @@ import com.dashlane.notificationcenter.view.HeaderItem
 import com.dashlane.notificationcenter.view.NotificationItem
 import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.security.DashlaneIntent
-import com.dashlane.security.identitydashboard.breach.BreachLogger
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
@@ -45,7 +44,6 @@ class NotificationCenterPresenter @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
     private val lockHelper: LockHelper,
     private val sensibleSettingsClickHelper: SensibleSettingsClickHelper,
-    private val breachLogger: BreachLogger,
     private val appEvents: AppEvents,
     private val navigator: Navigator
 ) : BasePresenter<NotificationCenterDef.DataProvider, NotificationCenterDef.View>(),
@@ -103,7 +101,7 @@ class NotificationCenterPresenter @Inject constructor(
         logger.logActionItemDismiss(item.type.trackingKey)
         providerOrNull?.dismiss(item)
         fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) {
-            saveAndRemoveBreach(item, viewOrNull?.items?.indexOf(item) ?: -1)
+            saveAndRemoveBreach(item)
         }
     }
 
@@ -150,13 +148,13 @@ class NotificationCenterPresenter @Inject constructor(
         navigator.goToChromeImportIntro(origin)
     }
 
-    override fun startAccountRecoverySetup(hasBiometricLockType: Boolean) {
+    override fun startBiometricRecoverySetup(hasBiometricLockType: Boolean) {
         runWhenUnlocked {
             context?.run {
                 val intent = if (hasBiometricLockType) {
-                    AccountRecoveryIntroActivity.newIntent(this)
+                    MasterPasswordResetIntroActivity.newIntent(this)
                 } else {
-                    AccountRecoveryBiometricIntroActivity.newIntent(this)
+                    BiometricRecoveryIntroActivity.newIntent(this)
                 }
 
                 startActivity(intent)
@@ -188,18 +186,16 @@ class NotificationCenterPresenter @Inject constructor(
 
     private suspend fun markAllBreachesAsViewed(list: List<NotificationItem>) {
         list.filterIsInstance(AlertActionItem::class.java)
-            .mapIndexed { index, item ->
-                breachLogger.logTrayShow(index, item.breachWrapper)
+            .mapIndexed { _, item ->
                 item.breachWrapper
             }.run {
                 breachesDataProvider.markAllAsViewed(this)
             }
     }
 
-    private suspend fun saveAndRemoveBreach(item: NotificationItem, position: Int) {
+    private suspend fun saveAndRemoveBreach(item: NotificationItem) {
         if (item !is AlertActionItem) return
         breachesDataProvider.saveAndRemove(item.breachWrapper, SyncObject.SecurityBreach.Status.ACKNOWLEDGED)
-        breachLogger.logTrayClose(position, item.breachWrapper)
         appEvents.post(BreachStatusChangedEvent())
     }
 

@@ -20,15 +20,15 @@ import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.useractivity.log.usage.UsageLogCode35
 import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class PinLockDataProvider @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
     private val lockRepository: LockRepository,
     private val userPreferencesManager: UserPreferencesManager,
@@ -40,8 +40,11 @@ class PinLockDataProvider @Inject constructor(
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     logRepository: LogRepository
 ) : LoginLockBaseDataProvider<PinLockContract.Presenter>(
-    lockManager, successIntentFactory, inAppLoginManager,
-    sessionManager, bySessionUsageLogRepository
+    lockManager,
+    successIntentFactory,
+    inAppLoginManager,
+    sessionManager,
+    bySessionUsageLogRepository
 ),
     PinLockContract.DataProvider {
 
@@ -143,7 +146,7 @@ class PinLockDataProvider @Inject constructor(
             .putBoolean(ConstantsPrefs.HOME_PAGE_GETTING_STARTED_PIN_IGNORE, true)
 
         val pin = firstStepPin!!
-        globalCoroutineScope.launch {
+        applicationCoroutineScope.launch {
             userSecureStorageManager.storePin(sessionManager.session, pin)
         }
 
@@ -153,12 +156,6 @@ class PinLockDataProvider @Inject constructor(
         } else {
             logUsageLog35Pin(UsageLogConstant.ActionType.changePinCode)
         }
-    }
-
-    override fun onShow() {
-    }
-
-    override fun onBack() {
     }
 
     private fun logUsageLog35Pin(action: String) {

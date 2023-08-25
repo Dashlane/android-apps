@@ -5,8 +5,6 @@ import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEva
 import com.skocken.presentation.definition.Base
 import kotlinx.coroutines.Deferred
 
-
-
 interface IdentityDashboardContract {
 
     interface ViewProxy : Base.IView {

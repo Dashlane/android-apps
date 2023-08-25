@@ -6,16 +6,10 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-
-
 class DialogHelper {
-    
-
     fun builder(context: Context): AlertDialog.Builder {
         return MaterialAlertDialogBuilder(context)
     }
-
-    
 
     fun builder(
         context: Context,
@@ -24,8 +18,6 @@ class DialogHelper {
         return MaterialAlertDialogBuilder(context, overrideThemeResId)
     }
 }
-
-
 
 fun AlertDialog.withCenteredButtons() {
     val positive = getButton(AlertDialog.BUTTON_POSITIVE)

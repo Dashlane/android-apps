@@ -4,24 +4,18 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.dashlane.cryptography.EncryptedBase64String
 import com.dashlane.cryptography.asEncryptedBase64
+import java.time.Instant
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
-import java.time.Instant
-
-
 
 sealed class RegisteredUserDevice : Parcelable {
     abstract val login: String
     abstract val securityFeatures: Set<SecurityFeature>
     abstract val serverKey: String?
 
-    
-
     val isServerKeyRequired
         get() = serverKey != null
-
-    
 
     @Parcelize
     data class ToRestore(
@@ -33,8 +27,6 @@ sealed class RegisteredUserDevice : Parcelable {
             get() = null
     }
 
-    
-
     @Parcelize
     data class Local(
         override val login: String,
@@ -42,8 +34,6 @@ sealed class RegisteredUserDevice : Parcelable {
         override val serverKey: String? = null,
         val accessKey: String
     ) : RegisteredUserDevice()
-
-    
 
     @Parcelize
     data class Remote(

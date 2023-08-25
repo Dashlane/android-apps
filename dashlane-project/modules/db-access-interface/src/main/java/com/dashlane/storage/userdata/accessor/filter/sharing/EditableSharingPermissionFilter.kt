@@ -3,8 +3,6 @@ package com.dashlane.storage.userdata.accessor.filter.sharing
 import android.annotation.SuppressLint
 import com.dashlane.util.model.UserPermission
 
-
-
 interface EditableSharingPermissionFilter : SharingFilter {
 
     var sharingFilter: SharingFilter
@@ -13,20 +11,14 @@ interface EditableSharingPermissionFilter : SharingFilter {
         sharingFilter = NoSharingFilter
     }
 
-    
-
     fun onlyNotShared() {
         specificSharingPermission(arrayOf(UserPermission.UNDEFINED))
     }
-
-    
 
     @SuppressLint("WrongConstant") 
     fun onlyShared() {
         specificSharingPermission(arrayOf(UserPermission.ADMIN, UserPermission.LIMITED))
     }
-
-    
 
     @SuppressLint("WrongConstant") 
     fun onlyShareable() {

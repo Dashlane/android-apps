@@ -13,8 +13,6 @@ import com.dashlane.vault.util.SharingStateChecker
 import com.dashlane.vault.util.isProtected
 import javax.inject.Inject
 
-
-
 class CreateFollowUpNotificationImpl @Inject constructor(
     private val followUpNotificationsStrings: FollowUpNotificationsStrings,
     private val followUpNotificationDynamicData: FollowUpNotificationDynamicData,
@@ -67,8 +65,6 @@ class CreateFollowUpNotificationImpl @Inject constructor(
         )
     }
 
-    
-
     private fun isFollowUpNotificationNeeded(summaryObject: SummaryObject, copyField: CopyField?): Boolean {
         if (summaryObject is SummaryObject.Authentifiant) {
             
@@ -109,29 +105,29 @@ class CreateFollowUpNotificationImpl @Inject constructor(
     private fun SummaryObject.getItemName(): String? = when (this) {
         is SummaryObject.Authentifiant -> this.title
         is SummaryObject.Address -> this.addressName
-        is SummaryObject.AuthCategory -> null
         is SummaryObject.BankStatement -> this.bankAccountName
         is SummaryObject.Company -> this.name
-        is SummaryObject.DriverLicence -> null
         is SummaryObject.Email -> this.emailName
-        is SummaryObject.FiscalStatement -> null
-        is SummaryObject.IdCard -> null
-        is SummaryObject.Identity -> null
-        is SummaryObject.Passport -> null
         is SummaryObject.PaymentCreditCard -> this.name
         is SummaryObject.PaymentPaypal -> this.name
-        is SummaryObject.PersonalWebsite -> null
-        is SummaryObject.Phone -> null
-        is SummaryObject.SecureFileInfo -> null
-        is SummaryObject.SecureNote -> null
-        is SummaryObject.SecureNoteCategory -> null
-        is SummaryObject.SecurityBreach -> null
-        is SummaryObject.SocialSecurityStatement -> null
-        is SummaryObject.GeneratedPassword -> null
-        is SummaryObject.DataChangeHistory -> null
+        is SummaryObject.Collection -> name
+        is SummaryObject.AuthCategory,
+        is SummaryObject.SecureNoteCategory,
+        is SummaryObject.SecureNote,
+        is SummaryObject.DriverLicence,
+        is SummaryObject.FiscalStatement,
+        is SummaryObject.IdCard,
+        is SummaryObject.Identity,
+        is SummaryObject.Passport,
+        is SummaryObject.PersonalWebsite,
+        is SummaryObject.Phone,
+        is SummaryObject.SocialSecurityStatement,
+        is SummaryObject.SecureFileInfo,
+        is SummaryObject.SecurityBreach,
+        is SummaryObject.GeneratedPassword,
+        is SummaryObject.DataChangeHistory,
+        is SummaryObject.Passkey -> null
     }.takeIf { it.isNotSemanticallyNull() }
-
-    
 
     private fun List<CopyField>.filterFieldsWithLimitedPermissions(summaryObject: SummaryObject): List<CopyField> =
         this.filterNot { copyField ->

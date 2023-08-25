@@ -9,7 +9,8 @@ import com.dashlane.authenticator.ipc.PasswordManagerAuthentifiant
 import com.dashlane.authenticator.ipc.PasswordManagerService
 import com.dashlane.authenticator.ipc.PasswordManagerState
 import com.dashlane.authenticator.ipc.isPaired
-import com.dashlane.core.sync.DataSyncHelper
+import com.dashlane.core.DataSync
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockPass
 import com.dashlane.login.lock.LockTypeManager
@@ -28,8 +29,6 @@ import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.url.toHttpUrl
-import com.dashlane.useractivity.log.usage.UsageLogCode134
-import com.dashlane.usersupportreporter.UserSupportFileLogger
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.util.tryAsSuccess
@@ -46,11 +45,11 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArraySet
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.runBlocking
 
 @Singleton
 class PasswordManagerServiceStubImpl @Inject constructor(
@@ -63,8 +62,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     private val mainDataAccessor: MainDataAccessor,
     private val urlDomainRegistryFactory: UrlDomainRegistryFactory,
     private val lockValidator: LockValidator,
-    private val syncHelper: DataSyncHelper,
-    private val userSupportFileLogger: UserSupportFileLogger,
+    private val dataSync: DataSync,
     private val isSettingUp2faChecker: IsSettingUp2faChecker,
     private val sharingPolicyDataProvider: SharingPolicyDataProvider
 ) : PasswordManagerService.Stub(
@@ -95,6 +93,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
                 PasswordManagerState.NO_USER
             }
         }
+
         Binder.getCallingUid() in pairedCallingUids -> getLockTypeStatePaired()
         else -> getLockTypeStatePairable()
     }
@@ -124,7 +123,9 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     override fun pair(): String? {
         if (getState() != PasswordManagerState.PAIRABLE_BIOMETRIC &&
             getState() != PasswordManagerState.PAIRABLE_PIN
-        ) return null
+        ) {
+            return null
+        }
 
         val userId = sessionManager.session?.userId ?: return null
 
@@ -188,29 +189,30 @@ class PasswordManagerServiceStubImpl @Inject constructor(
                 ignoreUserLock()
                 specificUid(items.map { it.id })
             }
-        ).map { (it as VaultItem<SyncObject.Authentifiant>).toPasswordManagerAuthentifiant() }
+        ).filterIsInstance<VaultItem<SyncObject.Authentifiant>>().map { it.toPasswordManagerAuthentifiant() }
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun saveAuthentifiant(
         authentifiant: PasswordManagerAuthentifiant
     ): PasswordManagerAuthentifiant? {
-        logD { "HasId=${authentifiant.id != null} HasOtpUrl=${authentifiant.otpUrl != null}" }
-
+            message = "HasId=${authentifiant.id != null} HasOtpUrl=${authentifiant.otpUrl != null}",
+            logToUserSupportFile = true
+        )
         if (!getState().isPaired()) return null
-
-        logD { "Paired=${true}" }
 
         val vaultItem = if (authentifiant.id == null) {
             authentifiant.toVaultItem()
         } else {
             mainDataAccessor.getVaultDataQuery()
-                .query(VaultFilter().apply {
+                .query(
+                    VaultFilter().apply {
                     ignoreUserLock()
                     specificDataType(SyncObjectType.AUTHENTIFIANT)
                     specificUid(authentifiant.id!!)
                     onlyShareable()
-                })
+                }
+                )
                 ?.let { it as VaultItem<SyncObject.Authentifiant> }
                 ?.copyWithOtpUrl(authentifiant.otpUrl)
                 ?.copySyncObject {
@@ -227,11 +229,10 @@ class PasswordManagerServiceStubImpl @Inject constructor(
             mainDataAccessor.getDataSaver().save(vaultItem)
         }
 
-        logD { "Item Saved=$saved" }
 
         return if (saved) {
-            sessionManager.session?.let { session ->
-                syncHelper.runSync(session, UsageLogCode134.Origin.SAVE)
+            runBlocking {
+                dataSync.awaitSync(Trigger.SAVE)
             }
             vaultItem.toPasswordManagerAuthentifiant()
         } else {
@@ -239,16 +240,20 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun setAuthentifiantIsFavorite(authentifiant: PasswordManagerAuthentifiant): PasswordManagerAuthentifiant? {
-        logD { "HasId=${authentifiant.id != null} HasOtpUrl=${authentifiant.otpUrl != null}" }
+            message = "HasId=${authentifiant.id != null} HasOtpUrl=${authentifiant.otpUrl != null}",
+            logToUserSupportFile = true
+        )
         if (!getState().isPaired() || authentifiant.id == null) return null
-        logD { "Paired=${true}" }
 
         val vaultItem = mainDataAccessor.getVaultDataQuery()
-            .query(VaultFilter().apply {
+            .query(
+                VaultFilter().apply {
                 ignoreUserLock()
                 specificUid(authentifiant.id!!)
-            })
+            }
+            )
             ?.let { it as VaultItem<SyncObject.Authentifiant> }
             ?.copySyncObject { this.isFavorite = authentifiant.isFavorite }
             ?: return null
@@ -257,12 +262,15 @@ class PasswordManagerServiceStubImpl @Inject constructor(
             mainDataAccessor.getDataSaver().save(vaultItem)
         }
 
-        logD { "Item Saved=$saved" }
 
         return if (saved) {
-            sessionManager.session?.let { session -> syncHelper.runSync(session, UsageLogCode134.Origin.SAVE) }
+            runBlocking {
+                dataSync.awaitSync(Trigger.SAVE)
+            }
             vaultItem.toPasswordManagerAuthentifiant()
-        } else null
+        } else {
+            null
+        }
     }
 
     override fun isSettingUp2fa() = isSettingUp2faChecker.isSettingUp2fa
@@ -317,10 +325,10 @@ class PasswordManagerServiceStubImpl @Inject constructor(
                     autoLogin = "true",
                     isFavorite = isFavorite
                 )
-            }.also { logD { "Item Created=${it != null}" } }
+            }.also {
+            }
 
     private fun Uri.parseOtp() = UriParser.parse(this).also {
-        logD { "Parse Success=${it != null}" }
     }
 
     private fun VaultItem<SyncObject.Authentifiant>.copyWithOtpUrl(url: String?) = copySyncObject {
@@ -332,15 +340,12 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         otpUrl = otp?.url.toSyncObfuscatedValue()
         otpSecret = otp?.takeIf { it.isStandardOtp() }?.secret?.toSyncObfuscatedValue()
 
-        logD { "Item Updated=${oldOtpUrl != otpUrl || oldOtpSecret != otpSecret}" }
+            message = "Item Updated=${oldOtpUrl != otpUrl || oldOtpSecret != otpSecret}",
+            logToUserSupportFile = true
+        )
     }.copyWithAttrs {
         syncState = SyncState.MODIFIED
         userModificationDate = Instant.now()
-    }
-
-    private inline fun logD(lazyMessage: () -> String) {
-        val msg = "D/ [AuthenticatorIpc|Save] ${lazyMessage()}"
-        userSupportFileLogger.add(msg)
     }
 
     private fun VaultItem<SyncObject.Authentifiant>.toPasswordManagerAuthentifiant() =
@@ -355,8 +360,6 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         )
 
     companion object {
-        
-
         private val SyncObject.Authentifiant.otpUrlCompat: String?
             get() {
                 val otpSecret = otpSecret?.takeUnless { it.isSemanticallyNull() }?.toString()
@@ -367,6 +370,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
                     otpSecret == null && otpUrl != null -> otpUrl
                     otpSecret != null && otpUrl != null &&
                         otpUrl.toUri().getQueryParameter("secret") == otpSecret -> otpUrl
+
                     else -> {
                         val issuer = urlDomain.orEmpty()
                         val accountName = loginForUi

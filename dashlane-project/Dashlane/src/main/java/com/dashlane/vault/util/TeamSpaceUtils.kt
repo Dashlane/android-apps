@@ -1,8 +1,8 @@
 package com.dashlane.vault.util
 
 import com.dashlane.hermes.generated.definitions.Space
+import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isValueNull
 import com.dashlane.vault.model.VaultItem
@@ -29,7 +29,7 @@ object TeamSpaceUtils {
 
     private fun getTeamSpaceIdOrDefault(spaceId: String?): String =
         spaceId?.takeUnless { it.isValueNull() }
-            ?: TeamspaceManager.PERSONAL_TEAMSPACE.teamId
+            ?: PersonalTeamspace.teamId ?: ""
 }
 
 fun TeamspaceAccessor.hasValidSpace(item: SummaryObject): Boolean =

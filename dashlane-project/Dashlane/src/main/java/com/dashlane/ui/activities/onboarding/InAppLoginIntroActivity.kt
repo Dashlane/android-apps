@@ -10,15 +10,9 @@ import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
-import com.dashlane.ui.activities.onboarding.logger.InAppLoginIntroLogger
-import com.dashlane.ui.activities.onboarding.logger.InAppLoginIntroLoggerImpl
-import com.dashlane.useractivity.log.inject.UserActivityComponent
-import com.dashlane.useractivity.log.usage.UsageLogCode131
 import com.skocken.presentation.presenter.BasePresenter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-
-
 
 @AndroidEntryPoint
 class InAppLoginIntroActivity : DashlaneActivity() {
@@ -36,10 +30,7 @@ class InAppLoginIntroActivity : DashlaneActivity() {
             navigator,
             globalPreferencesManager
         )
-        val logger = InAppLoginIntroLoggerImpl(UserActivityComponent(this).currentSessionUsageLogRepository)
-        presenter.logger = logger
         presenter.setView(IntroScreenViewProxy(this))
-        logger.takeIf { savedInstanceState == null }?.logShowInAppLoginScreen()
     }
 
     override fun onBackPressed() {
@@ -53,8 +44,6 @@ class InAppLoginIntroActivity : DashlaneActivity() {
     ) : BasePresenter<IntroScreenContract.DataProvider,
         IntroScreenContract.ViewProxy>(),
         IntroScreenContract.Presenter {
-
-        lateinit var logger: InAppLoginIntroLogger
 
         override fun onViewChanged() {
             super.onViewChanged()
@@ -72,7 +61,6 @@ class InAppLoginIntroActivity : DashlaneActivity() {
                 AutoFillNotificationCreator.cancelAutofillNotificationWorkers(it)
             }
             globalPreferencesManager.saveActivatedAutofillOnce()
-            logger.logActivateAutofill()
             activity?.setResult(Activity.RESULT_OK)
 
             navigator.goToInAppLogin(origin)
@@ -80,7 +68,6 @@ class InAppLoginIntroActivity : DashlaneActivity() {
         }
 
         override fun onClickNegativeButton() {
-            logger.logSkip(UsageLogCode131.Type.AUTOFILL_ACTIVATION_PROMPT)
             activity?.setResult(Activity.RESULT_CANCELED)
             activity?.finish()
         }

@@ -18,13 +18,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-
-
 internal class DebugCategorySync(debugActivity: Activity) : AbstractDebugCategory(debugActivity) {
 
-    override fun getName(): String = "Sync"
+    override val name: String
+        get() = "Sync"
 
-    override fun addSubItems(group: PreferenceGroup?) {
+    override fun addSubItems(group: PreferenceGroup) {
         addPreferenceButton(group, "View Data Change History") {
             showDataChangeHistory()
             true

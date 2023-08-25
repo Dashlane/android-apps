@@ -2,7 +2,7 @@
 
 package com.dashlane.vault
 
-import com.dashlane.ext.application.KnownApplication
+import com.dashlane.ext.application.TrustedBrowserApplication
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.Sha256Hash
 import com.dashlane.hermes.generated.definitions.Action
@@ -59,7 +59,9 @@ class VaultItemLogger @Inject constructor(
         domain?.let {
             logRepository.queueEvent(
                 CopyVaultItemFieldAnonymous(
-                    field = field, itemType = itemType, domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
+                    field = field,
+                    itemType = itemType,
+                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
                 )
             )
         }
@@ -70,7 +72,7 @@ class VaultItemLogger @Inject constructor(
         packageName: String,
         url: String?
     ) {
-        val isBrowser = KnownApplication.getKnownApplication(packageName) is KnownApplication.Browser
+        val isBrowser = TrustedBrowserApplication.getAppForPackage(packageName) != null
         val domain = if (isBrowser) {
             TrackingLogUtils.createWebDomainForLog(url.orEmpty())
         } else {
@@ -79,13 +81,16 @@ class VaultItemLogger @Inject constructor(
 
         logRepository.queueEvent(
             OpenExternalVaultItemLink(
-                domainType = domain.type, itemId = ItemId(id = itemId), itemType = ItemTypeWithLink.CREDENTIAL
+                domainType = domain.type,
+                itemId = ItemId(id = itemId),
+                itemType = ItemTypeWithLink.CREDENTIAL
             )
         )
 
         logRepository.queueEvent(
             OpenExternalVaultItemLinkAnonymous(
-                itemType = ItemTypeWithLink.CREDENTIAL, domain = domain
+                itemType = ItemTypeWithLink.CREDENTIAL,
+                domain = domain
             )
         )
     }
@@ -98,13 +103,18 @@ class VaultItemLogger @Inject constructor(
     ) {
         logRepository.queueEvent(
             RevealVaultItemField(
-                field = field, itemId = ItemId(id = itemId), itemType = itemType, isProtected = false
+                field = field,
+                itemId = ItemId(id = itemId),
+                itemType = itemType,
+                isProtected = false
             )
         )
         domain?.let {
             logRepository.queueEvent(
                 RevealVaultItemFieldAnonymous(
-                    field = field, itemType = itemType, domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
+                    field = field,
+                    itemType = itemType,
+                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
                 )
             )
         }
@@ -137,7 +147,8 @@ class VaultItemLogger @Inject constructor(
         url: String?,
         addedWebsites: List<String>?,
         removedWebsites: List<String>?,
-        removedApps: List<String>?
+        removedApps: List<String>?,
+        collectionCount: Int? = null 
     ) {
         logRepository.queueEvent(
             UpdateVaultItem(
@@ -145,7 +156,8 @@ class VaultItemLogger @Inject constructor(
                 fieldsEdited = editedFields,
                 itemId = ItemId(id = itemId),
                 itemType = itemType,
-                space = space
+                space = space,
+                collectionCount = collectionCount
             )
         )
 
@@ -167,7 +179,8 @@ class VaultItemLogger @Inject constructor(
     fun logAttachmentDownload(itemId: String, itemType: ItemType) {
         logRepository.queueEvent(
             DownloadVaultItemAttachment(
-                itemId = ItemId(id = itemId), itemType = itemType
+                itemId = ItemId(id = itemId),
+                itemType = itemType
             )
         )
     }
@@ -175,7 +188,9 @@ class VaultItemLogger @Inject constructor(
     fun logAttachmentUpdate(action: Action, itemId: String, itemType: ItemType) {
         logRepository.queueEvent(
             UpdateVaultItemAttachment(
-                attachmentAction = action, itemId = ItemId(id = itemId), itemType = itemType
+                attachmentAction = action,
+                itemId = ItemId(id = itemId),
+                itemType = itemType
             )
         )
     }
@@ -183,7 +198,8 @@ class VaultItemLogger @Inject constructor(
     fun logAttachmentView(itemId: String, itemType: ItemType) {
         logRepository.queueEvent(
             ViewVaultItemAttachment(
-                itemId = ItemId(id = itemId), itemType = itemType
+                itemId = ItemId(id = itemId),
+                itemType = itemType
             )
         )
     }
@@ -213,7 +229,7 @@ fun SyncObjectType.toItemTypeOrNull() = when (this) {
     SyncObjectType.SECURE_NOTE -> ItemType.SECURE_NOTE
     SyncObjectType.SECURITY_BREACH -> ItemType.SECURITY_BREACH
     SyncObjectType.SOCIAL_SECURITY_STATEMENT -> ItemType.SOCIAL_SECURITY
-    SyncObjectType.AUTH_CATEGORY, SyncObjectType.DATA_CHANGE_HISTORY, SyncObjectType.SECURE_FILE_INFO, SyncObjectType.SECURE_NOTE_CATEGORY, SyncObjectType.SETTINGS, SyncObjectType.PASSKEY -> null
+    SyncObjectType.AUTH_CATEGORY, SyncObjectType.DATA_CHANGE_HISTORY, SyncObjectType.SECURE_FILE_INFO, SyncObjectType.SECURE_NOTE_CATEGORY, SyncObjectType.SETTINGS, SyncObjectType.PASSKEY, SyncObjectType.COLLECTION -> null
 }
 
 fun SyncObjectType.toItemType() = toItemTypeOrNull() ?: throw IllegalStateException("No ItemType for $this")

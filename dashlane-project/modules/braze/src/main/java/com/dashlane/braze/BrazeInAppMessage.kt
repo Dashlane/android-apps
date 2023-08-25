@@ -3,8 +3,6 @@ package com.dashlane.braze
 import com.braze.models.inappmessage.InAppMessageModal
 import com.dashlane.braze.BrazeConstants.BRAZE_TRACKING_KEY_PARAM
 
-
-
 class BrazeInAppMessage(private val inAppMessage: InAppMessageModal) {
 
     val imageUrl: String? = inAppMessage.imageUrl
@@ -42,8 +40,6 @@ class BrazeInAppMessage(private val inAppMessage: InAppMessageModal) {
 
         return excluded.contains(EXCLUDED_TABLET) || excluded.contains(EXCLUDED_PHONE)
     }
-
-    
 
     data class Button(val text: String, val uri: String? = null, val onClick: () -> Unit = {})
 

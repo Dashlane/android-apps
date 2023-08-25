@@ -1,6 +1,6 @@
 package com.dashlane.login.settings
 
-import com.dashlane.accountrecovery.AccountRecovery
+import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.hermes.LogRepository
 import com.dashlane.login.LoginSuccessIntentFactory
 import com.dashlane.login.lock.LockTypeManager
@@ -11,7 +11,7 @@ import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.skocken.presentation.definition.Base
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,14 +22,14 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class LoginSettingsPresenter @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     val logger: LoginSettingsContract.Logger,
     private val loginSuccessIntentFactory: LoginSuccessIntentFactory,
     private val sessionManager: SessionManager,
-    private val accountRecovery: AccountRecovery,
+    private val biometricRecovery: BiometricRecovery,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val lockRepository: LockRepository,
     private val biometricAuthModule: BiometricAuthModule,
@@ -51,7 +51,7 @@ class LoginSettingsPresenter @Inject constructor(
         logger.logNext()
         sessionManager.session?.let { session ->
             if (view.biometricSettingChecked) {
-                globalCoroutineScope.launch(defaultCoroutineDispatcher) {
+                applicationCoroutineScope.launch(defaultCoroutineDispatcher) {
                     enableBiometric(session)
                     if (view.resetMpSettingChecked) {
                         enableResetMp()
@@ -84,7 +84,7 @@ class LoginSettingsPresenter @Inject constructor(
 
     private fun enableResetMp() {
         
-        accountRecovery.isFeatureKnown = true
-        accountRecovery.setFeatureEnabled(true, "firstLogin")
+        biometricRecovery.isFeatureKnown = true
+        biometricRecovery.setFeatureEnabled(true, "firstLogin")
     }
 }

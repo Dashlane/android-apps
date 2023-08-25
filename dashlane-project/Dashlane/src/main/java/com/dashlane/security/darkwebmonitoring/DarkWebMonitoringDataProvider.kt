@@ -28,7 +28,8 @@ class DarkWebMonitoringDataProvider @Inject constructor(
     private val teamspaceRepository: TeamspaceManagerRepository,
     private val breachDataHelper: BreachDataHelper,
     private val appEvents: AppEvents
-) : BaseDataProvider<DarkWebMonitoringContract.Presenter>(), DarkWebMonitoringContract.DataProvider,
+) : BaseDataProvider<DarkWebMonitoringContract.Presenter>(),
+DarkWebMonitoringContract.DataProvider,
     TeamspaceManager.Listener {
 
     private val appEventListener = AppEventsListener(appEvents, this)
@@ -67,8 +68,6 @@ class DarkWebMonitoringDataProvider @Inject constructor(
     override fun onStatusChanged(teamspace: Teamspace?, previousStatus: String?, newStatus: String?) {
         
     }
-
-    
 
     override fun onChange(teamspace: Teamspace?) {
         refreshUI()

@@ -8,7 +8,8 @@ import androidx.fragment.app.setFragmentResult
 import com.dashlane.R
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 
-class SharingConfirmationDialogCancelInvite : NotificationDialogFragment(),
+class SharingConfirmationDialogCancelInvite :
+    NotificationDialogFragment(),
     NotificationDialogFragment.TwoButtonClicker {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

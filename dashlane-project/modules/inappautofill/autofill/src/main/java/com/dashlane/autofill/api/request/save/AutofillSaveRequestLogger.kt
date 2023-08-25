@@ -5,8 +5,6 @@ import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.hermes.generated.definitions.SaveType
 import com.dashlane.vault.model.VaultItem
 
-
-
 interface AutofillSaveRequestLogger {
 
     fun onSave(

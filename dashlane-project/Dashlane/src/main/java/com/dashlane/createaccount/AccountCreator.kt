@@ -4,19 +4,11 @@ import android.widget.EditText
 import com.dashlane.authentication.AuthenticationException
 import com.dashlane.cryptography.ObfuscatedByteArray
 
-
-
 interface AccountCreator {
-
-    
 
     val isGdprDebugModeEnabled: Boolean
 
-    
-
     val isGdprForced: Boolean
-
-    
 
     @Throws(
         AuthenticationException::class,
@@ -30,8 +22,6 @@ interface AccountCreator {
         resetMpEnabled: Boolean
     )
 
-    
-
     @Throws(
         AuthenticationException::class,
         CannotInitializeSessionException::class
@@ -43,15 +33,9 @@ interface AccountCreator {
         termsState: TermsState?
     )
 
-    
-
     fun preFillUsername(usernameField: EditText, suggestedEmail: String? = null)
 
-    
-
     fun preFillPassword(passwordField: EditText)
-
-    
 
     data class TermsState(
         val conditions: Boolean,

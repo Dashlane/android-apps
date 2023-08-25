@@ -10,8 +10,6 @@ import com.dashlane.sync.repositories.ServerCredentials
 import com.dashlane.sync.util.SyncLogs
 import javax.inject.Inject
 
-
-
 class SyncServicesImpl @Inject constructor(
     private val downloadService: SyncDownloadService,
     private val uploadService: SyncUploadService,

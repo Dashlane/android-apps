@@ -3,18 +3,15 @@ package com.dashlane.invites
 import android.content.Context
 import android.widget.Toast
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.network.webservices.GetSharingLinkService
 import com.dashlane.session.SessionManager
 import com.dashlane.util.IntentFactory.sendShareWithFriendsIntent
-import com.dashlane.util.Network
+import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.Toaster
 import com.dashlane.util.isNotSemanticallyNull
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
-
 
 object InviteFriendsIntentHelper {
     fun launchInviteFriendsIntent(
@@ -22,6 +19,7 @@ object InviteFriendsIntentHelper {
         toaster: Toaster,
         sharingLinkService: GetSharingLinkService,
         sessionManager: SessionManager,
+        networkStateProvider: NetworkStateProvider,
         referralId: String?
     ) {
         if (referralId != null) {
@@ -30,7 +28,7 @@ object InviteFriendsIntentHelper {
         }
         
         val session = sessionManager.session
-        if (session != null && Network.isOn(SingletonProvider.getContext())) {
+        if (session != null && networkStateProvider.isOn()) {
             sharingLinkService.createCall(session.userId, session.uki).enqueue(object :
                 Callback<GetSharingLinkService.Content> {
                 override fun onResponse(

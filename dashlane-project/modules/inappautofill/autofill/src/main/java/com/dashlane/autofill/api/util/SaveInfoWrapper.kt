@@ -6,8 +6,6 @@ import com.dashlane.autofill.formdetector.BrowserDetectionHelper
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 
-
-
 internal class SaveInfoWrapper(summary: AutoFillHintSummary) {
 
     val saveInfo: SaveInfo? = when {
@@ -15,8 +13,6 @@ internal class SaveInfoWrapper(summary: AutoFillHintSummary) {
         BrowserDetectionHelper.isBrowserSupported(summary.packageName) -> null
         summary.formType == AutoFillFormType.CREDENTIAL -> buildForCredential(summary)
         summary.formType == AutoFillFormType.CREDIT_CARD -> buildForCreditCard(summary)
-        summary.formType == AutoFillFormType.USERNAME_ONLY -> buildForUsername(summary)
-        summary.formType == AutoFillFormType.EMAIL_ONLY -> buildForEmail(summary)
         else -> null 
     }
 
@@ -26,7 +22,8 @@ internal class SaveInfoWrapper(summary: AutoFillHintSummary) {
 
     private fun buildForCreditCard(summary: AutoFillHintSummary): SaveInfo? {
         return buildWith(
-            SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD, summary,
+            SaveInfo.SAVE_DATA_TYPE_CREDIT_CARD,
+            summary,
             arrayOf(
                 arrayOf(
                     AutoFillHint.CREDIT_CARD_EXPIRATION_DATE,
@@ -42,28 +39,13 @@ internal class SaveInfoWrapper(summary: AutoFillHintSummary) {
 
     private fun buildForCredential(summary: AutoFillHintSummary): SaveInfo? {
         return buildWith(
-            SaveInfo.SAVE_DATA_TYPE_PASSWORD, summary,
+            SaveInfo.SAVE_DATA_TYPE_PASSWORD,
+            summary,
             
             arrayOf(
                 arrayOf(AutoFillHint.PASSWORD, AutoFillHint.CURRENT_PASSWORD),
                 arrayOf(AutoFillHint.USERNAME, AutoFillHint.EMAIL_ADDRESS)
             )
-        )
-    }
-
-    private fun buildForUsername(summary: AutoFillHintSummary): SaveInfo? {
-        return buildWith(
-            SaveInfo.SAVE_DATA_TYPE_USERNAME, summary,
-            
-            arrayOf(arrayOf(AutoFillHint.USERNAME, AutoFillHint.EMAIL_ADDRESS))
-        )
-    }
-
-    private fun buildForEmail(summary: AutoFillHintSummary): SaveInfo? {
-        return buildWith(
-            SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS, summary,
-            
-            arrayOf(arrayOf(AutoFillHint.EMAIL_ADDRESS))
         )
     }
 

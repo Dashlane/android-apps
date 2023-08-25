@@ -7,15 +7,14 @@ import com.dashlane.autofill.AutofillOrigin.INLINE_AUTOFILL_KEYBOARD
 import com.dashlane.autofill.AutofillOrigin.IN_APP_LOGIN
 import com.dashlane.autofill.api.fillresponse.relatedOnlyByLinkedDomains
 import com.dashlane.autofill.api.ui.AutofillFeature
-import com.dashlane.autofill.api.unlockfill.SupportedAutofills
 import com.dashlane.autofill.api.util.AutofillLogUtil
 import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.ext.application.TrustedBrowserApplication
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.Sha256Hash
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
 import com.dashlane.hermes.generated.definitions.BrowseComponent
-import com.dashlane.hermes.generated.definitions.AutofillOrigin as HermesAutofillOrigin
 import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.hermes.generated.definitions.DomainType
 import com.dashlane.hermes.generated.definitions.FieldsFilled
@@ -30,38 +29,24 @@ import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.url.UrlDomain
-import com.dashlane.useractivity.log.install.InstallLogCode42
-import com.dashlane.useractivity.log.install.InstallLogRepository
 import com.dashlane.useractivity.log.usage.UsageLogCode5
 import com.dashlane.useractivity.log.usage.UsageLogCode75
-import com.dashlane.useractivity.log.usage.UsageLogCode96
 import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import javax.inject.Inject
-
-
+import com.dashlane.hermes.generated.definitions.AutofillOrigin as HermesAutofillOrigin
 
 @Suppress("LargeClass")
 class AutofillUsageLog @Inject constructor(
     sessionManager: SessionManager,
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    installLogRepository: InstallLogRepository,
     private val logRepository: LogRepository
 ) : AutofillAnalyzerDef.IAutofillUsageLog, AutofillLegacyLogger(
-    sessionManager, bySessionUsageLogRepository, installLogRepository
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     private var lastLoginFormFoundPackage: String? = null
-
-    override fun onManualRequestAsked(@AutofillOrigin origin: Int, packageName: String) {
-        log(
-            UsageLogCode96(
-                action = UsageLogCode96.Action.AUTOFILL_MANUAL_REQUEST,
-                app = packageName,
-                sender = getSenderUsage96(origin)
-            )
-        )
-    }
 
     override fun onLoginFormFound(packageName: String) {
         if (lastLoginFormFoundPackage != null && lastLoginFormFoundPackage == packageName) {
@@ -79,7 +64,6 @@ class AutofillUsageLog @Inject constructor(
         onShowList(
             origin = origin,
             packageName = packageName,
-            type = UsageLogCode96.Type.AUTHENTICATION,
             itemType = ItemType.CREDENTIAL,
             isNativeApp = isNativeApp,
             totalCount = totalCount
@@ -95,7 +79,6 @@ class AutofillUsageLog @Inject constructor(
         onShowList(
             origin = origin,
             packageName = packageName,
-            type = UsageLogCode96.Type.PAYMENT_MEAN_CREDITCARD,
             itemType = ItemType.CREDIT_CARD,
             isNativeApp = isNativeApp,
             totalCount = totalCount
@@ -109,63 +92,11 @@ class AutofillUsageLog @Inject constructor(
         totalCount: Int
     ) {
         onShowList(
-            origin = origin, packageName = packageName,
-            type = UsageLogCode96.Type.EMAIL,
+            origin = origin,
+            packageName = packageName,
             itemType = ItemType.CREDIT_CARD,
             isNativeApp = isNativeApp,
             totalCount = totalCount
-        )
-    }
-
-    override fun onShowSmsOtp(origin: Int, packageName: String) {
-        sendInstallLog42(origin, packageName, InstallLogCode42.Action.SHOW_SMS_OTP_PROMPT)
-    }
-
-    override fun onShowLogout(@AutofillOrigin origin: Int, packageName: String) {
-        sendInstallLog42(origin, packageName, InstallLogCode42.Action.SHOW_IMPALA)
-    }
-
-    override fun onNoResultsForCredential(origin: Int, packageName: String) {
-        onNoResults(origin, packageName, UsageLogCode96.Type.AUTHENTICATION)
-    }
-
-    override fun onNoResultsForCreditCard(origin: Int, packageName: String) {
-        onNoResults(origin, packageName, UsageLogCode96.Type.PAYMENT_MEAN_CREDITCARD)
-    }
-
-    override fun onNoResultsForEmail(origin: Int, packageName: String) {
-        onNoResults(origin, packageName, UsageLogCode96.Type.EMAIL)
-    }
-
-    override fun onClickToAutoFillSuggestion(
-        origin: Int,
-        packageName: String?,
-        website: UrlDomain?,
-        supportedAutofills: SupportedAutofills?
-    ) {
-        logClickToAutoFillSuggestion(
-            origin,
-            packageName,
-            website,
-            supportedAutofills.toUsageLog96Type()
-        )
-    }
-
-    fun logClickToAutoFillSuggestion(
-        origin: Int,
-        packageName: String?,
-        website: UrlDomain?,
-        type: UsageLogCode96.Type?
-    ) {
-        log(
-            UsageLogCode96(
-                app = packageName,
-                sender = getSenderUsage96(origin),
-                action = UsageLogCode96.Action.CLICK_SUGGESTION,
-                type = type,
-                hasCredentials = true,
-                webappDomain = website?.value
-            )
         )
     }
 
@@ -175,30 +106,6 @@ class AutofillUsageLog @Inject constructor(
 
     override fun onClickToAutoFillCreditCardButLock(@AutofillOrigin origin: Int) {
         onClickToAutoFillButLock(UsageLogConstant.LockAction.unlockCreditCard, null)
-    }
-
-    override fun onClickToAutoFillCredentialNotLock(
-        @AutofillOrigin origin: Int,
-        packageName: String,
-        itemUrl: String?
-    ) {
-        onClickToAutoFillNotLock(origin, packageName, itemUrl, UsageLogCode96.Type.AUTHENTICATION)
-    }
-
-    override fun onClickToAutoFillCreditCardNotLock(
-        @AutofillOrigin origin: Int,
-        packageName: String
-    ) {
-        onClickToAutoFillNotLock(
-            origin,
-            packageName,
-            null,
-            UsageLogCode96.Type.PAYMENT_MEAN_CREDITCARD
-        )
-    }
-
-    override fun onClickToAutoFillSmsOtp(@AutofillOrigin origin: Int, packageName: String) {
-        sendInstallLog42(origin, packageName, InstallLogCode42.Action.CLICK_SMS_OTP_PROMPT)
     }
 
     override fun onAutoFillCredentialDone(
@@ -249,6 +156,9 @@ class AutofillUsageLog @Inject constructor(
         formType: FormType
     ) {
         val domainWrapper = AutofillLogUtil.extractDomainFrom(urlDomain = websiteUrlDomain, packageName = packageName)
+        val browser = packageName.takeIf {
+            TrustedBrowserApplication.getAppForPackage(it) != null
+        }
         logRepository.queueEvent(
             PerformAutofill(
                 isAutologin = false,
@@ -257,7 +167,8 @@ class AutofillUsageLog @Inject constructor(
                 isManual = false,
                 matchType = matchType,
                 fieldsFilled = fieldsFilled,
-                formTypeList = listOf(formType)
+                formTypeList = listOf(formType),
+                mobileBrowserName = browser
             )
         )
 
@@ -334,19 +245,6 @@ class AutofillUsageLog @Inject constructor(
         )
     }
 
-    override fun onAutoFillSmsOtpDone(origin: Int, packageName: String) {
-        sendInstallLog42(origin, packageName, InstallLogCode42.Action.FILL_SMS_OTP)
-    }
-
-    override fun saveCredentialCancelLogout(origin: Int, packageName: String) {
-        val action = InstallLogCode42.Action.SAVE_ABORT_CREDENTIAL
-        sendInstallLog42(origin, packageName, action)
-    }
-
-    override fun saveCreditCardCancelLogout(origin: Int, packageName: String) {
-        sendInstallLog42(origin, packageName, InstallLogCode42.Action.SAVE_ABORT_CC)
-    }
-
     private fun getTypeUsage5(@AutofillOrigin origin: Int): UsageLogCode5.Type? {
         return when (origin) {
             AUTO_FILL_API -> UsageLogCode5.Type.ANDROID_AUTOFILL_API
@@ -359,7 +257,6 @@ class AutofillUsageLog @Inject constructor(
     private fun onShowList(
         @AutofillOrigin origin: Int,
         packageName: String,
-        type: UsageLogCode96.Type,
         itemType: ItemType,
         isNativeApp: Boolean,
         totalCount: Int
@@ -396,29 +293,6 @@ class AutofillUsageLog @Inject constructor(
                 isNativeApp = isNativeApp
             )
         )
-
-        
-        log(
-            UsageLogCode96(
-                action = UsageLogCode96.Action.SHOW_IMPALA,
-                app = packageName,
-                sender = getSenderUsage96(origin),
-                hasCredentials = totalCount != 0,
-                type = type
-            )
-        )
-    }
-
-    private fun onNoResults(origin: Int, packageName: String, type: UsageLogCode96.Type) {
-        log(
-            UsageLogCode96(
-                action = UsageLogCode96.Action.HIDDEN_IMPALA,
-                app = packageName,
-                sender = getSenderUsage96(origin),
-                hasCredentials = false,
-                type = type
-            )
-        )
     }
 
     private fun onClickToAutoFillButLock(action: String, itemUrl: String?) {
@@ -445,67 +319,5 @@ class AutofillUsageLog @Inject constructor(
                 website = itemUrl
             )
         )
-    }
-
-    private fun onClickToAutoFillNotLock(
-        @AutofillOrigin origin: Int,
-        packageName: String,
-        itemUrl: String?,
-        type: UsageLogCode96.Type
-    ) {
-        log(
-            UsageLogCode96(
-                action = UsageLogCode96.Action.AUTOLOGIN,
-                app = packageName,
-                sender = getSenderUsage96(origin),
-                website = itemUrl,
-                hasCredentials = true,
-                type = type
-            )
-        )
-    }
-
-    private fun sendInstallLog42(
-        origin: Int,
-        packageName: String,
-        action: InstallLogCode42.Action
-    ) {
-        log(
-            InstallLogCode42(
-                sender = getSenderInstall42(origin),
-                action = action,
-                appPackage = packageName
-            )
-        )
-    }
-
-    private fun SupportedAutofills?.toUsageLog96Type(): UsageLogCode96.Type? {
-        val supportedResponses = this ?: return null
-
-        return when (supportedResponses) {
-            SupportedAutofills.AUTHENTIFIANT -> UsageLogCode96.Type.AUTHENTICATION
-            SupportedAutofills.CREDIT_CARD -> UsageLogCode96.Type.PAYMENT_MEAN_CREDITCARD
-            SupportedAutofills.EMAIL -> UsageLogCode96.Type.EMAIL
-        }
-    }
-
-    companion object {
-        fun getSenderUsage96(@AutofillOrigin origin: Int): UsageLogCode96.Sender? {
-            return when (origin) {
-                AUTO_FILL_API -> UsageLogCode96.Sender.AUTOFILL_API
-                IN_APP_LOGIN -> UsageLogCode96.Sender.DASHLANE
-                INLINE_AUTOFILL_KEYBOARD -> UsageLogCode96.Sender.AUTOFILL_API_KEYBOARD
-                else -> null
-            }
-        }
-
-        fun getSenderInstall42(@AutofillOrigin origin: Int): InstallLogCode42.Sender? {
-            return when (origin) {
-                AUTO_FILL_API -> InstallLogCode42.Sender.AUTOFILL_API
-                IN_APP_LOGIN -> InstallLogCode42.Sender.DASHLANE
-                INLINE_AUTOFILL_KEYBOARD -> InstallLogCode42.Sender.AUTOFILL_API_KEYBOARD
-                else -> null
-            }
-        }
     }
 }

@@ -30,8 +30,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 
-
-
 private const val DASHLANE_DOMAIN = "dashlane"
 
 @AndroidEntryPoint
@@ -56,9 +54,12 @@ class AuthenticatorIntro : DashlaneActivity() {
         }
         val askRetry = registerForActivityResult(InvalidOtp(name)) { wantsRetry ->
             if (!wantsRetry) {
-                setResult(RESULT_CANCELED, Intent().apply {
+                setResult(
+                    RESULT_CANCELED,
+                    Intent().apply {
                     putExtra(RESULT_ITEM_ID, itemId)
-                })
+                }
+                )
                 finish()
             }
         }
@@ -119,20 +120,25 @@ class AuthenticatorIntro : DashlaneActivity() {
                     showDashlaneDomainDialog()
                     return
                 }
-                setResult(RESULT_OK, Intent().apply {
+                setResult(
+                    RESULT_OK,
+                    Intent().apply {
                     putExtra(RESULT_ITEM_ID, itemId)
                     if (otp is Totp) {
                         putExtra(RESULT_OTP, otp)
                     } else if (otp is Hotp) {
                         putExtra(RESULT_OTP, otp)
                     }
-                })
+                }
+                )
                 
                 itemId?.let {
                     logger.logCompleteAdd2fa(it, otp)
-                    startActivity(successIntent.apply {
+                    startActivity(
+                        successIntent.apply {
                         putExtra(EXTRA_CREDENTIAL_NAME, credentialName ?: otp.issuer)
-                    })
+                    }
+                    )
                 }
                 
                 

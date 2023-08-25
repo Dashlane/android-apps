@@ -13,8 +13,6 @@ import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
 
-
-
 public class MenuSeparatorViewHolder extends EfficientViewHolder<MenuDef.Item> {
 
     public static final MenuDef.Item ITEM = new MenuDef.Item() {

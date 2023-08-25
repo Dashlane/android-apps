@@ -94,7 +94,8 @@ object FabViewUtil {
     fun animateMenuShown(fabMenuHolder: FrameLayout) {
         fabMenuHolder.alpha = ANIMATION_BACKGROUND_ALPHA_INVISIBLE
         val objectAnimator = ObjectAnimator.ofFloat(
-            fabMenuHolder, "alpha",
+            fabMenuHolder,
+            "alpha",
             ANIMATION_BACKGROUND_ALPHA_INVISIBLE,
             ANIMATION_BACKGROUND_ALPHA_VISIBLE
         ).setDuration(

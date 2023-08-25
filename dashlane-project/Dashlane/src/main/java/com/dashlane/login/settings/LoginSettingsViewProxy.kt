@@ -11,7 +11,8 @@ class LoginSettingsViewProxy(
     rootView: View,
     logger: LoginSettingsContract.Logger,
     private val biometricSettingsHelper: BiometricSettingsHelper = BiometricSettingsHelperImpl(rootView, logger)
-) : BaseViewProxy<LoginSettingsContract.Presenter>(rootView), LoginSettingsContract.ViewProxy,
+) : BaseViewProxy<LoginSettingsContract.Presenter>(rootView),
+LoginSettingsContract.ViewProxy,
     BiometricSettingsHelper by biometricSettingsHelper {
 
     init {

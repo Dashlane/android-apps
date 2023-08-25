@@ -28,13 +28,15 @@ enum class DeviceType(
         nameResId = R.string.device_android,
         iconResId = R.drawable.device_android,
         isDesktop = false,
-        code = "server_android", "android"
+        code = "server_android",
+        "android"
     ),
     IPHONE(
         nameResId = R.string.device_iphone,
         iconResId = R.drawable.device_apple,
         isDesktop = false,
-        code = "server_iphone", "server_ipod"
+        code = "server_iphone",
+        "server_ipod"
     ),
     IPAD(
         nameResId = R.string.device_ipad,
@@ -52,7 +54,11 @@ enum class DeviceType(
         nameResId = R.string.device_web_app,
         iconResId = R.drawable.device_browser,
         isDesktop = false,
-        code = "server_leeloo", "server_leeloo_dev", "server_wac", "website", "real_website"
+        code = "server_leeloo",
+        "server_leeloo_dev",
+        "server_wac",
+        "website",
+        "real_website"
     ),
     UNKNOWN(R.string.device_unknow, R.drawable.device_unknown, false, "");
 

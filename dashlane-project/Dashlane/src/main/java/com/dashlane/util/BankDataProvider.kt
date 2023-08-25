@@ -7,8 +7,6 @@ import com.dashlane.vault.model.CreditCardBank
 import com.dashlane.vault.model.CreditCardBank.Companion.US_NO_TYPE
 import com.dashlane.xml.domain.utils.Country
 
-
-
 class BankDataProvider(private val banks: List<BankConfiguration>) {
 
     fun getBankConfiguration(bankDescriptor: String?): BankConfiguration {

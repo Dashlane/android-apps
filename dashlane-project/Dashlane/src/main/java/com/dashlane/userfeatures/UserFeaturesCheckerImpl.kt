@@ -8,8 +8,6 @@ import com.dashlane.util.asOptJSONObjectSequence
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import org.json.JSONObject
 
-
-
 class UserFeaturesCheckerImpl(
     private val sessionManager: SessionManager,
     private val accountStatusRepository: AccountStatusRepository,
@@ -45,6 +43,6 @@ class UserFeaturesCheckerImpl(
 
     private fun hasUserFeature(feature: String): Boolean {
         val featureFlips = featureFlipManager.featureFlips ?: return false
-        return featureFlips[feature]?.asBoolean ?: false
+        return featureFlips.contains(feature)
     }
 }

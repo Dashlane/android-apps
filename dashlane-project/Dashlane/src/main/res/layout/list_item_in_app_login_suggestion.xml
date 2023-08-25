@@ -22,7 +22,6 @@
         />
 
     
-    
     <TextView
         android:id="@+id/suggestion_account"
         android:layout_width="wrap_content"
@@ -36,7 +35,6 @@
         tools:text="test"
 
         />
-    
     
     <TextView
         android:id="@+id/suggestion_account_label"
@@ -67,7 +65,6 @@
         />
 
     
-
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/unsecure_app_imageview"
         android:layout_width="35dp"

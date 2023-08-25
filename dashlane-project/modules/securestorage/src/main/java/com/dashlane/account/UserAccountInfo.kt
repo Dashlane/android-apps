@@ -1,7 +1,5 @@
 package com.dashlane.account
 
-
-
 data class UserAccountInfo(
     val username: String,
     val otp2: Boolean,

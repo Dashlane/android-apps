@@ -22,6 +22,7 @@ import com.dashlane.R;
 import com.dashlane.core.DataSync;
 import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.events.SyncFinishedEvent;
+import com.dashlane.hermes.generated.definitions.Trigger;
 import com.dashlane.iconcrawler.IconWrapperUtils;
 import com.dashlane.loaders.datalists.ListLoader;
 import com.dashlane.login.lock.LockManager;
@@ -35,7 +36,6 @@ import com.dashlane.ui.fab.FabViewUtil;
 import com.dashlane.ui.widgets.view.MultiColumnRecyclerView;
 import com.dashlane.ui.widgets.view.RecyclerViewFloatingActionButton;
 import com.dashlane.url.icon.UrlDomainIconAndroidRepository;
-import com.dashlane.useractivity.log.usage.UsageLogCode134;
 import com.dashlane.util.ContextUtilsKt;
 import com.dashlane.util.DeviceUtils;
 import com.dashlane.vault.model.VaultItem;
@@ -255,7 +255,7 @@ public abstract class AbstractDataListFragment extends AbstractContentFragment i
 
     @Override
     public void onRefresh() {
-        DataSync.sync(UsageLogCode134.Origin.MANUAL);
+        SingletonProvider.getDataSync().sync(Trigger.MANUAL);
     }
 
     private void onSyncFinished() {

@@ -12,7 +12,8 @@ fun createSecureNoteCategory(
             this.categoryName = title
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 val SyncObject.SecureNoteCategory.Companion.alphabeticalComparator get() = compareBy(SummaryObject.SecureNoteCategory::categoryName)

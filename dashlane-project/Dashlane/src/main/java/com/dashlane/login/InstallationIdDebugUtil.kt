@@ -11,8 +11,6 @@ import kotlin.reflect.KMutableProperty0
 object InstallationIdDebugUtil {
     private const val TEST_INPUT: String = "test_analytics_id"
 
-    
-
     fun showInstallationId(
         context: Context?,
         text: KMutableProperty0<String>,

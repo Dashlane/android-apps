@@ -13,7 +13,6 @@ import com.dashlane.sync.xml.MergeListStrategy
 import com.dashlane.sync.xml.mergeInto
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.util.syncObjectType
 import com.dashlane.xml.XmlTransaction
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
@@ -22,9 +21,6 @@ import com.dashlane.xml.domain.toObject
 import com.dashlane.xml.domain.toTransaction
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.reflect.KClass
-
-
 
 class DataIdentifierSyncRepositoryRaclette @Inject constructor(
     private val dao: DataSyncDaoRaclette,
@@ -100,9 +96,8 @@ class DataIdentifierSyncRepositoryRaclette @Inject constructor(
         dao.applyBackupDate(uuid, backupTime)
     }
 
-    suspend fun preparePendingOperations(kClasses: List<KClass<out SyncObject>>) {
-        val dataTypes = kClasses.map { it.syncObjectType }
-        dao.markItemsInSync(dataTypes)
+    suspend fun preparePendingOperations(types: List<SyncObjectType>) {
+        dao.markItemsInSync(types)
     }
 
     fun fetchDuplicate(

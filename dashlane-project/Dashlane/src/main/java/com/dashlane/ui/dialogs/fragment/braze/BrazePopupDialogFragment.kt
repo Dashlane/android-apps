@@ -17,8 +17,6 @@ import com.dashlane.design.component.compat.view.ButtonMediumView
 import com.dashlane.url.toUrlDomain
 import com.dashlane.url.toUrlDomainOrNull
 
-
-
 class BrazePopupDialogFragment : NotificationDialogFragment() {
     private val announcementCenter = SingletonProvider.getAnnouncementCenter()
     private val navigator = SingletonProvider.getNavigator()
@@ -74,8 +72,6 @@ class BrazePopupDialogFragment : NotificationDialogFragment() {
         announcementCenter.announcementClosed(messageId)
         super.onCancel(dialog)
     }
-
-    
 
     private fun navigateSecurely(uri: String?) {
         uri ?: return

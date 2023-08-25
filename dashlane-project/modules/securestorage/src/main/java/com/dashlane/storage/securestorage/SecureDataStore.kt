@@ -2,8 +2,6 @@ package com.dashlane.storage.securestorage
 
 import com.dashlane.storage.securestorage.cryptography.SecureDataStoreCryptography
 
-
-
 class SecureDataStore(
     private val secureDataStorage: SecureDataStorage,
     private val secureDataStoreCryptography: SecureDataStoreCryptography

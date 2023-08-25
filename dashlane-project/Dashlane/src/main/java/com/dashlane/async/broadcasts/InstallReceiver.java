@@ -14,16 +14,12 @@ import com.dashlane.util.Constants;
 
 import java.util.Set;
 
-
-
 public class InstallReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context receiverContext, final Intent intent) {
         
         SingletonProvider.getThreadHelper().runOnBackgroundThread(() -> {
-
-            new InstallReceiverLogger(receiverContext).logInstallLog17();
 
             
             final Context context = SingletonProvider.getContext();

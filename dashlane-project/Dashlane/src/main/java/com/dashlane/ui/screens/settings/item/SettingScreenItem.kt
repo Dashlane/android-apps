@@ -8,8 +8,6 @@ data class SettingScreenItem(
     val navigator: Navigator,
     val page: AnyPage,
     val item: SettingItem,
-    
-
     val subItems: List<SettingItem>
 ) : SettingItem by item {
 

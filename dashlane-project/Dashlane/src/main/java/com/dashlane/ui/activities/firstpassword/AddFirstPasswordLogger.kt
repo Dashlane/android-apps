@@ -5,13 +5,10 @@ import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.useractivity.log.usage.UsageLogCode11
 import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogCode57
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.useractivity.log.usage.copyWithValuesFromAuthentifiant
-import com.dashlane.useractivity.log.usage.fillAndSend
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.TeamSpaceUtils
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
@@ -60,11 +57,6 @@ class AddFirstPasswordLogger @Inject constructor(
                     action = UsageLogCode11.Action.ADD
                 ).copyWithValuesFromAuthentifiant(credential)
             )
-            UsageLogCode57(
-                spaceId = teamId,
-                sender = UsageLogCode57.Sender.AUTOFILL_DEMO,
-                action = UsageLogCode57.Action.ADD
-            ).fillAndSend(this, credential.toSummary())
         }
     }
 

@@ -145,8 +145,6 @@ class LinkedAppsViewModel @Inject constructor(
         return items
     }
 
-    
-
     private fun openApp(item: LinkedAppsItem) {
         if (item.isAppInstalled) {
             _state.update { it.copy(actionOpenApp = item.packageName) }
@@ -168,14 +166,13 @@ class LinkedAppsViewModel @Inject constructor(
         _state.update { it.copy(actionOpenApp = null, actionOpenStore = null) }
     }
 
-    
-
     private fun openMainWebsite(item: LinkedWebsitesItem) {
         val packageNames = vaultItem?.toSummary<SummaryObject.Authentifiant>()?.linkedServices.getAllLinkedPackageName()
         _state.update {
             it.copy(
                 actionOpenWebsite = LinkedWebsitesViewModel.LinkedWebsitesUIState.LinkedWebsitesUIStateLoginOpener(
-                    item.defaultUrl.toUrlOrNull()?.toString(), packageNames
+                    item.defaultUrl.toUrlOrNull()?.toString(),
+                    packageNames
                 )
             )
         }

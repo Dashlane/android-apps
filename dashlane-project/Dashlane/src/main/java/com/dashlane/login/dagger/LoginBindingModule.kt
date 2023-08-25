@@ -1,7 +1,5 @@
 package com.dashlane.login.dagger
 
-import com.dashlane.account.UserAccountStorage.DataLossTrackingListener
-import com.dashlane.login.AccountDataLossTrackingListener
 import com.dashlane.login.pages.email.LoginEmailContract
 import com.dashlane.login.pages.email.LoginEmailDataProvider
 import com.dashlane.login.pages.email.LoginEmailLogger
@@ -16,8 +14,6 @@ import com.dashlane.login.pages.sso.SsoLockContract
 import com.dashlane.login.pages.sso.SsoLockDataProvider
 import com.dashlane.login.pages.token.LoginTokenContract
 import com.dashlane.login.pages.token.LoginTokenDataProvider
-import com.dashlane.login.pages.token.LoginTokenLogger
-import com.dashlane.login.pages.token.LoginTokenLoggerImpl
 import com.dashlane.login.pages.totp.LoginTotpLogger
 import com.dashlane.login.pages.totp.LoginTotpLoggerImpl
 import com.dashlane.login.pages.totp.u2f.NfcServiceDetector
@@ -30,10 +26,9 @@ import com.dashlane.login.root.LoginContract
 import com.dashlane.login.root.LoginDataProvider
 import com.dashlane.login.settings.LogginSettingsLogger
 import com.dashlane.login.settings.LoginSettingsContract
+import com.dashlane.settings.biometric.BiometricSettingsLogger
 import dagger.Binds
 import dagger.Module
-
-
 
 @Module(includes = [AuthBindingModule::class])
 interface LoginBindingModule {
@@ -53,9 +48,6 @@ interface LoginBindingModule {
     fun bindEmailLogger(impl: LoginEmailLoggerImpl): LoginEmailLogger
 
     @Binds
-    fun bindTokenLogger(impl: LoginTokenLoggerImpl): LoginTokenLogger
-
-    @Binds
     fun bindTotpLoggerFactory(loggerFactory: LoginTotpLoggerImpl.Factory): LoginTotpLogger.Factory
 
     @Binds
@@ -71,9 +63,6 @@ interface LoginBindingModule {
     fun bindU2fKeyDetector(u2fKeyDetector: U2fKeyDetectorImpl): U2fKeyDetector
 
     @Binds
-    fun bindDataLossTrackingListener(listener: AccountDataLossTrackingListener): DataLossTrackingListener
-
-    @Binds
     fun bindBiometricDataProvider(biometricDataProvider: PinLockDataProvider): PinLockContract.DataProvider
 
     @Binds
@@ -81,4 +70,7 @@ interface LoginBindingModule {
 
     @Binds
     fun bindLoginSettingsLogger(logger: LogginSettingsLogger): LoginSettingsContract.Logger
+
+    @Binds
+    fun bindBiometricSettingsLogger(logger: LogginSettingsLogger): BiometricSettingsLogger
 }

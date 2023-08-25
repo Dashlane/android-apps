@@ -30,8 +30,6 @@ import com.dashlane.xml.domain.SyncObjectType
 import java.text.Collator
 import java.time.LocalDate
 
-
-
 fun <T : SyncObject> createIdentitySubviews(
     context: Context,
     subViewFactory: SubViewFactory,
@@ -104,7 +102,8 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldFullName(
         { it, value ->
             val vaultItem = it as VaultItem<T>
             vaultItem.copyForUpdatedFullName(this, value)
-        })
+        }
+    )
         .apply { (this as? ItemEditValueTextSubView)?.invisible = !isOther }
 }
 

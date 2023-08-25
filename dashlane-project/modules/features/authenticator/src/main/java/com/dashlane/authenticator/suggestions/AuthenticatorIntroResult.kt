@@ -20,7 +20,8 @@ internal class AuthenticatorIntroResult : ActivityResultContract<CredentialItem,
     override fun createIntent(context: Context, item: CredentialItem): Intent {
         return Intent(context, AuthenticatorIntro::class.java).apply {
             putExtra(
-                EXTRA_CREDENTIAL_NAME, if (item.title.isSemanticallyNull()) {
+                EXTRA_CREDENTIAL_NAME,
+                if (item.title.isSemanticallyNull()) {
                     context.getString(R.string.authenticator_default_account_name)
                 } else {
                     item.title

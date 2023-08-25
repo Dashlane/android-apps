@@ -34,20 +34,7 @@ internal fun AutofillAnalyzerDef.IAutofillUsageLog.logShowList(
             isNativeApp = isNativeApp,
             totalCount = totalCount
         )
-        AutoFillFormType.OTP -> onShowSmsOtp(getAutofillApiOrigin(forKeyboard), packageName)
-    }
-}
-
-internal fun AutofillAnalyzerDef.IAutofillUsageLog.logNoResults(
-    packageName: String,
-    @AutoFillFormType.FormType formType: Int,
-    forKeyboard: Boolean
-) {
-    when (formType) {
-        AutoFillFormType.CREDIT_CARD -> onNoResultsForCreditCard(getAutofillApiOrigin(forKeyboard), packageName)
-        AutoFillFormType.CREDENTIAL, AutoFillFormType.USERNAME_ONLY, AutoFillFormType.USERNAME_OR_EMAIL ->
-            onNoResultsForCredential(getAutofillApiOrigin(forKeyboard), packageName)
-        AutoFillFormType.EMAIL_ONLY -> onNoResultsForEmail(getAutofillApiOrigin(forKeyboard), packageName)
+        else -> Unit
     }
 }
 

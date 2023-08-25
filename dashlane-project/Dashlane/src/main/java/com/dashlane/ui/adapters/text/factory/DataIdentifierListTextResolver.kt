@@ -9,8 +9,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.util.IdentityUtil
 import javax.inject.Inject
 
-
-
 open class DataIdentifierListTextResolver @Inject constructor(private val identityUtil: IdentityUtil) {
 
     fun getLine1(context: Context, item: SummaryObject): StatusText {
@@ -20,8 +18,6 @@ open class DataIdentifierListTextResolver @Inject constructor(private val identi
     fun getLine2(context: Context, item: SummaryObject): StatusText {
         return getTextFactory(context, item).getLine2(StatusText(context.getString(R.string.incomplete), true))
     }
-
-    
 
     internal fun getTextFactory(context: Context, item: SummaryObject): DataIdentifierListTextFactory {
         return when (item) {
@@ -54,7 +50,8 @@ open class DataIdentifierListTextResolver @Inject constructor(private val identi
         override fun getLine1(): StatusText {
             if (DeveloperUtilities.systemIsInDebug(context)) {
                 return StatusText(
-                    "TODO: ListTextFactory missing", true
+                    "TODO: ListTextFactory missing",
+                    true
                 )
             }
             return StatusText("", false)
@@ -63,7 +60,8 @@ open class DataIdentifierListTextResolver @Inject constructor(private val identi
         override fun getLine2(default: StatusText): StatusText {
             if (DeveloperUtilities.systemIsInDebug(context)) {
                 return StatusText(
-                    "TODO: No ListTextFactory in DataIdentifierListTextResolver", true
+                    "TODO: No ListTextFactory in DataIdentifierListTextResolver",
+                    true
                 )
             }
             return StatusText("", false)
@@ -72,7 +70,8 @@ open class DataIdentifierListTextResolver @Inject constructor(private val identi
         override fun getLine2FromField(field: SearchField<*>): StatusText {
             if (DeveloperUtilities.systemIsInDebug(context)) {
                 return StatusText(
-                    "TODO: No ListTextFactory in DataIdentifierListTextResolver", true
+                    "TODO: No ListTextFactory in DataIdentifierListTextResolver",
+                    true
                 )
             }
             return StatusText("", false)

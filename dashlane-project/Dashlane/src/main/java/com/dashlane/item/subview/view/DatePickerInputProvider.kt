@@ -12,8 +12,6 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-
-
 object DatePickerInputProvider {
 
     const val DATE_PICKER_DIALOG_TAG = "date_picker_dialog"
@@ -48,8 +46,6 @@ object DatePickerInputProvider {
         }
     }
 }
-
-
 
 private fun MaterialDatePicker.Builder<Long>.setLocalDateSelection(date: LocalDate): MaterialDatePicker.Builder<Long> =
     setSelection(ZonedDateTime.of(date, LocalTime.MIDNIGHT, ZoneOffset.UTC).toInstant().toEpochMilli())

@@ -7,8 +7,6 @@ import androidx.lifecycle.coroutineScope
 import com.dashlane.ui.activities.DashlaneActivity
 import dagger.hilt.android.AndroidEntryPoint
 
-
-
 @AndroidEntryPoint
 internal class M2wConnectActivity : DashlaneActivity() {
 

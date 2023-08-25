@@ -28,8 +28,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class ActionsSourcesActivity : DashlaneActivity() {
 
@@ -69,7 +67,7 @@ class ActionsSourcesActivity : DashlaneActivity() {
                 launch { viewModel.actionsSourcesStateFlow.collect { render(it) } }
                 launch {
                     viewModel.selectedItemFlow.collect {
-                        navigationService.navigateToRevertActions(this@ActionsSourcesActivity, it, "settings")
+                        navigationService.navigateToPausedAutofillSection(this@ActionsSourcesActivity, it, "settings")
                     }
                 }
             }
@@ -109,11 +107,7 @@ class ActionsSourcesActivity : DashlaneActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
-            title = if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES_IN_CONTEXT)) {
-                getString(R.string.autofill_actioned_sources_paused_title)
-            } else {
-                getString(R.string.autofill_actioned_sources_title)
-            }
+            title = getString(R.string.autofill_actioned_sources_paused_title)
         }
     }
 

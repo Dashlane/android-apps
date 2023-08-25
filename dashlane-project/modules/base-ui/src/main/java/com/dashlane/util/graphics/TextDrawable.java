@@ -14,8 +14,6 @@ import java.util.Locale;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
-
-
 public class TextDrawable extends Drawable implements BackgroundColorDrawable {
 
     private static final float TEXT_SIZE_FACTOR = 0.5f;

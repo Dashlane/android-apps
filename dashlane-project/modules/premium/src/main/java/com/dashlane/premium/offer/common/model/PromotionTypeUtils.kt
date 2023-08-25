@@ -2,8 +2,6 @@ package com.dashlane.premium.offer.common.model
 
 import com.dashlane.premium.R
 
-
-
 fun ProductDetailsWrapper.IntroductoryOfferProduct.toPromotionType(
     offerType: OfferType
 ): IntroOfferType? {

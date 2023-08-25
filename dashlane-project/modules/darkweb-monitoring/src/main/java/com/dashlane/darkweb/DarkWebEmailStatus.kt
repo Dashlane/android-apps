@@ -2,8 +2,6 @@ package com.dashlane.darkweb
 
 import com.google.gson.annotations.SerializedName
 
-
-
 data class DarkWebEmailStatus(
     @SerializedName("email") val email: String,
     @SerializedName("status") val status: String

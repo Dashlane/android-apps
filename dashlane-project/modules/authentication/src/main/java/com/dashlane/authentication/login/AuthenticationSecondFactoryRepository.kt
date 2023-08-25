@@ -10,8 +10,6 @@ import com.dashlane.authentication.AuthenticationTimeoutException
 import com.dashlane.authentication.AuthenticationUnknownException
 import com.dashlane.authentication.RegisteredUserDevice
 
-
-
 interface AuthenticationSecondFactoryRepository {
     @Throws(
         AuthenticationInvalidTokenException::class,

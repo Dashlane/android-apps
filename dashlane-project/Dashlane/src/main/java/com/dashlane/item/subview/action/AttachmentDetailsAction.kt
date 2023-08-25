@@ -5,8 +5,6 @@ import com.dashlane.R
 import com.dashlane.item.subview.Action
 import com.dashlane.vault.model.VaultItem
 
-
-
 class AttachmentDetailsAction(private val item: VaultItem<*>) : Action {
     var activityColor: Int = -1
 

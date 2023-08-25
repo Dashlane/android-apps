@@ -25,9 +25,11 @@ import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import com.skocken.presentation.viewproxy.BaseViewProxy
 import kotlin.math.roundToInt
 
-class PasswordAnalysisViewProxy(view: View) : BaseViewProxy<PasswordAnalysisContract.Presenter>(view),
+class PasswordAnalysisViewProxy(view: View) :
+    BaseViewProxy<PasswordAnalysisContract.Presenter>(view),
     PasswordAnalysisContract.ViewProxy,
-    EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider>, ViewPager.OnPageChangeListener {
+    EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider>,
+    ViewPager.OnPageChangeListener {
 
     private val viewSwitcher = findViewByIdEfficient<ViewSwitcher>(R.id.loader_view_switcher)!!
     private val viewPager = findViewByIdEfficient<ViewPager>(R.id.viewpager)!!
@@ -99,7 +101,8 @@ class PasswordAnalysisViewProxy(view: View) : BaseViewProxy<PasswordAnalysisCont
             if (childAt is TextView) {
                 val icon = PasswordAnalysisCountBadgeDrawable.newStateListDrawable(childAt.context, counter)
                 childAt.compoundDrawablePadding = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP, 4F,
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    4F,
                     context.resources.displayMetrics
                 ).roundToInt()
                 childAt.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null)
@@ -184,7 +187,7 @@ class PasswordAnalysisViewProxy(view: View) : BaseViewProxy<PasswordAnalysisCont
             return view == `object`
         }
 
-        override fun getPageTitle(position: Int): CharSequence? {
+        override fun getPageTitle(position: Int): CharSequence {
             return when (modes[position]) {
                 PasswordAnalysisContract.Mode.WEAK -> context.getString(R.string.security_dashboard_list_weak)
                 PasswordAnalysisContract.Mode.REUSED -> context.getString(R.string.security_dashboard_list_reused)
@@ -197,7 +200,7 @@ class PasswordAnalysisViewProxy(view: View) : BaseViewProxy<PasswordAnalysisCont
             return modes.size
         }
 
-        private fun getEmptyPage(position: Int): EmptyScreenViewProvider? {
+        private fun getEmptyPage(position: Int): EmptyScreenViewProvider {
             return when (modes[position]) {
                 PasswordAnalysisContract.Mode.WEAK -> ModeEmptyScreenViewProvider(
                     context,

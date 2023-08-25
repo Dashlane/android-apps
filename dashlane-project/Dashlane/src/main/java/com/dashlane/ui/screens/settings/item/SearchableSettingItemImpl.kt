@@ -3,8 +3,6 @@ package com.dashlane.ui.screens.settings.item
 import android.content.Context
 import com.dashlane.search.SearchableSettingItem
 
-
-
 class SearchableSettingItemImpl(
     private val item: SettingItem,
     private val parents: List<SettingScreenItem>
@@ -28,5 +26,5 @@ class SearchableSettingItemImpl(
 
     override fun getSettingDescription(): String? = description
 
-    override fun isSettingVisible(context: Context): Boolean = isVisible(context)
+    override fun isSettingVisible(context: Context): Boolean = isVisible()
 }

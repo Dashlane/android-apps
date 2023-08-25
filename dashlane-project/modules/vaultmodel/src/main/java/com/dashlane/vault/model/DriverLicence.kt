@@ -26,7 +26,8 @@ fun createDriverLicence(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.DriverLicence>.copySyncObject(builder: SyncObject.DriverLicence.Builder.() -> Unit = {}):

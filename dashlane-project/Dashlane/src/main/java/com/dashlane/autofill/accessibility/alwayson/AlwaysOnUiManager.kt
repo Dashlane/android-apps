@@ -23,14 +23,12 @@ import com.dashlane.util.notification.notificationBuilder
 import com.dashlane.util.toBitmap
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
-import java.time.Instant
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import wei.mark.standout.StandOutWindow
-
-
+import java.time.Instant
 
 class AlwaysOnUiManager(
     private val context: Context,
@@ -69,7 +67,8 @@ class AlwaysOnUiManager(
 
     @OptIn(DelicateCoroutinesApi::class)
     fun onItemPicked(uid: String) {
-        val authentifiant: SyncObject.Authentifiant = databaseAccess.loadAuthentifiant(uid)?.syncObject ?: return
+        val authentifiant: SyncObject.Authentifiant =
+            databaseAccess.loadSyncObject<SyncObject.Authentifiant>(uid)?.syncObject ?: return
         authentifiant.id?.let { itemId ->
             GlobalScope.launch(Dispatchers.IO) {
                 databaseAccess.updateLastViewDate(itemId, Instant.now())
@@ -123,19 +122,27 @@ class AlwaysOnUiManager(
                 isNativeApp = loginForm.websiteUrl != null,
                 totalCount = results
             )
-        } else {
-            autofillUsageLog.onShowLogout(AutofillOrigin.IN_APP_LOGIN, packageName)
         }
 
         val bubbleClass = DashlaneBubble::class.java
         StandOutWindow.show(context, bubbleClass, DashlaneBubble.WINDOW_ID)
         StandOutWindow.sendData(
-            context, bubbleClass, DashlaneBubble.WINDOW_ID,
-            DashlaneBubble.REQUEST_CODE_CHANGE_CONTROLLER, controllerBundle, bubbleClass, 0
+            context,
+            bubbleClass,
+            DashlaneBubble.WINDOW_ID,
+            DashlaneBubble.REQUEST_CODE_CHANGE_CONTROLLER,
+            controllerBundle,
+            bubbleClass,
+            0
         )
         StandOutWindow.sendData(
-            context, bubbleClass, DashlaneBubble.WINDOW_ID,
-            DashlaneBubble.REQUEST_CODE_MOVE_TO_FIELD, formFieldPosition, bubbleClass, 0
+            context,
+            bubbleClass,
+            DashlaneBubble.WINDOW_ID,
+            DashlaneBubble.REQUEST_CODE_MOVE_TO_FIELD,
+            formFieldPosition,
+            bubbleClass,
+            0
         )
     }
 
@@ -199,7 +206,11 @@ class AlwaysOnUiManager(
         }.build()
 
         
-        notificationManager.notify(NOTIFICATION_ID_REQUEST_OVERDRAW_PERMISSION, notification)
+        try {
+            notificationManager.notify(NOTIFICATION_ID_REQUEST_OVERDRAW_PERMISSION, notification)
+        } catch (e: SecurityException) {
+            
+        }
         return true
     }
 

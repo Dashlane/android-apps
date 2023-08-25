@@ -4,8 +4,6 @@ import android.content.Context
 import com.dashlane.R
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 
-
-
 class SharingCenterUserItem(
     context: Context,
     val user: SharingContact.User

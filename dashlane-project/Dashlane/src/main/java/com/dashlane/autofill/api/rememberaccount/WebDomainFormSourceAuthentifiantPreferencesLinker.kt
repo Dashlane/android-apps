@@ -8,8 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-
-
 class WebDomainFormSourceAuthentifiantPreferencesLinker @VisibleForTesting constructor(
     val globalPreferencesManager: GlobalPreferencesManager,
     val coroutineContext: CoroutineContext = Dispatchers.IO

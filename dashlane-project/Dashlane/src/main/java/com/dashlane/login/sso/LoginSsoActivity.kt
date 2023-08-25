@@ -5,21 +5,15 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import com.dashlane.R
-import com.dashlane.login.LoginSsoLoggerConfigProvider
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.util.getParcelableExtraCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
-class LoginSsoActivity : DashlaneActivity(), LoginSsoLoggerConfigProvider {
+class LoginSsoActivity : DashlaneActivity() {
 
     override var requireUserUnlock = false
-
-    override lateinit var ssoLoggerConfig: LoginSsoLogger.Config
 
     @Inject
     lateinit var presenter: LoginSsoContract.Presenter
@@ -30,14 +24,11 @@ class LoginSsoActivity : DashlaneActivity(), LoginSsoLoggerConfigProvider {
         val login = intent.getStringExtra(KEY_LOGIN)
         val serviceProviderUrl = intent.getStringExtra(KEY_SERVICE_PROVIDER_URL)
         val isNitroProvider = intent.getBooleanExtra(KEY_IS_SSO_PROVIDER, false)
-        val loggerConfig = intent.getParcelableExtraCompat<LoginSsoLogger.Config>(KEY_LOGGER_CONFIG)
 
-        if (login == null || serviceProviderUrl == null || loggerConfig == null) {
+        if (login == null || serviceProviderUrl == null) {
             finish()
             return
         }
-
-        this.ssoLoggerConfig = loggerConfig
 
         setContentView(R.layout.activity_sso_login)
 
@@ -83,7 +74,6 @@ class LoginSsoActivity : DashlaneActivity(), LoginSsoLoggerConfigProvider {
         const val KEY_IS_SSO_PROVIDER = "is_sso_provider"
         const val KEY_SERVICE_PROVIDER_URL = "service_provider_url"
         const val KEY_MIGRATE_TO_MASTER_PASSWORD_USER = "migrate_to_master_password_user"
-        const val KEY_LOGGER_CONFIG = LoginSsoLogger.Config.INTENT_EXTRA_KEY
 
         const val KEY_RESULT = "result"
     }

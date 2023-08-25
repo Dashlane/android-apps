@@ -17,7 +17,8 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-internal class OfferListViewProxy(view: View) : BaseViewProxy<OfferListContract.Presenter>(view),
+internal class OfferListViewProxy(view: View) :
+    BaseViewProxy<OfferListContract.Presenter>(view),
     OfferListContract.ViewProxy {
 
     private val loader = view.findViewById(R.id.offer_list_progress) as ProgressBar
@@ -57,7 +58,8 @@ internal class OfferListViewProxy(view: View) : BaseViewProxy<OfferListContract.
                     super.onPageSelected(position)
                     (periodicityPager.adapter as PeriodicityPagerAdapter).screens[position].onDisplay()
                 }
-            })
+            }
+        )
         TabLayoutMediator(periodicityTab, periodicityPager) { tab, position ->
             val screen = (periodicityPager.adapter as PeriodicityPagerAdapter).screens[position]
             tab.setCustomView(R.layout.offer_list_tab_item)

@@ -8,8 +8,6 @@ import com.dashlane.storage.securestorage.UserSecureStorageManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class AccountStatusRepository @Inject constructor(private val storageUser: UserSecureStorageManager) :
     SessionObserver, BySessionRepository<PremiumStatus> {

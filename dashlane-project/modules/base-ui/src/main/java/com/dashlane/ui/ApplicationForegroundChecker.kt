@@ -3,8 +3,6 @@ package com.dashlane.ui
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class ApplicationForegroundChecker @Inject constructor() : AbstractActivityLifecycleListener() {
 

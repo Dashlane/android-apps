@@ -4,8 +4,6 @@ import android.view.ViewGroup;
 
 import com.dashlane.BuildConfig;
 
-
-
 public class DimensionProvider {
     static final int WIDTH_INDEX = 0;
     static final int HEIGHT_INDEX = 1;

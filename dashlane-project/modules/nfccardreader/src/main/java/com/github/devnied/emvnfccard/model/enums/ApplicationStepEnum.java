@@ -1,31 +1,17 @@
-
-
 package com.github.devnied.emvnfccard.model.enums;
 
 import com.github.devnied.emvnfccard.model.Application;
 
 import java.util.List;
 
-
-
 public enum ApplicationStepEnum implements IKeyEnum {
 
-	
-
 	NOT_SELECTED(0),
-	
-
 	SELECTED(1), 
-	
-
 	READ(2);
 	
-	
-
 	private int key;
 	
-	
-
 	private ApplicationStepEnum(final int pKey) {
 		key = pKey;
 	}
@@ -35,8 +21,6 @@ public enum ApplicationStepEnum implements IKeyEnum {
 		return key;
 	}
 	
-	
-
 	public static boolean isAtLeast(final List<Application> pApplications, final ApplicationStepEnum pStep){
 		boolean ret = false;
 		if (pApplications != null && pStep != null){

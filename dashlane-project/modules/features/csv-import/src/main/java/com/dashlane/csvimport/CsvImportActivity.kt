@@ -13,7 +13,8 @@ import com.dashlane.csvimport.internal.csvimport.CsvImportContract
 import com.dashlane.csvimport.internal.csvimport.CsvImportDataProvider
 import com.dashlane.csvimport.internal.csvimport.CsvImportPresenter
 import com.dashlane.csvimport.internal.csvimport.CsvImportViewProxy
-import com.dashlane.hermes.inject.HermesComponent
+import com.dashlane.ext.application.KnownApplicationProvider
+import com.dashlane.hermes.LogRepository
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.ui.activities.DashlaneActivity
@@ -23,10 +24,10 @@ import com.dashlane.util.ActivityResultContractCompat
 import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getParcelableExtraCompat
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class CsvImportActivity : DashlaneActivity() {
@@ -42,6 +43,12 @@ class CsvImportActivity : DashlaneActivity() {
 
     @Inject
     lateinit var linkedServicesHelper: LinkedServicesHelper
+
+    @Inject
+    lateinit var knownApplicationProvider: KnownApplicationProvider
+
+    @Inject
+    lateinit var logRepository: LogRepository
 
     private lateinit var presenter: CsvImportContract.Presenter
     private lateinit var provider: CsvImportContract.DataProvider
@@ -67,12 +74,12 @@ class CsvImportActivity : DashlaneActivity() {
                 savedInstanceState?.getParcelableCompat(KEY_STATE) ?: CsvImportContract.State.Initial,
                 importAuthentifiantHelper,
                 mainDataAccessor,
-                linkedServicesHelper
+                linkedServicesHelper,
+                knownApplicationProvider
             )
         )[DataProviderHolder::class.java].provider
 
         val usageLogRepository = UserActivityComponent(this).currentSessionUsageLogRepository
-        val logRepository = HermesComponent(this).logRepository
         val customCsvImportActivityResultLauncher = registerForActivityResult(
             object : ActivityResultContractCompat<List<String>>() {
                 override fun createIntent(context: Context, input: List<String>): Intent =
@@ -115,7 +122,8 @@ class CsvImportActivity : DashlaneActivity() {
         currentState: CsvImportContract.State,
         importAuthentifiantHelper: ImportAuthentifiantHelper,
         mainDataAccessor: MainDataAccessor,
-        linkedServicesHelper: LinkedServicesHelper
+        linkedServicesHelper: LinkedServicesHelper,
+        knownApplicationProvider: KnownApplicationProvider
     ) : ViewModel(), CoroutineScope by MainScope() {
         class Factory(
             private val application: Application,
@@ -123,7 +131,8 @@ class CsvImportActivity : DashlaneActivity() {
             private val currentState: CsvImportContract.State,
             private val importAuthentifiantHelper: ImportAuthentifiantHelper,
             private val mainDataAccessor: MainDataAccessor,
-            private val linkedServicesHelper: LinkedServicesHelper
+            private val linkedServicesHelper: LinkedServicesHelper,
+            private val knownApplicationProvider: KnownApplicationProvider
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 check(modelClass == DataProviderHolder::class.java)
@@ -134,7 +143,8 @@ class CsvImportActivity : DashlaneActivity() {
                     currentState,
                     importAuthentifiantHelper,
                     mainDataAccessor,
-                    linkedServicesHelper
+                    linkedServicesHelper,
+                    knownApplicationProvider
                 ) as T
             }
         }
@@ -145,7 +155,8 @@ class CsvImportActivity : DashlaneActivity() {
             this,
             mainDataAccessor,
             importAuthentifiantHelper,
-            linkedServicesHelper
+            linkedServicesHelper,
+            knownApplicationProvider
         ) { application.contentResolver.openInputStream(uri)!! }
 
         override fun onCleared() = cancel()

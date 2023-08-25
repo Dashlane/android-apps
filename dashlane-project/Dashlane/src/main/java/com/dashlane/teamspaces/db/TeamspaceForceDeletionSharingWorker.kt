@@ -20,8 +20,6 @@ import com.dashlane.ui.screens.fragments.userdata.sharing.SharingRevokeMe
 import com.dashlane.vault.model.VaultItem
 import javax.inject.Inject
 
-
-
 open class TeamspaceForceDeletionSharingWorker @Inject constructor(
     private val sessionManager: SessionManager,
     private val sharingRevokeAllMembers: SharingRevokeAllMembers,

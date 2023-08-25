@@ -7,18 +7,21 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.emptywebsitewarning.domain.EmptyWebsiteWarningDialogResponse
-import com.dashlane.autofill.api.model.AuthentifiantSummaryItemToFill
+import com.dashlane.autofill.api.model.toItemToFill
 import com.dashlane.autofill.api.ui.AutoFillResponseActivity
 import com.dashlane.autofill.api.ui.AutofillFeature
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.url.toUrlDomain
 import com.dashlane.util.tryOrNull
-import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.model.VaultItem
+import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
-class EmptyWebsiteWarningActivity : AutoFillResponseActivity(), EmptyWebsiteWarningDialogResponse,
+class EmptyWebsiteWarningActivity :
+    AutoFillResponseActivity(),
+    EmptyWebsiteWarningDialogResponse,
     CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -46,8 +49,8 @@ class EmptyWebsiteWarningActivity : AutoFillResponseActivity(), EmptyWebsiteWarn
         }
     }
 
-    override fun onAutofillResult(result: SummaryObject.Authentifiant) = finishWithResult(
-        itemToFill = AuthentifiantSummaryItemToFill(primaryItem = result),
+    override fun onAutofillResult(result: VaultItem<SyncObject.Authentifiant>) = finishWithResult(
+        itemToFill = result.toItemToFill(),
         autofillFeature = AutofillFeature.EMPTY_WEBSITE,
         matchType = matchType
     )
@@ -57,8 +60,6 @@ class EmptyWebsiteWarningActivity : AutoFillResponseActivity(), EmptyWebsiteWarn
         autofillFeature = AutofillFeature.EMPTY_WEBSITE,
         matchType = matchType
     )
-
-    
 
     private fun openWarningBottomSheetDialog() {
         var dialog = supportFragmentManager.findFragmentByTag(EMPTY_WEBSITE_WARNING_DIALOG)

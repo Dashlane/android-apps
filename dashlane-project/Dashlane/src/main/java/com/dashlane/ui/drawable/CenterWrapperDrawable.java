@@ -6,8 +6,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
-
-
 public class CenterWrapperDrawable extends Drawable {
 
     private final Drawable mDrawable;

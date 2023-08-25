@@ -20,8 +20,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-
-
 class SearchLoader(
     private val genericDataQuery: GenericDataQuery,
     private val vaultDataQuery: VaultDataQuery,
@@ -64,8 +62,6 @@ class SearchLoader(
         return result
     }
 
-    
-
     private suspend fun prepareItemsForQuery(query: String): List<Any> {
         val cache = lastResult
         return if (cache?.acceptNewFilter(query) == true) {
@@ -82,8 +78,6 @@ class SearchLoader(
         return searchSorter.matchAndSort(allItems, "").mapNotNull { it.item as? SummaryObject.Authentifiant }
     }
 
-    
-
     fun loadAuthentifiantsById(authentifiantsIds: List<String>): List<SummaryObject.Authentifiant>? {
         val loadFilter = genericFilter {
             specificDataType(SyncObjectType.AUTHENTIFIANT)
@@ -97,8 +91,6 @@ class SearchLoader(
             .mapNotNull { it.item as? SummaryObject.Authentifiant }
             .takeIf { it.isNotEmpty() }
     }
-
-    
 
     @Suppress("UNCHECKED_CAST")
     fun loadAuthentifiantById(authentifiantId: String): VaultItem<SyncObject.Authentifiant>? {

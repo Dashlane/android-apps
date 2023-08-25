@@ -19,9 +19,9 @@ import com.dashlane.useractivity.log.UserActivityFlushFactory;
 import com.dashlane.useractivity.log.UserActivityRepository;
 import com.dashlane.useractivity.log.UserActivityRepositoryFactory;
 import com.dashlane.useractivity.log.install.InstallLogRepository;
-import com.dashlane.useractivity.log.install.InstallLogRepositoryAggregationDelegate;
 import com.dashlane.useractivity.log.install.InstallLogRepositoryFactory;
 import com.dashlane.useractivity.log.usage.UsageLogRepository;
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope;
 
 import java.time.Clock;
 
@@ -31,7 +31,7 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.android.qualifiers.ApplicationContext;
-import kotlinx.coroutines.GlobalScope;
+import kotlinx.coroutines.CoroutineScope;
 import okhttp3.Call;
 
 @Module
@@ -39,39 +39,29 @@ public class UserActivityModule {
 
     @Provides
     InstallLogRepository provideInstallLogRepository(
-            UserActivityFlush userActivityFlush,
-            UserActivityDataStore userActivityDataStore,
-            DeviceExtraData deviceExtraData,
-            Lazy<AggregateUserActivity> aggregateUserActivityLazy) {
-        InstallLogRepository installLogRepository = InstallLogRepositoryFactory.create(
-                GlobalScope.INSTANCE,
-                userActivityDataStore,
-                deviceExtraData,
-                userActivityFlush,
-                Clock.systemDefaultZone()
-        );
-        return new InstallLogRepositoryAggregationDelegate(
-                installLogRepository,
-                aggregateUserActivityLazy
-        );
+        @ApplicationCoroutineScope CoroutineScope applicationCoroutineScope,
+        UserActivityFlush userActivityFlush,
+        UserActivityDataStore userActivityDataStore,
+        DeviceExtraData deviceExtraData
+    ) {
+        return InstallLogRepositoryFactory.create(
+            applicationCoroutineScope,
+            userActivityDataStore,
+            deviceExtraData,
+            userActivityFlush,
+            Clock.systemDefaultZone());
     }
 
     @Provides
     @Singleton
     BySessionRepository<UsageLogRepository> provideBySessionUsageLogRepository(
-            @ApplicationContext Context context,
-            UserActivityFlush userActivityFlush,
-            UserActivityDataStore userActivityDataStore,
-            DeviceExtraData deviceExtraData,
-            UserDataRepository userDataRepository,
-            Lazy<AggregateUserActivity> aggregateUserActivityLazy) {
+        @ApplicationContext Context context,
+        UserDataRepository userDataRepository,
+        Lazy<AggregateUserActivity> aggregateUserActivityLazy) {
         return new BySessionUsageLogRepository(
-                context,
-                deviceExtraData,
-                userDataRepository,
-                userActivityDataStore,
-                userActivityFlush,
-                aggregateUserActivityLazy
+            context,
+            userDataRepository,
+            aggregateUserActivityLazy
         );
     }
 
@@ -83,8 +73,8 @@ public class UserActivityModule {
     @Provides
     @Singleton
     UserActivityRepository getUserActivityRepository(
-            UserActivityDataStore userActivityDataStore,
-            Call.Factory callFactory
+        UserActivityDataStore userActivityDataStore,
+        Call.Factory callFactory
     ) {
         return UserActivityRepositoryFactory.create(userActivityDataStore, callFactory);
     }
@@ -92,20 +82,20 @@ public class UserActivityModule {
     @Provides
     @Singleton
     UserActivityDataStore provideDataStore(
-            @ApplicationContext
-            Context context,
-            GlobalPreferencesManager globalPreferencesManager,
-            UserPreferencesManager userPreferencesManager
+        @ApplicationContext
+        Context context,
+        GlobalPreferencesManager globalPreferencesManager,
+        UserPreferencesManager userPreferencesManager
     ) {
         return new UserActivityDataStoreCompat(
+            globalPreferencesManager,
+            UserActivityDataStoreFactory.create(
+                UserActivityDatabase.create(context)
+            ),
+            new UserActivityDataStoreLegacy(
                 globalPreferencesManager,
-                UserActivityDataStoreFactory.create(
-                        UserActivityDatabase.create(context)
-                ),
-                new UserActivityDataStoreLegacy(
-                        globalPreferencesManager,
-                        userPreferencesManager
-                )
+                userPreferencesManager
+            )
         );
     }
 }

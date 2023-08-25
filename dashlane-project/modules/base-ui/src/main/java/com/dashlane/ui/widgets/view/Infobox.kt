@@ -18,8 +18,6 @@ import com.dashlane.util.updateConstraints
 import com.google.android.material.button.MaterialButton
 import kotlin.math.roundToInt
 
-
-
 class Infobox @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -54,8 +52,6 @@ class Infobox @JvmOverloads constructor(
 
     lateinit var primaryButton: Button
     lateinit var secondaryButton: Button
-
-    
 
     private var warning: Boolean = false
         set(value) {
@@ -119,8 +115,6 @@ class Infobox @JvmOverloads constructor(
         backgroundTint?.let { backgroundTintList = it }
     }
 
-    
-
     private fun updateTypeStyle() {
         when {
             title.isNullOrEmpty() -> {
@@ -174,8 +168,6 @@ class Infobox @JvmOverloads constructor(
             connect(iconView.id, ConstraintSet.BASELINE, titleView.id, ConstraintSet.BASELINE, 0)
             iconView.baseline = getBaseline(titleView.paint.textSize)
         }
-
-    
 
     private fun getBaseline(textSize: Float) = when {
         textSize < 30f -> context.dpToPx(12f) 

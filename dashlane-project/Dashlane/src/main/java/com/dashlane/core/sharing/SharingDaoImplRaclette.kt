@@ -27,9 +27,9 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.manager.getSuggestedTeamspace
 import com.dashlane.useractivity.RacletteLogger
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.vault.util.SyncObjectTypeUtils
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
+import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
 import com.dashlane.xml.serializer.XmlDeserializer
 import com.dashlane.xml.serializer.XmlSerializer
 import dagger.Lazy
@@ -250,7 +250,7 @@ class SharingDaoImplRaclette @Inject constructor(
 
         return memorySummaryRepository.databaseSyncSummary
             ?.items
-            ?.filter { it.hasDirtySharedField && it.type in SyncObjectTypeUtils.SHAREABLE }
+            ?.filter { it.hasDirtySharedField && it.type in SHAREABLE }
             ?.map { it.id }
     }
 }

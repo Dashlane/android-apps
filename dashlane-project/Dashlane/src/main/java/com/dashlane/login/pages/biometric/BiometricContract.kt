@@ -16,8 +16,10 @@ interface BiometricContract {
     interface DataProvider : LoginLockBaseContract.DataProvider {
         val biometricAuthModule: BiometricAuthModule
 
-        fun challengeAuthentication(cryptoObject: BiometricPrompt.CryptoObject?): Boolean
+        fun challengeAuthentication(cryptoObject: BiometricPrompt.CryptoObject): Boolean
 
-        fun createAccountRecoveryIntroActivityIntent(): Intent?
+        fun createMasterPasswordResetIntroActivityIntent(): Intent?
+
+        fun unlockWeakBiometric(): Boolean
     }
 }

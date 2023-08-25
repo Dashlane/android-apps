@@ -13,8 +13,6 @@ import java.lang.ref.WeakReference;
 
 import androidx.annotation.Nullable;
 
-
-
 public class DecipheringTextAnimation implements ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
 
     private final WeakReference<TextView> mTextViewRef;

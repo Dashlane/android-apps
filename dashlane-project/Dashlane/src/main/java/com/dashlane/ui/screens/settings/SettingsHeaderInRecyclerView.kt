@@ -6,14 +6,20 @@ import android.widget.TextView
 import androidx.core.view.ViewCompat
 import com.dashlane.R
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
-class SettingsHeaderInRecyclerView(private val header: SettingHeader) : DashlaneRecyclerAdapter.ViewTypeProvider {
+class SettingsHeaderInRecyclerView(private val header: SettingHeader) :
+    DashlaneRecyclerAdapter.ViewTypeProvider, DiffUtilComparator<SettingsHeaderInRecyclerView> {
 
     override fun getViewType() = VIEW_TYPE
+
+    override fun isItemTheSame(item: SettingsHeaderInRecyclerView): Boolean =
+        header == item.header
+
+    override fun isContentTheSame(item: SettingsHeaderInRecyclerView): Boolean =
+        header == item.header
 
     class ViewHolder(view: View) : EfficientViewHolder<SettingsHeaderInRecyclerView>(view) {
 
@@ -29,7 +35,8 @@ class SettingsHeaderInRecyclerView(private val header: SettingHeader) : Dashlane
 
         val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<SettingsHeaderInRecyclerView> =
             DashlaneRecyclerAdapter.ViewType(
-                R.layout.item_settings_header, ViewHolder::class.java
+                R.layout.item_settings_header,
+                ViewHolder::class.java
             )
     }
 }

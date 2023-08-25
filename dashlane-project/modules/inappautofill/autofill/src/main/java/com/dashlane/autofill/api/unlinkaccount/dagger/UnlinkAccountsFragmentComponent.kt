@@ -6,8 +6,6 @@ import com.dashlane.autofill.api.unlinkaccount.view.UnlinkAccountsFragment
 import dagger.BindsInstance
 import dagger.Component
 
-
-
 @UnlinkAccountsFragmentScope
 @Component(
     modules = [

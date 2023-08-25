@@ -10,8 +10,6 @@ class DashlaneLabsViewModels @Inject constructor(
     private val featuresChecker: UserFeaturesChecker
 ) : ViewModel() {
 
-    
-
     fun getLabsFeatureFlip(): List<DashlaneLabsItem> {
         return getLabsAvailableFeatureFlip()
             .filter { featuresChecker.has(it) }

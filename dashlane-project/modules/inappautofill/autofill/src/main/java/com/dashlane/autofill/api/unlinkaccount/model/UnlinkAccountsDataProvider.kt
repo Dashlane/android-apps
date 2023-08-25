@@ -16,8 +16,6 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-
-
 class UnlinkAccountsDataProvider @Inject constructor(
     private val autoFillFormSource: AutoFillFormSource,
     private val formSourcesDataProvider: FormSourcesDataProvider,

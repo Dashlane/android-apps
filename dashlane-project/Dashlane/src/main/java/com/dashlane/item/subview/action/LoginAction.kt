@@ -7,8 +7,6 @@ import com.dashlane.url.toUrlOrNull
 import com.dashlane.vault.model.getAllLinkedPackageName
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 open class LoginAction(
     private val url: String,
     private val linkedServices: SummaryObject.LinkedServices?,

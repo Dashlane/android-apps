@@ -3,6 +3,7 @@ package com.dashlane.item.subview.action.authenticator
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorIntro
+import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.util.showAuthenticatorRemoveConfirmDialog
 import com.dashlane.item.ItemEditViewContract.View.UiUpdateListener
 import com.dashlane.item.subview.Action
@@ -13,11 +14,10 @@ import com.dashlane.util.startActivityForResult
 import com.dashlane.vault.model.getAllLinkedPackageName
 import java.time.Duration
 
-
-
 class ActivateRemoveAuthenticatorAction(
     private val item: ItemAuthenticatorEditSubView,
-    private val listener: UiUpdateListener
+    private val listener: UiUpdateListener,
+    private val authenticatorLogger: AuthenticatorLogger
 ) : Action {
 
     override val icon = -1
@@ -52,7 +52,8 @@ class ActivateRemoveAuthenticatorAction(
             item.topDomain,
             item.linkedServices,
             item.professional,
-            item.value?.issuer
+            item.value?.issuer,
+            authenticatorLogger
         ) {
             
             item.notifyValueChanged(null)

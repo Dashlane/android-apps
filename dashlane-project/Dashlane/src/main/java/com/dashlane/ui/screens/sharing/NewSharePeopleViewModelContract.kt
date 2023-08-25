@@ -12,7 +12,6 @@ interface NewSharePeopleViewModelContract {
     val permission: StateFlow<Permission>
     fun onPermissionChanged(sharingPermission: Permission)
     fun onClickShare(contacts: List<SharingContact>)
-    fun onBackPressed(contacts: List<SharingContact>)
 
     enum class UIState {
         INIT,

@@ -3,8 +3,6 @@ package com.dashlane.autofill.accessibility
 import android.content.Context
 import android.view.accessibility.AccessibilityEvent
 
-
-
 class EventValidator(val context: Context) {
 
     private val currentActivityDetector = CurrentActivityDetector(context)

@@ -1,6 +1,7 @@
 package com.dashlane.core.sharing
 
 import com.dashlane.exception.NotLoggedInException
+import com.dashlane.server.api.endpoints.sharinguserdevice.GetUsersPublicKeyService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.RsaStatus
 import com.dashlane.server.api.endpoints.sharinguserdevice.Status
@@ -13,10 +14,7 @@ import com.dashlane.sharing.model.getUserGroupMembers
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isPending
 import com.dashlane.sharing.service.FindUsersDataProvider
-import com.dashlane.sharing.service.response.FindUsersResponse
 import javax.inject.Inject
-
-
 
 class SharingInvitePublicKeyUser @Inject constructor(
     private val userGroupInvitePublicKeyUser: SharingUserGroupInvitePublicKeyUser,
@@ -58,13 +56,13 @@ class SharingInvitePublicKeyUser @Inject constructor(
     private suspend fun executeGetUsers(
         session: Session,
         contactEmails: Set<String>
-    ): Map<String, FindUsersResponse.User> {
-        return findUsersDataProvider.findUsers(session, contactEmails)
+    ): List<GetUsersPublicKeyService.Data.Data> {
+        return findUsersDataProvider.findUsers(session, contactEmails.toList())
     }
 
     private suspend fun executeSendInvitation(
         session: Session,
-        users: Map<String, FindUsersResponse.User>,
+        users: List<GetUsersPublicKeyService.Data.Data>,
         usersToRequest: Map<String, List<UserDownload>>,
         itemGroupsAccepted: List<ItemGroup>,
         userGroupsAccepted: List<UserGroup>
@@ -79,8 +77,6 @@ class SharingInvitePublicKeyUser @Inject constructor(
 
         return newItemsGroups to newUserGroups
     }
-
-    
 
     private fun updateUsersToRequest(
         group: ItemGroup,
@@ -124,8 +120,6 @@ class SharingInvitePublicKeyUser @Inject constructor(
     private fun List<UserGroup>.filterUserGroupWhereAccepted(login: String): List<UserGroup> {
         return filter { it.getUser(login)?.isAccepted == true }
     }
-
-    
 
     private fun isAcceptedAsUserOrGroup(
         itemGroup: ItemGroup,

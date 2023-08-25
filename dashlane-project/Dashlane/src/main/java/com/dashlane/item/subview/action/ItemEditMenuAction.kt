@@ -3,8 +3,6 @@ package com.dashlane.item.subview.action
 import android.app.Activity
 import com.dashlane.vault.model.VaultItem
 
-
-
 open class ItemEditMenuAction(
     title: Int,
     icon: Int,

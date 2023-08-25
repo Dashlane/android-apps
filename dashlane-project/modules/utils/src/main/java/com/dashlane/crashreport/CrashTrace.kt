@@ -8,8 +8,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
-
 class CrashTrace(private val crashReporter: CrashReporter) {
 
     private val dateFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSSZ", Locale.ENGLISH)

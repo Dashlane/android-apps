@@ -4,8 +4,6 @@ import com.dashlane.autofill.api.common.domain.AutofillGeneratePasswordService
 import com.dashlane.password.generator.PasswordGeneratorCriteria
 import com.skocken.presentation.provider.BaseDataProvider
 
-
-
 abstract class GeneratePasswordDataProvider<T : GeneratePasswordContract.Presenter>(private val service: AutofillGeneratePasswordService) :
     BaseDataProvider<T>(), GeneratePasswordContract.DataProvider {
 

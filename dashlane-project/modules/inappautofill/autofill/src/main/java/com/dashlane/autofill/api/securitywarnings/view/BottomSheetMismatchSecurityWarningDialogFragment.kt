@@ -10,10 +10,12 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResult
 import com.dashlane.autofill.api.R
+import com.dashlane.autofill.api.securitywarnings.data.SecurityWarningAction
+import com.dashlane.autofill.api.securitywarnings.data.SecurityWarningType
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.ui.configureBottomSheet
 import com.dashlane.util.getParcelableCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -21,19 +23,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class BottomSheetMismatchSecurityWarningDialogFragment : BottomSheetDialogFragment() {
 
-    interface Actions {
-        fun mismatchDialogPositiveAction(doNotShowAgainChecked: Boolean, domain: Domain)
-        fun mismatchDialogNegativeAction(domain: Domain)
-        fun mismatchDialogCancelAction(domain: Domain)
-    }
-
-    private lateinit var domain: Domain
+    private var formSource: AutoFillFormSource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val formSource = requireArguments().getParcelableCompat<AutoFillFormSource>(ARG_FORM_SOURCE)
-        domain = formSource.getDomain()
+        formSource = requireArguments().getParcelableCompat(ARG_FORM_SOURCE)
 
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.Theme_Dashlane_Transparent_Cancelable)
     }
@@ -64,11 +59,11 @@ class BottomSheetMismatchSecurityWarningDialogFragment : BottomSheetDialogFragme
         title?.text =
             getString(R.string.autofill_mismatch_warning_title, authentifiantLabel, formSourceLabel)
         positiveButton.setOnClickListener {
-            getActions()?.mismatchDialogPositiveAction(checkBox.isChecked, domain)
+            setResult(SecurityWarningAction.POSITIVE, checkBox.isChecked)
             dismiss()
         }
         negativeButton.setOnClickListener {
-            getActions()?.mismatchDialogNegativeAction(domain)
+            setResult(SecurityWarningAction.NEGATIVE, false)
             dismiss()
         }
     }
@@ -80,11 +75,22 @@ class BottomSheetMismatchSecurityWarningDialogFragment : BottomSheetDialogFragme
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        getActions()?.mismatchDialogCancelAction(domain)
+        setResult(SecurityWarningAction.CANCEL, false)
         dismiss()
     }
 
-    private fun getActions(): Actions? = this.activity as? Actions
+    private fun setResult(action: SecurityWarningAction, checked: Boolean) {
+        setFragmentResult(
+            SecurityWarningsViewProxy.SECURITY_WARNING_ACTION_RESULT,
+            bundleOf(
+                SecurityWarningsViewProxy.PARAMS_WARNING_TYPE to SecurityWarningType.Mismatch(
+                    formSource,
+                    checked
+                ),
+                SecurityWarningsViewProxy.PARAMS_ACTION to action
+            )
+        )
+    }
 
     companion object {
 

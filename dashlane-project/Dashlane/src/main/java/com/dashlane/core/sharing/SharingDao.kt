@@ -13,8 +13,6 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.Lazy
 
-
-
 interface SharingDao {
 
     val vaultDataQuery: VaultDataQuery
@@ -22,22 +20,14 @@ interface SharingDao {
 
     val databaseOpen: Boolean
 
-    
-
     suspend fun getItemsSummary(
         dataType: SharingDataType
     ): List<Pair<String, Long>>
 
-    
-
     suspend fun updateItemTimestamp(uid: String, timestamp: Long)
-
-    
 
     suspend fun getItemKeyTimestamp(uid: String): Pair<String, Long>?
     fun isDirtyForSharing(id: String, type: SyncObjectType): Boolean
-
-    
 
     suspend fun getDirtyForSharing(): List<DataIdentifierExtraDataWrapper<out SyncObject>>
 

@@ -8,19 +8,19 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
+import com.dashlane.sharing.util.AuditLogHelper
 import com.dashlane.sharing.util.SharingCryptographyHelper
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-
 class AcceptItemGroupRequestForUserBuilder @Inject constructor(
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     private val sharingCryptography: SharingCryptographyHelper,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val auditLogHelper: AuditLogHelper
 ) {
 
     private val session: Session?
@@ -47,7 +47,8 @@ class AcceptItemGroupRequestForUserBuilder @Inject constructor(
                 itemsForEmailing = listOf(itemForEmailing),
                 acceptSignature = acceptSignature,
                 autoAccept = false,
-                userGroupId = null
+                userGroupId = null,
+                auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup)
             )
         }
     }
@@ -76,7 +77,8 @@ class AcceptItemGroupRequestForUserBuilder @Inject constructor(
                 itemsForEmailing = null,
                 acceptSignature = acceptSignature,
                 autoAccept = false,
-                userGroupId = AcceptItemGroupService.Request.UserGroupId(userGroup.groupId)
+                userGroupId = AcceptItemGroupService.Request.UserGroupId(userGroup.groupId),
+                auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup)
             )
         }
     }

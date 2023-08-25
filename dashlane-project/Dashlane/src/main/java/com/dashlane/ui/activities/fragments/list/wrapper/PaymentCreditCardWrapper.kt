@@ -10,8 +10,6 @@ import com.dashlane.util.graphics.RoundRectDrawable
 import com.dashlane.vault.model.getColorResource
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class PaymentCreditCardWrapper(
     vaultItem: SummaryObject.PaymentCreditCard,
     container: ItemListContext

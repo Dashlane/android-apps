@@ -14,8 +14,6 @@ import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class PasswordAnalysisItemWrapper(
     mode: PasswordAnalysisContract.Mode,
     authentifiantWrapper: DefaultVaultItemWrapper<SummaryObject.Authentifiant>,
@@ -34,12 +32,13 @@ class PasswordAnalysisItemWrapper(
         override fun onClickItemAction(v: View, item: SummaryObject) {
             if (item !is SummaryObject.Authentifiant) return
             val vaultItem = SingletonProvider.getMainDataAccessor().getVaultDataQuery()
-                .query(vaultFilter {
+                .query(
+                    vaultFilter {
                     specificUid(item.id)
-                }) as? VaultItem<SyncObject.Authentifiant> ?: return
+                }
+                ) as? VaultItem<SyncObject.Authentifiant> ?: return
 
             PopupMenu(v.context, v).apply {
-
                 val (menuItemInclude, menuItemExclude) =
                     if (mode == PasswordAnalysisContract.Mode.EXCLUDED) {
                         menu.add(R.string.security_dashboard_option_include) to null

@@ -16,13 +16,12 @@ import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.util.Toaster
 
-
-
 class ChangePauseViewProxy(
     private val fragment: ChangePauseFragment,
     private val presenter: ChangePauseContract.Presenter,
     private val changePauseViewTypeProviderFactory: ChangePauseViewTypeProviderFactory,
-    private val toaster: Toaster
+    private val toaster: Toaster,
+    private val autoFillFormSource: AutoFillFormSource
 ) : ChangePauseContract.View {
     private lateinit var activity: FragmentActivity
     private lateinit var itemsListView: RecyclerView
@@ -35,7 +34,7 @@ class ChangePauseViewProxy(
         itemsListView = view.findViewById(R.id.pauseSettings)
         itemsAdapter = DashlaneRecyclerAdapter()
         itemsAdapter.setOnItemClickListener { _, _, _, _ ->
-            presenter.onTogglePause()
+            presenter.onTogglePause(autoFillFormSource)
         }
         itemsListView.run {
             layoutManager = LinearLayoutManager(activity)
@@ -46,7 +45,7 @@ class ChangePauseViewProxy(
     }
 
     fun onResume() {
-        presenter.onResume()
+        presenter.onResume(autoFillFormSource)
     }
 
     override fun resumeAutofill(pauseModel: ChangePauseModel) {

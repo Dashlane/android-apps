@@ -9,8 +9,6 @@ import com.dashlane.R
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 import java.util.Locale
 
-
-
 open class ReadStateViewHolder<T : NotificationItem>(view: View) : EfficientViewHolder<T>(view) {
 
     override fun updateView(context: Context, item: T?) {
@@ -23,7 +21,8 @@ open class ReadStateViewHolder<T : NotificationItem>(view: View) : EfficientView
     private fun initTitleField(item: T) {
         findViewByIdEfficient<TextView>(R.id.title)!!.apply {
             setTypeface(
-                typeface, if (item.isRead()) {
+                typeface,
+                if (item.isRead()) {
                     Typeface.NORMAL
                 } else {
                     Typeface.BOLD

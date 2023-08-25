@@ -2,11 +2,8 @@ package com.dashlane.autofill.api.changepause
 
 import com.dashlane.autofill.api.changepause.model.ChangePauseModel
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import kotlinx.coroutines.CoroutineScope
 
 interface ChangePauseContract {
-
-    
 
     interface View {
         fun updatePause(pauseModel: ChangePauseModel)
@@ -18,21 +15,17 @@ interface ChangePauseContract {
         fun stopLoading()
     }
 
-    
-
     interface Presenter {
-        fun setView(view: View, viewCoroutineScope: CoroutineScope)
-        fun onResume()
-        fun onTogglePause()
+        fun setView(view: View)
+        fun onResume(autoFillFormSource: AutoFillFormSource)
+        fun onTogglePause(autoFillFormSource: AutoFillFormSource)
     }
-
-    
 
     interface DataProvider {
         fun bindResponses(responses: Responses)
         fun currentState(): ChangePauseModel?
-        fun loadPause()
-        fun togglePause()
+        fun loadPause(autoFillFormSource: AutoFillFormSource)
+        fun togglePause(autoFillFormSource: AutoFillFormSource)
 
         interface Responses {
             fun openPauseDialog(autoFillFormSource: AutoFillFormSource)

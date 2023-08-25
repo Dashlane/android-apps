@@ -25,8 +25,6 @@ internal interface SaveRequestHandler {
     )
 }
 
-
-
 internal class SaveRequestHandlerImpl @Inject constructor(
     private val databaseAccess: AutofillAnalyzerDef.DatabaseAccess,
     private val logger: AutofillAnalyzerDef.IAutofillUsageLog

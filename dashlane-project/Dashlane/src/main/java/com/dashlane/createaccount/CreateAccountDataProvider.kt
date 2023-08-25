@@ -10,10 +10,9 @@ import com.dashlane.createaccount.pages.confirmpassword.CreateAccountConfirmPass
 import com.dashlane.createaccount.pages.confirmpassword.CreateAccountConfirmPasswordDataProvider
 import com.dashlane.createaccount.pages.email.CreateAccountEmailContract
 import com.dashlane.createaccount.pages.email.CreateAccountEmailDataProvider
-import com.dashlane.createaccount.pages.settings.CreateAccountSettingsContract
-import com.dashlane.createaccount.pages.settings.CreateAccountSettingsDataProvider
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.login.root.LoginContract
+import com.dashlane.settings.biometric.BiometricSettingsLogger
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.log.AttributionsLogDataProvider
 import com.skocken.presentation.provider.BaseDataProvider
@@ -33,7 +32,7 @@ class CreateAccountDataProvider @Inject constructor(
     private val createEmailDataProvider: Provider<CreateAccountEmailDataProvider>,
     private val createChoosePasswordDataProvider: Provider<CreateAccountChoosePasswordDataProvider>,
     private val createConfirmPasswordDataProvider: Provider<CreateAccountConfirmPasswordDataProvider>,
-    private val createSettingsDataProvider: Provider<CreateAccountSettingsDataProvider>,
+    override val biometricSettingsLogger: BiometricSettingsLogger,
     private val logger: CreateAccountLogger,
     private val accountCreator: AccountCreator,
     private val createAccountSuccessIntentFactory: CreateAccountSuccessIntentFactory,
@@ -52,7 +51,6 @@ class CreateAccountDataProvider @Inject constructor(
         biometricEnabled: Boolean,
         resetMpEnabled: Boolean
     ) = withContext(defaultCoroutineDispatcher) {
-        logger.logCreateAccountClick(termsState)
         try {
             coroutineScope {
                 
@@ -110,12 +108,6 @@ class CreateAccountDataProvider @Inject constructor(
                 it.username = username
                 it.masterPassword = password
                 it.inEuropeanUnion = inEuropeanUnion
-                it.origin = origin
-                it.country = country
             }
-    }
-
-    override fun createSettingsDataProvider(): CreateAccountSettingsContract.DataProvider {
-        return createSettingsDataProvider.get()
     }
 }

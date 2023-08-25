@@ -7,8 +7,6 @@ import android.widget.Checkable;
 import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 
-
-
 public class CheckableLinearLayout extends LinearLayout implements Checkable {
     private CheckedTextView _checkbox;
 

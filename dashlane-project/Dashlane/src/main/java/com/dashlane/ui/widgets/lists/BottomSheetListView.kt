@@ -6,8 +6,6 @@ import android.view.MotionEvent
 import android.widget.AbsListView
 import android.widget.ListView
 
-
-
 @SuppressWarnings("ClickableViewAccessibility")
 class BottomSheetListView(context: Context, attrs: AttributeSet) : ListView(context, attrs) {
 

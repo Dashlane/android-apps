@@ -5,8 +5,6 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 
-
-
 @IntDef({AutofillOrigin.IN_APP_LOGIN,
          AutofillOrigin.AUTO_FILL_API,
          AutofillOrigin.INLINE_AUTOFILL_KEYBOARD})

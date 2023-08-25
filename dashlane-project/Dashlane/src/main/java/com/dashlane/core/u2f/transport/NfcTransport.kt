@@ -8,8 +8,6 @@ import com.dashlane.util.tryOrNull
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
-
-
 class NfcTransport(private val tag: IsoDep) : Transport {
     private val selectCommand =
         byteArrayOf(0x00, 0xa4.toByte(), 0x04, 0x00, 0x08, 0xa0.toByte(), 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01)

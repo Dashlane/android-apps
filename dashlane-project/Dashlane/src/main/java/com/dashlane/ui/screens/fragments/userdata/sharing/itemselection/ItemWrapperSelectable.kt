@@ -12,8 +12,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.util.ViewTypeUtils
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class ItemWrapperSelectable<D : SummaryObject>(itemWrapper: VaultItemWrapper<D>) :
     VaultItemDoubleWrapper<D>(itemWrapper) {
     var isSelect = false

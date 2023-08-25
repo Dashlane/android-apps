@@ -6,13 +6,11 @@
     <string name="free_trial_started_dialog_learn_more_cta">Learn more</string>
 
     <string name="trial_upgrade_recommendation_announcement_title">Enjoying our Premium features?</string>
-    <string name="trial_upgrade_recommendation_announcement_message_essentials_arg">Essentials</string>
     <string name="trial_upgrade_recommendation_announcement_message_premium_arg">Premium</string>
     <plurals name="trial_upgrade_recommendation_announcement_message">
         <item quantity="one">This Premium trial ends in %1$d day.&lt;br /&gt;&lt;br /&gt;Based on your app usage, our %2$s plan looks like the best fit for your needs.</item>
         <item quantity="other">This Premium trial ends in %1$d days.&lt;br /&gt;&lt;br /&gt;Based on your app usage, our %2$s plan looks like the best fit for your needs.</item>
     </plurals>
-    <string name="trial_upgrade_recommendation_announcement_essentials_cta">Get Essentials</string>
     <string name="trial_upgrade_recommendation_announcement_premium_cta">Get Premium</string>
     <string name="trial_upgrade_recommendation_announcement_not_now_cta">Not now</string>
 </resources>

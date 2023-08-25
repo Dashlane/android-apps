@@ -6,17 +6,11 @@ import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.flow.Flow
 
-
-
 interface UserGroupItemsViewModelContract {
     val userGroupId: String
     val uiState: Flow<UIState>
 
-    
-
     fun reloadData()
-
-    
 
     fun pullToRefresh()
 

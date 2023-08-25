@@ -10,8 +10,6 @@ import com.dashlane.R
 import com.dashlane.login.Device
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class DeviceViewHolder(private val v: View) : EfficientViewHolder<Device>(v) {
     val checkBox: CheckBox = view.findViewById(R.id.device_checkbox)
     var itemCheckListener: DeviceAdapter.OnItemCheckListener? = null

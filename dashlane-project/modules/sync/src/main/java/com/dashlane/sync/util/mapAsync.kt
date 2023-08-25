@@ -8,8 +8,6 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.coroutineScope
 
-
-
 @Suppress("EXPERIMENTAL_API_USAGE")
 internal suspend inline fun <R, T> Iterable<T>.mapAsync(
     progressChannel: SendChannel<Unit>?,
@@ -17,11 +15,13 @@ internal suspend inline fun <R, T> Iterable<T>.mapAsync(
 ): List<R> = coroutineScope {
     val deferredChannel = produce<Deferred<R>> {
         for (item in this@mapAsync) {
-            send(async {
+            send(
+                async {
                 val result = transform(item)
                 progressChannel?.send(Unit)
                 result
-            })
+            }
+            )
         }
     }
     deferredChannel.toList().awaitAll()

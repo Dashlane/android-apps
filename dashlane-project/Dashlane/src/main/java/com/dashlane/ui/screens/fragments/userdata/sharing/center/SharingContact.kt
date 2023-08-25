@@ -5,8 +5,6 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.vault.summary.SummaryObject
 typealias UserGroupModel = UserGroup
 
-
-
 sealed class SharingContact {
     data class UserGroup(
         val userGroup: UserGroupModel,

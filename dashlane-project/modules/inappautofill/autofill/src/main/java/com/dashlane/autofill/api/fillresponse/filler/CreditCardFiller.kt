@@ -2,21 +2,17 @@ package com.dashlane.autofill.api.fillresponse.filler
 
 import android.view.View
 import com.dashlane.autofill.api.fillresponse.DatasetWrapperBuilder
-import com.dashlane.autofill.api.model.CreditCardSummaryItemToFill
+import com.dashlane.autofill.api.model.CreditCardItemToFill
 import com.dashlane.autofill.api.model.ItemToFill
 import com.dashlane.autofill.api.util.AutofillValueFactory
 import com.dashlane.autofill.api.util.getBestEntry
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
-import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.xml.domain.SyncObject
 import java.time.Month
 import java.time.Year
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
-
 
 internal open class CreditCardFiller(private val autofillValueFactory: AutofillValueFactory) : Filler {
 
@@ -26,43 +22,42 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         item: ItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val creditCard = (item as? CreditCardSummaryItemToFill)?.primaryItem ?: return false
-        val address = item.optional
-        val cardNumberFieldFound = setCardNumber(dataSetBuilder, summary, null, requireLock)
-        val securityCodeFieldFound = setSecurityCode(dataSetBuilder, summary, null, requireLock)
-        val expirationDateFieldFound = setExpirationDate(dataSetBuilder, summary, creditCard, requireLock)
-        val postalCodeFieldFound = setPostalCode(dataSetBuilder, summary, address, requireLock)
+        val creditCardItemToFill = item as CreditCardItemToFill
+        val cardNumberFieldFound = setCardNumber(dataSetBuilder, summary, creditCardItemToFill, requireLock)
+        val securityCodeFieldFound = setSecurityCode(dataSetBuilder, summary, creditCardItemToFill, requireLock)
+        val expirationDateFieldFound = setExpirationDate(dataSetBuilder, summary, creditCardItemToFill, requireLock)
+        val postalCodeFieldFound = setPostalCode(dataSetBuilder, summary, creditCardItemToFill, requireLock)
         return cardNumberFieldFound || securityCodeFieldFound || expirationDateFieldFound || postalCodeFieldFound
     }
 
-    protected fun setCardNumber(
+    private fun setCardNumber(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
-        item: SyncObject.PaymentCreditCard?,
+        item: CreditCardItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val value = item?.cardNumber?.takeUnless { requireLock }?.toString() ?: ""
+        val value = item.syncObject?.cardNumber?.takeUnless { requireLock }?.toString() ?: ""
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.CREDIT_CARD_NUMBER)
     }
 
-    protected fun setSecurityCode(
+    private fun setSecurityCode(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
-        item: SyncObject.PaymentCreditCard?,
+        item: CreditCardItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val value = item?.securityCode?.takeUnless { requireLock }?.toString() ?: ""
+        val value = item.syncObject?.securityCode?.takeUnless { requireLock }?.toString() ?: ""
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.CREDIT_CARD_SECURITY_CODE)
     }
 
     protected fun setExpirationDate(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
-        item: SummaryObject.PaymentCreditCard,
+        item: CreditCardItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val month = if (requireLock) Month.JANUARY else item.expireMonth
-        val year = if (requireLock) Year.of(2016) else item.expireYear
+        val month = if (requireLock) Month.JANUARY else item.syncObject?.expireMonth
+        val year = if (requireLock) Year.of(2016) else item.syncObject?.expireYear
         if (month == null || year == null || year.value !in 2000..3000) {
             
             return false
@@ -91,13 +86,12 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         return hasValueSet
     }
 
-    protected fun setPostalCode(
+    private fun setPostalCode(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
-        item: SummaryObject.Address?,
+        item: CreditCardItemToFill,
         requireLock: Boolean
     ): Boolean {
-        item ?: return false
         val value = if (requireLock) "" else item.zipCode
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.POSTAL_CODE)
     }

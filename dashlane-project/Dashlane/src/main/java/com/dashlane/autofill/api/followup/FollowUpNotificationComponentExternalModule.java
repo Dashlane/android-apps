@@ -2,7 +2,6 @@ package com.dashlane.autofill.api.followup;
 
 import com.dashlane.followupnotification.api.FollowUpNotificationLockManager;
 import com.dashlane.followupnotification.api.FollowUpNotificationPermissionManager;
-import com.dashlane.followupnotification.services.FollowUpAutoRemovalService;
 import com.dashlane.followupnotification.services.FollowUpNotificationLogger;
 import com.dashlane.followupnotification.services.FollowUpNotificationSettingsService;
 
@@ -14,8 +13,6 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 
-
-
 @Module
 @InstallIn(SingletonComponent.class)
 public class FollowUpNotificationComponentExternalModule {
@@ -24,11 +21,6 @@ public class FollowUpNotificationComponentExternalModule {
     @Named("autoRemovalElapsedTime")
     public long providesAutoRemovalElapsedTime() {
         return 30000L;
-    }
-
-    @Provides
-    public FollowUpAutoRemovalService providesFollowUpAutoRemovalService(FollowUpAutoRemovalServiceImpl impl) {
-        return impl;
     }
 
     @Provides

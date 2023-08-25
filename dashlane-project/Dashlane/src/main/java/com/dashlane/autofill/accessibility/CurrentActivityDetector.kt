@@ -5,8 +5,6 @@ import android.content.Context
 import android.view.accessibility.AccessibilityEvent
 import com.dashlane.util.tryOrNull
 
-
-
 class CurrentActivityDetector(private val context: Context) {
 
     private val cachedValidActivity = mutableMapOf<Pair<String, String>, Boolean>()

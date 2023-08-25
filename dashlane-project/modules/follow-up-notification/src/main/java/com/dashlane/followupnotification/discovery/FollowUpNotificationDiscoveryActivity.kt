@@ -68,7 +68,8 @@ class FollowUpNotificationDiscoveryActivity : AppCompatActivity() {
         }
     }
 
-    private class DataProvider : BaseDataProvider<FollowUpNotificationDiscoveryContract.Presenter>(),
+    private class DataProvider :
+        BaseDataProvider<FollowUpNotificationDiscoveryContract.Presenter>(),
         FollowUpNotificationDiscoveryContract.DataProvider {
 
         override fun getScreenContent(config: ScreenConfiguration) = when (config) {

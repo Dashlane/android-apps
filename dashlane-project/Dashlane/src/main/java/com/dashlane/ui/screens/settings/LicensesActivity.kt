@@ -23,8 +23,6 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 
-
-
 class LicensesActivity : DashlaneActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

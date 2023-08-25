@@ -4,8 +4,6 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemContent
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 
-
-
 data class SharingItemUpdaterRequest(
     val itemGroupUpdates: List<ItemGroup> = emptyList(),
     val itemContentUpdates: List<ItemContent> = emptyList(),

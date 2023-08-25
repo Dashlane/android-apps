@@ -7,8 +7,6 @@ import android.content.Intent
 import com.dashlane.autofill.api.totp.AutofillApiTotp
 import com.dashlane.util.tryOrNull
 
-
-
 class AutofillApiTotpNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {

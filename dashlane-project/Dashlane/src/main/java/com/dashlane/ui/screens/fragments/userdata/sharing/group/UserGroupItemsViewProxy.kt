@@ -68,7 +68,9 @@ class UserGroupItemsViewProxy(
     private suspend fun displayData(state: UserGroupItemsViewModelContract.UIState.Data) {
         val listItems = state.items
             .map {
-                SharedVaultItemWrapper(context, it,
+                SharedVaultItemWrapper(
+                    context,
+                    it,
                     onPendingMenuClick = { _, _ -> },
                     onAcceptedMenuClick = { view, item ->
                         
@@ -77,7 +79,8 @@ class UserGroupItemsViewProxy(
                         } else {
                             showManageSharingContactAccepted(view, item)
                         }
-                    })
+                    }
+                )
             }
             .sortedWith(SharedVaultItemWrapper.comparator())
             .addHeaders(context)
@@ -108,11 +111,15 @@ class UserGroupItemsViewProxy(
         view: View,
         sharedItem: SharingModels
     ) {
-        val dialog = PopupMenuManageUserAccepted(context, view,
+        val dialog = PopupMenuManageUserAccepted(
+            context,
+            view,
             isAdmin = sharedItem.isMemberAdmin,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUserGroup(
-                    context, sharedItem.itemGroup.groupId, viewModel.userGroupId
+                    context,
+                    sharedItem.itemGroup.groupId,
+                    viewModel.userGroupId
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {

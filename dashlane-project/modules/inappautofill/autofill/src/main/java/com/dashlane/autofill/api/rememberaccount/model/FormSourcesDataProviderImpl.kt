@@ -6,23 +6,17 @@ import com.dashlane.autofill.api.util.formSourceIdentifier
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-
-
 @Singleton
 class FormSourcesDataProviderImpl @Inject constructor(
-    @Named("ApplicationLinkedPreference") private val applicationFormSourcePrefLinker: FormSourceAuthentifiantLinker,
-    @Named("WebDomainLinkedPreference") private val webDomainFormSourcePrefLinker: FormSourceAuthentifiantLinker,
     @Named("ApplicationDataLinked") private val applicationFormSourceLinker: FormSourceAuthentifiantLinker,
     @Named("WebDomainDataLinked") private val webDomainFormSourceLinker: FormSourceAuthentifiantLinker,
-    private val autofillApiRememberedAccountToaster: AutofillApiRememberedAccountToaster,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val autofillApiRememberedAccountToaster: AutofillApiRememberedAccountToaster
 ) : FormSourcesDataProvider {
     private val lock = Mutex()
 
@@ -48,20 +42,6 @@ class FormSourcesDataProviderImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllLinkedFormSources(): List<RememberedFormSource> {
-        return lock.withLock {
-            val app = applicationFormSourcePrefLinker.allLinked()
-                .map {
-                    RememberedFormSource(ApplicationFormSource(it.first), it.second)
-                }
-            val web = webDomainFormSourcePrefLinker.allLinked()
-                .map {
-                    RememberedFormSource(WebDomainFormSource("", it.first), it.second)
-                }
-            app + web
-        }
-    }
-
     override suspend fun getAllLinkedFormSourceAuthentifiantIds(autofillFormSource: AutoFillFormSource): List<String> {
         val filterContent = autofillFormSource.formSourceIdentifier to autofillFormSource.getDataLinker().allLinked()
         return lock.withLock {
@@ -75,17 +55,9 @@ class FormSourcesDataProviderImpl @Inject constructor(
         }
     }
 
-    private fun AutoFillFormSource.getDataLinker(): FormSourceAuthentifiantLinker {
-        return if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES_IN_CONTEXT)) {
-            when (this) {
-                is ApplicationFormSource -> applicationFormSourceLinker
-                is WebDomainFormSource -> webDomainFormSourceLinker
-            }
-        } else {
-            when (this) {
-                is ApplicationFormSource -> applicationFormSourcePrefLinker
-                is WebDomainFormSource -> webDomainFormSourcePrefLinker
-            }
+    private fun AutoFillFormSource.getDataLinker(): FormSourceAuthentifiantLinker =
+        when (this) {
+            is ApplicationFormSource -> applicationFormSourceLinker
+            is WebDomainFormSource -> webDomainFormSourceLinker
         }
-    }
 }

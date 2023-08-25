@@ -5,8 +5,6 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dashlane.followupnotification.FollowUpNotificationComponent
 
-
-
 class RemoveFollowUpNotificationWorker(
     appContext: Context,
     params: WorkerParameters

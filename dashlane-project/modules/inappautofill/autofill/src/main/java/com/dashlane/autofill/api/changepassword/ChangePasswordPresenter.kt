@@ -16,8 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-
 class ChangePasswordPresenter(
     private val coroutineScope: CoroutineScope,
     private val logger: AutofillChangePasswordLogger,
@@ -78,8 +76,6 @@ class ChangePasswordPresenter(
     override fun initDialog() {
         prefillLogin()
     }
-
-    
 
     private fun prefillLogin() {
         coroutineScope.launch(Dispatchers.Main) {

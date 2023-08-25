@@ -10,8 +10,6 @@ import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
 import io.sentry.protocol.User
 
-
-
 class SentryCrashReporter(
     context: Context,
     crashDeviceId: String,

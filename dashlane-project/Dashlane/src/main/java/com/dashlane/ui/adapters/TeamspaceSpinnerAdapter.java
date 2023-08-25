@@ -17,8 +17,6 @@ import com.dashlane.teamspaces.model.Teamspace;
 
 import java.util.List;
 
-
-
 public class TeamspaceSpinnerAdapter extends ArrayAdapter<Teamspace> {
     private boolean mDisabled;
 

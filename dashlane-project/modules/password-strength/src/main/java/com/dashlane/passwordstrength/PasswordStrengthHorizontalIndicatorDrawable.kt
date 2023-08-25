@@ -9,8 +9,6 @@ import android.graphics.drawable.Drawable
 import com.dashlane.util.dpToPx
 import kotlin.math.roundToInt
 
-
-
 class PasswordStrengthHorizontalIndicatorDrawable(context: Context) : Drawable() {
 
     var passwordStrength: PasswordStrengthScore? = null
@@ -46,10 +44,13 @@ class PasswordStrengthHorizontalIndicatorDrawable(context: Context) : Drawable()
                 ?: disabledBarColor
 
             canvas.drawRoundRect(
-                currentX.toFloat(), bounds.top.toFloat(),
+                currentX.toFloat(),
+                bounds.top.toFloat(),
                 (currentX + singleBarWidth).toFloat(),
                 bounds.bottom.toFloat(),
-                radiusSize, radiusSize, paint
+                radiusSize,
+                radiusSize,
+                paint
             )
 
             currentX += singleBarWidth + marginBetweenLevels

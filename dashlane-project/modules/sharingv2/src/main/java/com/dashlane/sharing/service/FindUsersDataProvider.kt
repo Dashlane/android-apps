@@ -1,13 +1,12 @@
 package com.dashlane.sharing.service
 
+import com.dashlane.network.tools.authorization
+import com.dashlane.server.api.endpoints.sharinguserdevice.GetUsersPublicKeyService
 import com.dashlane.session.Session
-import com.dashlane.sharing.service.response.FindUsersResponse
-import com.dashlane.util.JsonSerialization
 import javax.inject.Inject
 
 class FindUsersDataProvider @Inject constructor(
-    private val sharingServiceNew: SharingServiceNew,
-    private val jsonSerialization: JsonSerialization
+    private val getUsersPublicKeyService: GetUsersPublicKeyService
 ) {
     companion object {
         private const val FIND_USER_BATCH_SIZE = 100
@@ -15,20 +14,16 @@ class FindUsersDataProvider @Inject constructor(
 
     suspend fun findUsers(
         session: Session,
-        aliases: Set<String>
-    ): Map<String, FindUsersResponse.User> {
-        val login = session.userId
-        val uki = session.uki
-        val result: List<MutableMap<String, FindUsersResponse.User>> =
-            aliases.chunked(FIND_USER_BATCH_SIZE).mapNotNull { batch ->
-                sharingServiceNew.findUsers(
-                    login = login,
-                    uki = uki,
-                    aliases = ObjectToJson(batch, jsonSerialization)
-                ).content
-            }
-        return result.reduce { acc, mutableMap ->
-            acc.also { it.putAll(mutableMap) }
-        }
+        aliases: List<String>
+    ): List<GetUsersPublicKeyService.Data.Data> {
+        return aliases.chunked(FIND_USER_BATCH_SIZE).mapNotNull { batch ->
+            runCatching {
+                val response = getUsersPublicKeyService.execute(
+                    session.authorization,
+                    GetUsersPublicKeyService.Request(batch)
+                )
+                response.data.data
+            }.getOrNull()
+        }.flatten()
     }
 }

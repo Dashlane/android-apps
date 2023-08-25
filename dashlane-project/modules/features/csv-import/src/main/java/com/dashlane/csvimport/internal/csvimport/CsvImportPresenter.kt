@@ -21,6 +21,7 @@ import com.dashlane.csvimport.internal.localBroadcastManager
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.BackupFileType
 import com.dashlane.hermes.generated.definitions.ImportDataStatus
+import com.dashlane.hermes.generated.definitions.ImportDataStep
 import com.dashlane.hermes.generated.definitions.ImportSource
 import com.dashlane.hermes.generated.events.user.ImportData
 import com.dashlane.useractivity.log.usage.UsageLogRepository
@@ -146,14 +147,17 @@ internal class CsvImportPresenter(
                         R.plurals.csv_import_success_message,
                         state.count,
                         state.count
-                    ), Toast.LENGTH_SHORT
+                    ),
+                    Toast.LENGTH_SHORT
                 )
 
                 logRepository.queueEvent(
                     ImportData(
                         backupFileType = BackupFileType.CSV,
                         importDataStatus = ImportDataStatus.SUCCESS,
-                        importSource = ImportSource.SOURCE_OTHER
+                        importSource = ImportSource.SOURCE_OTHER,
+                        importDataStep = ImportDataStep.SUCCESS,
+                        isDirectImport = false
                     )
                 )
                 broadcastResultAndFinish(CSV_IMPORT_RESULT_SUCCESS)

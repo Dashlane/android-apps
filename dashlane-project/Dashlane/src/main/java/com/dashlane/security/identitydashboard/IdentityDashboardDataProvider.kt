@@ -32,7 +32,8 @@ class IdentityDashboardDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
     private val teamspaceRepository: TeamspaceManagerRepository,
     private val appEvents: AppEvents
-) : BaseDataProvider<IdentityDashboardContract.Presenter>(), IdentityDashboardContract.DataProvider,
+) : BaseDataProvider<IdentityDashboardContract.Presenter>(),
+IdentityDashboardContract.DataProvider,
     TeamspaceManager.Listener {
 
     lateinit var coroutineScope: CoroutineScope
@@ -95,8 +96,6 @@ class IdentityDashboardDataProvider @Inject constructor(
     override fun onStatusChanged(teamspace: Teamspace?, previousStatus: String?, newStatus: String?) {
         
     }
-
-    
 
     override fun onChange(teamspace: Teamspace?) {
         latestSecurityScoreEvaluatorResult = null

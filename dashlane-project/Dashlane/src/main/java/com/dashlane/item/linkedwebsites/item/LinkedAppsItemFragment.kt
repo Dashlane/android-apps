@@ -68,8 +68,6 @@ class LinkedAppsItemFragment : AbstractContentFragment() {
         }
     }
 
-    
-
     private fun setEmptyStateDescription() {
         val linkAppString = getString(R.string.autofill_link_app)
         val description = getString(R.string.linked_services_empty_state_description, linkAppString)

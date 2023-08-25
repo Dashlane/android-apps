@@ -5,8 +5,6 @@ import com.dashlane.followupnotification.services.FollowUpNotificationFlags
 import javax.inject.Inject
 import javax.inject.Named
 
-
-
 class FollowUpNotificationApiProviderImpl @Inject constructor(
     private val followUpNotificationFlags: FollowUpNotificationFlags,
     private val followUpNotificationSettings: FollowUpNotificationSettings,

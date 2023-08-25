@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.IntentSender
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 
-
-
 interface ChangePasswordActionIntentProvider {
     fun getChangePasswordIntentSender(
         context: Context,

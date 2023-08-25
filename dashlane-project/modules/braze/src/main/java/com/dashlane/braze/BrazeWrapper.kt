@@ -4,17 +4,15 @@ import android.app.Activity
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
-import com.appboy.models.push.BrazeNotificationPayload
-import com.braze.Constants
 import com.braze.Braze
+import com.braze.Constants
 import com.braze.IBrazeNotificationFactory
 import com.braze.events.IEventSubscriber
 import com.braze.events.InAppMessageEvent
+import com.braze.models.push.BrazeNotificationPayload
 import com.braze.push.BrazeNotificationFactory
 import com.braze.ui.inappmessage.BrazeInAppMessageManager
 import com.dashlane.util.notification.NotificationHelper
-
-
 
 class BrazeWrapper(
     private val braze: Braze,
@@ -32,8 +30,6 @@ class BrazeWrapper(
         braze.requestImmediateDataFlush()
     }
 
-    
-
     fun openSession(activity: Activity) {
         braze.openSession(activity)
         inAppManager.requestDisplayInAppMessage()
@@ -49,8 +45,6 @@ class BrazeWrapper(
             braze.changeUser(userId)
         }
     }
-
-    
 
     fun configureBrazeNotificationFactory() {
         Braze.customBrazeNotificationFactory = NotificationFactory
@@ -78,7 +72,8 @@ class BrazeWrapper(
 
             if (!channelExists) {
                 notificationExtras.putString(
-                    Constants.BRAZE_PUSH_NOTIFICATION_CHANNEL_ID_KEY, defaultChannel.id
+                    Constants.BRAZE_PUSH_NOTIFICATION_CHANNEL_ID_KEY,
+                    defaultChannel.id
                 )
             }
 
@@ -94,8 +89,6 @@ class BrazeWrapper(
     }
 
     companion object {
-        
-
         private val defaultChannel: NotificationHelper.Channel = NotificationHelper.Channel.MARKETING
     }
 }

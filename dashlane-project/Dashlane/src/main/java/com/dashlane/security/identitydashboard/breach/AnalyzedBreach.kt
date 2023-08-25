@@ -15,8 +15,6 @@ fun VaultItem<SyncObject.SecurityBreach>.toAnalyzedBreach() = AnalyzedBreach(
     uid
 )
 
-
-
 @SuppressLint("ParcelCreator")
 @Parcelize
 data class AnalyzedBreach(

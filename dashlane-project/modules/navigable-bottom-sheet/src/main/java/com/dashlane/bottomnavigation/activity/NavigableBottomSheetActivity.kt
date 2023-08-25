@@ -6,8 +6,6 @@ import androidx.navigation.findNavController
 import com.dashlane.bottomnavigation.NavigableBottomSheetDialogFragmentArgs
 import com.dashlane.bottomnavigation.R
 
-
-
 interface NavigableBottomSheetActivity {
     fun getBottomSheetNavigationGraphId(): Int
     fun getStartDestinationId(): Int = R.id.use_graph_start_destination

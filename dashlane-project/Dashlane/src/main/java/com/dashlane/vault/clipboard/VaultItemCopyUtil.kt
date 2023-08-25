@@ -6,8 +6,6 @@ import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.toHighlight
 
-
-
 object VaultItemCopyUtil {
     private val vaultItemClipboard
         get() = SingletonProvider.getComponent().vaultItemClipboard
@@ -15,8 +13,6 @@ object VaultItemCopyUtil {
     fun handleCopy(summaryObject: SummaryObject, copyField: CopyField) {
         vaultItemClipboard.handleCopy(summaryObject, copyField, updateLocalUsage = true, updateFrequentSearch = true)
     }
-
-    
 
     fun handleCopy(
         item: SummaryObject,
@@ -33,8 +29,6 @@ object VaultItemCopyUtil {
             itemListContext.sectionCount
         )
     }
-
-    
 
     fun hasContent(item: SummaryObject, copyField: CopyField): Boolean =
         vaultItemClipboard.hasContent(item, copyField)

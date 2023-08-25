@@ -8,7 +8,8 @@ import com.dashlane.security.identitydashboard.item.IdentityDashboardItem
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-class IdentityDashboardViewProxy(view: View) : BaseViewProxy<IdentityDashboardContract.Presenter>(view),
+class IdentityDashboardViewProxy(view: View) :
+    BaseViewProxy<IdentityDashboardContract.Presenter>(view),
     IdentityDashboardContract.ViewProxy {
 
     private val recyclerView = findViewByIdEfficient<RecyclerView>(R.id.recyclerview)!!

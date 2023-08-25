@@ -26,7 +26,7 @@ class AutofillLinkServiceViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            autoFillDatabaseAccess.loadSummaryAuthentifiant(args.itemId)?.let {
+            autoFillDatabaseAccess.loadSummary<SummaryObject.Authentifiant>(args.itemId)?.let {
                 summary = it
                 _state.emit(AutofillLinkServiceState.OnDataLoaded(it, args.formSource))
             }

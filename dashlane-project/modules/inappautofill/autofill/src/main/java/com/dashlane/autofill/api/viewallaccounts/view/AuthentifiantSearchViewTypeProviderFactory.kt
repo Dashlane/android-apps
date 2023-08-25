@@ -6,8 +6,6 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.ItemListContextProvider
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 interface AuthentifiantSearchViewTypeProviderFactory {
     fun create(
         matchedAuthentifiant: MatchedSearchResult,

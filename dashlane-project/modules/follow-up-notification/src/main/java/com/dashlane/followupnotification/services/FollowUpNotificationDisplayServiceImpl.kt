@@ -13,8 +13,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Named
 
-
-
 class FollowUpNotificationDisplayServiceImpl @Inject constructor(
     @ApplicationContext val context: Context,
     @Named("autoRemovalElapsedTime") val notificationAutoRemovalTime: Long,

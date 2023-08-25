@@ -6,8 +6,6 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.useractivity.log.usage.UsageLogCode34
 
-
-
 class SpentTimeOnViewLogger(
     private val sessionManager: SessionManager,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,

@@ -8,11 +8,7 @@ import android.widget.EditText
 import com.dashlane.ui.R
 import com.dashlane.util.getThemeAttrColor
 
-
-
 object CodeInputViewHelper {
-
-    
 
     fun initialize(editText: EditText, width: Int) {
         val characterCount = editText.text.length
@@ -23,8 +19,6 @@ object CodeInputViewHelper {
             initializeBackground(editText, characterCount)
         }
     }
-
-    
 
     private fun initializeSize(editText: EditText, characterCount: Int) {
         editText.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
@@ -55,8 +49,6 @@ object CodeInputViewHelper {
         editText.setTextColor(context.getThemeAttrColor(R.attr.colorOnBackground))
     }
 
-    
-
     private fun initializeBackground(editText: EditText, characterCount: Int) {
         val context = editText.context
         val resources = context.resources
@@ -83,8 +75,6 @@ object CodeInputViewHelper {
 
                 super.setBounds(left, top, right, bottom)
             }
-
-            
 
             @SuppressLint("PrivateResource")
             private fun bottomInset(resources: Resources) =

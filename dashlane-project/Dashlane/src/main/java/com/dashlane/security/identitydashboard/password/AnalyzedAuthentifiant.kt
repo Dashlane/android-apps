@@ -15,8 +15,6 @@ fun SyncObject.Authentifiant.toAnalyzedAuthentifiant() =
         this
     )
 
-
-
 data class AnalyzedAuthentifiant(
     val checked: Boolean,
     val password: String,

@@ -5,8 +5,6 @@ import com.dashlane.authenticator.Otp
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class ItemAuthenticatorEditSubView(
     val credentialName: String,
     val itemId: String,

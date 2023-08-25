@@ -34,8 +34,6 @@ import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import retrofit2.Retrofit
 
-
-
 class SettingsSecurityMiscList(
     private val context: Context,
     navigator: Navigator,
@@ -62,8 +60,8 @@ class SettingsSecurityMiscList(
         override val header = miscHeader
         override val title = context.getString(R.string.settings_security_flag_title)
         override val description = context.getString(R.string.settings_security_flag_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = screenshotPolicy.areScreenshotAllowed()
@@ -92,8 +90,8 @@ class SettingsSecurityMiscList(
         override val header = miscHeader
         override val title = context.getString(R.string.settings_clear_clipboard)
         override val description = context.getString(R.string.settings_clear_clipboard_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) =
@@ -109,8 +107,8 @@ class SettingsSecurityMiscList(
         override val header = miscHeader
         override val title = context.getString(R.string.setting_automatically_copy_2fa)
         override val description = context.getString(R.string.setting_automatically_copy_2fa_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) =
+        override fun isEnable() = true
+        override fun isVisible() =
             userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.AUTOMATICALLY_COPY_2FA)
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
@@ -129,8 +127,10 @@ class SettingsSecurityMiscList(
             get() = readablePayload?.let { context.getString(R.string.settings_cryptography_description, it) }
 
         private val readablePayload
-            get() = when (val marker =
-                sessionManager.session?.let { cryptographyRepository.getCryptographyMarker(it) }) {
+            get() = when (
+                val marker =
+                sessionManager.session?.let { cryptographyRepository.getCryptographyMarker(it) }
+            ) {
                 CryptographyMarker.Kwc3 -> context.getString(R.string.settings_cryptography_description_compatibility)
                 is CryptographyMarker.Flexible -> {
                     when (marker.keyDerivation) {
@@ -144,10 +144,10 @@ class SettingsSecurityMiscList(
                 else -> null
             }
 
-        override fun isEnable(context: Context) = false
+        override fun isEnable() = false
 
         
-        override fun isVisible(context: Context) = readablePayload != null
+        override fun isVisible() = readablePayload != null
 
         override fun onClick(context: Context) {
             
@@ -176,8 +176,8 @@ class SettingsSecurityMiscList(
         override val header = miscHeader
         override val title = context.getString(R.string.setting_change_master_password_title)
         override val description = context.getString(R.string.setting_change_master_password_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context): Boolean = masterPasswordFeatureAccessChecker.canAccessFeature()
+        override fun isEnable() = true
+        override fun isVisible(): Boolean = masterPasswordFeatureAccessChecker.canAccessFeature()
 
         override fun onClick(context: Context) {
             bySessionUsageLogRepository[sessionManager.session]
@@ -218,8 +218,8 @@ class SettingsSecurityMiscList(
         override val header = miscHeader
         override val title = context.getString(R.string.setting_privacy_title)
         override val description = context.getString(R.string.setting_privacy_message)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
         override fun onClick(context: Context) =
             SettingPrivacySetting(context, retrofit, sessionManager, toaster, bySessionUsageLogRepository)
                 .open()
@@ -231,8 +231,8 @@ class SettingsSecurityMiscList(
         override val header = miscHeader
         override val title = context.getString(R.string.setting_manage_devices_title)
         override val description = context.getString(R.string.setting_manage_devices_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
         override fun onClick(context: Context) = navigator.goToManageDevicesFromSettings()
     }
 

@@ -2,8 +2,6 @@ package com.dashlane.util
 
 import com.dashlane.session.SessionManager
 
-
-
 class UserChangedDetector(
     private val sessionManager: SessionManager
 ) {

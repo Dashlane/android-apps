@@ -3,8 +3,6 @@ package com.dashlane.login.progress
 import android.content.Intent
 import androidx.annotation.IntRange
 
-
-
 interface LoginSyncProgressContract {
 
     interface ViewProxy {

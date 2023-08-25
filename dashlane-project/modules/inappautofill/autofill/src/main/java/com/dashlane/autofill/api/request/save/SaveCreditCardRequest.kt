@@ -2,7 +2,6 @@ package com.dashlane.autofill.api.request.save
 
 import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
-import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.util.time.toMonthOrNull
@@ -14,8 +13,6 @@ import java.time.Instant
 import java.time.Month
 import java.time.Year
 import java.time.ZoneId
-
-
 
 internal class SaveCreditCardRequest(
     summary: AutoFillHintSummary,
@@ -75,7 +72,6 @@ internal class SaveCreditCardRequest(
         forKeyboard: Boolean
     ) {
         super.notifyLogout(callback)
-        usageLog.saveCreditCardCancelLogout(getAutofillApiOrigin(forKeyboard), summary.packageName)
     }
 }
 

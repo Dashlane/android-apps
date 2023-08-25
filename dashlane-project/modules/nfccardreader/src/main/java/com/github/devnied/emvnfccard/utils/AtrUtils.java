@@ -1,6 +1,4 @@
 
-
-
 package com.github.devnied.emvnfccard.utils;
 
 import org.apache.commons.collections4.MultiValuedMap;
@@ -16,11 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
-
-
 public final class AtrUtils {
-
-    
 
     private static final MultiValuedMap<String, String> MAP = new ArrayListValuedHashMap<String, String>();
 
@@ -69,8 +63,6 @@ public final class AtrUtils {
         }
     }
 
-    
-
     public static final Collection<String> getDescription(final String pAtr) {
         Collection<String> ret = null;
         if (StringUtils.isNotBlank(pAtr)) {
@@ -84,8 +76,6 @@ public final class AtrUtils {
         }
         return ret;
     }
-
-    
 
     public static final Collection<String> getDescriptionFromAts(final String pAts) {
         Collection<String> ret = new ArrayList<String>();
@@ -116,8 +106,6 @@ public final class AtrUtils {
         }
         return ret;
     }
-
-    
 
     private AtrUtils() {
     }

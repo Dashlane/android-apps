@@ -12,8 +12,6 @@ import com.dashlane.autofill.api.totp.services.TotpNotificationDisplayService
 import com.dashlane.util.Toaster
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class ClipboardTotpCode(
     private val autofillTotp: AutofillApiTotpService,
     private val totpRepository: TotpNotificationRepository,

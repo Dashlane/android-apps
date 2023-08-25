@@ -15,8 +15,6 @@ import com.dashlane.ui.adapters.TeamspaceSpinnerAdapter
 import com.dashlane.ui.util.SpinnerUtil
 import com.dashlane.ui.widgets.Notificator
 
-
-
 object SpaceSelectorProvider {
 
     fun create(
@@ -27,7 +25,6 @@ object SpaceSelectorProvider {
         item: ItemEditSpaceSubView?,
         selectionAction: ((Int) -> Unit)? = null
     ): LinearLayout {
-
         val view = SpinnerInputProvider.create(
             activity,
             title = activity.getString(R.string.teamspaces_selector_label),

@@ -18,7 +18,6 @@ import com.dashlane.braze.BrazeInAppMessageSubscriber;
 import com.dashlane.braze.BrazeWrapper;
 import com.dashlane.debug.DashlaneBuildConfig;
 import com.dashlane.device.DeviceInfoRepository;
-import com.dashlane.device.DeviceService;
 import com.dashlane.featureflipping.FeatureFlipManager;
 import com.dashlane.network.inject.LegacyWebservicesApi;
 import com.dashlane.network.inject.RetrofitModule;
@@ -59,11 +58,10 @@ import com.dashlane.url.icon.UrlDomainIconRepositoryUtils;
 import com.dashlane.useractivity.LogSenderService;
 import com.dashlane.useractivity.log.usage.UsageLogRepository;
 import com.dashlane.userfeatures.UserFeaturesCheckerImpl;
-import com.dashlane.usersupportreporter.UserSupportFileLogger;
 import com.dashlane.util.ThreadHelper;
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper;
 import com.dashlane.util.inject.OptionalProvider;
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope;
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope;
 import com.dashlane.util.userfeatures.UserFeaturesChecker;
 import com.google.gson.Gson;
 
@@ -76,11 +74,8 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.GlobalScope;
 import okhttp3.Call;
 import retrofit2.Retrofit;
-
-
 
 @Module(includes = {BinderModule.class, UserDataAccessorModule.class, RetrofitModule.class,
         InAppLoginModule.class, TrackingModule.class})
@@ -147,11 +142,10 @@ public class SingletonModule {
 
     @Provides
     public BrazeInAppMessageSubscriber provideBrazeContentCardSubscriber(
-            @GlobalCoroutineScope CoroutineScope coroutineScope,
-            AnnouncementCenter announcementCenter,
-            UserFeaturesChecker featuresChecker
+            @ApplicationCoroutineScope CoroutineScope coroutineScope,
+            AnnouncementCenter announcementCenter
     ) {
-        return new BrazeInAppPopupModule(coroutineScope, announcementCenter, featuresChecker);
+        return new BrazeInAppPopupModule(coroutineScope, announcementCenter);
     }
 
     @Singleton
@@ -194,15 +188,8 @@ public class SingletonModule {
     @Provides
     @Singleton
     public StoreOffersCache provideAccessibleOffersCache(StoreOffersService service,
-                                                         AccountStatusRepository accountStatusRepository,
-                                                         SessionManager sessionManager,
-                                                         BySessionRepository<UsageLogRepository> bySessionUsageLogRepository,
-                                                         DeviceInfoRepository deviceInfoRepository) {
-        return new StoreOffersCache(service,
-                accountStatusRepository,
-                sessionManager,
-                bySessionUsageLogRepository,
-                deviceInfoRepository);
+                                                         SessionManager sessionManager) {
+        return new StoreOffersCache(service, sessionManager);
     }
 
     @Provides
@@ -213,16 +200,8 @@ public class SingletonModule {
 
     @Provides
     @Singleton
-    public DeviceService provideDeviceService(@LegacyWebservicesApi Retrofit retrofit) {
-        return retrofit.create(DeviceService.class);
-    }
-
-    @Provides
-    @Singleton
-    public CryptoObjectHelper provideCryptoObjectHelper(
-            UserSupportFileLogger userSupportFileLogger,
-            UserPreferencesManager userPreferencesManager) {
-        return new CryptoObjectHelper(userSupportFileLogger, userPreferencesManager);
+    public CryptoObjectHelper provideCryptoObjectHelper(UserPreferencesManager userPreferencesManager) {
+        return new CryptoObjectHelper(userPreferencesManager);
     }
 
     @Provides
@@ -261,10 +240,12 @@ public class SingletonModule {
 
     @Singleton
     @Provides
-    UrlDomainIconRepository provideUrlDomainIconRepository(UrlDomainIconDataStore dataStore,
-                                                           DashlaneApi dashlaneApi) {
+    UrlDomainIconRepository provideUrlDomainIconRepository(
+            @ApplicationCoroutineScope CoroutineScope applicationCoroutineScope,
+            UrlDomainIconDataStore dataStore,
+            DashlaneApi dashlaneApi) {
         return UrlDomainIconRepositoryUtils.create(
-                GlobalScope.INSTANCE,
+                applicationCoroutineScope,
                 dataStore,
                 dashlaneApi.getEndpoints().getIconcrawler().getIconService(),
                 dashlaneApi.getDashlaneTime()
@@ -287,12 +268,6 @@ public class SingletonModule {
     static AutofillAnalyzerDef.IUserPreferencesAccess provideAutofillUserPreferencesAccess(
             UserPreferencesManager mUserPreferencesManager) {
         return new AutofillUserPreferencesAccess(mUserPreferencesManager);
-    }
-
-    @Provides
-    @GlobalCoroutineScope
-    CoroutineScope provideCoroutineScope() {
-        return GlobalScope.INSTANCE;
     }
 
     @Provides

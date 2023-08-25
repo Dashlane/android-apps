@@ -3,7 +3,6 @@ package com.dashlane.util;
 import com.dashlane.BuildConfig;
 import com.dashlane.R;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.logger.ExceptionLog;
 import com.dashlane.notification.model.TokenNotificationHandler;
 import com.dashlane.xml.domain.SyncObjectType;
 
@@ -19,13 +18,10 @@ public class Constants {
     public static final String DEFAULT_TEAMSPACE = "default_space";
     public static final String DEFAULT_TEAMSPACE_TYPE = "default_space_type";
     public static final String DEFAULT_TEAMSPACE_ID = "default_space_id";
-    public static final long SYNC_REFRESH_INTERVAL = TimeUnit.MINUTES.toMillis(5); 
 
     private Constants() {
         
     }
-
-    
 
     public static final long PREMIUM_NEW_DEVICE_RECURRING_DELAY_MS = TimeUnit.DAYS.toMillis(15);
     public static final int PREMIUM_NEW_DEVICE_RECURRING_MAX_COUNT = 3;
@@ -34,7 +30,6 @@ public class Constants {
         try {
             return SingletonProvider.getContext().getString(R.string.language_iso_639_1);
         } catch (Exception e) {
-            ExceptionLog.v(e);
             return "EN";
         }
     }
@@ -122,15 +117,11 @@ public class Constants {
     }
 
     public static class GCM {
-        
-
         public static final String CLEAR_GCM_NOTIFICATION = "com.dashlane.gcm.CLEAR_NOTIFICATIONS";
 
         public static final HashMap<String, TokenNotificationHandler> Token =
                 new HashMap<String, TokenNotificationHandler>();
         public static final HashMap<String, Boolean> TokenShouldNotify = new HashMap<String, Boolean>();
-        public static boolean GCM_OFF = false;
-
         private GCM() {
             
         }

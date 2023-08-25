@@ -31,8 +31,11 @@ import com.dashlane.server.api.endpoints.authentication.AuthVerificationTotpServ
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationU2fService
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 
 @Module
+@InstallIn(ViewModelComponent::class)
 object LoginAuthModule {
     @Provides
     fun provideEmailRepository(

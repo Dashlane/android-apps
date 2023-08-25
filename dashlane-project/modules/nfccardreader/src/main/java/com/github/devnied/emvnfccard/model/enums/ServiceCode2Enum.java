@@ -1,8 +1,4 @@
-
-
 package com.github.devnied.emvnfccard.model.enums;
-
-
 
 public enum ServiceCode2Enum implements IKeyEnum {
 
@@ -17,8 +13,6 @@ public enum ServiceCode2Enum implements IKeyEnum {
 		this.value = value;
 		this.authorizationProcessing = authorizationProcessing;
 	}
-
-	
 
 	public String getAuthorizationProcessing() {
 		return authorizationProcessing;

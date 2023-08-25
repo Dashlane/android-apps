@@ -5,14 +5,10 @@ import android.text.SpannableStringBuilder
 import android.text.style.BulletSpan
 import androidx.annotation.StringRes
 
-
-
 internal fun SpannableStringBuilder.toBulletPointSpannable(bulletSpan: BulletSpan): SpannableStringBuilder {
     this.setSpan(bulletSpan, 0, this.length, 0)
     return this
 }
-
-
 
 internal fun Context.getSpannableStringBuilder(@StringRes stringId: Int):
         SpannableStringBuilder {

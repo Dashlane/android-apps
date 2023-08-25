@@ -9,8 +9,6 @@ interface OffersLogger {
 
     var origin: String?
 
-    
-
     val currentPageViewFlow: Flow<Pair<AnyPage, Boolean>>
 
     fun showOfferList(productPeriodicity: ProductPeriodicity?, displayedOffers: List<OfferType>, hasIntroOffers: Boolean)
@@ -48,8 +46,6 @@ interface OffersLogger {
     fun logSkuDetailsError(offerType: OfferType? = null)
 
     fun logNoValidOfferOption(offerType: OfferType? = null)
-
-    
 
 
     fun logVerifyingReceipt(planId: String)

@@ -10,8 +10,6 @@ import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class MutexPausedFormSourcesProvider @Inject constructor(
     private val pausedFormSourcesRepository: PausedFormSourcesRepository
@@ -92,7 +90,8 @@ class MutexPausedFormSourcesProvider @Inject constructor(
                         WebDomainFormSource(
                             "",
                             it.first
-                        ), it.second
+                        ),
+                        it.second
                     )
                 }
             app + web

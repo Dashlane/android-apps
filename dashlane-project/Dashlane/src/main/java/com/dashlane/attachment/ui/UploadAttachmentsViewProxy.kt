@@ -72,11 +72,14 @@ class UploadAttachmentsViewProxy(val activity: AppCompatActivity) :
             .builder(context)
             .setMessage(errorMessageLocalized)
             .setTitle(R.string.dashlane_main_app_name)
-            .setPositiveButton(android.R.string.ok, object : DialogInterface.OnClickListener {
+            .setPositiveButton(
+                android.R.string.ok,
+                object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface, which: Int) {
                     dialog.dismiss()
                 }
-            })
+            }
+            )
             .setCancelable(true).show()
     }
 }

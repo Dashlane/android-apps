@@ -2,12 +2,10 @@ package com.dashlane.notification.model;
 
 import android.content.Context;
 
-import com.dashlane.core.DataSync;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.logger.ExceptionLog;
+import com.dashlane.hermes.generated.definitions.Trigger;
 import com.dashlane.notification.FcmMessage;
 import com.dashlane.session.Session;
-import com.dashlane.useractivity.log.usage.UsageLogCode134;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +38,6 @@ public class SyncNotificationHandler extends AbstractNotificationHandler {
                 mDeviceId = jsonFormatedData.getString(JSON_KEY_DEVICE_ID);
             }
         } catch (JSONException e) {
-            ExceptionLog.v(e);
         }
     }
 
@@ -52,7 +49,7 @@ public class SyncNotificationHandler extends AbstractNotificationHandler {
         if ((mDeviceId == null ||
              !mDeviceId.equals(session.getDeviceId())) &&
              getRecipientEmail().equals(session.getUserId())) {
-            DataSync.sync(UsageLogCode134.Origin.PUSH);
+            SingletonProvider.getDataSync().sync(Trigger.PUSH);
         }
     }
 }

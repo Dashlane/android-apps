@@ -2,8 +2,6 @@ package com.dashlane.session
 
 import com.dashlane.util.isValidEmail
 
-
-
 class Username private constructor(val email: String) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

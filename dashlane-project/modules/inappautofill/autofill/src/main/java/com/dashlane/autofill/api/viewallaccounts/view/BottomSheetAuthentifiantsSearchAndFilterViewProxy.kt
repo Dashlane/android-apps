@@ -27,8 +27,6 @@ import com.google.android.material.textfield.TextInputEditText
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import javax.inject.Inject
 
-
-
 class BottomSheetAuthentifiantsSearchAndFilterViewProxy @Inject constructor(
     private val bottomSheetDialogFragment: BottomSheetAuthentifiantsSearchAndFilterDialogFragment,
     private val authentifiantSearchViewTypeProviderFactory: AuthentifiantSearchViewTypeProviderFactory,
@@ -55,7 +53,8 @@ class BottomSheetAuthentifiantsSearchAndFilterViewProxy @Inject constructor(
     fun createView(inflater: LayoutInflater, container: ViewGroup?): View? {
         val contentView =
             inflater.cloneInContext(bottomSheetDialogFragment.requireActivity()).inflate(
-                R.layout.bottom_sheet_authentifiant_list_dialog_fragment, container,
+                R.layout.bottom_sheet_authentifiant_list_dialog_fragment,
+                container,
                 false
             )
         setView(contentView)

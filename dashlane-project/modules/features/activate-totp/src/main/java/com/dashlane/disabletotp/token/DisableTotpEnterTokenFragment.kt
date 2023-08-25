@@ -30,7 +30,6 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-
         _binding = FragmentDisableTotpEnterTokenBinding.inflate(inflater, container, false)
 
         val minContentHeight = requireContext().resources.getDimensionPixelSize(R.dimen.size_480dp)
@@ -56,7 +55,9 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
         token.setOnEditorActionListener { _, id, _ ->
             if (id == EditorInfo.IME_ACTION_NEXT) {
                 buttonPositive.performClick()
-            } else false
+            } else {
+                false
+            }
         }
 
         token.requestFocus()

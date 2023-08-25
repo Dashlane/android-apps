@@ -98,6 +98,7 @@
     <string name="benefit_security_alerts_basic">Personalized security alerts</string>
     <string name="benefit_security_alerts_advanced">&lt;strong&gt;Dark Web Monitoring&lt;/strong&gt; &amp;amp; alerts</string>
     <string name="benefit_vpn">&lt;strong&gt;VPN&lt;/strong&gt; for WiFi protection</string>
+    <string name="benefit_vpn_family">&lt;strong&gt;VPN&lt;/strong&gt; for WiFi protection (1 account per plan)</string>
     <string name="benefit_secure_files">&lt;strong&gt;%1$s GB of encrypted file storage&lt;/strong&gt;</string>
     <string name="benefit_password_sharing_limited">Securely share up to %1$s logins</string>
     <string name="benefit_password_sharing_unlimited">Unlimited login sharing</string>

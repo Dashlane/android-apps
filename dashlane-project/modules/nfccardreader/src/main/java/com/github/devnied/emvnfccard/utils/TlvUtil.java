@@ -15,31 +15,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 public final class TlvUtil {
 
-    
-
-    private static final int UNIVERSAL_CLASS = 0;            
 
 
-    
 
-    private static final int APPLICATION_CLASS = 1;          
-
-
-    
-
-    private static final int CONTEXT_SPECIFIC_CLASS = 2;    
-
-
-    
-
-    private static final int PRIVATE_CLASS = 3;          
-
-
-    
 
     private static ITag searchTagById(final int tagId) {
         return EmvTags.getNotNull(getTagAsBytes(tagId));
@@ -69,8 +49,6 @@ public final class TlvUtil {
         return tlv;
     }
 
-    
-
     public static List<TagAndLength> parseTagAndLength(final byte[] data) {
         List<TagAndLength> tagAndLengthList = new ArrayList<TagAndLength>();
         if (data != null) {
@@ -91,8 +69,6 @@ public final class TlvUtil {
         }
         return tagAndLengthList;
     }
-
-    
 
     public static List<TLV> getlistTLV(final byte[] pData, final ITag... pTag) {
         List<TLV> list = new ArrayList<>();
@@ -115,8 +91,6 @@ public final class TlvUtil {
         return list;
     }
 
-    
-
     public static List<TLV> getlistTLV(final byte[] pData, final ITag pTag, final boolean pAdd) {
 
         List<TLV> list = new ArrayList<>();
@@ -138,8 +112,6 @@ public final class TlvUtil {
         }
         return list;
     }
-
-    
 
     public static byte[] getValue(final byte[] pData, final ITag... pTag) {
         byte[] ret = null;
@@ -167,8 +139,6 @@ public final class TlvUtil {
         return ret;
     }
 
-    
-
     public static int getLength(final List<TagAndLength> pList) {
         int ret = 0;
         if (pList != null) {
@@ -178,8 +148,6 @@ public final class TlvUtil {
         }
         return ret;
     }
-
-    
 
     private static byte[] getTagAsBytes(int tag) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -200,8 +168,6 @@ public final class TlvUtil {
                 tagBytes[0] |= 0xC0;
                 break;
             default:
-                
-
                 break;
         }
         if (!isPrimitive(tag)) {
@@ -244,13 +210,9 @@ public final class TlvUtil {
         return ((msByte & 0x20) == 0x00);
     }
 
-    
-
     private static byte[] getLengthAsBytes(int length) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         if (length < 0x80) {
-            
-
             out.write(length);
         } else {
             int byteCount = log(length, 256);
@@ -271,8 +233,6 @@ public final class TlvUtil {
         }
         return result;
     }
-
-    
 
     private TlvUtil() {
     }

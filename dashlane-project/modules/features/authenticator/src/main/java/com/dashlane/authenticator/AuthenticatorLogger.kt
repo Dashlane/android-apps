@@ -37,11 +37,7 @@ import javax.inject.Inject
 
 class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: LogRepository) {
 
-    
-
     private var professional: Boolean? = null
-
-    
 
     private var domain: Domain? = null
 

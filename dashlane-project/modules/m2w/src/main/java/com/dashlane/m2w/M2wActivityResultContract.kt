@@ -10,8 +10,6 @@ class M2wActivityResultContract @Inject constructor(
     private val m2xIntentFactory: M2xIntentFactory
 ) : ActivityResultContract<String, Boolean>() {
 
-    
-
     override fun createIntent(context: Context, input: String): Intent =
         m2xIntentFactory.buildM2xConnect(input)
 

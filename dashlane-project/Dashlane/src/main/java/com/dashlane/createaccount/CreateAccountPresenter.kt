@@ -59,8 +59,6 @@ class CreateAccountPresenter(
             pagesStateHelper.password = value
         }
 
-    
-
     val rootView: ConstraintLayout
         get() = view.root
 
@@ -211,13 +209,11 @@ class CreateAccountPresenter(
     }
 
     private fun createSettingsPresenter(): CreateAccountSettingsPresenter {
-        val dataProvider = provider.createSettingsDataProvider()
         val view = inflate(R.layout.include_create_account_settings)
-        val viewProxy = CreateAccountSettingsViewProxy(view, dataProvider.logger)
+        val viewProxy = CreateAccountSettingsViewProxy(view, provider.biometricSettingsLogger)
         return CreateAccountSettingsPresenter(
             this
         ).apply {
-            setProvider(dataProvider)
             setView(viewProxy)
         }
     }
@@ -282,8 +278,6 @@ class CreateAccountPresenter(
         createAccount(deferredCreateAccount)
     }
 
-    
-
     private fun notifySuccess() {
         activity?.apply {
             startActivity(provider.createSuccessIntent())
@@ -320,17 +314,11 @@ class CreateAccountPresenter(
         setCurrentPageView(page)
     }
 
-    
-
     private inner class PagesStateHelper {
 
         val pageStates = mutableListOf<CreateAccountBaseContract.Presenter>()
 
-        
-
         var user: String? = null
-
-        
 
         var password: ObfuscatedByteArray? = null
 
@@ -348,8 +336,6 @@ class CreateAccountPresenter(
         val hasPrevious
             get() = pageStates.size > 1
 
-        
-
         fun addedPage(presenter: CreateAccountBaseContract.Presenter) {
             val previous = pageStates.lastOrNull()
             pageStates.add(presenter)
@@ -359,8 +345,6 @@ class CreateAccountPresenter(
             presenter.onShow()
             updateCurrentPageView()
         }
-
-        
 
         fun removedLastPage() {
             currentPresenter.visible = false
@@ -380,8 +364,6 @@ class CreateAccountPresenter(
             updateCurrentPageView()
         }
 
-        
-
         fun writeState(bundle: Bundle) {
             bundle.putString(STATE_EMAIL, user)
             bundle.putBoolean(STATE_IN_EU, inEuropeanUnion)
@@ -392,12 +374,8 @@ class CreateAccountPresenter(
             
         }
 
-        
-
         fun readState(bundle: Bundle) {
             pageStates.add(createEmailPresenter())
-            
-
             inEuropeanUnion = bundle.getBoolean(STATE_IN_EU)
             country = bundle.getString(STATE_COUNTRY)
             biometricAuthentication = bundle.getBoolean(STATE_BIOMETRIC)

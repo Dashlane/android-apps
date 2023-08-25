@@ -5,8 +5,6 @@ import com.dashlane.session.SessionManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import javax.inject.Inject
 
-
-
 class SharingKeysHelperImpl @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,

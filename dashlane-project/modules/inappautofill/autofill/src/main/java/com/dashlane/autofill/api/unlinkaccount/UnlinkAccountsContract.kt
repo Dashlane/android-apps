@@ -6,8 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 
 interface UnlinkAccountsContract {
 
-    
-
     interface View {
         fun unlinkAccount(account: SummaryObject.Authentifiant, formSourceTitle: String)
         fun updateLinkedAccounts(items: List<SummaryObject.Authentifiant>)
@@ -18,16 +16,12 @@ interface UnlinkAccountsContract {
         fun stopLoading()
     }
 
-    
-
     interface Presenter {
         fun setView(view: View, viewCoroutineScope: CoroutineScope)
         fun onResume()
         fun onRefresh()
         fun onLinkedAccountsItemClick(position: Int)
     }
-
-    
 
     interface DataProvider {
         fun bindResponses(responses: Responses)

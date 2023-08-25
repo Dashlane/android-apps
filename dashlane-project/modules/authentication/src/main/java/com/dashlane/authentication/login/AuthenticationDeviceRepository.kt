@@ -1,7 +1,5 @@
 package com.dashlane.authentication.login
 
-
-
 interface AuthenticationDeviceRepository {
     suspend fun getAccessKeyStatus(
         login: String,

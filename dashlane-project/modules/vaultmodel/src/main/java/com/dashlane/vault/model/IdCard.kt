@@ -24,7 +24,8 @@ fun createIdCard(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.IdCard>.copySyncObject(builder: SyncObject.IdCard.Builder.() -> Unit = {}):

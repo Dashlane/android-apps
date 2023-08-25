@@ -28,18 +28,15 @@ class PaywallPresenter(
             setPositiveButton(R.string.paywall_intro_upgrade_premium_cta)
             setNegativeButton(R.string.paywall_intro_close_cta)
         }
-        onShowPaywall()
     }
 
     override fun onClickPositiveButton() {
-        onClickUpgrade()
         logger.onClickUpgrade()
         navigator.goToOffers(offerType = OfferType.PREMIUM.toString(), origin = trackingKey)
         activity?.finish()
     }
 
     override fun onClickNegativeButton() {
-        onClickClose()
         logger.onClickClose()
         activity?.finish()
     }
@@ -49,7 +46,6 @@ class PaywallPresenter(
     }
 
     override fun onClickLink(position: Int, label: Int) {
-        onClickSeeAllOptions()
         logger.onClickSeeAllOptions()
         navigator.goToOffers(origin = trackingKey)
         activity?.finish()

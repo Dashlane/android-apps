@@ -14,16 +14,12 @@ import com.dashlane.session.Session
 import com.dashlane.storage.securestorage.cryptography.FlexibleDecryptionEngineFactory
 import javax.inject.Inject
 
-
-
 class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
     private val secureDataStorageFactory: SecureDataStorage.Factory,
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
     private val logger: CryptographyMigrationLogger
 ) {
-    
-
     fun migrateLocalKeyIfNeeded(
         session: Session,
         cryptographyMarker: CryptographyMarker

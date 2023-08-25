@@ -8,13 +8,11 @@ import com.dashlane.nitro.api.NitroApi
 import com.dashlane.nitro.api.endpoints.ConfirmLoginService
 import com.dashlane.nitro.api.endpoints.RequestLoginService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-
+import javax.inject.Inject
 
 @HiltViewModel
 class NitroSsoInfoViewModel @Inject constructor(private val nitro: Nitro) : ViewModel() {
@@ -24,13 +22,12 @@ class NitroSsoInfoViewModel @Inject constructor(private val nitro: Nitro) : View
     private var _nitroState = MutableStateFlow<NitroState>(NitroState.Default)
     val nitroState: StateFlow<NitroState> = _nitroState.asStateFlow()
 
-    
-
     internal fun authenticate(nitroUrl: String, domainName: String) {
         viewModelScope.launch {
+            _nitroState.emit(NitroState.Loading)
             nitroApi = nitro.authenticate(nitroUrl)
             _nitroState.emit(
-                NitroState.Ready(
+                NitroState.Init(
                     nitroApi.endpoints.requestLoginService.execute(
                         RequestLoginService.Request(domainName = domainName)
                     ).data
@@ -39,7 +36,11 @@ class NitroSsoInfoViewModel @Inject constructor(private val nitro: Nitro) : View
         }
     }
 
-    
+    internal fun onWebviewReady() {
+        viewModelScope.launch {
+            _nitroState.emit(NitroState.Ready)
+        }
+    }
 
     fun confirmLogin(
         samlResponse: String,
@@ -72,19 +73,13 @@ class NitroSsoInfoViewModel @Inject constructor(private val nitro: Nitro) : View
     }
 
     sealed class NitroState {
-        
-
         object Default : NitroState()
 
-        
+        data class Init(val data: RequestLoginService.Data) : NitroState()
 
-        data class Ready(val data: RequestLoginService.Data) : NitroState()
-
-        
+        object Ready : NitroState()
 
         object Loading : NitroState()
-
-        
 
         data class LoginResult(val result: GetSsoInfoResult) : NitroState()
     }

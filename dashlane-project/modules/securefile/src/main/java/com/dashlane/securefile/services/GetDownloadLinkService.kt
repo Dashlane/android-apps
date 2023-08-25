@@ -5,8 +5,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-
-
 interface GetDownloadLinkService {
 
     @POST("/1/securefile/getDownloadLink")
@@ -28,8 +26,6 @@ interface GetDownloadLinkService {
         @SerializedName("content")
         val content: Content?
     ) {
-        
-
         class Content(
             @SerializedName("url")
             val url: String

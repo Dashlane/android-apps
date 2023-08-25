@@ -4,6 +4,7 @@ import com.dashlane.nitro.CoseSign1.Companion.decodeCoseSign1OrNull
 import com.dashlane.nitro.api.NitroApi
 import com.dashlane.nitro.api.NitroApiClientImpl
 import com.dashlane.nitro.api.NitroApiImpl
+import com.dashlane.nitro.api.tools.toHostUrl
 import com.dashlane.nitro.api.tunnel.NitroTunnelApiImpl
 import com.dashlane.nitro.api.tunnel.endpoints.ClientHelloService
 import com.dashlane.nitro.api.tunnel.endpoints.TerminateHelloService
@@ -34,7 +35,7 @@ internal class NitroImpl @Inject constructor(
             val apiClient = DashlaneApiClient(
                 callFactory,
                 connectivityCheck,
-                nitroUrl
+                nitroUrl.toHostUrl()
             )
 
             val nitroTunnelEndpoints = NitroTunnelApiImpl(apiClient).endpoints

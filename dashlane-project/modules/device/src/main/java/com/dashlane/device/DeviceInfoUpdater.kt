@@ -1,7 +1,7 @@
 package com.dashlane.device
 
 import com.dashlane.network.webservices.GetCountryService
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,8 +12,8 @@ import javax.inject.Singleton
 
 @Singleton
 class DeviceInfoUpdater @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val deviceCountryRepository: DeviceInfoRepositoryImpl,
@@ -22,11 +22,12 @@ class DeviceInfoUpdater @Inject constructor(
 
     private var refreshing = false
 
+    @Suppress("kotlin:S6311")
     fun refreshIfNeeded() {
         val refreshTimestamp = deviceCountryRepository.deviceCountryRefreshTimestamp
         val millisSinceLastRefresh = System.currentTimeMillis() - refreshTimestamp
         if (millisSinceLastRefresh >= TimeUnit.DAYS.toMillis(REFRESH_PERIOD_DAYS.toLong())) {
-            globalCoroutineScope.launch(mainCoroutineDispatcher) {
+            applicationCoroutineScope.launch(mainCoroutineDispatcher) {
                 refresh()
             }
         }

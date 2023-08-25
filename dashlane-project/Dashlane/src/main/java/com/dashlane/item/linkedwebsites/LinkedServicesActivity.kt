@@ -38,15 +38,18 @@ open class LinkedServicesActivity : DashlaneActivity() {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             title = getString(R.string.multi_domain_credentials_title)
-            if (!viewModel.fromViewOnly && viewModel.doneButtonActivated()) {
+            if (!viewModel.fromViewOnly) {
                 setCloseIndicatorButton(this)
             }
         }
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 linkedServicesViewProxy.onClose(true)
             }
-        })
+        }
+        )
     }
 
     private fun setCloseIndicatorButton(actionBar: ActionBar) {

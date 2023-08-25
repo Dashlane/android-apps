@@ -17,8 +17,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.util.Toaster
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class UnlinkAccountsViewProxy(
     private val fragment: UnlinkAccountsFragment,
     private val presenter: UnlinkAccountsContract.Presenter,

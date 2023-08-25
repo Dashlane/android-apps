@@ -7,8 +7,6 @@ import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
 import com.dashlane.ui.widgets.view.Infobox
 
-
-
 class DeviceLimitViewProxy(val activity: FragmentActivity, maxDevices: Int) : DeviceLimitContract.ViewProxy {
 
     var presenter: DeviceLimitContract.Presenter? = null

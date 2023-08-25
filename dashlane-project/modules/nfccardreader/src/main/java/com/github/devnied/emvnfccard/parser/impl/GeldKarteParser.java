@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.parser.impl;
 
 import com.github.devnied.emvnfccard.enums.CommandEnum;
@@ -25,15 +23,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-
-
 public class GeldKarteParser extends AbstractParser {
-
-    
 
     private static final Pattern PATTERN =
             Pattern.compile(StringUtils.deleteWhitespace(EmvCardScheme.GELDKARTE.getAid()[2]) + ".*");
@@ -48,7 +43,7 @@ public class GeldKarteParser extends AbstractParser {
     }
 
     @Override
-    public boolean parse(Application pApplication) throws CommunicationException {
+    public boolean parse(Application pApplication, Calendar pNow) throws CommunicationException {
         boolean ret = false;
         
         byte[] data = selectAID(pApplication.getAid());
@@ -79,7 +74,7 @@ public class GeldKarteParser extends AbstractParser {
             pApplication.setLeftPinTry(getLeftPinTry());
             pApplication.setTransactionCounter(getTransactionCounter());
             
-            pApplication.getListTransactions().addAll(extractLogEntry(logEntry));
+            pApplication.getListTransactions().addAll(extractLogEntry(logEntry, pNow));
             
             template.get().getCard().setState(CardStateEnum.ACTIVE);
             ret = true;
@@ -87,8 +82,6 @@ public class GeldKarteParser extends AbstractParser {
 
         return ret;
     }
-
-    
 
     protected void readEF_BLOG(final Application pApplication) throws CommunicationException {
         List<EmvTransactionRecord> list = new ArrayList<EmvTransactionRecord>();
@@ -138,8 +131,6 @@ public class GeldKarteParser extends AbstractParser {
         return null;
     }
 
-    
-
     protected void readEfBetrag(final Application pApplication) throws CommunicationException {
         
         byte[] data = template.get().getProvider()
@@ -149,8 +140,6 @@ public class GeldKarteParser extends AbstractParser {
             pApplication.setAmount(Float.parseFloat(String.format("%02x%02x%02x", data[0], data[1], data[2])) / 100.0f);
         }
     }
-
-    
 
     protected void extractEF_ID(final Application pApplication) throws CommunicationException {
         

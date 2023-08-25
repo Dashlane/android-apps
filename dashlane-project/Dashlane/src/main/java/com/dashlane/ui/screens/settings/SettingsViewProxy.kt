@@ -15,8 +15,6 @@ import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.util.SnackbarUtils
 import kotlinx.coroutines.launch
 
-
-
 class SettingsViewProxy(
     private val recyclerView: RecyclerView,
     private val toolbarProvider: () -> Toolbar,
@@ -80,7 +78,7 @@ class SettingsViewProxy(
         val items = mutableListOf<DashlaneRecyclerAdapter.ViewTypeProvider>()
         var latestHeader: SettingHeader? = null
         viewModel.settingScreenItem.subItems
-            .filter { it.isVisible(context) }
+            .filter { it.isVisible() }
             .forEach {
                 val newHeader = it.header
                 if (newHeader?.title != latestHeader?.title) {
@@ -132,7 +130,7 @@ class SettingsViewProxy(
 
     private fun setItems(items: List<DashlaneRecyclerAdapter.ViewTypeProvider>) {
         val adapterPosition = findFirstVisibleItemPosition()
-        adapter.updateWith(items)
+        adapter.populateItems(items)
         scrollToAdapterPosition(adapterPosition)
     }
 

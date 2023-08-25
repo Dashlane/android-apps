@@ -1,24 +1,20 @@
 package com.dashlane.device
 
 import android.content.Context
-import com.dashlane.accountrecovery.AccountRecovery
+import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.inapplogin.InAppLoginManager
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.util.PackageUtilities
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-
-
 class DeviceInformationGenerator(
     private val context: Context,
     private val crashReporter: CrashReporter,
-    private val accountRecovery: AccountRecovery,
-    private val inAppLoginManager: InAppLoginManager,
-    private val dataStorageProvider: DataStorageProvider
+    private val biometricRecovery: BiometricRecovery,
+    private val inAppLoginManager: InAppLoginManager
 ) {
 
     fun generate() = DeviceInformation(
@@ -28,10 +24,10 @@ class DeviceInformationGenerator(
             context.packageName
         )?.sha256Signatures?.joinToString(),
         installerOrigin = PackageUtilities.getInstallerOrigin(context),
-        hasMPReset = accountRecovery.isFeatureEnabled.toString(),
+        hasMPReset = biometricRecovery.isFeatureEnabled.toString(),
         appInstallDate = PackageUtilities.getAppPackageInfo(context)?.firstInstallTime?.toZonedDateTime(),
         autofillEnabled = inAppLoginManager.isEnableForApp().toString(),
-        racletteDatabase = dataStorageProvider.useRaclette.toString()
+        racletteDatabase = true.toString()
     )
 
     private fun Long.toZonedDateTime(): String =

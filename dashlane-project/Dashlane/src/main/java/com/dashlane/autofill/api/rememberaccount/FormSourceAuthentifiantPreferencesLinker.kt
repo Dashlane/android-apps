@@ -6,8 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-
-
 class FormSourceAuthentifiantPreferencesLinker constructor(
     private val preferencesKey: String,
     val globalPreferencesManager: GlobalPreferencesManager,

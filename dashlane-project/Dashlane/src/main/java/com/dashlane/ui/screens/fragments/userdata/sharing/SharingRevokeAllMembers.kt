@@ -6,8 +6,6 @@ import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import javax.inject.Inject
 
-
-
 class SharingRevokeAllMembers @Inject constructor(
     private val sharingDataProvider: SharingDataProvider
 ) {

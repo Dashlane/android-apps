@@ -89,7 +89,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val action: NotificationCenterDef.Presenter.() -> Unit = { startChromeImport() }
     }
 
-    data class AccountRecoveryActionItem(
+    data class BiometricRecoveryActionItem(
         override val actionItemsRepository: NotificationCenterRepository,
         private val hasBiometricLockType: Boolean
     ) : ActionItem {
@@ -99,7 +99,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val description: Int = R.string.action_item_account_recovery_description
         override val icon: Int = R.drawable.ic_action_item_account_recovery
         override val action: NotificationCenterDef.Presenter.() -> Unit =
-            { startAccountRecoverySetup(hasBiometricLockType) }
+            { startBiometricRecoverySetup(hasBiometricLockType) }
     }
 
     data class FreeTrialStartedActionItem(
@@ -150,7 +150,8 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
             setText(R.id.title, context.getString(item.title, *item.titleFormatArgs))
             setText(R.id.description, context.getString(item.description))
             setImageDrawable(
-                R.id.icon, CircleDrawable.with(
+                R.id.icon,
+                CircleDrawable.with(
                     context = context,
                     backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
                     drawableRes = item.icon,

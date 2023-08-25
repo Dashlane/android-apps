@@ -80,8 +80,6 @@ class AuthenticatorSuggestionsViewProxy(
             viewModel
         )
 
-    
-
     private val expandableCards = listOf<ExpandableCardView>(
         
         view.findViewById(R.id.authenticator_question_1)!!,

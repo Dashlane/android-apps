@@ -7,8 +7,6 @@ sealed class LoginMode {
 
     object Pin : LoginMode()
 
-    
-
     data class MasterPassword(val verification: VerificationMode = VerificationMode.NONE) : LoginMode()
 
     object Sso : LoginMode()

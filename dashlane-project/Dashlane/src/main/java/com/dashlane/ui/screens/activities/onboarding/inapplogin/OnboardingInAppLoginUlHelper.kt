@@ -5,8 +5,6 @@ import com.dashlane.useractivity.log.usage.UsageLogCode34
 import com.dashlane.useractivity.log.usage.UsageLogCode95
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 
-
-
 class OnboardingInAppLoginUlHelper(
     private val teamspaceManager: TeamspaceManager?,
     private val usageLogRepository: UsageLogRepository?

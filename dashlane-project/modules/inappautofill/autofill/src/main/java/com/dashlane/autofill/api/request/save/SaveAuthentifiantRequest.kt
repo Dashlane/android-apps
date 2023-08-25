@@ -2,14 +2,11 @@ package com.dashlane.autofill.api.request.save
 
 import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
-import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-
 
 internal class SaveAuthentifiantRequest(
     summary: AutoFillHintSummary,
@@ -39,14 +36,6 @@ internal class SaveAuthentifiantRequest(
             }
         }
         save(context, coroutineScope, username, password, saveCallback, hasInline)
-    }
-
-    override fun notifyLogout(
-        callback: SaveCallback,
-        forKeyboard: Boolean
-    ) {
-        super.notifyLogout(callback, forKeyboard)
-        usageLog.saveCredentialCancelLogout(getAutofillApiOrigin(forKeyboard), summary.packageName)
     }
 
     private fun save(

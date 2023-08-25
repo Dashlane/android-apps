@@ -15,8 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-
 class CreateAccountPresenter(
     private val website: String?,
     private val packageName: String?,
@@ -93,8 +91,6 @@ class CreateAccountPresenter(
         resultHandler?.onCancel()
     }
 
-    
-
     private fun prefillWebsiteIfPossible() {
         val result = getContentForWebsiteField()
         if (result != null) {
@@ -102,13 +98,9 @@ class CreateAccountPresenter(
         }
     }
 
-    
-
     private fun getContentForWebsiteField(): String? {
         return when {
-            website.isNotSemanticallyNull() -> {
-                website
-            }
+            website.isNotSemanticallyNull() -> website
             packageName != null -> {
                 provider.getMatchingWebsite(packageName)
             }

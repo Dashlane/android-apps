@@ -24,8 +24,6 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 class GenericFilter(
     override var dataTypeFilter: DataTypeFilter = AllDataTypeFilter,
     override var spaceFilter: SpaceFilter = NoSpaceFilter,
@@ -33,8 +31,13 @@ class GenericFilter(
     override var sharingFilter: SharingFilter = NoSharingFilter,
     override var lockFilter: LockFilter = DefaultLockFilter,
     override var statusFilter: StatusFilter = DefaultStatusFilter
-) : BaseFilter, EditableSpaceFilter, EditableDataTypeFilter, EditableUidFilter, EditableSharingPermissionFilter,
-    EditableLockFilter, EditableStatusFilter {
+) : BaseFilter,
+EditableSpaceFilter,
+EditableDataTypeFilter,
+EditableUidFilter,
+EditableSharingPermissionFilter,
+    EditableLockFilter,
+EditableStatusFilter {
 
     constructor(uid: String, dataType: SyncObjectType? = null) :
             this(
