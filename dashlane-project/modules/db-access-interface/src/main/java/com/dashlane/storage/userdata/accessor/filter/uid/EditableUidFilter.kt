@@ -1,7 +1,5 @@
 package com.dashlane.storage.userdata.accessor.filter.uid
 
-
-
 interface EditableUidFilter : UidFilter {
 
     var uidFilter: UidFilter

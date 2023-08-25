@@ -9,15 +9,9 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import kotlinx.parcelize.Parcelize
 
 sealed class AuthenticatorDashboardUiState {
-    
-
     object Progress : AuthenticatorDashboardUiState()
 
-    
-
     object NoOtp : AuthenticatorDashboardUiState()
-
-    
 
     data class HasLogins(
         val logins: List<CredentialItem>,
@@ -40,8 +34,6 @@ sealed class AuthenticatorDashboardUiState {
             )
         }
     }
-
-    
 
     data class HandleUri(val otpUri: Uri) : AuthenticatorDashboardUiState()
 }

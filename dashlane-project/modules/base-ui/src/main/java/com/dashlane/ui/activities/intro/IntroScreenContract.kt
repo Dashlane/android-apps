@@ -6,8 +6,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.skocken.presentation.definition.Base
 
-
-
 interface IntroScreenContract {
 
     interface ViewProxy : Base.IView {

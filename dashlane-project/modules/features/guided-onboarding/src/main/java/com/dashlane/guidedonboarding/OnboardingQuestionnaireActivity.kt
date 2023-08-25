@@ -6,6 +6,7 @@ import androidx.activity.OnBackPressedCallback
 import com.dashlane.darkweb.DarkWebMonitoringManager
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.ui.PostAccountCreationCoordinator
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.useractivity.log.inject.UserActivityComponent
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +25,9 @@ class OnboardingQuestionnaireActivity : DashlaneActivity() {
     @Inject
     lateinit var darkWebMonitoringManager: DarkWebMonitoringManager
 
+    @Inject
+    lateinit var postAccountCreationCoordinator: PostAccountCreationCoordinator
+
     private lateinit var presenter: OnboardingQuestionnaireContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +42,7 @@ class OnboardingQuestionnaireActivity : DashlaneActivity() {
         val currentAccountEmail = globalPreferencesManager.getLastLoggedInUser()
         presenter = OnboardingQuestionnairePresenter(
             logger,
-            GuidedOnboardingComponent(this).postAccountCreationCoordinator,
+            postAccountCreationCoordinator,
             currentAccountEmail
         ).apply {
             restore(savedInstanceState)

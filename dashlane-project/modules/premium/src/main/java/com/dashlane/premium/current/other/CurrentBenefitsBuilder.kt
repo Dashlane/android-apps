@@ -14,10 +14,10 @@ import com.dashlane.util.userfeatures.getFamilyBundleLimitValue
 internal class CurrentBenefitsBuilder(
     private val userFeaturesChecker: UserFeaturesChecker
 ) {
-    internal fun build() = buildAllBenefits().filterNotNull()
+    internal fun build(isFamily: Boolean) = buildAllBenefits(isFamily).filterNotNull()
 
     @VisibleForTesting
-    internal fun buildAllBenefits(): List<CurrentPlan.Benefit?> = listOf(
+    internal fun buildAllBenefits(isFamily: Boolean): List<CurrentPlan.Benefit?> = listOf(
         getStoringPasswordLimit().withAction(null),
         getDevicesSyncLimit()?.withAction(null),
         getSecureNotesCreation()?.withAction(null),
@@ -25,7 +25,7 @@ internal class CurrentBenefitsBuilder(
         getSharing()?.withAction(null),
         getDarkWebMonitoring()?.withAction { openDarkWebMonitoringInfo() },
         getBundleType()?.withAction(null),
-        getWifiProtection()?.withAction(null),
+        getWifiProtection(isFamily)?.withAction(null),
         getPremiumPlus()?.withAction(null)
     )
 
@@ -63,9 +63,11 @@ internal class CurrentBenefitsBuilder(
         }
     }
 
-    private fun getWifiProtection() =
+    private fun getWifiProtection(isFamily: Boolean) = if (isFamily) {
+        TextResource.StringText(R.string.current_benefit_vpn_family)
+    } else {
         TextResource.StringText(R.string.current_benefit_vpn)
-            .takeIf { userFeaturesChecker.has(Capability.VPN_ACCESS) }
+    }.takeIf { userFeaturesChecker.has(Capability.VPN_ACCESS) }
 
     private fun getPremiumPlus() =
         TextResource.StringText(R.string.current_benefit_premium_plus)

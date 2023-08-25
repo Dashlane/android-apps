@@ -6,8 +6,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
 import com.dashlane.ui.menu.teamspace.TeamspaceAdapterItem
 import com.skocken.presentation.definition.Base
 
-
-
 interface MenuDef {
     @IntDef(Mode.DEFAULT, Mode.TEAMSPACE)
     @Retention(AnnotationRetention.SOURCE)
@@ -34,7 +32,7 @@ interface MenuDef {
     }
 
     interface IView : Base.IView {
-        fun setItems(item: List<Item>)
+        fun setItems(items: List<Item>)
     }
 
     interface Item : ViewTypeProvider {

@@ -36,8 +36,10 @@ class ItemScreenConfigurationIdCardProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     @Suppress("UNCHECKED_CAST")

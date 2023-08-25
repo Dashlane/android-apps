@@ -15,8 +15,8 @@ import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.SnackbarUtils
 import com.google.android.material.snackbar.Snackbar
-import java.time.Duration
 import kotlinx.coroutines.launch
+import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -83,7 +83,7 @@ class BackupCoordinatorImpl @Inject constructor(
             activity.lockHelper.startAutoLockGracePeriod(Duration.ofMinutes(2))
 
             val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "*/*"
+                type = "\1/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
             }.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
 
@@ -111,7 +111,8 @@ class BackupCoordinatorImpl @Inject constructor(
                     BackupActivityIntents.newImportIntent(
                         activity,
                         uri
-                    ), REQUEST_CODE_IMPORT
+                    ),
+                    REQUEST_CODE_IMPORT
                 )
             } else {
                 getBackupLogger().logFailureDisplay(BackupLogger.Which.IMPORT)

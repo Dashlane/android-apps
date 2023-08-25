@@ -11,8 +11,6 @@ import com.dashlane.ui.fragments.BottomSheetListDialogFragment
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class SecureNoteColorMenuAction(
     item: VaultItem<SyncObject.SecureNote>,
     private val colorSelectAction: (SyncObject.SecureNoteType) -> Unit = {},

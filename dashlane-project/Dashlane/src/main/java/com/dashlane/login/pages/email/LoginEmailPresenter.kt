@@ -33,7 +33,6 @@ class LoginEmailPresenter(
 
     override fun onCreateAccountClicked(skipEmailIfPrefilled: Boolean) {
         context?.let { context ->
-            provider.accountCreation()
             context.startActivity<CreateAccountActivity> {
                 putExtra(CreateAccountActivity.EXTRA_PRE_FILLED_EMAIL, view.emailText)
                 putExtra(CreateAccountActivity.EXTRA_SKIP_EMAIL_IF_PRE_FILLED, skipEmailIfPrefilled)
@@ -53,7 +52,6 @@ class LoginEmailPresenter(
     }
 
     override fun onAutoFill() = provider.onAutoFill()
-    override fun onClear() = provider.onClear()
 
     override fun showOtpPage(secondFactor: AuthenticationSecondFactor.Totp) {
         rootPresenter.showProgress = false
@@ -63,6 +61,11 @@ class LoginEmailPresenter(
     override fun notifyUnknownError() {
         rootPresenter.showProgress = false
         view.showError(R.string.login_button_error)
+    }
+
+    override fun notifyTeamError() {
+        rootPresenter.showProgress = false
+        view.showError(R.string.login_team_error)
     }
 
     override fun notifyEmailError() {
@@ -80,6 +83,11 @@ class LoginEmailPresenter(
         rootPresenter.showDashlaneAuthenticatorPage(secondFactor)
     }
 
+    override fun showSecretTransferQRPage() {
+        rootPresenter.showProgress = false
+        rootPresenter.showSecretTransferQRPage()
+    }
+
     override fun onNextClicked() {
         val email = view.emailText
         val trimmedEmail = email.trim()
@@ -89,8 +97,7 @@ class LoginEmailPresenter(
 
         if ("diagnostic" == email || "debug" == email) {
             view.emailText = ""
-            val context = context ?: return
-            provider.uploadUserSupportFile(context, coroutineScope)
+            askUserForConfirmation()
             return
         }
 
@@ -130,6 +137,16 @@ class LoginEmailPresenter(
         }
     }
 
+    override fun askUserForConfirmation() = view.showConfirmationDialog()
+
+    override fun userSupportFileConfirmed() = provider.uploadUserSupportFile()
+
+    override fun showUploadingDialog() = view.showUploadingDialog()
+
+    override fun showUploadFinishedDialog(crashDeviceId: String, copy: (String) -> Unit) = view.showUploadFinishedDialog(crashDeviceId, copy)
+
+    override fun showUploadFailedDialog() = view.showUploadFailedDialog()
+
     private fun notifyVersionExpiredError() {
         activity?.run {
             endOfLife.showExpiredVersionMessaging(this)
@@ -148,7 +165,7 @@ class LoginEmailPresenter(
 
     override fun showPasswordStep(registeredUserDevice: RegisteredUserDevice) {
         rootPresenter.showProgress = false
-        rootPresenter.showPrimaryFactorStep(registeredUserDevice)
+        rootPresenter.showPrimaryFactorStep(registeredUserDevice = registeredUserDevice, authTicket = null)
     }
 
     override fun startLoginSso(intent: Intent) {

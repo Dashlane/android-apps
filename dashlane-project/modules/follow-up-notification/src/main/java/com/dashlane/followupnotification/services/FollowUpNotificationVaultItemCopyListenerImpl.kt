@@ -9,8 +9,6 @@ import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class FollowUpNotificationVaultItemCopyListenerImpl @Inject constructor(
     @ApplicationContext
     private val context: Context

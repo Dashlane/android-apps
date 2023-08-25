@@ -4,8 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import android.webkit.WebView
 
-
-
 class WebViewCommunicatorImpl : WebViewCommunicator {
 
     val handler = Handler(Looper.getMainLooper())

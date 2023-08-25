@@ -21,8 +21,6 @@ public class TimerCounter {
         return this;
     }
 
-    
-
     public long getDurationMs() {
         if (mStartTime == 0) {
             return 0;

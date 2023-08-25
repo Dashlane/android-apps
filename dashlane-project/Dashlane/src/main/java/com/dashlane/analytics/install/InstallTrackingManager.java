@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import com.dashlane.analytics.referrer.ReferrerManager;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.logger.ExceptionLog;
 import com.dashlane.navigation.NavigationConstants;
 import com.dashlane.preference.ConstantsPrefs;
 import com.dashlane.preference.GlobalPreferencesManager;
@@ -16,8 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-
-
 
 public class InstallTrackingManager {
 
@@ -40,7 +37,6 @@ public class InstallTrackingManager {
                 parseReferrerExtra(context, dataUri);
                 parseReferrerOrigin(context, dataUri);
             } catch (UnsupportedEncodingException e) {
-                ExceptionLog.v(e);
             }
         }
     }

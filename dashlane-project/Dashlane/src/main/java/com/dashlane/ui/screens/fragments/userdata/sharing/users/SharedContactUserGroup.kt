@@ -8,8 +8,6 @@ import com.dashlane.ui.drawable.CircleDrawable
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 
-
-
 class SharedContactUserGroup(
     context: Context,
     private val userGroup: SharingModels.ItemUserGroup,

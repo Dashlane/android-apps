@@ -6,8 +6,6 @@ import com.dashlane.teamspaces.model.Teamspace
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 
-
-
 object TeamspaceParser {
     fun deserializeTeamspaces(teamspaces: String?): List<Teamspace> {
         return teamspaces?.let {

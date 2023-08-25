@@ -9,71 +9,39 @@ import java.util.Locale
 internal interface OnboardingQuestionnaireContract {
 
     interface Presenter : Base.IPresenter {
-        
-
         fun onClickContinue()
-
-        
 
         fun onBackPressed(): Boolean
 
-        
-
         fun onAnswerSelected(indexQuestion: Int, answer: QuestionnaireAnswer?)
-
-        
 
         fun restore(savedInstanceState: Bundle?)
 
-        
-
         fun onSaveInstanceState(outState: Bundle)
-
-        
 
         fun onClickTrustButton()
 
-        
-
         fun onClickSkipButton()
-
-        
 
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     }
 
     interface View : Base.IView {
-        
-
         fun showQuestion1(q1SelectedAnswer: QuestionnaireAnswer?)
-
-        
 
         fun showQuestion2(q2SelectedAnswer: QuestionnaireAnswer?)
 
-        
-
         fun showQuestion3(q3SelectedAnswer: QuestionnaireAnswer)
 
-        
-
         fun showPlanReady(animate: Boolean)
-
-        
 
         fun showDarkWebRegistrationError()
     }
 
     interface DataProvider : Base.IDataProvider {
-        
-
         fun savePlanResult(q2SelectedAnswer: QuestionnaireAnswer)
 
-        
-
         fun saveDarkWebMonitoringResult(hasAlerts: Boolean)
-
-        
 
         suspend fun optIn(email: String): String
     }

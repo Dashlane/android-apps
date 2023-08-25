@@ -1,7 +1,5 @@
 package com.dashlane.autofill.api.createaccount.domain
 
-
-
 data class CredentialInfo(
     val title: String?,
     val website: String?,

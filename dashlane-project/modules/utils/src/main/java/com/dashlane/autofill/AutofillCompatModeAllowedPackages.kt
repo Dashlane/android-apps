@@ -4,8 +4,6 @@ import android.content.Context
 import android.provider.Settings
 import com.dashlane.util.isNotSemanticallyNull
 
-
-
 class AutofillCompatModeAllowedPackages(val compatSetting: String? = null) {
 
     private val compatEntriesByPackageName: Map<String, CompatAppEntry>? = compatSetting.toListCompatApps()
@@ -15,31 +13,21 @@ class AutofillCompatModeAllowedPackages(val compatSetting: String? = null) {
         val urlBarIds: List<String>
     )
 
-    
-
     fun isDefined(): Boolean {
         return compatEntriesByPackageName != null
     }
-
-    
 
     fun isAppDeclared(packageName: String): Boolean {
         return compatEntriesByPackageName?.containsKey(packageName) ?: return false
     }
 
-    
-
     fun matchAppUrlBarId(packageName: String, urlBarId: String): Boolean {
         return compatEntriesByPackageName?.get(packageName)?.urlBarIds?.contains(urlBarId) ?: return false
     }
 
-    
-
     fun getAppUrlBarIds(packageName: String): List<String>? {
         return compatEntriesByPackageName?.get(packageName)?.urlBarIds
     }
-
-    
 
     fun getAppPackageNames(): List<String>? {
         return compatEntriesByPackageName?.keys?.toList()

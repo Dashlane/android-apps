@@ -4,7 +4,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
-import com.dashlane.logger.Log
+import android.util.Log
 import com.dashlane.network.tools.CloudflareHeaderInterceptor
 import com.dashlane.network.tools.MoreDetailedExceptionRequestInterceptor
 import com.dashlane.network.webservices.DashlaneUrls.URL_API
@@ -19,9 +19,6 @@ import com.dashlane.server.api.analytics.AnalyticsApi
 import com.dashlane.server.api.analytics.AnalyticsApiClient
 import dagger.Module
 import dagger.Provides
-import okhttp3.Call
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
@@ -29,8 +26,9 @@ import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 import javax.inject.Provider
 import javax.inject.Singleton
-
-
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 
 @Module
 class HttpModule {
@@ -85,7 +83,7 @@ class HttpModule {
         connectivityCheck: ConnectivityCheck,
         analyticsAuthorization: Authorization.Analytics
     ):
-            AnalyticsApi {
+        AnalyticsApi {
         return AnalyticsApi(
             client = AnalyticsApiClient(
                 callFactory = okHttpClient.newBuilder()

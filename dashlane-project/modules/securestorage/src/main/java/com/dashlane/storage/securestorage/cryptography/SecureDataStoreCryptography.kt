@@ -14,8 +14,6 @@ interface SecureDataStoreCryptography {
     fun decrypt(encryptedData: EncryptedBase64String): ByteArray?
 }
 
-
-
 class SecureDataStoreCryptographyMpProtectedImpl(
     private val cryptographyEngineFactory: CryptographyEngineFactory
 ) : SecureDataStoreCryptography {

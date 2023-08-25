@@ -1,12 +1,8 @@
-
-
 package com.github.devnied.emvnfccard.iso7816emv;
 
 import com.github.devnied.emvnfccard.utils.BytesUtils;
 
 import java.util.Arrays;
-
-
 
 public class TerminalTransactionQualifiers {
 
@@ -70,8 +66,6 @@ public class TerminalTransactionQualifiers {
     public void setContactlessVSDCsupported(final boolean value) {
         data[0] = BytesUtils.setBit(data[0], 6, value);
         if (value) {
-            
-
             setContactlessEMVmodeSupported(false);
         }
     }

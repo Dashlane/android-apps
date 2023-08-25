@@ -58,7 +58,10 @@ class ExpandableCardView @JvmOverloads constructor(
     private fun init(attrs: AttributeSet?, defStyleAttr: Int) {
         backgroundTintList = ColorStateList.valueOf(context.getColor((R.color.container_agnostic_neutral_supershy)))
         context.withStyledAttributes(
-            attrs, R.styleable.ExpandableCardView, defStyleAttr, R.style.Widget_Dashlane_ExpandableCardView
+            attrs,
+            R.styleable.ExpandableCardView,
+            defStyleAttr,
+            R.style.Widget_Dashlane_ExpandableCardView
         ) {
             val headerId = getResourceIdOrThrow(R.styleable.ExpandableCardView_headerLayout)
             inflate(context, headerId, contentLayout)

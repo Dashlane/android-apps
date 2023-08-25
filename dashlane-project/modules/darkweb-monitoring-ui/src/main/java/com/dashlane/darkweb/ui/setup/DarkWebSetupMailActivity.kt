@@ -20,7 +20,5 @@ class DarkWebSetupMailActivity : AppCompatActivity() {
 
     companion object {
         const val INTENT_SIGN_UP_MAIL = "input_mail"
-        const val ORIGIN_KEY = "origin"
-        const val ORIGIN_ADD_ADDRESS = "add_address"
     }
 }

@@ -30,7 +30,6 @@ import com.dashlane.vault.VaultItemLogClickListener
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.model.urlForUsageLog
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.desktopId
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -58,7 +57,8 @@ class VaultListViewModel @Inject constructor(
     private val dataSync: DataSync,
     @field:SuppressLint("StaticFieldLeak") @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
-) : ViewModel(), VaultList.ViewModel,
+) : ViewModel(),
+VaultList.ViewModel,
     EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider> {
 
     private val filter: Filter =
@@ -82,7 +82,7 @@ class VaultListViewModel @Inject constructor(
     ) { (it as? VaultItemViewTypeProvider)?.itemWrapper }
 
     private val isSyncRunning: Boolean
-        get() = dataSync.isSyncRunning
+        get() = dataSync.dataSyncState.replayCache.firstOrNull() == DataSync.DataSyncState.Active
 
     override fun onRefresh() {
         provider.syncData()
@@ -97,7 +97,7 @@ class VaultListViewModel @Inject constructor(
         if (item is VaultItemViewTypeProvider) {
             val website: String? = (item.summaryObject as? SummaryObject.Authentifiant)?.urlForUsageLog
             logger.logClickOpenItem(item.itemListContext, website, filter)
-            navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.desktopId)
+            navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.xmlObjectName)
         }
     }
 

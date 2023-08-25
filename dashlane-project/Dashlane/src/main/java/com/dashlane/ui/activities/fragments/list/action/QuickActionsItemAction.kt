@@ -9,8 +9,6 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.util.clipboard.vault.VaultItemFieldContentService
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class QuickActionsItemAction(
     private val item: SummaryObject,
     private val itemListContext: ItemListContext

@@ -60,7 +60,8 @@ class LinkedWebsitesViewModel @Inject constructor(
     private fun buildMainWebsite(): List<DashlaneRecyclerAdapter.ViewTypeProvider> {
         return urlDomain?.let {
             listOf(
-                LinkedServicesHeaderItem(R.string.multi_domain_credentials_main_website, false), LinkedWebsitesItem(
+                LinkedServicesHeaderItem(R.string.multi_domain_credentials_main_website, false),
+                LinkedWebsitesItem(
                     urlDomain,
                     isMain = true,
                     isEditable = false,
@@ -80,7 +81,8 @@ class LinkedWebsitesViewModel @Inject constructor(
             items.add(LinkedServicesHeaderItem(R.string.multi_domain_credentials_added_by_you, false))
         }
         temporaryLinkedWebsites.forEach {
-            items.add(LinkedWebsitesItem(
+            items.add(
+                LinkedWebsitesItem(
                 it,
                 isEditable = isEditMode,
                 isPageEditMode = isEditMode,
@@ -90,7 +92,8 @@ class LinkedWebsitesViewModel @Inject constructor(
                 openWebsiteListener = this::openWebsite
             ).apply {
                 editableResult[uid] = it
-            })
+            }
+            )
         }
         if (isEditMode) {
             if (addNew) {
@@ -139,7 +142,8 @@ class LinkedWebsitesViewModel @Inject constructor(
         val viewProviderWithNewOne = mutableListOf<DashlaneRecyclerAdapter.ViewTypeProvider>().also {
             it.addAll(_state.value.viewProvider)
             it.add(
-                position, LinkedWebsitesItem(
+                position,
+                LinkedWebsitesItem(
                     "",
                     isEditable = true,
                     isPageEditMode = isEditMode,
@@ -177,13 +181,9 @@ class LinkedWebsitesViewModel @Inject constructor(
         return editableResult[uid] ?: defaultUrl
     }
 
-    
-
-    fun getMutableWebsitesValue() = editableResult.filter { result ->
+    fun getEditableWebsitesResult() = editableResult.filter { result ->
         _state.value.viewProvider.filterIsInstance(LinkedWebsitesItem::class.java).any { it.uid == result.key }
     }.values.filter { it.isNotBlank() }
-
-    
 
     private fun openWebsite(item: LinkedWebsitesItem) {
         val packageNames = if (item.isMain) {
@@ -194,7 +194,8 @@ class LinkedWebsitesViewModel @Inject constructor(
         _state.update {
             it.copy(
                 actionOpenWebsite = LinkedWebsitesUIState.LinkedWebsitesUIStateLoginOpener(
-                    item.defaultUrl.toUrlOrNull()?.toString(), packageNames
+                    item.defaultUrl.toUrlOrNull()?.toString(),
+                    packageNames
                 )
             )
         }

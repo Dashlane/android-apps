@@ -53,8 +53,10 @@ class ItemScreenConfigurationBankAccountProvider(
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     override val logger = BankStatementLogger(
@@ -163,7 +165,8 @@ class ItemScreenConfigurationBankAccountProvider(
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace()) {
             subViewFactory.createSpaceSelector(
-                item.syncObject.spaceId, teamspaceAccessor,
+                item.syncObject.spaceId,
+                teamspaceAccessor,
                 null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -181,7 +184,8 @@ class ItemScreenConfigurationBankAccountProvider(
         val iban = item.syncObject.bankAccountIBAN?.toString()
         val subview = subViewFactory.createSubViewString(
             context.getString(ibanHeaderRes(item.syncObject.localeFormat ?: Country.UnitedStates)),
-            iban, true,
+            iban,
+            true,
             VaultItem<*>::copyForUpdatedIban
         ) { ibanShown -> if (ibanShown) logRevealIban(item) }
         return if (editMode) {
@@ -195,7 +199,8 @@ class ItemScreenConfigurationBankAccountProvider(
                         ibanCopyField(item.syncObject.localeFormat ?: Country.UnitedStates),
                         action = {
                             logger.logCopyIban()
-                        })
+                        }
+                    )
                 )
             }
         }
@@ -211,7 +216,8 @@ class ItemScreenConfigurationBankAccountProvider(
         val bicHeaderRes = bicHeaderRes(item.syncObject.localeFormat ?: Country.UnitedStates)
         val subview = subViewFactory.createSubViewString(
             context.getString(bicHeaderRes),
-            bic, true,
+            bic,
+            true,
             VaultItem<*>::copyForUpdatedBic
         ) { bicShown -> if (bicShown) logRevealBic(item) }
         return if (editMode) {
@@ -220,11 +226,15 @@ class ItemScreenConfigurationBankAccountProvider(
             subview?.let {
                 ItemSubViewWithActionWrapper(
                     it,
-                    CopyAction(item.syncObject.toSummary(), bicCopyField(
+                    CopyAction(
+                        item.syncObject.toSummary(),
+                        bicCopyField(
                         item.syncObject.localeFormat ?: Country.UnitedStates
-                    ), action = {
+                    ),
+                        action = {
                         logger.logCopyBic()
-                    })
+                    }
+                    )
                 )
             }
         }

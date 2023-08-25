@@ -2,8 +2,6 @@ package com.dashlane.util;
 
 import java.lang.reflect.Type;
 
-
-
 public interface JsonSerialization {
 
     <T> T fromJson(String json, Class<T> classOfT) throws JsonException;

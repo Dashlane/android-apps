@@ -16,7 +16,8 @@ fun createPaymentPaypal(
             this.password = password
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 val SyncObject.PaymentPaypal.Companion.PAYPAL

@@ -1,7 +1,5 @@
 package com.dashlane.autofill.api.securitywarnings.data
 
-
-
 interface SecurityWarningsPreferencesManagerWrapper {
     val incorrectJsonKey: String
     val unknownJsonKey: String

@@ -2,8 +2,6 @@ package com.dashlane.autofill.api.totp.repository
 
 import com.dashlane.autofill.api.totp.model.TotpNotification
 
-
-
 interface TotpNotificationRepository {
     fun addTotpNotification(totpNotification: TotpNotification)
 

@@ -3,7 +3,6 @@ package com.dashlane.login.pages.biometric
 import android.app.Activity
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.biometric.BiometricPrompt
@@ -44,7 +43,8 @@ class BiometricPresenter(
     rootPresenter,
     coroutineScope,
     lockManager
-), BiometricContract.Presenter {
+),
+BiometricContract.Presenter {
 
     override val lockTypeName: String = UsageLogConstant.LockType.fingerPrint
 
@@ -87,11 +87,6 @@ class BiometricPresenter(
         view.showEmail(provider.username)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        startListeningForHardwareAuthentication()
-    }
-
     override fun initView() {
         super.initView()
         if (provider.lockSetting.shouldThemeAsDialog) {
@@ -104,7 +99,7 @@ class BiometricPresenter(
 
         listOfNotNull(
             provider.createNextActivityIntent(),
-            provider.createAccountRecoveryIntroActivityIntent()
+            provider.createMasterPasswordResetIntroActivityIntent()
         ).takeUnless { it.isEmpty() }?.let {
             activity?.startActivities(it.toTypedArray())
         }
@@ -116,19 +111,20 @@ class BiometricPresenter(
     private fun startListeningForHardwareAuthentication() {
         val fragmentActivity = activity as? FragmentActivity ?: return
         val biometricPromptFlow = if (provider.lockSetting.isLockCancelable) {
-            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
                 .setTitle(
-                    provider.lockSetting.topicLock
-                        ?: fragmentActivity.getString(R.string.window_biometric_unlock_hardware_module_google_fp_title)
+                    provider.lockSetting.topicLock ?: fragmentActivity.getString(R.string.window_biometric_unlock_hardware_module_google_fp_title)
                 )
                 .setSubtitle(provider.lockSetting.subTopicLock ?: provider.username)
                 .setNegativeButtonText(fragmentActivity.getString(R.string.cancel))
                 .setConfirmationRequired(false)
-                .setAllowedAuthenticators(provider.biometricAuthModule.getPromptAuthenticator())
-                .build()
-            provider.biometricAuthModule.startHardwareAuthentication(fragmentActivity, provider.username, promptInfo)
+            provider.biometricAuthModule.startHardwareAuthentication(
+                activity = fragmentActivity,
+                username = provider.username,
+                promptInfoBuilder = promptInfoBuilder
+            )
         } else {
-            provider.biometricAuthModule.startHardwareAuthentication(fragmentActivity)
+            provider.biometricAuthModule.startHardwareAuthentication(activity = fragmentActivity)
         }
 
         fragmentActivity.lifecycleScope.launch {
@@ -142,8 +138,16 @@ class BiometricPresenter(
 
     private fun processAuthenticationResult(result: BiometricAuthModule.Result) {
         when (result) {
-            is BiometricAuthModule.Result.Success -> {
+            is BiometricAuthModule.Result.StrongBiometricSuccess -> {
                 if (provider.challengeAuthentication(result.cryptoObject)) {
+                    loginLogger.logSuccess(loginMode = LoginMode.Biometric)
+                    onUnlock()
+                } else {
+                    forceLogout(null)
+                }
+            }
+            is BiometricAuthModule.Result.WeakBiometricSuccess -> {
+                if (provider.unlockWeakBiometric()) {
                     loginLogger.logSuccess(loginMode = LoginMode.Biometric)
                     onUnlock()
                 } else {

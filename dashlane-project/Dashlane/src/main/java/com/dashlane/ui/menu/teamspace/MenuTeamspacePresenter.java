@@ -14,8 +14,6 @@ import com.dashlane.teamspaces.model.Teamspace;
 import com.dashlane.ui.menu.MenuDef;
 import com.skocken.presentation.presenter.BaseItemPresenter;
 
-
-
 public class MenuTeamspacePresenter extends BaseItemPresenter<IDataProvider, IView>
         implements IPresenter {
 

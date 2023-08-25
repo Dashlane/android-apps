@@ -2,8 +2,6 @@ package com.dashlane.account
 
 import androidx.annotation.IntDef
 
-
-
 data class UserSecuritySettings(
     val isToken: Boolean = false,
     val isTotp: Boolean = false,
@@ -13,8 +11,6 @@ data class UserSecuritySettings(
     val isSso: Boolean = false,
     val isAuthenticatorEnabled: Boolean = false
 ) {
-    
-
     constructor(@UserSecurityFlags flags: Int) : this(
         flags == SECURITY_TOKEN,
         (flags and SECURITY_TOTP) != 0,
@@ -24,8 +20,6 @@ data class UserSecuritySettings(
         (flags and SECURITY_FLAG_SSO) != 0,
         (flags and SECURITY_FLAG_AUTHENTICATOR) != 0
         )
-
-    
 
     
     fun asFlags(): Int {
@@ -43,8 +37,6 @@ data class UserSecuritySettings(
             .map(Pair<Boolean, Int>::second)
             .reduce(Int::or)
     }
-
-    
 
     fun asString(otp2: Boolean = false): String {
         val type = when {
@@ -70,7 +62,8 @@ data class UserSecuritySettings(
             SECURITY_FLAG_U2F,
             SECURITY_FLAG_SSO,
             SECURITY_FLAG_AUTHENTICATOR
-        ], flag = true
+        ],
+        flag = true
     )
     annotation class UserSecurityFlags
 
@@ -79,6 +72,7 @@ data class UserSecuritySettings(
         const val SECURITY_TOTP = 1 shl 1
         const val SECURITY_TOTP_2 = 1 shl 2
         const val SECURITY_FLAG_DUO = 1 shl 3
+
         
         const val SECURITY_FLAG_U2F = 1 shl 5
         const val SECURITY_FLAG_SSO = 1 shl 6

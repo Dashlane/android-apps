@@ -18,8 +18,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-
-
 class SettingsManager(
     private val userSecureStorageManager: UserSecureStorageManager,
     private val userPreferencesManager: UserPreferencesManager,
@@ -34,21 +32,13 @@ class SettingsManager(
 
     private val settingsCacheLock = Mutex()
 
-    
-
     private var settingsCache: Deferred<Settings>? = null
-
-    
 
     private val validSettingsCache: Deferred<Settings>?
         get() = settingsCache?.takeUnless { it.isCompleted && it.isCancelled }
 
-    
-
     @Suppress("EXPERIMENTAL_API_USAGE")
     private val loadDispatcher: CoroutineDispatcher = newSingleThreadContext(javaClass.simpleName)
-
-    
 
     fun getSettings(): Settings =
         runCatching { runBlocking { loadSettings() } }.getOrDefault(Settings())

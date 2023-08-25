@@ -2,11 +2,9 @@ package com.dashlane.item.subview.provider.personalinfo
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.IdentityLogger
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ValueChangeManager
@@ -28,27 +26,18 @@ import com.dashlane.vault.model.getStringId
 import com.dashlane.xml.domain.SyncObject
 import java.time.LocalDate
 
-
-
 class ItemScreenConfigurationIdentityProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     dataCounter: DataCounter,
-    deviceInfoRepository: DeviceInfoRepository,
     sessionManager: SessionManager,
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, dataCounter,
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    dataCounter,
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
-
-    override val logger = IdentityLogger(
-        teamspaceAccessor,
-        deviceInfoRepository,
-        dataCounter,
-        sessionManager,
-        bySessionUsageLogRepository
-    )
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -126,7 +115,9 @@ class ItemScreenConfigurationIdentityProvider(
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace()) {
             subViewFactory.createSpaceSelector(
-                item.syncObject.spaceId, teamspaceAccessor, null,
+                item.syncObject.spaceId,
+                teamspaceAccessor,
+                null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
         } else {
@@ -246,7 +237,8 @@ class ItemScreenConfigurationIdentityProvider(
         val selectedTitle = item.syncObject.title
         selectedTitle?.getStringId()?.let { titleStringId ->
             return subViewFactory.createSubviewListNonDefault(
-                context.getString(R.string.type), context.getString(titleStringId),
+                context.getString(R.string.type),
+                context.getString(titleStringId),
                 allTitleCategories
             ) { it, value ->
                 it.copyForUpdatedTitle(context, value)

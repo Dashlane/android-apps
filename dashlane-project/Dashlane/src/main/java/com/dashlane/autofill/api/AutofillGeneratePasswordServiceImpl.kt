@@ -8,8 +8,6 @@ import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.getPasswordStrengthScore
 import javax.inject.Inject
 
-
-
 class AutofillGeneratePasswordServiceImpl @Inject constructor(
     private val passwordGenerator: PasswordGeneratorWrapper,
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator

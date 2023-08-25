@@ -15,7 +15,6 @@ import com.dashlane.useractivity.log.usage.getUsageLogNameFromType
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.getUsageLogLabel
 import com.dashlane.vault.model.isSpaceItem
-import com.dashlane.vault.model.toSql
 import com.dashlane.vault.model.urlForUsageLog
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
@@ -39,7 +38,7 @@ open class BaseLogger(
     }
 
     override fun logDisplay(dataType: SyncObjectType) {
-        val logName = dataType.toSql()?.tableName ?: return
+        val logName = dataType.transactionType
         log(
             UsageLogCode34(
                 spaceId = teamspaceAccessor.current?.anonTeamId,
@@ -78,7 +77,9 @@ open class BaseLogger(
         val summaryObject: SummaryObject = vaultItem.toSummary()
         val spaceId = if (vaultItem.isSpaceItem()) {
             teamspaceAccessor.get(TeamSpaceUtils.getTeamSpaceId(vaultItem))?.anonTeamId
-        } else null
+        } else {
+            null
+        }
         val from = when (categorizationMethod) {
             ItemEditSpaceSubView.CategorizationMethod.FORCED_CATEGORIZATION -> UsageLogCode11.From.FORCED_CATEGORIZATION
             ItemEditSpaceSubView.CategorizationMethod.SMART_CATEGORIZATION -> UsageLogCode11.From.SMART_CATEGORIZATION

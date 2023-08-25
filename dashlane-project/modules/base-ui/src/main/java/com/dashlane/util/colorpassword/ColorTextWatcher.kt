@@ -5,8 +5,6 @@ import android.text.Editable
 import android.text.Spannable
 import android.text.TextWatcher
 
-
-
 open class ColorTextWatcher(context: Context) : TextWatcher {
     private val characterColor: CharacterColor = CharacterColor(context)
 

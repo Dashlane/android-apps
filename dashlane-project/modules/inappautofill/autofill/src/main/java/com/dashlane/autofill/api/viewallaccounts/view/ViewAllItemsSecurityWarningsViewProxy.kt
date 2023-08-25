@@ -6,6 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.internal.AutofillFormSourcesStrings
+import com.dashlane.autofill.api.model.AuthentifiantItemToFill
 import com.dashlane.autofill.api.rememberaccount.model.FormSourcesDataProvider
 import com.dashlane.autofill.api.securitywarnings.AutofillSecurityWarningsLogger
 import com.dashlane.autofill.api.securitywarnings.model.RememberSecurityWarningsService
@@ -15,12 +16,7 @@ import com.dashlane.autofill.api.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.api.viewallaccounts.services.ViewAllAccountSelectionNotifier
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.util.Toaster
-import com.dashlane.util.model.UserPermission
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.vault.summary.SummaryObject
 import kotlinx.coroutines.launch
-
-
 
 internal class ViewAllItemsSecurityWarningsViewProxy(
     private val autofillViewAllItemsActivity: AutofillViewAllItemsActivity,
@@ -31,19 +27,21 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
     autofillFormSourcesStrings: AutofillFormSourcesStrings,
     toaster: Toaster,
     val viewAllAccountSelectionNotifier: ViewAllAccountSelectionNotifier,
-    val userFeaturesChecker: UserFeaturesChecker,
     val formSourcesDataProvider: FormSourcesDataProvider
 ) : SecurityWarningsViewProxy(
-    autofillViewAllItemsActivity, applicationContext, authentifiantResult, securityWarningsLogger,
-    rememberSecurityWarningsService, autofillFormSourcesStrings, toaster,
+    autofillViewAllItemsActivity,
+    applicationContext,
+    authentifiantResult,
+    securityWarningsLogger,
+    rememberSecurityWarningsService,
+    autofillFormSourcesStrings,
+    toaster,
     MatchType.EXPLORE_PASSWORDS
 ) {
 
     override fun autoAcceptUnknown(): Boolean = true
 
     override fun autoAcceptMismatch(): Boolean = true
-
-    
 
     override fun finishWithResult(
         unlockedAuthentifiant: UnlockedAuthentifiant,
@@ -53,12 +51,10 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
         if (showWarningRemembered) {
             toaster.show(R.string.autofill_warning_we_will_remember, Toast.LENGTH_SHORT)
         }
-        if (!hasEditRight(unlockedAuthentifiant.authentifiantSummary) &&
-            userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES_IN_CONTEXT)
-        ) {
+        if (!hasEditRight(unlockedAuthentifiant.itemToFill)) {
             
             finishAndAutofill(unlockedAuthentifiant, false)
-        } else if (warningShown || !userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES_IN_CONTEXT)) {
+        } else if (warningShown) {
             
             
             finishAndAutofill(unlockedAuthentifiant, true)
@@ -78,8 +74,6 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
         }
     }
 
-    
-
     private fun openLinkServiceBottomSheet(unlockedAuthentifiant: UnlockedAuthentifiant) {
         autofillViewAllItemsActivity.onNavigateToLinkService(
             unlockedAuthentifiant.formSource,
@@ -88,7 +82,8 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
 
         
         autofillViewAllItemsActivity.getNavigableFragment()?.childFragmentManager?.setFragmentResultListener(
-            AutofillViewAllItemsActivity.LINK_SERVICE_REQUEST_KEY, autofillViewAllItemsActivity
+            AutofillViewAllItemsActivity.LINK_SERVICE_REQUEST_KEY,
+            autofillViewAllItemsActivity
         ) { _, bundle ->
             if (bundle.getBoolean(AutofillViewAllItemsActivity.LINK_SERVICE_SHOULD_AUTOFILL)) {
                 val shouldLink = bundle.getBoolean(AutofillViewAllItemsActivity.LINK_SERVICE_SHOULD_LINK)
@@ -113,7 +108,7 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
         )
     }
 
-    private fun hasEditRight(summary: SummaryObject.Authentifiant): Boolean {
-        return !summary.isShared || summary.sharingPermission == UserPermission.ADMIN
+    private fun hasEditRight(itemToFill: AuthentifiantItemToFill): Boolean {
+        return !itemToFill.isSharedWithLimitedRight
     }
 }

@@ -6,8 +6,6 @@ import com.dashlane.R
 import com.dashlane.ui.drawable.CircleDrawable
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 
-
-
 class SharingCenterUserGroupItem(
     context: Context,
     val userGroup: SharingContact.UserGroup
@@ -35,19 +33,22 @@ class SharingCenterUserGroupItem(
         } else {
             resources.getQuantityString(
                 R.plurals.sharing_shared_group_items,
-                itemCount, itemCount
+                itemCount,
+                itemCount
             )
         }
         val memberCountString = resources.getQuantityString(
             R.plurals.sharing_shared_group_members,
-            memberCount, memberCount
+            memberCount,
+            memberCount
         )
         return if (memberCount == 0) {
             itemCountString
         } else {
             context.getString(
                 R.string.sharing_shared_group_items_and_members,
-                itemCountString, memberCountString
+                itemCountString,
+                memberCountString
             )
         }
     }

@@ -12,8 +12,6 @@ import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId
 import kotlin.math.roundToInt
 
-
-
 object MetaTextViewProvider {
 
     fun create(context: Context, header: String, value: String): LinearLayout {

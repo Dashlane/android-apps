@@ -7,8 +7,6 @@ import com.dashlane.autofill.api.viewallaccounts.view.AutofillViewAllItemsActivi
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import javax.inject.Inject
 
-
-
 class AutofillViewAllItemsActivityIntentProvider @Inject constructor() : ViewAllAccountsActionIntentProvider {
     override fun getViewAllAccountsIntentSender(
         context: Context,

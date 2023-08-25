@@ -5,9 +5,11 @@ import android.content.Intent
 import android.text.style.UnderlineSpan
 import android.widget.Toast
 import com.dashlane.R
+import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.login.LoginActivity
 import com.dashlane.login.LoginIntents
 import com.dashlane.login.LoginLogger
+import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyActivity
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockSetting
 import com.dashlane.login.pages.LoginBaseContract
@@ -16,13 +18,10 @@ import com.dashlane.login.pages.LoginSwitchAccountUtil
 import com.dashlane.login.pages.password.LoginPasswordContract.InvalidPasswordException.InvalidReason
 import com.dashlane.login.root.LoginPresenter
 import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.util.StaticTimerUtil
 import com.dashlane.util.coroutines.DeferredViewModel
 import com.dashlane.util.getFormattedSpannable
 import com.dashlane.util.getWindowSizeWithoutStatusBar
 import com.dashlane.util.hideSoftKeyboard
-import com.dashlane.util.logD
-import com.dashlane.util.logI
 import com.dashlane.util.safelyStartBrowserActivity
 import com.dashlane.util.showToaster
 import kotlinx.coroutines.CancellationException
@@ -33,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.launch
 
+@Suppress("LargeClass")
 class LoginPasswordPresenter(
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
@@ -43,27 +43,21 @@ class LoginPasswordPresenter(
     rootPresenter,
     coroutineScope,
     lockManager
-), LoginPasswordContract.Presenter {
+),
+LoginPasswordContract.Presenter {
 
-    
-
-    private var unlockAccountRecovery: CompletableDeferred<Unit>? = null
+    private var unlockBiometricRecovery: CompletableDeferred<Unit>? = null
 
     override val lockTypeName: String = UsageLogConstant.LockType.master
-
-    override fun onLoginIssuesClicked() {
-        provider.loginIssuesClicked()
-        view.showPasswordHelp()
-    }
-
-    
 
     private sealed class Command {
         object Login : Command()
         object Help : Command()
         object ForgotPassword : Command()
         class ChangeAccount(val email: String? = null) : Command()
-        object AccountRecovery : Command()
+        object BiometricRecovery : Command()
+        object RecoveryDialog : Command()
+        object AccountRecoveryKey : Command()
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
@@ -76,32 +70,34 @@ class LoginPasswordPresenter(
             passwordValidationHolder.deferred = null
 
             val done = when (command) {
-                Command.Login -> login()
+                Command.Login -> login(view.passwordText.toString())
                 Command.Help -> {
                     val intent = provider.loginHelp()
                     context?.safelyStartBrowserActivity(intent)
                     false
                 }
+
                 Command.ForgotPassword -> {
                     val intent = provider.passwordForgotten()
                     context?.safelyStartBrowserActivity(intent)
                     false
                 }
+
                 is Command.ChangeAccount -> {
                     startActivityChangeAccount(command.email)
                     false
                 }
-                Command.AccountRecovery -> {
+
+                Command.BiometricRecovery -> {
                     activity?.run {
-                        
                         
                         if (!provider.lockSetting.isLoggedIn) {
                             provider.loadStaleSession()
                         }
                         provider.onPromptBiometricForRecovery()
-                        lockManager.showLockForAccountReset(
+                        lockManager.showLockForBiometricRecovery(
                             this,
-                            UNLOCK_FOR_ACCOUNT_RECOVERY,
+                            UNLOCK_FOR_BIOMETRIC_RECOVERY,
                             resources.getString(R.string.account_recovery_biometric_prompt_title),
                             resources.getString(
                                 R.string.account_recovery_biometric_prompt_description,
@@ -109,8 +105,19 @@ class LoginPasswordPresenter(
                             )
                         )
                     }
-                    unlockAccountRecovery = CompletableDeferred()
-                    unlockAccountRecovery?.await()
+                    unlockBiometricRecovery = CompletableDeferred()
+                    unlockBiometricRecovery?.await()
+                    false
+                }
+
+                Command.RecoveryDialog -> {
+                    view.showRecoveryDialog()
+                    false
+                }
+
+                Command.AccountRecoveryKey -> {
+                    val intent = provider.getAccountRecoveryKeyIntent()
+                    intent?.let { activity?.startActivityForResult(it, RESULT_FOR_ACCOUNT_RECOVERY_KEY) }
                     false
                 }
             }
@@ -122,7 +129,7 @@ class LoginPasswordPresenter(
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == UNLOCK_FOR_ACCOUNT_RECOVERY) {
+        if (requestCode == UNLOCK_FOR_BIOMETRIC_RECOVERY) {
             if (resultCode == Activity.RESULT_OK) {
                 provider.getChangeMPIntent()?.let {
                     activity?.startActivity(it)
@@ -132,13 +139,19 @@ class LoginPasswordPresenter(
                 
                 provider.unloadSession()
             }
-            unlockAccountRecovery?.complete(Unit)
+            unlockBiometricRecovery?.complete(Unit)
+        } else if (requestCode == RESULT_FOR_ACCOUNT_RECOVERY_KEY) {
+            if (resultCode == Activity.RESULT_OK) {
+                coroutineScope.launch {
+                    val password = data?.getSerializableExtra(LoginAccountRecoveryKeyActivity.ACCOUNT_RECOVERY_PASSWORD_RESULT) as? ObfuscatedByteArray
+                    password?.let { login(it.decodeUtf8ToString()) }
+                }
+            } else if (!provider.lockSetting.isLoggedIn) {
+                
+                provider.unloadSession()
+            }
         }
     }
-
-    override fun onShowLoginPasswordHelp() = provider.loginHelpShown()
-    override fun onPasswordVisibilityToggle(passwordShown: Boolean) =
-        provider.passwordVisibilityToggled(passwordShown)
 
     override fun initView() {
         super.initView()
@@ -162,8 +175,11 @@ class LoginPasswordPresenter(
                 showUnlockLayout(isLoggedIn)
                 setUnlockTopic(topicLock)
 
-                if (LoginSwitchAccountUtil.canSwitch(unlockReason)) showSwitchAccount(provider.loginHistory) else
+                if (LoginSwitchAccountUtil.canSwitch(unlockReason)) {
+                    showSwitchAccount(provider.loginHistory)
+                } else {
                     hideSwitchAccount()
+                }
 
                 val cancelText = when {
                     provider.lockSetting.allowBypass -> R.string.login_enter_mp_later
@@ -172,8 +188,6 @@ class LoginPasswordPresenter(
                 }
                 setCancelBtnText(cancelText?.let { context.getString(it) })
             }
-
-            isAccountRecoveryAvailable = provider.canMakeAccountRecovery
 
             if (activity.let { it != null && it.intent.getBooleanExtra(LoginActivity.SYNC_ERROR, false) }) {
                 showError(R.string.login_sync_error)
@@ -188,21 +202,20 @@ class LoginPasswordPresenter(
                 provider.askMasterPasswordLater()
                 rootPresenter.showLockPage()
             }
+
             provider.lockSetting.isLoggedIn -> rootPresenter.onPrimaryFactorCancelOrLogout()
             else -> offerCommand(Command.ChangeAccount())
         }
     }
 
     override fun onNextClicked() {
-        logI { "Login click" }
-        StaticTimerUtil.setLoginButtonInteraction(System.currentTimeMillis())
         offerCommand(Command.Login)
     }
 
-    private suspend fun login(): Boolean {
+    private suspend fun login(password: String): Boolean {
         val leaveAfterSuccess = LoginIntents.shouldCloseLoginAfterSuccess(activity!!.intent)
         val deferred = passwordValidationHolder.async(Dispatchers.Default) {
-            provider.validatePassword(view.passwordText, leaveAfterSuccess)
+            provider.validatePassword(password, leaveAfterSuccess)
         }
         return login(deferred)
     }
@@ -229,7 +242,6 @@ class LoginPasswordPresenter(
     }
 
     private fun notifyError(t: Throwable) {
-        logI(throwable = t) { "Login failed. " }
         when (t) {
             is LoginPasswordContract.InvalidPasswordException -> {
                 when (t.reason) {
@@ -238,49 +250,67 @@ class LoginPasswordPresenter(
                     InvalidReason.INVALID -> notifyPasswordError()
                 }
             }
+
             is LoginPasswordContract.AccountResetException -> {
                 activity?.showToaster(R.string.forced_logout, Toast.LENGTH_LONG)
                 startActivityChangeAccount()
             }
+
             is LoginBaseContract.OfflineException -> notifyOffline()
             is LoginBaseContract.NetworkException -> notifyNetworkError()
             else -> notifyUnknownError()
         }
     }
 
-    
-
     private fun notifyEmptyPassword() {
         view.showError(R.string.password_empty)
     }
 
-    
-
     private fun notifyPasswordError() {
-        if (provider.canMakeAccountRecovery) {
-            val error = view.resources.getFormattedSpannable(
-                R.string.account_recovery_password_is_not_correct,
-                view.resources.getString(R.string.account_recovery_password_is_not_correct_underline),
-                listOf(UnderlineSpan())
-            )
+        coroutineScope.launch {
+            val hasBiometricReset = provider.canMakeBiometricRecovery
+            val hasAccountRecoveryKeyEnabled = provider.getAccountRecoveryKeyStatus().enabled
 
-            view.showError(error) {
-                onClickAccountRecovery()
-            }
-        } else {
-            val error = view.resources.getFormattedSpannable(
-                R.string.password_is_not_correct_please_try_again_with_login_issues,
-                view.resources.getString(R.string.password_is_not_correct_please_try_again_with_login_issues_underline),
-                listOf(UnderlineSpan())
-            )
+            when {
+                hasBiometricReset && hasAccountRecoveryKeyEnabled -> offerCommand(Command.RecoveryDialog)
+                hasBiometricReset -> {
+                    val error = view.resources.getFormattedSpannable(
+                        R.string.account_recovery_password_is_not_correct,
+                        view.resources.getString(R.string.account_recovery_password_is_not_correct_underline),
+                        listOf(UnderlineSpan())
+                    )
 
-            view.showError(error) {
-                onLoginIssuesClicked()
+                    view.showError(error) {
+                        offerCommand(Command.BiometricRecovery)
+                    }
+                }
+
+                hasAccountRecoveryKeyEnabled -> {
+                    val error = view.resources.getFormattedSpannable(
+                        R.string.account_recovery_password_is_not_correct,
+                        view.resources.getString(R.string.account_recovery_password_is_not_correct_underline),
+                        listOf(UnderlineSpan())
+                    )
+
+                    view.showError(error) {
+                        offerCommand(Command.AccountRecoveryKey)
+                    }
+                }
+
+                else -> {
+                    val error = view.resources.getFormattedSpannable(
+                        R.string.password_is_not_correct_please_try_again_with_login_issues,
+                        view.resources.getString(R.string.password_is_not_correct_please_try_again_with_login_issues_underline),
+                        listOf(UnderlineSpan())
+                    )
+
+                    view.showError(error) {
+                        view.showPasswordHelp()
+                    }
+                }
             }
         }
     }
-
-    
 
     private fun notifyFailedUnlock() {
         view.showError(R.string.password_is_not_correct_please_try_again)
@@ -289,14 +319,10 @@ class LoginPasswordPresenter(
         }
     }
 
-    
-
     private fun notifyUnknownError() {
         rootPresenter.showProgress = false
         view.showError(R.string.error)
     }
-
-    
 
     private fun notifySuccess(intent: Intent?) {
         lockManager.hasEnteredMP = true
@@ -322,7 +348,6 @@ class LoginPasswordPresenter(
     }
 
     override fun onClickForgotButton() {
-        provider.onClickForgotButton()
         startRecoveryOrSendToFAQ()
     }
 
@@ -335,29 +360,34 @@ class LoginPasswordPresenter(
         offerCommand(Command.ChangeAccount(email))
     }
 
-    override fun onClickAccountRecovery() {
-        offerCommand(Command.AccountRecovery)
+    override fun onClickBiometricRecovery() {
+        offerCommand(Command.BiometricRecovery)
+    }
+
+    override fun onClickAccountRecoveryKey() {
+        offerCommand(Command.AccountRecoveryKey)
     }
 
     private fun startRecoveryOrSendToFAQ() {
-        val hasBiometricReset = provider.canMakeAccountRecovery
+        coroutineScope.launch {
+            val hasBiometricReset = provider.canMakeBiometricRecovery
+            val hasAccountRecoveryKeyEnabled = provider.getAccountRecoveryKeyStatus().enabled
+            loginLogger.logForgetMasterPassword(hasBiometricReset)
 
-        loginLogger.logForgetMasterPassword(hasBiometricReset)
-
-        if (hasBiometricReset) {
-            offerCommand(Command.AccountRecovery)
-        } else {
-            offerCommand(Command.ForgotPassword)
+            when {
+                hasBiometricReset && hasAccountRecoveryKeyEnabled -> offerCommand(Command.RecoveryDialog)
+                hasBiometricReset -> offerCommand(Command.BiometricRecovery)
+                hasAccountRecoveryKeyEnabled -> offerCommand(Command.AccountRecoveryKey)
+                else -> offerCommand(Command.ForgotPassword)
+            }
         }
     }
 
     private fun offerCommand(command: Command) {
         try {
             if (!actor.trySend(command).isSuccess) {
-                logD { "Actor refused command $command because busy." }
             }
         } catch (t: Throwable) {
-            logD(throwable = t) { "Actor refused command $command because closed." }
         }
     }
 
@@ -369,6 +399,7 @@ class LoginPasswordPresenter(
     }
 
     companion object {
-        const val UNLOCK_FOR_ACCOUNT_RECOVERY = 4631
+        const val UNLOCK_FOR_BIOMETRIC_RECOVERY = 4631
+        const val RESULT_FOR_ACCOUNT_RECOVERY_KEY = 4632
     }
 }

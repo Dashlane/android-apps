@@ -198,8 +198,6 @@ class OnboardingInAppLoginActivity : DashlaneActivity() {
         startActivity(intent)
     }
 
-    
-
     private fun launchAutoFillSetting(
         inAppLoginManager: InAppLoginManager,
         toEnable: Boolean

@@ -20,8 +20,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-
 public class MultiColumnRecyclerView extends RecyclerView {
     public static final MultiColumnSpec DATA_IDENTIFIER_SPEC = new MultiColumnSpec() {
         @Override
@@ -172,8 +170,6 @@ public class MultiColumnRecyclerView extends RecyclerView {
     }
 
     public interface MultiColumnSpec {
-
-        
 
         int getMinMultiColumnCount();
 

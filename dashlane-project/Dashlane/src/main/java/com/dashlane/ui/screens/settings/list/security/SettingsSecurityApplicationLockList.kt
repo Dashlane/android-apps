@@ -6,17 +6,20 @@ import android.content.res.Resources
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.accountrecovery.AccountRecovery
-import com.dashlane.accountrecovery.AccountRecoveryBiometricIntroActivity
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountrecoverykey.AccountRecoveryStatus
 import com.dashlane.activatetotp.ActivateTotpLogger
-import com.dashlane.disabletotp.DisableTotpActivity
-import com.dashlane.disabletotp.DisableTotpEnforcedIntroActivity
 import com.dashlane.activatetotp.DownloadAuthenticatorAppIntroActivity
 import com.dashlane.authenticator.isAuthenticatorAppInstalled
+import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.biometricrecovery.BiometricRecoveryIntroActivity
 import com.dashlane.cryptography.ObfuscatedByteArray
+import com.dashlane.disabletotp.DisableTotpActivity
+import com.dashlane.disabletotp.DisableTotpEnforcedIntroActivity
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.lock.OnboardingApplicationLockActivity
+import com.dashlane.navigation.Navigator
 import com.dashlane.security.SecurityHelper
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionCredentialsSaver
@@ -46,8 +49,6 @@ import com.dashlane.util.tryOrNull
 import java.time.Duration
 import java.util.Arrays
 
-
-
 class SettingsSecurityApplicationLockList(
     private val context: Context,
     private val lockManager: LockManager,
@@ -58,11 +59,13 @@ class SettingsSecurityApplicationLockList(
     userAccountStorage: UserAccountStorage,
     private val dialogHelper: DialogHelper,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
-    private val accountRecovery: AccountRecovery,
+    private val biometricRecovery: BiometricRecovery,
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     use2faSettingStateHolder: Use2faSettingStateHolder,
     activateTotpLogger: ActivateTotpLogger,
-    private val sessionCredentialsSaver: SessionCredentialsSaver
+    private val sessionCredentialsSaver: SessionCredentialsSaver,
+    private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
+    private val navigator: Navigator
 ) {
 
     private val teamspaceNotificator = TeamspaceRestrictionNotificator()
@@ -77,8 +80,8 @@ class SettingsSecurityApplicationLockList(
         override val header = appLockHeader
         override val title = context.getString(R.string.settings_use_pincode)
         override val description = context.getString(R.string.setting_use_pincode_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) =
             getLockType(lockManager) == LockTypeManager.LOCK_TYPE_PIN_CODE
@@ -90,7 +93,7 @@ class SettingsSecurityApplicationLockList(
             }
             if (enable) {
                 
-                runIfAccountRecoveryDeactivationAcknowledged(context) {
+                runIfBiometricRecoveryDeactivationAcknowledged(context) {
                     sensibleSettingsClickHelper.perform(context = context) {
                         lockManager.showLockActivityToSetPinCode(context, false)
                     }
@@ -133,8 +136,8 @@ class SettingsSecurityApplicationLockList(
             override val description =
                 context.getString(R.string.setting_use_google_fingerprint_description)
 
-            override fun isEnable(context: Context) = true
-            override fun isVisible(context: Context) = biometricAuthModule.isHardwareSupported()
+            override fun isEnable() = true
+            override fun isVisible() = biometricAuthModule.isHardwareSupported()
             override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
             override fun isChecked(context: Context) = biometricAuthModule.isFeatureEnabled()
 
@@ -145,7 +148,7 @@ class SettingsSecurityApplicationLockList(
                         biometricAuthModule.startOnboarding(context)
                     }
                 } else {
-                    runIfAccountRecoveryDeactivationAcknowledged(context) {
+                    runIfBiometricRecoveryDeactivationAcknowledged(context) {
                         
                         lockManager.setLockType(LockTypeManager.LOCK_TYPE_MASTER_PASSWORD)
                         listener?.onSettingsInvalidate()
@@ -161,8 +164,8 @@ class SettingsSecurityApplicationLockList(
         override val description =
             context.getString(R.string.settings_disable_totp2_for_device_description)
 
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context): Boolean {
+        override fun isEnable() = true
+        override fun isVisible(): Boolean {
             if (!isOtp2()) return false
             val lockType = getLockType(lockManager)
             return lockType == LockTypeManager.LOCK_TYPE_PIN_CODE || lockType == LockTypeManager.LOCK_TYPE_BIOMETRIC
@@ -216,8 +219,8 @@ class SettingsSecurityApplicationLockList(
         override val description =
             context.getString(R.string.setting_unlock_item_with_pincode_description)
 
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) =
+        override fun isEnable() = true
+        override fun isVisible() =
             getLockType(lockManager) == LockTypeManager.LOCK_TYPE_PIN_CODE
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
@@ -251,8 +254,8 @@ class SettingsSecurityApplicationLockList(
         override val description =
             context.getString(R.string.setting_unlock_item_with_fingerprint_description)
 
-        override fun isEnable(context: Context) = unlockItemPinCode.isEnable(context)
-        override fun isVisible(context: Context) =
+        override fun isEnable() = unlockItemPinCode.isEnable()
+        override fun isVisible() =
             getLockType(lockManager) == LockTypeManager.LOCK_TYPE_BIOMETRIC
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
@@ -267,16 +270,16 @@ class SettingsSecurityApplicationLockList(
         override val header = appLockHeader
         override val title = context.getString(R.string.settings_lock_on_exit)
         override val description = context.getString(R.string.setting_lock_on_exit_description)
-        override fun isEnable(context: Context) =
+        override fun isEnable() =
             teamspaceAccessorProvider.get()?.isFeatureEnabled(Teamspace.Feature.AUTOLOCK) ?: false
 
-        override fun isVisible(context: Context) = true
+        override fun isVisible() = true
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = lockManager.isLockOnExit()
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
-            if (!isEnable(context)) {
+            if (!isEnable()) {
                 teamspaceNotificator.notifyFeatureRestricted(
                     context.getBaseActivity() as FragmentActivity,
                     Teamspace.Feature.AUTOLOCK
@@ -322,8 +325,8 @@ class SettingsSecurityApplicationLockList(
                 }
             }
 
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
 
         override fun onClick(context: Context) {
             sensibleSettingsClickHelper.perform(
@@ -350,7 +353,8 @@ class SettingsSecurityApplicationLockList(
                         .takeIf { it > 0 }
                         ?.let { Duration.ofSeconds(it.toLong()) }
                     lockManager.lockTimeout = timeOutValue
-                    (when (timeOutValue) {
+                    (
+                        when (timeOutValue) {
                         null -> UsageLogConstant.ActionType.autoLockTimeNever
                         Duration.ofSeconds(5) -> UsageLogConstant.ActionType.autoLockTime5s
                         Duration.ofSeconds(30) -> UsageLogConstant.ActionType.autoLockTime30s
@@ -359,7 +363,8 @@ class SettingsSecurityApplicationLockList(
                         Duration.ofMinutes(5) -> UsageLogConstant.ActionType.autoLockTime5m
                         Duration.ofMinutes(15) -> UsageLogConstant.ActionType.autoLockTime15m
                         else -> null
-                    })?.let {
+                    }
+                    )?.let {
                         bySessionUsageLogRepository[sessionManager.session]
                             ?.enqueue(
                                 UsageLogCode35(
@@ -381,7 +386,7 @@ class SettingsSecurityApplicationLockList(
         }
     }
 
-    private val accountRecoveryItem =
+    private val biometricRecoveryItem =
         object : SettingItem, SettingCheckable, SettingChange.Listenable {
             override var listener: SettingChange.Listener? = null
             override val id = "master-password-reset"
@@ -390,23 +395,23 @@ class SettingsSecurityApplicationLockList(
             override val description =
                 context.getString(R.string.account_recovery_setting_description)
 
-            override fun isEnable(context: Context) = true
-            override fun isVisible(context: Context) = accountRecovery.isFeatureAvailable
+            override fun isEnable() = true
+            override fun isVisible() = biometricRecovery.isFeatureAvailable
 
             override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
 
             override fun isChecked(context: Context) =
-                accountRecovery.isFeatureEnabled && biometricAuthModule.isFeatureEnabled()
+                biometricRecovery.isFeatureEnabled && biometricAuthModule.isFeatureEnabled()
 
             override fun onCheckChanged(context: Context, enable: Boolean) {
-                accountRecovery.isFeatureKnown = true
+                biometricRecovery.isFeatureKnown = true
 
                 if (!enable) {
                     dialogHelper.builder(context)
                         .setTitle(R.string.account_recovery_deactivation_title)
                         .setMessage(R.string.account_recovery_deactivation_message)
                         .setPositiveButton(R.string.account_recovery_deactivation_positive_cta) { _, _ ->
-                            accountRecovery.setFeatureEnabled(
+                            biometricRecovery.setFeatureEnabled(
                                 false,
                                 UsageLogConstant.ViewType.settings
                             )
@@ -426,30 +431,49 @@ class SettingsSecurityApplicationLockList(
 
                     if (!hasBiometric) {
                         context.startActivity(
-                            AccountRecoveryBiometricIntroActivity.newIntent(context)
+                            BiometricRecoveryIntroActivity.newIntent(context)
                                 .clearTop()
                         )
                     } else {
-                        accountRecovery.setFeatureEnabled(true, UsageLogConstant.ViewType.settings)
+                        biometricRecovery.setFeatureEnabled(true, UsageLogConstant.ViewType.settings)
                     }
                 }
             }
+        }
+
+    private val accountRecoveryKeyItem =
+        object : SettingItem, SettingChange.Listenable {
+            override var listener: SettingChange.Listener? = null
+            override val id = "account-recovery"
+            override val header = appLockHeader
+            override val title = context.getString(R.string.account_recovery_key_setting_title)
+            override val description get() =
+                if (checkStatus()?.enabled == true) context.getString(R.string.account_recovery_key_setting_description_on) else context.getString(R.string.account_recovery_key_setting_description_off)
+
+            override fun isEnable() = true
+            override fun isVisible() = checkStatus()?.visible ?: false
+
+            override fun onClick(context: Context) {
+                navigator.goToAccountRecoveryKey(id)
+            }
+
+            private fun checkStatus(): AccountRecoveryStatus? = accountRecoveryKeyRepository.getAccountRecoveryStatusBlocking()
         }
 
     private fun getLockType(lockManager: LockManager): Int {
         return tryOrNull { lockManager.getLockType() } ?: LockTypeManager.LOCK_TYPE_MASTER_PASSWORD
     }
 
-    private fun runIfAccountRecoveryDeactivationAcknowledged(
+    private fun runIfBiometricRecoveryDeactivationAcknowledged(
         uiContext: Context,
         action: () -> Unit
     ) {
-        if (accountRecovery.isFeatureEnabled) {
+        if (biometricRecovery.isFeatureEnabled) {
             dialogHelper.builder(uiContext)
                 .setTitle(R.string.account_recovery_biometric_deactivation_title)
                 .setMessage(R.string.account_recovery_biometric_deactivation_message)
                 .setPositiveButton(R.string.account_recovery_biometric_deactivation_positive_cta) { _, _ ->
-                    accountRecovery.setFeatureEnabled(false, UsageLogConstant.ViewType.settings)
+                    biometricRecovery.setFeatureEnabled(false, UsageLogConstant.ViewType.settings)
                     action()
                 }
                 .setNegativeButton(
@@ -488,9 +512,9 @@ class SettingsSecurityApplicationLockList(
                 }
             )
 
-        override fun isVisible(context: Context) = use2faSettingState.visible
+        override fun isVisible() = use2faSettingState.visible
 
-        override fun isEnable(context: Context) = use2faSettingState.enabled
+        override fun isEnable() = use2faSettingState.enabled
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
 
@@ -537,7 +561,8 @@ class SettingsSecurityApplicationLockList(
         lockPinCodeItem,
         lockFingerprintItem,
         use2faItem,
-        accountRecoveryItem,
+        biometricRecoveryItem,
+        accountRecoveryKeyItem,
         disableLocalOtp2Item,
         unlockItemPinCode,
         unlockItemFingerprint,

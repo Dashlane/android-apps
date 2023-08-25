@@ -9,8 +9,6 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.isSpaceSupported
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class DataIdentifierSpaceCategorization(
     private val teamspaceAccessor: TeamspaceAccessor,
     forTeamspace: Teamspace = checkNotNull(teamspaceAccessor.current) { "No current space selected" }

@@ -7,8 +7,6 @@ import com.dashlane.util.clipboard.vault.VaultItemFieldContentServiceImpl
 import dagger.Binds
 import dagger.Module
 
-
-
 @Module
 abstract class CopyComponentModule {
     @Binds

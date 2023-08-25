@@ -3,7 +3,6 @@ package com.dashlane.util.log
 import android.app.Application
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.usersupportreporter.UserSupportFileLogger
 import com.dashlane.util.PackageUtilities
 import java.time.Instant
 import java.time.ZoneId
@@ -11,17 +10,12 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-
-
 class UserSupportFileLoggerApplicationCreated @Inject constructor(
-    private val userSupportFileLogger: UserSupportFileLogger,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val deviceInfoRepository: DeviceInfoRepository
 ) {
 
     fun onApplicationCreated(application: Application) {
-        userSupportFileLogger.add("ApplicationCreated")
-
         val userLoggedOut = globalPreferencesManager.isUserLoggedOut
         val isMultipleAccountLoadedOnThisDevice = globalPreferencesManager.isMultipleAccountLoadedOnThisDevice
         val lastLoggedInUser = globalPreferencesManager.getLastLoggedInUser()
@@ -32,7 +26,6 @@ class UserSupportFileLoggerApplicationCreated @Inject constructor(
         val appInstallDate = appPackageInfo?.firstInstallTime?.toZonedDateTime()
         val appLastUpdateDate = appPackageInfo?.lastUpdateTime?.toZonedDateTime()
 
-        userSupportFileLogger.add(
             "Dump device informations. " +
                     "userLoggedOut: $userLoggedOut, " +
                     "isMultipleAccountLoadedOnThisDevice: $isMultipleAccountLoadedOnThisDevice, " +
@@ -40,7 +33,8 @@ class UserSupportFileLoggerApplicationCreated @Inject constructor(
                     "anonymousDeviceId: $anonymousDeviceId, " +
                     "deviceId: $deviceId, " +
                     "appInstallDate: $appInstallDate, " +
-                    "appLastUpdateDate: $appLastUpdateDate"
+                    "appLastUpdateDate: $appLastUpdateDate",
+            logToUserSupportFile = true
         )
     }
 

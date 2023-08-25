@@ -23,13 +23,9 @@ import androidx.annotation.Dimension
 import java.io.File
 import java.io.IOException
 
-
-
 inline fun <reified T> Context.startActivity(intentBlock: Intent.() -> Unit = {}) {
     startActivity(Intent(this, T::class.java).apply(intentBlock))
 }
-
-
 
 inline fun <reified T> Context.startActivity(
     @AnimRes enterResId: Int,
@@ -42,8 +38,6 @@ inline fun <reified T> Context.startActivity(
 
 inline fun <reified T> Context.startService(intentBlock: Intent.() -> Unit): ComponentName? =
     startService(Intent(this, T::class.java).apply(intentBlock))
-
-
 
 inline fun <reified T> Activity.startActivityForResult(
     requestCode: Int,
@@ -66,46 +60,32 @@ fun Context.readFile(filename: String) =
 fun Context.writeFile(filename: String, data: String) =
     File(filesDir, filename).writeText(data)
 
-
-
 val Context.telephonyManager
     get() = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-
-
 
 val Context.inputMethodManager
     get() = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
 private val tempArray = IntArray(1)
 
-
-
 @ColorInt
 fun Context.getThemeAttrColor(@AttrRes attr: Int): Int = getThemeAttr(attr) {
     getColor(0, 0)
 }
-
-
 
 @Dimension
 fun Context.getThemeAttrDimensionPixelSize(@AttrRes attr: Int): Int = getThemeAttr(attr) {
     getDimensionPixelSize(0, 0)
 }
 
-
-
 @AnyRes
 fun Context.getThemeAttrResourceId(@AttrRes attr: Int): Int = getThemeAttr(attr) {
     getResourceId(0, 0)
 }
 
-
-
 fun Context.getThemeAttrDrawable(@AttrRes attr: Int): Drawable = getThemeAttr(attr) {
     getDrawable(0)!!
 }
-
-
 
 @AttrRes
 fun Context.getAttr(@AttrRes attr: Int, @AttrRes fallbackAttr: Int): Int = getThemeAttr(attr) {

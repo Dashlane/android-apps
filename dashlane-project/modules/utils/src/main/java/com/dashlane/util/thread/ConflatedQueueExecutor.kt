@@ -8,8 +8,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import java.util.concurrent.Executor
 
-
-
 class ConflatedQueueExecutor : Executor {
 
     @OptIn(DelicateCoroutinesApi::class, ObsoleteCoroutinesApi::class)

@@ -13,11 +13,7 @@ public class AccountsManager {
 
     private AccountManager mAccountManager;
 
-    
-
     private static final String ACCOUNT_TYPE = "com.dashlane";
-
-    
 
     private static final String SERVER_KEY = "serverkey";
 
@@ -55,8 +51,6 @@ public class AccountsManager {
             return null;
         }
     }
-
-    
 
     public void clearAllAccounts() {
         AccountManager accountManager = getAccountManager();

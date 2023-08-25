@@ -14,18 +14,13 @@ interface LockTimeManager {
 
     fun startAutoLockGracePeriod(duration: Duration, lockManager: LockManager)
     fun shouldAuthoriseForView(): Boolean
-    
 
     fun setLastActionTimestampToNow()
-
-    
 
     fun setUnlockTimestampToNow()
 
     fun isInAutoLockGracePeriod(): Boolean
     fun stopAutoLockGracePeriod()
-
-    
 
     fun elapsedDuration(instant: Instant): Duration =
         Duration.between(instant, Instant.ofEpochMilli(SystemClock.elapsedRealtime()))

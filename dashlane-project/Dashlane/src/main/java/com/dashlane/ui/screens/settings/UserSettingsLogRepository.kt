@@ -1,6 +1,6 @@
 package com.dashlane.ui.screens.settings
 
-import com.dashlane.accountrecovery.AccountRecovery
+import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.hermes.generated.events.user.UserSettings
 import com.dashlane.inapplogin.InAppLoginManager
@@ -14,13 +14,11 @@ import com.dashlane.util.tryOrNull
 import dagger.Reusable
 import javax.inject.Inject
 
-
-
 @Reusable
 class UserSettingsLogRepository @Inject constructor(
     private val lockManager: LockManager,
     private val inAppLoginManager: InAppLoginManager,
-    private val accountRecovery: AccountRecovery,
+    private val biometricRecovery: BiometricRecovery,
     private val userPreferencesManager: UserPreferencesManager
 ) {
     fun get(): UserSettings {
@@ -32,7 +30,7 @@ class UserSettingsLogRepository @Inject constructor(
             hasAuthenticationWithPin = lockType == LOCK_TYPE_PIN_CODE,
             hasAuthenticationWithBiometrics = hasBiometrics,
             hasAutofillActivated = inAppLoginManager.isEnableForApp(),
-            hasMasterPasswordBiometricReset = hasBiometrics && accountRecovery.isFeatureEnabled,
+            hasMasterPasswordBiometricReset = hasBiometrics && biometricRecovery.isFeatureEnabled,
             hasUnlockItemWithBiometric = hasBiometrics && lockManager.isItemUnlockableByPinOrFingerprint(),
             hasLockOnExit = lockManager.isLockOnExit(),
             lockAutoTimeout = lockManager.lockTimeout?.seconds?.toInt(),
@@ -49,7 +47,7 @@ fun UserSettingsLogRepository(): UserSettingsLogRepository {
     return UserSettingsLogRepository(
         lockManager = singletonComponent.lockManager,
         inAppLoginManager = singletonComponent.inAppLoginManager,
-        accountRecovery = singletonComponent.accountRecovery,
+        biometricRecovery = singletonComponent.biometricRecovery,
         userPreferencesManager = singletonComponent.userPreferencesManager
     )
 }

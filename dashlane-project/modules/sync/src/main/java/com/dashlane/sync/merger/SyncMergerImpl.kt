@@ -21,7 +21,6 @@ class SyncMergerImpl @Inject constructor(
         incomingTransactions: List<IncomingTransaction>,
         outgoingTransactions: List<OutgoingTransaction>
     ): Pair<List<OutgoingTransaction>, List<IncomingTransaction>> {
-
         val localOperationUUIDs = outgoingTransactions.asSequence()
             .map(OutgoingTransaction::identifier)
             .toSet()
@@ -49,8 +48,6 @@ class SyncMergerImpl @Inject constructor(
         return Pair(toDoOnServer, toDoOnLocal)
     }
 
-    
-
     private fun resolveConflicts(
         toDoOnLocal: List<IncomingTransaction>,
         toDoOnServer: List<OutgoingTransaction>
@@ -62,8 +59,6 @@ class SyncMergerImpl @Inject constructor(
 
         return result.flatMap { it.first } to result.flatMap { it.second }
     }
-
-    
 
     private fun resolveConflict(
         pendingLocalOperation: IncomingTransaction,
@@ -83,8 +78,6 @@ class SyncMergerImpl @Inject constructor(
             else -> defaultConflictResolution(pendingLocalOperation, pendingRemoteOperation)
         }
     }
-
-    
 
 
     private fun mergePasswordHistory(
@@ -132,8 +125,6 @@ class SyncMergerImpl @Inject constructor(
         val mergedIncomingUpdate = incomingUpdate.copy(syncObject = mergedSyncObject)
         return listOf(mergedIncomingUpdate) to listOf(mergedOutgoingUpdate)
     }
-
-    
 
     private fun createDuplicate(
         outgoingUpdate: OutgoingTransaction.Update

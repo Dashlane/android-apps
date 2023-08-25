@@ -13,7 +13,8 @@ fun createPersonalWebsite(
             this.name = name
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.PersonalWebsite>.copySyncObject(builder: SyncObject.PersonalWebsite.Builder.() -> Unit = {}):

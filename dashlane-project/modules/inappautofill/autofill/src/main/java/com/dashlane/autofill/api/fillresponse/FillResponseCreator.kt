@@ -9,8 +9,6 @@ import com.dashlane.autofill.announcement.KeyboardAutofillService
 import com.dashlane.autofill.api.changepassword.AutoFillChangePasswordConfiguration
 import com.dashlane.autofill.api.getPreviousEntriesFrom
 import com.dashlane.autofill.api.model.ItemToFill
-import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
-import com.dashlane.autofill.api.request.autofill.logger.logNoResults
 import com.dashlane.autofill.api.request.autofill.logger.logShowList
 import com.dashlane.autofill.api.setClassLoaderInDashlane
 import com.dashlane.autofill.api.unlockfill.AutofillAuthActivity
@@ -76,7 +74,6 @@ internal class FillResponseCreatorImpl @Inject constructor(
 
         val isOtp = summary.formType == AutoFillFormType.OTP
         if (!isOtp && result == null) {
-            logger.onShowLogout(getAutofillApiOrigin(hasInlineSpecs), summary.packageName)
             val logOutIntentSender =
                 AutofillAuthActivity.getAuthIntentSenderForLoggedOutDataset(
                     context = applicationContext,
@@ -140,8 +137,6 @@ internal class FillResponseCreatorImpl @Inject constructor(
                 isNativeApp = summary.formSource is ApplicationFormSource,
                 totalCount = response.dataSets.count()
             )
-        } else {
-            logger.logNoResults(updatedEntriesSummary.packageName, summary.formType, hasInlineSpecs)
         }
         return response
     }

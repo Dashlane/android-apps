@@ -11,7 +11,6 @@ import com.dashlane.R
 import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.login.pages.LoginBaseSubViewProxy
 import com.dashlane.login.pages.LoginSwitchAccountUtil
-import com.dashlane.util.addOnFieldVisibilityToggleListener
 import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId
@@ -24,7 +23,8 @@ import com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
 import kotlin.math.roundToInt
 
-class LoginPasswordViewProxy(view: View) : LoginBaseSubViewProxy<LoginPasswordContract.Presenter>(view),
+class LoginPasswordViewProxy(view: View) :
+    LoginBaseSubViewProxy<LoginPasswordContract.Presenter>(view),
     LoginPasswordContract.ViewProxy {
 
     override val passwordText: CharSequence
@@ -40,24 +40,6 @@ class LoginPasswordViewProxy(view: View) : LoginBaseSubViewProxy<LoginPasswordCo
     private val passwordExplanation = findViewByIdEfficient<TextView>(R.id.view_password_explanation)!!
 
     override var isDialog: Boolean = false
-
-    override var isAccountRecoveryAvailable = false
-
-    private val bottomSheetDialog by lazy {
-        BottomSheetDialog(context).apply {
-            setContentView(R.layout.dialog_bottom_sheet_password_help)
-            setOnShowListener {
-                presenter.onShowLoginPasswordHelp()
-                val v = findViewById<View>(R.id.design_bottom_sheet)
-                if (v != null) {
-                    
-                    BottomSheetBehavior.from(v).peekHeight = v.height
-                }
-            }
-            findViewById<View>(R.id.view_login_help)!!.apply { setOnClickListener { presenter.onClickLoginHelpRequested() } }
-            findViewById<View>(R.id.view_login_forgot_password)!!.apply { setOnClickListener { presenter.onClickForgotPassword() } }
-        }
-    }
 
     init {
         root.addOnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ ->
@@ -88,7 +70,7 @@ class LoginPasswordViewProxy(view: View) : LoginBaseSubViewProxy<LoginPasswordCo
             }
 
             onTextChanged { charSequence, _, _, _ ->
-                val isEmpty = charSequence.isNullOrEmpty()
+                val isEmpty = charSequence.isEmpty()
 
                 if (isEmpty != wasEmpty) {
                     wasEmpty = isEmpty
@@ -109,8 +91,6 @@ class LoginPasswordViewProxy(view: View) : LoginBaseSubViewProxy<LoginPasswordCo
             }
         }
 
-        passwordLayout.addOnFieldVisibilityToggleListener { presenter.onPasswordVisibilityToggle(it) }
-
         DeveloperUtilities.preFillPassword(passwordView)
     }
 
@@ -119,7 +99,50 @@ class LoginPasswordViewProxy(view: View) : LoginBaseSubViewProxy<LoginPasswordCo
     }
 
     override fun showPasswordHelp() {
-        bottomSheetDialog.show()
+        BottomSheetDialog(context)
+            .apply {
+                setContentView(R.layout.dialog_bottom_sheet_password_help)
+                setOnShowListener {
+                    val v = findViewById<View>(R.id.design_bottom_sheet)
+                    if (v != null) {
+                        
+                        BottomSheetBehavior.from(v).peekHeight = v.height
+                    }
+                }
+                findViewById<View>(R.id.view_login_help)!!.apply { setOnClickListener { presenter.onClickLoginHelpRequested() } }
+                findViewById<View>(R.id.view_login_forgot_password)!!.apply { setOnClickListener { presenter.onClickForgotPassword() } }
+            }
+            .show()
+    }
+
+    override fun showRecoveryDialog() {
+        BottomSheetDialog(context)
+            .apply {
+                setContentView(R.layout.dialog_bottom_sheet_password_help)
+                setOnShowListener {
+                    val v = findViewById<View>(R.id.design_bottom_sheet)
+                    if (v != null) {
+                        
+                        BottomSheetBehavior.from(v).peekHeight = v.height
+                    }
+                }
+                findViewById<TextView>(R.id.view_login_title)?.apply { text = context.getString(R.string.login_password_dialog_trouble_login_title) }
+                findViewById<Button>(R.id.view_login_help)?.apply {
+                    text = context.getString(R.string.login_password_dialog_trouble_biometric_button)
+                    setOnClickListener {
+                        presenter.onClickBiometricRecovery()
+                        dismiss()
+                    }
+                }
+                findViewById<Button>(R.id.view_login_forgot_password)?.apply {
+                    text = context.getString(R.string.login_password_dialog_trouble_recovery_key_button)
+                    setOnClickListener {
+                        presenter.onClickAccountRecoveryKey()
+                        dismiss()
+                    }
+                }
+            }
+            .show()
     }
 
     override fun setUnlockTopic(topic: String?) {
@@ -157,8 +180,11 @@ class LoginPasswordViewProxy(view: View) : LoginBaseSubViewProxy<LoginPasswordCo
         space ?: return
 
         val spaceHeight = context.resources.getDimension(
-            if (isDialog || !hasEnoughHeightForHeader) R.dimen.lock_scene_top_space_dialog
-            else R.dimen.lock_scene_top_space
+            if (isDialog || !hasEnoughHeightForHeader) {
+                R.dimen.lock_scene_top_space_dialog
+            } else {
+                R.dimen.lock_scene_top_space
+            }
         ).roundToInt()
 
         if (space.layoutParams?.height != spaceHeight) {

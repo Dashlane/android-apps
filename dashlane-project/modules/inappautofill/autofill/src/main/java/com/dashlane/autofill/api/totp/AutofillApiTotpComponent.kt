@@ -9,8 +9,6 @@ import com.dashlane.autofill.api.totp.services.TotpNotificationClipboardService
 import com.dashlane.autofill.api.totp.services.TotpNotificationUpdateService
 import com.dashlane.util.Toaster
 
-
-
 interface AutofillApiTotpComponent {
     val autofillApiTotpService: AutofillApiTotpService
     val totpRepository: TotpNotificationRepository

@@ -15,36 +15,15 @@ import com.dashlane.hermes.generated.events.user.SelectVaultItem
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.useractivity.log.install.InstallLogRepository
-import com.dashlane.useractivity.log.usage.UsageLogCode96
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import javax.inject.Inject
 
 class AutofillViewAllAccountsLoggerImpl @Inject constructor(
     sessionManager: SessionManager,
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    installLogRepository: InstallLogRepository,
     private val logRepository: LogRepository
 ) : AutofillViewAllAccountsLogger,
-    AutofillLegacyLogger(sessionManager, bySessionUsageLogRepository, installLogRepository) {
-
-    override fun onClickToViewAllAccounts(
-        @AutofillOrigin origin: Int,
-        packageName: String,
-        webappDomain: String,
-        hasCredentials: Boolean
-    ) {
-        log(
-            UsageLogCode96(
-                app = packageName,
-                sender = AutofillUsageLog.getSenderUsage96(origin),
-                action = UsageLogCode96.Action.VIEW_ALL_ACCOUNTS,
-                hasCredentials = hasCredentials,
-                type = UsageLogCode96.Type.AUTHENTICATION,
-                webappDomain = webappDomain
-            )
-        )
-    }
+    AutofillLegacyLogger(sessionManager, bySessionUsageLogRepository) {
 
     override fun onResultsLoaded() {
         logRepository.queuePageView(
@@ -72,17 +51,6 @@ class AutofillViewAllAccountsLoggerImpl @Inject constructor(
                 )
             )
         }
-        log(
-            UsageLogCode96(
-                app = packageName,
-                sender = AutofillUsageLog.getSenderUsage96(origin),
-                action = UsageLogCode96.Action.AUTOLOGIN_FROM_LIST,
-                hasCredentials = true,
-                website = itemUrl,
-                type = UsageLogCode96.Type.AUTHENTICATION,
-                webappDomain = webappDomain
-            )
-        )
     }
 
     override fun onViewAllAccountOver(

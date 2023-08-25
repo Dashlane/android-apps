@@ -13,7 +13,7 @@ import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import javax.inject.Inject
@@ -24,11 +24,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-
-
 @Singleton
 class Enforce2faLimiter(
-    private val globalCoroutineScope: CoroutineScope,
+    private val applicationCoroutineScope: CoroutineScope,
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val enforced2faLimitUseCase: HasEnforced2faLimitUseCase,
@@ -37,8 +35,8 @@ class Enforce2faLimiter(
 
     @Inject
     constructor(
-        @GlobalCoroutineScope
-        globalCoroutineScope: CoroutineScope,
+        @ApplicationCoroutineScope
+        applicationCoroutineScope: CoroutineScope,
         @MainCoroutineDispatcher
         mainCoroutineDispatcher: CoroutineDispatcher,
         sessionManager: SessionManager,
@@ -47,7 +45,7 @@ class Enforce2faLimiter(
         userFeaturesChecker: UserFeaturesChecker,
         use2faSettingState: Use2faSettingStateHolder
     ) : this(
-        globalCoroutineScope = globalCoroutineScope,
+        applicationCoroutineScope = applicationCoroutineScope,
         mainCoroutineDispatcher = mainCoroutineDispatcher,
         sessionManager = sessionManager,
         enforced2faLimitUseCase = HasEnforced2FaLimitUseCaseImpl(
@@ -86,7 +84,7 @@ class Enforce2faLimiter(
     private fun checkLimit(activity: Activity) {
         
         val session = sessionManager.session ?: return
-        globalCoroutineScope.launch(mainCoroutineDispatcher) {
+        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             hasEnforce2faLimit = enforced2faLimitUseCase(
                 session = session,
                 hasTotpSetupFallback = null
@@ -104,7 +102,7 @@ class Enforce2faLimiter(
                     this.redirectionDone = false
                 }
             }
-            .launchIn(globalCoroutineScope)
+            .launchIn(applicationCoroutineScope)
     }
 
     private fun mayShowIntro(activity: Activity) {

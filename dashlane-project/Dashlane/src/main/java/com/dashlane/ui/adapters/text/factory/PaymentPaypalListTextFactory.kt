@@ -23,7 +23,8 @@ class PaymentPaypalListTextFactory(
         return when {
             item.login.isSemanticallyNull() -> default
             item.isPasswordEmpty -> StatusText(
-                context.getString(R.string.incomplete_reason_missing_password_list_line_2), true
+                context.getString(R.string.incomplete_reason_missing_password_list_line_2),
+                true
             )
             else -> StatusText(item.login!!)
         }

@@ -1,21 +1,18 @@
 package com.dashlane.login.pages.password
 
 import android.content.Intent
+import com.dashlane.accountrecoverykey.AccountRecoveryStatus
 import com.dashlane.login.pages.LoginLockBaseContract
-
-
 
 interface LoginPasswordContract {
 
     interface ViewProxy : LoginLockBaseContract.ViewProxy {
 
-        
-
         val passwordText: CharSequence
 
-        
-
         fun showPasswordHelp()
+
+        fun showRecoveryDialog()
 
         fun setUnlockTopic(topic: String?)
 
@@ -30,82 +27,42 @@ interface LoginPasswordContract {
         fun setExplanation(string: String)
 
         var isDialog: Boolean
-
-        var isAccountRecoveryAvailable: Boolean
     }
 
     interface Presenter : LoginLockBaseContract.Presenter {
 
-        
-
         fun onClickLoginHelpRequested()
-
-        
 
         fun onClickForgotPassword()
 
-        
-
         fun onClickChangeAccount(email: String?)
-
-        
-
-        fun onShowLoginPasswordHelp()
-
-        
-
-        fun onPasswordVisibilityToggle(passwordShown: Boolean)
-
-        
-
-        fun onLoginIssuesClicked()
 
         fun onCancelClicked()
 
-        fun onClickAccountRecovery()
-
-        
-
         fun onClickForgotButton()
+
+        fun onClickBiometricRecovery()
+
+        fun onClickAccountRecoveryKey()
     }
 
     interface DataProvider : LoginLockBaseContract.DataProvider {
 
         val loginHistory: List<String>
 
-        
-
         suspend fun validatePassword(password: CharSequence, leaveAfterSuccess: Boolean): SuccessfulLogin
 
-        
-
-        fun loginIssuesClicked()
-
-        
-
-        fun loginHelpShown()
-
-        
-
-        fun passwordVisibilityToggled(passwordShown: Boolean)
-
-        
+        suspend fun getAccountRecoveryKeyStatus(): AccountRecoveryStatus
 
         fun loginHelp(): Intent
 
-        
-
         fun passwordForgotten(): Intent
-
-        
 
         suspend fun changeAccount(email: String?): Intent
 
-        
-
         fun askMasterPasswordLater()
 
-        val canMakeAccountRecovery: Boolean
+        val canMakeBiometricRecovery: Boolean
 
         suspend fun loadStaleSession()
 
@@ -113,20 +70,14 @@ interface LoginPasswordContract {
 
         fun getChangeMPIntent(): Intent?
 
-        
-
-        fun onClickForgotButton()
+        fun getAccountRecoveryKeyIntent(): Intent?
 
         fun onPromptBiometricForRecovery()
 
         fun onGoToChangeMP()
     }
 
-    
-
     class SuccessfulLogin(val intent: Intent?)
-
-    
 
     class InvalidPasswordException(
         val reason: InvalidReason = InvalidReason.INVALID,
@@ -138,8 +89,6 @@ interface LoginPasswordContract {
             EMPTY
         }
     }
-
-    
 
     class AccountResetException(cause: Throwable? = null) : Exception(cause)
 }

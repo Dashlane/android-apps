@@ -18,8 +18,6 @@ import com.dashlane.autofill.formdetector.model.AutoFillViewNode
 import com.dashlane.util.thread.ConflatedQueueExecutor
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class AlwaysOnEventHandler(
     val alwaysOnUiManager: AlwaysOnUiManager,
     private val blackList: AutoFillBlackList,
@@ -117,7 +115,8 @@ class AlwaysOnEventHandler(
                 loginForm,
                 authentifiants?.sortedByDescending {
                     it.locallyViewedDate ?: it.modificationDatetime ?: it.creationDatetime
-                })
+                }
+            )
         )
     }
 

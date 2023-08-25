@@ -125,7 +125,6 @@
     <string name="disable_totp_deactivation_message_complete">2FA is turned off</string>
 
     
-    
     <string name="disable_totp_enforced_intro_title">Temporarily turn off 2FA?</string>
     
     <string name="disable_totp_enforced_intro_description">Your admin requires 2FA. If you need to update your 2FA preferences, you’ll need to turn off then re-setup 2FA.\n\nWhile 2FA is off, you won’t be able to access your vault.</string>

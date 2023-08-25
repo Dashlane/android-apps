@@ -10,14 +10,10 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 
-
-
 class DateTimeFieldFactory(
     private val clock: Clock,
     private val relativeDateFormatter: RelativeDateFormatter
 ) {
-    
-
     fun createCreationDateField(
         editMode: Boolean,
         context: Context,
@@ -37,8 +33,6 @@ class DateTimeFieldFactory(
         }
         return null
     }
-
-    
 
     fun createLatestUpdateDateField(
         editMode: Boolean,
@@ -62,16 +56,12 @@ class DateTimeFieldFactory(
         return null
     }
 
-    
-
     private fun Instant.toRelativeDateTimeFormat(context: Context): String? =
         when {
             this.isSemanticallyNull() -> null
             this.isInNowRange(clock) -> context.getString(R.string.now_display_format)
             else -> relativeDateFormatter.format(instant = this)
         }
-
-    
 
     private fun Instant.isInNowRange(clock: Clock) =
         Duration.between(this, Instant.now(clock)).abs() < NOW_RANGE_THRESHOLD_DURATION

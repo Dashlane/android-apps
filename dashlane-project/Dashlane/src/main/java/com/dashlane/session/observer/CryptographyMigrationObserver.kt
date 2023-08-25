@@ -7,8 +7,6 @@ import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.storage.securestorage.SecureStorageLocalKeyCryptographyMarkerMigration
 import javax.inject.Inject
 
-
-
 class CryptographyMigrationObserver @Inject constructor(
     private val userCryptographyRepository: UserCryptographyRepository,
     private val localKeyCryptographyMarkerMigration: SecureStorageLocalKeyCryptographyMarkerMigration

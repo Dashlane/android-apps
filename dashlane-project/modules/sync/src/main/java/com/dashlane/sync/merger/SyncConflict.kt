@@ -9,11 +9,7 @@ import com.dashlane.xml.domain.toTransaction
 import javax.inject.Inject
 import kotlin.jvm.Throws
 
-
-
 class SyncConflict @Inject constructor() {
-
-    
 
     @Throws(DuplicateException::class)
     fun mergeConflicting(
@@ -51,8 +47,6 @@ class SyncConflict @Inject constructor() {
         val node = XmlData.ObjectNode(syncObjectType.xmlObjectName, data)
         return XmlTransaction(node).toObject()
     }
-
-    
 
     internal class DuplicateException(
         message: String? = null,

@@ -97,14 +97,10 @@ class LoginTotpPresenter(
         useU2fAuthenticationIfAvailable()
     }
 
-    
-
     private fun notifyDuoAuthenticationDenied() {
         rootPresenter.showProgress = false
         view.showError(R.string.request_duo_challenge_declined)
     }
-
-    
 
     private fun notifyDuoTimeoutError() {
         rootPresenter.showProgress = false
@@ -117,7 +113,7 @@ class LoginTotpPresenter(
             migrationToSsoMemberInfo = migrationToSsoMemberInfo?.copy(totpAuthTicket = authTicket)
         }
         coroutineScope.launch(Dispatchers.Main) {
-            rootPresenter.onTotpSuccess(registeredUserDevice)
+            rootPresenter.onTotpSuccess(registeredUserDevice, authTicket)
         }
     }
 
@@ -138,8 +134,6 @@ class LoginTotpPresenter(
         viewOrNull?.showError(R.string.request_u2f_verification_fail)
         useU2fAuthenticationIfAvailable()
     }
-
-    override fun onU2fPopupOpened() = provider.u2fPopupOpened()
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private fun useDuoAuthentication() {
@@ -171,12 +165,9 @@ class LoginTotpPresenter(
         return DialogHelper().builder(context!!)
             .setTitle(R.string.request_duo_challenge_title)
             .setMessage(R.string.request_duo_challenge_prompt)
-            .setNegativeButton(R.string.cancel) { _, _ ->
-                provider.duoPopupClosed()
-            }
+            .setNegativeButton(R.string.cancel) { _, _ -> }
             .setCancelable(false)
             .create().apply {
-                setOnShowListener { provider.duoPopupOpened() }
                 show()
             }
     }

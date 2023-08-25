@@ -5,8 +5,6 @@ import com.dashlane.autofill.api.util.AutofillValueFactory
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 
-
-
 internal class ViewAllAccountsFiller(private val autofillValueFactory: AutofillValueFactory) {
 
     fun fill(

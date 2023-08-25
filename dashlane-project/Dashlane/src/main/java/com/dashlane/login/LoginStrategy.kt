@@ -26,8 +26,6 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-
 class LoginStrategy(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val listDevicesService: ListDevicesService,
@@ -38,19 +36,11 @@ class LoginStrategy(
     lateinit var devices: MutableList<Device>
 
     enum class Strategy {
-        
-
         NO_STRATEGY,
-
-        
 
         MONOBUCKET,
 
-        
-
         DEVICE_LIMIT,
-
-        
 
         ENFORCE_2FA,
     }

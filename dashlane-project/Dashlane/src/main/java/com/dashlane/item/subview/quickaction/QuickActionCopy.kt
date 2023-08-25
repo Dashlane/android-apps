@@ -62,8 +62,6 @@ class QuickActionCopy(
         }
 
     companion object {
-        
-
         fun createActionIfFieldExist(
             summaryObject: SummaryObject,
             copyField: CopyField,

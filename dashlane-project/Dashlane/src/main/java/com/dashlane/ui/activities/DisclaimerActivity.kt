@@ -5,10 +5,14 @@ import android.view.MenuItem
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.util.usagelogs.ViewLogger
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-
-
+@AndroidEntryPoint
 class DisclaimerActivity : DashlaneActivity() {
+
+    @Inject
+    lateinit var viewLogger: ViewLogger
     companion object {
         const val EXTRA_DISCLAIMER_RES_ID = "disclaimer_content_res_id"
     }
@@ -30,7 +34,7 @@ class DisclaimerActivity : DashlaneActivity() {
 
     override fun onResume() {
         super.onResume()
-        ViewLogger().log("DisclaimerActivity")
+        viewLogger.log("DisclaimerActivity")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -9,8 +9,6 @@ import com.dashlane.autofill.api.totp.services.TotpNotificationUpdateService
 import com.dashlane.xml.domain.SyncObject
 import java.util.UUID
 
-
-
 class StartTotpNotification(
     private val autofillTotp: AutofillApiTotpService,
     private val totpRepository: TotpNotificationRepository,

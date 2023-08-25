@@ -8,8 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 class UnlinkAccountsPresenter @Inject constructor(
     private val dataProvider: UnlinkAccountsContract.DataProvider
 ) : UnlinkAccountsContract.Presenter, UnlinkAccountsContract.DataProvider.Responses {
@@ -98,8 +96,6 @@ class UnlinkAccountsPresenter @Inject constructor(
             it.showErrorOnUnlinkAccount()
         }
     }
-
-    
 
     private fun updateView(block: suspend (UnlinkAccountsContract.View) -> Unit = {}) {
         val view = this.view ?: return

@@ -118,7 +118,13 @@ abstract class BaseUiUpdateListener(private val activity: AppCompatActivity, pri
         navigator.goToLinkedWebsites(itemId, fromViewOnly, addNew, temporaryWebsites, temporaryApps, urlDomain)
     }
 
-    
+    override fun openCollectionSelector(
+        fromViewOnly: Boolean,
+        temporaryCollections: List<String>,
+        spaceId: String
+    ) {
+        navigator.goToCollectionSelectorFromItemEdit(fromViewOnly, temporaryCollections, spaceId)
+    }
 
     abstract fun requestFocus(subview: ItemSubView<*>)
 

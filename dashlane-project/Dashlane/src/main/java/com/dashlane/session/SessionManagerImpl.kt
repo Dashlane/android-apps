@@ -16,11 +16,8 @@ import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureStorageManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.usersupportreporter.UserSupportFileLogger
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
-import com.dashlane.util.logE
-import com.dashlane.util.stackTraceToSafeString
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineDispatcher
@@ -32,13 +29,12 @@ import javax.inject.Singleton
 
 @Singleton
 class SessionManagerImpl @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val userSecureStorageManager: Lazy<UserSecureStorageManager>,
     private val deviceInfoRepository: DeviceInfoRepository,
-    private val userSupportFileLogger: UserSupportFileLogger,
     private val crashReporter: Lazy<CrashReporter>,
     private val sessionCoroutineScopeRepository: Lazy<SessionCoroutineScopeRepository>,
     private val userDataRepository: Lazy<UserDataRepository>,
@@ -143,6 +139,10 @@ class SessionManagerImpl @Inject constructor(
         val sessionAccessKey = accessKey
             ?: userPreferencesManagerLazy.get().preferencesFor(username).accessKey
             ?: deviceInfoRepository.deviceId
+            ?: return SessionResult.Error(
+                SessionResult.ErrorCode.ERROR_SESSION_ACCESS_KEY,
+                "No session access key available"
+            )
         val remoteKey = secureStorage.secureStorageManager.getRemoteKey(username, localKey)
         if (remoteKey == null && appKey !is AppKey.Password) {
             loginLogger.logErrorUnknown(loginMode = loginMode)
@@ -157,9 +157,7 @@ class SessionManagerImpl @Inject constructor(
     }
 
     override suspend fun destroySession(session: Session, byUser: Boolean, forceLogout: Boolean) {
-        userSupportFileLogger.add("Received Logout for ${session.userId}. Logout by user: $byUser")
-        crashReporter.get()
-            .addInformation("[SessionManager] Session destroyed. Logout by user:$byUser")
+        crashReporter.get().addInformation("[SessionManager] Session destroyed. Logout by user:$byUser")
         
         notifySessionEnded(session, byUser, forceLogout)
         userDataRepository.get().sessionCleanup(session, forceLogout)
@@ -172,8 +170,6 @@ class SessionManagerImpl @Inject constructor(
             detach(it)
         }
     }
-
-    
 
     private suspend fun initialize(
         session: Session,
@@ -195,7 +191,9 @@ class SessionManagerImpl @Inject constructor(
 
             SessionResult.Success(session)
         } catch (e: Exception) {
-            userSupportFileLogger.add("A session initializationObserver has failed, session can't be initialized")
+                "A session initializationObserver has failed, session can't be initialized",
+                throwable = e
+            )
             destroySession(session, false)
             SessionResult.Error(
                 SessionResult.ErrorCode.ERROR_INIT,
@@ -210,28 +208,29 @@ class SessionManagerImpl @Inject constructor(
         allowOverwriteAccessKey: Boolean,
         loginInfo: LoginInfo
     ): SessionResult {
-        return when (val sessionInitializationResult =
-            initialize(_session!!, userSettings, allowOverwriteAccessKey, loginInfo)) {
+        return when (
+            val sessionInitializationResult =
+            initialize(_session!!, userSettings, allowOverwriteAccessKey, loginInfo)
+        ) {
             is SessionResult.Success -> {
                 
                 startSession(_session!!, loginInfo)
                 sessionInitializationResult
             }
+
             else -> sessionInitializationResult
         }
     }
 
-    private suspend fun startSession(session: Session, loginInfo: LoginInfo?) = globalCoroutineScope.launch(mainCoroutineDispatcher) {
-        
-        try {
-            notifySessionStarted(session, loginInfo)
-        } catch (e: Exception) {
-            userSupportFileLogger.add("A session observer has failed, session can't be fully loaded")
-            userSupportFileLogger.add(e.stackTraceToSafeString())
-            destroySession(session, false)
-            logE(throwable = e) { "A session observer has failed, session can't be fully loaded" }
+    private suspend fun startSession(session: Session, loginInfo: LoginInfo?) =
+        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
+            
+            try {
+                notifySessionStarted(session, loginInfo)
+            } catch (e: Exception) {
+                destroySession(session, false)
+            }
         }
-    }
 
     private suspend fun notifySessionEnded(session: Session, byUser: Boolean, forceLogout: Boolean) {
         observerList.toList().forEach {
@@ -239,7 +238,6 @@ class SessionManagerImpl @Inject constructor(
                 it.sessionEnded(session, byUser, forceLogout)
             } catch (throwable: Throwable) {
                 
-                logE(throwable = throwable) { "An error occurred when ending session" }
             }
         }
     }

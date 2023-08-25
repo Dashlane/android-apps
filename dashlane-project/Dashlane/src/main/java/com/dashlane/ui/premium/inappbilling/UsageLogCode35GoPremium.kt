@@ -5,8 +5,6 @@ import com.dashlane.navigation.NavigationHelper
 import com.dashlane.useractivity.log.usage.UsageLogCode35
 import com.dashlane.useractivity.log.usage.UsageLogConstant
 
-
-
 object UsageLogCode35GoPremium {
 
     @JvmStatic
@@ -30,7 +28,9 @@ object UsageLogCode35GoPremium {
 
     @JvmStatic
     fun isDeepLinkToPremium(deepLink: String?): Boolean {
-        return (deepLink != null &&
-                deepLink.contains(NavigationHelper.Destination.MainPath.GET_PREMIUM))
+        return (
+            deepLink != null &&
+                deepLink.contains(NavigationHelper.Destination.MainPath.GET_PREMIUM)
+        )
     }
 }

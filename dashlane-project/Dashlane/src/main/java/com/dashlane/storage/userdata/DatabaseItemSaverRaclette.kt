@@ -11,8 +11,8 @@ import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.sync.VaultItemBackupWrapper
 import com.dashlane.useractivity.RacletteLogger
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.util.isSupportedSyncObjectType
 import com.dashlane.xml.domain.SyncObject
+import com.dashlane.xml.domain.isSupportedSyncObjectType
 import dagger.Lazy
 import javax.inject.Inject
 

@@ -12,8 +12,6 @@ import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.Statu
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 interface VaultItemWrapper<D : SummaryObject> :
     MultiColumnViewTypeProvider,
     DiffUtilComparator<VaultItemWrapper<out SummaryObject>>,

@@ -1,7 +1,5 @@
 package com.dashlane.item.subview
 
-
-
 interface ValueChangeManager<T> {
 
     fun addValueChangedListener(listener: Listener<T>)

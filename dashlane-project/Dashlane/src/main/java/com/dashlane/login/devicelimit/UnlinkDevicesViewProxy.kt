@@ -8,8 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dashlane.R
 import com.dashlane.login.Device
 
-
-
 class UnlinkDevicesViewProxy(val activity: FragmentActivity, private val maxDevices: Int) :
     UnlinkDevicesContract.ViewProxy {
 

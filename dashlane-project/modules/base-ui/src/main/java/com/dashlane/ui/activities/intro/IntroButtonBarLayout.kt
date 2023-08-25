@@ -6,8 +6,6 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 
-
-
 internal class IntroButtonBarLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -17,14 +15,14 @@ internal class IntroButtonBarLayout @JvmOverloads constructor(
     private var lastWidthSize = -1
 
     private var isStacked: Boolean
-        get() = orientation == LinearLayout.VERTICAL
+        get() = orientation == VERTICAL
         set(stacked) {
-            orientation = if (stacked) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
+            orientation = if (stacked) VERTICAL else HORIZONTAL
             gravity = if (stacked) Gravity.END else Gravity.BOTTOM
         }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val widthSize = View.MeasureSpec.getSize(widthMeasureSpec)
+        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
 
         if (widthSize > lastWidthSize && isStacked) {
             
@@ -39,8 +37,8 @@ internal class IntroButtonBarLayout @JvmOverloads constructor(
         
         
         val initialWidthMeasureSpec: Int
-        if (!isStacked && View.MeasureSpec.getMode(widthMeasureSpec) == View.MeasureSpec.EXACTLY) {
-            initialWidthMeasureSpec = View.MeasureSpec.makeMeasureSpec(widthSize, View.MeasureSpec.AT_MOST)
+        if (!isStacked && MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) {
+            initialWidthMeasureSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.AT_MOST)
 
             
             needsRemeasure = true
@@ -51,7 +49,6 @@ internal class IntroButtonBarLayout @JvmOverloads constructor(
         super.onMeasure(initialWidthMeasureSpec, heightMeasureSpec)
 
         if (!isStacked) {
-
             val measuredWidth = measuredWidthAndState
             val measuredWidthState = measuredWidth and View.MEASURED_STATE_MASK
             val stack = measuredWidthState == View.MEASURED_STATE_TOO_SMALL

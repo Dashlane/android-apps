@@ -6,8 +6,6 @@ import com.dashlane.R
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 
-
-
 class SharedContactUser(
     context: Context,
     private val user: SharingModels.ItemUser,

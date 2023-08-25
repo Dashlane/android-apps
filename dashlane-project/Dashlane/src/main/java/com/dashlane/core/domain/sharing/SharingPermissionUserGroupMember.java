@@ -7,8 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 
 import androidx.annotation.IntDef;
 
-
-
 @IntDef({SharingPermissionUserGroupMember.ADMIN, SharingPermissionUserGroupMember.MEMBER,
         SharingPermissionUserGroupMember.REVOKED})
 @Retention(RetentionPolicy.SOURCE)

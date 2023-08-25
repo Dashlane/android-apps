@@ -6,18 +6,15 @@ import android.content.Intent;
 import androidx.annotation.WorkerThread;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.dashlane.core.DataSync;
+
 import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.events.SyncFinishedEvent;
-import com.dashlane.logger.ExceptionLog;
+import com.dashlane.hermes.generated.definitions.Trigger;
 import com.dashlane.security.DashlaneIntent;
-import com.dashlane.useractivity.log.usage.UsageLogCode134;
 import com.dashlane.util.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
-
-
 
 public class BroadcastManager {
 
@@ -33,8 +30,6 @@ public class BroadcastManager {
         return buffIntent;
     }
 
-    
-
     public static void sendPasswordErrorBroadcast() {
         try {
             Intent passwordIntent = new Intent(Constants.BROADCASTS.PASSWORD_SUCCESS_BROADCAST);
@@ -49,26 +44,23 @@ public class BroadcastManager {
     }
 
     private static void logBroadcastError(Exception e) {
-        ExceptionLog.v(e);
     }
 
-    public static void sendSyncFinishedBroadcast(UsageLogCode134.Origin origin) {
+    public static void sendSyncFinishedBroadcast(Trigger origin) {
         onSyncFinished(SyncFinishedEvent.State.SUCCESS, origin);
     }
 
-    public static void sendSyncFailedBroadcast(UsageLogCode134.Origin origin) {
+    public static void sendSyncFailedBroadcast(Trigger origin) {
         onSyncFinished(SyncFinishedEvent.State.ERROR, origin);
     }
 
-    public static void sendOfflineSyncFailedBroadcast(UsageLogCode134.Origin origin) {
+    public static void sendOfflineSyncFailedBroadcast(Trigger origin) {
         onSyncFinished(SyncFinishedEvent.State.OFFLINE, origin);
     }
 
     @WorkerThread
-    private static void onSyncFinished(SyncFinishedEvent.State state, UsageLogCode134.Origin origin) {
+    private static void onSyncFinished(SyncFinishedEvent.State state, Trigger origin) {
         try {
-            boolean success = state == SyncFinishedEvent.State.SUCCESS;
-            DataSync.getInstance().onGlobalSyncFinished(success);
             notifySyncFinished(state, origin);
         } catch (Exception e) {
             
@@ -76,14 +68,14 @@ public class BroadcastManager {
         }
     }
 
-    private static void notifySyncFinished(SyncFinishedEvent.State state, UsageLogCode134.Origin origin) {
+    private static void notifySyncFinished(SyncFinishedEvent.State state, Trigger origin) {
         boolean success = state == SyncFinishedEvent.State.SUCCESS;
         Intent syncFinishIntent = new Intent(Constants.BROADCASTS.SYNCFINISHED_BROADCAST);
         syncFinishIntent.putExtra(Constants.BROADCASTS.SUCCESS_EXTRA, success);
         LocalBroadcastManager.getInstance(SingletonProvider.getContext())
                              .sendBroadcast(syncFinishIntent);
         SyncFinishedEvent.Trigger trigger;
-        if (UsageLogCode134.Origin.MANUAL.equals(origin)) {
+        if (Trigger.MANUAL.equals(origin)) {
             trigger = SyncFinishedEvent.Trigger.BY_USER;
         } else {
             trigger = SyncFinishedEvent.Trigger.OTHER;

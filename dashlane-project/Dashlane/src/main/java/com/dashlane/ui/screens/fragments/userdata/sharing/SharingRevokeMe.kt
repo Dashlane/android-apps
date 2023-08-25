@@ -6,8 +6,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.toSummary
 import javax.inject.Inject
 
-
-
 class SharingRevokeMe @Inject constructor(
     private val sharingDataProvider: SharingDataProvider
 ) {

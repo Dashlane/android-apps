@@ -6,8 +6,6 @@ import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.tryOrNull
 import javax.inject.Inject
 
-
-
 class TeamspaceAccessorProvider @Inject constructor(
     private val sessionManager: SessionManager,
     private val teamspaceRepository: TeamspaceManagerRepository

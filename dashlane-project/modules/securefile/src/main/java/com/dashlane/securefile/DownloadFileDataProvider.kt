@@ -24,7 +24,6 @@ class DownloadFileDataProvider @Inject constructor(
             val progression =
                 actor<Float> { consumeEach { presenter.notifyFileDownloadProgress(attachment, anonymousId, it) } }
             try {
-                presenter.notifyFileDownloadStarted(attachment, anonymousId)
                 secureFileStorage.download(attachment.toSecureFile(), progression)
                 presenter.notifyFileDownloaded(attachment, anonymousId)
             } catch (e: Exception) {

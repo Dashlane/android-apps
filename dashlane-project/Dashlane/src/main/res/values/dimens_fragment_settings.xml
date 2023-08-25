@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="fragment_setting_section_header_min_height">48dp</dimen>
-    <dimen name="fragment_setting_section_header_padding_bottom">11dp</dimen>
     <dimen name="fragment_setting_list_item_padding_top">6.5dp</dimen>
     <dimen name="fragment_setting_list_item_description_margin_top">0.5dp</dimen>
 </resources>

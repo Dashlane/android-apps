@@ -22,13 +22,16 @@ class CustomCsvImportActivity : DashlaneActivity() {
 
         CustomCsvImportViewProxy(this, viewModel)
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (!viewModel.onBackPressed()) {
                     finish()
                 }
             }
-        })
+        }
+        )
     }
 
     @IntDef(

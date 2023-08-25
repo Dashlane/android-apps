@@ -2,22 +2,11 @@ package com.dashlane.core.sharing
 
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isAcceptedOrPending
-import com.dashlane.storage.userdata.Database
 import com.dashlane.storage.userdata.dao.ItemContentDB
-import com.dashlane.storage.userdata.dao.SharingItemContentDao
-import com.dashlane.storage.userdata.dao.SharingItemGroupDao
-import com.dashlane.storage.userdata.dao.SharingUserGroupDao
-import com.dashlane.util.JsonSerialization
 
-class SharingDaoMemoryDataAccessImpl(
-    private val sessionManager: SessionManager,
-    private val userDataRepository: UserDatabaseRepository,
-    private val jsonSerialization: JsonSerialization
-) : SharingDaoMemoryDataAccess {
+class SharingDaoMemoryDataAccessImpl : SharingDaoMemoryDataAccess {
     override lateinit var itemGroups: MutableList<ItemGroup>
     override lateinit var userGroups: MutableList<UserGroup>
     override lateinit var itemContentsDB: MutableList<ItemContentDB>
@@ -26,23 +15,7 @@ class SharingDaoMemoryDataAccessImpl(
     override val userGroupsToDelete: MutableList<String> = mutableListOf()
     override val itemContentsDBToDelete: MutableList<String> = mutableListOf()
 
-    private val database: Database?
-        get() = sessionManager.session?.let { userDataRepository.getDatabase(it) }
-
-    private val itemGroupDao: SharingItemGroupDao?
-        get() = database?.let { SharingItemGroupDao(jsonSerialization, it) }
-
-    private val userGroupDao: SharingUserGroupDao?
-        get() = database?.let { SharingUserGroupDao(jsonSerialization, it) }
-
-    private val itemContentDao: SharingItemContentDao?
-        get() = database?.let { SharingItemContentDao(jsonSerialization, it) }
-
-    override suspend fun init() {
-        itemGroups = itemGroupDao?.loadAll()?.toMutableList() ?: mutableListOf()
-        userGroups = userGroupDao?.loadAll()?.toMutableList() ?: mutableListOf()
-        itemContentsDB = itemContentDao?.loadAll()?.toMutableList() ?: mutableListOf()
-    }
+    override suspend fun init() = Unit
 
     override fun saveItemGroups(itemGroups: List<ItemGroup>) {
         this.itemGroups.addOrReplaceItemGroup(itemGroups)
@@ -89,18 +62,5 @@ class SharingDaoMemoryDataAccessImpl(
         return itemContentsDB.find { it.id == itemUid }?.extraData
     }
 
-    override suspend fun close() {
-        itemGroupDao?.apply {
-            itemGroups.forEach { save(it) }
-            itemGroupsToDelete.forEach { delete(it) }
-        }
-        userGroupDao?.apply {
-            userGroups.forEach { save(it) }
-            userGroupsToDelete.forEach { delete(it) }
-        }
-        itemContentDao?.apply {
-            itemContentsDB.forEach { saveItemContent(it) }
-            itemContentsDBToDelete.forEach { delete(it) }
-        }
-    }
+    override suspend fun close() = Unit
 }

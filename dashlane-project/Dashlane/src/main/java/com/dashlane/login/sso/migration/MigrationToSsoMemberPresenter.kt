@@ -69,7 +69,6 @@ class MigrationToSsoMemberPresenter @Inject constructor(
         if (requestCode != REQUEST_CODE_GET_USER_SSO_INFO) return
 
         if (resultCode == Activity.RESULT_CANCELED) {
-            ssoLogger.logGetUserSsoInfoCancel()
             logout()
             return
         }
@@ -80,8 +79,6 @@ class MigrationToSsoMemberPresenter @Inject constructor(
             logout()
             return
         }
-
-        ssoLogger.logGetUserSsoInfoSuccess()
 
         userSsoInfo = result.userSsoInfo
         migrateToSsoMember()
@@ -103,16 +100,15 @@ class MigrationToSsoMemberPresenter @Inject constructor(
             try {
                 val intent = deferred.await()
                 notifySuccess(intent)
-            } catch (_: CancellationException) {
+            } catch (e: CancellationException) {
                 
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 notifyError()
             }
         }
     }
 
     private fun notifySuccess(intent: Intent) {
-        ssoLogger.logLoginSuccess()
         activity?.run {
             startActivity(intent)
             finish()

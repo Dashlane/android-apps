@@ -3,8 +3,6 @@ package com.dashlane.similarpassword
 import java.util.BitSet
 import java.util.Comparator
 
-
-
 data class GroupOfPassword(
     val initialPassword: String,
     val passwords: Set<String>
@@ -84,8 +82,6 @@ data class GroupOfPassword(
             return duplicatePasswords.toSet()
         }
 
-        
-
         private fun getPasswordsToKeep(sortedBitSets: List<BitSet>): BitSet {
             val totalCount = sortedBitSets.size
             val toKeep = BitSet(totalCount)
@@ -107,12 +103,8 @@ data class GroupOfPassword(
             return toKeep
         }
 
-        
-
         private fun removeDuplicateAndSmall(passwords: Array<String>) =
             passwords.distinct().filterNot { similarPassword.isShortPassword(it) }
-
-        
 
         private fun getPasswordSimilarityMap(passwords: List<String>): Array<BitSet> {
             val totalCount = passwords.size
@@ -133,8 +125,6 @@ data class GroupOfPassword(
             }
             return bitSets
         }
-
-        
 
         private fun createGroupsSimilar(
             orginalPasswordMap: Array<BitSet>,

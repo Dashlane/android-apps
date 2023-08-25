@@ -27,6 +27,7 @@ import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.valueWithoutWww
 import com.dashlane.vault.model.isSpaceItem
 import com.dashlane.vault.model.loginForUi
+import com.dashlane.vault.model.titleForList
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.model.urlForUI
 import kotlinx.coroutines.launch
@@ -79,13 +80,13 @@ class AutofillLinkServiceViewProxy(
                                         it.formSource.formSourceIdentifier
                                     ) ?: it.formSource.formSourceIdentifier
                                     showTitle(appName)
-                                    showDescription(it.item.urlForUI(), appName)
+                                    showDescription(it.item.titleForList, appName)
                                 }
                                 is WebDomainFormSource -> {
                                     val url = it.formSource.formSourceIdentifier.toUrlDomainOrNull()?.valueWithoutWww()
                                         ?: it.formSource.formSourceIdentifier
                                     showTitle(url)
-                                    showDescription(it.item.urlForUI(), url)
+                                    showDescription(it.item.titleForList, url)
                                 }
                             }
                             vaultUrlView.text = it.item.urlForUI()
@@ -128,19 +129,23 @@ class AutofillLinkServiceViewProxy(
         titleView.text = spannable
     }
 
-    private fun showDescription(url: String?, serviceName: String) {
+    private fun showDescription(title: String?, serviceName: String) {
         val descriptionString = when (viewModel.getFormSource()) {
             is ApplicationFormSource -> fragment.requireContext().getString(
-                R.string.autofill_link_existing_detail_app, url, serviceName
+                R.string.autofill_link_existing_detail_app,
+                title,
+                serviceName
             )
             is WebDomainFormSource -> fragment.requireContext().getString(
-                R.string.autofill_link_existing_detail, url, serviceName
+                R.string.autofill_link_existing_detail,
+                title,
+                serviceName
             )
         }
         val spannable = SpannableStringBuilder(descriptionString)
-        url?.let {
-            val startIndex = descriptionString.indexOf(url)
-            spannable.setSpan(StyleSpan(Typeface.BOLD), startIndex, startIndex + url.length, 0)
+        title?.let {
+            val startIndex = descriptionString.indexOf(title)
+            spannable.setSpan(StyleSpan(Typeface.BOLD), startIndex, startIndex + title.length, 0)
         }
         val startIndex = descriptionString.indexOf(serviceName)
         spannable.setSpan(StyleSpan(Typeface.BOLD), startIndex, startIndex + serviceName.length, 0)

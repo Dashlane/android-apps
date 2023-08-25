@@ -17,7 +17,8 @@ import com.dashlane.util.addTextChangedListener
 import com.google.android.material.textfield.TextInputLayout
 import kotlin.properties.Delegates
 
-class LoginTotpViewProxy(view: View) : LoginBaseSubViewProxy<LoginTotpContract.Presenter>(view),
+class LoginTotpViewProxy(view: View) :
+    LoginBaseSubViewProxy<LoginTotpContract.Presenter>(view),
     LoginTotpContract.ViewProxy {
 
     private val totpLayout = findViewByIdEfficient<TextInputLayout>(R.id.view_login_totp_layout)!!
@@ -52,11 +53,7 @@ class LoginTotpViewProxy(view: View) : LoginBaseSubViewProxy<LoginTotpContract.P
             }
         }
 
-    
-
     private var u2fDialog: AlertDialog? = null
-
-    
 
     private var u2fPresenceDialog: AlertDialog? = null
 
@@ -80,7 +77,6 @@ class LoginTotpViewProxy(view: View) : LoginBaseSubViewProxy<LoginTotpContract.P
             }
         }
         totpNfcView.setOnClickListener {
-            presenter.onU2fPopupOpened()
             u2fDialog = DialogHelper().builder(context).apply {
                 setTitle(R.string.u2f_login_popup_title)
                 setMessage(R.string.u2f_login_popup_message)

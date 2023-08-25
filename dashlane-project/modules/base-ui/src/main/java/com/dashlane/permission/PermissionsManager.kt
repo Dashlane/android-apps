@@ -3,11 +3,7 @@ package com.dashlane.permission
 import android.Manifest
 import android.app.Activity
 
-
-
 interface PermissionsManager {
-    
-
     fun requestPermission(
         activity: Activity,
         permissionCode: Int,
@@ -17,11 +13,7 @@ interface PermissionsManager {
 
     fun isAllowedToWriteToPublicFolder(): Boolean
 
-    
-
     fun isAllowed(permission: String): Boolean
-
-    
 
     fun onRequestPermissionResult(
         activity: Activity,

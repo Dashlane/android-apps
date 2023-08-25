@@ -3,6 +3,7 @@ package com.dashlane.securearchive
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.BackupFileType
 import com.dashlane.hermes.generated.definitions.ImportDataStatus
+import com.dashlane.hermes.generated.definitions.ImportDataStep
 import com.dashlane.hermes.generated.definitions.ImportSource
 import com.dashlane.hermes.generated.events.user.ExportData
 import com.dashlane.hermes.generated.events.user.ImportData
@@ -15,11 +16,7 @@ internal class BackupLogger @Inject constructor(
     private val usageLogRepository: UsageLogRepository?
 ) {
 
-    
-
     fun logStart(which: Which) = log(which, "start")
-
-    
 
     fun logExportSuccessDisplay() {
         logRepository.queueEvent(ExportData(BackupFileType.SECURE_VAULT))
@@ -30,14 +27,14 @@ internal class BackupLogger @Inject constructor(
         )
     }
 
-    
-
     fun logImportSuccessDisplay(count: Int) {
         logRepository.queueEvent(
             ImportData(
                 backupFileType = BackupFileType.SECURE_VAULT,
                 importDataStatus = ImportDataStatus.SUCCESS,
-                importSource = ImportSource.SOURCE_DASH
+                importSource = ImportSource.SOURCE_DASH,
+                importDataStep = ImportDataStep.SUCCESS,
+                isDirectImport = false
             )
         )
         log(
@@ -46,8 +43,6 @@ internal class BackupLogger @Inject constructor(
             subaction = count.toString()
         )
     }
-
-    
 
     fun logSeeFileClicked() = log(
         Which.EXPORT,

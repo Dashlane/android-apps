@@ -5,8 +5,6 @@ import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 
-
-
 class LimitedWebChromeClient : WebChromeClient() {
     
     override fun onJsPrompt(

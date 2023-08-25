@@ -13,10 +13,9 @@ import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.datatype.ShareableDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
+import com.dashlane.teamspaces.CombinedTeamspace
 import com.dashlane.teamspaces.manager.TeamspaceManager
 import javax.inject.Inject
-
-
 
 class SharingContactCreator @Inject constructor(
     private val dataProvider: SharingDataProviderImpl,
@@ -105,8 +104,6 @@ class SharingContactCreator @Inject constructor(
         }.filter { isValidInCurrentSpace(it) }
     }
 
-    
-
     private fun isValidInCurrentSpace(
         user: SharingContact.User
     ): Boolean {
@@ -115,8 +112,6 @@ class SharingContactCreator @Inject constructor(
         }
         return hasOneInCurrentSpace(user.itemIds)
     }
-
-    
 
     private fun isValidInCurrentSpace(
         userGroup: SharingContact.UserGroup
@@ -132,7 +127,7 @@ class SharingContactCreator @Inject constructor(
     private fun hasOneInCurrentSpace(uids: List<String>): Boolean = getCountAvailable(uids) > 0
 
     private fun isCombinedSpace(): Boolean =
-        teamspaceManager?.current === TeamspaceManager.COMBINED_TEAMSPACE
+        teamspaceManager?.current === CombinedTeamspace
 
     private fun getCountAvailable(uids: List<String>): Int {
         if (uids.isEmpty()) {

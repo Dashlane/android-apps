@@ -4,8 +4,6 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.storage.userdata.dao.ItemContentDB
 
-
-
 interface SharingDaoMemoryDataAccess {
     val itemGroups: List<ItemGroup>
     val userGroups: List<UserGroup>

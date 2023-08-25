@@ -24,8 +24,6 @@ import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class ItemScreenConfigurationWebsiteProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     dataCounter: DataCounter,
@@ -33,8 +31,10 @@ class ItemScreenConfigurationWebsiteProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, dataCounter,
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    dataCounter,
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     @Suppress("UNCHECKED_CAST")
@@ -102,7 +102,9 @@ class ItemScreenConfigurationWebsiteProvider(
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace()) {
             subViewFactory.createSpaceSelector(
-                item.syncObject.spaceId, teamspaceAccessor, listOfNotNull(websiteView),
+                item.syncObject.spaceId,
+                teamspaceAccessor,
+                listOfNotNull(websiteView),
                 VaultItem<*>::copyForUpdatedTeamspace
             )
         } else {
@@ -118,8 +120,10 @@ class ItemScreenConfigurationWebsiteProvider(
     ): ItemSubView<String>? {
         val website = item.syncObject.website
         val websiteView = subViewFactory.createSubViewString(
-            context.getString(R.string.personal_website_hint_url), website,
-            false, VaultItem<*>::copyForUpdatedWebsite
+            context.getString(R.string.personal_website_hint_url),
+            website,
+            false,
+            VaultItem<*>::copyForUpdatedWebsite
         )
         return if (websiteView == null || editMode) {
             websiteView
@@ -137,7 +141,8 @@ class ItemScreenConfigurationWebsiteProvider(
         item: VaultItem<SyncObject.PersonalWebsite>
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
-            context.getString(R.string.personal_website_hint_name), item.syncObject.name,
+            context.getString(R.string.personal_website_hint_name),
+            item.syncObject.name,
             false,
             VaultItem<*>::copyForUpdatedName
         )

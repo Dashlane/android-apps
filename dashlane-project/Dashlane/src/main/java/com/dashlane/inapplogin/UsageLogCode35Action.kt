@@ -20,8 +20,6 @@ object UsageLogCode35Action {
     const val EXPAND_ASSOCIATED_DOMAINS = "expandAssociatedDomains"
 }
 
-
-
 internal fun sendAutofillActivationLog(usageLogRepository: UsageLogRepository?, inAppLoginManager: InAppLoginManager) {
     val autofillAction = if (!inAppLoginManager.hasAutofillApiDisabled()) {
         "True"

@@ -5,11 +5,7 @@ import com.dashlane.authentication.sso.utils.UserSsoInfo
 import com.dashlane.authentication.sso.utils.toIdpUrl
 import com.dashlane.authentication.sso.utils.toUserSsoInfo
 
-
-
 object SelfHostedSsoHelper {
-
-    
 
     fun getServiceProviderIntent(serviceProviderUrl: String, login: String): Intent? {
         return Intent(
@@ -17,8 +13,6 @@ object SelfHostedSsoHelper {
             serviceProviderUrl.toIdpUrl(login)
         )
     }
-
-    
 
     fun parseResult(login: String, intent: Intent): GetSsoInfoResult {
         val userSsoInfo = intent.data?.run {

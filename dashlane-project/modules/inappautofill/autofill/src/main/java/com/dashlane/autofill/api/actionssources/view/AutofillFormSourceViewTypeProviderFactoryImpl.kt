@@ -12,8 +12,6 @@ import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.graphics.RemoteImageDrawableWithDominantColorBorders
 import javax.inject.Inject
 
-
-
 class AutofillFormSourceViewTypeProviderFactoryImpl @Inject constructor() : AutofillFormSourceViewTypeProviderFactory {
 
     override fun create(actionedFormSource: ActionedFormSource): AutofillFormSourceViewTypeProviderFactory.AutofillFormSourceWrapper {

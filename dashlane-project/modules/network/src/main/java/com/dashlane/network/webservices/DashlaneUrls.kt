@@ -2,8 +2,6 @@ package com.dashlane.network.webservices
 
 import com.dashlane.network.BuildConfig
 
-
-
 object DashlaneUrls {
     const val URL_WEBSERVICES = BuildConfig.URL_WEBSERVICES
     const val URL_API = BuildConfig.URL_API

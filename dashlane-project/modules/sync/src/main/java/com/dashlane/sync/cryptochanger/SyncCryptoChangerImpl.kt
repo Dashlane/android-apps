@@ -317,15 +317,14 @@ class SyncCryptoChangerImpl @Inject constructor(
     )
 }
 
-
-
 private fun checkOtp2status(
     downloadResponseData: MasterPasswordDownloadService.Data,
     appKey: AppKey
 ) {
     val isServerKeyExpected = downloadResponseData.otpStatus.isServerKeyRequired
-    if (appKey is AppKey.Password && appKey.isServerKeyNotNull != isServerKeyExpected)
+    if (appKey is AppKey.Password && appKey.isServerKeyNotNull != isServerKeyExpected) {
         error("App key OTP2 status mismatch, expected server key: $isServerKeyExpected.")
+    }
 }
 
 private fun XmlDecryptionEngine.decryptTransaction(

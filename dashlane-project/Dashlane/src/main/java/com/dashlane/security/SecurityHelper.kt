@@ -23,8 +23,6 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Provider
 
-
-
 class SecurityHelper @Inject constructor(
     private val lockManager: Lazy<LockManager>,
     private val keyguardManagerProvider: Provider<KeyguardManager>,
@@ -36,8 +34,6 @@ class SecurityHelper @Inject constructor(
 
     private val intentHelper = IntentHelper(packageManagerProvider)
 
-    
-
     fun isDeviceSecured(): Boolean {
         
         if (DeveloperUtilities.isSmoketestAccount(sessionManager.session)) {
@@ -45,8 +41,6 @@ class SecurityHelper @Inject constructor(
         }
         return keyguardManager.isDeviceSecure
     }
-
-    
 
     fun allowedToUsePin(): Boolean =
         isDeviceSecured()
@@ -142,20 +136,14 @@ class SecurityHelper @Inject constructor(
         lockManager.get().setLockType(LockTypeManager.LOCK_TYPE_MASTER_PASSWORD)
     }
 
-    
-
     private class IntentHelper(
         private val packageManagerProvider: Provider<PackageManager>
     ) {
         private val packageManager
             get() = packageManagerProvider.get()
 
-        
-
         fun findEnableDeviceLockIntent(): Intent? =
             IntentRegistry.enableDeviceLockIntentSequence.find(::isAvailableIntent)
-
-        
 
         fun findEnableBiometricsIntent(): Intent? =
             IntentRegistry.enableBiometricsIntentSequence.find(::isAvailableIntent)
@@ -164,19 +152,13 @@ class SecurityHelper @Inject constructor(
             packageManager.queryIntentActivitiesCompat(intent, 0).size > 0
     }
 
-    
-
     private object IntentRegistry {
-
-        
 
         val enableDeviceLockIntentSequence
             get() = sequence {
                 yield(intentSettingsEnableLockScreen)
                 yield(intentSettingsSecurity)
             }
-
-        
 
         val enableBiometricsIntentSequence
             get() = sequence {
@@ -193,13 +175,9 @@ class SecurityHelper @Inject constructor(
         private val intentSettingsEnableLockScreen: Intent
             get() = createSettingsIntent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD)
 
-        
-
         @get:RequiresApi(Build.VERSION_CODES.R)
         private val intentSettingsBiometricsEnroll: Intent
             get() = createSettingsIntent(Settings.ACTION_BIOMETRIC_ENROLL)
-
-        
 
         @get:RequiresApi(Build.VERSION_CODES.R)
         private val intentSettingsBiometricsEnrollStrong: Intent

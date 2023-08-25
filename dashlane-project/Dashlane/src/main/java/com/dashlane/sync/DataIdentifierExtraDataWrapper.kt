@@ -5,8 +5,6 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.serializer.XmlSerializer
 import java.time.Instant
 
-
-
 data class DataIdentifierExtraDataWrapper<T : SyncObject>(
     val vaultItem: VaultItem<T>,
     val extraData: String?,

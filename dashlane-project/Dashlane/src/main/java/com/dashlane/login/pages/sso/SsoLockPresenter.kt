@@ -25,6 +25,8 @@ import com.dashlane.util.getWindowSizeWithoutStatusBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.actor
 
+private const val SSO_EXCEPTION_MESSAGE = "SSO session exception"
+
 class SsoLockPresenter(
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
@@ -34,7 +36,8 @@ class SsoLockPresenter(
     rootPresenter,
     coroutineScope,
     lockManager
-), SsoLockContract.Presenter {
+),
+SsoLockContract.Presenter {
     override val lockTypeName: String
         get() = UsageLogConstant.LockType.sso
 
@@ -107,13 +110,13 @@ class SsoLockPresenter(
                     ),
                     REQUEST_CODE_GET_SSO_USER_INFO
                 )
-            } catch (_: SsoLockContract.NoSessionLoadedException) {
+            } catch (e: SsoLockContract.NoSessionLoadedException) {
                 notifyUnknownError()
             } catch (_: AuthenticationOfflineException) {
                 notifyOffline()
             } catch (_: AuthenticationNetworkException) {
                 notifyNetworkError()
-            } catch (_: AuthenticationUnknownException) {
+            } catch (e: AuthenticationUnknownException) {
                 notifyUnknownError()
             }
         }
@@ -151,13 +154,13 @@ class SsoLockPresenter(
                 notifySuccess()
             } catch (_: AuthenticationInvalidSsoException) {
                 notifyInvalidSsoError()
-            } catch (_: SsoLockContract.NoSessionLoadedException) {
+            } catch (e: SsoLockContract.NoSessionLoadedException) {
                 notifyUnknownError()
             } catch (_: AuthenticationOfflineException) {
                 notifyOffline()
             } catch (_: AuthenticationNetworkException) {
                 notifyNetworkError()
-            } catch (_: AuthenticationUnknownException) {
+            } catch (e: AuthenticationUnknownException) {
                 notifyUnknownError()
             }
         }

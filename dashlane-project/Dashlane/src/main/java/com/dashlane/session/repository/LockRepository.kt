@@ -11,8 +11,6 @@ import com.dashlane.session.SessionObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class LockRepository @Inject constructor(
     private val lockManager: LockManager,

@@ -56,8 +56,6 @@ class SecureArchiveManager @Inject constructor(
     private val archiveReader = XmlArchiveReader()
     private val archiveWriter = XmlArchiveWriter()
 
-    
-
     suspend fun hasData(uri: Uri): Boolean = withContext(Dispatchers.Default) {
         !readSecureArchive(uri)?.data?.value.isNullOrEmpty()
     }

@@ -10,20 +10,17 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dashlane.R
 import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.debug.DaDaDa
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
 import com.dashlane.notification.AutofillReceiver
-import com.dashlane.notification.FcmHelper
-import com.dashlane.notification.NotificationLogger
-import com.dashlane.notification.appendNotificationExtras
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.SplashScreenActivity
 import com.dashlane.useractivity.log.usage.UsageLogCode95
-import com.dashlane.debug.DaDaDa
 import com.dashlane.util.clearTask
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.notification.buildNotification
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,13 +28,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 class AutoFillNotificationCreator @Inject constructor(
     @ApplicationContext
     context: Context,
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     private val inAppLoginManager: InAppLoginManager,
     private val daDaDa: DaDaDa,
     private val globalPreferencesManager: GlobalPreferencesManager
@@ -56,8 +51,6 @@ class AutoFillNotificationCreator @Inject constructor(
         private const val DURATION_DAY_EXISTING_INACTIVE_USER = 7
         private const val DURATION_DAY_EXISTING_ACTIVE_USER = 28
 
-        
-
         @JvmStatic
         fun cancelAutofillNotificationWorkers(context: Context) {
             val workManager = WorkManager.getInstance(context)
@@ -67,11 +60,9 @@ class AutoFillNotificationCreator @Inject constructor(
         }
     }
 
-    
-
     fun createForNewUser() {
         if (!isEligibleForNotification()) return
-        globalCoroutineScope.launch {
+        applicationCoroutineScope.launch {
             workManager.createPeriodicIfNonExist<AutoFillNotificationWorker>(
                 TAG_NEW_USER,
                 duration = getDurationNewUser(),
@@ -80,11 +71,9 @@ class AutoFillNotificationCreator @Inject constructor(
         }
     }
 
-    
-
     fun createForExistingUser() {
         if (!isEligibleForNotification()) return
-        globalCoroutineScope.launch {
+        applicationCoroutineScope.launch {
             
             
             if (workManager.getWorkInfosByTag(TAG_NEW_USER).await().isNotEmpty()) return@launch
@@ -106,15 +95,11 @@ class AutoFillNotificationCreator @Inject constructor(
         }
     }
 
-    
-
     private suspend fun isActive(): Boolean {
         val newUser = workManager.getWorkInfosByTag(TAG_NEW_USER)
         val isInactiveUser = workManager.getWorkInfosByTag(TAG_EXISTING_USER_INACTIVE)
         return newUser.await().isEmpty() && isInactiveUser.await().isNotEmpty()
     }
-
-    
 
     private fun isEligibleForNotification(): Boolean {
         val isNotificationEligible = inAppLoginManager.hasAutofillApiDisabled()
@@ -157,16 +142,12 @@ class AutoFillNotificationCreator @Inject constructor(
         getWorkManagerDuration(DURATION_DAY_EXISTING_ACTIVE_USER, 19)
     }
 
-    
-
     class AutoFillNotificationWorker(
         context: Context,
         params: WorkerParameters
     ) : Worker(context, params) {
 
         private val inAppLoginManager: InAppLoginManager by lazy { SingletonProvider.getComponent().inAppLoginManager }
-
-        private val fcmHelper: FcmHelper by lazy { SingletonProvider.getFcmHelper() }
 
         override fun doWork(): Result {
             if (!inAppLoginManager.hasAutofillApiDisabled()) return Result.success()
@@ -182,11 +163,13 @@ class AutoFillNotificationCreator @Inject constructor(
                 clearTask()
                 action = Intent.ACTION_VIEW
                 data = uri
-                appendNotificationExtras(NotificationLogger.NotificationType.AUTO_FILL_REMINDER.typeName)
             }
 
             val pendingIntent = PendingIntent.getActivity(
-                context, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                context,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
             val positiveAction = NotificationCompat.Action(
@@ -224,8 +207,11 @@ class AutoFillNotificationCreator @Inject constructor(
                 addAction(positiveAction)
                 addAction(negativeAction)
             }
-            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
-            fcmHelper.logDisplay(NotificationLogger.NotificationType.AUTO_FILL_REMINDER.typeName)
+            try {
+                NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+            } catch (e: SecurityException) {
+                
+            }
             return Result.success()
         }
     }

@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Intent
 import android.widget.Toast
 import androidx.preference.PreferenceGroup
-import com.dashlane.CipherDatabaseUtils
 import com.dashlane.cryptography.DecryptionEngine
 import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.cryptography.decryptFileToUtf8String
@@ -13,17 +12,16 @@ import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.session.Session
 import com.dashlane.session.repository.RacletteDatabase
 import com.dashlane.session.repository.UserDatabaseRepository
-import com.dashlane.session.repository.isLegacyDatabaseExist
 import com.dashlane.util.FileUtils
 import com.dashlane.util.showToaster
 import com.dashlane.vault.summary.groupBySyncObjectType
-import java.io.File
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.encodeUtf8
 import org.json.JSONObject
+import java.io.File
 import kotlin.math.round
 
 internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCategory(debugActivity) {
@@ -37,9 +35,6 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
     private val racletteDatabase: RacletteDatabase?
         get() = userDatabaseRepository.getRacletteDatabase(session)
 
-    private val isLegacyDatabaseExist: Boolean
-        get() = session.isLegacyDatabaseExist(debugActivity)
-
     private val isRacletteDatabaseExist: Boolean
         get() = SingletonProvider.getComponent().databaseProvider.exist(session.userId)
 
@@ -47,27 +42,13 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
         get() = SingletonProvider.getComponent().cryptography
             .createDecryptionEngine(session.localKey.cryptographyKey)
 
-    override fun addSubItems(group: PreferenceGroup?) {
-        val legacyDatabaseFile =
-            debugActivity.getDatabasePath(CipherDatabaseUtils.getDatabaseName(session.userId))
-
+    override fun addSubItems(group: PreferenceGroup) {
         addPreferenceCheckbox(
             group,
-            "isLegacyDatabaseExist",
+            "isRacletteDatabaseExist",
             null,
-            isLegacyDatabaseExist,
+            isRacletteDatabaseExist,
             false,
-            null
-        )
-        addPreferenceButton(
-            group,
-            "legacy database size",
-            legacyDatabaseFile.walkTopDown().map { it.length() }.sum().toSize(),
-            null
-        )
-
-        addPreferenceCheckbox(
-            group, "isRacletteDatabaseExist", null, isRacletteDatabaseExist, false,
             null
         )
 
@@ -75,9 +56,10 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
         addRacletteItems(group, racletteDatabase)
     }
 
-    override fun getName(): String = "Raclette"
+    override val name: String
+        get() = "Raclette"
 
-    private fun addRacletteItems(group: PreferenceGroup?, racletteDatabase: RacletteDatabase) {
+    private fun addRacletteItems(group: PreferenceGroup, racletteDatabase: RacletteDatabase) {
         val databaseName = session.userId.encodeUtf8().sha256().hex() + ".aes"
 
         val file = File(File(debugActivity.filesDir, "databases"), databaseName)
@@ -106,24 +88,32 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
         addPreferenceButton(group, "SyncSummary", decSyncMemory) { showFile(syncSummaryFile) }
 
         addPreferenceButton(
-            group, "DataChangeHistorySummary", racletteDatabase.memorySummaryRepository
+            group,
+            "DataChangeHistorySummary",
+            racletteDatabase.memorySummaryRepository
                 .databaseDataChangeHistorySummary?.data?.size.toString()
         ) { showFile(dataChangeHistorySummaryFile) }
 
         addPreferenceButton(
-            group, "Sharing ItemGroups", racletteDatabase.sharingRepository
+            group,
+            "Sharing ItemGroups",
+            racletteDatabase.sharingRepository
                 .loadItemGroups()
                 .size.toString()
         ) { showFile(sharingItemGroupsFile) }
 
         addPreferenceButton(
-            group, "Sharing UserGroups", racletteDatabase.sharingRepository
+            group,
+            "Sharing UserGroups",
+            racletteDatabase.sharingRepository
                 .loadUserGroups()
                 .size.toString()
         ) { showFile(sharingUserGroupsFile) }
 
         addPreferenceButton(
-            group, "Sharing ItemContent", racletteDatabase.sharingRepository
+            group,
+            "Sharing ItemContent",
+            racletteDatabase.sharingRepository
                 .loadItemContents()
                 .size.toString()
         ) { showFile(sharingItemContentsFile) }
@@ -131,7 +121,7 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
 
     private fun addSizeItems(
         file: File,
-        group: PreferenceGroup?,
+        group: PreferenceGroup,
         summaryFile: File,
         syncSummaryFile: File,
         dataChangeHistorySummaryFile: File
@@ -199,7 +189,10 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
     }
 
     private fun Long.toSize() = (round(this / 1024.0 * 100) / 100).let {
-        if (it > 1024) "${round(it / 1024 * 100) / 100} MB"
-        else "$it KB"
+        if (it > 1024) {
+            "${round(it / 1024 * 100) / 100} MB"
+        } else {
+            "$it KB"
+        }
     }
 }

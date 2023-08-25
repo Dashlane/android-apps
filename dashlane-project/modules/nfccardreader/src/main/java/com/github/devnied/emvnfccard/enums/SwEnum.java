@@ -1,10 +1,6 @@
-
-
 package com.github.devnied.emvnfccard.enums;
 
 import com.github.devnied.emvnfccard.utils.BytesUtils;
-
-
 
 public enum SwEnum {
 
@@ -184,34 +180,22 @@ public enum SwEnum {
     SW_9F00("9F00", "PIN blocked and Unblock Try Counter is 3"),
     SW_9F04("9F04", "PIN not succesfully verified, PIN blocked and Unblock Try Counter is 3");
 
-    
-
     private final byte[] status;
 
-    
-
     private final String detail;
-
-    
 
     private SwEnum(final String pStatus, final String pDetail) {
         status = BytesUtils.fromString(pStatus);
         detail = pDetail;
     }
 
-    
-
     public byte[] getStatus() {
         return status;
     }
 
-    
-
     public String getDetail() {
         return detail;
     }
-
-    
 
     public static SwEnum getSW(final byte[] pData) {
         SwEnum ret = null;

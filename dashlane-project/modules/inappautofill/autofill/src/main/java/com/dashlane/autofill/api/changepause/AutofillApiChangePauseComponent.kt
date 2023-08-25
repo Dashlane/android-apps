@@ -4,8 +4,6 @@ import android.content.Context
 import com.dashlane.autofill.api.changepause.services.ChangePauseStrings
 import com.dashlane.autofill.api.changepause.view.ChangePauseViewTypeProviderFactory
 
-
-
 interface AutofillApiChangePauseComponent {
     val autofillApiChangePauseLogger: AutofillApiChangePauseLogger
     val changePauseViewTypeProviderFactory: ChangePauseViewTypeProviderFactory

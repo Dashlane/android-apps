@@ -14,8 +14,6 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
     private var state = TlvInputState()
     private var markedState: TlvInputState? = null
 
-    
-
     init {
         try {
             if (inputStream is BufferedInputStream || inputStream is ByteArrayInputStream) {
@@ -25,8 +23,6 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
             
         }
     }
-
-    
 
     @Throws(IOException::class)
     fun readTag(): Int {
@@ -63,8 +59,6 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         }
     }
 
-    
-
     @Throws(IOException::class)
     fun readLength() = try {
         check(state.isAtStartOfLength) { "Not at start of length" }
@@ -72,11 +66,7 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         var length: Int
         var b = inputStream.readUnsignedByte()
         bytesRead++
-        if (b and 0x80 == 0x00) { 
-
             length = b
-        } else { 
-
             val count = b and 0x7F
             length = 0
             (0 until count).forEach { _ ->
@@ -92,8 +82,6 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         throw e
     }
 
-    
-
     @Throws(IOException::class)
     fun readValue() = try {
         check(state.isProcessingValue) { "Not yet processing value!" }
@@ -106,12 +94,8 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         throw e
     }
 
-    
-
     @Throws(IOException::class)
     override fun available() = inputStream.available()
-
-    
 
     @Throws(IOException::class)
     override fun read(): Int {
@@ -123,8 +107,6 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         return result
     }
 
-    
-
     @Throws(IOException::class)
     override fun skip(n: Long): Long {
         if (n <= 0) {
@@ -135,19 +117,13 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         return result
     }
 
-    
-
     @Synchronized
     override fun mark(readLimit: Int) {
         inputStream.mark(readLimit)
         markedState = TlvInputState(state)
     }
 
-    
-
     override fun markSupported() = inputStream.markSupported()
-
-    
 
     @Synchronized
     @Throws(IOException::class)
@@ -160,18 +136,12 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         markedState = null
     }
 
-    
-
     @Throws(IOException::class)
     override fun close() = inputStream.close()
 
     override fun toString() = state.toString()
 
-    
-
     private inner class TlvInputState private constructor(
-        
-
         private val state: Deque<TlStruct>,
         var isAtStartOfTag: Boolean,
         var isAtStartOfLength: Boolean,
@@ -201,8 +171,6 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         fun setTagProcessed(
             tag: Int,
             byteCount: Int
-        ) { 
-
             val obj = TlStruct(tag)
             if (!state.isEmpty()) {
                 val parent = state.peek()!!

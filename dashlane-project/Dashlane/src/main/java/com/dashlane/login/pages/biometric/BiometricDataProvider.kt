@@ -1,8 +1,8 @@
 package com.dashlane.login.pages.biometric
 
 import androidx.biometric.BiometricPrompt
-import com.dashlane.accountrecovery.AccountRecovery
-import com.dashlane.accountrecovery.AccountRecoveryIntroDialogActivity
+import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.biometricrecovery.MasterPasswordResetIntroDialogActivity
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.login.LoginSuccessIntentFactory
 import com.dashlane.login.lock.LockManager
@@ -21,10 +21,15 @@ class BiometricDataProvider @Inject constructor(
     sessionManager: SessionManager,
     lockManager: LockManager,
     inAppLoginManager: InAppLoginManager,
-    val accountRecovery: AccountRecovery,
+    val biometricRecovery: BiometricRecovery,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
-) : LoginLockBaseDataProvider<BiometricContract.Presenter>(lockManager, successIntentFactory, inAppLoginManager,
-    sessionManager, bySessionUsageLogRepository),
+) : LoginLockBaseDataProvider<BiometricContract.Presenter>(
+    lockManager,
+    successIntentFactory,
+    inAppLoginManager,
+    sessionManager,
+    bySessionUsageLogRepository
+),
     BiometricContract.DataProvider {
 
     override val username = sessionManager.session?.userId ?: ""
@@ -34,21 +39,17 @@ class BiometricDataProvider @Inject constructor(
         biometricAuthModule.referrer = lockSetting.lockReferrer
     }
 
-    override fun onShow() {
-    }
-
-    override fun onBack() {
-    }
-
-    override fun createAccountRecoveryIntroActivityIntent() = presenter.activity?.let { activity ->
-        if (accountRecovery.isFeatureAvailable && !accountRecovery.isFeatureKnown) {
-            AccountRecoveryIntroDialogActivity.newIntent(activity)
+    override fun createMasterPasswordResetIntroActivityIntent() = presenter.activity?.let { activity ->
+        if (biometricRecovery.isFeatureAvailable && !biometricRecovery.isFeatureKnown) {
+            MasterPasswordResetIntroDialogActivity.newIntent(activity)
         } else {
             null
         }
     }
 
-    override fun challengeAuthentication(cryptoObject: BiometricPrompt.CryptoObject?): Boolean {
+    override fun challengeAuthentication(cryptoObject: BiometricPrompt.CryptoObject): Boolean {
         return lockManager.unlock(LockPass.ofBiometric(cryptoObject))
     }
+
+    override fun unlockWeakBiometric(): Boolean = lockManager.unlock(LockPass.ofWeakBiometric())
 }

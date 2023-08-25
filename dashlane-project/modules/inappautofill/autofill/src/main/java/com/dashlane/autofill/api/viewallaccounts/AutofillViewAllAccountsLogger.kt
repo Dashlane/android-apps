@@ -4,12 +4,6 @@ import com.dashlane.autofill.AutofillOrigin
 import com.dashlane.ui.adapter.ItemListContext
 
 interface AutofillViewAllAccountsLogger {
-    fun onClickToViewAllAccounts(
-        @AutofillOrigin origin: Int,
-        packageName: String,
-        webappDomain: String,
-        hasCredentials: Boolean
-    )
 
     fun onResultsLoaded()
 

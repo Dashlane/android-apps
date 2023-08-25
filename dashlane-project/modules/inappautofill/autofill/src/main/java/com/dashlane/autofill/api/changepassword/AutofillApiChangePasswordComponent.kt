@@ -4,8 +4,6 @@ import android.content.Context
 import com.dashlane.autofill.api.changepassword.domain.AutofillUpdateAccountService
 import com.dashlane.util.Toaster
 
-
-
 interface AutofillApiChangePasswordComponent {
     val autofillUpdateAccountService: AutofillUpdateAccountService
     val changePasswordLogger: AutofillChangePasswordLogger

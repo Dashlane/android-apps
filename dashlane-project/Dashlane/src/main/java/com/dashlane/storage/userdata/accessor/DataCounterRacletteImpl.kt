@@ -6,8 +6,6 @@ import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import dagger.Lazy
 import javax.inject.Inject
 
-
-
 class DataCounterRacletteImpl @Inject constructor(
     private val dataStorageProvider: Lazy<DataStorageProvider>,
     private val lockHelper: LockHelper

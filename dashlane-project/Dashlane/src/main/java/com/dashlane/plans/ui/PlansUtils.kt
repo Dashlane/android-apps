@@ -6,8 +6,6 @@ import com.dashlane.core.premium.PremiumStatus
 
 object PlansUtils {
 
-    
-
     fun getTitle(context: Context, premiumStatus: PremiumStatus): String {
         val isPremiumPlus = premiumStatus.premiumPlan.isPremiumPlus
         val isAdvanced = premiumStatus.premiumPlan.isAdvanced

@@ -3,8 +3,6 @@ package com.dashlane.autofill.api.actionssources.model
 import android.content.pm.ApplicationInfo
 import com.dashlane.ext.application.KnownApplication
 
-
-
 sealed class ActionedFormSourceIcon {
 
     data class InstalledApplicationIcon(val applicationInfo: ApplicationInfo) : ActionedFormSourceIcon()

@@ -1,7 +1,7 @@
 package com.dashlane.createaccount
 
 import android.widget.EditText
-import com.dashlane.accountrecovery.AccountRecovery
+import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.analytics.referrer.ReferrerManager
 import com.dashlane.authentication.TermsOfService
 import com.dashlane.authentication.create.AccountCreationRepository
@@ -27,25 +27,19 @@ import com.dashlane.session.SessionTrasher
 import com.dashlane.session.Username
 import com.dashlane.session.VaultKey
 import com.dashlane.session.repository.LockRepository
-import com.dashlane.useractivity.log.install.InstallLogCode17
-import com.dashlane.useractivity.log.install.InstallLogRepository
-import com.dashlane.usersupportreporter.UserSupportFileLogger
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
-import com.dashlane.util.installlogs.DataLossTrackingLogger
 import com.dashlane.xml.domain.SyncObject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-
-
 
 class AccountCreatorImpl @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
@@ -53,15 +47,13 @@ class AccountCreatorImpl @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
     private val accountCreationRepository: AccountCreationRepository,
     private val sessionInitializer: SessionInitializer,
-    private val userSupportFileLogger: UserSupportFileLogger,
     private val userPreferencesManager: UserPreferencesManager,
     private val accountCreationSetup: AccountCreationSetup,
     private val sessionTrasher: SessionTrasher,
     private val localNotificationCreator: LocalNotificationCreator,
     private val lockManager: LockManager,
-    private val installLogRepository: InstallLogRepository,
     private val authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
-    private val accountRecovery: AccountRecovery,
+    private val biometricRecovery: BiometricRecovery,
     private val daDaDa: DaDaDa
 ) : AccountCreator {
 
@@ -70,8 +62,6 @@ class AccountCreatorImpl @Inject constructor(
 
     override val isGdprForced: Boolean
         get() = daDaDa.isGdprForced
-
-    
 
     override suspend fun createAccount(
         username: String,
@@ -99,7 +89,6 @@ class AccountCreatorImpl @Inject constructor(
             userSettings = result.settings,
             sharingPublicKey = result.sharingKeys.public,
             sharingPrivateKey = result.sharingKeys.private,
-            emailConsentsGiven = termsState?.offers,
             accountReset = result.isAccountReset,
             origin = result.origin,
             remoteKey = result.remoteKey,
@@ -136,7 +125,6 @@ class AccountCreatorImpl @Inject constructor(
             userSettings = result.settings,
             sharingPublicKey = result.sharingKeys.public,
             sharingPrivateKey = result.sharingKeys.private,
-            emailConsentsGiven = termsState?.offers,
             accountReset = result.isAccountReset,
             origin = result.origin,
             remoteKey = result.remoteKey,
@@ -171,7 +159,6 @@ class AccountCreatorImpl @Inject constructor(
         userSettings: SyncObject.Settings,
         sharingPublicKey: SharingKeys.Public,
         sharingPrivateKey: SharingKeys.Private,
-        emailConsentsGiven: Boolean?,
         accountReset: Boolean,
         origin: String?,
         remoteKey: VaultKey.RemoteKey?,
@@ -184,7 +171,6 @@ class AccountCreatorImpl @Inject constructor(
     ) {
         val username = Username.ofEmail(email)
         if (accountReset) {
-            DataLossTrackingLogger(installLogRepository).log(DataLossTrackingLogger.Reason.CREATE_ACCOUNT_RESET)
             sessionTrasher.trash(username)
         }
         val localKeyResult =
@@ -214,13 +200,12 @@ class AccountCreatorImpl @Inject constructor(
                 finishAccountCreation(
                     session,
                     origin,
-                    emailConsentsGiven,
-                    accountReset,
                     biometricEnabled,
                     resetMpEnabled,
                     appKey
                 )
             }
+
             is SessionResult.Error -> throw AccountCreator.CannotInitializeSessionException(sessionResult.cause)
         }
     }
@@ -228,34 +213,26 @@ class AccountCreatorImpl @Inject constructor(
     private suspend fun finishAccountCreation(
         session: Session,
         origin: String?,
-        emailConsentsGiven: Boolean?,
-        isAccountReset: Boolean,
         biometricEnabled: Boolean,
         resetMpEnabled: Boolean,
         appKey: AppKey
     ) {
         val username = session.userId
-        userSupportFileLogger.add("Account Creation: $username")
         runCatching {
-            accountCreationSetup.setupCreatedAccount(username, isAccountReset, origin, emailConsentsGiven)
+            accountCreationSetup.setupCreatedAccount(username = username, userOrigin = origin)
         }
 
-        installLogRepository.enqueue(InstallLogCode17(subStep = "26"))
         ReferrerManager.getInstance().accountHasBeenCreated()
         localNotificationCreator.registerAccountCreation()
 
         lockManager.unlock(LockPass.ofPassword(appKey))
         if (biometricEnabled) {
-            installLogRepository.enqueue(InstallLogCode17(subStep = "37"))
-            globalCoroutineScope.launch(defaultCoroutineDispatcher) {
+            applicationCoroutineScope.launch(defaultCoroutineDispatcher) {
                 enableBiometric(session)
                 if (resetMpEnabled) {
                     enableResetMp()
-                    installLogRepository.enqueue(InstallLogCode17(subStep = "37.1"))
                 }
             }
-        } else {
-            installLogRepository.enqueue(InstallLogCode17(subStep = "38"))
         }
     }
 
@@ -273,8 +250,8 @@ class AccountCreatorImpl @Inject constructor(
 
     private fun enableResetMp() {
         
-        accountRecovery.isFeatureKnown = true
-        accountRecovery.setFeatureEnabled(
+        biometricRecovery.isFeatureKnown = true
+        biometricRecovery.setFeatureEnabled(
             true,
             "accountCreation"
         )

@@ -7,6 +7,7 @@ import com.dashlane.authentication.AuthenticationInvalidEmailException
 import com.dashlane.authentication.AuthenticationNetworkException
 import com.dashlane.authentication.AuthenticationOfflineException
 import com.dashlane.authentication.AuthenticationSecondFactor
+import com.dashlane.authentication.AuthenticationTeamException
 import com.dashlane.authentication.AuthenticationUnknownException
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
@@ -31,6 +32,7 @@ import com.dashlane.server.api.endpoints.authentication.AuthVerification
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceDeactivatedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceNotFoundException
 import com.dashlane.server.api.endpoints.authentication.exceptions.SsoBlockedException
+import com.dashlane.server.api.endpoints.authentication.exceptions.TeamGenericErrorException
 import com.dashlane.server.api.endpoints.authentication.exceptions.UserNotFoundException
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.exceptions.DashlaneApiHttp400BusinessException
@@ -90,8 +92,6 @@ class AuthenticationEmailRepositoryImpl(
             }
         }
     }
-
-    
 
     private suspend fun fetchOrRestoreUserStatus(
         login: String,
@@ -156,6 +156,8 @@ class AuthenticationEmailRepositoryImpl(
             throw AuthenticationAccountNotFoundException(cause = e)
         } catch (e: SsoBlockedException) {
             throw AuthenticationContactSsoAdministratorException(cause = e)
+        } catch (e: TeamGenericErrorException) {
+            throw AuthenticationTeamException(cause = e)
         } catch (e: DashlaneApiException) {
             throw e.toAuthenticationException(endpoint = AuthenticationNetworkException.Endpoint.REGISTRATION)
         }
@@ -230,8 +232,6 @@ class AuthenticationEmailRepositoryImpl(
             else -> throw AuthenticationUnknownException(message = "Unknown verification")
         }
     }
-
-    
 
     private suspend fun resetUser(
         login: String,

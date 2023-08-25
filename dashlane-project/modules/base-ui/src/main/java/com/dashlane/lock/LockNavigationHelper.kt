@@ -13,7 +13,7 @@ interface LockNavigationHelper {
         customMessage: String?
     )
 
-    fun showLockForAccountReset(
+    fun showLockForBiometricRecovery(
         activity: Activity,
         requestCode: Int,
         customMessage: String?,
@@ -35,8 +35,6 @@ interface LockNavigationHelper {
     fun showLockActivity(context: Context)
 
     fun logoutAndCallLoginScreenForInAppLogin(context: Context)
-
-    
 
     suspend fun showAndWaitLockActivityForItem(context: Context, item: SummaryObject): UnlockEvent?
 }

@@ -1,8 +1,8 @@
 package com.dashlane.premium.current
 
 import com.dashlane.premium.current.model.CurrentPlanType
-import com.dashlane.premium.current.model.CurrentPlanType.B2B
 import com.dashlane.premium.current.model.CurrentPlanType.ADVANCED
+import com.dashlane.premium.current.model.CurrentPlanType.B2B
 import com.dashlane.premium.current.model.CurrentPlanType.ESSENTIALS
 import com.dashlane.premium.current.model.CurrentPlanType.FAMILY_ADMIN
 import com.dashlane.premium.current.model.CurrentPlanType.FAMILY_INVITEE
@@ -39,7 +39,10 @@ internal class CurrentPlanDataProvider(
 
     override fun isVpnAllowed() = userFeaturesChecker.canShowVpn()
 
-    override fun getBenefits() = CurrentBenefitsBuilder(userFeaturesChecker = userFeaturesChecker).build()
+    override fun getBenefits() = CurrentBenefitsBuilder(
+        userFeaturesChecker =
+    userFeaturesChecker
+    ).build(getType().isFamily())
 
     override fun getType(): CurrentPlanType {
         if (statusProvider.isB2bUser()) {
@@ -64,4 +67,7 @@ internal class CurrentPlanDataProvider(
             Unknown -> UNKNOWN
         }
     }
+
+    private fun CurrentPlanType.isFamily() =
+        this == FAMILY_INVITEE || this == FAMILY_ADMIN
 }

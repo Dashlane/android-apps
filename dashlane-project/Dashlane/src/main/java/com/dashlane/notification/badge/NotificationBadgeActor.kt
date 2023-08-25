@@ -1,9 +1,8 @@
 package com.dashlane.notification.badge
 
 import com.dashlane.notificationcenter.NotificationCenterRepository
-import com.dashlane.storage.userdata.Database
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -17,26 +16,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class NotificationBadgeActor @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val sharingInvitationRepository: SharingInvitationRepository,
     private val actionItemsRepository: NotificationCenterRepository
-) : Database.OnUpdateListener {
-
-    override fun onInsertOrUpdate(database: Database?) {
-        refresh()
-    }
-
-    
-
+) {
     @Suppress("EXPERIMENTAL_API_USAGE")
     private val resultBroadcastChannel = BroadcastChannel<Result>(capacity = Channel.CONFLATED)
 
@@ -44,24 +34,18 @@ class NotificationBadgeActor @Inject constructor(
     private val lastResult: Result
         get() = openStateSubscription().consume { tryReceive().getOrNull() } ?: Result()
 
-    
-
     val hasUnread: Boolean
         get() = hasSharing || hasUnReadActionItems
 
-    
-
     val hasSharing: Boolean
         get() = lastResult.hasSharing
-
-    
 
     val hasUnReadActionItems: Boolean
         get() = lastResult.hasUnReadActionItems
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private val actor =
-        globalCoroutineScope.actor<Unit>(context = defaultCoroutineDispatcher, capacity = Channel.CONFLATED) {
+        applicationCoroutineScope.actor<Unit>(context = defaultCoroutineDispatcher, capacity = Channel.CONFLATED) {
             consumeEach {
                 val hasSharingDeferred = async { sharingInvitationRepository.hasInvitations() }
                 val hasUnReadActionItemsDeferred = async { actionItemsRepository.hasAtLeastOneUnRead() }
@@ -73,13 +57,9 @@ class NotificationBadgeActor @Inject constructor(
             }
         }
 
-    
-
     fun refresh() {
         actor.trySend(Unit)
     }
-
-    
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     fun subscribe(coroutineScope: CoroutineScope, listener: NotificationBadgeListener) {
@@ -90,8 +70,6 @@ class NotificationBadgeActor @Inject constructor(
         }
     }
 
-    
-
     @Suppress("EXPERIMENTAL_API_USAGE")
     private fun broadcastIfNeeded(result: Result) {
         if (result != lastResult) {
@@ -99,13 +77,9 @@ class NotificationBadgeActor @Inject constructor(
         }
     }
 
-    
-
     @Suppress("EXPERIMENTAL_API_USAGE")
     private fun openStateSubscription() = resultBroadcastChannel.openSubscription()
 }
-
-
 
 private data class Result(
     val hasSharing: Boolean = false,

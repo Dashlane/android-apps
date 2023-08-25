@@ -10,8 +10,6 @@ import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.skocken.presentation.definition.Base
 
-
-
 interface DarkWebMonitoringContract {
 
     interface ViewProxy : Base.IView {

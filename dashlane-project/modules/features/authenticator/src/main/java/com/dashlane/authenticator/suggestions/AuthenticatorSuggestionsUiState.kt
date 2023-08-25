@@ -8,23 +8,13 @@ import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 sealed class AuthenticatorSuggestionsUiState {
-    
-
     object Progress : AuthenticatorSuggestionsUiState()
-
-    
 
     object NoLogins : AuthenticatorSuggestionsUiState()
 
-    
-
     object AllSetup : AuthenticatorSuggestionsUiState()
 
-    
-
     object SetupComplete : AuthenticatorSuggestionsUiState()
-
-    
 
     data class HasLogins(
         val logins: List<CredentialItem>,
@@ -39,8 +29,6 @@ sealed class AuthenticatorSuggestionsUiState {
             val packageName: String? = null,
             val professional: Boolean = false
         ) : DashlaneRecyclerAdapter.ViewTypeProvider, Parcelable {
-            
-
             @IgnoredOnParcel
             var layout = R.layout.authenticator_credential_item
             override fun getViewType() = DashlaneRecyclerAdapter.ViewType(

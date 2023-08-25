@@ -24,8 +24,6 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-
 abstract class GeneratePasswordPresenter<P : GeneratePasswordContract.DataProvider, V : GeneratePasswordContract.ViewProxy>(
     private val coroutineScope: CoroutineScope,
     private val logger: AutofillGeneratePasswordLogger,
@@ -110,8 +108,6 @@ abstract class GeneratePasswordPresenter<P : GeneratePasswordContract.DataProvid
         generatePasswordActor.trySend(criteria)
         provider.setPasswordGeneratorDefaultConfiguration(criteria)
     }
-
-    
 
     override suspend fun saveGeneratedPasswordIfUsed(result: VaultItem<SyncObject.Authentifiant>) {
         val authentifiant = result.syncObject

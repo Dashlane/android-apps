@@ -13,8 +13,6 @@ import com.skocken.presentation.viewholder.PresenterViewHolder;
 
 import androidx.annotation.Nullable;
 
-
-
 public class MenuItemViewHolder extends PresenterViewHolder<MenuDef.Item, MenuItemDef.IPresenter>
         implements MenuItemDef.IView {
 

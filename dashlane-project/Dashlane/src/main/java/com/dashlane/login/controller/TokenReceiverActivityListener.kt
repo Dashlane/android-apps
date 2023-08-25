@@ -19,8 +19,6 @@ import com.dashlane.util.Toaster
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class TokenReceiverActivityListener @Inject constructor(
     private val sessionManager: SessionManager,

@@ -1,10 +1,5 @@
 package com.dashlane.masterpassword
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.account.UserSecuritySettings
 import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
@@ -17,7 +12,9 @@ import com.dashlane.cryptography.encodeUtf8ToByteArray
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.cryptography.toCryptographyMarkerOrNull
 import com.dashlane.cryptography.use
+import com.dashlane.debug.DaDaDa
 import com.dashlane.exception.NotLoggedInException
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.login.LoginMode
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
@@ -36,14 +33,9 @@ import com.dashlane.storage.securestorage.LocalKeyRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureDataStorage
 import com.dashlane.storage.securestorage.SecureStorageManager
-import com.dashlane.storage.userdata.Database
-import com.dashlane.sync.SyncComponent
 import com.dashlane.sync.cryptochanger.SyncCryptoChanger
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode134
-import com.dashlane.util.Constants
-import com.dashlane.debug.DaDaDa
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
@@ -55,39 +47,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 interface MasterPasswordChanger : ActivateTotpServerKeyChanger {
-    
-
     val canChangeMasterPassword: Boolean
-
-    
 
     val job: Job?
 
-    
-
     val progressStateFlow: StateFlow<Progress>
-
-    
 
     suspend fun updateMasterPassword(
         newPassword: ObfuscatedByteArray,
         uploadReason: MasterPasswordUploadService.Request.UploadReason?
     ): Boolean
 
-    
-
     suspend fun migrateToMasterPasswordUser(
         newPassword: ObfuscatedByteArray,
         authTicket: String
     ): Boolean
-
-    
 
     suspend fun migrateToSsoMember(
         ssoKey: AppKey.SsoKey,
@@ -95,53 +72,31 @@ interface MasterPasswordChanger : ActivateTotpServerKeyChanger {
         ssoServerKey: ByteArray
     ): Boolean
 
-    
-
     suspend fun reset()
-
-    
 
     sealed class Progress {
 
-        
-
         object Initializing : Progress()
-
-        
 
         object Downloading : Progress()
 
-        
-
         class Ciphering(val index: Int, val total: Int) : Progress()
-
-        
 
         object Uploading : Progress()
 
         object Confirmation : Progress()
 
         sealed class Completed : Progress() {
-            
-
             data class Error(val progress: Progress? = null, val error: Exception) : Completed()
-
-            
 
             object Success : Completed()
         }
     }
 
-    
-
     class SyncFailedException : Exception()
-
-    
 
     class NotLocalKeyMigratedException : Exception()
 }
-
-
 
 @Singleton
 class MasterPasswordChangerImpl @Inject constructor(
@@ -158,7 +113,7 @@ class MasterPasswordChangerImpl @Inject constructor(
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
     private val dataStorageProvider: Lazy<DataStorageProvider>,
     private val dadada: DaDaDa,
-    private val localBroadcastManagerProvider: Provider<LocalBroadcastManager>,
+    private val syncCryptoChanger: SyncCryptoChanger
 ) : MasterPasswordChanger {
 
     private val teamspaceAccessor: TeamspaceAccessor?
@@ -168,40 +123,21 @@ class MasterPasswordChangerImpl @Inject constructor(
         get() = teamspaceAccessor?.getFeatureValue(Teamspace.Feature.CRYPTO_FORCED_PAYLOAD)
             ?.toCryptographyMarkerOrNull()
 
-    
-
     override val canChangeMasterPassword: Boolean
         get() {
             val session = sessionManager.session ?: return false
-            return runCatching {
-                if (dataStorageProvider.get().useRaclette) {
-                    userDatabaseRepository.isRacletteDatabaseAccessible(session)
-                } else {
-                    val localKey = session.localKey
-                    val rawKey = Database.RawKey(localKey)
-                    
-                    userDatabaseRepository.getDatabase(session)!!.isDecryptable(rawKey)
-                }
-            }.getOrDefault(false)
+            return userDatabaseRepository.isRacletteDatabaseAccessible(session)
         }
 
     override var job: Job? = null
     override val progressStateFlow =
         MutableStateFlow<MasterPasswordChanger.Progress>(MasterPasswordChanger.Progress.Initializing)
 
-    private val syncComponent: SyncComponent
-        get() = dataSync.get().syncComponent
-
     override suspend fun reset() {
         job?.cancelAndJoin()
         job = null
         progressStateFlow.value = MasterPasswordChanger.Progress.Initializing
     }
-
-    private val localBroadcastManager
-        get() = localBroadcastManagerProvider.get()
-
-    
 
     override suspend fun updateMasterPassword(
         newPassword: ObfuscatedByteArray,
@@ -232,8 +168,6 @@ class MasterPasswordChangerImpl @Inject constructor(
         return changeMasterPassword(securityUpdate, uploadReason)
     }
 
-    
-
     override suspend fun migrateToMasterPasswordUser(
         newPassword: ObfuscatedByteArray,
         authTicket: String
@@ -253,8 +187,6 @@ class MasterPasswordChangerImpl @Inject constructor(
         )
         return changeMasterPassword(securityUpdate)
     }
-
-    
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     override suspend fun migrateToSsoMember(
@@ -312,7 +244,11 @@ class MasterPasswordChangerImpl @Inject constructor(
             if (newServerKey == null) {
                 sessionCredentialsSaver.removeServerKey(session.username)
             } else {
-                sessionCredentialsSaver.saveServerKey(newServerKey.encodeUtf8ToByteArray(), session.localKey, session.username)
+                sessionCredentialsSaver.saveServerKey(
+                    newServerKey.encodeUtf8ToByteArray(),
+                    session.localKey,
+                    session.username
+                )
             }
         }
     }
@@ -346,7 +282,7 @@ class MasterPasswordChangerImpl @Inject constructor(
 
         return try {
             val newSettings = withContext(Dispatchers.Default) {
-                syncComponent.syncCryptoChanger.updateCryptography(
+                syncCryptoChanger.updateCryptography(
                     authorization = session.authorization,
                     userKeys = session.userKeys,
                     newUserKeys = securityUpdate.newUserKeys,
@@ -416,7 +352,7 @@ class MasterPasswordChangerImpl @Inject constructor(
                 sessionCredentialsSaver.deleteSavedCredentials(session.username)
 
                 
-                syncComponent.syncCryptoChanger.reAuthorizeDevice(session.authorization)
+                syncCryptoChanger.reAuthorizeDevice(session.authorization)
 
                 
                 val localKeyResult = runCatching {
@@ -448,7 +384,10 @@ class MasterPasswordChangerImpl @Inject constructor(
         session: Session
     ) {
         if (remoteKey == null) {
-            val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
+            val secureDataStorage = secureStorageManager.getSecureDataStorage(
+                username,
+                SecureDataStorage.Type.LOCAL_KEY_PROTECTED
+            )
             secureStorageManager.removeKeyData(secureDataStorage, SecureDataKey.REMOTE_KEY)
         } else {
             val localKey =
@@ -464,29 +403,9 @@ class MasterPasswordChangerImpl @Inject constructor(
         }
     }
 
-    private suspend fun awaitSyncDone(): Boolean = suspendCoroutine {
-        val localBroadcastManager = this.localBroadcastManager
-        val syncFilter = IntentFilter(Constants.BROADCASTS.SYNC_PROGRESS_BROADCAST)
-        syncFilter.addAction(Constants.BROADCASTS.SYNCFINISHED_BROADCAST)
-        syncFilter.addAction(Constants.BROADCASTS.PASSWORD_SUCCESS_BROADCAST)
-        localBroadcastManager.registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == Constants.BROADCASTS.SYNCFINISHED_BROADCAST) {
-                    localBroadcastManager.unregisterReceiver(this)
-                    val success = intent.getBooleanExtra(Constants.BROADCASTS.SUCCESS_EXTRA, false)
-                    it.resume(success)
-                } else if (intent?.action == Constants.BROADCASTS.PASSWORD_SUCCESS_BROADCAST &&
-                    !intent.getBooleanExtra(Constants.BROADCASTS.SUCCESS_EXTRA, false)
-                ) {
-                    localBroadcastManager.unregisterReceiver(this)
-                    it.resume(false)
-                }
-            }
-        }, syncFilter)
-        
-        if (!dataSync.get().isSyncRunning) {
-            DataSync.sync(UsageLogCode134.Origin.CHANGE_MASTER_PASSWORD)
-        }
+    private suspend fun awaitSyncDone(): Boolean {
+        val dataSync = dataSync.get()
+        return dataSync.awaitSync(Trigger.CHANGE_MASTER_PASSWORD)
     }
 
     @Suppress("UseDataClass")
@@ -499,7 +418,7 @@ class MasterPasswordChangerImpl @Inject constructor(
     ) {
         val newAppKey: AppKey
             get() = newUserKeys.app
-        val newVaultKey: VaultKey
+        private val newVaultKey: VaultKey
             get() = newUserKeys.vault
         val newRemoteKey: VaultKey.RemoteKey?
             get() = newVaultKey as? VaultKey.RemoteKey

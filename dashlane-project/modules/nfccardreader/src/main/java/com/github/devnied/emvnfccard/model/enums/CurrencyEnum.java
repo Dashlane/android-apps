@@ -1,10 +1,6 @@
-
-
 package com.github.devnied.emvnfccard.model.enums;
 
 import java.util.Locale;
-
-
 
 public enum CurrencyEnum implements IKeyEnum {
 
@@ -255,25 +251,17 @@ public enum CurrencyEnum implements IKeyEnum {
         this.countries = countries;
     }
 
-    
-
     public String getCode() {
         return code;
     }
-
-    
 
     public String getName() {
         return name;
     }
 
-    
-
     public CountryCodeEnum[] getCountries() {
         return countries;
     }
-
-    
 
     public String format(final long amount) {
         String formatted;
@@ -319,8 +307,6 @@ public enum CurrencyEnum implements IKeyEnum {
         return getCode() + " " + formatted;
     }
 
-    
-
     public static CurrencyEnum find(final String code) {
         for (int i = 0; i < values().length; i++) {
             if (values()[i].getCode().equals(code)) {
@@ -331,8 +317,6 @@ public enum CurrencyEnum implements IKeyEnum {
         
         return null;
     }
-
-    
 
     public static CurrencyEnum find(final CountryCodeEnum pCountryCodeEnum) {
         CurrencyEnum currency = null;
@@ -379,8 +363,6 @@ public enum CurrencyEnum implements IKeyEnum {
         
         return currency;
     }
-
-    
 
     public static CurrencyEnum find(final CountryCodeEnum CountryCodeEnum, final CurrencyEnum defaultCurrency) {
         CurrencyEnum currency = find(CountryCodeEnum);

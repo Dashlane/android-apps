@@ -60,7 +60,8 @@ object DeviceUtils {
         val screenWidth = getScreenSize(context)[0]
         val screenWidthLessDefaultMargin = screenWidth - getDips(context, 56)
         return min(
-            screenWidthLessDefaultMargin, getDips(context, 320)
+            screenWidthLessDefaultMargin,
+            getDips(context, 320)
         )
     }
 

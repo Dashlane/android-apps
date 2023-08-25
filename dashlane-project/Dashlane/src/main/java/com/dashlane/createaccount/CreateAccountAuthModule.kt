@@ -19,8 +19,11 @@ import com.dashlane.server.api.endpoints.account.CreateAccountService
 import com.dashlane.server.api.endpoints.account.CreateAccountSsoService
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 @Module
+@InstallIn(SingletonComponent::class)
 object CreateAccountAuthModule {
     @Provides
     fun provideEmailRepository(accountExistsService: AccountExistsService): AccountCreationEmailRepository =

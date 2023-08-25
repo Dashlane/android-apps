@@ -21,8 +21,6 @@ class CreateAccountConfirmPasswordPresenter(
 
     override val nextEnabled = true
 
-    override fun onPasswordVisibilityToggle(passwordShown: Boolean) = provider.passwordVisibilityToggled(passwordShown)
-
     override fun onShow() {
         super.onShow()
         view.setRecapPassword(provider.clearPassword)
@@ -81,25 +79,17 @@ class CreateAccountConfirmPasswordPresenter(
         }
     }
 
-    
-
     private fun notifyPasswordMatchError() {
         view.showError(R.string.passwords_do_not_match)
     }
-
-    
 
     private fun notifyNetworkError() {
         view.showError(R.string.network_error)
     }
 
-    
-
     private fun notifyUnknownError() {
         view.showError(R.string.error)
     }
-
-    
 
     private fun showSettings() {
         activity?.hideSoftKeyboard()

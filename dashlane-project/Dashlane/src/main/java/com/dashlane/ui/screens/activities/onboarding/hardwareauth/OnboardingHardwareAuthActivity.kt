@@ -10,8 +10,6 @@ import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.util.clearTop
 import com.skocken.presentation.presenter.BasePresenter
 
-
-
 class OnboardingHardwareAuthActivity : DashlaneActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +32,8 @@ class OnboardingHardwareAuthActivity : DashlaneActivity() {
         if (isActivationSuccessful) finish()
     }
 
-    private class Presenter : BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
+    private class Presenter :
+        BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
         IntroScreenContract.Presenter {
         override fun onViewChanged() {
             super.onViewChanged()

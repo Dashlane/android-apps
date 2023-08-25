@@ -13,8 +13,6 @@ import com.dashlane.util.DeviceUtils
 import com.dashlane.util.announceForAccessibility
 import com.dashlane.util.logPageView
 
-
-
 class MainDrawerToggle(
     private val activity: Activity,
     private val drawerLayout: DrawerLayout,

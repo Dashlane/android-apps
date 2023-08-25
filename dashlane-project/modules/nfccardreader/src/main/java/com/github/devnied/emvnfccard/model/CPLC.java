@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.model;
 
 import com.github.devnied.emvnfccard.parser.apdu.annotation.Data;
@@ -9,13 +7,9 @@ import com.github.devnied.emvnfccard.parser.apdu.impl.DataFactory;
 import java.io.Serializable;
 import java.util.Date;
 
-
-
 public class CPLC extends AbstractByteBean<CPLC> implements Serializable {
 	
 	
-	
-
 	private static final long serialVersionUID = -7955013273912185280L;
 	
 	
@@ -78,109 +72,73 @@ public class CPLC extends AbstractByteBean<CPLC> implements Serializable {
 	
 	
 
-	
-
 	public Integer getIcFabricator() {
 		return ic_fabricator;
 	}
-
-	
 
 	public Integer getIcType() {
 		return ic_type;
 	}
 
-	
-
 	public Integer getOs() {
 		return os;
 	}
-
-	
 
 	public Date getOsReleaseDate() {
 		return os_release_date;
 	}
 
-	
-
 	public Integer getOsReleaseLevel() {
 		return os_release_level;
 	}
-
-	
 
 	public Date getIcFabricDate() {
 		return ic_fabric_date;
 	}
 
-	
-
 	public Integer getIcSerialNumber() {
 		return ic_serial_number;
 	}
-
-	
 
 	public Integer getIcBatchId() {
 		return ic_batch_id;
 	}
 
-	
-
 	public Integer getIcModuleFabricator() {
 		return ic_module_fabricator;
 	}
-
-	
 
 	public Date getIcPackagingDate() {
 		return ic_packaging_date;
 	}
 
-	
-
 	public Integer getIccManufacturer() {
 		return icc_manufacturer;
 	}
-
-	
 
 	public Date getIcEmbeddingDate() {
 		return ic_embedding_date;
 	}
 
-	
-
 	public Integer getPrepersoId() {
 		return preperso_id;
 	}
-
-	
 
 	public Date getPrepersoDate() {
 		return preperso_date;
 	}
 
-	
-
 	public Integer getPrepersoEquipment() {
 		return preperso_equipment;
 	}
-
-	
 
 	public Integer getPersoId() {
 		return perso_id;
 	}
 
-	
-
 	public Date getPersoDate() {
 		return perso_date;
 	}
-
-	
 
 	public Integer getPersoEquipment() {
 		return perso_equipment;

@@ -28,8 +28,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-
-
 class SettingPrivacySetting(
     private val context: Context,
     @LegacyWebservicesApi private val retrofit: Retrofit,
@@ -93,8 +91,6 @@ class SettingPrivacySetting(
             completeExceptionally(NotLoggedInException())
         }
     }
-
-    
 
     interface SubscriptionCodeService {
         @FormUrlEncoded

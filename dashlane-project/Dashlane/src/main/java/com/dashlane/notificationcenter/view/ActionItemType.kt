@@ -1,7 +1,5 @@
 package com.dashlane.notificationcenter.view
 
-
-
 enum class ActionItemType(val trackingKey: String) {
     AUTO_FILL("autologin"),
     PIN_CODE("pincode"),

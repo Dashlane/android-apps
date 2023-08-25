@@ -7,31 +7,21 @@ import android.view.View;
 import com.dashlane.R;
 import com.dashlane.cryptography.ObfuscatedByteArray;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.login.LoginSsoLoggerConfigProvider;
 import com.dashlane.login.dagger.TrackingId;
-import com.dashlane.login.lock.LockSetting;
 import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory;
-import com.dashlane.login.sso.LoginSsoLogger;
 import com.dashlane.ui.AutoFillDisablerKt;
 import com.dashlane.ui.ScreeenshotEnablerKt;
 import com.dashlane.ui.activities.DashlaneActivity;
 import com.dashlane.ui.endoflife.EndOfLife;
-import com.dashlane.useractivity.log.install.InstallLogCode69;
 
 import javax.inject.Inject;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwnerKt;
 import dagger.hilt.android.AndroidEntryPoint;
 
-import static com.dashlane.useractivity.log.usage.UsageLogExtensionKt.getUsageLogCode2SenderFromOrigin;
-
-
-
 @AndroidEntryPoint
-public class CreateAccountActivity extends DashlaneActivity
-        implements LoginSsoLoggerConfigProvider {
+public class CreateAccountActivity extends DashlaneActivity {
 
     public static final String EXTRA_PRE_FILLED_EMAIL = "pre_filled_email";
     public static final String EXTRA_SKIP_EMAIL_IF_PRE_FILLED = "skipEmailIfPrefilled";
@@ -112,16 +102,5 @@ public class CreateAccountActivity extends DashlaneActivity
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mPresenter.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @NonNull
-    @Override
-    public LoginSsoLogger.Config getSsoLoggerConfig() {
-        return new LoginSsoLogger.Config(
-                trackingId,
-                InstallLogCode69.Type.CREATE_ACCOUNT,
-                getIntent().getStringExtra(LockSetting.EXTRA_DOMAIN),
-                getUsageLogCode2SenderFromOrigin(getIntent())
-        );
     }
 }

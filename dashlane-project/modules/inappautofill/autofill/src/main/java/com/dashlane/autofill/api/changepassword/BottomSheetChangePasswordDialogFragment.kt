@@ -14,8 +14,6 @@ import com.dashlane.autofill.api.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.bottomnavigation.NavigableBottomSheetDialogFragmentCanceledListener
 import com.dashlane.bottomnavigation.NavigableBottomSheetFragment
 
-
-
 class BottomSheetChangePasswordDialogFragment :
     NavigableBottomSheetFragment,
     NavigableBottomSheetDialogFragmentCanceledListener,
@@ -54,7 +52,8 @@ class BottomSheetChangePasswordDialogFragment :
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.cloneInContext(activity).inflate(
-            R.layout.bottom_sheet_change_password_layout, container,
+            R.layout.bottom_sheet_change_password_layout,
+            container,
             false
         )
         val generateLogger = generatePasswordComponent.generatePasswordLogger

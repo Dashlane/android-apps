@@ -2,8 +2,6 @@ package com.dashlane.item.subview.edit
 
 import com.dashlane.vault.model.VaultItem
 
-
-
 class ItemEditValueListNonDefaultSubView(
     var title: String,
     override var value: String,

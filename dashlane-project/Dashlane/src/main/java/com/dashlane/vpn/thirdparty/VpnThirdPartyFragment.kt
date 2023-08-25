@@ -20,8 +20,10 @@ class VpnThirdPartyFragment : AbstractContentFragment() {
 
     @Inject
     lateinit var userPreferencesManager: UserPreferencesManager
+
     @Inject
     lateinit var preferences: GlobalPreferencesManager
+
     @Inject
     lateinit var helpCenterCoordinator: HelpCenterCoordinator
 

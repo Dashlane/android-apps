@@ -5,8 +5,6 @@ import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.url.UrlDomain
 
-
-
 sealed class RememberSecurityWarning(
     open val signatureVerification: SignatureVerification,
     open val item: Item,

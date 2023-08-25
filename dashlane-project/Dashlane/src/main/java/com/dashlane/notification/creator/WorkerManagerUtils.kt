@@ -15,8 +15,6 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-
-
 suspend inline fun <reified W : ListenableWorker> WorkManager.updateIfExist(tag: String, duration: Long) {
     val (enqueued, succeeded) = findEnqueuedAndSucceeded(tag)
 
@@ -31,8 +29,6 @@ suspend inline fun <reified W : ListenableWorker> WorkManager.updateIfExist(tag:
     }
 }
 
-
-
 suspend inline fun <reified W : ListenableWorker> WorkManager.createIfNonExist(tag: String, duration: Long) {
     val (enqueued, succeeded) = findEnqueuedAndSucceeded(tag)
 
@@ -44,8 +40,6 @@ suspend inline fun <reified W : ListenableWorker> WorkManager.createIfNonExist(t
         createWorker<W>(tag, duration)
     }
 }
-
-
 
 suspend inline fun <reified W : ListenableWorker> WorkManager.createPeriodicIfNonExist(
     tag: String,
@@ -83,11 +77,7 @@ inline fun <reified W : ListenableWorker> WorkManager.createPeriodicWorker(
     enqueue(work)
 }
 
-
-
 suspend fun <T> ListenableFuture<T>.await(): T = withContext(Dispatchers.Default) { get() }
-
-
 
 suspend fun WorkManager.findEnqueuedAndSucceeded(tag: String): Pair<WorkInfo?, WorkInfo?> {
     val list = getWorkInfosByTag(tag).await()
@@ -97,8 +87,6 @@ suspend fun WorkManager.findEnqueuedAndSucceeded(tag: String): Pair<WorkInfo?, W
         it.state == WorkInfo.State.SUCCEEDED
     }
 }
-
-
 
 fun getWorkManagerDuration(
     durationByDay: Int,

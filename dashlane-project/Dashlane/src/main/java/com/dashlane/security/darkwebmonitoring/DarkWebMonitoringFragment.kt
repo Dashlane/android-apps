@@ -13,8 +13,6 @@ import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class DarkWebMonitoringFragment : AbstractContentFragment() {
 

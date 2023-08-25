@@ -18,8 +18,6 @@ fun Drawable.toBitmap(): Bitmap = when {
     }
 }
 
-
-
 fun Context.getImageDrawableByWebsiteUrl(title: String?, websiteUrl: String?): Drawable {
     val drawable = RemoteImageRoundRectDrawable(
         this,
@@ -30,13 +28,9 @@ fun Context.getImageDrawableByWebsiteUrl(title: String?, websiteUrl: String?): D
     return drawable
 }
 
-
-
 fun Context.getImageDrawableByWebsiteUrl(title: String?): Drawable {
     return getImageDrawableByWebsiteUrl(title, title)
 }
-
-
 
 fun Context.getPlaceholder(originalTitle: String?): Drawable {
     return PlaceholderForTextDrawableFactory.buildDrawable(

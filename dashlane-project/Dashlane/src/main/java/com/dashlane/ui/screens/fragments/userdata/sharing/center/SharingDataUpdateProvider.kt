@@ -34,12 +34,15 @@ class SharingDataUpdateProvider @Inject constructor(
         val authorization = session?.authorization ?: return null
         if (itemGroupId != null && userGroupId != null) return null
 
-        val result = sharingGetService.execute(authorization, SharingGetService.Request(
+        val result = sharingGetService.execute(
+            authorization,
+            SharingGetService.Request(
             itemGroupIds = itemGroupId?.let { listOf(SharingGetService.Request.ItemGroupId(it)) }
                 ?: emptyList(),
             userGroupIds = userGroupId?.let { listOf(SharingGetService.Request.UserGroupId(it)) }
                 ?: emptyList()
-        ))
+        )
+        )
 
         return result.data.itemGroups?.singleOrNull()?.revision
             ?: result.data.userGroups?.singleOrNull()?.revision

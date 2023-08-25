@@ -75,31 +75,21 @@ class CreateAccountEmailPresenter(
             }
         }
 
-    
-
     private fun notifyEmailEmpty() {
         view.showError(R.string.create_account_error_email_empty_description)
     }
-
-    
 
     private fun notifyEmailInvalid() {
         view.showError(R.string.create_account_error_email_description)
     }
 
-    
-
     private fun notifyNetworkError() {
         view.showError(R.string.unable_to_verify_username_with_dashlane_at_this_time_please_try_again_later)
     }
 
-    
-
     private fun notifyEmailAccountAlreadyExists() {
         view.showError(R.string.username_exists_already)
     }
-
-    
 
     private fun notifyContactSsoAdministrator() {
         contactSsoAdministratorDialogFactory.show(
@@ -107,13 +97,9 @@ class CreateAccountEmailPresenter(
         )
     }
 
-    
-
     private fun notifyVersionExpiredError() {
         view.showError(R.string.expired_version_noupdate_title)
     }
-
-    
 
     private fun confirmUnlikelyEmail(
         email: String,
@@ -126,10 +112,8 @@ class CreateAccountEmailPresenter(
             inEuropeanUnion,
             country,
             loginSsoIntent
-        ) { provider.confirmEmailShown() }
+        )
     }
-
-    
 
     private fun notifySuccess(
         username: String,
@@ -159,15 +143,12 @@ class CreateAccountEmailPresenter(
         view.exposeTrackingInstallationId(provider.getTrackingInstallationId())
     }
 
-    override fun onCancelConfirmEmail() = provider.confirmEmailCancelled()
-
     override fun onConfirmEmail(
         email: String,
         inEuropeanUnion: Boolean,
         country: String?,
         loginSsoIntent: Intent?
     ) {
-        provider.emailConfirmed(email, inEuropeanUnion)
         notifySuccess(email, inEuropeanUnion, country, loginSsoIntent)
     }
 

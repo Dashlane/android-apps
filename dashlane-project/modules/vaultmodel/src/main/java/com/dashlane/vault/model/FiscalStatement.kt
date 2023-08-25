@@ -17,7 +17,8 @@ fun createFiscalStatement(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.FiscalStatement>.copySyncObject(builder: SyncObject.FiscalStatement.Builder.() -> Unit = {}):

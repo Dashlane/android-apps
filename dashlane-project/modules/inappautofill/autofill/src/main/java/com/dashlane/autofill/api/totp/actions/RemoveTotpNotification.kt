@@ -5,8 +5,6 @@ import com.dashlane.autofill.api.totp.services.AutofillApiTotpNotificationLogger
 import com.dashlane.autofill.api.totp.services.TotpNotificationDisplayService
 import com.dashlane.autofill.api.totp.services.TotpNotificationUpdateService
 
-
-
 class RemoveTotpNotification(
     private val totpRepository: TotpNotificationRepository,
     private val totpNotificationDisplayService: TotpNotificationDisplayService,

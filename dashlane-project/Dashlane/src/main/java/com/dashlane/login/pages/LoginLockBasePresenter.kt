@@ -16,7 +16,6 @@ abstract class LoginLockBasePresenter<P : LoginLockBaseContract.DataProvider, Q 
 ) : LoginBasePresenter<P, Q>(rootPresenter, coroutineScope), LoginLockBaseContract.Presenter {
 
     override fun logoutTooManyAttempts(errorMessage: CharSequence?, logSent: Boolean) {
-        SingletonProvider.getUserSupportFileLogger().add("TooManyAttempts Logout")
         val toaster = SingletonProvider.getToaster()
         if (!logSent) {
             providerOrNull?.logUsageLogCode75(UsageLogConstant.LockAction.logout)

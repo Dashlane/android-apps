@@ -4,8 +4,6 @@ import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.item.subview.Action
 
-
-
 open class MenuAction(
     override val text: Int,
     override val icon: Int,

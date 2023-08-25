@@ -9,8 +9,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.vault.summary.SummaryObject
 
 object ViewTypeUtils {
-    
-
     @JvmField
     val DEFAULT_ITEM_WRAPPER_VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<VaultItemWrapper<out SummaryObject>> =
         DashlaneRecyclerAdapter.ViewType(R.layout.item_dataidentifier, ItemWrapperViewHolder::class.java)

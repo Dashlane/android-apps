@@ -14,7 +14,11 @@ sealed class GetSsoInfoResult : Parcelable {
     sealed class Error : GetSsoInfoResult() {
         @Parcelize
         object CannotOpenServiceProvider : Error()
+
         @Parcelize
         object UnauthorizedNavigation : Error()
+
+        @Parcelize
+        object SamlResponseNotFound : Error()
     }
 }

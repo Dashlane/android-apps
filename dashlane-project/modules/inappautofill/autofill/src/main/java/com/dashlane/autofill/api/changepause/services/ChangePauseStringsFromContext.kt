@@ -9,8 +9,6 @@ import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class ChangePauseStringsFromContext @Inject constructor(
     @ApplicationContext
     private val context: Context,

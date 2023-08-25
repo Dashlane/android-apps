@@ -11,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
-
-
 public class MenuSectionHeaderItem implements MenuDef.Item, DiffUtilComparator<MenuSectionHeaderItem> {
 
     final DashlaneRecyclerAdapter.ViewType<MenuDef.Item> VIEW_TYPE =

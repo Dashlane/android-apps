@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.parser.apdu.impl;
 
 import com.github.devnied.emvnfccard.iso7816emv.ITag;
@@ -12,19 +10,14 @@ import com.github.devnied.emvnfccard.utils.BitUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-
-
 public abstract class AbstractByteBean<T> extends AbstractData implements IFile {
 
-    
-
     private static final long serialVersionUID = -2016039522844322383L;
-
-    
 
     private Collection<AnnotationData> getAnnotationSet(final Collection<TagAndLength> pTags) {
         Collection<AnnotationData> ret = null;
@@ -48,10 +41,8 @@ public abstract class AbstractByteBean<T> extends AbstractData implements IFile 
         return ret;
     }
 
-    
-
     @Override
-    public void parse(final byte[] pData, final Collection<TagAndLength> pTags) {
+    public void parse(final byte[] pData, final Collection<TagAndLength> pTags, Calendar pNow) {
         Collection<AnnotationData> set = getAnnotationSet(pTags);
         BitUtils bit = new BitUtils(pData);
         Iterator<AnnotationData> it = set.iterator();
@@ -60,13 +51,11 @@ public abstract class AbstractByteBean<T> extends AbstractData implements IFile 
             if (data.isSkip()) {
                 bit.addCurrentBitIndex(data.getSize());
             } else {
-                Object obj = DataFactory.getObject(data, bit);
+                Object obj = DataFactory.getObject(data, bit, pNow);
                 setField(data.getField(), this, obj);
             }
         }
     }
-
-    
 
     protected void setField(final Field field, final IFile pData, final Object pValue) {
         if (field != null) {

@@ -13,8 +13,6 @@ import com.dashlane.ui.widgets.view.chips.SharingContactChipsView
 import com.dashlane.util.isValidEmail
 import com.tokenautocomplete.TokenCompleteTextView
 
-
-
 class SharingContactAutocompleteTextView(context: Context, attrs: AttributeSet) :
     TokenCompleteTextView<SharingContact>(context, attrs) {
     private val layoutInflater: LayoutInflater =
@@ -38,7 +36,9 @@ class SharingContactAutocompleteTextView(context: Context, attrs: AttributeSet) 
     override fun defaultObject(completionText: String): SharingContact? {
         return if (completionText.isValidEmail()) {
             SharingContactUser(completionText)
-        } else null
+        } else {
+            null
+        }
     }
 
     override fun addListeners() {

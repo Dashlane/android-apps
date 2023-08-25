@@ -5,11 +5,7 @@ import android.os.Bundle
 import com.dashlane.authenticator.Otp
 import com.dashlane.useractivity.log.usage.UsageLogCode57
 import com.dashlane.util.isSemanticallyNull
-import com.dashlane.vault.model.DataIdentifierId
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObjectType
-
-
 
 data class ItemEditViewSetupOptions(
     val dataType: SyncObjectType,
@@ -23,5 +19,5 @@ data class ItemEditViewSetupOptions(
     val savedAdditionalData: Bundle?,
     val scannedOtp: Otp?
 ) {
-    val editMode: Boolean = forceEdit || uid.isSemanticallyNull() || dataType.desktopId == DataIdentifierId.SECURE_NOTE
+    val editMode: Boolean = forceEdit || uid.isSemanticallyNull() || dataType == SyncObjectType.SECURE_NOTE
 }

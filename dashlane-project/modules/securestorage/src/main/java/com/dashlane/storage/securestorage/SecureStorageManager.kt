@@ -12,15 +12,11 @@ import com.dashlane.storage.securestorage.cryptography.SecureDataStoreCryptograp
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class SecureStorageManager @Inject constructor(
     private val cryptography: Cryptography,
     private val secureDataStorageFactory: SecureDataStorage.Factory
 ) {
-    
-
     fun isKeyDataStored(username: Username, @SecureDataKey.Key keyIdentifier: String): Boolean {
         val mpSecureDataStore = getSecureDataStorage(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED)
         val lkSecureDataStore = getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
@@ -59,8 +55,6 @@ class SecureStorageManager @Inject constructor(
     fun removeKeyData(secureDataStorage: SecureDataStorage, @SecureDataKey.Key keyIdentifier: String) {
         secureDataStorage.remove(keyIdentifier)
     }
-
-    
 
     fun wipeUserData(username: Username) {
         

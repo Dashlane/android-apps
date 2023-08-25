@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
-import com.dashlane.vault.util.SyncObjectTypeUtils
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,9 +22,10 @@ class SharingNewShareItemFragment : AbstractContentFragment() {
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         val view: View = inflater.inflate(R.layout.fragment_data_list, container, false)
-
-        val type =
-            SyncObjectTypeUtils.valueFromDesktopId(requireArguments().getInt(EXTRA_DATA_TYPE))
+        val rawDataType = requireArguments().getString(EXTRA_DATA_TYPE)
+        val type = rawDataType
+            ?.let { SyncObjectType.forXmlNameOrNull(it) }
+            ?: throw IllegalArgumentException("Unsupported type $rawDataType")
         SharingNewShareItemViewProxy(lifecycle, view, viewModel, type)
 
         return view
@@ -36,7 +35,8 @@ class SharingNewShareItemFragment : AbstractContentFragment() {
         private const val EXTRA_DATA_TYPE = "extra_data_type"
         fun newInstance(dataType: SyncObjectType): SharingNewShareItemFragment {
             val fragment = SharingNewShareItemFragment()
-            fragment.arguments = Bundle().also { it.putInt(EXTRA_DATA_TYPE, dataType.desktopId) }
+            fragment.arguments =
+                Bundle().also { it.putString(EXTRA_DATA_TYPE, dataType.xmlObjectName) }
             return fragment
         }
     }

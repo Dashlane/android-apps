@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="collections_header_item_edit">Categories</string>
+    
+    <string name="collection_selector_activity_title">Add a category</string>
+    
+    <string name="collection_selector_activity_create_button">Create</string>
+    
+    <string name="collection_list_view_provider_add_button">Add a category</string>
+</resources>

@@ -14,8 +14,6 @@ import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.graphics.RoundRectDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class SharingInvitationUserGroup(
     context: Context,
     private val groupInvite: SharingContact.UserGroupInvite,
@@ -35,10 +33,14 @@ class SharingInvitationUserGroup(
 
     private fun createDisplaySubTitleUserGroup(context: Context): String {
         val userDownload = groupInvite.userGroup.getUser(groupInvite.login)
-        return if (userDownload != null) context.getString(
+        return if (userDownload != null) {
+            context.getString(
             R.string.sharing_pending_invite_user_group_description,
             userDownload.referrer
-        ) else ""
+        )
+        } else {
+            ""
+        }
     }
 
     class ItemViewHolder(itemView: View) :

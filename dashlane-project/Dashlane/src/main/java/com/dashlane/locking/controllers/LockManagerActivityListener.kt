@@ -20,8 +20,6 @@ import com.dashlane.useractivity.log.usage.UsageLogCode35
 import com.dashlane.useractivity.log.usage.UsageLogConstant
 import javax.inject.Inject
 
-
-
 class LockManagerActivityListener @Inject constructor(
     private val lockManager: LockManager,
     private val sessionManager: SessionManager,
@@ -93,8 +91,6 @@ class LockManagerActivityListener @Inject constructor(
                 )
             )
     }
-
-    
 
     private fun activityUnlockFailed(activity: Activity): Boolean =
         (activity as? DashlaneActivity)?.requireUserUnlock == true &&

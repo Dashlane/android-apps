@@ -8,8 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-
-
 abstract class DataLoaderForUi<T>(private val lifecycleCoroutineScope: LifecycleCoroutineScope) {
 
     constructor(lifecycle: LifecycleOwner) : this(lifecycle.lifecycleScope)

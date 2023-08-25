@@ -10,8 +10,6 @@ import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.useractivity.log.inject.UserActivityComponent
 import com.dashlane.util.setCurrentPageView
 
-
-
 class M2wIntroActivity : DashlaneActivity() {
 
     private lateinit var presenter: M2wIntroPresenter
@@ -68,11 +66,7 @@ class M2wIntroActivity : DashlaneActivity() {
     }
 
     companion object {
-        
-
         const val EXTRA_FINISH = "finish"
-
-        
 
         const val EXTRA_SKIP = "skip"
     }

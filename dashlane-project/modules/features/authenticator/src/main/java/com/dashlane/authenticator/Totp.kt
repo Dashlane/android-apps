@@ -9,8 +9,6 @@ import com.dashlane.authenticator.util.TotpCounter
 import kotlinx.parcelize.Parcelize
 import java.time.Duration
 
-
-
 @Keep
 @Parcelize
 data class Totp(

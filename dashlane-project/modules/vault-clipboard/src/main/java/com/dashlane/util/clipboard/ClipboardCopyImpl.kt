@@ -12,16 +12,14 @@ import androidx.work.CoroutineWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.util.Toaster
 import com.dashlane.util.isSemanticallyNull
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlinx.coroutines.delay
 
 class ClipboardCopyImpl @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
@@ -58,7 +56,6 @@ class ClipboardCopyImpl @Inject constructor(
                 clipboardManager.setPrimaryClip(clipData)
             }
         } catch (e: Exception) {
-            Log.v(e)
         }
 
         if (!autoClear) {
@@ -74,7 +71,6 @@ class ClipboardCopyImpl @Inject constructor(
                 workManager.enqueue(request)
             }
         } catch (e: Exception) {
-            Log.v(e)
         }
     }
 
@@ -105,7 +101,6 @@ class ClipboardCopyImpl @Inject constructor(
                     clipboard.clearPrimaryClip()
                 }
             } catch (e: Exception) {
-                Log.v(e)
             }
 
             return Result.success()

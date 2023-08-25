@@ -3,8 +3,6 @@ package com.dashlane.preference
 import android.content.SharedPreferences
 import com.dashlane.util.MD5Hash
 
-
-
 abstract class PreferenceEntry internal constructor(val key: String) {
 
     internal abstract fun addTo(editor: SharedPreferences.Editor)

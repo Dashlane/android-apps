@@ -7,8 +7,6 @@ import com.skocken.presentation.definition.Base;
 
 import androidx.annotation.Nullable;
 
-
-
 public interface MenuItemDef {
 
     interface IPresenter extends Base.IItemPresenter<MenuDef.Item> {

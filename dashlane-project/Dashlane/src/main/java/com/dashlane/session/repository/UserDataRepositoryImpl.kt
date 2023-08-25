@@ -14,8 +14,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 open class UserDataRepositoryImpl @Inject constructor(
     private val globalPreferencesManager: GlobalPreferencesManager,
@@ -39,8 +37,6 @@ open class UserDataRepositoryImpl @Inject constructor(
         )
 
     override fun get(session: Session?): SettingsManager? = session?.let { getSettingsManager(it) }
-
-    
 
     override suspend fun sessionInitializing(
         session: Session,

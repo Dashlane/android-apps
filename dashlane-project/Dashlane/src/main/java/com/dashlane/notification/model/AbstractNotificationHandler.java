@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.SystemClock;
 
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.logger.ExceptionLog;
 import com.dashlane.notification.FcmMessage;
 import com.dashlane.security.DashlaneIntent;
 import com.dashlane.util.Constants;
@@ -34,13 +33,9 @@ public abstract class AbstractNotificationHandler {
         mFcmMessage = fcmMessage;
     }
 
-    
-
     public void clearNotification(Context context) {
         NotificationManagerCompat.from(context).cancel(mNotificationId);
     }
-
-    
 
     public abstract void handlePushNotification();
 
@@ -73,8 +68,6 @@ public abstract class AbstractNotificationHandler {
         return mTimeToLive;
     }
 
-    
-
     protected void parseMessage() {
         String gcmData = mFcmMessage.getData();
         try {
@@ -84,17 +77,12 @@ public abstract class AbstractNotificationHandler {
                 mTimeToLive = jsonFormatedData.getLong(JSON_KEY_TTL);
             }
         } catch (JSONException e) {
-            ExceptionLog.v(e);
         }
     }
-
-    
 
     protected boolean hasTTL() {
         return mTimeToLive >= 0;
     }
-
-    
 
     protected void setUpCancelAlarm(Context context) {
         if (hasTTL()) {
@@ -106,8 +94,6 @@ public abstract class AbstractNotificationHandler {
                              intentExecuted);
         }
     }
-
-    
 
     protected boolean hasRecipient() {
         return StringUtils.isNotSemanticallyNull(mRecipientEmail);

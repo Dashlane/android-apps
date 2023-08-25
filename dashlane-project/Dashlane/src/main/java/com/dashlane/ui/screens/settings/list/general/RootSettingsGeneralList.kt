@@ -6,6 +6,7 @@ import com.dashlane.core.DataSync
 import com.dashlane.followupnotification.domain.FollowUpNotificationSettings
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.hermes.generated.events.user.ToggleAnalytics
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.login.lock.LockManager
@@ -20,7 +21,6 @@ import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.useractivity.log.usage.UsageLogCode35
 import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.useractivity.log.usage.UsageLogRepository
@@ -28,8 +28,6 @@ import com.dashlane.util.DarkThemeHelper
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
-
 
 @Suppress("UseDataClass")
 class RootSettingsGeneralList(
@@ -48,7 +46,8 @@ class RootSettingsGeneralList(
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     userPreferencesManager: UserPreferencesManager,
     globalPreferencesManager: GlobalPreferencesManager,
-    followUpNotificationSettings: FollowUpNotificationSettings
+    followUpNotificationSettings: FollowUpNotificationSettings,
+    dataSync: DataSync
 ) {
 
     private val settingsGeneralAutoLoginList = SettingsGeneralAutoLoginList(
@@ -56,8 +55,7 @@ class RootSettingsGeneralList(
         lockManager,
         inAppLoginManager,
         navigator,
-        userPreferencesManager,
-        userFeaturesChecker
+        userPreferencesManager
     )
 
     private val settingsGeneralNotificationsList = SettingsGeneralNotificationsList(
@@ -79,8 +77,8 @@ class RootSettingsGeneralList(
         override val header = displayHeader
         override val title = context.getString(R.string.settings_dark_theme)
         override val description = context.getString(R.string.settings_dark_theme_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = darkThemeHelper.isSettingAvailable
+        override fun isEnable() = true
+        override fun isVisible() = darkThemeHelper.isSettingAvailable
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = darkThemeHelper.isSettingEnabled
         override fun onCheckChanged(context: Context, enable: Boolean) {
@@ -107,10 +105,10 @@ class RootSettingsGeneralList(
         override val header = syncHeader
         override val title = context.getString(R.string.setting_sync_now)
         override val description = context.getString(R.string.setting_sync_now_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
 
-        override fun onClick(context: Context) = DataSync.sync(UsageLogCode134.Origin.MANUAL)
+        override fun onClick(context: Context) = dataSync.sync(Trigger.MANUAL)
     }
 
     private val allowSendLogs = object : SettingItem, SettingCheckable {
@@ -118,8 +116,8 @@ class RootSettingsGeneralList(
         override val header = SettingHeader(context.getString(R.string.setting_logs_header))
         override val title = context.getString(R.string.setting_allow_logs_title)
         override val description = context.getString(R.string.setting_allow_logs_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) =
+        override fun isEnable() = true
+        override fun isVisible() =
             userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.SHOW_ALLOW_SEND_LOGS)
 
         override fun isChecked(context: Context): Boolean = globalPreferencesManager.allowSendLogs
@@ -157,8 +155,8 @@ class RootSettingsGeneralList(
             override val description =
                 context.getString(R.string.settings_category_general_description)
 
-            override fun isEnable(context: Context) = true
-            override fun isVisible(context: Context) = true
+            override fun isEnable() = true
+            override fun isVisible() = true
             override fun onClick(context: Context) {}
         },
         listOfNotNull(

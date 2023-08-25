@@ -2,8 +2,6 @@ package com.dashlane.autofill.api.totp.model
 
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class TotpNotification(
     val id: String,
     val credential: SyncObject.Authentifiant

@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.core.DataSync
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingUserGroupUser
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -19,7 +19,8 @@ class UserGroupMembersViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dataProvider: UserGroupDataProvider,
     appEvents: AppEvents,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val dataSync: DataSync
 ) : ViewModel(), UserGroupMembersViewModelContract {
 
     private val userId: String?
@@ -60,5 +61,5 @@ class UserGroupMembersViewModel @Inject constructor(
         }
     }
 
-    override fun pullToRefresh() = DataSync.sync(UsageLogCode134.Origin.MANUAL)
+    override fun pullToRefresh() = dataSync.sync(Trigger.MANUAL)
 }

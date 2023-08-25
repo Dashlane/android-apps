@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.utils;
 
 import com.github.devnied.emvnfccard.enums.TagValueTypeEnum;
@@ -7,19 +5,15 @@ import com.github.devnied.emvnfccard.iso7816emv.ITag;
 import com.github.devnied.emvnfccard.iso7816emv.impl.TagImpl;
 import com.github.devnied.emvnfccard.model.CPLC;
 
-
+import java.util.Calendar;
 
 
 public final class CPLCUtils {
 
-    
-
     private static final ITag CPLC_TAG =
             new TagImpl("9f7f", TagValueTypeEnum.BINARY, "Card Production Life Cycle Data", "");
 
-    
-
-    public static CPLC parse(byte[] raw) {
+    public static CPLC parse(byte[] raw, Calendar now) {
         CPLC ret = null;
         if (raw != null) {
             byte[] cplc = null;
@@ -34,12 +28,10 @@ public final class CPLCUtils {
                 return null;
             }
             ret = new CPLC();
-            ret.parse(cplc, null);
+            ret.parse(cplc, null, now);
         }
         return ret;
     }
-
-    
 
     private CPLCUtils() {
     }

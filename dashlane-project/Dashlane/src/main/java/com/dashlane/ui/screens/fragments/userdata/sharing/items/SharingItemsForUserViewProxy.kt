@@ -72,13 +72,16 @@ class SharingItemsForUserViewProxy(
     private suspend fun displayData(state: SharingItemsForUserViewModelContract.UIState.Data) {
         val listItems = state.items
             .map {
-                SharedVaultItemWrapper(context, it,
+                SharedVaultItemWrapper(
+                    context,
+                    it,
                     onPendingMenuClick = { view, item ->
                         showManageSharingContactPending(view, item)
                     },
                     onAcceptedMenuClick = { view, item ->
                         showManageSharingContactAccepted(view, item)
-                    })
+                    }
+                )
             }
             .sortedWith(SharedVaultItemWrapper.comparator())
             .addHeaders(context)
@@ -101,10 +104,14 @@ class SharingItemsForUserViewProxy(
         view: View,
         sharedItem: SharingModels
     ) {
-        val dialog = PopupMenuManageUserPending(context, view,
+        val dialog = PopupMenuManageUserPending(
+            context,
+            view,
             onCancelInvite = {
                 SharingConfirmationDialogCancelInvite.newInstanceForUser(
-                    context, sharedItem.itemGroup.groupId, viewModel.memberLogin
+                    context,
+                    sharedItem.itemGroup.groupId,
+                    viewModel.memberLogin
                 ).show(fragmentManager, SharingConfirmationDialogCancelInvite.TAG)
             },
             onResendInvite = {
@@ -118,11 +125,15 @@ class SharingItemsForUserViewProxy(
         view: View,
         sharedItem: SharingModels
     ) {
-        val dialog = PopupMenuManageUserAccepted(context, view,
+        val dialog = PopupMenuManageUserAccepted(
+            context,
+            view,
             isAdmin = sharedItem.isMemberAdmin,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUser(
-                    context, sharedItem.itemGroup.groupId, viewModel.memberLogin
+                    context,
+                    sharedItem.itemGroup.groupId,
+                    viewModel.memberLogin
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {

@@ -20,11 +20,14 @@ fun createGeneratedPassword(
             this.platform = platform
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.GeneratedPassword>.addAuthId(authId: String): VaultItem<SyncObject.GeneratedPassword> {
-    return this.copy(syncObject = this.syncObject.copy {
+    return this.copy(
+        syncObject = this.syncObject.copy {
         this.authId = authId
-    })
+    }
+    )
 }

@@ -7,6 +7,8 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
+import com.dashlane.authenticator.AuthenticatorLogger
+import com.dashlane.crashreport.CrashReporterManager
 import com.dashlane.followupnotification.services.FollowUpNotificationDiscoveryService
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.item.nfc.NfcHelper
@@ -19,18 +21,15 @@ import com.dashlane.useractivity.log.usage.UsageLogCode57
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.hasBeenSaved
-import com.dashlane.vault.util.SyncObjectTypeUtils.valueFromDesktopId
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.util.PresenterOwner
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
-class ItemEditViewActivity : DashlaneActivity(),
+class ItemEditViewActivity :
+    DashlaneActivity(),
     PresenterOwner.Provider<ItemEditViewPresenter, ItemEditViewContract.View> {
     @Inject
     lateinit var sharingPolicyDataProvider: SharingPolicyDataProvider
@@ -43,6 +42,12 @@ class ItemEditViewActivity : DashlaneActivity(),
 
     @Inject
     lateinit var mFollowUpNotificationDiscoveryService: FollowUpNotificationDiscoveryService
+
+    @Inject
+    lateinit var crashReporterManager: CrashReporterManager
+
+    @Inject
+    lateinit var authenticatorLogger: AuthenticatorLogger
 
     lateinit var presenterOwner: PresenterOwner<ItemEditViewPresenter, ItemEditViewContract.View>
     lateinit var nfcHelper: NfcHelper
@@ -78,8 +83,8 @@ class ItemEditViewActivity : DashlaneActivity(),
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val isOutside = event.action == MotionEvent.ACTION_DOWN &&
-                window.isOutOfBounds(this, event) ||
-                event.action == MotionEvent.ACTION_OUTSIDE
+            window.isOutOfBounds(this, event) ||
+            event.action == MotionEvent.ACTION_OUTSIDE
         if (window.peekDecorView() != null && isOutside) {
             onBackPressed()
             return true
@@ -104,7 +109,6 @@ class ItemEditViewActivity : DashlaneActivity(),
             
             outState.putString(PARAM_UID, item.uid)
         }
-        outState.putInt(PARAM_DATA_TYPE, item.syncObject.desktopId)
         outState.putBoolean(PARAM_FORCE_EDIT, dataProvider.isEditMode)
         outState.putBoolean(PARAM_TOOLBAR_COLLAPSED, presenter.isToolbarCollapsed())
         outState.putBundle(PARAM_SCREEN_CONFIGURATION, dataProvider.getScreenConfiguration().toBundle())
@@ -160,7 +164,7 @@ class ItemEditViewActivity : DashlaneActivity(),
         presenter: ItemEditViewPresenter,
         savedInstanceState: Bundle?
     ): ItemEditViewContract.View {
-        return ItemEditViewViewProxy(this, ViewFactory(this), this, navigator)
+        return ItemEditViewViewProxy(this, ViewFactory(this), this, navigator, authenticatorLogger)
     }
 
     val presenter: ItemEditViewPresenter
@@ -190,26 +194,31 @@ class ItemEditViewActivity : DashlaneActivity(),
         var toolbarCollapsed = false
         var forceEdit = args.forceEdit
         var uid = args.uid
-        val dataType: SyncObjectType?
+        val dataTypeName = args.dataTypeName
+        val dataType: SyncObjectType = if (dataTypeName != null) {
+            getDataType(dataTypeName) ?: throw IllegalArgumentException("$dataTypeName is not supported")
+        } else {
+            SyncObjectType.forXmlName(args.dataType)
+        }
         if (savedInstanceState != null) {
             screenConfig = savedInstanceState.getBundle(PARAM_SCREEN_CONFIGURATION)
             additionalData = savedInstanceState.getBundle(PARAM_ADDITIONAL_DATA)
             toolbarCollapsed = savedInstanceState.getBoolean(PARAM_TOOLBAR_COLLAPSED, false)
             forceEdit = savedInstanceState.getBoolean(PARAM_FORCE_EDIT, forceEdit)
             uid = savedInstanceState.getString(PARAM_UID, uid)
-            dataType = valueFromDesktopId(savedInstanceState.getInt(PARAM_DATA_TYPE))
-        } else {
-            val dataTypeName = args.dataTypeName
-            dataType = if (dataTypeName != null) {
-                getDataType(dataTypeName)
-            } else {
-                valueFromDesktopId(args.dataType)
-            }
         }
         setCurrentPageView(dataType, uid)
         val screenOptions = ItemEditViewSetupOptions(
-            dataType!!, uid, args.url, toolbarCollapsed,
-            forceEdit, sender, args.successIntent, screenConfig, additionalData, args.otp
+            dataType,
+            uid,
+            args.url,
+            toolbarCollapsed,
+            forceEdit,
+            sender,
+            args.successIntent,
+            screenConfig,
+            additionalData,
+            args.otp
         )
         presenter.setup(this, screenOptions)
 
@@ -221,16 +230,16 @@ class ItemEditViewActivity : DashlaneActivity(),
 
     private fun displayNotificationOnboardingIfNecessary(
         args: ItemEditViewActivityArgs,
-        dataType: SyncObjectType?
+        dataType: SyncObjectType
     ) {
         if (mFollowUpNotificationDiscoveryService.canDisplayReminderScreen(args.uid)) {
             navigator.goToFollowUpNotificationDiscoveryScreen(true)
-        } else if (mFollowUpNotificationDiscoveryService.canDisplayDiscoveryScreen(dataType!!)) {
+        } else if (mFollowUpNotificationDiscoveryService.canDisplayDiscoveryScreen(dataType)) {
             navigator.goToFollowUpNotificationDiscoveryScreen(false)
         }
     }
 
-    private fun setCurrentPageView(dataType: SyncObjectType?, uid: String?) {
+    private fun setCurrentPageView(dataType: SyncObjectType, uid: String?) {
         val page = if (uid == null) {
             getCreatePage(dataType)
         } else {
@@ -242,12 +251,11 @@ class ItemEditViewActivity : DashlaneActivity(),
 
     companion object {
         private const val PARAM_UID = "uid"
-        private const val PARAM_DATA_TYPE = "data_type"
         private const val PARAM_FORCE_EDIT = "force_edit"
         private const val PARAM_TOOLBAR_COLLAPSED = "param_toolbar_collapsed"
         private const val PARAM_SCREEN_CONFIGURATION = "param_screen_configuration"
         private const val PARAM_ADDITIONAL_DATA = "param_additional_data"
-        private fun getDetailPage(dataType: SyncObjectType?): AnyPage? {
+        private fun getDetailPage(dataType: SyncObjectType): AnyPage? {
             return when (dataType) {
                 SyncObjectType.AUTHENTIFIANT -> AnyPage.ITEM_CREDENTIAL_DETAILS
                 SyncObjectType.SECURE_NOTE -> AnyPage.ITEM_SECURE_NOTE_DETAILS
@@ -269,7 +277,7 @@ class ItemEditViewActivity : DashlaneActivity(),
             }
         }
 
-        private fun getCreatePage(dataType: SyncObjectType?): AnyPage? {
+        private fun getCreatePage(dataType: SyncObjectType): AnyPage? {
             return when (dataType) {
                 SyncObjectType.AUTHENTIFIANT -> AnyPage.ITEM_CREDENTIAL_CREATE
                 SyncObjectType.SECURE_NOTE -> AnyPage.ITEM_SECURE_NOTE_CREATE

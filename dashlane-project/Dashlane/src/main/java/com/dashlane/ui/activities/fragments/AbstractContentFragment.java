@@ -24,7 +24,6 @@ import com.dashlane.ui.fragments.BaseUiFragment;
 import com.dashlane.ui.screens.fragments.userdata.CredentialAddStep1Fragment;
 import com.dashlane.ui.util.ActionBarUtil;
 import com.dashlane.util.ColorUtilsKt;
-import com.dashlane.util.usagelogs.ViewLogger;
 
 
 public abstract class AbstractContentFragment extends BaseUiFragment implements
@@ -32,7 +31,6 @@ public abstract class AbstractContentFragment extends BaseUiFragment implements
                                                                      SearchView.OnQueryTextListener,
                                                                      SearchView.OnCloseListener,
                                                                      ActionBarUtil.Delegate {
-    private final ViewLogger mViewLogger = new ViewLogger();
     protected SearchView mSearchView;
     protected Menu mMenu;
     protected int mActionBarColor = Color.TRANSPARENT;
@@ -91,10 +89,6 @@ public abstract class AbstractContentFragment extends BaseUiFragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         return super.onCreateView(inflater, container, savedInstanceState);
-    }
-
-    public ViewLogger getViewLogger() {
-        return mViewLogger;
     }
 
     @Override

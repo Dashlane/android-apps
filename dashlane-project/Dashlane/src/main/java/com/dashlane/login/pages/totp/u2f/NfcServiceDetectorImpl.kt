@@ -16,8 +16,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.properties.Delegates
 
-
-
 @ActivityScoped
 class NfcServiceDetectorImpl @Inject constructor(
     private val activity: Activity
@@ -53,8 +51,6 @@ class NfcServiceDetectorImpl @Inject constructor(
             resumed = false
         }
     }
-
-    
 
     fun onNewIntent(intent: Intent) {
         val tag = intent.getParcelableExtraCompat<Tag>(NfcAdapter.EXTRA_TAG)

@@ -17,13 +17,13 @@ import com.dashlane.core.u2f.U2fKey
 import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginBaseDataProvider
 import com.dashlane.login.pages.totp.u2f.U2fKeyDetector
-import com.dashlane.util.Network
+import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.tryOrNull
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
 class LoginTotpDataProvider @Inject constructor(
-    private val network: Network,
+    private val network: NetworkStateProvider,
     private val secondFactoryRepository: AuthenticationSecondFactoryRepository,
     private val u2fKeyDetector: U2fKeyDetector,
     private val loggerFactory: LoginTotpLogger.Factory,
@@ -47,16 +47,12 @@ class LoginTotpDataProvider @Inject constructor(
 
     private var u2fInProgress = false
 
-    override fun onShow() = logger.logLand()
-    override fun onBack() = logger.logBack()
-
     override suspend fun validateTotp(otp: String, auto: Boolean) {
         try {
             val result = secondFactoryRepository.validate(secondFactor, otp)
             handleTotpSuccess(
                 result.registeredUserDevice,
-                result.authTicket,
-                auto = auto
+                result.authTicket
             )
         } catch (e: AuthenticationException) {
             when (e) {
@@ -67,59 +63,46 @@ class LoginTotpDataProvider @Inject constructor(
                 )
                 is AuthenticationLockedOutException -> handleTotpError(auto, lockedOut = true)
                 is AuthenticationOfflineException -> {
-                    logger.logTotpNetworkError(auto)
                     throw LoginBaseContract.OfflineException(e)
                 }
-                else -> handleTotpNetworkError(auto)
+                else -> handleTotpNetworkError()
             }
         }
     }
 
     override suspend fun executeDuoAuthentication() {
-        logger.logDuoClick()
         val duoPush = AuthenticationSecondFactor.DuoPush(
             login = username,
             securityFeatures = secondFactor.securityFeatures
         )
         try {
             val result = secondFactoryRepository.validate(duoPush)
-            logger.logDuoSuccess()
             handleTotpSuccess(
                 result.registeredUserDevice,
-                result.authTicket,
-                auto = false
+                result.authTicket
             )
         } catch (e: AuthenticationException) {
             when (e) {
                 is AuthenticationSecondFactorFailedException,
                     
                 is AuthenticationAccountConfigurationChangedException -> {
-                    logger.logDuoDenied()
                     throw LoginTotpContract.DuoDeniedException(e)
                 }
                 is AuthenticationTimeoutException -> {
-                    logger.logDuoTimeout()
                     throw LoginTotpContract.DuoTimeoutException(e)
                 }
                 is AuthenticationOfflineException -> {
-                    logger.logDuoNetworkError()
                     throw LoginBaseContract.OfflineException(e)
                 }
                 is AuthenticationExpiredVersionException -> {
-                    logger.logDuoNetworkError()
                     throw LoginBaseContract.ExpiredVersionException(e)
                 }
                 else -> {
-                    logger.logDuoNetworkError()
                     throw LoginBaseContract.NetworkException(e)
                 }
             }
         }
     }
-
-    override fun duoPopupOpened() = logger.logDuoAppear()
-    override fun duoPopupClosed() = logger.logDuoCancel()
-    override fun u2fPopupOpened() = logger.logU2fPopupClick()
 
     override suspend fun executeU2fAuthentication(coroutineScope: CoroutineScope) {
         if (u2fInProgress) return
@@ -127,7 +110,6 @@ class LoginTotpDataProvider @Inject constructor(
 
         checkOnline { }
 
-        logger.logExecuteU2fAuthentication()
         val u2fSecondFactor = secondFactor.u2f ?: return
         val u2fChallenges =
             u2fSecondFactor.challenges.map { it.toU2fChallenge() }
@@ -152,8 +134,7 @@ class LoginTotpDataProvider @Inject constructor(
             )
             handleTotpSuccess(
                 result.registeredUserDevice,
-                result.authTicket,
-                auto = false
+                result.authTicket
             )
         } catch (e: AuthenticationException) {
             when (e) {
@@ -163,15 +144,12 @@ class LoginTotpDataProvider @Inject constructor(
                     lockedOut = false
                 )
                 is AuthenticationOfflineException -> {
-                    logger.logTotpNetworkError(autoSend = false)
                     presenter.notifyOffline()
                 }
                 is AuthenticationExpiredVersionException -> {
-                    logger.logTotpNetworkError(autoSend = false)
                     presenter.notifyExpiredVersion()
                 }
                 else -> {
-                    logger.logTotpNetworkError(autoSend = false)
                     presenter.notifyU2fKeyMatchFailError()
                 }
             }
@@ -190,13 +168,11 @@ class LoginTotpDataProvider @Inject constructor(
             u2fKey.signChallenges(challenges)
         }
         if (challengeAnswer == null) {
-            logger.logFailedSignU2FTag()
             
             u2fKeyDetector.ignore(u2fKey)
             u2fInProgress = false
             presenter.notifyU2fKeyMatchFailError()
         } else {
-            logger.logSuccessSignU2FTag()
             presenter.notifyU2fKeyMatched()
         }
         return challengeAnswer
@@ -207,24 +183,21 @@ class LoginTotpDataProvider @Inject constructor(
         presenter.notifyTotpError(lockedOut)
     }
 
-    private fun handleTotpNetworkError(auto: Boolean) {
-        logger.logTotpNetworkError(auto)
+    private fun handleTotpNetworkError() {
         presenter.notifyNetworkError()
     }
 
     private fun handleTotpSuccess(
         registeredUserDevice: RegisteredUserDevice,
-        authTicket: String?,
-        auto: Boolean
+        authTicket: String?
     ) {
         u2fKeyDetector.cancel()
-        logger.logTotpSuccess(auto)
         presenter.onTotpSuccess(registeredUserDevice, authTicket)
         u2fInProgress = false
     }
 
     private inline fun checkOnline(block: () -> Unit) {
-        val offline = !network.isOn
+        val offline = !network.isOn()
         if (offline) {
             block()
             throw LoginBaseContract.OfflineException()

@@ -302,8 +302,6 @@ class AccountCreationRepositoryImpl(
     )
 
     companion object {
-        
-
         private const val SDK_VERSION = "1.0.0.0"
     }
 }

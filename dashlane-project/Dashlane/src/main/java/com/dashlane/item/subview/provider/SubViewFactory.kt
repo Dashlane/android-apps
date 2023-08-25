@@ -11,11 +11,7 @@ import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.vault.model.VaultItem
 
-
-
 interface SubViewFactory {
-    
-
     fun createSubViewString(
         header: String,
         value: String?,
@@ -28,8 +24,6 @@ interface SubViewFactory {
         protectedStateListener: (Boolean) -> Unit = {}
     ): ItemSubView<String>?
 
-    
-
     fun createSubViewNumber(
         header: String,
         value: String?,
@@ -40,16 +34,12 @@ interface SubViewFactory {
         protectedStateListener: (Boolean) -> Unit = {}
     ): ItemSubView<String>?
 
-    
-
     fun createSubviewList(
         title: String,
         selectedValue: String,
         values: List<String>,
         valueUpdate: (VaultItem<*>, String) -> VaultItem<*>? = { _, _ -> null }
     ): ItemSubView<String>?
-
-    
 
     fun createSubviewListNonDefault(
         title: String,
@@ -58,16 +48,12 @@ interface SubViewFactory {
         valueUpdate: (VaultItem<*>, String) -> VaultItem<*>? = { _, _ -> null }
     ): ItemSubView<String>?
 
-    
-
     fun createSubviewBoolean(
         header: String,
         description: String?,
         value: Boolean,
         valueUpdate: (VaultItem<*>, Boolean) -> VaultItem<*>? = { _, _ -> null }
     ): ItemSubView<Boolean>?
-
-    
 
     fun createSpaceSelector(
         current: String?,
@@ -77,8 +63,6 @@ interface SubViewFactory {
         linkedWebsites: List<String> = listOf()
     ): ItemSubView<Teamspace>?
 
-    
-
     fun createSubviewDelete(
         context: Context,
         listener: ItemEditViewContract.View.UiUpdateListener,
@@ -86,25 +70,13 @@ interface SubViewFactory {
         text: String = context.getString(R.string.delete)
     ): ItemClickActionSubView?
 
-    
-
     fun createSubviewSharingDetails(
         context: Context,
         vaultItem: VaultItem<*>,
         sharingPolicy: SharingPolicyDataProvider
     ): ItemSubView<String>?
 
-    
-
     fun createSubviewAttachmentDetails(context: Context, vaultItem: VaultItem<*>): ItemSubView<String>?
-
-    
-
-    fun createSubviewLinkedDomains(
-        context: Context,
-        vaultItem: VaultItem<*>,
-        expandLinkedDomainsListener: (List<String>) -> Unit = {}
-    ): ItemSubView<List<String>>?
 
     companion object {
         const val INPUT_TYPE_NUMBER = 1

@@ -38,6 +38,5 @@ interface BreachAlertDetail {
 
     interface Logger {
         fun logDelete(breachWrapper: BreachWrapper)
-        fun logCheckCredentials()
     }
 }

@@ -36,8 +36,6 @@ class PermissionsManagerImpl @Inject constructor(
         }
     }
 
-    
-
     private fun getHandlerForRequestCode(code: Int): PermissionsManager.OnPermissionResponseHandler? {
         val handler = handlers[code]
         handlers.remove(code)

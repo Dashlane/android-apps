@@ -7,8 +7,6 @@ import com.dashlane.util.clearTask
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
-
-
 class ChangeMasterPasswordLogoutHelper @Inject constructor(
     private val sessionManager: SessionManager
 ) {

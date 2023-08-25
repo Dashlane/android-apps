@@ -85,8 +85,6 @@ class StepInfoBox @JvmOverloads constructor(
         }
     }
 
-    
-
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
 

@@ -27,8 +27,6 @@ class LinkedServicesHelper @Inject constructor(
         return addSignatureToLinkedServices(appSignatures, null, linkSource)
     }
 
-    
-
     fun addSignatureToLinkedServices(
         signatures: List<AppSignature>,
         originalLinkedServices: SyncObject.Authentifiant.LinkedServices?,
@@ -87,7 +85,8 @@ class LinkedServicesHelper @Inject constructor(
         val existingLinkedApps = linkedServices?.associatedAndroidApps
             ?.filter { associated -> apps.any { it == associated.packageName } || associated.linkSource == LinkSource.DASHLANE }
         val newLinkedServices = SyncObject.Authentifiant.LinkedServices(
-            existingLinkedApps, linkedServices?.associatedDomains
+            existingLinkedApps,
+            linkedServices?.associatedDomains
         )
         return addLinkedApps(
             newLinkedServices,
@@ -96,8 +95,6 @@ class LinkedServicesHelper @Inject constructor(
             }.flatten()
         )
     }
-
-    
 
     fun addLinkedApps(
         linkedServices: SyncObject.Authentifiant.LinkedServices?,
@@ -135,7 +132,8 @@ class LinkedServicesHelper @Inject constructor(
         val existingLinkedWebsites = linkedServices?.associatedDomains
             ?.filter { associated -> domains.any { it == associated.domain } }
         val newLinkedServices = SyncObject.Authentifiant.LinkedServices(
-            linkedServices?.associatedAndroidApps, existingLinkedWebsites
+            linkedServices?.associatedAndroidApps,
+            existingLinkedWebsites
         )
         return addLinkedDomains(
             newLinkedServices,
@@ -144,8 +142,6 @@ class LinkedServicesHelper @Inject constructor(
             }
         )
     }
-
-    
 
     fun addLinkedDomains(
         linkedServices: SyncObject.Authentifiant.LinkedServices?,

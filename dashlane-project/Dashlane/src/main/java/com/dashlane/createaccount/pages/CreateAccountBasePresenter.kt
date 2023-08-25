@@ -7,18 +7,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlin.properties.Delegates
 
-
-
 abstract class CreateAccountBasePresenter<D : CreateAccountBaseContract.DataProvider, V : Base.IView> :
     BasePresenter<D, V>(), CreateAccountBaseContract.Presenter {
 
     private val job = Job()
     protected val coroutineScope = CoroutineScope(job)
 
-    override fun onShow() = provider.onShow()
-
+    override fun onShow() = Unit
     final override fun onBackPressed(): Boolean {
-        provider.onBack()
         return false
     }
 

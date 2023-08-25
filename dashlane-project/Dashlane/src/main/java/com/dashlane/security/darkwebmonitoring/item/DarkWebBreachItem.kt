@@ -12,8 +12,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.util.getImageDrawableByWebsiteUrl
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 data class DarkWebBreachItem(val breach: BreachWrapper) : DashlaneRecyclerAdapter.ViewTypeProvider {
 
     var selected = false

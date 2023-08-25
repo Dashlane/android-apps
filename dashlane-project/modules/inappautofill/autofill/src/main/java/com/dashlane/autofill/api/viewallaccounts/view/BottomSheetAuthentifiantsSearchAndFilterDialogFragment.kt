@@ -13,8 +13,6 @@ import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.util.setCurrentPageView
 import javax.inject.Inject
 
-
-
 class BottomSheetAuthentifiantsSearchAndFilterDialogFragment :
     NavigableBottomSheetFragment,
     NavigableBottomSheetDialogFragmentCanceledListener,

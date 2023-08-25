@@ -9,8 +9,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.utils.Country
 
-
-
 @Suppress("LongMethod")
 fun SummaryObject.getQuickActions(
     vaultContentService: VaultItemFieldContentService,
@@ -245,8 +243,6 @@ fun SummaryObject.getQuickActions(
         else -> emptyList()
     }
 }
-
-
 
 @Suppress("LongMethod")
 internal fun getBankStatementQuickAction(

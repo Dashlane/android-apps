@@ -1,12 +1,8 @@
-
-
 @file:JvmName("CursorUtils")
 
 package com.dashlane.util
 
 import android.database.Cursor
-
-
 
 fun Cursor.getString(columnName: String): String? {
     val columnIndex = getColumnIndex(columnName)
@@ -17,8 +13,6 @@ fun Cursor.getString(columnName: String): String? {
     }
 }
 
-
-
 fun Cursor.getInt(columnName: String): Int {
     val columnIndex = getColumnIndex(columnName)
     return if (columnIndex < 0) {
@@ -28,13 +22,9 @@ fun Cursor.getInt(columnName: String): Int {
     }
 }
 
-
-
 fun Cursor.getBoolean(columnName: String): Boolean {
     return getInt(columnName) == 1
 }
-
-
 
 fun Cursor.getLong(columnName: String): Long {
     val columnIndex = getColumnIndex(columnName)
@@ -45,15 +35,11 @@ fun Cursor.getLong(columnName: String): Long {
     }
 }
 
-
-
 fun Cursor?.closeCursor() {
     if (this != null && !isClosed) {
         close()
     }
 }
-
-
 
 fun Cursor?.getCountAndClose(): Int {
     if (this == null) {
@@ -64,8 +50,6 @@ fun Cursor?.getCountAndClose(): Int {
     return count
 }
 
-
-
 @JvmOverloads
 fun Cursor?.getStringListFromCursor(columnIndex: Int = 0): List<String> {
     if (this != null && columnIndex >= 0) {
@@ -73,8 +57,6 @@ fun Cursor?.getStringListFromCursor(columnIndex: Int = 0): List<String> {
     }
     return emptyList()
 }
-
-
 
 inline fun <T> Cursor.toList(transform: Cursor.() -> T): List<T> {
     val list = mutableListOf<T>()

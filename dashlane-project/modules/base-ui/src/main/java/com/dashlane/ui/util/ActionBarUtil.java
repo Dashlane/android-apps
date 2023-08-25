@@ -17,8 +17,6 @@ import com.dashlane.util.ContextUtilsKt;
 import com.dashlane.util.StatusBarUtils;
 
 
-
-
 public class ActionBarUtil {
 
     private DashlaneActivity mActivity;

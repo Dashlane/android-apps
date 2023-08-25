@@ -4,8 +4,6 @@ import com.dashlane.nitro.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 
-
-
 class CloudflareNitroHeaderInterceptor : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {

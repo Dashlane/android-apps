@@ -7,8 +7,6 @@ import com.dashlane.permission.PermissionsManager
 import com.dashlane.ui.ActivityLifecycleListener
 import com.dashlane.ui.ScreenshotPolicy
 
-
-
 interface UiPartComponent {
 
     val screenshotPolicy: ScreenshotPolicy

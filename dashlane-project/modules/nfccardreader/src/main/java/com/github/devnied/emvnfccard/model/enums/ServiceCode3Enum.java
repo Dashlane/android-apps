@@ -1,8 +1,4 @@
-
-
 package com.github.devnied.emvnfccard.model.enums;
-
-
 
 public enum ServiceCode3Enum implements IKeyEnum {
 
@@ -25,13 +21,9 @@ public enum ServiceCode3Enum implements IKeyEnum {
 		this.pinRequirements = pinRequirements;
 	}
 
-	
-
 	public String getAllowedServices() {
 		return allowedServices;
 	}
-
-	
 
 	public String getPinRequirements() {
 		return pinRequirements;

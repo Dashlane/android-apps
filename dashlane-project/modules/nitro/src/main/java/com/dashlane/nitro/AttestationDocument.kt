@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 
-
-
 internal data class AttestationDocument(
     val certificate: ByteArray,
     val pcrs: ObjectNode,

@@ -27,8 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
-
-
 class SetUpAuthenticatorResultContract : ActivityResultContract<Unit?, Otp?>() {
 
     private lateinit var successResultLauncher: ActivityResultLauncher<List<Input>>
@@ -119,8 +117,6 @@ class SetUpAuthenticatorResultContract : ActivityResultContract<Unit?, Otp?>() {
             }
         }
     }
-
-    
 
     class SuccessResultContract : ActivityResultContract<List<Input>, Input?>() {
         @Parcelize

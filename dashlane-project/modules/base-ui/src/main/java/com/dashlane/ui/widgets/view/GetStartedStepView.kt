@@ -88,7 +88,7 @@ class GetStartedStepView @JvmOverloads constructor(
         init(attrs, defStyleAttr)
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable {
         return SaveState(
             superState = super.onSaveInstanceState(),
             expanded = expanded,
@@ -144,7 +144,10 @@ class GetStartedStepView @JvmOverloads constructor(
 
     private fun init(attrs: AttributeSet?, defStyleAttr: Int) {
         context.withStyledAttributes(
-            attrs, R.styleable.GetStartedStepView, defStyleAttr, R.style.Widget_Dashlane_GetStartedStepView
+            attrs,
+            R.styleable.GetStartedStepView,
+            defStyleAttr,
+            R.style.Widget_Dashlane_GetStartedStepView
         ) {
             completionColor = getColorStateListOrThrow(R.styleable.GetStartedStepView_stepCompletionColor)
             check.imageTintList = completionColor
@@ -216,8 +219,6 @@ class GetStartedStepView @JvmOverloads constructor(
             false -> expandGroup.visibility = View.GONE
         }
     }
-
-    
 
     private fun getSceneRoot(): ViewGroup {
         return sceneRootIdRes?.let { rootView.findViewById(it) as? ViewGroup } ?: this

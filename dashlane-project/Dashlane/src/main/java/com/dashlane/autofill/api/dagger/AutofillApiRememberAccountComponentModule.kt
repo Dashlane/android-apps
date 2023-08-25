@@ -14,8 +14,6 @@ import dagger.Module
 import javax.inject.Named
 import javax.inject.Singleton
 
-
-
 @Module
 internal abstract class AutofillApiRememberAccountComponentModule {
     @Singleton

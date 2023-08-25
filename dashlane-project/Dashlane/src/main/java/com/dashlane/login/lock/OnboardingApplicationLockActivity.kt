@@ -11,8 +11,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import com.dashlane.R
-import com.dashlane.accountrecovery.AccountRecovery
-import com.dashlane.accountrecovery.AccountRecoveryIntroActivity
+import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
 import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.login.LoginActivity
@@ -33,8 +33,6 @@ import com.skocken.presentation.presenter.BasePresenter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class OnboardingApplicationLockActivity : DashlaneActivity() {
 
@@ -42,7 +40,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
     lateinit var biometricAuthModule: BiometricAuthModule
 
     @Inject
-    lateinit var accountRecovery: AccountRecovery
+    lateinit var biometricRecovery: BiometricRecovery
 
     private lateinit var presenter: Presenter
 
@@ -75,7 +73,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
             SingletonProvider.getLockManager(),
             biometricAuthModule,
             SingletonProvider.getSecurityHelper(),
-            accountRecovery,
+            biometricRecovery,
             nextIntent,
             fromUse2fa
         )
@@ -132,7 +130,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         private val lockTypeManager: LockTypeManager,
         private val biometricAuthModule: BiometricAuthModule,
         private val securityHelper: SecurityHelper,
-        private val accountRecovery: AccountRecovery,
+        private val biometricRecovery: BiometricRecovery,
         private val nextIntent: Intent,
         private val fromUse2fa: Boolean
     ) : BasePresenter<IntroScreenContract.DataProvider, ViewProxy>(),
@@ -244,8 +242,8 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
                     buildList {
                         add(nextIntent.clearTop())
 
-                        if (biometricEnabled && accountRecovery.isFeatureAvailable) {
-                            add(AccountRecoveryIntroActivity.newIntent(this@run))
+                        if (biometricEnabled && biometricRecovery.isFeatureAvailable) {
+                            add(MasterPasswordResetIntroActivity.newIntent(this@run))
                         }
                     }.toTypedArray()
                 )

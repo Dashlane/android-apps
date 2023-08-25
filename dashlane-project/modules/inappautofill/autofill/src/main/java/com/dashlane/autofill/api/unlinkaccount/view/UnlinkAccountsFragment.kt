@@ -13,8 +13,6 @@ import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.util.getParcelableCompat
 import javax.inject.Inject
 
-
-
 class UnlinkAccountsFragment : Fragment() {
 
     @Inject

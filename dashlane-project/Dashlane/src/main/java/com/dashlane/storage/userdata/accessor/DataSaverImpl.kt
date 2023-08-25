@@ -4,7 +4,6 @@ import com.dashlane.core.history.AuthentifiantHistoryGenerator
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierDeletedEvent
 import com.dashlane.events.PasswordChangedEvent
-import com.dashlane.storage.DataStorageMigrationHelper
 import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.DatabaseItemSaver
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
@@ -12,17 +11,13 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.objectType
-import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Singleton
-
-
 
 @Singleton
 class DataSaverImpl @Inject constructor(
     private val authentifiantHistoryGenerator: AuthentifiantHistoryGenerator,
     private val dataStorageProvider: DataStorageProvider,
-    private val dataStorageMigrationHelper: Lazy<DataStorageMigrationHelper>,
     private val appEvents: AppEvents
 ) : DataSaver {
     private val dataChangeHistorySaver: DataChangeHistorySaver
@@ -34,7 +29,6 @@ class DataSaverImpl @Inject constructor(
 
     override suspend fun <T : SyncObject> save(saveRequest: DataSaver.SaveRequest<T>): List<VaultItem<*>> {
         if (saveRequest.itemsToSave.isEmpty()) return emptyList()
-        dataStorageMigrationHelper.get().waiting()
         
         val (regularItems, dataChangeHistories) = saveRequest.splitWithDataChangeHistory()
 
@@ -83,8 +77,6 @@ class DataSaverImpl @Inject constructor(
 
         return savedRegularItems + savedDataChangeHistories
     }
-
-    
 
     private fun checkPasswordChanged(oldItem: VaultItem<*>, item: VaultItem<*>) {
         if (item.syncObjectType == SyncObjectType.AUTHENTIFIANT &&

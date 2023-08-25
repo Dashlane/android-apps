@@ -8,9 +8,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResult
 import com.dashlane.autofill.api.R
+import com.dashlane.autofill.api.securitywarnings.data.SecurityWarningAction
+import com.dashlane.autofill.api.securitywarnings.data.SecurityWarningType
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.ui.configureBottomSheet
 import com.dashlane.util.getParcelableCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -18,19 +20,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class BottomSheetUnknownSecurityWarningDialogFragment : BottomSheetDialogFragment() {
 
-    interface Actions {
-        fun unknownDialogPositiveAction(domain: Domain)
-        fun unknownDialogNegativeAction(domain: Domain)
-        fun unknownDialogCancelAction(domain: Domain)
-    }
-
-    private lateinit var domain: Domain
+    private var formSource: AutoFillFormSource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val formSource = requireArguments().getParcelableCompat<AutoFillFormSource>(ARG_FORM_SOURCE)
-        domain = formSource.getDomain()
+        formSource = requireArguments().getParcelableCompat(ARG_FORM_SOURCE)
 
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.Theme_Dashlane_Transparent_Cancelable)
     }
@@ -54,11 +49,11 @@ class BottomSheetUnknownSecurityWarningDialogFragment : BottomSheetDialogFragmen
         val negativeButton = view.findViewById<Button>(R.id.cancel_button)
 
         positiveButton.setOnClickListener {
-            getActions()?.unknownDialogPositiveAction(domain)
+            setResult(SecurityWarningAction.POSITIVE)
             dismiss()
         }
         negativeButton.setOnClickListener {
-            getActions()?.unknownDialogNegativeAction(domain)
+            setResult(SecurityWarningAction.NEGATIVE)
             dismiss()
         }
     }
@@ -70,11 +65,19 @@ class BottomSheetUnknownSecurityWarningDialogFragment : BottomSheetDialogFragmen
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        getActions()?.unknownDialogCancelAction(domain)
+        setResult(SecurityWarningAction.CANCEL)
         dismiss()
     }
 
-    private fun getActions(): Actions? = this.activity as? Actions
+    private fun setResult(action: SecurityWarningAction) {
+        setFragmentResult(
+            SecurityWarningsViewProxy.SECURITY_WARNING_ACTION_RESULT,
+            bundleOf(
+                SecurityWarningsViewProxy.PARAMS_WARNING_TYPE to SecurityWarningType.Unknown(formSource),
+                SecurityWarningsViewProxy.PARAMS_ACTION to action
+            )
+        )
+    }
 
     companion object {
 

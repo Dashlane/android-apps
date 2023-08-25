@@ -15,8 +15,6 @@ import com.dashlane.storage.userdata.accessor.filter.uid.UidFilter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 class CredentialFilter(
     override var spaceFilter: SpaceFilter = NoSpaceFilter,
     override var uidFilter: UidFilter = NoUidFilter,
@@ -38,19 +36,13 @@ class CredentialFilter(
     var domains: Array<out String>? = null
         private set
 
-    
-
     var allowSimilarDomains: Boolean = false
     var email: String? = null
     var packageName: String? = null
 
-    
-
     fun forDomain(domain: String) {
         this.domains = arrayOf(domain)
     }
-
-    
 
     fun forDomains(domains: Collection<String>) {
         this.domains = domains.toTypedArray()

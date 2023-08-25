@@ -3,8 +3,6 @@ package com.dashlane.m2w
 import android.content.Context
 import android.content.Intent
 
-
-
 object M2wIntentCoordinator {
     internal const val EXTRA_ORIGIN = "origin"
     internal const val EXTRA_M2W_COMPLETED = "m2w_completed"
@@ -22,8 +20,6 @@ object M2wIntentCoordinator {
         Intent(context, M2wConnectActivity::class.java),
         origin
     )
-
-    
 
     fun isM2wCompleted(intent: Intent) = intent.getBooleanExtra(EXTRA_M2W_COMPLETED, false)
 

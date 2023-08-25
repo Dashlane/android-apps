@@ -26,12 +26,3 @@ interface CrashReporter {
         const val VIEW_DESTROYED = "View Destroyed"
     }
 }
-
-interface CrashReporterComponent {
-
-    val crashReporter: CrashReporter
-
-    interface Application {
-        val component: CrashReporterComponent
-    }
-}

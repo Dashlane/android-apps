@@ -1,12 +1,8 @@
 
-
-
 package com.dashlane.authenticator.util;
 
 import java.util.HashMap;
 import java.util.Locale;
-
-
 
 public class Base32String {
     

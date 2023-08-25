@@ -5,8 +5,6 @@ import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import org.json.JSONArray
 
-
-
 fun createSecurityBreach(
     dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(),
     breachId: String,
@@ -24,7 +22,8 @@ fun createSecurityBreach(
             this.leakedPasswords = serialize(leakedPasswords).toSyncObfuscatedValue()
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 var SyncObject.SecurityBreach.Builder.leakedPasswordsSet: Set<String>?

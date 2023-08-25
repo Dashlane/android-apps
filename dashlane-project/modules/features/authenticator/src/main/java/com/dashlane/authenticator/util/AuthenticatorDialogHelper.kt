@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.R
-import com.dashlane.hermes.inject.HermesComponent
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.ui.util.withCenteredButtons
 import com.dashlane.useractivity.hermes.TrackingLogUtils
@@ -19,6 +18,7 @@ fun DialogHelper.showAuthenticatorRemoveConfirmDialog(
     linkedServices: SummaryObject.LinkedServices? = null,
     professional: Boolean,
     issuer: String?,
+    authenticatorLogger: AuthenticatorLogger,
     confirmCallback: () -> Unit
 ): AlertDialog = builder(context, R.style.ThemeOverlay_Dashlane_DashlaneWarningDialog)
     .apply {
@@ -30,9 +30,7 @@ fun DialogHelper.showAuthenticatorRemoveConfirmDialog(
         setPositiveButton(R.string.authenticator_item_edit_remove_popup_positive_button) { _, _ ->
             val packageName = linkedServices.getAllLinkedPackageName().firstOrNull()
             val domain = TrackingLogUtils.createDomainForLog(topDomain, packageName)
-            AuthenticatorLogger(HermesComponent(context).logRepository)
-                .setup(professional, domain)
-                .logRemove2fa(issuer)
+            authenticatorLogger.setup(professional, domain).logRemove2fa(issuer)
             
             confirmCallback.invoke()
         }

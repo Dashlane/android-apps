@@ -3,8 +3,6 @@ package com.dashlane.util.clipboard.vault
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 
-
-
 internal sealed class CopyFieldContentMapper<S : SummaryObject, F : SyncObject, C : Any>(
     private val summaryObjectSafeCast: (SummaryObject) -> S?,
     private val syncObjectSafeCast: (SyncObject) -> F?

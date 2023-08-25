@@ -1,7 +1,5 @@
 package com.dashlane.securefile
 
-
-
 object FileSecurity {
     @Transient
     private val GENERIC_SUPPORTED_TYPES = arrayOf("image", "audio", "video", "text")
@@ -23,6 +21,7 @@ object FileSecurity {
         
         
     )
+
     @Transient
     private val SUPPORTED_EXTENSIONS = arrayOf(
         "docx", "doc", "csv", "xlsx", "xls", "ppt", "pptx", "pdf", "txt", "zip",

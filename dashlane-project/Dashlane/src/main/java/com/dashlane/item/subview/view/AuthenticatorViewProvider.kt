@@ -16,8 +16,6 @@ import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrDrawable
 import com.dashlane.util.getThemeAttrResourceId
 
-
-
 object AuthenticatorViewProvider {
 
     @SuppressLint("InflateParams")
@@ -36,7 +34,8 @@ object AuthenticatorViewProvider {
 
     private fun LinearLayout.createCodeLayout(context: Context, otp: Otp) {
         val margin = context.dpToPx(6)
-        addView(LinearLayout(context).apply {
+        addView(
+            LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             val params = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -63,20 +62,25 @@ object AuthenticatorViewProvider {
                             .apply { marginEnd = context.dpToPx(8) }
                     background =
                         context.getThemeAttrDrawable(R.attr.selectableItemBackgroundBorderless)
-                })
-            addView(TextView(context).apply {
+                }
+            )
+            addView(
+                TextView(context).apply {
                 id = R.id.item_subview_textview
                 setTextAppearance(context.getThemeAttrResourceId(R.attr.textAppearanceBody1))
                 typeface = ResourcesCompat.getFont(context, R.font.roboto_mono_regular)
-            })
-        })
+            }
+            )
+        }
+        )
     }
 
     private fun LinearLayout.createBaseLayout(context: Context, title: String) {
         orientation = LinearLayout.VERTICAL
         val marginStart = context.dpToPx(4)
 
-        addView(TextView(context).apply {
+        addView(
+            TextView(context).apply {
             setTextAppearance(context.getThemeAttrResourceId(R.attr.textAppearanceBody2))
             setTextColor(context.getThemeAttrColor(R.attr.colorOnBackgroundMedium))
             this.text = title
@@ -86,6 +90,7 @@ object AuthenticatorViewProvider {
             )
             params.marginStart = marginStart
             layoutParams = params
-        })
+        }
+        )
     }
 }

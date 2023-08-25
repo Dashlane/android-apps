@@ -18,6 +18,7 @@ import androidx.lifecycle.coroutineScope
 import com.dashlane.R
 import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.design.component.compat.view.ButtonMediumView
+import com.dashlane.hermes.LogRepository
 import com.dashlane.password.generator.PasswordGeneratorCriteria
 import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
 import com.dashlane.passwordgenerator.criteria
@@ -26,6 +27,7 @@ import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.passwordstrength.borderColorRes
 import com.dashlane.passwordstrength.getStrengthDescription
 import com.dashlane.passwordstrength.isSafeEnoughForSpecialMode
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
@@ -43,6 +45,8 @@ import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import com.dashlane.utils.PasswordScrambler
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.ref.WeakReference
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -50,8 +54,6 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import java.lang.ref.WeakReference
-import javax.inject.Inject
 
 @Suppress("LargeClass")
 @ObsoleteCoroutinesApi
@@ -63,6 +65,12 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
 
     @Inject
     lateinit var userFeaturesChecker: UserFeaturesChecker
+
+    @Inject
+    lateinit var logRepository: LogRepository
+
+    @Inject
+    lateinit var mainDataAccessor: MainDataAccessor
 
     private val eligibleToSpecialPrideMode: Boolean
         get() = userFeaturesChecker.has(FeatureFlip.SPECIAL_PRIDE_MODE)
@@ -87,7 +95,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     private val logger: PasswordGeneratorLogger
         get() = PasswordGeneratorLogger(
             SingletonProvider.getComponent().bySessionUsageLogRepository[SingletonProvider.getSessionManager().session],
-            SingletonProvider.getComponent().logRepository
+            logRepository
         )
 
     private var generatorActor =
@@ -267,7 +275,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             NoSpaceFilter,
             DefaultLockFilter
         )
-        return SingletonProvider.getMainDataAccessor().getDataCounter().count(filter)
+        return mainDataAccessor.getDataCounter().count(filter)
     }
 
     private suspend fun generatePassword(configuration: PasswordGeneratorCriteria) {

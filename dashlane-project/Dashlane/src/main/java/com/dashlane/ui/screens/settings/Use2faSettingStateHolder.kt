@@ -12,8 +12,6 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-
-
 @Singleton
 class Use2faSettingStateHolder @Inject constructor(
     private val sessionManager: SessionManager,

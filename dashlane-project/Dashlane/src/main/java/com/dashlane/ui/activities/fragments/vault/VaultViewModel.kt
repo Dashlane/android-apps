@@ -16,8 +16,6 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.withContext
 
-
-
 class VaultViewModel(val dataStorageProvider: DataStorageProvider) : ViewModel() {
     private val genericDataQuery: GenericDataQuery
         get() = dataStorageProvider.genericDataQuery

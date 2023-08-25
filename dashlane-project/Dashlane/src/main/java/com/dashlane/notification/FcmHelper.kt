@@ -6,7 +6,7 @@ import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.ApplicationForegroundChecker
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.isSemanticallyNull
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
@@ -14,25 +14,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class FcmHelper @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val userPreferencesManager: UserPreferencesManager,
     private val register: PushNotificationRegister,
     private val applicationForegroundChecker: ApplicationForegroundChecker,
-    private val logger: NotificationLoggerImpl
-) : NotificationLogger by logger {
+) {
     companion object {
         
         private const val SERVER_REGISTERED = "dservNot"
 
         const val INTENT_COME_FROM_NOTIFICATION = "intent_come_from_notification"
-        const val INTENT_NOTIFICATION_NAME = "intent_notification_name"
     }
 
     private var serverRegistered: Boolean
@@ -77,7 +73,7 @@ class FcmHelper @Inject constructor(
 
         
 
-        globalCoroutineScope.launch {
+        applicationCoroutineScope.launch {
             
             val success = register.register(username, uki, token!!)
             if (success) {
@@ -87,20 +83,14 @@ class FcmHelper @Inject constructor(
         }
     }
 
-    
-
     fun clearRegistration() {
         globalPreferencesManager.fcmRegistrationId = ""
         serverRegistered = false
     }
 
-    
-
     fun clearAllNotification(context: Context) {
         NotificationManagerCompat.from(context).cancelAll()
     }
-
-    
 
     fun clearNotification(context: Context, id: Int) {
         NotificationManagerCompat.from(context).cancel(id)

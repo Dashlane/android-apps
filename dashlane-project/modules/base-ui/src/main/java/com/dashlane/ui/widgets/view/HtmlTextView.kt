@@ -5,8 +5,6 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.text.HtmlCompat
 
-
-
 internal class HtmlTextView : AppCompatTextView {
     constructor(context: Context) : super(context)
 

@@ -25,42 +25,24 @@ import wei.mark.standout.StandOutWindow;
 import wei.mark.standout.constants.StandOutFlags;
 import wei.mark.standout.ui.Window;
 
-
-
 public class DashlaneBubble extends StandOutWindow {
-
-    
 
     public static final int REQUEST_CODE_MOVE_TO_FIELD = 0;
 
-    
-
     public static final int REQUEST_CODE_IN_APP_LOGIN_CLOSED = 1;
-
-    
 
     public static final int REQUEST_CODE_IN_APP_LOGGED_OUT_CLOSED = 2;
 
-    
-
     public static final int REQUEST_CODE_CHANGE_CONTROLLER = 3;
 
-    
-
     public static final String DATA_FORM_FIELD_BOUND = "data_form_field_bound";
-
-    
 
     public static final String DATA_CONTROLLER_TYPE = "extra_controller_type";
     public static final String DATA_ANALYSIS_RESULT_COUNT = "data_analysis_result_count";
 
     public static final int WINDOW_ID = DashlaneBubble.class.hashCode();
     public static final String DATA_ANALYSIS_RESULT_APP = "data_analysis_result_packagename";
-    
-
     public static final int CONTROLLER_LOGGED_OUT = 1;
-    
-
     public static final int CONTROLLER_IN_APP_LOGIN = 0;
     private LayoutInflater mLayoutInflater;
     private DashlaneBubbleController mController;
@@ -228,7 +210,7 @@ public class DashlaneBubble extends StandOutWindow {
         switch (data.getInt(DATA_CONTROLLER_TYPE, 0)) {
             case CONTROLLER_IN_APP_LOGIN:
                 mPackageName = data.getString(DATA_ANALYSIS_RESULT_APP);
-                return new InAppLoginController(data.getInt(DATA_ANALYSIS_RESULT_COUNT), mPackageName);
+                return new InAppLoginController(data.getInt(DATA_ANALYSIS_RESULT_COUNT));
             case CONTROLLER_LOGGED_OUT:
                 mPackageName = data.getString(DATA_ANALYSIS_RESULT_APP);
                 return new InAppLoggedOutController(mPackageName);

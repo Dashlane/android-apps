@@ -15,8 +15,8 @@ import com.dashlane.storage.userdata.accessor.filter.uid.UidFilter
 import com.dashlane.util.model.UserPermission
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.SyncObjectTypeUtils
 import com.dashlane.xml.domain.SyncObjectType
+import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
 import dagger.Lazy
 import javax.inject.Inject
 
@@ -106,7 +106,7 @@ class GenericDataQueryImplRaclette @Inject constructor(
         if (filter !is SharingFilter) return this
 
         return filter { summaryObject ->
-            if (summaryObject.syncObjectType !in SyncObjectTypeUtils.SHAREABLE) return@filter true
+            if (summaryObject.syncObjectType !in SHAREABLE) return@filter true
             
             filter.sharingPermissions?.any {
                 

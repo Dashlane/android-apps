@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.parser.apdu.impl;
 
 import android.annotation.SuppressLint;
@@ -12,32 +10,22 @@ import com.github.devnied.emvnfccard.utils.EnumUtils;
 import java.util.Calendar;
 import java.util.Date;
 
-
-
 public final class DataFactory {
-
-    
 
     public static final int BCD_DATE = 1;
 
     public static final int CPCL_DATE = 2;
 
-    
-
     public static final int HALF_BYTE_SIZE = 4;
-
-    
 
     public static final String BCD_FORMAT = "BCD_Format";
 
-    
-
-    private static Date getDate(final AnnotationData pAnnotation, final BitUtils pBit) {
+    private static Date getDate(final AnnotationData pAnnotation, final BitUtils pBit, Calendar pNow) {
         Date date = null;
         if (pAnnotation.getDateStandard() == BCD_DATE) {
             date = pBit.getNextDate(pAnnotation.getSize(), pAnnotation.getFormat(), true);
         } else if (pAnnotation.getDateStandard() == CPCL_DATE) {
-            date = calculateCplcDate(pBit.getNextByte(pAnnotation.getSize()));
+            date = calculateCplcDate(pBit.getNextByte(pAnnotation.getSize()), pNow);
         } else {
             date = pBit.getNextDate(pAnnotation.getSize(), pAnnotation.getFormat());
         }
@@ -45,10 +33,8 @@ public final class DataFactory {
     }
 
 
-    
-
     @SuppressLint("JavaUtilDateUsage")
-    public static Date calculateCplcDate(byte[] dateBytes)
+    public static Date calculateCplcDate(byte[] dateBytes, Calendar now)
             throws IllegalArgumentException {
         if (dateBytes == null || dateBytes.length != 2) {
             throw new IllegalArgumentException(
@@ -58,8 +44,6 @@ public final class DataFactory {
         if (dateBytes[0] == 0 && dateBytes[1] == 0) {
             return null;
         }
-        
-        Calendar now = Calendar.getInstance();
 
         int currenctYear = now.get(Calendar.YEAR);
         int startYearOfCurrentDecade = currenctYear - (currenctYear % 10);
@@ -85,15 +69,11 @@ public final class DataFactory {
         return calculatedDate.getTime();
     }
 
-    
-
     private static int getInteger(final AnnotationData pAnnotation, final BitUtils pBit) {
         return pBit.getNextInteger(pAnnotation.getSize());
     }
 
-    
-
-    public static Object getObject(final AnnotationData pAnnotation, final BitUtils pBit) {
+    public static Object getObject(final AnnotationData pAnnotation, final BitUtils pBit, Calendar pNow) {
         Object obj = null;
         Class<?> clazz = pAnnotation.getField().getType();
 
@@ -104,14 +84,12 @@ public final class DataFactory {
         } else if (clazz.equals(String.class)) {
             obj = getString(pAnnotation, pBit);
         } else if (clazz.equals(Date.class)) {
-            obj = getDate(pAnnotation, pBit);
+            obj = getDate(pAnnotation, pBit, pNow);
         } else if (clazz.isEnum()) {
             obj = getEnum(pAnnotation, pBit);
         }
         return obj;
     }
-
-    
 
     private static Float getFloat(final AnnotationData pAnnotation, final BitUtils pBit) {
         Float ret = null;
@@ -125,8 +103,6 @@ public final class DataFactory {
         return ret;
     }
 
-    
-
     @SuppressWarnings("unchecked")
     private static IKeyEnum getEnum(final AnnotationData pAnnotation, final BitUtils pBit) {
         int val = 0;
@@ -137,8 +113,6 @@ public final class DataFactory {
         }
         return EnumUtils.getValue(val, (Class<? extends IKeyEnum>) pAnnotation.getField().getType());
     }
-
-    
 
     private static String getString(final AnnotationData pAnnotation, final BitUtils pBit) {
         String obj = null;
@@ -151,8 +125,6 @@ public final class DataFactory {
 
         return obj;
     }
-
-    
 
     private DataFactory() {
     }

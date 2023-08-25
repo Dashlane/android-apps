@@ -30,7 +30,6 @@ import com.dashlane.ui.fab.FabDef
 import com.dashlane.ui.fab.FabPresenter
 import com.dashlane.ui.screens.fragments.search.ui.SearchListViewHelper
 import com.dashlane.ui.screens.settings.SearchableSettingInRecyclerView
-import com.dashlane.useractivity.log.inject.UserActivityComponent
 import com.dashlane.util.DeviceUtils.hideKeyboard
 import com.dashlane.util.animation.fadeIn
 import com.dashlane.util.animation.fadeOut
@@ -43,15 +42,14 @@ import com.dashlane.vault.util.valueOfFromDataIdentifier
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class SearchFragment : AbstractContentFragment(),
+class SearchFragment :
+    AbstractContentFragment(),
     EfficientAdapter.OnItemClickListener<ViewTypeProvider> {
 
     @Inject
@@ -66,10 +64,7 @@ class SearchFragment : AbstractContentFragment(),
     private val searchViewModel: SearchViewModel by viewModels()
     private val searchLogger: SearchLogger
             by lazy {
-                SearchLogger(
-                    UserActivityComponent.invoke(requireContext()).currentSessionUsageLogRepository,
-                    logRepository
-                )
+                SearchLogger(logRepository)
             }
 
     private val adapter = DashlaneRecyclerAdapter<ViewTypeProvider>()
@@ -157,7 +152,6 @@ class SearchFragment : AbstractContentFragment(),
     override fun onDestroy() {
         super.onDestroy()
         searchLogger.logClose(
-            keywords = searchViewModel.latestQuery.wordCount(),
             typedCharCount = searchViewModel.latestQuery.charCount(),
             resultCount = searchViewModel.resultCount
         )
@@ -218,10 +212,8 @@ class SearchFragment : AbstractContentFragment(),
             val activity = activity
             if (activity != null && type != null) {
                 searchLogger.logClick(
-                    keywordsCount = searchViewModel.latestQuery.wordCount(),
                     typedCharCount = searchViewModel.latestQuery.charCount(),
-                    resultCount = searchViewModel.resultCount,
-                    itemType = type
+                    resultCount = searchViewModel.resultCount
                 )
             }
             searchService.markedItemAsSearched(
@@ -311,5 +303,4 @@ class SearchFragment : AbstractContentFragment(),
     }
 }
 
-private fun String?.wordCount() = this?.split(" ")?.toTypedArray()?.size ?: 0
 private fun String?.charCount() = this?.length ?: 0

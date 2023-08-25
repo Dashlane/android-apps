@@ -12,8 +12,6 @@ import com.skocken.presentation.viewholder.PresenterViewHolder;
 import static com.dashlane.ui.menu.teamspace.MenuTeamspaceDef.IPresenter;
 import static com.dashlane.ui.menu.teamspace.MenuTeamspaceDef.IView;
 
-
-
 public class MenuTeamspaceViewHolder extends PresenterViewHolder<MenuDef.Item, IPresenter>
         implements IView {
 

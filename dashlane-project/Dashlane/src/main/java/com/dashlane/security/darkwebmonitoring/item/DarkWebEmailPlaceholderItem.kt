@@ -6,8 +6,6 @@ import com.dashlane.R
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class DarkWebEmailPlaceholderItem : DashlaneRecyclerAdapter.ViewTypeProvider {
 
     override fun getViewType() = VIEW_TYPE

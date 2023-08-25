@@ -11,8 +11,6 @@ import com.dashlane.xml.domain.properties.AuthentifiantXml
 import com.dashlane.xml.domain.properties.SecureNoteXml
 import com.dashlane.xml.domain.properties.SyncObjectXml
 
-
-
 @OptIn(ExperimentalStdlibApi::class)
 object SharedItemMerger {
 

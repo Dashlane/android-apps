@@ -21,7 +21,6 @@ import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.ui.activities.fragments.list.action.ActionItemHelper
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.desktopId
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.skocken.presentation.viewproxy.BaseViewProxy
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -49,8 +48,6 @@ class QuickActionsViewProxy(
         quickActionsLogger.logOpenQuickActions(item, itemListContext)
     }
 
-    
-
     @OptIn(DelicateCoroutinesApi::class)
     override fun setActions(actions: List<Action>) {
         actions.forEach { action ->
@@ -68,11 +65,11 @@ class QuickActionsViewProxy(
                             context,
                             dataQuery,
                             item.id,
-                            item.syncObjectType.desktopId
+                            item.syncObjectType.xmlObjectName
                         )
-                    ) return@launch
-
-                    
+                    ) {
+                        return@launch
+                    }
 
                     GlobalScope.launch {
                         delay(100)

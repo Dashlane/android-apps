@@ -5,8 +5,6 @@ import android.content.Context;
 import com.dashlane.R;
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment;
 
-
-
 public class SharingPermissionInfoDialogFragment {
 
     public static final String TAG = SharingPermissionInfoDialogFragment.class.getName();

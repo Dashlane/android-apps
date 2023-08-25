@@ -11,7 +11,7 @@ import com.dashlane.autofill.api.changepassword.domain.AutofillChangePasswordErr
 import com.dashlane.autofill.api.changepassword.domain.AutofillChangePasswordErrors.USER_LOGGED_OUT
 import com.dashlane.autofill.api.changepassword.domain.AutofillChangePasswordResultHandler
 import com.dashlane.autofill.api.internal.AutofillApiComponent
-import com.dashlane.autofill.api.model.AuthentifiantItemToFill
+import com.dashlane.autofill.api.model.toItemToFill
 import com.dashlane.autofill.api.navigation.AutofillNavigatorImpl
 import com.dashlane.autofill.api.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.autofill.api.ui.AutoFillResponseActivity
@@ -23,8 +23,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
-
-
 
 class AutofillChangePasswordActivity :
     DelegateNavigationBottomSheetFragment.NavigationDelegate,
@@ -72,10 +70,7 @@ class AutofillChangePasswordActivity :
         oldItem: SyncObject.Authentifiant
     ) {
         finishWithResult(
-            itemToFill = AuthentifiantItemToFill(
-                primaryItem = result,
-                oldItem = oldItem
-            ),
+            itemToFill = result.toItemToFill(oldPassword = oldItem.password),
             autofillFeature = AutofillFeature.CHANGE_PASSWORD,
             matchType = MatchType.REGULAR
         )
@@ -98,13 +93,9 @@ class AutofillChangePasswordActivity :
         finish()
     }
 
-    
-
     override fun onCancel() {
         finish()
     }
-
-    
 
 
     private fun openBottomSheetDialog() {

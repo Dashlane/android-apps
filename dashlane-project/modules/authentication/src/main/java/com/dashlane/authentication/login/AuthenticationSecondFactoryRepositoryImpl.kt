@@ -39,9 +39,9 @@ import com.dashlane.server.api.endpoints.authentication.exceptions.VerificationT
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.exceptions.DashlaneApiHttp400BusinessException
 import com.dashlane.server.api.time.toInstant
+import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.Instant
 
 class AuthenticationSecondFactoryRepositoryImpl(
     private val userStorage: UserStorage,
@@ -70,34 +70,27 @@ class AuthenticationSecondFactoryRepositoryImpl(
         }
 
         val login = emailToken.login
-        val userDevice = userStorage.getUser(login)
-        return if (userDevice == null) {
-            val (authTicket, responseData) = try {
-                registerDeviceWithToken(login, token)
-            } catch (e: DashlaneApiHttp400BusinessException) {
-                throw e.toEmailTokenError(emailToken, ::resendToken)
-            } catch (e: DashlaneApiException) {
-                throw e.toAuthenticationException()
-            }
-            val encryptedSettings = responseData.settings.content
-                ?: throw AuthenticationUnknownException(message = "settings.content == null")
-            val settingsDate = responseData.settings.backupDate.toInstant()
-            AuthenticationSecondFactoryRepository.ValidationResult(
-                responseData.toRegisteredUserDevice(
-                    login = login,
-                    securityFeatures = emailToken.securityFeatures,
-                    encryptedSettings = encryptedSettings,
-                    settingsDate = settingsDate
-                ),
-                authTicket = authTicket
-            )
-        } else {
-            
-            AuthenticationSecondFactoryRepository.ValidationResult(
-                userDevice.toRegisteredUserDevice(),
-                authTicket = null
-            )
+        val (authTicket, responseData) = try {
+            registerDeviceWithToken(login, token)
+        } catch (e: DashlaneApiHttp400BusinessException) {
+            throw e.toEmailTokenError(emailToken, ::resendToken)
+        } catch (e: DashlaneApiException) {
+            throw e.toAuthenticationException()
         }
+        val encryptedSettings = responseData.settings.content
+            ?: throw AuthenticationUnknownException(message = "settings.content == null")
+        val settingsDate = responseData.settings.backupDate.toInstant()
+        return AuthenticationSecondFactoryRepository.ValidationResult(
+            responseData.toRegisteredUserDevice(
+                login = login,
+                securityFeatures = emailToken.securityFeatures,
+                encryptedSettings = encryptedSettings,
+                settingsDate = settingsDate
+            ),
+            authTicket = authTicket
+        )
+        
+        
     }
 
     private suspend fun registerDeviceWithToken(
@@ -209,28 +202,23 @@ class AuthenticationSecondFactoryRepositoryImpl(
                     authTicket = authTicket
                 )
             } else {
-                if (userDevice.isServerKeyNeeded) {
-                    if (connectivityCheck.isOffline) {
-                        throw AuthenticationOfflineException()
-                    }
-
-                    val (authTicket, responseData) = try {
-                        val verifyResult = verify(login, verification)
-                        verifyResult.authTicket to verifyResult.login(userDevice.accessKey)
-                    } catch (e: DashlaneApiException) {
-                        throw e.toError()
-                    }
-                    AuthenticationSecondFactoryRepository.ValidationResult(
-                        registeredUserDevice = userDevice.toRegisteredUserDevice(responseData.serverKey),
-                        authTicket = authTicket
-                    )
-                } else {
-                    
-                    AuthenticationSecondFactoryRepository.ValidationResult(
-                        registeredUserDevice = userDevice.toRegisteredUserDevice(),
-                        authTicket = null
-                    )
+                
+                if (connectivityCheck.isOffline) {
+                    throw AuthenticationOfflineException()
                 }
+
+                val (authTicket, responseData) = try {
+                    val verifyResult = verify(login, verification)
+                    verifyResult.authTicket to verifyResult.login(userDevice.accessKey)
+                } catch (e: DashlaneApiException) {
+                    throw e.toError()
+                }
+                AuthenticationSecondFactoryRepository.ValidationResult(
+                    registeredUserDevice = userDevice.toRegisteredUserDevice(responseData.serverKey),
+                    authTicket = authTicket
+                )
+                
+                
             }
         }
 
@@ -241,6 +229,7 @@ class AuthenticationSecondFactoryRepositoryImpl(
                 is DeviceNotFoundException,
                 is VerificationMethodDisabledException,
                 is UserNotFoundException -> AuthenticationAccountConfigurationChangedException(cause = this)
+
                 is DashlaneApiHttp400BusinessException -> toError()
                 else -> toAuthenticationException()
             }
@@ -299,6 +288,7 @@ class AuthenticationSecondFactoryRepositoryImpl(
             is FailedToContactAuthenticatorDeviceException,
             is UserHasNoActiveAuthenticatorException,
             is VerificationFailedException -> AuthenticationSecondFactorFailedException(cause = this)
+
             is VerificationTimeoutException -> AuthenticationTimeoutException(cause = this)
             else -> AuthenticationUnknownException(cause = this)
         }
@@ -354,9 +344,11 @@ private suspend fun DashlaneApiHttp400BusinessException.toEmailTokenError(
             }
             AuthenticationInvalidTokenException(cause = this)
         }
+
         is VerificationMethodDisabledException -> AuthenticationAccountConfigurationChangedException(
             cause = this
         )
+
         is AccountBlockedContactSupportException -> AuthenticationLockedOutException(cause = this)
         else -> AuthenticationUnknownException(cause = this)
     }
@@ -374,5 +366,5 @@ private fun DashlaneApiHttp400BusinessException.toDuoPushError(): Authentication
         else -> AuthenticationUnknownException(cause = this)
     }
 
-internal fun List<RemoteKey>.findByTypeOrNull(type: RemoteKey.Type): EncryptedBase64String? =
+fun List<RemoteKey>.findByTypeOrNull(type: RemoteKey.Type): EncryptedBase64String? =
     firstOrNull { it.type == type }?.key?.asEncryptedBase64()

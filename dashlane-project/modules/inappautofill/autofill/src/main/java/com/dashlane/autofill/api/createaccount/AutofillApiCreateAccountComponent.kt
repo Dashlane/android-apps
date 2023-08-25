@@ -4,8 +4,6 @@ import android.content.Context
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountService
 import com.dashlane.util.Toaster
 
-
-
 interface AutofillApiCreateAccountComponent {
     val autofillAccountCreationService: AutofillCreateAccountService
     val createAccountLogger: AutofillCreateAccountLogger

@@ -1,14 +1,10 @@
 package com.dashlane.util
 
-
-
 inline fun <T> tryOrNull(block: () -> T): T? = try {
     block()
 } catch (ignored: Exception) {
     null
 }
-
-
 
 inline fun tryAsSuccess(block: () -> Unit): Boolean = try {
     block(); true
@@ -16,11 +12,7 @@ inline fun tryAsSuccess(block: () -> Unit): Boolean = try {
     false
 }
 
-
-
 inline fun <T> nullUnless(condition: Boolean, block: () -> T): T? = if (condition) block() else null
-
-
 
 inline fun <T> T?.runIfNull(closure: () -> Unit): T? =
     if (this != null) {
@@ -29,8 +21,6 @@ inline fun <T> T?.runIfNull(closure: () -> Unit): T? =
         closure()
         this
     }
-
-
 
 val <T> T.exhaustive: T
     get() = this

@@ -1,7 +1,5 @@
 package com.dashlane.ui.screens.settings
 
-
-
 sealed class Use2faSettingState {
     abstract val enabled: Boolean
     abstract val visible: Boolean

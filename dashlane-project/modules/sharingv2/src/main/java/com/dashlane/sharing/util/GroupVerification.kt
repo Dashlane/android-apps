@@ -13,8 +13,6 @@ import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAcceptedOrPending
 
-
-
 class GroupVerification(
     private val sharingCryptography: SharingCryptographyHelper,
     private val currentUserId: String
@@ -33,7 +31,9 @@ class GroupVerification(
         return if (decryptGroupKey == null) {
             
             true
-        } else verifyProposeSignature(userDownloads, decryptGroupKey.toByteArray())
+        } else {
+            verifyProposeSignature(userDownloads, decryptGroupKey.toByteArray())
+        }
     }
 
     
@@ -53,8 +53,10 @@ class GroupVerification(
         return if (decryptGroupKey == null) {
             
             true
-        } else verifyProposeSignature(userDownloads, decryptGroupKey.toByteArray()) &&
+        } else {
+            verifyProposeSignature(userDownloads, decryptGroupKey.toByteArray()) &&
                 verifyProposeSignatureUserGroup(groupMembers, decryptGroupKey.toByteArray())
+        }
     }
 
     @Throws(KeyNotFoundException::class)
@@ -116,7 +118,9 @@ class GroupVerification(
         
         return if (!verifyAcceptSignature(userDownload, groupId, groupKey.toByteArray())) {
             null 
-        } else groupKey
+        } else {
+            groupKey
+        }
     }
 
     private fun getGroupKey(
@@ -140,7 +144,9 @@ class GroupVerification(
             )
         ) {
             null 
-        } else decryptGroupKeyFromUserGroup
+        } else {
+            decryptGroupKeyFromUserGroup
+        }
     }
 
     private fun verifyAcceptSignature(
@@ -148,11 +154,15 @@ class GroupVerification(
         groupId: String,
         groupKey: ByteArray
     ): Boolean {
-        return (Status.ACCEPTED != member.status ||
+        return (
+            Status.ACCEPTED != member.status ||
                 sharingCryptography.verifyAcceptationSignature(
                     member.acceptSignature,
-                    groupId, groupKey, null
-                ))
+                    groupId,
+                    groupKey,
+                    null
+                )
+        )
     }
 
     private fun verifyAcceptSignature(
@@ -161,11 +171,15 @@ class GroupVerification(
         groupKey: ByteArray,
         publicKey: SharingKeys.Public
     ): Boolean {
-        return (Status.ACCEPTED != member.status ||
+        return (
+            Status.ACCEPTED != member.status ||
                 sharingCryptography.verifyAcceptationSignature(
                     member.acceptSignature,
-                    groupId, groupKey, publicKey
-                ))
+                    groupId,
+                    groupKey,
+                    publicKey
+                )
+        )
     }
 
     @VisibleForTesting

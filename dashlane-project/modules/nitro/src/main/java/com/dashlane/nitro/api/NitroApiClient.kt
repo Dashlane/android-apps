@@ -4,8 +4,6 @@ import com.dashlane.server.api.Response
 import com.dashlane.server.api.exceptions.DashlaneApiHttp400BusinessException
 
 internal interface NitroApiClient {
-    
-
     suspend fun <ResponseDataT> execute(
         path: String,
         request: Any,

@@ -7,8 +7,6 @@ import com.dashlane.premium.utils.toFormattedPrice
 import com.dashlane.ui.model.TextResource
 import java.util.Locale
 
-
-
 sealed class IntroOfferType {
     abstract val productDetails: ProductDetailsWrapper.IntroductoryOfferProduct
     abstract val offerType: OfferType
@@ -85,8 +83,6 @@ sealed class IntroOfferType {
         ).format(context.resources)
     }
 
-    
-
     data class MatchingCycleFreeTrial(
         override val offerType: OfferType,
         override val productDetails: ProductDetailsWrapper.IntroductoryOfferProduct
@@ -131,8 +127,6 @@ sealed class IntroOfferType {
         }
     }
 
-    
-
     data class MismatchingCycleFreeTrial(
         override val offerType: OfferType,
         override val productDetails: ProductDetailsWrapper.IntroductoryOfferProduct
@@ -168,8 +162,6 @@ sealed class IntroOfferType {
             ).format(context.resources)
         }
     }
-
-    
 
     data class MonthlySinglePayment(
         override val offerType: OfferType,
@@ -220,8 +212,6 @@ sealed class IntroOfferType {
         }
     }
 
-    
-
     data class MonthlyRecurringPayment(
         override val offerType: OfferType,
         override val productDetails: ProductDetailsWrapper.IntroductoryOfferProduct
@@ -268,8 +258,6 @@ sealed class IntroOfferType {
             ).format(context.resources)
         }
     }
-
-    
 
     data class MonthlySinglePaymentToYearly(
         override val offerType: OfferType,
@@ -322,8 +310,6 @@ sealed class IntroOfferType {
         }
     }
 
-    
-
     data class YearlySinglePaymentToYearly(
         override val offerType: OfferType,
         override val productDetails: ProductDetailsWrapper.IntroductoryOfferProduct
@@ -372,8 +358,6 @@ sealed class IntroOfferType {
         }
     }
 
-    
-
     data class MonthlyRecurringPaymentToYearly(
         override val offerType: OfferType,
         override val productDetails: ProductDetailsWrapper.IntroductoryOfferProduct
@@ -417,8 +401,6 @@ sealed class IntroOfferType {
             ).format(context.resources)
         }
     }
-
-    
 
     data class YearlyRecurringPaymentToYearly(
         override val offerType: OfferType,

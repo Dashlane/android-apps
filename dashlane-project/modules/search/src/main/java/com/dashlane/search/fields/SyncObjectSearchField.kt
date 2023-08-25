@@ -5,8 +5,6 @@ import com.dashlane.search.ItemType
 import com.dashlane.search.SearchField
 import com.dashlane.xml.domain.SyncObject
 
-
-
 enum class CredentialField(
     override val order: Int,
     override val itemType: ItemType = ItemType.CREDENTIAL,

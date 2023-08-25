@@ -12,8 +12,6 @@ import android.text.TextPaint
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 
-
-
 open class TextFitDrawable @JvmOverloads constructor(
     private val text: String,
     @ColorInt textColor: Int,

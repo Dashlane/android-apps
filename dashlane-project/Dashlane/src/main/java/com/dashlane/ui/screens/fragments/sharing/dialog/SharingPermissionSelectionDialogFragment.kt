@@ -13,8 +13,6 @@ import com.dashlane.ui.screens.sharing.NewSharePeopleViewProxy
 import com.dashlane.ui.screens.sharing.NewSharePeopleViewProxy.Companion.CHANGE_PERMISSION_VALUE
 import com.dashlane.util.getSerializableCompat
 
-
-
 class SharingPermissionSelectionDialogFragment : NotificationDialogFragment() {
     override fun onPreCreateDialog(builder: AlertDialog.Builder) {
         super.onPreCreateDialog(builder)

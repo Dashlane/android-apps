@@ -1,39 +1,29 @@
 package com.dashlane.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
-import com.dashlane.analytics.referrer.ReferrerManager;
-import com.dashlane.async.BroadcastManager;
-import com.dashlane.authentication.sso.GetUserSsoInfoActivity;
-import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.managers.PerfLogManager;
-import com.dashlane.navigation.NavigationConstants;
-import com.dashlane.preference.ConstantsPrefs;
-import com.dashlane.preference.GlobalPreferencesManager;
-import com.dashlane.session.Username;
-import com.dashlane.util.ActivityUtils;
-import com.dashlane.util.DeepLinkLogger;
-import com.dashlane.util.StaticTimerUtil;
-import com.dashlane.util.log.FirstLaunchDetector;
-import com.dashlane.util.log.LaunchLogger;
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-
-import java.io.IOException;
-
-import javax.inject.Inject;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
+
+import com.dashlane.analytics.referrer.ReferrerManager;
+import com.dashlane.async.BroadcastManager;
+import com.dashlane.authentication.sso.GetUserSsoInfoActivity;
+import com.dashlane.dagger.singleton.SingletonProvider;
+import com.dashlane.navigation.NavigationConstants;
+import com.dashlane.preference.ConstantsPrefs;
+import com.dashlane.preference.GlobalPreferencesManager;
+import com.dashlane.session.Username;
+import com.dashlane.util.ActivityUtils;
+import com.dashlane.util.log.FirstLaunchDetector;
+import com.dashlane.util.log.LaunchLogger;
+
+import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
 
 @SuppressLint("CustomSplashScreen")
@@ -45,8 +35,6 @@ public class SplashScreenActivity extends FragmentActivity {
 
     @Inject
     LaunchLogger launchLogger;
-
-    
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,7 +49,7 @@ public class SplashScreenActivity extends FragmentActivity {
 
         SingletonProvider.getDaDaDa().refreshAsync(this);
 
-        SingletonProvider.getUserSupportFileLogger().add("SplashScreen Display");
+                .info("SplashScreenActivity onCreate", "", true);
 
         proceedWithLoading();
 
@@ -71,19 +59,10 @@ public class SplashScreenActivity extends FragmentActivity {
     }
 
     @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        StaticTimerUtil.setSplashScreenShown(System.currentTimeMillis());
-        PerfLogManager.getInstance().sendSplashScreenLoadTimeLog();
-    }
-
-    @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         firstLaunchDetector.detect();
     }
-
-    
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -113,8 +92,6 @@ public class SplashScreenActivity extends FragmentActivity {
         if (currentIntent != null) {
             final Uri uri = currentIntent.getData();
             if (uri != null) {
-                DeepLinkLogger.Companion.invoke().log(uri, "attempt");
-
                 
                 startActivity(newIntent);
                 finishAffinity();
@@ -132,37 +109,8 @@ public class SplashScreenActivity extends FragmentActivity {
     private void doMarketingStuff() {
         ReferrerManager.getInstance().initialize(
                 SingletonProvider.getGlobalPreferencesManager().getString(ConstantsPrefs.REFERRED_BY));
-
-        initializeTrackersUsingPlaystoreAndTrackAsync(SingletonProvider.getContext());
     }
 
-    private void initializeTrackersUsingPlaystoreAndTrackAsync(final Context context) {
-        
-        new Thread(() -> initializeTrackersUsingPlaystoreAndTrack(context)).start();
-    }
-
-    private void initializeTrackersUsingPlaystoreAndTrack(Context context) {
-        
-        if (GoogleApiAvailability.getInstance()
-                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-            try {
-                AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo
-                        (getApplicationContext());
-            } catch (IOException e) {
-                
-                
-
-            } catch (GooglePlayServicesNotAvailableException e) {
-                
-
-            } catch (GooglePlayServicesRepairableException e) {
-                
-
-            } catch (NullPointerException e) {
-                
-            }
-        }
-    }
 
     private boolean interceptUserSsoInfo() {
         Intent intent = getIntent();
@@ -189,8 +137,6 @@ public class SplashScreenActivity extends FragmentActivity {
         }
         return true;
     }
-
-    
 
     private void keepSplashScreenTheme() {
         final boolean[] started = {false};

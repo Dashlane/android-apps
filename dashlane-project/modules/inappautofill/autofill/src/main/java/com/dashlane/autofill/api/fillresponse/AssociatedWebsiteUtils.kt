@@ -3,8 +3,6 @@ package com.dashlane.autofill.api.fillresponse
 import com.dashlane.ext.application.KnownLinkedDomains
 import com.dashlane.url.UrlDomain
 
-
-
 fun UrlDomain?.relatedOnlyByLinkedDomains(associatedUrlDomain: UrlDomain?): Boolean {
     val urlDomain = this ?: return false
     val otherUrlDomain = associatedUrlDomain ?: return false

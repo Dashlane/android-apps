@@ -9,8 +9,6 @@ import com.dashlane.util.getApplicationInfoCompat
 import com.dashlane.util.queryIntentActivitiesCompat
 import com.dashlane.util.tryOrNull
 
-
-
 data class ExternalApplication(
     val packageName: String,
     val drawable: Drawable,
@@ -18,8 +16,6 @@ data class ExternalApplication(
 ) {
 
     companion object {
-
-        
 
         fun of(context: Context, packageName: String): ExternalApplication? {
             val packageManager = context.packageManager
@@ -31,8 +27,6 @@ data class ExternalApplication(
                 ExternalApplication(packageName, icon, label)
             }
         }
-
-        
 
         fun of(context: Context, intent: Intent): ExternalApplication? {
             val packageManager = context.packageManager

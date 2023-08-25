@@ -28,8 +28,6 @@ import java.io.File
 import java.time.Instant
 import java.util.UUID
 
-
-
 class GlobalPreferencesManager(
     private val context: Context,
     private val backupManager: BackupManager
@@ -168,11 +166,7 @@ class GlobalPreferencesManager(
 
     fun hasActivatedAutofillOnce(): Boolean = getBoolean(HAS_ACTIVATED_AUTOFILL_ONCE, false)
 
-    
-
     fun count() = sharedPreferences?.let { it.all.keys.size } ?: -1
-
-    
 
     private fun getBackupToken(username: String) =
         getStringSet(BACKUP_TOKEN_SET)?.firstOrNull { it.startsWith(username) }?.split(";;")

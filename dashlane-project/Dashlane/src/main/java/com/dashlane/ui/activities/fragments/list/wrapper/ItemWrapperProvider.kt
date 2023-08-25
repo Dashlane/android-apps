@@ -10,8 +10,6 @@ import com.dashlane.vault.summary.toSummary
 fun VaultItem<*>.toItemWrapper(container: ItemListContext) =
     toSummary<SummaryObject>().toItemWrapper(container)
 
-
-
 @Suppress("UNCHECKED_CAST")
 fun SummaryObject.toItemWrapper(container: ItemListContext): VaultItemWrapper<out SummaryObject>? {
     return when (this) {

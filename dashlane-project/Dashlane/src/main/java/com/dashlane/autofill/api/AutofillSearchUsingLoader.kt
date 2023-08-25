@@ -10,8 +10,7 @@ import com.dashlane.search.SearchSorter
 import com.dashlane.search.fields.LegacySearchField
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.ui.screens.fragments.search.util.SearchSorterProvider
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.util.IdentityUtil
@@ -20,23 +19,20 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
-
-
 class AutofillSearchUsingLoader @Inject constructor(
     @ApplicationContext
     val applicationContext: Context,
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     dataIdentifierListTextResolver: DataIdentifierListTextResolver,
-    identityUtil: IdentityUtil,
-    userFeaturesChecker: UserFeaturesChecker
+    identityUtil: IdentityUtil
 ) : AutofillSearch {
     private val searchLoader: SearchLoader
     private val searchSorter: SearchSorter = SearchSorterProvider
-        .getSearchSorter(dataIdentifierListTextResolver, identityUtil, userFeaturesChecker)
+        .getSearchSorter(dataIdentifierListTextResolver, identityUtil)
 
     init {
-        searchLoader = SearchLoader(searchSorter, globalCoroutineScope)
+        searchLoader = SearchLoader(searchSorter, applicationCoroutineScope)
     }
 
     override fun loadAuthentifiants(): List<SummaryObject.Authentifiant> =

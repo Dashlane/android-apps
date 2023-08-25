@@ -15,7 +15,8 @@ fun createEmail(
             this.email = emailAddress
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.Email>.copySyncObject(builder: SyncObject.Email.Builder.() -> Unit = {}):

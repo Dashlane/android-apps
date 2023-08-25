@@ -6,7 +6,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.api.model.TextItemToFill
+import com.dashlane.autofill.api.model.OtpItemToFill
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -41,7 +41,7 @@ class SmsOtpAutofillBottomSheet(private val activity: SmsOtpAutofillActivity) {
         cancelButton.setOnClickListener { dialog.cancel() }
         autofillButton.setOnClickListener {
             activity.finishWithResult(
-                itemToFill = TextItemToFill(codeTextView.text.toString()),
+                itemToFill = OtpItemToFill(code = codeTextView.text.toString()),
                 autofillFeature = AutofillFeature.SMS_OTP_CODE,
                 matchType = MatchType.REGULAR
             )
@@ -70,7 +70,7 @@ class SmsOtpAutofillBottomSheet(private val activity: SmsOtpAutofillActivity) {
 
         codeTextView.setOnClickListener {
             activity.finishWithResult(
-                itemToFill = TextItemToFill(code),
+                itemToFill = OtpItemToFill(code = code),
                 autofillFeature = AutofillFeature.SMS_OTP_CODE,
                 matchType = MatchType.REGULAR
             )

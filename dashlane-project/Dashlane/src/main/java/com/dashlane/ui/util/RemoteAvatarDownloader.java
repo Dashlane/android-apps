@@ -13,8 +13,6 @@ import java.lang.ref.WeakReference;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-
-
 public class RemoteAvatarDownloader extends CustomTarget<Drawable> {
 
     @NonNull

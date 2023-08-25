@@ -6,7 +6,6 @@
     <string name="and_accessibility_add_button">Add</string>
     <string name="and_accessibility_add_attachment_button">Add attachment</string>
     <string name="and_accessibility_action_expand">Expand</string>
-    <string name="and_accessibility_action_collapse">Collapse</string>
     <string name="and_accessibility_close">Close</string>
     <string name="and_accessibility_info">More information</string>
     <string name="and_accessibility_user_profile_icon">Profile icon</string>
@@ -52,4 +51,8 @@
     <string name="and_accessibility_open_linked_app">Open application</string>
     
     <string name="and_accessibility_open_linked_website">Open website</string>
+    
+    <string name="and_accessibility_secret_transfer_qrcode">Scan QR Code</string>
+    
+    <string name="and_accessibility_secret_transfer_success">Success</string>
 </resources>

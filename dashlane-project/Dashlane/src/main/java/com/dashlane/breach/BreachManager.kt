@@ -14,8 +14,6 @@ import com.dashlane.events.register
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.ItemId
 import com.dashlane.hermes.generated.events.user.ReceiveSecurityAlert
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.notificationcenter.alerts.BreachDataHelper
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.getAlertTypeForLogs
@@ -29,7 +27,7 @@ import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
@@ -40,21 +38,19 @@ import com.dashlane.vault.model.leakedPasswordsSet
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
+import java.time.Instant
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Call
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class BreachManager @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     @DefaultCoroutineDispatcher
@@ -94,10 +90,8 @@ class BreachManager @Inject constructor(
         }
     }
 
-    
-
     private fun markBreachSolved() {
-        globalCoroutineScope.launch(mainCoroutineDispatcher) {
+        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             breachLoader.getBreachesWrapper()
                 .filter { !it.localBreach.solved && it.linkedAuthentifiant.isEmpty() && !it.publicBreach.hasCreditCardLeaked() }
                 .forEach {
@@ -120,15 +114,16 @@ class BreachManager @Inject constructor(
         val lastFetchedPublicRevision = lastFetchedPublicBreachRevision()
         val lastFetchedDarkWebDate = lastFetchedDarkWebDate()
 
-        globalCoroutineScope.launch(mainCoroutineDispatcher) {
+        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             val publicBreachResult = try {
                 breachService.getBreaches(
-                    session.userId, session.uki, lastFetchedPublicRevision,
+                    session.userId,
+                    session.uki,
+                    lastFetchedPublicRevision,
                     
                     revisionOnly = lastFetchedPublicRevision == 0
                 )
             } catch (e: Throwable) {
-                Log.v(e)
                 refreshInProgress = false
                 null
             } ?: return@launch
@@ -155,8 +150,6 @@ class BreachManager @Inject constructor(
         }
     }
 
-    
-
     @WorkerThread
     fun getSecurityBreachesToSave(breaches: List<BreachWithOriginalJson>):
             List<VaultItem<SyncObject.SecurityBreach>> {
@@ -181,11 +174,8 @@ class BreachManager @Inject constructor(
         breachAlertCenter.onTerminate()
     }
 
-    
-
     @WorkerThread
     private suspend fun saveOrUpdateBreaches(breaches: List<BreachWithOriginalJson>) {
-
         val securityBreachesToSave = getSecurityBreachesToSave(breaches)
 
         saveSecurityBreaches(securityBreachesToSave)
@@ -343,7 +333,8 @@ class BreachManager @Inject constructor(
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)
                 specificUid(ids)
-            })
+            }
+        )
             .asSequence()
             .filterIsInstance<VaultItem<SyncObject.Authentifiant>>()
             .mapNotNull { it.syncObject.password }

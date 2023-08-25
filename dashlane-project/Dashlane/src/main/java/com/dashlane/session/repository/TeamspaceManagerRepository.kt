@@ -14,8 +14,6 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class TeamspaceManagerRepository @Inject constructor(
     private val userDataRepository: UserDataRepository,
@@ -30,13 +28,12 @@ class TeamspaceManagerRepository @Inject constructor(
 
     fun sessionInitializing(session: Session) {
         val teamspacesJson = accountStatusRepository.get().getPremiumStatus(session).teamspaces
-        val spaceAnonIdDataProvider = SpaceAnonIdDataProvider(bySessionUsageLogRepository, session)
+        val spaceAnonIdDataProvider = SpaceAnonIdDataProvider()
         val spaces = teamspaceUpdater.get().deserializeTeamspaces(teamspacesJson)
         teamspaceManagerPerSession[session] =
             TeamspaceManager(
                 spaceAnonIdDataProvider,
                 userDataRepository.getSettingsManager(session),
-                spaces,
                 TeamspaceUsageLogSpaceChanged(bySessionUsageLogRepository, session)
             ).also {
                 it.init(spaces, forceCategorizationManager.get())

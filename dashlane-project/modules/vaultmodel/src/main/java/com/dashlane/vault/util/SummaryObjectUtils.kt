@@ -10,8 +10,6 @@ import com.dashlane.vault.summary.SummaryObject.IdCard
 import com.dashlane.vault.summary.SummaryObject.Passport
 import com.dashlane.vault.summary.SummaryObject.SocialSecurityStatement
 
-
-
 fun SummaryObject.attachmentsAllowed(userFeaturesChecker: UserFeaturesChecker) = when {
     isShared -> false
     isIdDataType() && userFeaturesChecker.has(ATTACHMENT_FOR_IDS) -> true
@@ -20,8 +18,6 @@ fun SummaryObject.attachmentsAllowed(userFeaturesChecker: UserFeaturesChecker) =
 
 val SummaryObject.isProtected
     get() = (this as? SummaryObject.SecureNote)?.secured ?: false
-
-
 
 fun SummaryObject.isIdDataType() = when (this) {
     is DriverLicence, is FiscalStatement, is IdCard, is Passport, is SocialSecurityStatement -> true

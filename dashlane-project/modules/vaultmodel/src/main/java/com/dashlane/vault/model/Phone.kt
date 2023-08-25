@@ -18,7 +18,8 @@ fun createPhone(
             this.phoneName = phoneName
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun SummaryObject.Phone.getPhoneNameAndNumber(context: Context): String {

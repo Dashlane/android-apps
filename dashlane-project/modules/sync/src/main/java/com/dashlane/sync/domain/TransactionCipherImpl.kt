@@ -49,8 +49,6 @@ class TransactionCipherImpl(
         syncLogs
     )
 
-    
-
     override suspend fun decipherIncomingTransactions(
         transactions: List<SyncDownloadTransaction>,
         cryptographyEngineFactory: CryptographyEngineFactory,
@@ -139,7 +137,7 @@ class TransactionCipherImpl(
         transaction: Transaction
     ): SyncObject {
         val syncTransactionXml = try {
-            decryptionEngine.decryptBase64ToXmlTransaction(content.asEncryptedBase64(), compressed = true)
+                decryptionEngine.decryptBase64ToXmlTransaction(content.asEncryptedBase64(), compressed = true)
         } catch (e: CryptographyException) {
             syncLogs.onDecipherTransactionError(syncObjectType.transactionType, transaction, e)
             

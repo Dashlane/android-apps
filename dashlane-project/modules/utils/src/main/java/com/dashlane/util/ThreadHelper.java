@@ -5,8 +5,6 @@ import android.os.Looper;
 
 import androidx.annotation.MainThread;
 
-
-
 public class ThreadHelper {
 
     private Handler mHandler;

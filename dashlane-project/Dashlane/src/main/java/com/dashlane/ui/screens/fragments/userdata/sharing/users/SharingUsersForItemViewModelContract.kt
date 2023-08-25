@@ -5,17 +5,11 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import kotlinx.coroutines.flow.Flow
 
-
-
 interface SharingUsersForItemViewModelContract {
     val itemId: String
     val uiState: Flow<UIState>
 
-    
-
     fun reloadData()
-
-    
 
     fun pullToRefresh()
 

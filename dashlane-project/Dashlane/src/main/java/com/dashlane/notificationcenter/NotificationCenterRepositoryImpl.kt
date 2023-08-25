@@ -2,8 +2,8 @@ package com.dashlane.notificationcenter
 
 import android.content.Context
 import android.text.format.DateUtils
-import com.dashlane.accountrecovery.AccountRecovery
 import com.dashlane.announcements.modules.trialupgraderecommendation.TrialUpgradeRecommendationModule
+import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.csvimport.OnboardingChromeImportUtils
 import com.dashlane.darkweb.DarkWebEmailStatus
@@ -38,7 +38,6 @@ import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.tryOrNull
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -63,12 +62,11 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private val securityHelper: SecurityHelper,
     private val biometricAuthModule: BiometricAuthModule,
     private val userDataRepository: UserDataRepository,
-    private val accountRecovery: AccountRecovery,
+    private val biometricRecovery: BiometricRecovery,
     private val accountStatusRepository: AccountStatusRepository,
     private val darkWebMonitoringManager: DarkWebMonitoringManager,
     private val storeOffersManager: StoreOffersManager,
-    private val storeOffersFormatter: StoreOffersFormatter,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val storeOffersFormatter: StoreOffersFormatter
 ) : NotificationCenterRepository {
 
     private val hasBiometric
@@ -100,8 +98,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         }.awaitAll().flatten()
     }
 
-    
-
     @Suppress("EXPERIMENTAL_API_USAGE")
     override suspend fun load(section: ActionItemSection, limit: Int?): List<NotificationItem> {
         val types = actionItemTypes[section] ?: return listOf()
@@ -112,12 +108,8 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         }
     }
 
-    
-
     override suspend fun hasAtLeastOneUnRead(): Boolean =
         loadAll().filterNotDismissedAndUnRead().isNotEmpty()
-
-    
 
     override fun getOrInitCreationDate(item: NotificationItem): Instant {
         if (item is AlertActionItem) {
@@ -181,7 +173,7 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             ActionItemType.BREACH_ALERT -> loadBreachItems(limit)
             ActionItemType.SHARING -> loadSharingItems()
             ActionItemType.CHROME_IMPORT -> listOf(createChromeImportItem(section))
-            ActionItemType.ACCOUNT_RECOVERY -> listOf(createAccountRecoveryItem())
+            ActionItemType.ACCOUNT_RECOVERY -> listOf(createBiometricRecoveryItem())
             ActionItemType.FREE_TRIAL_STARTED -> listOf(createFreeTrialStartedItem())
             ActionItemType.TRIAL_UPGRADE_RECOMMENDATION -> listOf(createTrialUpgradeRecommendationItem())
             ActionItemType.AUTHENTICATOR_ANNOUNCEMENT -> listOf(createAuthenticatorAnnouncementItem())
@@ -195,13 +187,15 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private fun createAutoFillItem(): ActionItem? =
         if (meetConditionAutoFill()) {
             ActionItem.AutoFillActionItem(this)
-        } else null
+        } else {
+            null
+        }
 
     private fun createChromeImportItem(section: ActionItemSection): ActionItem? =
         if (meetConditionChromeImport()) ActionItem.ChromeImportActionItem(this, section) else null
 
-    private fun createAccountRecoveryItem(): ActionItem? = if (meetConditionAccountRecovery()) {
-        ActionItem.AccountRecoveryActionItem(this, lockType == LockTypeManager.LOCK_TYPE_BIOMETRIC)
+    private fun createBiometricRecoveryItem(): ActionItem? = if (meetConditionBiometricRecovery()) {
+        ActionItem.BiometricRecoveryActionItem(this, lockType == LockTypeManager.LOCK_TYPE_BIOMETRIC)
     } else {
         null
     }
@@ -232,9 +226,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         }
 
     private suspend fun createPromotionItems(): List<NotificationItem> {
-        if (!userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.INTRO_OFFERS_ENTRY_POINTS)) {
-            return listOf()
-        }
         val pendingOffers = loadStoreOffers().map { storeOffer ->
             val offerType = storeOffer.offerType
             val introOffers = listOf(storeOffer.monthly?.productDetails, storeOffer.yearly?.productDetails)
@@ -243,7 +234,8 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             introOffers.mapNotNull { productDetails ->
                 productDetails.toPromotionType(offerType)?.let { offerData ->
                     IntroOfferActionItem(
-                        actionItemsRepository = this, introOfferType = offerData
+                        actionItemsRepository = this,
+                        introOfferType = offerData
                     )
                 }
             }
@@ -292,10 +284,10 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             !userPreferencesManager.hasStartedChromeImport
     }
 
-    private fun meetConditionAccountRecovery(): Boolean = securityHelper.isDeviceSecured() &&
+    private fun meetConditionBiometricRecovery(): Boolean = securityHelper.isDeviceSecured() &&
         hasBiometric &&
-        accountRecovery.isFeatureAvailable &&
-        !accountRecovery.isFeatureEnabled
+        biometricRecovery.isFeatureAvailable &&
+        !biometricRecovery.isFeatureEnabled
 
     private fun isChromeImportForGettingStarted(): Boolean {
         val creationTimestampSeconds = sessionManager.session?.let {
@@ -318,9 +310,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             ?: false
 
     private fun meetConditionTrialUpgradeRecommendation(): Boolean {
-        if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.PLAN_UPDATE)) {
-            return false
-        }
         val daysLeftForDisplay = TrialUpgradeRecommendationModule.REMAINING_TRIALS_DAYS
         return sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }
             ?.run { isTrial && remainingDays < daysLeftForDisplay + 1 }
@@ -396,8 +385,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         private const val PREFERENCE_CREATION_DATE = "action_item_creation_date_"
         private const val DELAY_CHROME_IMPORT_ACCOUNT_CREATION =
             48 * DateUtils.HOUR_IN_MILLIS 
-
-        
 
         fun setDismissed(
             userPreferencesManager: UserPreferencesManager,

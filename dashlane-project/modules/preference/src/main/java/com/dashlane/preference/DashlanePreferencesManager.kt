@@ -4,8 +4,6 @@ import android.content.SharedPreferences
 import com.dashlane.util.MD5Hash
 import java.util.HashSet
 
-
-
 abstract class DashlanePreferencesManager {
 
     protected abstract val sharedPreferences: SharedPreferences?
@@ -85,8 +83,6 @@ abstract class DashlanePreferencesManager {
         return sharedPreferences?.contains(label) ?: false ||
                 sharedPreferences?.contains(MD5Hash.hash(label)) ?: false
     }
-
-    
 
     fun apply(vararg preferenceEntries: PreferenceEntry): Boolean {
         return apply(preferenceEntries.toList())

@@ -9,8 +9,6 @@ import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import com.dashlane.BuildConfig
 
-
-
 class InAppLoginByAccessibilityManager(private val context: Context) {
 
     fun isEnable() = isAccessibilityOn() && isDrawOnTopPermissionEnabled() && isOlderThanAndroidQ()

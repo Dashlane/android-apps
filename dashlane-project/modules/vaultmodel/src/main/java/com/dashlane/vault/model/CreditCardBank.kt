@@ -4,8 +4,6 @@ class CreditCardBank(bankDescriptor: String?) {
 
     val bankDescriptor = BankDescriptor.get(bankDescriptor?.takeIf { it.split('-').size == 2 }) ?: ""
 
-    
-
     object BankDescriptor {
 
         

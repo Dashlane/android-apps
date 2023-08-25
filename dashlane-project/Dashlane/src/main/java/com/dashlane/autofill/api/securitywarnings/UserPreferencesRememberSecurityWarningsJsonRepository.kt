@@ -7,8 +7,6 @@ import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import javax.inject.Inject
 
-
-
 class UserPreferencesRememberSecurityWarningsJsonRepository @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager
 ) : RememberSecurityWarningsRepository by JsonPreferencesRememberSecurityWarningsRepository(

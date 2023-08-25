@@ -8,12 +8,10 @@ import android.content.pm.Signature
 import android.os.Build
 import androidx.annotation.VisibleForTesting
 import com.dashlane.core.helpers.AppSignature
-import com.dashlane.ext.application.KnownApplication
+import com.dashlane.ext.application.AutofillExtraDataApplication
 import com.dashlane.url.isTrademarkDomain
 import com.dashlane.url.toUrlOrNull
 import okio.ByteString
-
-
 
 object PackageUtilities {
     private val DOMAINS_EXTENSIONS = arrayOf(
@@ -37,7 +35,7 @@ object PackageUtilities {
         "vu", "wf", "ws", "ye", "yt", "yu", "za", "zm"
     )
     private val APP_KEYWORD_TO_IGNORE = arrayOf(
-        "app", "android", "droid", "full", "free", "mobile", "client", "mail", "sig", "pass", "password"
+        "app", "android", "droid", "full", "free", "mobile", "client", "mail", "sig", "pass", "password", "secure", "direct"
     ).plus(DOMAINS_EXTENSIONS)
 
     private val cacheKeywords = HashMap<String, List<String>>()
@@ -165,7 +163,9 @@ object PackageUtilities {
         val keywords = ArrayList<String>()
 
         
-        KnownApplication.getKeywords(packageName)?.forEach { keywords.add(it) }
+        AutofillExtraDataApplication.getAppForPackage(packageName)?.keywords?.forEach {
+            keywords.add(it)
+        }
 
         
         val packageNameParts = getKeywords(packageName).filterNot { keyword ->

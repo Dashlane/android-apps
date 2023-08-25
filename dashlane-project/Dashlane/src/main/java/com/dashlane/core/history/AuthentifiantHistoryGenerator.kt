@@ -8,8 +8,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
-
-
 class AuthentifiantHistoryGenerator @Inject constructor(
     private val sessionManager: SessionManager,
     private val provider: DataChangeHistoryQueryProvider

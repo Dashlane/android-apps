@@ -18,13 +18,9 @@ internal interface OfferDetailsViewModelContract {
 
     val offerDetailsFlow: Flow<OfferDetails?>
 
-    
-
     val currentPageViewFlow: Flow<Pair<AnyPage, Boolean>>
 
     val purchaseCheckingCoordinator: PurchaseCheckingCoordinator
-
-    
 
     fun onInAppPurchaseStarted(product: OfferDetails.Product)
 

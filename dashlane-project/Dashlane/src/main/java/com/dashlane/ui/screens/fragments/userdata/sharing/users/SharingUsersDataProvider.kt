@@ -11,8 +11,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-
 class SharingUsersDataProvider @Inject constructor(
     private val dataStorageProvider: DataStorageProvider,
     private val mainDataAccessor: MainDataAccessor,
@@ -30,9 +28,11 @@ class SharingUsersDataProvider @Inject constructor(
         return withContext(ioCoroutineDispatcher) {
             val itemGroup = sharingDao.loadItemGroupForItem(itemId)
                 ?: return@withContext emptyList<SharingModels>()
-            val summaryObject = genericDataQuery.queryFirst(genericFilter {
+            val summaryObject = genericDataQuery.queryFirst(
+                genericFilter {
                 specificUid(itemId)
-            }) ?: return@withContext emptyList<SharingModels>()
+            }
+            ) ?: return@withContext emptyList<SharingModels>()
 
             val groups = itemGroup.groups?.map {
                 SharingModels.ItemUserGroup(

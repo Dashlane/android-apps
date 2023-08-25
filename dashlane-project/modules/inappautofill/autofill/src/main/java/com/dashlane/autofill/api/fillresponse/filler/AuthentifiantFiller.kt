@@ -1,38 +1,35 @@
 package com.dashlane.autofill.api.fillresponse.filler
 
 import com.dashlane.autofill.api.fillresponse.DatasetWrapperBuilder
-import com.dashlane.autofill.api.model.AuthentifiantSummaryItemToFill
+import com.dashlane.autofill.api.model.AuthentifiantItemToFill
 import com.dashlane.autofill.api.model.ItemToFill
 import com.dashlane.autofill.api.util.AutofillValueFactory
 import com.dashlane.autofill.api.util.getBestEntry
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
-import com.dashlane.vault.model.loginForUi
-import com.dashlane.vault.summary.SummaryObject
-
-
 
 internal open class AuthentifiantFiller(private val autofillValueFactory: AutofillValueFactory) : Filler {
 
-    @Suppress("UNCHECKED_CAST")
     override fun fill(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         item: ItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val authentifiant = (item as? AuthentifiantSummaryItemToFill)?.primaryItem ?: return false
-        val loginFieldFound = setLogin(dataSetBuilder, summary, authentifiant)
-        val passwordFieldFound = setPassword(dataSetBuilder, summary, "")
+        val authentifiantItem = item as AuthentifiantItemToFill
+        val loginFieldFound = setLogin(dataSetBuilder, summary, authentifiantItem)
+        val password = authentifiantItem.syncObject?.password.takeUnless { requireLock }?.toString() ?: ""
+        val oldPassword = item.oldPassword?.toString()
+        val passwordFieldFound = setPassword(dataSetBuilder, summary, password, oldPassword)
         return loginFieldFound || passwordFieldFound
     }
 
-    protected fun setLogin(
+    private fun setLogin(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
-        item: SummaryObject.Authentifiant
+        item: AuthentifiantItemToFill
     ): Boolean {
-        val login = item.loginForUi ?: return false
+        val login = item.login ?: return false
 
         if (login.contains("@") && setEmailAddress(dataSetBuilder, summary, login)) {
             

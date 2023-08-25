@@ -10,8 +10,6 @@ import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.isNotSemanticallyNull
 
-
-
 class AuthenticatorEnterActivationKey : DashlaneActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,9 +25,12 @@ class AuthenticatorEnterActivationKey : DashlaneActivity() {
             findViewById<Button>(R.id.authenticator_enter_activation_key_positive_button).apply {
                 setOnClickListener {
                     val secret = input.text.toString()
-                    setResult(RESULT_OK, Intent().apply {
+                    setResult(
+                        RESULT_OK,
+                        Intent().apply {
                         putExtra(RESULT_OTP_SECRET, secret)
-                    })
+                    }
+                    )
                     finish()
                 }
             }

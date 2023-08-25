@@ -2,13 +2,13 @@ package com.dashlane.network
 
 import com.google.gson.annotations.SerializedName
 
-
-
 open class BaseNetworkResponse<T> {
     @SerializedName("code")
     var code: Int = 0
+
     @SerializedName("message")
     var message: String? = null
+
     @SerializedName("content")
     var content: T? = null
 

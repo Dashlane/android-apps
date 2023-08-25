@@ -20,7 +20,8 @@ fun createBankStatement(
             this.bankAccountBank = bank?.bankDescriptor
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.BankStatement>.copySyncObject(builder: SyncObject.BankStatement.Builder.() -> Unit = {}):

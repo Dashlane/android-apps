@@ -9,4 +9,7 @@ abstract class MenuModule {
     @Singleton
     @Binds
     abstract fun bindMenuPresenter(impl: MenuPresenter): MenuDef.IPresenter
+
+    @Binds
+    abstract fun bindMenuLogger(impl: MenuUsageLoggerImpl): MenuUsageLogger
 }

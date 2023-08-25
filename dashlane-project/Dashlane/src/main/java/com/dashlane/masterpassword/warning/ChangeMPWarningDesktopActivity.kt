@@ -25,8 +25,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-
-
 class ChangeMPWarningDesktopActivity : DashlaneActivity() {
 
     private lateinit var origin: ChangeMasterPasswordOrigin

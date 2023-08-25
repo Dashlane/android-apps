@@ -7,8 +7,6 @@ import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.session.Session;
 
 
-
-
 public class NoLockEditTextWatcher implements TextWatcher {
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {

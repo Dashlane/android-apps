@@ -12,10 +12,9 @@ import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.events.clearLastEvent
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.LoginActivity
-import com.dashlane.login.LoginActivity.ALLOW_SKIP_EMAIL
+import com.dashlane.login.LoginActivity.Companion.ALLOW_SKIP_EMAIL
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.fragments.BaseDialogFragment
-import com.dashlane.util.DevUtil
 import com.dashlane.util.clearTask
 import com.dashlane.util.clearTop
 import com.dashlane.util.getBaseActivity
@@ -64,8 +63,6 @@ object NavigationUtils {
 
     @JvmStatic
     fun logoutAndCallLoginScreen(context: Context, allowSkipEmail: Boolean = false) {
-        val userSupportFileLogger = SingletonProvider.getUserSupportFileLogger()
-        userSupportFileLogger.add("Lock action Logout")
         val intent = if (context is Activity) {
             context.intent
         } else {
@@ -105,7 +102,7 @@ object NavigationUtils {
             if (allowSkipEmail) {
                 loginIntent.putExtra(ALLOW_SKIP_EMAIL, true)
             }
-            DevUtil.startActivityOrDefaultErrorMessage(context, loginIntent)
+            context.startActivity(loginIntent)
         }
     }
 }

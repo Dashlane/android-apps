@@ -2,8 +2,6 @@ package com.dashlane.storage.userdata.accessor.filter.datatype
 
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 object PersonalInfosDataTypeFilter : DataTypeFilter {
     override val dataTypes = arrayOf(
         SyncObjectType.IDENTITY,

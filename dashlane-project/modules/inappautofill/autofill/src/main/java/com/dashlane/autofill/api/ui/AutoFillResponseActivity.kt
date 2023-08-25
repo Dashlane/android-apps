@@ -17,7 +17,6 @@ import com.dashlane.autofill.api.model.AuthentifiantItemToFill
 import com.dashlane.autofill.api.model.CreditCardItemToFill
 import com.dashlane.autofill.api.model.EmailItemToFill
 import com.dashlane.autofill.api.model.ItemToFill
-import com.dashlane.autofill.api.model.TextItemToFill
 import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
 import com.dashlane.autofill.api.request.autofill.logger.getHermesAutofillApiOrigin
 import com.dashlane.autofill.api.viewallaccounts.AutofillViewAllAccountsLogger
@@ -31,13 +30,12 @@ import com.dashlane.url.UrlDomain
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.CurrentPageViewLogger
 import com.dashlane.util.getParcelableCompat
-import com.dashlane.vault.model.urlDomain
-import java.time.Instant
-import java.util.UUID
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.UUID
 import kotlin.reflect.KClass
 
 abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLogger.Owner {
@@ -97,7 +95,6 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         val authenticationKey = intent.getStringExtra(EXTRA_AUTHENTICATION_KEY)
         if (authenticationKey == null || !latestAuthenticationKey.contains(authenticationKey)) {
             latestAuthenticationKey.clear() 
-            onAutofillResponseCreated()
             finish()
             return
         }
@@ -105,13 +102,10 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         isFirstRun = savedInstanceState == null
         isHandlingConfigurationChange = savedInstanceState?.getBoolean(EXTRA_IS_HANDLING_CONFIGURATION_CHANGE) ?: false
         summary = intent.getBundleExtra(EXTRA_SUB_BUNDLE)?.getParcelableCompat(EXTRA_AUTOFILL_HINT_SUMMARY)
-        onAutofillResponseCreated()
         matchType = intent.getStringExtra(EXTRA_MATCH_TYPE)?.let { matchType ->
             MatchType.values().firstOrNull { it.code == matchType }
         } ?: MatchType.REGULAR
     }
-
-    
 
     internal fun performLoginAndUnlock(onUnlocked: () -> Unit) {
         val isLocked = lockManager.isInAppLoginLocked
@@ -141,11 +135,6 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
     private fun startNotLoggedInActivity() {
         lockManager.logoutAndCallLoginScreenForInAppLogin(this)
         isFirstRun = false
-    }
-
-    
-
-    protected open fun onAutofillResponseCreated() {
     }
 
     override fun finish() {
@@ -200,11 +189,14 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         )
 
         val dataset = componentInternal.dataSetCreator.create(
-            summary, itemToFill, false, isChangePassword, null
+            summary,
+            itemToFill,
+            false,
+            isChangePassword,
+            null
         )
-        val itemId = itemToFill.getItemId()
-        updateItemLastViewDate(itemId)
-        onAutofillPerformed(itemToFill)
+        updateItemLastViewDate(itemToFill.itemId)
+        autofillPerformedCallback.onAutofillPerformed(itemToFill, summary)
         finishWithResultIntentResult(dataset?.build()?.toAndroidDataset())
     }
 
@@ -230,7 +222,7 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
                 origin = origin,
                 packageName = packageName,
                 websiteUrlDomain = website,
-                itemUrlDomain = itemToFill.primaryItem.syncObject.urlDomain?.toUrlDomainOrNull(),
+                itemUrlDomain = itemToFill.url.toUrlDomainOrNull(),
                 autofillFeature = autofillFeature,
                 matchType = matchType,
                 autofillOrigin = autofillOrigin,
@@ -254,22 +246,7 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
                 autofillOrigin = autofillOrigin,
                 autofillMechanism = AutofillMechanism.ANDROID_AUTOFILL_API
             )
-            else -> if (itemToFill is TextItemToFill) {
-                autofillUsageLog.onAutoFillSmsOtpDone(
-                    origin = origin, packageName = packageName
-                )
-            }
-        }
-    }
-
-    private fun onAutofillPerformed(itemToFill: ItemToFill?) {
-        when (itemToFill) {
-            is AuthentifiantItemToFill -> autofillPerformedCallback.onAuthentifiantFilled(itemToFill.primaryItem.syncObject)
-            is CreditCardItemToFill -> autofillPerformedCallback.onCreditCardFilled(itemToFill.primaryItem.syncObject)
-            is EmailItemToFill -> autofillPerformedCallback.onEmailFilled(itemToFill.primaryItem)
-            else -> {
-                
-            }
+            else -> Unit
         }
     }
 

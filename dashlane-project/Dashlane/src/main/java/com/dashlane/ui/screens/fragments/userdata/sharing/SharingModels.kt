@@ -10,8 +10,6 @@ import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isPending
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 sealed class SharingModels {
     abstract val item: SummaryObject
     abstract val itemGroup: ItemGroup
@@ -21,8 +19,6 @@ sealed class SharingModels {
     abstract val isPending: Boolean
     abstract val isAccepted: Boolean
     abstract val sharingStatusResource: Int
-
-    
 
     data class ItemUser(
         val user: UserDownload,
@@ -39,8 +35,6 @@ sealed class SharingModels {
             get() = user.getSharingStatusResource()
     }
 
-    
-
     data class ItemUserGroup(
         val userGroup: UserGroupMember,
         override val itemGroup: ItemGroup,
@@ -56,8 +50,6 @@ sealed class SharingModels {
             get() = userGroup.getSharingStatusResource()
     }
 }
-
-
 
 data class SharingUserGroupUser(
     val userGroup: UserGroup,

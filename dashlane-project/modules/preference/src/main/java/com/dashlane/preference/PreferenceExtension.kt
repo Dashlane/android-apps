@@ -3,8 +3,6 @@ package com.dashlane.preference
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-
-
 fun DashlanePreferencesManager.stringPreference(
     key: String,
     defaultValue: String? = null
@@ -16,8 +14,6 @@ fun DashlanePreferencesManager.stringPreference(
         DashlanePreferencesManager::getString,
         DashlanePreferencesManager::putString
     )
-
-
 
 fun DashlanePreferencesManager.booleanPreference(
     key: String,
@@ -31,8 +27,6 @@ fun DashlanePreferencesManager.booleanPreference(
         DashlanePreferencesManager::putBoolean
     )
 
-
-
 fun DashlanePreferencesManager.intPreference(key: String, defaultValue: Int = 0): ReadWriteProperty<Any, Int> =
     PreferenceProperty(
         this,
@@ -41,8 +35,6 @@ fun DashlanePreferencesManager.intPreference(key: String, defaultValue: Int = 0)
         DashlanePreferencesManager::getInt,
         DashlanePreferencesManager::putInt
     )
-
-
 
 fun DashlanePreferencesManager.longPreference(key: String, defaultValue: Long = 0L): ReadWriteProperty<Any, Long> =
     PreferenceProperty(

@@ -2,14 +2,9 @@ package com.dashlane.security.identitydashboard.password
 
 import androidx.annotation.VisibleForTesting
 import com.dashlane.breach.Breach
-import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.PasswordStrengthScore
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.UsageLogCode12SecurityScore
 import com.dashlane.security.identitydashboard.SecurityScore
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.similarpassword.GroupOfPassword
 import com.dashlane.similarpassword.SimilarPassword
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
@@ -18,19 +13,15 @@ import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.manager.DataIdentifierSpaceCategorization
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.url.UrlDomain
 import com.dashlane.url.registry.UrlDomainCategory
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.url.toUrlDomainOrNull
-import com.dashlane.useractivity.log.usage.UsageLogCode12
-import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.util.Constants
 import com.dashlane.util.JsonSerialization
 import com.dashlane.util.inject.OptionalProvider
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.Cache
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
 import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.util.time.TimeMeasurement
 import com.dashlane.util.tryOrNull
@@ -41,34 +32,25 @@ import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.actor
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-
-
 @Singleton
 class AuthentifiantSecurityEvaluator @Inject constructor(
-    @GlobalCoroutineScope
-    globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    applicationCoroutineScope: CoroutineScope,
     private val similarPassword: SimilarPassword,
     @Cache
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
     private val jsonSerialization: JsonSerialization,
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
-    private val userPreferencesManager: UserPreferencesManager,
-    private val urlDomainRegistryFactory: UrlDomainRegistryFactory,
-    private val deviceInfoRepository: DeviceInfoRepository,
-    private val sessionManager: SessionManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
+    private val urlDomainRegistryFactory: UrlDomainRegistryFactory
 ) {
 
-    
-
     @Suppress("EXPERIMENTAL_API_USAGE")
-    private val actor = globalCoroutineScope.actor<ComputeRequest>(capacity = UNLIMITED) {
+    private val actor = applicationCoroutineScope.actor<ComputeRequest>(capacity = UNLIMITED) {
         for (request in channel) {
             val result = computeResult(
                 getAuthentifiants(
@@ -99,7 +81,8 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
                 genericDataQuery,
                 teamspace,
                 ignoreUserLock
-            ) { result -> it.resume(result) })
+            ) { result -> it.resume(result) }
+        )
     }
 
     @Suppress("LongMethod")
@@ -165,21 +148,6 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         
         val securityScore = getSecurityScore(allCorrupted, importantCorrupted, totalAccount)
         timeMeasurement.tick("computeSecurityScore")
-        
-        val totalImportantAccount =
-            toCheckAuthentifiants.count {
-                sensitiveDomainCached[it.navigationUrl?.toUrlDomainOrNull()]?.isDataSensitive ?: false
-            }
-        val excludedCount = ignoredAuthentifiants.count()
-        sendUsageLog12(
-            teamspace = teamspace,
-            securityScore = securityScore,
-            allCorrupted = allCorrupted,
-            importantCorrupted = importantCorrupted,
-            totalAccount = totalAccount,
-            totalImportantAccount = totalImportantAccount,
-            excludedCount = excludedCount
-        )
         timeMeasurement.tick("computeUL12")
         val totalSafeCredentials = countSafeCredentials(
             toCheckAuthentifiants,
@@ -276,10 +244,12 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
 
     private fun getAuthentifiants(vaultDataQuery: VaultDataQuery, ignoreUserLock: Boolean) =
         
-        vaultDataQuery.queryAll(vaultFilter {
+        vaultDataQuery.queryAll(
+            vaultFilter {
             if (ignoreUserLock) ignoreUserLock()
             specificDataType(SyncObjectType.AUTHENTIFIANT)
-        }).mapNotNull {
+        }
+        ).mapNotNull {
             val syncObject = it.syncObject as SyncObject.Authentifiant
 
             if (!syncObject.password.isNullOrEmpty()) {
@@ -317,43 +287,6 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
     private fun byLogin(): Comparator<AnalyzedAuthentifiant> {
         return compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) { it.loginForUi }
     }
-
-    private fun sendUsageLog12(
-        teamspace: Teamspace?,
-        securityScore: Float,
-        allCorrupted: Int,
-        importantCorrupted: Int,
-        totalAccount: Int,
-        totalImportantAccount: Int,
-        excludedCount: Int
-    ) {
-
-        if (teamspace == TeamspaceManager.COMBINED_TEAMSPACE ||
-            teamspaceAccessorProvider.get()?.canChangeTeamspace() == false
-        ) {
-            
-            UsageLogCode12SecurityScore.markAsSent(userPreferencesManager)
-        }
-
-        bySessionUsageLogRepository[sessionManager.session]
-            ?.enqueue(
-                UsageLogCode12(
-                    securityIndex = securityScore.takeIf { it >= 0 },
-                    passwordCount = totalAccount.toLong(),
-                    corruptedPasswordCount = allCorrupted.toLong(),
-                    importantPasswordCount = totalImportantAccount.toLong(),
-                    importantCorruptedPasswordCount = importantCorrupted.toLong(),
-                    excludedPasswordCount = excludedCount.toLong(),
-                    unresolvedIssuesCount = excludedCount.toLong(),
-                    spaceId = teamspace?.anonTeamId,
-                    format = Locale.getDefault().country,
-                    oslang = Constants.getOSLang(),
-                    osformat = deviceInfoRepository.deviceCountry,
-                    lang = Constants.getLang()
-                )
-            )
-    }
-
     data class Result(
         val securityScore: Float,
         val totalCredentials: Int,

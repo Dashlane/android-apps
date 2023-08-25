@@ -2,8 +2,6 @@ package com.dashlane.followupnotification.domain
 
 import com.dashlane.util.clipboard.vault.CopyField
 
-
-
 data class FollowUpNotification(
     val id: String,
     val vaultItemId: String,

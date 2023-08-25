@@ -8,8 +8,6 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-
-
 interface SubscriptionCodeService {
     @FormUrlEncoded
     @POST("/3/premium/getSubscriptionCode")
@@ -18,8 +16,10 @@ interface SubscriptionCodeService {
     class SubscriptionCodeResponse {
         @SerializedName("code")
         val code: Int = 0
+
         @SerializedName("message")
         val message: String? = null
+
         @SerializedName("content")
         val content: JsonObject? = null
 

@@ -1,17 +1,11 @@
-
-
 package com.dashlane.similarpassword
 
 import java.util.Arrays
-
-
 
 class LevenshteinDistance {
     
     private val pArray = IntArray(DEFAULT_MAX_STRING_SIZE)
     private val dArray = IntArray(DEFAULT_MAX_STRING_SIZE)
-
-    
 
     
     @Suppress("kotlin:S3776", "LongMethod", "ComplexMethod")
@@ -24,8 +18,6 @@ class LevenshteinDistance {
         if (threshold < 0) {
             throw IllegalArgumentException("Threshold must not be negative")
         }
-
-        
 
 
         var n = tmpLeft.length 
@@ -72,12 +64,14 @@ class LevenshteinDistance {
 
             
             val min = Math.max(1, j - threshold)
-            val max = if (j > Integer.MAX_VALUE - threshold)
+            val max = if (j > Integer.MAX_VALUE - threshold) {
                 n
-            else
+            } else {
                 Math.min(
-                    n, j + threshold
+                    n,
+                    j + threshold
                 )
+            }
 
             
             
@@ -113,7 +107,9 @@ class LevenshteinDistance {
         
         return if (p[n] <= threshold) {
             p[n]
-        } else -1
+        } else {
+            -1
+        }
     }
 
     companion object {

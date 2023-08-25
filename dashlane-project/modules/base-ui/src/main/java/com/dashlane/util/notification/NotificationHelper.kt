@@ -1,29 +1,20 @@
 package com.dashlane.util.notification
 
-import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.dashlane.useractivity.log.install.InstallLogCode30
-import com.dashlane.useractivity.log.install.InstallLogRepository
 import com.dashlane.util.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
-
-
 
 @Singleton
 class NotificationHelper @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val installLogRepository: InstallLogRepository,
-    private val notificationManager: NotificationManager?,
-    private val activityManagerProvider: Provider<ActivityManager?>
+    private val notificationManager: NotificationManager?
 ) {
 
     enum class Channel(
@@ -94,9 +85,6 @@ class NotificationHelper @Inject constructor(
         private const val FOLLOW_UP_NOTIFICATION_HIGH_CHANNEL = "follow_up_notification_high_channel"
     }
 
-    private val activityManager: ActivityManager?
-        get() = activityManagerProvider.get()
-
     fun initChannels() {
         notificationManager ?: return
 
@@ -117,37 +105,7 @@ class NotificationHelper @Inject constructor(
             
             deleteNotificationChannel(FOLLOW_UP_NOTIFICATION_CHANNEL)
         }
-
-        logConfiguration()
     }
-
-    private fun logConfiguration() {
-        notificationManager ?: return
-
-        
-        val isBackgroundRestricted =
-            if (Build.VERSION.SDK_INT >= 28) {
-                activityManager?.isBackgroundRestricted
-                    ?: false
-            } else {
-                false
-            }
-
-        val log = InstallLogCode30(
-            isNotificationEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled(),
-            isBackgroundRestricted = isBackgroundRestricted
-        ).copy(
-            notificationChannelImportanceToken = getNotificationImportance(Channel.TOKEN),
-            notificationChannelImportanceSecurity = getNotificationImportance(Channel.SECURITY),
-            notificationChannelImportanceMarketing = getNotificationImportance(Channel.MARKETING),
-            notificationChannelImportanceVpn = getNotificationImportance(Channel.VPN),
-            notificationChannelImportancePassive = getNotificationImportance(Channel.PASSIVE)
-        )
-        installLogRepository.enqueue(log)
-    }
-
-    private fun getNotificationImportance(channel: Channel): Int =
-        notificationManager?.getNotificationChannel(channel.id)?.importance ?: channel.importance
 
     private fun Channel.toNotificationChannel(context: Context) =
         NotificationChannel(id, context.getString(title), importance)

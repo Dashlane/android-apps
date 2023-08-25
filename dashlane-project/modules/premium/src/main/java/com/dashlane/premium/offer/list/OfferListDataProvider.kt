@@ -48,8 +48,7 @@ internal class OfferListDataProvider @Inject constructor(
                 monthlyOfferTypes = getOrderedAvailableOfferTypesWithoutPlayStore(storeOffers, MONTHLY),
                 yearlyOfferTypes = getOrderedAvailableOfferTypesWithoutPlayStore(storeOffers, YEARLY),
                 currentOffer = currentOffer,
-                vpnMentionAllowed = isVpnMentionAllowed(),
-                supportIntroductoryOffers = isIntroOffersSupported()
+                vpnMentionAllowed = isVpnMentionAllowed()
             ).build()
         }
         if (formattedOffers.isEmpty()) {
@@ -64,8 +63,7 @@ internal class OfferListDataProvider @Inject constructor(
             currencyFormatter = currencyFormatter,
             yearlySavings = yearlySavings,
             currentOffer = getCurrentOfferInfo(formattedStatus),
-            vpnMentionAllowed = isVpnMentionAllowed(),
-            supportIntroductoryOffers = isIntroOffersSupported()
+            vpnMentionAllowed = isVpnMentionAllowed()
         ).build()
     }
 
@@ -81,8 +79,6 @@ internal class OfferListDataProvider @Inject constructor(
         }
     }
 
-    
-
     private fun getOrderedAvailableOfferTypes(
         formattedOffers: List<FormattedStoreOffer>,
         periodicity: ProductPeriodicity
@@ -94,8 +90,6 @@ internal class OfferListDataProvider @Inject constructor(
                 YEARLY -> offer?.yearly != null
             }
         }
-
-    
 
     private fun getOrderedAvailableOfferTypesWithoutPlayStore(
         storeOffers: StoreOffersService.Data,
@@ -143,6 +137,4 @@ internal class OfferListDataProvider @Inject constructor(
     }
 
     private fun isVpnMentionAllowed() = userFeaturesChecker.canShowVpn()
-
-    private fun isIntroOffersSupported() = userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.INTRO_OFFERS)
 }

@@ -17,13 +17,12 @@ import com.dashlane.util.setProgressDrawablePrimaryTrack
 import com.google.android.material.textfield.TextInputEditText
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-
-
 abstract class GeneratePasswordViewProxy<T : GeneratePasswordContract.Presenter>(
     dialogView: View,
     defaultCriteria: PasswordGeneratorCriteria,
     private val logger: AutofillGeneratePasswordLogger,
-) : GeneratePasswordContract.ViewProxy, BaseViewProxy<T>(dialogView),
+) : GeneratePasswordContract.ViewProxy,
+BaseViewProxy<T>(dialogView),
     PasswordGeneratorConfigurationView.ConfigurationChangeListener {
     private var password: TextInputEditText? = null
     private var generateButton: Button? = null
@@ -142,8 +141,6 @@ abstract class GeneratePasswordViewProxy<T : GeneratePasswordContract.Presenter>
         }
     }
 
-    
-
     private fun initGeneratorConfiguration(defaultCriteria: PasswordGeneratorCriteria) {
         val min = resources.getInteger(R.integer.password_generator_min_length_generated_password)
         val max = resources.getInteger(R.integer.password_generator_max_length_generated_password)
@@ -151,13 +148,9 @@ abstract class GeneratePasswordViewProxy<T : GeneratePasswordContract.Presenter>
         generatorConfiguration?.listener = this
     }
 
-    
-
     private fun revealPassword() {
         password?.transformationMethod = null
     }
-
-    
 
     private fun toggleGeneratorConfiguration() {
         if (generatorConfiguration?.visibility == View.VISIBLE) {

@@ -24,8 +24,6 @@ class ConstantsPrefs {
         internal const val ALLOW_SEND_LOGS = "allowSendLogs"
         internal const val REGISTERED_AUTHENTICATOR_PUSH_ID = "registeredAuthenticatorPushId"
 
-        
-
         internal const val CREDENTIALS_TIMESTAMP = "credentials_timestamp"
 
         const val UKI = "uki"
@@ -39,26 +37,21 @@ class ConstantsPrefs {
         const val RUNS = "num"
 
         const val PREMIUM_SERVER_RESPONSE = "premiumServerResponse"
-        const val SYNC_ONLY_ON_WIFI = "syncOnlyOnWifi"
         const val TIME_OUT_LOCK = "lockTimeOut"
         const val LOCK_ON_EXIT = "lockOnExit"
         const val UNLOCK_ITEMS_WITH_PIN_OR_FP = "unlockItemsWithPincode"
 
         const val USE_GOOGLE_FINGERPRINT = "useGoogleFingerprint"
         const val INVALIDATED_BIOMETRIC = "invalidatedBiometric"
-        const val INSTALL_EVENT = "install_event"
         const val USER_ORIGIN = "userOrigin"
         const val WINDOW_SECURITY_FLAG_DISABLED = "windowSecurityDisabled"
         const val GRACE_PERIOD_END_NOTIFICATION_DONE = "gracePeriodEndNotified"
         const val TIMESTAMP_NEXT_PREMIUM_REMINDER = "nextPremiumReminderTimestamp"
         const val SHOW_PREMIUM_REMINDER = "showPremiumReminder"
         const val USER_NUMBER_DEVICES = "numberOfDevices"
-        const val LAST_BACKUPSYNC_TIMESTAMP = "lastBackupTimestamp"
         const val OTP2SECURITY = "otp2"
         const val SECURITY_SETTINGS = "loginSecuritySettings"
         const val CLEAR_CLIPBOARD_ON_TIMEOUT = "clearclipboard"
-        const val RUNNING_VERSION = "runningversion"
-        const val FIRST_RUN_VERSION_CODE = "firstRunVersionCode"
         const val TOKEN_RETRIEVED_ON_PUSH = "tokenRetrievedOnPush"
         const val PASSWORD_GENERATOR_LENGTH = "pwdGeneratorLength"
         const val PASSWORD_GENERATOR_DIGITS = "pwdGeneratorDigits"
@@ -89,12 +82,8 @@ class ConstantsPrefs {
 
         const val IS_DARK_THEME_ENABLED = "isDarkThemeEnabled"
 
-        
-
         const val PREMIUM_NEW_DEVICE_LATEST_TIMESTAMP = "premium_new_device_latest_timestamp"
         const val PREMIUM_NEW_DEVICE_DISPLAY_COUNT = "premium_new_device_display_count"
-
-        
 
         const val LOCK_POPUP_LATEST_TIMESTAMP = "lock_popup_latest_timestamp"
 
@@ -108,57 +97,33 @@ class ConstantsPrefs {
         const val HAS_FINISHED_M2D = "has_finished_m2d"
         const val HAS_STARTED_CHROME_IMPORT = "has_started_chrome_import"
 
-        
-
         const val AUTOFILL_NOTIFICATION_DISMISS_COUNT = "autofill_notification_dismiss"
-
-        
 
         const val PAUSED_APP_SOURCES_LIST = "paused_app_sources_list"
         const val PAUSED_WEB_SOURCES_LIST = "paused_web_sources_list"
 
-        
-
         const val AUTOFILL_UPGRADE_POPUP_LATEST_TIMESTAMP = "autofill_upgrade_popup_latest_timestamp"
-
-        
 
         const val BACKUP_TOKEN_SET = "backup_token_set"
 
-        
-
         const val LAST_SHOWN_AVAILABLE_UPDATE_DATE = "last_shown_available_update_date"
-
-        
 
         const val AUTOFILL_REMEMBER_ACCOUNT_FOR_APP_SOURCES_LIST = "autofill_remember_app_sources_list"
         const val AUTOFILL_REMEMBER_ACCOUNT_FOR_WEB_SOURCES_LIST = "autofill_remember_web_sources_list"
 
-        
-
         internal const val USE_INLINE_AUTOFILL_SETTING = "useInlineAutofillSetting"
-
-        
 
         internal const val REQUEST_DISPLAY_KEYBOARD_ANNOUNCEMENT = "requestDisplayKeyboardAnnouncement"
 
         const val KEYBOARD_AUTOFILL_ANNOUNCEMENT_TIMESTAMP = "keyboardAutofillAnnouncementTimestamp"
         const val HAS_SEEN_KEYBOARD_ON_BOARDING_SUGGESTION = "hasSeenKeyboardOnBoardingSuggestion"
 
-        
-
         internal const val LAST_OS_VERSION = "lastOSVersion"
-
-        
 
         const val AUTOFILL_REMEMBER_SECURITY_WARNINGS_INCORRECT_JSON = "autofill_security_warnings_incorrect_json"
         const val AUTOFILL_REMEMBER_SECURITY_WARNINGS_UNKNOWN_JSON = "autofill_security_warnings_unknown_json"
 
-        
-
         const val AUDIT_DUPLICATES_PROCESSED = "audit_duplicates_processed"
-
-        
 
         const val INSTALLATION_TRACKING_ID = "installationTrackingId"
 
@@ -167,44 +132,26 @@ class ConstantsPrefs {
         const val FOLLOW_UP_NOTIFICATION_DISCOVERY_SCREEN = "follow_up_notification_discovery_screen"
         const val FOLLOW_UP_NOTIFICATION_REMINDER_SCREEN = "follow_up_notification_reminder_screen"
 
-        
-
         const val FOLLOW_UP_NOTIFICATION_LAST_ITEM_ID = "follow_up_notification_last_item_id"
         const val FOLLOW_UP_NOTIFICATION_LAST_NOTIFICATION_ID =
             "follow_up_notification_last_notification_id"
         const val FOLLOW_UP_NOTIFICATION_HAS_INTERACTED = "follow_up_notification_has_inteacted"
 
-        
-
         const val MP_RESET_RECOVERY_STARTED = "mp_reset_recovery_started"
 
-        
-
         const val VPN_THIRD_PARTY_INFOBOX_DISMISSED = "vpn_third_party_infobox_dismissed"
-
-        
 
         const val VPN_THIRD_PARTY_GET_STARTED_DISPLAYED = "vpn_third_party_get_started_displayed"
 
         const val CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP = "crypto_migration_attempt_timstamp"
 
-        
-
         const val VAULT_REPORT_LATEST_TRIGGER_TIMESTAMP = "vault_report_latest_trigger_timestamp"
-
-        
 
         const val AUTHENTICATOR_GET_STARTED_DISPLAYED = "authenticator_get_started_displayed"
 
-        
-
         const val BIOMETRIC_SEAL_PADDING_MIGRATION_ATTEMPT = "biometric_seal_padding_migration"
 
-        
-
         const val IS_FIRST_PASSWORD_MANAGER_LAUNCH_LOG_SENT = "is_first_password_manager_launch_log_sent"
-
-        
 
         const val HAS_AUTOMATIC_2FA_TOKEN_COPY = "has_automatic_2fa_token_copy"
     }

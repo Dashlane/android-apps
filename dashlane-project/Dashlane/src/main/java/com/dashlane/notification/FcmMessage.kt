@@ -3,8 +3,6 @@ package com.dashlane.notification
 import com.dashlane.util.tryOrNull
 import org.json.JSONObject
 
-
-
 data class FcmMessage(
     val data: String? = null,
     val login: String? = null,

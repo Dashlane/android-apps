@@ -196,7 +196,8 @@ class PasswordAnalysisPresenter(
 
         getHeaderTitle(mode, groupOfAuthentifiant.groupBy, extra)?.let { add(HeaderItem(it)) }
 
-        addAll(authentifiants.map {
+        addAll(
+            authentifiants.map {
             cachedItemWrapper.getOrPut(it.item) {
                 
                 PasswordAnalysisItemWrapper(
@@ -205,7 +206,8 @@ class PasswordAnalysisPresenter(
                     listener
                 )
             }
-        })
+        }
+        )
     }
 
     private fun showAsRefreshing() {
@@ -243,8 +245,10 @@ class PasswordAnalysisPresenter(
                     .sortedBy { it.groupBy }
             PasswordAnalysisContract.Mode.REUSED ->
                 result.authentifiantsBySimilarity
-                    .sortedWith(compareByDescending<GroupOfAuthentifiant<GroupOfPassword>> { it.countReal }
-                        .thenBy { it.groupBy.initialPassword })
+                    .sortedWith(
+                        compareByDescending<GroupOfAuthentifiant<GroupOfPassword>> { it.countReal }
+                        .thenBy { it.groupBy.initialPassword }
+                    )
             PasswordAnalysisContract.Mode.EXCLUDED ->
                 listOf(GroupOfAuthentifiant(null, result.authentifiantsIgnored))
             PasswordAnalysisContract.Mode.COMPROMISED ->

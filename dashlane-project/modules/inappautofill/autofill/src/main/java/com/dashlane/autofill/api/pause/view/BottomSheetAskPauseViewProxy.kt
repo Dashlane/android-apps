@@ -18,8 +18,6 @@ import com.dashlane.ui.bottomSheetDialog
 import com.dashlane.ui.configureBottomSheet
 import com.dashlane.util.Toaster
 
-
-
 class BottomSheetAskPauseViewProxy(
     private val bottomSheetDialogFragment: BottomSheetAskPauseDialogFragment,
     private val presenter: AskPauseContract.Presenter,
@@ -35,7 +33,8 @@ class BottomSheetAskPauseViewProxy(
 
     fun createView(inflater: LayoutInflater, container: ViewGroup?): View? {
         val contentView = inflater.inflate(
-            R.layout.bottom_sheet_form_source_pause_dialog_fragment, container,
+            R.layout.bottom_sheet_form_source_pause_dialog_fragment,
+            container,
             false
         )
         setView(contentView)
@@ -107,7 +106,7 @@ class BottomSheetAskPauseViewProxy(
     fun onResume() {
         val pausedFormSource =
             getFormSourceChoosePauseDialogResponse()?.getPausedFormSource() ?: return
-        presenter.onResume(pausedFormSource)
+        presenter.onResume(pausedFormSource, openInDashlane)
     }
 
     fun onCancel() {

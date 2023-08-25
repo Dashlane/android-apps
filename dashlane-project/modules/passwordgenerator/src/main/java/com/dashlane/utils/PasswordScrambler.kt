@@ -5,8 +5,6 @@ import java.time.Duration
 import java.time.Instant
 import kotlin.random.Random
 
-
-
 class PasswordScrambler {
     private val random = Random(Instant.now().toEpochMilli())
 

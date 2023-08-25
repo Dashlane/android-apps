@@ -8,19 +8,26 @@ import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import com.dashlane.R
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingLoadable
 import com.dashlane.util.getThemeAttrColor
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
-class SettingInRecyclerView(val display: SettingItem) : DashlaneRecyclerAdapter.ViewTypeProvider {
+class SettingInRecyclerView(val display: SettingItem) :
+    DashlaneRecyclerAdapter.ViewTypeProvider,
+    DiffUtilComparator<SettingInRecyclerView> {
     var onSettingInteraction: (() -> Unit)? = null
     var needsHighlight = false
 
     override fun getViewType() = VIEW_TYPE
+
+    override fun isItemTheSame(item: SettingInRecyclerView): Boolean =
+        item.display.isItemTheSame(display)
+
+    override fun isContentTheSame(item: SettingInRecyclerView): Boolean =
+        item.display.isContentTheSame(display) && item.needsHighlight == needsHighlight
 
     class ViewHolder(view: View) : EfficientViewHolder<SettingInRecyclerView>(view) {
         private val clickListener = View.OnClickListener {
@@ -33,7 +40,7 @@ class SettingInRecyclerView(val display: SettingItem) : DashlaneRecyclerAdapter.
 
         override fun updateView(context: Context, item: SettingInRecyclerView?) {
             val display = item?.display
-            val editable = display?.isEnable(context) ?: false
+            val editable = display?.isEnable() ?: false
             setText(R.id.setting_title, display?.title)
             setText(R.id.setting_description, display?.description)
 
@@ -79,14 +86,18 @@ class SettingInRecyclerView(val display: SettingItem) : DashlaneRecyclerAdapter.
             item?.highlightIfNecessary()
         }
 
-        
-
         private fun SettingInRecyclerView.highlightIfNecessary() {
             if (needsHighlight) {
                 needsHighlight = false 
 
                 val highlightColor = context.getThemeAttrColor(R.attr.colorControlHighlight)
-                val animator = ofArgb(view, "backgroundColor", Color.TRANSPARENT, highlightColor, Color.TRANSPARENT)
+                val animator = ofArgb(
+                    view,
+                    "backgroundColor",
+                    Color.TRANSPARENT,
+                    highlightColor,
+                    Color.TRANSPARENT
+                )
                 animator.repeatCount = 1
                 animator.duration = 1000
                 animator.startDelay = 500
@@ -101,7 +112,8 @@ class SettingInRecyclerView(val display: SettingItem) : DashlaneRecyclerAdapter.
 
         val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<SettingInRecyclerView> =
             DashlaneRecyclerAdapter.ViewType(
-                R.layout.list_item_setting_checkbox, ViewHolder::class.java
+                R.layout.list_item_setting_checkbox,
+                ViewHolder::class.java
             )
     }
 }

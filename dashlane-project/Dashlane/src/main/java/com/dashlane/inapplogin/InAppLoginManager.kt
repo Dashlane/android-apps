@@ -7,14 +7,10 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.annotation.IntDef
 
-
-
 class InAppLoginManager(
     val inAppLoginByAccessibilityManager: InAppLoginByAccessibilityManager,
     val inAppLoginByAutoFillApiManager: InAppLoginByAutoFillApiManager?
 ) {
-
-    
 
     val intentOverlayPermissionIfRequire: Intent?
         get() {
@@ -39,8 +35,6 @@ class InAppLoginManager(
             inAppLoginByAccessibilityManager.isEnable()
         }
     }
-
-    
 
     fun isDisabledForApp(): Boolean {
         return if (inAppLoginByAutoFillApiManager != null) {
@@ -74,8 +68,6 @@ class InAppLoginManager(
             else -> false
         }
     }
-
-    
 
     fun hasAutofillApiDisabled(): Boolean = !isEnable(TYPE_AUTO_FILL_API)
 

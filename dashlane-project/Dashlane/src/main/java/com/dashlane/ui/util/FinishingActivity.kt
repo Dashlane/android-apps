@@ -5,8 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.util.startActivity
 
-
-
 class FinishingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,8 +13,6 @@ class FinishingActivity : AppCompatActivity() {
     }
 
     companion object {
-
-        
 
         @JvmStatic
         fun finishApplication(context: Context) = context.startActivity<FinishingActivity>()

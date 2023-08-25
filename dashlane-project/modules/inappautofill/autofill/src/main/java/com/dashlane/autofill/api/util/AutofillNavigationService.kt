@@ -5,34 +5,20 @@ import android.app.PendingIntent
 import android.content.IntentSender
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 
-
-
 interface AutofillNavigationService {
-    
-
     fun navigateToPlansPage(activity: Activity, origin: String)
-
-    
 
     fun navigateToAutofillSettings(activity: Activity, startAsNewTask: Boolean = false)
 
-    
-
     fun navigateToPasswordSection(activity: Activity, startAsNewTask: Boolean = false)
 
-    
-
-    fun navigateToRevertActions(
+    fun navigateToPausedAutofillSection(
         activity: Activity,
         autofillFormSource: AutoFillFormSource,
         origin: String
     )
 
-    
-
     fun getLongPressActionOnInline(): PendingIntent
-
-    
 
     fun getOnBoardingIntentSender(): IntentSender
 

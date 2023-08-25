@@ -10,7 +10,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.dashlane.announcements.AnnouncementsActivityLifecycle
 import com.dashlane.applinkfetcher.AuthentifiantAppLinkDownloader
-import com.dashlane.auditduplicates.AuditDuplicatesTriggerByLifecycleListener
 import com.dashlane.authenticator.IsSettingUp2faChecker
 import com.dashlane.breach.BreachManagerActivityListener
 import com.dashlane.hermes.LogFlush
@@ -26,6 +25,7 @@ import com.dashlane.navigation.Navigator
 import com.dashlane.notification.LocalNotificationCenterActivityListener
 import com.dashlane.notification.badge.NotificationBadgeActivityListener
 import com.dashlane.securearchive.BackupCoordinatorImpl
+import com.dashlane.security.HideOverlayWindowActivityListener
 import com.dashlane.security.TouchFilterActivityListener
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
@@ -33,11 +33,8 @@ import com.dashlane.update.AppUpdateNeededActivityListener
 import com.dashlane.useractivity.AggregateUserActivityLifecycleListener
 import com.dashlane.useractivity.log.UserActivityFlush
 import com.dashlane.useractivity.log.UserActivityFlushLifecycleObserver
-import com.dashlane.usersupportreporter.UserSupportFileAutoLoggerListener
 import javax.inject.Inject
 import javax.inject.Singleton
-
-
 
 @Singleton
 class GlobalActivityLifecycleListener @Inject constructor(
@@ -45,13 +42,11 @@ class GlobalActivityLifecycleListener @Inject constructor(
     announcementsActivityLifecycle: AnnouncementsActivityLifecycle,
     aggregateUserActivityLifecycleListener: AggregateUserActivityLifecycleListener,
     lockManagerActivityListener: LockManagerActivityListener,
-    userSupportFileAutoLoggerListener: UserSupportFileAutoLoggerListener,
     applicationForegroundChecker: ApplicationForegroundChecker,
     backupIntentCoordinator: BackupCoordinatorImpl,
     tokenReceiverActivityListener: TokenReceiverActivityListener,
     numberOfRunsActivityListener: NumberOfRunsActivityListener,
     authentifiantAppLinkDownloader: AuthentifiantAppLinkDownloader,
-    auditDuplicatesTriggerByLifecycleListener: AuditDuplicatesTriggerByLifecycleListener,
     passwordResetActivityListener: PasswordResetActivityListener,
     notificationBadgeActivityListener: NotificationBadgeActivityListener,
     localNotificationCenterActivityListener: LocalNotificationCenterActivityListener,
@@ -60,6 +55,7 @@ class GlobalActivityLifecycleListener @Inject constructor(
     lockSelfCheckActivityListener: LockSelfCheckActivityListener,
     deviceLimitActivityListener: DeviceLimitActivityListener,
     touchFilterActivityListener: TouchFilterActivityListener,
+    hideOverlayWindowActivityListener: HideOverlayWindowActivityListener,
     userActivityFlush: UserActivityFlush,
     logFlush: LogFlush,
     navigator: Navigator,
@@ -85,17 +81,17 @@ class GlobalActivityLifecycleListener @Inject constructor(
         }
 
         
+        register(hideOverlayWindowActivityListener)
         register(touchFilterActivityListener)
         register(announcementsActivityLifecycle)
         register(aggregateUserActivityLifecycleListener)
         register(lockManagerActivityListener)
-        register(userSupportFileAutoLoggerListener)
+        register(ActivityLifecycleLoggerListener())
         register(applicationForegroundChecker)
         register(backupIntentCoordinator.activityLifecycleListener)
         register(tokenReceiverActivityListener)
         register(numberOfRunsActivityListener)
         register(authentifiantAppLinkDownloader)
-        register(auditDuplicatesTriggerByLifecycleListener)
         register(passwordResetActivityListener)
         register(notificationBadgeActivityListener)
         register(localNotificationCenterActivityListener)

@@ -10,7 +10,7 @@ import com.dashlane.session.SessionManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.util.clearTask
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -18,12 +18,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class DeviceLimitActivityListener @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
@@ -38,7 +36,7 @@ class DeviceLimitActivityListener @Inject constructor(
         if (isFirstLogin) return
         val session = sessionManager.session ?: return
         
-        globalCoroutineScope.launch(mainCoroutineDispatcher) {
+        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             strategy = loginStrategy.getStrategy(session)
             if (!activity.isFinishing) mayShowPaywall(activity)
         }

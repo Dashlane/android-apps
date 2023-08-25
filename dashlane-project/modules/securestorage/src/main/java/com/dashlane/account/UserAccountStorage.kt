@@ -3,8 +3,6 @@ package com.dashlane.account
 import com.dashlane.session.Session
 import com.dashlane.session.Username
 
-
-
 interface UserAccountStorage {
 
     operator fun get(username: String): UserAccountInfo? =
@@ -22,8 +20,4 @@ interface UserAccountStorage {
         saveSecuritySettings(Username.ofEmail(username), securitySettings)
 
     fun saveSecuritySettings(username: Username, securitySettings: UserSecuritySettings)
-
-    interface DataLossTrackingListener {
-        fun logUserSupportFile(message: String)
-    }
 }

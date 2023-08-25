@@ -2,6 +2,5 @@
 <resources>
     <bool name="is_accessibility_supported">false</bool>
     
-
     <bool name="is_no_op_accessibility_supported">true</bool>
 </resources>

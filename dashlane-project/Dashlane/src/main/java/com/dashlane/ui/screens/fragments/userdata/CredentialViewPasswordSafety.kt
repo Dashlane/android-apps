@@ -28,8 +28,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-
 class CredentialViewPasswordSafety(
     rootView: View,
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
@@ -121,7 +119,9 @@ class CredentialViewPasswordSafety(
         val jobsPending = mutableListOf<Job>()
 
         
-        refreshValue(jobsPending, passwordResults.deferredStrengthScore,
+        refreshValue(
+            jobsPending,
+            passwordResults.deferredStrengthScore,
             onPreExecute = { strengthTextView.visibility = View.INVISIBLE },
             onPostExecute = {
                 if (it == null) {
@@ -132,10 +132,13 @@ class CredentialViewPasswordSafety(
                     strengthTextView.visibility = View.VISIBLE
                     strengthTextView.text = context.getStringFormatted(R.string.password_safety_strength, strengthLabel)
                 }
-            })
+            }
+        )
 
         
-        refreshValue(jobsPending, passwordResults.deferredReused,
+        refreshValue(
+            jobsPending,
+            passwordResults.deferredReused,
             onPreExecute = { reusedTextView.visibility = View.INVISIBLE },
             onPostExecute = {
                 if (it >= 2) {
@@ -144,10 +147,13 @@ class CredentialViewPasswordSafety(
                 } else {
                     reusedTextView.visibility = View.GONE
                 }
-            })
+            }
+        )
 
         
-        refreshValue(jobsPending, passwordResults.deferredCompromised,
+        refreshValue(
+            jobsPending,
+            passwordResults.deferredCompromised,
             onPreExecute = { compromisedTextView.visibility = View.INVISIBLE },
             onPostExecute = { compromised ->
                 if (compromised) {
@@ -156,7 +162,8 @@ class CredentialViewPasswordSafety(
                 } else {
                     compromisedTextView.visibility = View.GONE
                 }
-            })
+            }
+        )
 
         uiRefreshJobs = jobsPending.toList()
     }

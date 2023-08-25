@@ -5,18 +5,16 @@ import com.dashlane.R
 import com.dashlane.lock.LockHelper
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.lock.LockManager
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 class SensibleSettingsClickHelper @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val lockManager: LockManager
@@ -46,7 +44,7 @@ class SensibleSettingsClickHelper @Inject constructor(
         origin: UnlockEvent.Reason.WithCode.Origin,
         onUnlock: () -> Unit
     ) {
-        globalCoroutineScope.launch(mainCoroutineDispatcher) {
+        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             lockManager.showAndWaitLockActivityForReason(
                 context,
                 UnlockEvent.Reason.WithCode(UNLOCK_EVENT_CODE, origin),

@@ -6,8 +6,6 @@ import com.dashlane.autofill.api.changepause.view.ChangePauseViewTypeProviderFac
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import javax.inject.Inject
 
-
-
 class ChangePauseViewTypeProviderFactoryImpl @Inject constructor() : ChangePauseViewTypeProviderFactory {
 
     override fun create(pauseModel: ChangePauseModel): ChangePauseViewTypeProviderFactory.PauseSetting {

@@ -8,7 +8,7 @@ import com.dashlane.server.api.endpoints.abtesting.AbTestingUserExperimentsServi
 import com.dashlane.session.RemoteConfiguration
 import com.dashlane.session.SessionManager
 import com.dashlane.session.Username
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -23,8 +23,8 @@ import javax.inject.Singleton
 
 @Singleton
 class RemoteAbTestManager @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
     private val userPreferences: UserPreferencesManager,
     private val service: AbTestingUserExperimentsService
@@ -38,7 +38,7 @@ class RemoteAbTestManager @Inject constructor(
         }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
-    private val refreshActor = globalCoroutineScope.actor<Unit>(capacity = Channel.CONFLATED) {
+    private val refreshActor = applicationCoroutineScope.actor<Unit>(capacity = Channel.CONFLATED) {
         consumeEach {
             refreshIfNeeded()
         }
@@ -68,13 +68,9 @@ class RemoteAbTestManager @Inject constructor(
         }
     }
 
-    
-
     override fun load(): RemoteConfiguration.LoadResult {
         return if (hasRefreshed()) RemoteConfiguration.LoadResult.Success else RemoteConfiguration.LoadResult.Failure
     }
-
-    
 
     private suspend fun refresh() = withContext(Dispatchers.Default) {
         
@@ -102,8 +98,6 @@ class RemoteAbTestManager @Inject constructor(
         lastSuccessfulRefreshTime = System.currentTimeMillis()
     }
 
-    
-
     @VisibleForTesting
     internal fun prepareUpdateList(
         content: List<AbTestingUserExperimentsService.Data.AbTest>,
@@ -113,8 +107,6 @@ class RemoteAbTestManager @Inject constructor(
             getVariantIfEligibleForTest(currentTest, content)
         }
     }
-
-    
 
     private fun getVariantIfEligibleForTest(
         currentTest: Test,
@@ -143,8 +135,6 @@ class RemoteAbTestManager @Inject constructor(
             )
         }
     }
-
-    
 
     @VisibleForTesting
     internal fun updateAbPreferences(updatedValues: List<AbTestStatus>): Boolean {

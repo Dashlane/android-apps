@@ -4,8 +4,10 @@ import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.LinkedServicesHelper
 import com.dashlane.core.DataSync
+import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.core.helpers.PackageSignatureStatus
-import com.dashlane.ext.application.KnownApplication
+import com.dashlane.ext.application.KnownApplicationProvider
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
@@ -18,7 +20,6 @@ import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
 import com.dashlane.url.root
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.util.PackageUtilities
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isValidEmail
@@ -33,7 +34,6 @@ import com.dashlane.vault.model.createAuthentifiant
 import com.dashlane.vault.model.createPaymentCreditCard
 import com.dashlane.vault.model.formatTitle
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.copyWithDefaultValue
 import com.dashlane.vault.util.copyWithNewPassword
 import com.dashlane.vault.util.copyWithNewUrl
@@ -41,7 +41,6 @@ import com.dashlane.vault.util.getSignatureVerificationWith
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
 import java.time.Month
 import java.time.Year
@@ -49,16 +48,16 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-
-
 @Suppress("LargeClass")
 class AutoFillDataBaseAccess @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val sessionManager: SessionManager,
     private val mainDataAccessor: MainDataAccessor,
     @IoCoroutineDispatcher private val ioCoroutineDispatcher: CoroutineDispatcher,
     private val teamspaceForceCategorizationManager: TeamspaceForceCategorizationManager,
-    private val linkedServicesHelper: LinkedServicesHelper
+    private val linkedServicesHelper: LinkedServicesHelper,
+    private val dataSync: DataSync,
+    private val knownApplicationProvider: KnownApplicationProvider,
+    private val packageNameSignatureHelper: PackageNameSignatureHelper
 ) : AutofillAnalyzerDef.DatabaseAccess {
 
     private val dataCounter: DataCounter
@@ -71,45 +70,8 @@ class AutoFillDataBaseAccess @Inject constructor(
     override val isLoggedIn: Boolean
         get() = sessionManager.session != null
 
-    @Suppress("UNCHECKED_CAST")
-    override fun loadEmail(uid: String): SummaryObject.Email? {
-        if (!isLoggedIn) return null
-        val filter = genericFilter {
-            ignoreUserLock()
-            specificUid(uid)
-            specificDataType(SyncObjectType.EMAIL)
-        }
-        return genericDataQuery.queryFirst(filter) as? SummaryObject.Email
-    }
-
-    override fun loadEmails(): List<SummaryObject.Email>? {
-        if (!isLoggedIn) return null
-        val filter = genericFilter {
-            ignoreUserLock()
-            specificDataType(SyncObjectType.EMAIL)
-        }
-        return genericDataQuery.queryAll(filter).filterIsInstance<SummaryObject.Email>()
-    }
-
-    override fun loadAuthentifiant(uid: String): VaultItem<SyncObject.Authentifiant>? {
-        if (!isLoggedIn) return null
-        val dataQuery = mainDataAccessor.getVaultDataQuery()
-        val filter = vaultFilter {
-            ignoreUserLock()
-            specificUid(uid)
-            specificDataType(SyncObjectType.AUTHENTIFIANT)
-        }
-        return dataQuery.query(filter)?.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
-    }
-
-    override fun loadSummaryAuthentifiant(uid: String): SummaryObject.Authentifiant? {
-        return genericDataQuery.queryFirst(GenericFilter(uid))
-            ?.takeIf { it is SummaryObject.Authentifiant } as SummaryObject.Authentifiant?
-    }
-
-    override fun loadAllAuthentifiant(): List<SummaryObject.Authentifiant> {
-        return genericDataQuery.queryAll(vaultFilter { specificDataType(SyncObjectType.AUTHENTIFIANT) })
-            .map { it as SummaryObject.Authentifiant }
+    override fun <T : SummaryObject> loadSummary(uid: String): T? {
+        return genericDataQuery.queryFirst(GenericFilter(uid)) as? T
     }
 
     override fun loadAuthentifiantsByPackageName(packageName: String): List<SummaryObject.Authentifiant>? {
@@ -126,7 +88,7 @@ class AutoFillDataBaseAccess @Inject constructor(
 
         
         val verificationStatusToCredentials = (packageNameCredentials + packageNameDomainsCredentials)
-            .groupBy { it.getSignatureVerificationWith(context, packageName) }
+            .groupBy { it.getSignatureVerificationWith(packageNameSignatureHelper, packageName) }
 
         val verified = verificationStatusToCredentials[PackageSignatureStatus.VERIFIED].orEmpty()
         val unknown = verificationStatusToCredentials[PackageSignatureStatus.UNKNOWN].orEmpty()
@@ -148,7 +110,8 @@ class AutoFillDataBaseAccess @Inject constructor(
     }
 
     private fun loadAuthentifiantsPackageNameWhiteListDomains(packageName: String): List<SummaryObject.Authentifiant>? {
-        val domain = KnownApplication.getKnownApplication(packageName)?.mainDomain?.toUrlOrNull()?.root ?: return null
+        val domain = knownApplicationProvider.getWhitelistedApplication(packageName)
+            ?.mainDomain?.toUrlOrNull()?.root ?: return null
         val authentifiants = getCachedResult(domain)
         if (authentifiants != null) {
             return authentifiants
@@ -182,37 +145,23 @@ class AutoFillDataBaseAccess @Inject constructor(
         return credentials
     }
 
-    override fun loadCreditCard(uid: String): VaultItem<SyncObject.PaymentCreditCard>? {
+    override fun <T : SummaryObject> loadSummaries(type: SyncObjectType): List<T>? {
+        if (!isLoggedIn) return null
+        val filter = genericFilter {
+            ignoreUserLock()
+            specificDataType(type)
+        }
+        return genericDataQuery.queryAll(filter).mapNotNull { it as? T }
+    }
+
+    override fun <T : SyncObject> loadSyncObject(itemId: String): VaultItem<T>? {
         if (!isLoggedIn) return null
         val dataQuery = mainDataAccessor.getVaultDataQuery()
         val filter = vaultFilter {
             ignoreUserLock()
-            specificUid(uid)
-            specificDataType(SyncObjectType.PAYMENT_CREDIT_CARD)
+            specificUid(itemId)
         }
-        return dataQuery.query(filter)?.asVaultItemOfClassOrNull(SyncObject.PaymentCreditCard::class.java)
-    }
-
-    override fun loadCreditCards(): List<SummaryObject.PaymentCreditCard>? {
-        if (!isLoggedIn) return null
-        val filter = genericFilter {
-            ignoreUserLock()
-            specificDataType(SyncObjectType.PAYMENT_CREDIT_CARD)
-        }
-        return genericDataQuery.queryAll(filter).filterIsInstance<SummaryObject.PaymentCreditCard>()
-    }
-
-    override fun loadAddress(uid: String): SummaryObject.Address? = loadAddresses(listOf(uid))?.firstOrNull()
-
-    override fun loadAddresses(uids: Collection<String>): List<SummaryObject.Address>? {
-        if (!isLoggedIn) return null
-        val filter = genericFilter {
-            ignoreUserLock()
-            specificUid(uids)
-            specificDataType(SyncObjectType.ADDRESS)
-        }
-
-        return genericDataQuery.queryAll(filter).filterIsInstance<SummaryObject.Address>()
+        return dataQuery.query(filter) as? VaultItem<T>
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -271,13 +220,14 @@ class AutoFillDataBaseAccess @Inject constructor(
             
             return null
         }
-        return authentifiant as? VaultItem<SyncObject.Authentifiant>
+        return authentifiant.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
     }
 
-    
-
     @Suppress("UNCHECKED_CAST")
-    override suspend fun updateAuthentifiantWebsite(uid: String, website: String): SummaryObject.Authentifiant? {
+    override suspend fun updateAuthentifiantWebsite(
+        uid: String,
+        website: String
+    ): VaultItem<SyncObject.Authentifiant>? {
         if (!isLoggedIn) return null
 
         val filter = vaultFilter {
@@ -288,7 +238,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             mainDataAccessor.getVaultDataQuery().query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
         val updatedAccount = account.copyWithNewUrl(website).copyWithAttrs { syncState = SyncState.MODIFIED }
         mainDataAccessor.getDataSaver().save(updatedAccount)
-        return updatedAccount.toSummary()
+        return updatedAccount
     }
 
     override suspend fun updateLastViewDate(
@@ -347,8 +297,6 @@ class AutoFillDataBaseAccess @Inject constructor(
         }
     }
 
-    
-
     private fun getAuthentifiantData(
         website: String?,
         packageName: String,
@@ -367,7 +315,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             linkedServices = linkedServicesHelper.getLinkedServicesWithAppSignature(packageName)
 
             
-            val appWebsite = KnownApplication.getPrimaryWebsite(packageName)
+            val appWebsite = knownApplicationProvider.getKnownApplication(packageName)?.mainDomain
             newTitle = SyncObject.Authentifiant.formatTitle(
                 appWebsite ?: PackageUtilities.getApplicationNameFromPackage(context, packageName)
             )
@@ -416,7 +364,7 @@ class AutoFillDataBaseAccess @Inject constructor(
 
     override suspend fun addAuthentifiantLinkedWebDomain(uid: String, website: String): Boolean {
         return withContext(ioCoroutineDispatcher) {
-            loadAuthentifiant(uid)?.let { vault ->
+            loadSyncObject<SyncObject.Authentifiant>(uid)?.let { vault ->
                 val newLinkedServices = linkedServicesHelper.addLinkedDomains(
                     vault.syncObject.linkedServices,
                     listOf(
@@ -437,7 +385,7 @@ class AutoFillDataBaseAccess @Inject constructor(
                     teamspaceForceCategorizationManager.executeSync()
 
                     
-                    DataSync.sync(UsageLogCode134.Origin.SAVE)
+                    dataSync.sync(Trigger.SAVE)
                 }
             }
             return@withContext false
@@ -447,7 +395,7 @@ class AutoFillDataBaseAccess @Inject constructor(
     override suspend fun addAuthentifiantLinkedApp(uid: String, packageName: String): Boolean {
         linkedServicesHelper.getLinkedServicesWithAppSignature(packageName).let {
             return withContext(ioCoroutineDispatcher) {
-                loadAuthentifiant(uid)?.let { vault ->
+                loadSyncObject<SyncObject.Authentifiant>(uid)?.let { vault ->
                     val newLinkedServices = linkedServicesHelper.addLinkedApps(
                         vault.syncObject.linkedServices,
                         it.associatedAndroidApps ?: emptyList()
@@ -460,7 +408,7 @@ class AutoFillDataBaseAccess @Inject constructor(
                     }
                     return@withContext mainDataAccessor.getDataSaver().save(toSaveItem).also {
                         
-                        DataSync.sync(UsageLogCode134.Origin.SAVE)
+                        dataSync.sync(Trigger.SAVE)
                     }
                 }
                 return@withContext false

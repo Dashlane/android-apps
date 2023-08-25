@@ -12,8 +12,6 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 
-
-
 public class SpinnerAdapterDefaultValue<T> extends AbstractSpinnerAdapterWithDefaultValue<T> {
 
     private int mDropdownLayoutRes;

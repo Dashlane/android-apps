@@ -7,8 +7,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import java.util.Locale
 
-
-
 class EmailSuggestionProviderImpl(private val mainDataAccessor: MainDataAccessor) :
     EmailSuggestionProvider {
     private val genericDataQuery: GenericDataQuery

@@ -11,7 +11,8 @@ fun VaultItem<*>.getUpdatedLinkedWebsites(
     if (syncObjectToSave is SyncObject.Authentifiant && syncObjectSaved is SyncObject.Authentifiant) {
         return getUpdatedLinkedWebsites(
             syncObjectToSave.linkedServices?.associatedDomains?.map { it.domain ?: "" },
-            syncObjectSaved.linkedServices?.associatedDomains?.map { it.domain ?: "" })
+            syncObjectSaved.linkedServices?.associatedDomains?.map { it.domain ?: "" }
+        )
     }
     return null
 }
@@ -26,8 +27,6 @@ fun VaultItem<*>.getRemovedLinkedApps(oldItem: VaultItem<*>): List<String>? {
     }
     return null
 }
-
-
 
 fun getUpdatedLinkedWebsites(websites: List<String>?, oldWebsites: List<String>?): Pair<List<String>, List<String>> {
     val addedWebsites = (websites ?: listOf()) - (oldWebsites ?: listOf())

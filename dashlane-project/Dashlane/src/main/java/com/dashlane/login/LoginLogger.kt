@@ -16,11 +16,7 @@ import com.dashlane.hermes.generated.events.user.UseAnotherAccount
 import com.dashlane.lock.UnlockEvent
 
 interface LoginLogger {
-    
-
     fun logSuccess(isFirstLogin: Boolean = false, loginMode: LoginMode)
-
-    
 
     fun logWrongPassword(verification: VerificationMode)
     fun logWrongEmail()
@@ -29,31 +25,17 @@ interface LoginLogger {
     fun logWrongPin()
     fun logInvalidSso()
 
-    
-
     fun logErrorUnknown(loginMode: LoginMode)
-
-    
 
     fun logResendToken()
 
-    
-
     fun logAskAuthentication(loginMode: LoginMode)
-
-    
 
     fun logUseAnotherAccount()
 
-    
-
     fun logForgetMasterPassword(hasBiometricReset: Boolean)
 
-    
-
     fun logAskUseMasterPassword(originMode: Mode)
-
-    
 
     fun logAskUseSso(originMode: Mode)
 }
@@ -64,7 +46,7 @@ fun LoginLogger(
     unlockEventReason: UnlockEvent.Reason? = null
 ): LoginLogger = LoginLoggerImpl(logRepository, unlockEventReason)
 
-private class LoginLoggerImpl(
+class LoginLoggerImpl(
     private val logRepository: LogRepository,
     private val unlockEventReason: UnlockEvent.Reason?
 ) : LoginLogger {

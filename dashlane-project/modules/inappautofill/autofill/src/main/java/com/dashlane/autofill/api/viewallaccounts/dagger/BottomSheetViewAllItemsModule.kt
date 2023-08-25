@@ -12,8 +12,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.CoroutineScope
 
-
-
 @Module
 @InstallIn(ActivityComponent::class)
 class BottomSheetViewAllItemsModule {

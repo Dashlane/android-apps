@@ -5,34 +5,18 @@ import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 
-
-
 interface PasswordGeneratorWrapper {
-    
-
     var passwordLength: Int
-
-    
 
     var isUsingAmbiguousChar: Boolean
 
-    
-
     var isUsingSymbols: Boolean
-
-    
 
     var isUsingLetters: Boolean
 
-    
-
     var isUsingDigits: Boolean
 
-    
-
     suspend fun generatePassword(criteria: PasswordGeneratorCriteria?): Result
-
-    
 
     suspend fun saveToPasswordHistory(
         password: String,

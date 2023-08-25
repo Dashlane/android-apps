@@ -1,6 +1,5 @@
 package com.dashlane.nitro
 
-import com.dashlane.logger.Log
 import com.dashlane.nitro.AttestationDocument.Companion.decodeAttestationDocumentOrNull
 import com.dashlane.nitro.cryptography.SecretStreamServerInfo
 import com.dashlane.nitro.util.ECDSASignatureConverter
@@ -60,8 +59,6 @@ internal class AttestationValidatorImpl @Inject constructor() : AttestationValid
         }
     }
 
-    
-
     private fun verifySignature(
         document: AttestationDocument,
         coseSign1: CoseSign1
@@ -86,14 +83,11 @@ internal class AttestationValidatorImpl @Inject constructor() : AttestationValid
         val convertedSignature = try {
             ECDSASignatureConverter.convertConcatToDerFormat(coseSign1.signature)
         } catch (e: ECDSASignatureConverter.CoseException) {
-            Log.d("NITRO", e.message ?: "")
             return false
         }
 
         return signature.verify(convertedSignature)
     }
-
-    
 
     private fun verifyPcr(attestationDocument: AttestationDocument): Boolean {
         val pcrs = attestationDocument.pcrs

@@ -11,8 +11,6 @@ sealed class HelpCenterLink {
         val anchor: String? = null
     ) : HelpCenterLink()
 
-    
-
     val uri: Uri
         get() = Uri.Builder()
             .scheme("https")
@@ -50,8 +48,6 @@ sealed class HelpCenterLink {
         val ARTICLE_AUTHENTICATOR = Article("115003383365")
         val ARTICLE_AUTHENTICATOR_APP = Article("4583048536082")
         val ARTICLE_USE_RECOVERY_CODE = Article("202699101")
-
-        
 
         @get:VisibleForTesting
         val helpCenterLanguage: String

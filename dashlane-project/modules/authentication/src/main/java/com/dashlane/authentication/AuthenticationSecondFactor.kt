@@ -3,8 +3,6 @@ package com.dashlane.authentication
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-
-
 sealed class AuthenticationSecondFactor : Parcelable {
 
     abstract val login: String

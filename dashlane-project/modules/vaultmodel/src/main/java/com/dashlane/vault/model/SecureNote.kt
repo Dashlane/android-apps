@@ -19,7 +19,8 @@ fun createSecureNote(
             this.secured = isSecured
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.SecureNote>.copySyncObject(builder: SyncObject.SecureNote.Builder.() -> Unit = {}):

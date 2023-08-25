@@ -29,8 +29,6 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
-
 @Suppress("EXPERIMENTAL_API_USAGE")
 class LoginSyncProgressPresenter(
     private val activity: Activity,
@@ -42,8 +40,6 @@ class LoginSyncProgressPresenter(
     private val viewModel: DeferredViewModel<Unit>,
     coroutineScope: CoroutineScope
 ) : LoginSyncProgressContract.Presenter, CoroutineScope by coroutineScope {
-
-    
 
     private val finalizationActor = actor<Boolean>(Dispatchers.Main.immediate, Channel.UNLIMITED) {
         var finalizationProgressJob: Job? = null
@@ -183,7 +179,8 @@ class LoginSyncProgressPresenter(
             val groups = devicesToUnregister.minus(devices)
             try {
                 deactivateDevicesService.execute(
-                    session.authorization, DeactivateDevicesService.Request(
+                    session.authorization,
+                    DeactivateDevicesService.Request(
                         deviceIds = devices.map { it.id },
                         pairingGroupIds = groups.map { it.pairingGroupId!! }
                     )
@@ -197,15 +194,9 @@ class LoginSyncProgressPresenter(
     }
 
     companion object {
-        
-
         private const val CHRONOLOGICAL_SYNC_PERCENT_HALF = 40
 
-        
-
         private const val FINALIZATION_PERCENT = 20
-
-        
 
         private const val FINALIZATION_PERCENT_STEP_INITIAL_DURATION_MILLIS = 100L
     }

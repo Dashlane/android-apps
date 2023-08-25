@@ -7,7 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
 import androidx.fragment.app.viewModels
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
@@ -25,11 +24,6 @@ class SharingNewSharePeopleFragment : AbstractContentFragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         val view: View = inflater.inflate(R.layout.fragment_sharing_message, container, false)
         viewProxy = NewSharePeopleViewProxy(this, view, viewModel)
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            viewProxy.onBackPressed()
-            remove()
-            activity?.onBackPressed()
-        }
         return view
     }
 
@@ -45,5 +39,9 @@ class SharingNewSharePeopleFragment : AbstractContentFragment() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    companion object {
+        const val FROM_ITEM_VIEW = "from_item_view"
     }
 }

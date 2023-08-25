@@ -26,8 +26,6 @@ import com.dashlane.vault.model.getStringId
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class ItemScreenConfigurationEmailProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     dataCounter: DataCounter,
@@ -36,8 +34,10 @@ class ItemScreenConfigurationEmailProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, dataCounter,
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    dataCounter,
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     @Suppress("UNCHECKED_CAST")
@@ -154,8 +154,10 @@ class ItemScreenConfigurationEmailProvider(
         val selectedType = context.getString(item.syncObject.type.getStringId())
 
         return subViewFactory.createSubviewList(
-            context.getString(R.string.type), selectedType,
-            allTypeCategories.map { context.getString(it.getStringId()) }, typeUpdate
+            context.getString(R.string.type),
+            selectedType,
+            allTypeCategories.map { context.getString(it.getStringId()) },
+            typeUpdate
         )
     }
 

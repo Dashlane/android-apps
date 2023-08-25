@@ -18,7 +18,6 @@ class DisableTotpRecoveryCodeAlertDialogBuilder(val context: Activity) {
         positiveAction: ((String) -> Unit),
         negativeAction: (() -> Unit)
     ) {
-
         val dialogBuilder = DialogHelper().builder(context).apply {
             setView(binding.root)
             setCancelable(true)

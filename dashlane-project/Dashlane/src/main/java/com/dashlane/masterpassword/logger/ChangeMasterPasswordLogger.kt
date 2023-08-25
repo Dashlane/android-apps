@@ -9,8 +9,6 @@ import com.dashlane.session.SessionManager
 import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 
-
-
 class ChangeMasterPasswordLogger(
     private val sessionManager: SessionManager,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
@@ -89,35 +87,19 @@ class ChangeMasterPasswordLogger(
     }
 
     companion object {
-        
-
         const val ERROR_DOWNLOAD = "download"
-
-        
 
         const val ERROR_DECIPHER = "decipher"
 
-        
-
         const val ERROR_CIPHER = "cipher"
-
-        
 
         const val ERROR_UPLOAD = "upload"
 
-        
-
         const val ERROR_CONFIRMATION = "confirm_failed"
-
-        
 
         const val ERROR_LOGIN = "login"
 
-        
-
         const val ERROR_SYNC_FAILED = "sync_failed"
-
-        
 
         const val ERROR_UNKNOWN = "unknown"
     }

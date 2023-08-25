@@ -11,7 +11,8 @@ fun createAuthCategory(
             this.categoryName = name
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 val SyncObject.AuthCategory.Companion.alphabeticalComparator

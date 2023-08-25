@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.LayoutRes
 import androidx.core.view.animation.PathInterpolatorCompat
+import androidx.navigation.findNavController
 import androidx.transition.AutoTransition
 import androidx.transition.ChangeTransform
 import androidx.transition.Fade
@@ -15,6 +16,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.dashlane.R
+import com.dashlane.login.LoginHostFragmentDirections
 import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.authenticator.LoginDashlaneAuthenticatorContract
 import com.dashlane.login.pages.authenticator.LoginDashlaneAuthenticatorPresenter
@@ -50,7 +52,6 @@ class LoginViewProxy(rootView: View) : BaseViewProxy<LoginContract.Presenter>(ro
     }
 
     override fun transition(from: LoginBaseContract.Presenter?, to: LoginBaseContract.Presenter) {
-
         
         val transition = when {
             from is LoginEmailPresenter && to is LoginTotpPresenter -> createEmailToTotpTransition()
@@ -94,6 +95,10 @@ class LoginViewProxy(rootView: View) : BaseViewProxy<LoginContract.Presenter>(ro
         to.visible = true
         
         TransitionManager.go(scene, transition)
+    }
+
+    override fun transitionToCompose() {
+        root.findNavController().navigate(LoginHostFragmentDirections.actionFragmentToCompose())
     }
 
     private fun createViewProxyForPresenter(presenter: LoginBaseContract.Presenter) = when (presenter) {
@@ -156,30 +161,32 @@ class LoginViewProxy(rootView: View) : BaseViewProxy<LoginContract.Presenter>(ro
 
 private const val DEFAULT_DURATION = 400L
 
-
-
 private fun createEmailToTotpTransition(): Transition = TransitionSet()
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_email_layout)
         duration = 400
         interpolator = bezier
-    })
-    .addTransition(transformEmail(500).apply {
+    }
+    )
+    .addTransition(
+        transformEmail(500).apply {
         startDelay = 250
-    })
-    .addTransition(Fade().apply {
+    }
+    )
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.frame_login_totp)
         interpolator = bezier
         startDelay = 400
         duration = 400
-    })
+    }
+    )
     .addTransition(
         buttonChanger(R.id.btn_create_account, R.id.btn_push)
     )
 
-
-
-private fun createTotpToEmailTransition(): Transition? = TransitionSet()
+private fun createTotpToEmailTransition(): Transition = TransitionSet()
     .addTransition(
         transformEmail(500).apply {
             startDelay = 50
@@ -190,17 +197,17 @@ private fun createTotpToEmailTransition(): Transition? = TransitionSet()
             duration = 400
         }
     )
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_email_layout)
         duration = 400
         startDelay = 400
         interpolator = bezier
-    })
+    }
+    )
     .addTransition(
         buttonChanger(R.id.btn_push, R.id.btn_create_account)
     )
-
-
 
 private fun createTotpToPasswordTransition(): Transition = TransitionSet()
     .addTransition(
@@ -208,49 +215,53 @@ private fun createTotpToPasswordTransition(): Transition = TransitionSet()
             duration = 400
         }
     )
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_pw_layout)
         duration = 400
         startDelay = 400
         interpolator = bezier
-    })
-
-
+    }
+    )
 
 private fun createPasswordToTotpTransition(): Transition = TransitionSet()
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_pw_layout)
         interpolator = bezier
         duration = 400
-    })
-    .addTransition(Fade().apply {
+    }
+    )
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.frame_login_totp)
         interpolator = bezier
         startDelay = 400
         duration = 400
-    })
-
-
+    }
+    )
 
 private fun createEmailToPasswordTransition(): Transition = TransitionSet()
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_email_layout)
         duration = 400
         interpolator = bezier
-    })
+    }
+    )
     .addTransition(
         transformEmail(500).apply {
             startDelay = 250
         }
     )
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_pw_layout)
         interpolator = bezier
         startDelay = 400
         duration = 400
-    })
-
-
+    }
+    )
 
 private fun createPasswordToEmailTransition(): Transition = TransitionSet()
     .addTransition(
@@ -258,16 +269,20 @@ private fun createPasswordToEmailTransition(): Transition = TransitionSet()
             startDelay = 50
         }
     )
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_pw_layout)
         duration = 400
         interpolator = bezier
-    })
-    .addTransition(fadeInSlide().apply {
+    }
+    )
+    .addTransition(
+        fadeInSlide().apply {
         addTarget(R.id.view_login_email_layout)
         startDelay = 400
         duration = 400
-    })
+    }
+    )
 
 private fun createTokenToPasswordTransition(): Transition = TransitionSet()
     .addTransition(
@@ -275,41 +290,53 @@ private fun createTokenToPasswordTransition(): Transition = TransitionSet()
             duration = 400
         }
     )
-    .addTransition(fadeInSlide().apply {
+    .addTransition(
+        fadeInSlide().apply {
         addTarget(R.id.view_login_pw_layout)
         duration = 400
         startDelay = 400
         interpolator = bezier
-    })
+    }
+    )
 
 private fun createPasswordToTokenTransition(): Transition = TransitionSet()
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_pw_layout)
         interpolator = bezier
         duration = 400
-    })
-    .addTransition(Fade().apply {
+    }
+    )
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_token_layout)
         interpolator = bezier
         startDelay = 400
         duration = 400
-    })
+    }
+    )
 
 private fun createEmailToTokenTransition(): Transition = TransitionSet()
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_email_layout)
         duration = 400
         interpolator = bezier
-    })
-    .addTransition(transformEmail(500).apply {
+    }
+    )
+    .addTransition(
+        transformEmail(500).apply {
         startDelay = 250
-    })
-    .addTransition(Fade().apply {
+    }
+    )
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_token_layout)
         interpolator = bezier
         startDelay = 400
         duration = 400
-    })
+    }
+    )
     .addTransition(
         buttonChanger(R.id.btn_create_account, R.id.btn_where_is)
     )
@@ -325,22 +352,20 @@ private fun createTokenToEmailTransition(): Transition = TransitionSet()
             duration = 400
         }
     )
-    .addTransition(Fade().apply {
+    .addTransition(
+        Fade().apply {
         addTarget(R.id.view_login_email_layout)
         duration = 400
         startDelay = 400
         interpolator = bezier
-    })
+    }
+    )
     .addTransition(
         buttonChanger(R.id.btn_where_is, R.id.btn_create_account)
     )
 
-
-
 private fun transformEmail(duration: Long = DEFAULT_DURATION) =
     transform(duration).also { it.addTarget("email") }
-
-
 
 private fun transform(duration: Long = DEFAULT_DURATION) =
     ChangeTransform().also {
@@ -356,13 +381,17 @@ private fun fadeInSlide(
     items?.forEach {
         addTarget(it)
     }
-    addTransition(Fade().apply {
+    addTransition(
+        Fade().apply {
         interpolator = bezier
-    })
+    }
+    )
 
-    addTransition(Slide().apply {
+    addTransition(
+        Slide().apply {
         interpolator = KeepEndEaseInOutInterpolator(slideKept)
-    })
+    }
+    )
 
     this.duration = duration
 }
@@ -375,13 +404,17 @@ private fun fadeOutSlide(
     itemIds?.forEach {
         addTarget(it)
     }
-    addTransition(Slide().apply {
+    addTransition(
+        Slide().apply {
         interpolator = KeepStartEaseInOutInterpolator(slideKept)
-    })
+    }
+    )
 
-    addTransition(Fade().apply {
+    addTransition(
+        Fade().apply {
         interpolator = bezier
-    })
+    }
+    )
 
     this.duration = duration
 }

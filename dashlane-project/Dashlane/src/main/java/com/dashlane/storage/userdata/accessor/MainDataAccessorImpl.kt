@@ -3,8 +3,6 @@ package com.dashlane.storage.userdata.accessor
 import com.dashlane.storage.DataStorageProvider
 import javax.inject.Inject
 
-
-
 class MainDataAccessorImpl @Inject constructor(
     private val dataSaver: DataSaver,
     private val generatedPasswordQuery: GeneratedPasswordQueryImpl,
@@ -16,6 +14,8 @@ class MainDataAccessorImpl @Inject constructor(
     override fun getGenericDataQuery() = dataStorageProvider.genericDataQuery
 
     override fun getCredentialDataQuery() = dataStorageProvider.credentialDataQuery
+
+    override fun getCollectionDataQuery() = dataStorageProvider.collectionDataQuery
 
     override fun getDataChangeHistoryQuery() = dataStorageProvider.dataChangeHistoryQuery
 

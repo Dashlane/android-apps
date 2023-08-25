@@ -9,8 +9,6 @@ import com.dashlane.ui.screens.fragments.search.ui.SearchItemWrapper
 import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
 
-
-
 class AuthentifiantSearchViewTypeProviderFactoryImpl @Inject constructor() :
     AuthentifiantSearchViewTypeProviderFactory {
 
@@ -37,7 +35,8 @@ class AuthentifiantSearchViewTypeProviderFactoryImpl @Inject constructor() :
             matchedAuthentifiant.item as SummaryObject.Authentifiant,
             itemListContext
         )
-    ), AuthentifiantSearchViewTypeProviderFactory.AuthentifiantWrapperItem {
+    ),
+    AuthentifiantSearchViewTypeProviderFactory.AuthentifiantWrapperItem {
         override fun getListItemActions(): List<ListItemAction> = emptyList()
         override fun getAuthentifiant(): SummaryObject.Authentifiant {
             return originalItemWrapper.itemObject

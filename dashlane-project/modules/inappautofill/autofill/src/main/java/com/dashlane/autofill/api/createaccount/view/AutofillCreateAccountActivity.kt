@@ -6,17 +6,15 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.api.createaccount.AutofillApiCreateAccountComponent
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountErrors
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountErrors.DATABASE_ERROR
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountErrors.USER_LOGGED_OUT
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountResultHandler
 import com.dashlane.autofill.api.createaccount.getDomainInfoForCreateAccount
 import com.dashlane.autofill.api.internal.AutofillApiComponent
-import com.dashlane.autofill.api.model.AuthentifiantItemToFill
+import com.dashlane.autofill.api.model.toItemToFill
 import com.dashlane.autofill.api.navigation.AutofillNavigatorImpl
 import com.dashlane.autofill.api.navigation.getAutofillBottomSheetNavigator
-import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
 import com.dashlane.autofill.api.ui.AutoFillResponseActivity
 import com.dashlane.autofill.api.ui.AutofillFeature
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
@@ -26,8 +24,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
-
-
 
 class AutofillCreateAccountActivity :
     DelegateNavigationBottomSheetFragment.NavigationDelegate,
@@ -40,10 +36,6 @@ class AutofillCreateAccountActivity :
 
     private val toaster by lazy(LazyThreadSafetyMode.NONE) {
         AutofillApiComponent(this).toaster
-    }
-
-    private val createAccountLogger by lazy(LazyThreadSafetyMode.NONE) {
-        AutofillApiCreateAccountComponent(this).createAccountLogger
     }
 
     private lateinit var summaryPackageName: String
@@ -72,14 +64,6 @@ class AutofillCreateAccountActivity :
             finish()
             return
         }
-        if (isFirstRun) {
-            createAccountLogger.logOnClickCreateAccount(
-                getAutofillApiOrigin(forKeyboardAutofill),
-                summaryPackageName,
-                summaryWebDomain,
-                hasExtraCredential
-            )
-        }
         performLoginAndUnlock {
             openBottomSheetDialog()
         }
@@ -87,7 +71,7 @@ class AutofillCreateAccountActivity :
 
     override fun onFinishWithResult(result: VaultItem<SyncObject.Authentifiant>) {
         finishWithResult(
-            itemToFill = AuthentifiantItemToFill(primaryItem = result, lastUsedDate = result.locallyViewedDate),
+            itemToFill = result.toItemToFill(),
             autofillFeature = AutofillFeature.CREATE_ACCOUNT,
             matchType = MatchType.CREATED_PASSWORD
         )
@@ -109,13 +93,9 @@ class AutofillCreateAccountActivity :
         finish()
     }
 
-    
-
     override fun onCancel() {
         finish()
     }
-
-    
 
     private fun openBottomSheetDialog() {
         AutofillNavigatorImpl(this).goToCreateAccountDialogFromWaitForDecision()

@@ -12,10 +12,7 @@ import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginBaseDataProvider
 import javax.inject.Inject
 
-
-
 class LoginTokenDataProvider @Inject constructor(
-    override val logger: LoginTokenLogger,
     private val secondFactoryRepository: AuthenticationSecondFactoryRepository
 ) : LoginBaseDataProvider<LoginTokenContract.Presenter>(), LoginTokenContract.DataProvider {
 
@@ -28,16 +25,12 @@ class LoginTokenDataProvider @Inject constructor(
     override val username: String
         get() = emailSecondFactor.login
 
-    override fun onShow() = logger.logLand()
-    override fun onBack() = logger.logBack()
-
-    override suspend fun validateToken(token: String, auto: Boolean): RegisteredUserDevice = try {
+    override suspend fun validateToken(token: String, auto: Boolean): Pair<RegisteredUserDevice, String?> = try {
         val result = secondFactoryRepository.validate(
             emailSecondFactor,
             token
         )
-        logger.logTokenSuccess(auto)
-        result.registeredUserDevice
+        result.registeredUserDevice to result.authTicket
     } catch (e: AuthenticationException) {
         when (e) {
             is AuthenticationInvalidTokenException,
@@ -45,27 +38,18 @@ class LoginTokenDataProvider @Inject constructor(
             is AuthenticationAccountConfigurationChangedException,
                 
             is AuthenticationLockedOutException -> {
-                logger.logInvalidToken(auto)
                 throw LoginTokenContract.InvalidTokenException(false, e)
             }
             is AuthenticationOfflineException -> {
-                logger.logNetworkError(auto)
                 throw LoginBaseContract.OfflineException(e)
             }
             else -> {
-                logger.logNetworkError(auto)
                 throw LoginBaseContract.NetworkException(e)
             }
         }
     }
 
-    override fun resendTokenClicked() = logger.logWhereIsMyCodeClick()
-    override fun resendTokenPopupOpened() = logger.logWhereIsMyCodeAppear()
-    override fun resendTokenPopupClosed() = logger.logCloseWhereIsMyCode()
-    override fun resendTokenPopupDismissed() = logger.logDismissWhereIsMyCode()
-
     override suspend fun resendToken() {
-        logger.logResendCode()
         try {
             secondFactoryRepository.resendToken(AuthenticationSecondFactor.EmailToken(username))
         } catch (_: AuthenticationException) {

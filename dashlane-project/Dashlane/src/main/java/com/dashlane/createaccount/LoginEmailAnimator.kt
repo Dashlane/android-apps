@@ -8,15 +8,9 @@ import android.widget.TextView
 import com.dashlane.util.getRelativePosition
 import com.dashlane.util.getThemeAttrColor
 
-
-
 class LoginEmailAnimator(context: Context) {
 
-    
-
     val alpha = Color.alpha(context.getThemeAttrColor(android.R.attr.textColorSecondary)) / 255.0f
-
-    
 
     fun animate(dest: TextView, origin: EditText) {
         dest.visibility = View.INVISIBLE

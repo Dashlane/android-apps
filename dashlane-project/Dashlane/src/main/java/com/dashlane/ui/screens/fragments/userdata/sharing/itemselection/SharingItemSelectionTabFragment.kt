@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import com.dashlane.R
@@ -17,8 +16,6 @@ import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class SharingItemSelectionTabFragment : AbstractContentFragment() {
 
@@ -27,21 +24,12 @@ class SharingItemSelectionTabFragment : AbstractContentFragment() {
 
     private val viewModel by viewModels<NewShareItemViewModel>()
 
-    private val backCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            viewModel.onBackPressed()
-            remove()
-            activity?.onBackPressed()
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         setCurrentPageView(AnyPage.SHARING_CREATE_ITEM)
-        requireActivity().onBackPressedDispatcher.addCallback(backCallback)
         return inflater.inflate(R.layout.fragment_tablayout_viewpager2_with_fab, container, false)
     }
 
@@ -52,10 +40,6 @@ class SharingItemSelectionTabFragment : AbstractContentFragment() {
         activity?.invalidateOptionsMenu()
 
         SharingItemSelectionTabViewProxy(view, this, viewModel)
-
-        if (savedInstanceState == null) {
-            viewModel.onCreated()
-        }
     }
 
     override fun onQueryTextSubmit(query: String): Boolean = viewModel.onQueryChange(query)

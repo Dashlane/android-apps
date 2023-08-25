@@ -5,8 +5,6 @@ import android.widget.TextView
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-
-
 class TextViewOptionalText(
     val textView: TextView,
     private val nullVisibility: Int,

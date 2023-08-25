@@ -4,8 +4,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.definition.Base
 
-
-
 interface PasswordAnalysisContract {
 
     interface ViewProxy : Base.IView {

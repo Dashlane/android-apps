@@ -8,25 +8,13 @@ interface LinkedServicesContract {
         fun save(linkedWebsites: List<String>, linkedApps: List<String>)
         fun switchEditMode()
 
-        
-
         fun hasOtherItemsDuplicate(linkedWebsites: List<String>): Pair<String, String>?
-
-        
 
         fun hasWebsitesToSave(linkedWebsites: List<String>): Boolean
 
-        
-
         fun hasAppsToSave(linkedApps: List<String>): Boolean
 
-        
-
         fun canEdit(): Boolean
-
-        
-
-        fun doneButtonActivated(): Boolean
     }
 
     interface DataProvider {
@@ -36,8 +24,6 @@ interface LinkedServicesContract {
             linkedWebsites: List<String>,
             linkedApps: List<String>
         ): Boolean
-
-        
 
         fun getDuplicateWebsitesItem(
             vaultItem: VaultItem<SyncObject.Authentifiant>?,

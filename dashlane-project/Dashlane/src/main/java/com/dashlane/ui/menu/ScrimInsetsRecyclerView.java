@@ -1,8 +1,6 @@
 package com.dashlane.ui.menu;
 
 
-
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,11 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 
-
-
 public class ScrimInsetsRecyclerView extends RecyclerView {
-
-    
 
     private static final int FOREGROUND_COLOR = Color.argb(68, 0, 0, 0); 
 

@@ -15,11 +15,9 @@ import com.dashlane.sync.repositories.strategies.SyncServices
 import com.dashlane.sync.treat.SyncSummaryItem
 import com.dashlane.sync.util.SyncLogs
 import com.dashlane.sync.vault.SyncVault
-import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.reflect.KClass
 
 class ChronologicalSyncImpl @Inject constructor(
     private val syncServices: SyncServices,
@@ -39,9 +37,9 @@ class ChronologicalSyncImpl @Inject constructor(
         val lastLocalSyncDate = vault.lastSyncTime
 
         
-        val syncObjectClasses = enumValues<SyncObjectType>().map(SyncObjectType::kClass)
-        vault.prepareOutgoingOperations(syncObjectClasses)
-        val outgoingTransactions = vault.getOutgoingTransactions(syncObjectClasses)
+        val syncObjectTypes = enumValues<SyncObjectType>().toList()
+        vault.prepareOutgoingOperations(syncObjectTypes)
+        val outgoingTransactions = vault.getOutgoingTransactions(syncObjectTypes)
 
         val outgoingUpdateCount = outgoingTransactions.count { it is OutgoingTransaction.Update }
         val outgoingDeleteCount = outgoingTransactions.count { it is OutgoingTransaction.Delete }
@@ -65,7 +63,7 @@ class ChronologicalSyncImpl @Inject constructor(
             )
 
         
-        syncLocal(vault, vaultOperations.transactions, syncProgressChannel, syncObjectClasses)
+        syncLocal(vault, vaultOperations.transactions, syncProgressChannel, syncObjectTypes)
 
         
         vault.lastSyncTime = backupDate
@@ -86,8 +84,6 @@ class ChronologicalSyncImpl @Inject constructor(
             )
         )
     }
-
-    
 
     private suspend fun syncRemote(
         serverCredentials: ServerCredentials,
@@ -210,13 +206,11 @@ class ChronologicalSyncImpl @Inject constructor(
         val downloadedSharingKeys: SharingKeys?
     )
 
-    
-
     private suspend fun syncLocal(
         vault: SyncVault,
         vaultOperations: List<IncomingTransaction>,
         syncProgressChannel: SyncProgressChannel?,
-        syncObjectClasses: List<KClass<out SyncObject>>
+        syncObjectTypes: List<SyncObjectType>
     ) {
         
         vault.inTransaction {
@@ -224,7 +218,7 @@ class ChronologicalSyncImpl @Inject constructor(
         }
 
         
-        vault.clearOutgoingOperations(syncObjectClasses)
+        vault.clearOutgoingOperations(syncObjectTypes)
     }
 
     private fun SyncVault.TransactionScope.syncLocal(

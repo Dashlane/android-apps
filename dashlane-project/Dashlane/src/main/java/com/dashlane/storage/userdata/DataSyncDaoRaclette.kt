@@ -12,9 +12,9 @@ import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.DatabaseSyncSummary
 import com.dashlane.vault.summary.SyncSummaryItem
-import com.dashlane.vault.util.SyncObjectTypeUtils
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
+import com.dashlane.xml.domain.isSupportedSyncObjectType
 import java.time.Instant
 import javax.inject.Inject
 
@@ -106,11 +106,11 @@ class DataSyncDaoRaclette @Inject constructor(
         val vaultObjectRepository = vaultObjectRepository ?: return
         val databaseSyncSummary = memorySummaryRepository?.databaseSyncSummary ?: return
         val idsToDelete = databaseSyncSummary.items.filter {
-            it.type in SyncObjectTypeUtils.ALL && it.syncState == SyncState.IN_SYNC_DELETED
+            it.type.isSupportedSyncObjectType && it.syncState == SyncState.IN_SYNC_DELETED
         }
         runCatching {
             val itemsToSync = databaseSyncSummary.items.filter {
-                it.type in SyncObjectTypeUtils.ALL && it.syncState == SyncState.IN_SYNC_MODIFIED
+                it.type.isSupportedSyncObjectType && it.syncState == SyncState.IN_SYNC_MODIFIED
             }.mapNotNull {
                 vaultObjectRepository[Id.of(it.id)]?.copyWithAttrs {
                     syncState = SyncState.SYNCED

@@ -24,12 +24,15 @@ class TrustFAQActivity : DashlaneActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finish()
                 overridePendingTransition(R.anim.no_animation, R.anim.slide_out_bottom)
             }
-        })
+        }
+        )
 
         val userActivityComponent = UserActivityComponent(this)
         val usageLogRepository = userActivityComponent.currentSessionUsageLogRepository

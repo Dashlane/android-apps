@@ -1,19 +1,16 @@
 package com.dashlane.sync.util
 
 import com.dashlane.sync.domain.Transaction
-import com.dashlane.xml.domain.SyncObjectType
+import com.dashlane.sync.treat.SyncSummaryItem
 import java.time.Instant
 
-
-
-interface SyncLogs : SyncNetworkLogs, SyncDecipherTransactionLogs,
-    SyncCipherLogs, SyncTreatProblemLogs {
-
-    
+interface SyncLogs :
+    SyncNetworkLogs,
+    SyncDecipherTransactionLogs,
+    SyncCipherLogs,
+    SyncTreatProblemLogs {
 
     fun onSyncBegin()
-
-    
 
     fun onSyncChronologicalStart(
         syncTime: Instant?,
@@ -21,22 +18,14 @@ interface SyncLogs : SyncNetworkLogs, SyncDecipherTransactionLogs,
         deleteCount: Int
     )
 
-    
-
     fun onSyncChronologicalDone()
 
-    
-
     fun onSyncDone()
-
-    
 
     fun onSyncError(t: Throwable)
 }
 
 interface SyncNetworkLogs {
-
-    
 
     fun onDownloadRequest(
         syncTime: Instant?,
@@ -44,15 +33,11 @@ interface SyncNetworkLogs {
         sharingKeys: Boolean
     )
 
-    
-
     fun onDownloadResponse(
         syncTime: Instant?,
         updateCount: Int?,
         deleteCount: Int?
     )
-
-    
 
     fun onDownloadError(throwable: Throwable)
 
@@ -62,8 +47,6 @@ interface SyncNetworkLogs {
 
     fun onUploadError(throwable: Throwable)
 }
-
-
 
 interface SyncDecipherTransactionLogs {
     fun onDecipherTransactionsStart()
@@ -83,15 +66,9 @@ interface SyncDecipherTransactionLogs {
     fun onDecipherTransactionsDone(count: Int, errors: Int)
 }
 
-
-
 interface SyncCipherLogs {
 
-    
-
     fun onCipherTransactionsStart()
-
-    
 
     fun onCipherTransaction(
         action: String,
@@ -103,40 +80,34 @@ interface SyncCipherLogs {
     fun onCipherTransactionsDone()
 }
 
-
-
 interface SyncTreatProblemLogs {
 
     fun onTreatProblemStart()
     fun onTreatProblemSummaryBegin(localCount: Int, remoteCount: Int)
-    fun onTreatProblemSummaryUploadMissing(type: SyncObjectType, identifier: String, backupTime: Instant?)
-    fun onTreatProblemSummaryUpToDate(type: SyncObjectType, identifier: String, backupTime: Instant?)
+    fun onTreatProblemSummaryUploadMissing(item: List<SyncSummaryItem>)
+    fun onTreatProblemSummaryUpToDate(item: List<SyncSummaryItem>)
     fun onTreatProblemSummaryUploadOutOfDate(
-        type: SyncObjectType,
-        identifier: String,
-        backupTime: Instant?,
-        outOfDateTime: Instant?
+        item: List<SyncSummaryItem>
     )
 
-    fun onTreatProblemSummaryDownloadMissing(type: SyncObjectType, identifier: String, backupTime: Instant?)
+    fun onTreatProblemSummaryDownloadMissing(item: List<SyncSummaryItem>)
     fun onTreatProblemSummaryDownloadOutOfDate(
-        type: SyncObjectType,
-        identifier: String,
-        backupTime: Instant?,
-        outOfDateTime: Instant?
+        item: List<SyncSummaryItem>
     )
 
     fun onTreatProblemSummaryDone()
 
-    
-
     fun onTreatProblemNotNeeded()
 
-    
+    fun onTreatProblemDownload(downloadCount: Int)
 
-    fun onTreatProblemUpload(downloadCount: Int, uploadCount: Int)
+    fun onTreatProblemApplyDownloadedTransactionsLocally(t: Throwable)
 
-    
+    fun onTreatProblemUpload(uploadCount: Int)
 
     fun onTreatProblemDone()
+
+    fun onTreatProblemDownloadEmpty()
+
+    fun onTreatProblemDownloadMissed()
 }

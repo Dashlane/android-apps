@@ -8,8 +8,6 @@ import com.dashlane.autofill.api.util.getBestEntry
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 
-
-
 internal class EmailFiller(private val autofillValueFactory: AutofillValueFactory) : Filler {
 
     override fun fill(
@@ -18,11 +16,11 @@ internal class EmailFiller(private val autofillValueFactory: AutofillValueFactor
         item: ItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val email = (item as? EmailItemToFill)?.primaryItem ?: return false
+        val emailItemToFill = item as EmailItemToFill
         val entry = summary.getBestEntry {
             it.hasOneOfHints(arrayOf(AutoFillHint.EMAIL_ADDRESS, AutoFillHint.USERNAME))
         } ?: return false
-        dataSetBuilder.setValue(entry.id, autofillValueFactory.forText(email.email))
+        dataSetBuilder.setValue(entry.id, autofillValueFactory.forText(emailItemToFill.email))
         return true
     }
 }

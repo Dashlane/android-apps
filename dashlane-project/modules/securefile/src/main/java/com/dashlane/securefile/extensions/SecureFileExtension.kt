@@ -13,8 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 
-
-
 fun SecureFile.toSecureFileInfo(username: String): VaultItem<SyncObject.SecureFileInfo> {
     val timestamp = Instant.now()
     return createSecureFileInfo(
@@ -31,12 +29,12 @@ fun SecureFile.toSecureFileInfo(username: String): VaultItem<SyncObject.SecureFi
     )
 }
 
-
-
 @Suppress("UNCHECKED_CAST")
 suspend fun VaultDataQuery.getSecureFileInfo(uid: String) = withContext(Dispatchers.IO) {
-    query(vaultFilter {
+    query(
+        vaultFilter {
         specificUid(uid)
         specificDataType(SyncObjectType.SECURE_FILE_INFO)
-    }) as? VaultItem<SyncObject.SecureFileInfo>
+    }
+    ) as? VaultItem<SyncObject.SecureFileInfo>
 }

@@ -2,8 +2,6 @@ package com.dashlane.item.subview.edit
 
 import com.dashlane.vault.model.VaultItem
 
-
-
 open class ItemEditValueTextSubView(
     var hint: String,
     override var value: String,

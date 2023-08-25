@@ -32,8 +32,6 @@ import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class ItemScreenConfigurationPaypalProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     dataCounter: DataCounter,
@@ -43,12 +41,15 @@ class ItemScreenConfigurationPaypalProvider(
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, dataCounter,
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    dataCounter,
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     override val logger = PaypalAccountLogger(
-        teamspaceAccessor, dataCounter,
+        teamspaceAccessor,
+        dataCounter,
         sessionManager,
         bySessionUsageLogRepository
     )

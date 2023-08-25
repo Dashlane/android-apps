@@ -6,13 +6,19 @@ import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.useractivity.log.usage.UsageLog
 import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.useractivity.log.usage.UsageLogRepository
+import javax.inject.Inject
 
-class MenuUsageLogger(
+interface MenuUsageLogger {
+    fun logMenuLock()
+    fun logSpaceChange(teamspace: Teamspace?)
+}
+
+class MenuUsageLoggerImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
-) {
+) : MenuUsageLogger {
 
-    fun logMenuLock() {
+    override fun logMenuLock() {
         log(
             UsageLogCode75(
                 type = "lock",
@@ -22,7 +28,7 @@ class MenuUsageLogger(
         )
     }
 
-    fun logSpaceChange(teamspace: Teamspace?) {
+    override fun logSpaceChange(teamspace: Teamspace?) {
         log(
             UsageLogCode75(
                 type = "MainMenu",

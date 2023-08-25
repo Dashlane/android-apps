@@ -6,8 +6,6 @@ import com.dashlane.R
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.toSummary
 
-
-
 class NewShareMenuAction(item: VaultItem<*>) : MenuAction(
     R.string.share_from_services_menu_title,
     R.drawable.ic_share,

@@ -1,14 +1,14 @@
 package com.dashlane.autofill.api.emptywebsitewarning.presenter
 
 import com.dashlane.autofill.api.emptywebsitewarning.EmptyWebsiteWarningContract
-import com.dashlane.autofill.api.emptywebsitewarning.EmptyWebsiteWarningLogger
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.getLoginForUi
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
 class EmptyWebsiteWarningPresenter @Inject constructor(
-    private val dataProvider: EmptyWebsiteWarningContract.DataProvider,
-    private val logger: EmptyWebsiteWarningLogger
+    private val dataProvider: EmptyWebsiteWarningContract.DataProvider
 ) : EmptyWebsiteWarningContract.Presenter {
 
     override suspend fun getAccountWrapper(
@@ -27,13 +27,10 @@ class EmptyWebsiteWarningPresenter @Inject constructor(
 
     override suspend fun fetchAccount(uid: String): SummaryObject.Authentifiant? = dataProvider.fetchAccount(uid)
 
-    override suspend fun updateAccountWithNewUrl(uid: String, website: String): SummaryObject.Authentifiant? {
-        val result = dataProvider.updateAccountWithNewUrl(uid, website)
-        logger.logUpdateAccount(website)
-        return result
+    override suspend fun updateAccountWithNewUrl(
+        uid: String,
+        website: String
+    ): VaultItem<SyncObject.Authentifiant>? {
+        return dataProvider.updateAccountWithNewUrl(uid, website)
     }
-
-    override fun onCancel(website: String) = logger.logCancel(website)
-
-    override fun onDisplay(website: String) = logger.logDisplay(website)
 }

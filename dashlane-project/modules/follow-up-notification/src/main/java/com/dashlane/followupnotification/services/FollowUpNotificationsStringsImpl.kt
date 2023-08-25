@@ -7,8 +7,6 @@ import com.dashlane.util.clipboard.vault.CopyField
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class FollowUpNotificationsStringsImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : FollowUpNotificationsStrings {

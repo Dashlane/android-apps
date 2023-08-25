@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 
-
-
 class RemoteImageDrawableWithDominantColorBorders(
     context: Context,
     @ColorInt backgroundColor: Int,

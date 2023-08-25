@@ -57,7 +57,7 @@ class CreateAccountEmailViewProxy(
             .setPositiveButton(R.string.confirm) { _, _ ->
                 presenter.onConfirmEmail(email, inEuropeanUnion, country, loginSsoIntent)
             }
-            .setNegativeButton(R.string.cancel) { _, _ -> presenter.onCancelConfirmEmail() }
+            .setNegativeButton(R.string.cancel) { _, _ -> }
             .create()
             .apply { setOnShowListener { callback() } }
             .show()

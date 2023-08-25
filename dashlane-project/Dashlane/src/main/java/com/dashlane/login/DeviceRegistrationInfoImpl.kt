@@ -12,8 +12,6 @@ import com.dashlane.util.DeviceUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class DeviceRegistrationInfoImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,

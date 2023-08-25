@@ -3,8 +3,6 @@ package com.dashlane.csvimport
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.useractivity.log.usage.UsageLogCode75
 
-
-
 class ImportFromChromeLogger(
     private val usageLogRepository: UsageLogRepository?,
     private val origin: UsageLogCode75.Origin? = null,

@@ -11,8 +11,6 @@ import android.widget.TextView;
 
 import com.dashlane.R;
 
-
-
 public class PinCodeKeyboardView extends TableLayout implements View.OnClickListener {
 
     private PinCodeKeyboardListener mListener;

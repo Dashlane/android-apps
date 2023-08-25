@@ -1,7 +1,5 @@
 package com.dashlane.csvimport.internal
 
-
-
 internal data class CsvSchema(
     val hasHeader: Boolean,
     val separator: Char,

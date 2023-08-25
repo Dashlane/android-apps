@@ -2,8 +2,6 @@ package com.dashlane.autofill.api.pause.services
 
 import java.time.Instant
 
-
-
 interface PausedFormSourcesRepository {
     suspend fun isApplicationPaused(formSourceIdentifier: String): Boolean
     suspend fun isWebsitePaused(formSourceIdentifier: String): Boolean

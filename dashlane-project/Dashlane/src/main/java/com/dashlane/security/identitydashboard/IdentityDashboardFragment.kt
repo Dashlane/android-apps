@@ -9,13 +9,11 @@ import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import javax.inject.Inject
-
-
+import kotlinx.coroutines.CoroutineScope
 
 @AndroidEntryPoint
 class IdentityDashboardFragment : AbstractContentFragment() {
@@ -25,7 +23,10 @@ class IdentityDashboardFragment : AbstractContentFragment() {
     @Inject
     lateinit var presenter: IdentityDashboardPresenter
 
-    @OptIn(DelicateCoroutinesApi::class)
+    @Inject
+    @ApplicationCoroutineScope
+    lateinit var applicationCoroutineScope: CoroutineScope
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -39,7 +40,7 @@ class IdentityDashboardFragment : AbstractContentFragment() {
         val scope = if (activity is DashlaneActivity) {
             (activity as DashlaneActivity?)!!.lifecycleScope
         } else {
-            GlobalScope
+            applicationCoroutineScope
         }
         presenter.coroutineScope = scope
         dataProvider.coroutineScope = scope

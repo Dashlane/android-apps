@@ -8,13 +8,9 @@ import java.io.File
 import java.io.IOException
 import java.util.zip.ZipInputStream
 
-
-
 @Throws(IOException::class)
 fun AssetManager.readString(asset: String) =
     open(asset).use { it.reader().readText() }
-
-
 
 @Throws(IOException::class)
 fun AssetManager.unzip(asset: String, destination: File) {

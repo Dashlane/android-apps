@@ -2,32 +2,23 @@ package com.dashlane.util.usagelogs
 
 import androidx.annotation.VisibleForTesting
 import androidx.navigation.NavDestination
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.useractivity.log.usage.UsageLogCode34
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.isSemanticallyNull
+import javax.inject.Inject
 
-
-
-class ViewLogger @VisibleForTesting internal constructor(
+class ViewLogger @Inject constructor(
     private val sessionManager: SessionManager,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val bySessionTeamspaceAccessor: BySessionRepository<TeamspaceAccessor>,
+    private val teamspaceManagerRepository: TeamspaceManagerRepository,
     private val navDestinationConverter: NavDestinationToUsageLogViewName
 ) {
 
     @VisibleForTesting
     var lastView: String? = ""
-
-    constructor() : this(
-        SingletonProvider.getSessionManager(),
-        SingletonProvider.getComponent().bySessionUsageLogRepository,
-        SingletonProvider.getComponent().teamspaceRepository,
-        NavDestinationToUsageLogViewName()
-    )
 
     fun log(destination: NavDestination) {
         log(navDestinationConverter.convert(destination))
@@ -39,7 +30,7 @@ class ViewLogger @VisibleForTesting internal constructor(
         sessionManager.session?.let { session ->
             bySessionUsageLogRepository[session]?.enqueue(
                 UsageLogCode34(
-                    spaceId = bySessionTeamspaceAccessor[session]?.current?.anonTeamId,
+                    spaceId = teamspaceManagerRepository[session]?.current?.anonTeamId,
                     viewName = viewName
                 )
             )

@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
@@ -22,7 +21,6 @@ class LinkedServicesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dataProvider: LinkedServicesDataProvider,
     private val sharingPolicyDataProvider: SharingPolicyDataProvider,
-    private val userFeaturesChecker: UserFeaturesChecker,
     @IoCoroutineDispatcher
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel(), LinkedServicesContract.ViewModel {
@@ -55,7 +53,7 @@ class LinkedServicesViewModel @Inject constructor(
                 it.copy(closePageImmediate = true)
             }
         }
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             vaultItem = dataProvider.getItem(itemId)
             _state.update {
                 it.copy(vaultItem = vaultItem)
@@ -87,14 +85,13 @@ class LinkedServicesViewModel @Inject constructor(
         temporaryLinkedWebsites != linkedWebsites
 
     override fun hasAppsToSave(linkedApps: List<String>): Boolean =
-        (temporaryLinkedApps
+        (
+            temporaryLinkedApps
             ?: vaultItem?.syncObject?.linkedServices?.associatedAndroidApps
                 ?.filter { it.linkSource == SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps.LinkSource.USER }
-                ?.map { it.packageName } ?: listOf()) != linkedApps
+                ?.map { it.packageName } ?: listOf()
+        ) != linkedApps
 
     override fun canEdit(): Boolean =
         vaultItem?.let { sharingPolicyDataProvider.canEditItem(it.toSummary(), false) } ?: false
-
-    override fun doneButtonActivated(): Boolean =
-        userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES_DONE_BUTTON)
 }

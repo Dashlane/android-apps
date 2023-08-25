@@ -21,8 +21,12 @@ class SecureNoteListTextFactory(
 
     override fun getLine2(default: StatusText): StatusText {
         return StatusText(
-            if (item.secured == true) context.getString(R.string.secure_note_is_locked) else item
+            if (item.secured == true) {
+                context.getString(R.string.secure_note_is_locked)
+            } else {
+                item
                 .content ?: ""
+            }
         )
     }
 

@@ -6,8 +6,6 @@ import com.dashlane.core.helpers.SignatureVerification.Incorrect
 import com.dashlane.core.helpers.SignatureVerification.UnknownWithSignature
 import com.dashlane.hermes.generated.definitions.Domain
 
-
-
 interface AutofillSecurityWarningsLogger {
     fun onDisplayedIncorrectWarning(
         security: Incorrect,

@@ -11,8 +11,6 @@ import com.dashlane.preference.ConstantsPrefs;
 import com.dashlane.session.Session;
 import com.dashlane.teamspaces.model.Teamspace;
 
-
-
 public class RevokedDetector implements TeamspaceManager.Listener {
     @Override
     public void onStatusChanged(Teamspace teamspace, String previousStatus, String newStatus) {

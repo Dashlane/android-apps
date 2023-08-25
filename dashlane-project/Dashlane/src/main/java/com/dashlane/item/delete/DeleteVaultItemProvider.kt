@@ -4,13 +4,15 @@ import com.dashlane.attachment.AttachmentsParser
 import com.dashlane.attachment.VaultItemLogAttachmentHelper
 import com.dashlane.core.DataSync
 import com.dashlane.hermes.generated.definitions.Action
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.securefile.DeleteFileManager
 import com.dashlane.securefile.extensions.toSecureFile
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.filter.collectionFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.util.tryOrNull
+import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
@@ -26,29 +28,48 @@ import javax.inject.Inject
 class DeleteVaultItemProvider @Inject constructor(
     mainDataAccessor: MainDataAccessor,
     private val vaultItemLogger: VaultItemLogger,
+    private val activityLogger: VaultActivityLogger,
     private val deleteFileManager: DeleteFileManager,
-    private val sharingPolicy: SharingPolicyDataProvider
+    private val sharingPolicy: SharingPolicyDataProvider,
+    private val dataSync: DataSync
 ) : BaseDataProvider<DeleteVaultItemContract.Presenter>(), DeleteVaultItemContract.DataProvider {
 
     private val dataQuery = mainDataAccessor.getVaultDataQuery()
+    private val collectionDataQuery = mainDataAccessor.getCollectionDataQuery()
     private val dataSaver = mainDataAccessor.getDataSaver()
 
     override suspend fun deleteItem(itemId: String): Boolean {
         val itemFilter = vaultFilter {
             specificUid(itemId)
         }
+        val removedFromCollections: List<VaultItem<*>> = collectionDataQuery.queryByIds(
+            collectionDataQuery.queryAll(
+                collectionFilter {
+            withVaultItemId = itemId
+        }
+            ).map { it.id }
+        ).map { syncCollection ->
+            syncCollection.copy(
+                syncObject = syncCollection.syncObject.copy {
+                vaultItems = vaultItems?.filterNot { it.id == itemId }
+            }
+            )
+        }
+
         dataQuery.query(itemFilter)?.let { item ->
             val deletedItem = item.copyWithAttrs { syncState = SyncState.DELETED }
             val isDeleted = if (item.isShared()) {
+                saveItems(removedFromCollections)
                 
                 revokeSharingAccess(item)
             } else {
-                deleteAttachments(item) && saveItem(deletedItem)
+                deleteAttachments(item) && saveItems(removedFromCollections + deletedItem)
             }
 
             return if (isDeleted) {
+                val action = Action.DELETE
                 vaultItemLogger.logUpdate(
-                    action = Action.DELETE,
+                    action = action,
                     editedFields = null,
                     itemId = item.uid,
                     itemType = item.syncObjectType.toItemType(),
@@ -58,9 +79,9 @@ class DeleteVaultItemProvider @Inject constructor(
                     removedWebsites = null,
                     removedApps = null
                 )
-
+                activityLogger.sendActivityLog(vaultItem = item, action = action)
                 
-                DataSync.sync(UsageLogCode134.Origin.SAVE)
+                dataSync.sync(Trigger.SAVE)
                 true
             } else {
                 false
@@ -69,13 +90,9 @@ class DeleteVaultItemProvider @Inject constructor(
         return false
     }
 
-    
-
     private suspend fun revokeSharingAccess(item: VaultItem<*>): Boolean {
         return sharingPolicy.doCancelSharingFor(item)
     }
-
-    
 
     private suspend fun deleteAttachments(item: VaultItem<*>): Boolean {
         val attachments = AttachmentsParser().parse(item.syncObject.attachments)
@@ -94,7 +111,7 @@ class DeleteVaultItemProvider @Inject constructor(
         return allAttachmentDeleted
     }
 
-    private suspend fun saveItem(data: VaultItem<*>) =
+    private suspend fun saveItems(data: List<VaultItem<*>>) =
         withContext(Dispatchers.Default) { tryOrNull { dataSaver.save(data) } ?: false }
 
     private fun attachmentDeleted(item: VaultItem<*>, secureFileInfoId: String) {

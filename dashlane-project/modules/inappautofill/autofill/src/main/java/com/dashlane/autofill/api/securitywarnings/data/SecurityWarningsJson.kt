@@ -4,8 +4,6 @@ import com.dashlane.autofill.api.securitywarnings.model.Item
 import com.dashlane.autofill.api.securitywarnings.model.Source
 import com.google.gson.annotations.SerializedName
 
-
-
 internal data class SecurityWarningsJson(
     @SerializedName("securityWarningType")
     val securityWarningType: String,

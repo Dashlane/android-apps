@@ -3,8 +3,6 @@ package com.dashlane.attachment.extensions
 import com.dashlane.attachment.ui.AttachmentItem
 import com.dashlane.xml.domain.SyncObject
 
-
-
 fun SyncObject.SecureFileInfo.toAttachmentItem(): AttachmentItem {
     return AttachmentItem().apply {
         id = this@toAttachmentItem.id

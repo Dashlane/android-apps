@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.dashlane.vpn.thirdparty.R
 
-
-
 class VpnThirdPartyActivateAccountLoadingFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_vpn_third_party_activate_account_loading, container, false)

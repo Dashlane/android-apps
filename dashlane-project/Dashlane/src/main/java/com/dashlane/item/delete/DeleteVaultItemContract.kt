@@ -14,8 +14,6 @@ interface DeleteVaultItemContract {
 
     interface DataProvider : Base.IDataProvider {
 
-        
-
         suspend fun deleteItem(itemId: String): Boolean
     }
 

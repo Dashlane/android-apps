@@ -5,8 +5,6 @@ import android.view.View
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.skocken.presentation.definition.Base
 
-
-
 interface FabDef {
     interface IDataProvider : Base.IDataProvider
     interface IView : Base.IView {

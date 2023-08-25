@@ -3,8 +3,6 @@ package com.dashlane.authentication
 import java.time.Duration
 import java.time.Instant
 
-
-
 data class CipheredBackupToken(
     val token: String,
     val tokenDate: Instant

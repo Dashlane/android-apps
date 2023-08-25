@@ -3,8 +3,6 @@ package com.dashlane.security;
 import android.content.Context;
 import android.content.Intent;
 
-
-
 public class DashlaneIntent {
 
     private static final String DASHLANE_PACKAGE = "com.dashlane";

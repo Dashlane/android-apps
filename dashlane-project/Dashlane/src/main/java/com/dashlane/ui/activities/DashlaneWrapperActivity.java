@@ -15,8 +15,6 @@ import androidx.annotation.Nullable;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
-
-
 @AndroidEntryPoint
 public class DashlaneWrapperActivity extends DashlaneActivity {
 

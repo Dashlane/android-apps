@@ -2,7 +2,6 @@ package com.dashlane.autofill
 
 import android.content.Context
 import com.dashlane.autofill.api.ui.AutofillFeature
-import com.dashlane.autofill.api.unlockfill.SupportedAutofills
 import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
 import com.dashlane.hermes.generated.definitions.MatchType
@@ -10,6 +9,7 @@ import com.dashlane.url.UrlDomain
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
+import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import java.time.Month
 import java.time.Year
@@ -19,19 +19,13 @@ interface AutofillAnalyzerDef {
     interface DatabaseAccess {
         fun clearCache()
         val isLoggedIn: Boolean
-        fun loadAuthentifiant(uid: String): VaultItem<SyncObject.Authentifiant>?
-        fun loadSummaryAuthentifiant(uid: String): SummaryObject.Authentifiant?
-        fun loadAllAuthentifiant(): List<SummaryObject.Authentifiant>
-        fun loadCreditCard(uid: String): VaultItem<SyncObject.PaymentCreditCard>?
-        fun loadEmail(uid: String): SummaryObject.Email?
-        fun loadAddress(uid: String): SummaryObject.Address?
         fun loadAuthentifiantsByPackageName(packageName: String): List<SummaryObject.Authentifiant>?
         fun loadAuthentifiantsByUrl(url: String): List<SummaryObject.Authentifiant>?
-        fun loadCreditCards(): List<SummaryObject.PaymentCreditCard>?
-        fun loadEmails(): List<SummaryObject.Email>?
-        fun loadAddresses(uids: Collection<String>): List<SummaryObject.Address>?
+        fun <T : SummaryObject> loadSummaries(type: SyncObjectType): List<T>?
 
-        
+        fun <T : SummaryObject> loadSummary(uid: String): T?
+
+        fun <T : SyncObject> loadSyncObject(itemId: String): VaultItem<T>?
 
         suspend fun createNewAuthentifiantFromAutofill(
             context: Context,
@@ -50,14 +44,10 @@ interface AutofillAnalyzerDef {
             password: String?
         ): VaultItem<SyncObject.Authentifiant>?
 
-        
-
         suspend fun updateAuthentifiantWebsite(
             uid: String,
             website: String
-        ): SummaryObject.Authentifiant?
-
-        
+        ): VaultItem<SyncObject.Authentifiant>?
 
         suspend fun updateLastViewDate(
             itemId: String,
@@ -71,22 +61,14 @@ interface AutofillAnalyzerDef {
             expireYear: Year?
         ): VaultItem<SyncObject.PaymentCreditCard>?
 
-        
-
         suspend fun updateAuthentifiantPassword(
             uid: String?,
             password: String?
         ): VaultItem<SyncObject.Authentifiant>?
 
-        
-
         suspend fun addAuthentifiantLinkedWebDomain(uid: String, website: String): Boolean
 
-        
-
         suspend fun addAuthentifiantLinkedApp(uid: String, packageName: String): Boolean
-
-        
 
         val authentifiantCount: Int
     }
@@ -100,7 +82,6 @@ interface AutofillAnalyzerDef {
     }
 
     interface IAutofillUsageLog {
-        fun onManualRequestAsked(@AutofillOrigin origin: Int, packageName: String)
         fun onLoginFormFound(packageName: String)
         fun onShowCredentialsList(
             @AutofillOrigin origin: Int,
@@ -123,28 +104,8 @@ interface AutofillAnalyzerDef {
             totalCount: Int
         )
 
-        fun onShowSmsOtp(@AutofillOrigin origin: Int, packageName: String)
-        fun onShowLogout(@AutofillOrigin origin: Int, packageName: String)
-        fun onNoResultsForCredential(@AutofillOrigin origin: Int, packageName: String)
-        fun onNoResultsForCreditCard(@AutofillOrigin origin: Int, packageName: String)
-        fun onNoResultsForEmail(@AutofillOrigin origin: Int, packageName: String)
-        fun onClickToAutoFillSuggestion(
-            @AutofillOrigin origin: Int,
-            packageName: String?,
-            website: UrlDomain?,
-            supportedAutofills: SupportedAutofills?
-        )
-
         fun onClickToAutoFillCredentialButLock(@AutofillOrigin origin: Int, itemUrl: String?)
         fun onClickToAutoFillCreditCardButLock(@AutofillOrigin origin: Int)
-        fun onClickToAutoFillCredentialNotLock(
-            @AutofillOrigin origin: Int,
-            packageName: String,
-            itemUrl: String?
-        )
-
-        fun onClickToAutoFillCreditCardNotLock(@AutofillOrigin origin: Int, packageName: String)
-        fun onClickToAutoFillSmsOtp(@AutofillOrigin origin: Int, packageName: String)
         fun onAutoFillCredentialDone(
             @AutofillOrigin origin: Int,
             packageName: String,
@@ -175,10 +136,6 @@ interface AutofillAnalyzerDef {
             autofillOrigin: HermesAutofillOrigin,
             autofillMechanism: AutofillMechanism
         )
-
-        fun onAutoFillSmsOtpDone(@AutofillOrigin origin: Int, packageName: String)
-        fun saveCredentialCancelLogout(@AutofillOrigin origin: Int, packageName: String)
-        fun saveCreditCardCancelLogout(@AutofillOrigin origin: Int, packageName: String)
     }
 
     interface ILockManager {
@@ -188,14 +145,8 @@ interface AutofillAnalyzerDef {
         fun logoutAndCallLoginScreenForInAppLogin(context: Context)
     }
 
-    
-
     interface IUserPreferencesAccess {
-        
-
         fun hasKeyboardAutofillEnabled(): Boolean
-
-        
 
         fun hasAutomatic2faTokenCopy(): Boolean
     }

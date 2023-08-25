@@ -13,13 +13,11 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObjectType
-import java.time.Instant
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
-
-
 
 class VaultItemClipboardImpl @Inject constructor(
     private val mainDataAccessor: MainDataAccessor,
@@ -53,8 +51,6 @@ class VaultItemClipboardImpl @Inject constructor(
             handleCopy(it, copyField)
         } ?: false
 
-    
-
     override fun handleCopy(vaultItem: VaultItem<*>, copyField: CopyField): Boolean {
         if (!vaultItemFieldContentService.hasContent(vaultItem, copyField)) {
             return false
@@ -72,8 +68,6 @@ class VaultItemClipboardImpl @Inject constructor(
 
         return true
     }
-
-    
 
     override fun handleCopy(
         item: SummaryObject,
@@ -109,13 +103,17 @@ class VaultItemClipboardImpl @Inject constructor(
     private fun markAsViewed(item: SummaryObject) {
         
         GlobalScope.launch {
-            val vaultItem = vaultDataQuery.query(vaultFilter {
+            val vaultItem = vaultDataQuery.query(
+                vaultFilter {
                 specificUid(item.id)
-            }) ?: return@launch
-            dataSaver.save(vaultItem.copyWithAttrs {
+            }
+            ) ?: return@launch
+            dataSaver.save(
+                vaultItem.copyWithAttrs {
                 locallyViewedDate = Instant.now()
                 locallyUsedCount = vaultItem.locallyUsedCount + 1
-            })
+            }
+            )
         }
     }
 
@@ -123,9 +121,8 @@ class VaultItemClipboardImpl @Inject constructor(
         vaultFilter {
             specificUid(itemId)
             specificDataType(syncObjectType)
-        })
-
-    
+        }
+    )
 
     override fun hasContent(item: SummaryObject, copyField: CopyField): Boolean {
         if (UserPermission.LIMITED == item.sharingPermission) return false

@@ -116,8 +116,8 @@
             app:nullable="true" />
         <argument
             android:name="data_type"
-            android:defaultValue="-1"
-            app:argType="integer" />
+            android:defaultValue="KWAuthentifiant"
+            app:argType="string"/>
         <argument
             android:name="force_edit"
             android:defaultValue="false"
@@ -147,6 +147,22 @@
             android:defaultValue="@null"
             app:argType="com.dashlane.authenticator.Otp"
             app:nullable="true" />
+    </activity>
+    <activity
+        android:id="@+id/nav_collection_selector"
+        android:name="com.dashlane.item.collection.CollectionSelectorActivity">
+        <argument
+            android:name="temporaryCollections"
+            app:argType="string[]"
+            app:nullable="false" />
+        <argument
+            android:name="fromView"
+            app:argType="boolean"
+            app:nullable="false" />
+        <argument
+            android:name="spaceId"
+            app:argType="string"
+            app:nullable="false" />
     </activity>
     <activity
         android:id="@+id/nav_follow_up_notification_discovery_screen"
@@ -676,6 +692,42 @@
             app:argType="boolean" />
     </fragment>
     <fragment
+        android:id="@+id/nav_secret_transfer"
+        android:name="com.dashlane.secrettransfer.SecretTransferFragment"
+        android:label="@string/secret_transfer_settings_entry_title" >
+        <deepLink
+            android:id="@+id/deeplink_link_device"
+            app:uri="dashlane:///mplesslogin?id={id}&amp;key={key}" />
+        <argument
+            android:name="id"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="key"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_account_recovery_key"
+        android:name="com.dashlane.accountrecoverykey.AccountRecoveryKeyFragment"
+        android:label="@string/account_recovery_key_setting_title" >
+        <argument
+            android:name="id"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="origin"
+            android:defaultValue="mainMenu"
+            app:argType="string" />
+    </fragment>
+    <fragment
         android:id="@+id/nav_dashlane_labs"
         android:name="com.dashlane.ui.screens.settings.list.general.labs.DashlaneLabsFragment"
         android:label="@string/setting_dashlane_labs" />
@@ -902,4 +954,25 @@
     <action
         android:id="@+id/go_to_delete_item"
         app:destination="@id/nav_delete_vault_item_dialog" />
+    <action
+        android:id="@+id/go_to_secret_transfer"
+        app:destination="@id/nav_secret_transfer"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_account_recovery_key"
+        app:destination="@id/nav_account_recovery_key"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/item_edit_view_to_collection_selector"
+        app:destination="@id/nav_collection_selector"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
 </navigation>

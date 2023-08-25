@@ -14,8 +14,6 @@ import androidx.annotation.ColorRes;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 
-
-
 public class CircleFirstLetterDrawable extends TextDrawable {
 
     public static final int[] USERS_PROFILE_COLORS_RES = new int[]{

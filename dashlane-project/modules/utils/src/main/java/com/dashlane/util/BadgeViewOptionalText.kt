@@ -5,8 +5,6 @@ import com.dashlane.design.component.compat.view.BadgeView
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-
-
 class BadgeViewOptionalText(
     val badgeView: BadgeView,
     private val nullVisibility: Int

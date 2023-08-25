@@ -29,7 +29,8 @@ fun createIdentity(
             this.birthPlace = placeOfBirth
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 val SummaryObject.Identity.identityPartialOrFullNameNoLogin: String?

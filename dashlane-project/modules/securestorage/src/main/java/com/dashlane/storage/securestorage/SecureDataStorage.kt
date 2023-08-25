@@ -37,8 +37,6 @@ interface SecureDataStorage {
     }
 }
 
-
-
 class SecureDataStorageImpl(
     private val sharedPreferences: SharedPreferences,
     override val type: SecureDataStorage.Type

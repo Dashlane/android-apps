@@ -10,8 +10,6 @@ import com.dashlane.util.notification.NotificationHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-
-
 class TotpNotificationDisplayServiceImpl @Inject constructor(@ApplicationContext val context: Context) :
     TotpNotificationDisplayService {
     companion object {

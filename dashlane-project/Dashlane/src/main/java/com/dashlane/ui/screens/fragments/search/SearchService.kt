@@ -13,11 +13,8 @@ import com.dashlane.ui.fab.VaultFabViewProxy
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
-
-
 
 interface SearchService {
 
@@ -59,7 +56,7 @@ class SearchServiceImpl @Inject constructor(
     }
 
     override fun navigateToItem(item: SummaryObject) {
-        navigator.goToItem(item.id, item.syncObjectType.desktopId)
+        navigator.goToItem(item.id, item.syncObjectType.xmlObjectName)
     }
 
     override fun navigateToSettings(settingsId: String?, origin: String?) {

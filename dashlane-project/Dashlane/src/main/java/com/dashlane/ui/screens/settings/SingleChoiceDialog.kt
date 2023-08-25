@@ -7,8 +7,6 @@ import androidx.annotation.StringRes
 import com.dashlane.R
 import com.dashlane.ui.util.DialogHelper
 
-
-
 class SingleChoiceDialog(private val dialogHelper: DialogHelper) {
 
     fun show(
@@ -19,7 +17,8 @@ class SingleChoiceDialog(private val dialogHelper: DialogHelper) {
         onSelect: (Int) -> Unit
     ) {
         val adapter = ArrayAdapter<CharSequence>(
-            context, R.layout.simple_list_item_single_choice,
+            context,
+            R.layout.simple_list_item_single_choice,
             context.resources.getTextArray(items)
         )
         dialogHelper.builder(context)

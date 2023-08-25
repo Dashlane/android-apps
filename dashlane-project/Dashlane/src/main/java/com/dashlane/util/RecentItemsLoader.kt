@@ -7,8 +7,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.mostRecentAccessTime
 import javax.inject.Inject
 
-
-
 class RecentItemsLoader @Inject constructor(
     private val genericDataQuery: GenericDataQuery
 ) {

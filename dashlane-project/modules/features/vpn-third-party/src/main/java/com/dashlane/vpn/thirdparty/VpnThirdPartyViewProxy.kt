@@ -37,8 +37,6 @@ class VpnThirdPartyViewProxy(
     private val loginCopy: Button = findViewByIdEfficient(R.id.vpn_third_party_copy_login)!!
     private val passwordCopy: Button = findViewByIdEfficient(R.id.vpn_third_party_copy_password)!!
 
-    
-
     private val expandableCards = listOf<ExpandableCardView>(
         
         findViewByIdEfficient(R.id.vpn_third_party_question_1)!!,

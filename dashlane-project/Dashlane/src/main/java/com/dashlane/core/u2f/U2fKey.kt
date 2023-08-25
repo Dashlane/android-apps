@@ -8,13 +8,9 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.nio.charset.Charset
 
-
-
 class U2fKey(val transport: Transport) {
 
     val requireUserAction = transport !is NfcTransport
-
-    
 
     suspend fun signChallenges(challenges: List<U2fChallenge>) = withContext(Dispatchers.IO) {
         transport.use {

@@ -30,8 +30,11 @@ private fun byLogin(): Comparator<SummaryObject.Authentifiant> {
 
 private fun byLoginAuthentifiant(): Comparator<SummaryObject> {
     return compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) {
-        if (it is SummaryObject.Authentifiant) it.loginForUi
-        else null
+        if (it is SummaryObject.Authentifiant) {
+            it.loginForUi
+        } else {
+            null
+        }
     }
 }
 

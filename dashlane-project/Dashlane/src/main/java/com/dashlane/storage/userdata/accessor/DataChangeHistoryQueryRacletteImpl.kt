@@ -13,8 +13,6 @@ import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
 import javax.inject.Inject
 
-
-
 class DataChangeHistoryQueryRacletteImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,

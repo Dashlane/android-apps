@@ -1,7 +1,5 @@
 package com.dashlane.nitro.util
 
-
-
 object ECDSASignatureConverter {
 
     private val DER_SEQUENCE_TAG = byteArrayOf(0x30)

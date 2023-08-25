@@ -8,8 +8,6 @@ import com.dashlane.autofill.api.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.vault.model.loginForUi
 
-
-
 class AskChangePasswordViewProxy(
     private val autoFillResponseActivity: AutoFillResponseActivity,
     private val summary: AutoFillHintSummary,

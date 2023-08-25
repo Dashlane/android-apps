@@ -29,13 +29,12 @@ import com.dashlane.help.HelpCenterLink
 import com.dashlane.help.newIntent
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.item.ItemEditViewActivity
+import com.dashlane.item.collection.CollectionSelectorActivity
 import com.dashlane.item.delete.DeleteVaultItemFragment
 import com.dashlane.item.delete.DeleteVaultItemFragmentArgs
 import com.dashlane.item.linkedwebsites.LinkedServicesActivity
 import com.dashlane.lock.LockHelper
 import com.dashlane.lock.UnlockEvent
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.login.lock.unlockItemIfNeeded
 import com.dashlane.navigation.NavControllerUtils.TOP_LEVEL_DESTINATIONS
 import com.dashlane.navigation.NavControllerUtils.setup
@@ -66,20 +65,21 @@ import com.dashlane.ui.screens.settings.SettingsFragmentDirections
 import com.dashlane.ui.screens.sharing.SharingNewSharePeopleFragmentDirections
 import com.dashlane.useractivity.log.usage.UsageLogCode80
 import com.dashlane.util.DeviceUtils
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.launchUrl
 import com.dashlane.util.logPageView
 import com.dashlane.util.safelyStartBrowserActivity
 import com.dashlane.util.startActivityForResult
+import com.dashlane.util.usagelogs.ViewLogger
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability
 import com.dashlane.util.userfeatures.canShowVpn
 import com.dashlane.util.userfeatures.canUpgradeToGetVpn
-import com.dashlane.vault.util.desktopId
 import com.dashlane.vpn.thirdparty.VpnThirdPartyFragmentDirections
 import com.dashlane.xml.domain.SyncObjectType.AUTHENTIFIANT
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.Serializable
@@ -95,14 +95,16 @@ class NavigatorImpl @Inject constructor(
     private val lockRepository: LockRepository,
     private val mainDataAccessor: MainDataAccessor,
     private val checklistHelper: ChecklistHelper,
-    private val appEvents: AppEvents
+    private val appEvents: AppEvents,
+    @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    private val viewLoggerDestinationChangedListener: ViewLoggerDestinationChangedListener,
+    private val viewLogger: ViewLogger
 ) : Navigator, AbstractActivityLifecycleListener() {
     private val dataQuery: GenericDataQuery
         get() = mainDataAccessor.getGenericDataQuery()
 
     override val currentDestination: NavDestination?
         get() = navigationController?.currentDestination
-    private val viewLoggerDestinationChangedListener = ViewLoggerDestinationChangedListener()
     private var menuIconDestinationChangedListener: MenuIconDestinationChangedListener? = null
     private var deepLinkFound: Boolean = false
 
@@ -190,15 +192,18 @@ class NavigatorImpl @Inject constructor(
                 
                 return
             }
+
             userFeaturesChecker.has(Capability.VPN_ACCESS) -> {
                 DrawerNavigationDirections.goToThirdPartyVpn()
             }
+
             userFeaturesChecker.canUpgradeToGetVpn() -> {
                 DrawerNavigationDirections.goToPaywall(
                     origin = origin,
                     paywallIntroType = PaywallIntroType.VPN
                 )
             }
+
             else -> {
                 DrawerNavigationDirections.goToVpnB2bIntro()
             }
@@ -260,10 +265,9 @@ class NavigatorImpl @Inject constructor(
         activity.startActivity(
             Intent(activity, FollowUpNotificationDiscoveryActivity::class.java).apply {
                 putExtras(bundle)
-            })
+            }
+        )
     }
-
-    
 
     override fun goToQuickActions(itemId: String, itemListContext: Parcelable, originPage: AnyPage?) {
         navigate(
@@ -285,7 +289,7 @@ class NavigatorImpl @Inject constructor(
 
     override fun goToHelpCenter(origin: String?) {
         activity.logPageView(AnyPage.HELP)
-        val intent = HelpCenterLink.Base.newIntent(activity, true)
+        val intent = HelpCenterLink.Base.newIntent(activity, viewLogger, true)
         activity.safelyStartBrowserActivity(intent)
     }
 
@@ -306,9 +310,11 @@ class NavigatorImpl @Inject constructor(
         if (navigationController == null) {
             
             val extras = OffersActivityArgs(offerType = offerType, origin = origin).toBundle()
-            activity.startActivity(Intent(activity, OffersActivity::class.java).apply {
+            activity.startActivity(
+                Intent(activity, OffersActivity::class.java).apply {
                 putExtras(extras)
-            })
+            }
+            )
             return
         }
         val action = DrawerNavigationDirections.goToOffers(offerType = offerType, origin = origin)
@@ -343,26 +349,29 @@ class NavigatorImpl @Inject constructor(
                     breach = breach,
                     origin = origin.originOrDefault()
                 )
+
             R.id.nav_notif_center ->
                 NotificationCenterFragmentDirections.actionCenterToBreachAlertDetail(
                     breach = breach,
                     origin = origin.originOrDefault()
                 )
+
             R.id.nav_action_center_section_details ->
                 NotificationCenterSectionDetailsFragmentDirections.actionCenterSectionToBreachAlertDetail(
                     breach = breach,
                     origin = origin.originOrDefault()
                 )
+
             else -> DrawerNavigationDirections.goToBreachAlertDetail(breach = breach)
         }
         navigate(action)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    override fun goToItem(uid: String, type: Int) {
+    override fun goToItem(uid: String, type: String) {
         val lockManager =
             lockRepository.getLockManager(sessionManager) ?: return 
-        GlobalScope.launch(Dispatchers.Main.immediate) {
+        applicationCoroutineScope.launch(Dispatchers.Main.immediate) {
             
             if (!lockManager.unlockItemIfNeeded(activity, dataQuery, uid, type)) return@launch
             val action = DrawerNavigationDirections.goToItemEdit(
@@ -374,7 +383,7 @@ class NavigatorImpl @Inject constructor(
         }
     }
 
-    override fun goToCreateItem(type: Int) {
+    override fun goToCreateItem(type: String) {
         navigate(DrawerNavigationDirections.goToItemEdit(dataType = type))
     }
 
@@ -386,7 +395,7 @@ class NavigatorImpl @Inject constructor(
         otp: Parcelable?
     ) {
         val action = DrawerNavigationDirections.goToItemEdit(
-            dataType = AUTHENTIFIANT.desktopId,
+            dataType = AUTHENTIFIANT.xmlObjectName,
             url = url,
             sender = sender,
             successIntent = successIntent,
@@ -398,7 +407,8 @@ class NavigatorImpl @Inject constructor(
             activity.startActivityForResult(
                 Intent(activity, ItemEditViewActivity::class.java).apply {
                     putExtras(action.arguments)
-                }, requestCode
+                },
+                requestCode
             )
         }
     }
@@ -413,6 +423,26 @@ class NavigatorImpl @Inject constructor(
         }
         val action = DrawerNavigationDirections.goToDeleteItem(itemId = itemId, isShared = isShared)
         navigate(action)
+    }
+
+    override fun goToCollectionSelectorFromItemEdit(
+        fromViewOnly: Boolean,
+        temporaryCollections: List<String>,
+        spaceId: String
+    ) {
+        val action = DrawerNavigationDirections.itemEditViewToCollectionSelector(
+            temporaryCollections = temporaryCollections.toTypedArray(),
+            fromView = fromViewOnly,
+            spaceId = spaceId
+        )
+        
+        
+        activity.startActivityForResult<CollectionSelectorActivity>(CollectionSelectorActivity.SHOW_COLLECTION_SELECTOR) {
+            putExtras(action.arguments)
+        }
+        if (!fromViewOnly) {
+            activity.overridePendingTransition(R.anim.slide_in_bottom, R.anim.no_animation)
+        }
     }
 
     override fun goToCredentialAddStep1(
@@ -448,7 +478,7 @@ class NavigatorImpl @Inject constructor(
     override fun goToCredentialFromPasswordAnalysis(uid: String) {
         val action = PasswordAnalysisFragmentDirections.passwordAnalysisToItemEdit(
             uid = uid,
-            dataType = AUTHENTIFIANT.desktopId
+            dataType = AUTHENTIFIANT.xmlObjectName
         )
         navigate(action)
     }
@@ -515,11 +545,13 @@ class NavigatorImpl @Inject constructor(
                     needsRefresh = needsRefresh,
                     origin = origin.originOrDefault()
                 )
+
             R.id.nav_action_center_section_details ->
                 NotificationCenterSectionDetailsFragmentDirections.actionCenterSectionToSharingCenter(
                     needsRefresh = needsRefresh,
                     origin = origin.originOrDefault()
                 )
+
             else -> return
         }
         navigate(action)
@@ -565,9 +597,11 @@ class NavigatorImpl @Inject constructor(
         val introType = PaywallIntroType.values().firstOrNull { it.name == type } ?: return
         if (navigationController == null) {
             val args = PaywallActivityArgs(origin = origin, paywallIntroType = introType).toBundle()
-            activity.startActivity(Intent(activity, PaywallActivity::class.java).apply {
+            activity.startActivity(
+                Intent(activity, PaywallActivity::class.java).apply {
                 putExtras(args)
-            })
+            }
+            )
             return
         }
         val action =
@@ -651,7 +685,7 @@ class NavigatorImpl @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     override fun handleDeepLink(intent: Intent) {
         intent.data ?: intent.extras ?: return
-        GlobalScope.launch(Dispatchers.Main.immediate) {
+        applicationCoroutineScope.launch(Dispatchers.Main.immediate) {
             val lockManager = lockRepository.getLockManager(sessionManager)
             if (lockManager?.isLocked == true) {
                 val event = lockManager.showAndWaitLockActivityForReason(
@@ -704,9 +738,20 @@ class NavigatorImpl @Inject constructor(
             putExtra(LinkedServicesActivity.PARAM_TEMPORARY_APPS, temporaryApps?.toTypedArray())
             putExtra(LinkedServicesActivity.PARAM_URL_DOMAIN, urlDomain)
         }
-        if (!fromViewOnly && userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES_DONE_BUTTON)) {
+        if (!fromViewOnly) {
             activity.overridePendingTransition(R.anim.slide_in_bottom, R.anim.no_animation)
         }
+    }
+
+    override fun goToSecretTransfer(settingsId: String?, origin: String?) {
+        val action = DrawerNavigationDirections.goToSecretTransfer(id = settingsId, origin = origin.originOrDefault())
+        navigate(action)
+    }
+
+    override fun goToAccountRecoveryKey(settingsId: String?, origin: String?) {
+        val action =
+            DrawerNavigationDirections.goToAccountRecoveryKey(id = settingsId, origin = origin.originOrDefault())
+        navigate(action)
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -727,7 +772,7 @@ class NavigatorImpl @Inject constructor(
         activity.launchUrl(url)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    @Suppress("kotlin:S6311")
     private fun navigate(
         action: NavDirections,
         keepKeyboardOpen: Boolean = false,
@@ -751,7 +796,7 @@ class NavigatorImpl @Inject constructor(
                 }
             controller.navigate(action, navOptions)
             if (!keepKeyboardOpen) {
-                GlobalScope.launch(Dispatchers.Main.immediate) { closeKeyboard() }
+                applicationCoroutineScope.launch(Dispatchers.Main.immediate) { closeKeyboard() }
             }
             if (closeMainActivity) mainActivity.finish()
         }
@@ -763,7 +808,6 @@ class NavigatorImpl @Inject constructor(
             delay(150L)
             DeviceUtils.hideKeyboard(activity)
         } catch (e: IllegalStateException) {
-            Log.v(e)
         }
     }
 
@@ -772,7 +816,7 @@ class NavigatorImpl @Inject constructor(
         if (navigationController != null) {
             block.invoke()
         } else {
-            GlobalScope.launch(Dispatchers.Main.immediate) {
+            applicationCoroutineScope.launch(Dispatchers.Main.immediate) {
                 while (navigationController == null) delay(1)
                 
                 

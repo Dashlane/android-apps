@@ -4,17 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.dashlane.bottomnavigation.NavigableBottomSheetFragment
 
-
-
 interface DelegateNavigationBottomSheetFragment : NavigableBottomSheetFragment {
-
-    
 
     interface NavigationDelegate {
         fun delegatedNavigate(delegateNavigationBottomSheetFragment: DelegateNavigationBottomSheetFragment)
     }
-
-    
 
     fun delegateNavigation() {
         runIfValidDelegatee { navigationDelegatee, navigateFromBottomSheetFragmentActivityViewModel ->
@@ -39,8 +33,6 @@ interface DelegateNavigationBottomSheetFragment : NavigableBottomSheetFragment {
 
         block.invoke(fragmentActivity, delegationOnceViewModel)
     }
-
-    
 
     class NavigateFromBottomSheetFragmentActivityViewModel : ViewModel() {
         var navigated: Boolean = false

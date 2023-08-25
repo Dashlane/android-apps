@@ -14,8 +14,6 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.util.isNotSemanticallyNull
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class SharingInvitationItem(
     context: Context,
     private val itemInvite: SharingContact.ItemInvite,
@@ -47,10 +45,14 @@ class SharingInvitationItem(
     private fun createDisplaySubTitleItemGroup(context: Context): String {
         val userDownload = itemInvite.itemGroup.getUser(itemInvite.login) ?: return ""
         val referrer = userDownload.referrer
-        return if (referrer.isNotSemanticallyNull()) context.getString(
+        return if (referrer.isNotSemanticallyNull()) {
+            context.getString(
             R.string.sharing_pending_invite_item_group_description,
             referrer
-        ) else ""
+        )
+        } else {
+            ""
+        }
     }
 
     class ItemViewHolder(itemView: View) :

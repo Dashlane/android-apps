@@ -13,8 +13,6 @@ import java.util.Objects;
 import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
 
-
-
 public class HeaderItem
         implements DashlaneRecyclerAdapter.MultiColumnViewTypeProvider,
         DiffUtilComparator<HeaderItem> {

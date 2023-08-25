@@ -28,7 +28,7 @@ class SharingSyncCommunicatorImpl @Inject constructor(
             val sharing = response.data
             SharingSyncCommunicator.GetSharingResult(
                 itemGroups = sharing.itemGroups ?: emptyList(),
-                userGroup = sharing.userGroups ?: emptyList(),
+                userGroups = sharing.userGroups ?: emptyList(),
                 itemContents = sharing.items ?: emptyList(),
             )
         }

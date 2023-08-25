@@ -1,7 +1,5 @@
 package com.dashlane.item.subview.readonly
 
-
-
 class ItemReadValueListSubView(
     val title: String,
     override var value: String,

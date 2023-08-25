@@ -25,8 +25,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.random.asKotlinRandom
 
-
-
 class UsbTransport(
     private val context: Context,
     private val manager: UsbManager,
@@ -96,7 +94,8 @@ class UsbTransport(
     }
 
     private suspend fun askPermissions() = suspendCoroutine<Boolean> {
-        context.registerExportedReceiverCompat(object : BroadcastReceiver() {
+        context.registerExportedReceiverCompat(
+            object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (permissionAction == intent.action) {
                     val device = intent.getParcelableExtraCompat<UsbDevice>(UsbManager.EXTRA_DEVICE)
@@ -107,7 +106,9 @@ class UsbTransport(
                     it.resume(false)
                 }
             }
-        }, IntentFilter(permissionAction))
+        },
+            IntentFilter(permissionAction)
+        )
 
         
         manager.requestPermission(
@@ -120,8 +121,6 @@ class UsbTransport(
             )
         )
     }
-
-    
 
     @Throws(IOException::class)
     private fun initChannel(connection: UsbDeviceConnection, input: UsbEndpoint, output: UsbEndpoint) {
@@ -191,11 +190,7 @@ class UsbTransport(
         transportHelper.getResponseCode(response) == UsbTransportHelper.RESP_USER_PRESENCE_REQUIRED
 
     companion object {
-        
-
         private const val USAGE_U2F = 0x01
-
-        
 
         private const val USAGE_FIDO = 0xf1d0
     }

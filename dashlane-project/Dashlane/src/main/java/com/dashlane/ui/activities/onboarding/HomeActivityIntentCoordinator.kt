@@ -12,16 +12,10 @@ import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.PostAccountCreationCoordinator
 import com.dashlane.ui.activities.HomeActivity
 
-
-
 class HomeActivityIntentCoordinator {
     companion object : PostAccountCreationCoordinator {
 
-        
-
         private const val EXTRA_ORIGIN_ACCOUNT_CREATION = "from_account_creation"
-
-        
 
         override fun startHomeScreenAfterAccountCreation(activity: Activity) {
             SingletonProvider.getAppEvents().clearLastEvent<UnlockEvent>()

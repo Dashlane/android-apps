@@ -9,8 +9,6 @@ import android.util.DisplayMetrics
 import android.view.ViewGroup
 import android.view.WindowManager
 
-
-
 fun Activity.hideSoftKeyboard() {
     val view = currentFocus
     if (view != null) {

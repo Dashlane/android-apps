@@ -15,8 +15,6 @@ import com.dashlane.R
 import com.dashlane.util.getThemeAttrColor
 import java.text.NumberFormat
 
-
-
 class LoginSyncProgressProcessPercentViewProxy(val view: View) {
 
     private val progressLayout =

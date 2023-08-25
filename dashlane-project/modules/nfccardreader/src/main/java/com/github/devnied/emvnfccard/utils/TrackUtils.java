@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.utils;
 
 import com.github.devnied.emvnfccard.model.EmvTrack1;
@@ -17,24 +15,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-
-
 public final class TrackUtils {
-
-    
 
     public static final String CARD_HOLDER_NAME_SEPARATOR = "/";
 
-    
-
     private static final Pattern TRACK2_EQUIVALENT_PATTERN = Pattern.compile("([0-9]{1,19})D([0-9]{4})([0-9]{3})?(.*)");
-
-    
 
     private static final Pattern TRACK1_PATTERN = Pattern
             .compile("%?([A-Z])([0-9]{1,19})(\\?[0-9])?\\^([^\\^]{2,26})\\^([0-9]{4}|\\^)([0-9]{3}|\\^)([^\\?]+)\\??");
-
-    
 
     public static EmvTrack2 extractTrack2EquivalentData(final byte[] pRawTrack2) {
         EmvTrack2 ret = null;
@@ -62,8 +50,6 @@ public final class TrackUtils {
         }
         return ret;
     }
-
-    
 
     public static EmvTrack1 extractTrack1Data(final byte[] pRawTrack1) {
         EmvTrack1 ret = null;
@@ -98,8 +84,6 @@ public final class TrackUtils {
         }
         return ret;
     }
-
-    
 
     private TrackUtils() {
     }

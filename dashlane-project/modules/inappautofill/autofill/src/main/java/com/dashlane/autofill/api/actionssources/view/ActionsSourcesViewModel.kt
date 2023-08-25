@@ -7,7 +7,6 @@ import com.dashlane.autofill.api.actionssources.model.ActionsSourcesDataProvider
 import com.dashlane.autofill.api.actionssources.model.ActionsSourcesError
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.logD
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -50,7 +49,6 @@ class ActionsSourcesViewModel @Inject constructor(
                 hasNavigated = true
                 selectedItemMutableFLow.emit(selectedFormSource)
             } catch (e: IllegalStateException) {
-                logD("ActionsSourcesViewModel", e.message ?: "", e)
                 actionsSourcesStateMutableFlow.update { previousState ->
                     ActionsSourcesState.Error(previousState.data, ActionsSourcesError.AllSelectItem)
                 }

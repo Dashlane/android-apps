@@ -6,14 +6,13 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingResult
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -24,44 +23,30 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 
-
-
 @Singleton
 class BillingManagerImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher
 ) : BillingManager {
 
-    
-
     private var billingClient: BillingClient? = null
-
-    
 
     private var isServiceConnected: Boolean = false
 
-    
-
     private val purchaseChannel: Channel<ServiceResult> = Channel(Channel.RENDEZVOUS)
-
-    
 
     private var connectionDeferred: Deferred<Int>? = null
 
-    
-
     override fun connect() {
         initializeBillingClientIfNecessary()
-        globalCoroutineScope.launch {
+        applicationCoroutineScope.launch {
             startServiceConnectionIfNecessary()
         }
     }
-
-    
 
     override fun disconnect() {
         billingClient?.apply {
@@ -73,8 +58,6 @@ class BillingManagerImpl @Inject constructor(
             }
         }
     }
-
-    
 
     override fun areSubscriptionsSupported(): Boolean =
         billingClient?.areSubscriptionsSupported() ?: false
@@ -88,15 +71,16 @@ class BillingManagerImpl @Inject constructor(
                 connectionResult.isSuccess() -> scope
                 connectionResult.canRetry() -> {
                     connectionDeferred = null
-                    if (startServiceConnectionIfNecessary().isSuccess()) scope
-                    else null
+                    if (startServiceConnectionIfNecessary().isSuccess()) {
+                        scope
+                    } else {
+                        null
+                    }
                 }
                 else -> null
             }
         }
     }
-
-    
 
     private suspend fun startServiceConnection(): Int {
         return suspendCancellableCoroutine { continuation ->
@@ -115,17 +99,13 @@ class BillingManagerImpl @Inject constructor(
         }
     }
 
-    
-
     private suspend fun startServiceConnectionIfNecessary(): Int = withTimeoutOrNull(CONNECTION_TIMEOUT_MILLIS) {
         if (isServiceConnected && billingClient?.isReady == true) BillingResponseCode.OK
 
         connectionDeferred?.takeUnless { it.isCancelled && it.isCompleted }
-            ?.await() ?: globalCoroutineScope.async { startServiceConnection() }
+            ?.await() ?: applicationCoroutineScope.async { startServiceConnection() }
             .also { connectionDeferred = it }.await()
     } ?: BillingResponseCode.ERROR
-
-    
 
     @MainThread
     private fun initializeBillingClientIfNecessary() {
@@ -142,8 +122,6 @@ class BillingManagerImpl @Inject constructor(
     }
 
     companion object {
-        
-
         private const val CONNECTION_TIMEOUT_MILLIS = 1000L
     }
 }

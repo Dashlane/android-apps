@@ -1,7 +1,5 @@
 package com.dashlane.autofill.api.totp.services
 
-
-
 interface TotpNotificationDisplayService {
 
     fun display(

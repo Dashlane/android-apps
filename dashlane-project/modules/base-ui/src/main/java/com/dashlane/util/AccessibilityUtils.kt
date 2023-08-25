@@ -12,12 +12,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 
 fun View.onInitializeAccessibilityNodeInfo(onInitializeAccessibilityNodeInfo: (AccessibilityNodeInfoCompat) -> Unit) {
-    ViewCompat.setAccessibilityDelegate(this, object : AccessibilityDelegateCompat() {
+    ViewCompat.setAccessibilityDelegate(
+        this,
+        object : AccessibilityDelegateCompat() {
         override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
             super.onInitializeAccessibilityNodeInfo(host, info)
             onInitializeAccessibilityNodeInfo.invoke(info)
         }
-    })
+    }
+    )
 }
 
 @Suppress("DEPRECATION")

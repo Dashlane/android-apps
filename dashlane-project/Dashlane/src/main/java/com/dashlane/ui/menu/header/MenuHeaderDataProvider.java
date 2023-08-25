@@ -10,8 +10,6 @@ import com.dashlane.teamspaces.manager.TeamspaceManager;
 import com.dashlane.teamspaces.model.Teamspace;
 import com.skocken.presentation.provider.BaseDataProvider;
 
-
-
 public class MenuHeaderDataProvider extends BaseDataProvider<IPresenter> implements IDataProvider {
 
     @Override

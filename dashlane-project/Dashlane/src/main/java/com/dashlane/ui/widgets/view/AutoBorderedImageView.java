@@ -14,8 +14,6 @@ import com.dashlane.util.graphics.BitmapUtils;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
-
-
 public class AutoBorderedImageView extends AppCompatImageView {
 
     private int mDefaultBackgroundRes;

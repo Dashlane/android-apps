@@ -5,8 +5,6 @@ import com.dashlane.server.api.endpoints.authentication.AuthRegistrationAuthTick
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationEmailTokenService
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationU2fService
 
-
-
 interface AuthenticationAuthTicketHelper {
     suspend fun verifyEmailToken(
         login: String,

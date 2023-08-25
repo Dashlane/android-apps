@@ -7,8 +7,6 @@ import com.dashlane.ui.AbstractActivityLifecycleListener
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class TouchFilterActivityListener @Inject constructor() : AbstractActivityLifecycleListener() {
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

@@ -2,7 +2,7 @@ package com.dashlane.autofill.api.fillresponse.filler
 
 import com.dashlane.autofill.api.fillresponse.DatasetWrapperBuilder
 import com.dashlane.autofill.api.model.ItemToFill
-import com.dashlane.autofill.api.model.TextItemToFill
+import com.dashlane.autofill.api.model.OtpItemToFill
 import com.dashlane.autofill.api.util.AutofillValueFactory
 import com.dashlane.autofill.api.util.getBestEntry
 import com.dashlane.autofill.formdetector.field.AutoFillHint
@@ -16,10 +16,10 @@ internal class OtpCodeFiller(private val autofillValueFactory: AutofillValueFact
         item: ItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val text = (item as? TextItemToFill)?.value ?: return false
+        val otpItemToFill = item as OtpItemToFill
         val fullSmsCodeEntry = summary.getBestEntry { it.hasHint(AutoFillHint.SMS_OTP_CODE) }
         if (fullSmsCodeEntry == null) {
-            val toFillLength = text.length
+            val toFillLength = otpItemToFill.code.length
             val smsOtpCodePerDigit = AutoFillHint.smsOtpCodePerDigit
             if (toFillLength == 0 || toFillLength > smsOtpCodePerDigit.size) {
                 return false
@@ -27,11 +27,11 @@ internal class OtpCodeFiller(private val autofillValueFactory: AutofillValueFact
             repeat(toFillLength) { i ->
                 val hint = smsOtpCodePerDigit[i]
                 val entry = summary.getBestEntry { it.hasHint(hint) } ?: return false
-                dataSetBuilder.setValue(entry.id, autofillValueFactory.forText(text[i].toString()))
+                dataSetBuilder.setValue(entry.id, autofillValueFactory.forText(otpItemToFill.code[i].toString()))
             }
             return true
         } else {
-            dataSetBuilder.setValue(fullSmsCodeEntry.id, autofillValueFactory.forText(text))
+            dataSetBuilder.setValue(fullSmsCodeEntry.id, autofillValueFactory.forText(otpItemToFill.code))
             return true
         }
     }

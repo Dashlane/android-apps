@@ -7,12 +7,8 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 
-
-
 class UsbTransportHelper {
     var channel: Int = CHANNEL_BROADCAST
-
-    
 
     @Suppress("DEPRECATION")
     @Throws(IOException::class)
@@ -70,8 +66,6 @@ class UsbTransportHelper {
         return null
     }
 
-    
-
     fun wrapDataApdu(tag: Byte, data: ByteArray): ByteArray {
         var sequenceIdx = 0
         var offset = 0
@@ -104,8 +98,6 @@ class UsbTransportHelper {
         }
         return output.toByteArray()
     }
-
-    
 
     @Throws(IOException::class)
     fun unwrapResponseApdu(tag: Byte, data: ByteArray?): ByteArray? {
@@ -160,8 +152,6 @@ class UsbTransportHelper {
         }
         return response.toByteArray()
     }
-
-    
 
     fun getUsagePageOrUsage(data: ByteArray, size: Int, getUsage: Boolean): Int {
         var result = -1

@@ -5,8 +5,6 @@ import com.dashlane.login.Device
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class DeviceAdapter(private val selectable: Boolean) : DashlaneRecyclerAdapter<Device>() {
 
     interface OnItemCheckListener {

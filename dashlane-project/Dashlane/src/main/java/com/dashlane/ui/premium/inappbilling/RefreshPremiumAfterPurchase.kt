@@ -4,18 +4,17 @@ import com.dashlane.core.premium.PremiumStatus
 import com.dashlane.core.premium.PremiumStatusManager
 import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.useractivity.log.usage.UsageLogConstant
+import javax.inject.Inject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-
-
-object RefreshPremiumAfterPurchase {
+class RefreshPremiumAfterPurchase @Inject constructor(
+    private val premiumStatusManager: PremiumStatusManager
+) {
 
     @OptIn(DelicateCoroutinesApi::class)
-    @JvmStatic
     fun execute(errorListener: () -> Unit) {
         GlobalScope.launch(Dispatchers.Main) {
             val session = SingletonProvider.getSessionManager().session
@@ -25,8 +24,7 @@ object RefreshPremiumAfterPurchase {
             }
             val accountStatusRepository = SingletonProvider.getComponent().accountStatusRepository
             val previousPremiumStatus = accountStatusRepository.getPremiumStatus(session)
-            val verifyPremium = PremiumStatusManager.create()
-            val success = withContext(Dispatchers.Default) { verifyPremium.refreshPremiumStatus(session) }
+            val success = premiumStatusManager.refreshPremiumStatus(session)
             if (success) {
                 val newPremiumStatus = accountStatusRepository.getPremiumStatus(session)
                 onPremiumStatusUpdated(previousPremiumStatus, newPremiumStatus)

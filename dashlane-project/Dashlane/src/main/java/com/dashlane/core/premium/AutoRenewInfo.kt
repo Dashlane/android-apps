@@ -30,8 +30,6 @@ data class AutoRenewInfo constructor(
         trigger = jsonObject?.optString(JSON_KEY_TRIGGER)
     )
 
-    
-
     @StringDef(
         UNKNOWN,
         MONTHLY,
@@ -39,8 +37,6 @@ data class AutoRenewInfo constructor(
         YEARLY
     )
     annotation class Periodicity
-
-    
 
     @StringDef(
         MANUAL,

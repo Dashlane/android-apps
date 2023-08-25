@@ -11,8 +11,6 @@ import com.dashlane.hermes.generated.definitions.AnyPage
 import java.io.Serializable
 
 interface Navigator {
-    
-
     val currentDestination: NavDestination?
 
     
@@ -26,6 +24,8 @@ interface Navigator {
     fun goToVpn(origin: String? = null)
     fun goToSettings(settingsId: String? = null, origin: String? = null)
     fun goToHelpCenter(origin: String? = null)
+    fun goToSecretTransfer(settingsId: String? = null, origin: String? = null)
+    fun goToAccountRecoveryKey(settingsId: String? = null, origin: String? = null)
     fun goToPersonalPlanOrHome(origin: String? = null)
     fun goToOffers(origin: String? = null, offerType: String? = null)
 
@@ -34,8 +34,6 @@ interface Navigator {
     fun goToInAppLogin(origin: String? = null, onBoardingType: Serializable? = null)
     fun goToSearch(query: String? = null)
     fun goToPaywall(type: String, origin: String? = null)
-
-    
 
     @TargetApi(Build.VERSION_CODES.P)
     fun goToGuidedPasswordChange(
@@ -61,8 +59,8 @@ interface Navigator {
     fun goToPasswordAnalysisFromIdentityDashboard(origin: String? = null, tab: String? = null)
 
     
-    fun goToItem(uid: String, type: Int)
-    fun goToCreateItem(type: Int)
+    fun goToItem(uid: String, type: String)
+    fun goToCreateItem(type: String)
     fun goToCreateAuthentifiant(
         sender: String?,
         url: String,
@@ -72,6 +70,8 @@ interface Navigator {
     )
 
     fun goToDeleteVaultItem(itemId: String, isShared: Boolean)
+
+    fun goToCollectionSelectorFromItemEdit(fromViewOnly: Boolean, temporaryCollections: List<String>, spaceId: String)
 
     fun goToCredentialAddStep1(sender: String?, expandImportOptions: Boolean = false, successIntent: Intent? = null)
     fun goToCredentialFromPasswordAnalysis(uid: String)

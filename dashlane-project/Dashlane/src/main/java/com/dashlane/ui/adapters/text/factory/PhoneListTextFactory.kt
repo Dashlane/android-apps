@@ -14,8 +14,11 @@ class PhoneListTextFactory(
 
     override fun getLine1(): StatusText {
         return StatusText(
-            if (item.phoneName.isSemanticallyNull())
-                context.getString(ITEM_TYPE_NAME_ID) else item.phoneName!!
+            if (item.phoneName.isSemanticallyNull()) {
+                context.getString(ITEM_TYPE_NAME_ID)
+            } else {
+                item.phoneName!!
+            }
         )
     }
 

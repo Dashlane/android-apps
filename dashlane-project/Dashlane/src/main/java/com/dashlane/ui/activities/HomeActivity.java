@@ -17,12 +17,9 @@ import com.dashlane.debug.DaDaDa;
 import com.dashlane.events.AppEvents;
 import com.dashlane.events.PremiumStatusChangedEvent;
 import com.dashlane.login.lock.LockManager;
-import com.dashlane.managers.PerfLogManager;
 import com.dashlane.navigation.NavigationConstants;
 import com.dashlane.navigation.NavigationUtils;
-import com.dashlane.security.UsageLogCode12SecurityScoreFactory;
 import com.dashlane.session.Session;
-import com.dashlane.teamspaces.manager.TeamspaceSettingsLogger;
 import com.dashlane.ui.activities.fragments.vault.HiddenImpala;
 import com.dashlane.ui.dialogs.fragment.SpaceRevokedDialog;
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment;
@@ -32,7 +29,6 @@ import com.dashlane.ui.util.DrawerLayoutUtilsKt;
 import com.dashlane.ui.widgets.view.MainDrawerToggle;
 import com.dashlane.util.AppShortcutsUtil;
 import com.dashlane.util.DeviceUtils;
-import com.dashlane.util.StaticTimerUtil;
 
 import javax.inject.Inject;
 
@@ -41,8 +37,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleOwnerKt;
 import dagger.hilt.android.AndroidEntryPoint;
-
-
 
 @AndroidEntryPoint
 public class HomeActivity extends DashlaneActivity
@@ -96,15 +90,6 @@ public class HomeActivity extends DashlaneActivity
     @Override
     public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        
-        final boolean isConfigChanged = savedInstanceState != null &&
-                savedInstanceState.getBoolean(SAVED_STATE_HAS_CHANGED_CONFIGURATIONS, false);
-        if (!isConfigChanged) {
-            StaticTimerUtil.setLoginProcessFinish(System.currentTimeMillis());
-            PerfLogManager.getInstance().sendLogginEventLoadTime();
-            SingletonProvider.getComponent().getTimeToLoadRemoteLogger().logStop();
-            SingletonProvider.getComponent().getTimeToLoadLocalLogger().logStop();
-        }
         handleDeepLink(getIntent());
     }
 
@@ -204,10 +189,6 @@ public class HomeActivity extends DashlaneActivity
             builder.build().show(getSupportFragmentManager(), link);
         }
 
-        UsageLogCode12SecurityScoreFactory.newInstance().sendIfRequire();
-
-        TeamspaceSettingsLogger.logIfNeeded();
-
         SingletonProvider.getSecurityHelper().showPopupPinCodeDisableIfWasEnable(this);
 
         SingletonProvider.getComponent().getDeviceUpdateManager().updateIfNeeded();
@@ -292,13 +273,9 @@ public class HomeActivity extends DashlaneActivity
                 );
     }
 
-    
-
     private void configureAndroidActivityFeatures() {
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
     }
-
-    
 
     private void loadAccessibleOffers() {
         SingletonProvider.getAccessibleOffersCache()

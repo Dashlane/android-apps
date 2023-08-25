@@ -81,7 +81,8 @@ class SharingUsersForItemViewProxy(
     private suspend fun displayData(state: SharingUsersForItemViewModelContract.UIState.Data) {
         val summaryObject = state.items.first().item
         toolbar?.title = when (summaryObject) {
-            is SummaryObject.Authentifiant -> summaryObject.title
+            is SummaryObject.Authentifiant ->
+                summaryObject.title
                 ?: summaryObject.urlForGoToWebsite?.getUrlDisplayName
             is SummaryObject.SecureNote -> summaryObject.title
             else -> null
@@ -90,25 +91,31 @@ class SharingUsersForItemViewProxy(
         val users =
             state.items.filterIsInstance<SharingModels.ItemUser>()
                 .map {
-                    SharedContactUser(context, it,
+                    SharedContactUser(
+                        context,
+                        it,
                         onPendingMenuClick = { view, item ->
                             showManageSharingContactPendingForUser(view, item)
                         },
                         onAcceptedMenuClick = { view, item ->
                             showManageSharingContactAcceptedForUser(view, item)
-                        })
+                        }
+                    )
                 }.sortedWith(SharingContactItem.comparator())
 
         val userGroups = state.items
             .filterIsInstance<SharingModels.ItemUserGroup>()
             .map {
-                SharedContactUserGroup(context, it,
+                SharedContactUserGroup(
+                    context,
+                    it,
                     onPendingMenuClick = { view, item ->
                         showManageSharingContactPendingForUserGroup(view, item)
                     },
                     onAcceptedMenuClick = { view, item ->
                         showManageSharingContactAcceptedForUserGroup(view, item)
-                    })
+                    }
+                )
             }.sortedWith(SharingContactItem.comparator())
 
         val listItems = (userGroups + users).addHeaders()
@@ -126,7 +133,8 @@ class SharingUsersForItemViewProxy(
             indexOfFirst { it is SharedContactUser }
                 .takeIf { it != -1 }?.also {
                     add(
-                        it, HeaderItem(context.getString(R.string.sharing_center_label_individuals))
+                        it,
+                        HeaderItem(context.getString(R.string.sharing_center_label_individuals))
                     )
                 }
 
@@ -141,10 +149,14 @@ class SharingUsersForItemViewProxy(
         view: View,
         sharedItem: SharingModels.ItemUserGroup
     ) {
-        val dialog = PopupMenuManageUserPending(context, view,
+        val dialog = PopupMenuManageUserPending(
+            context,
+            view,
             onCancelInvite = {
                 SharingConfirmationDialogCancelInvite.newInstanceForUserGroup(
-                    context, sharedItem.itemGroup.groupId, sharedItem.userGroup.groupId
+                    context,
+                    sharedItem.itemGroup.groupId,
+                    sharedItem.userGroup.groupId
                 ).show(fragmentManager, SharingConfirmationDialogCancelInvite.TAG)
             },
             onResendInvite = {
@@ -158,10 +170,14 @@ class SharingUsersForItemViewProxy(
         view: View,
         sharedItem: SharingModels.ItemUser
     ) {
-        val dialog = PopupMenuManageUserPending(context, view,
+        val dialog = PopupMenuManageUserPending(
+            context,
+            view,
             onCancelInvite = {
                 SharingConfirmationDialogCancelInvite.newInstanceForUser(
-                    context, sharedItem.itemGroup.groupId, sharedItem.user.userId
+                    context,
+                    sharedItem.itemGroup.groupId,
+                    sharedItem.user.userId
                 ).show(fragmentManager, SharingConfirmationDialogCancelInvite.TAG)
             },
             onResendInvite = {
@@ -175,11 +191,15 @@ class SharingUsersForItemViewProxy(
         view: View,
         sharedItem: SharingModels.ItemUser
     ) {
-        val dialog = PopupMenuManageUserAccepted(context, view,
+        val dialog = PopupMenuManageUserAccepted(
+            context,
+            view,
             isAdmin = sharedItem.isMemberAdmin,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUser(
-                    context, sharedItem.itemGroup.groupId, sharedItem.user.userId
+                    context,
+                    sharedItem.itemGroup.groupId,
+                    sharedItem.user.userId
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {
@@ -197,11 +217,15 @@ class SharingUsersForItemViewProxy(
         view: View,
         sharedItem: SharingModels.ItemUserGroup
     ) {
-        val dialog = PopupMenuManageUserAccepted(context, view,
+        val dialog = PopupMenuManageUserAccepted(
+            context,
+            view,
             isAdmin = sharedItem.isMemberAdmin,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUserGroup(
-                    context, sharedItem.itemGroup.groupId, sharedItem.userGroup.groupId
+                    context,
+                    sharedItem.itemGroup.groupId,
+                    sharedItem.userGroup.groupId
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {

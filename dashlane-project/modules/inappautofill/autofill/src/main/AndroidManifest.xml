@@ -51,10 +51,10 @@
 
         <activity
             android:name="com.dashlane.autofill.api.actionssources.view.ActionsSourcesActivity"
-            android:label="@string/autofill_actioned_sources_title" />
+            android:label="@string/autofill_pause_resume_settings_title" />
 
         <activity
-            android:name="com.dashlane.autofill.api.revertactionssettings.RevertActionsActivity"
+            android:name="com.dashlane.autofill.api.pausedautofillsettings.PausedAutofillActivity"
             android:label="@string/autofill_revert_actions_title" />
 
         <activity

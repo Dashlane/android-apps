@@ -8,8 +8,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 
-
-
 public class SpentTimeOnViewManager {
 
     final private static Duration SIGNIFICANT_TIME_SPENT = Duration.ofSeconds(1);

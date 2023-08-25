@@ -1,12 +1,10 @@
 package com.dashlane.teamspaces.manager;
 
 import com.dashlane.core.HashForLog;
-import com.dashlane.session.BySessionRepository;
-import com.dashlane.session.Session;
 import com.dashlane.settings.SettingsManager;
+import com.dashlane.teamspaces.CombinedTeamspace;
+import com.dashlane.teamspaces.PersonalTeamspace;
 import com.dashlane.teamspaces.model.Teamspace;
-import com.dashlane.useractivity.log.usage.UsageLogCode105;
-import com.dashlane.useractivity.log.usage.UsageLogRepository;
 import com.dashlane.util.GsonJsonSerialization;
 import com.dashlane.util.JsonSerialization;
 import com.dashlane.xml.domain.SyncObject;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.collection.ArrayMap;
 import kotlin.Unit;
@@ -24,23 +21,15 @@ import kotlin.Unit;
 import static kotlin.text.StringsKt.trim;
 
 
-
-
 public class SpaceAnonIdDataProvider {
     private static final ArrayMap EMPTY_ANON_ID_MAP = new ArrayMap();
-    private final SpaceAnonIdLogger mUsageLogger;
     private final JsonSerialization mJsonSerialization;
 
-    public SpaceAnonIdDataProvider(@NonNull BySessionRepository<UsageLogRepository> bySessionUsageLogRepository,
-            @NonNull Session session) {
-        this(new SpaceAnonIdLogger(bySessionUsageLogRepository, session),
-             new GsonJsonSerialization(new Gson())
-        );
+    public SpaceAnonIdDataProvider() {
+        this(new GsonJsonSerialization(new Gson()));
     }
 
-    @VisibleForTesting
-    SpaceAnonIdDataProvider(SpaceAnonIdLogger usageLogger, JsonSerialization jsonSerialization) {
-        mUsageLogger = usageLogger;
+    public SpaceAnonIdDataProvider(JsonSerialization jsonSerialization) {
         mJsonSerialization = jsonSerialization;
     }
 
@@ -51,8 +40,8 @@ public class SpaceAnonIdDataProvider {
 
         
         ArrayMap<Teamspace, String> anonymizedIds = new ArrayMap<>(deserializedMap.size());
-        anonymizedIds.put(TeamspaceManager.PERSONAL_TEAMSPACE, Teamspace.DEFAULT_SPACE_ANON_ID);
-        anonymizedIds.put(TeamspaceManager.COMBINED_TEAMSPACE, Teamspace.ALL_SPACE_ANON_ID);
+        anonymizedIds.put(PersonalTeamspace.INSTANCE, Teamspace.DEFAULT_SPACE_ANON_ID);
+        anonymizedIds.put(CombinedTeamspace.INSTANCE, Teamspace.ALL_SPACE_ANON_ID);
 
         boolean hasNewSpaces = false;
 
@@ -88,15 +77,12 @@ public class SpaceAnonIdDataProvider {
     void reportSpaces(SettingsManager settingsManager, ArrayMap<Teamspace, String> anonIdMap) {
 
         
-        mUsageLogger.logSpace(UsageLogCode105.Type.PERSONAL, Teamspace.DEFAULT_SPACE_ANON_ID);
-        mUsageLogger.logSpace(UsageLogCode105.Type.GLOBAL, Teamspace.ALL_SPACE_ANON_ID);
 
         ArrayMap<String, String> jsonMap = new ArrayMap<>();
         for (Map.Entry<Teamspace, String> entry : anonIdMap.entrySet()) {
             Teamspace team = entry.getKey();
             if (!isCombinedSpace(team) && !isDefaultSpace(team)) {
                 String anonId = entry.getValue();
-                mUsageLogger.logSpace(UsageLogCode105.Type.TEAM_OFFER, anonId);
                 jsonMap.put(team.getTeamId(), anonId);
             }
         }
@@ -138,10 +124,10 @@ public class SpaceAnonIdDataProvider {
     }
 
     private boolean isCombinedSpace(Teamspace itemSelected) {
-        return itemSelected == TeamspaceManager.COMBINED_TEAMSPACE;
+        return itemSelected == CombinedTeamspace.INSTANCE;
     }
 
     private boolean isDefaultSpace(Teamspace itemSelected) {
-        return itemSelected == TeamspaceManager.PERSONAL_TEAMSPACE;
+        return itemSelected == PersonalTeamspace.INSTANCE;
     }
 }

@@ -21,7 +21,8 @@ fun createSocialSecurityStatement(
             this.sex = sex
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.SocialSecurityStatement>.copySyncObject(builder: SyncObject.SocialSecurityStatement.Builder.() -> Unit = {}):

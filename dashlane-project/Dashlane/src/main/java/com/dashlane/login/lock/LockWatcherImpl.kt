@@ -6,21 +6,20 @@ import com.dashlane.lock.LockHelper
 import com.dashlane.lock.LockWatcher
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.ui.activities.DashlaneActivity
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.util.HashSet
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Singleton
-class LockWatcherImpl @Inject constructor() : LockWatcher {
+class LockWatcherImpl @Inject constructor(
+    @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope
+) : LockWatcher {
 
     private val listeners = HashSet<LockWatcher.Listener>()
     private val lockWaiter = LockWaiter()
-
-    
 
     fun setLockHelper(lockHelper: LockHelper) {
         lockWaiter.setLockHelper(lockHelper)
@@ -52,9 +51,8 @@ class LockWatcherImpl @Inject constructor() : LockWatcher {
 
     override suspend fun waitUnlock() = lockWaiter.waitUnlock()
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun waitUnlock(activity: Activity?, unlockListener: LockWatcher.UnlockListener) {
-        val scope = if (activity is DashlaneActivity) activity.lifecycleScope else GlobalScope
+        val scope = if (activity is DashlaneActivity) activity.lifecycleScope else applicationCoroutineScope
         scope.launch(Dispatchers.Main) {
             waitUnlock()
             unlockListener.onUnlockEvent(UnlockEvent(true, UnlockEvent.Reason.AppAccess()))

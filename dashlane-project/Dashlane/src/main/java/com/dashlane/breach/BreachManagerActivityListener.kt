@@ -7,8 +7,6 @@ import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import javax.inject.Inject
 
-
-
 class BreachManagerActivityListener @Inject constructor(private val breachManager: BreachManager) :
     AbstractActivityLifecycleListener() {
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

@@ -12,8 +12,6 @@ class QuickActionShare(summaryObject: SummaryObject) : NewShareAction(summaryObj
     override val tintColorRes = R.color.text_neutral_catchy
 
     companion object {
-        
-
         fun createActionIfShareAvailable(summaryObject: SummaryObject): QuickActionShare? {
             if (SingletonProvider.getSharingPolicyDataProvider().canShareItem(summaryObject)) {
                 if (summaryObject is SummaryObject.SecureNote) {

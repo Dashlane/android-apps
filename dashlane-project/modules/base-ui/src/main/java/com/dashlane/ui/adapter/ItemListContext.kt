@@ -4,8 +4,6 @@ import android.os.Parcelable
 import androidx.annotation.Keep
 import kotlinx.parcelize.Parcelize
 
-
-
 @Keep
 @Parcelize
 data class ItemListContext(
@@ -14,12 +12,8 @@ data class ItemListContext(
     val indexInContainerSection: Int = -1,
     val sectionCount: Int = -1
 ) : Parcelable {
-    
-
     val positionInContainerSection
         get() = indexInContainerSection.takeIf { it > -1 }?.plus(1) ?: -1
-
-    
 
     enum class Container(val label: String) {
         ALL_ITEMS("allItems"),
@@ -38,8 +32,6 @@ data class ItemListContext(
             return ItemListContext(container = this, section = section)
         }
     }
-
-    
 
     enum class Section(val label: String) {
         SUGGESTED("Suggested"),

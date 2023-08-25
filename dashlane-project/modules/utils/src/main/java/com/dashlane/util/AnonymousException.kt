@@ -2,8 +2,6 @@ package com.dashlane.util
 
 import androidx.annotation.Keep
 
-
-
 fun Throwable.anonymize(): Throwable {
     
     if (this is SecureException) return this
@@ -12,8 +10,6 @@ fun Throwable.anonymize(): Throwable {
     obfuscatedThrowable.stackTrace = stackTrace
     return obfuscatedThrowable
 }
-
-
 
 @Keep
 open class SecureException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)

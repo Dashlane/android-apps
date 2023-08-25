@@ -65,7 +65,8 @@ data class SharingActionItemUserGroup(
             binding.title.text =
                 context.getString(R.string.action_item_sharing_invitation_item_title)
             setImageDrawable(
-                R.id.icon, CircleDrawable.with(
+                R.id.icon,
+                CircleDrawable.with(
                     context = context,
                     backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
                     drawableRes = R.drawable.ic_action_item_sharing_invitation,

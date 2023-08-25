@@ -43,17 +43,13 @@ import com.dashlane.ui.adapters.text.factory.SecureNoteListTextFactory
 import com.dashlane.ui.adapters.text.factory.SocialSecurityStatementListTextFactory
 import com.dashlane.url.toUrlDomain
 import com.dashlane.util.tryOrNull
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.util.IdentityUtil
 
 class SearchImprovementsUtils(
     private val textResolver: DataIdentifierListTextResolver,
-    private val identityUtil: IdentityUtil,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val identityUtil: IdentityUtil
 ) {
-
-    
 
     @Suppress("LongMethod")
     fun getFilter(context: Context): Map<Any, List<(Any, String) -> Match?>> = mapOf(
@@ -81,12 +77,8 @@ class SearchImprovementsUtils(
             },
             { item, query ->
                 
-                if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES)) {
-                    item.asCredential()?.linkedServices?.associatedDomains?.firstNotNullOfOrNull {
-                        it.domain.toMatchOrNull(query, CredentialField.BUNDLE_WEBSITES)
-                    }
-                } else {
-                    null
+                item.asCredential()?.linkedServices?.associatedDomains?.firstNotNullOfOrNull {
+                    it.domain.toMatchOrNull(query, CredentialField.BUNDLE_WEBSITES)
                 }
             },
             { item, query -> item.asCredential()?.note?.toMatchOrNull(query, CredentialField.NOTE) },
@@ -172,7 +164,8 @@ class SearchImprovementsUtils(
                         null
                     }
                 }
-            }),
+            }
+    ),
 
         
         ItemType.DRIVER_LICENCE to listOf(
@@ -199,7 +192,8 @@ class SearchImprovementsUtils(
             { item, query ->
                 item.asFiscalStatement()?.let { identityUtil.getOwner(it) }
                     ?.toMatchOrNull(query, FiscalStatementField.FULL_NAME)
-            }),
+            }
+    ),
 
         ItemType.ID_CARD to listOf(
             { item, query ->

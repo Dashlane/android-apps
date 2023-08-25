@@ -29,8 +29,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okio.IOException
 
-
-
 class AttachmentListPresenter(
     private val coroutineScope: CoroutineScope,
     private val actionBarColor: Int,

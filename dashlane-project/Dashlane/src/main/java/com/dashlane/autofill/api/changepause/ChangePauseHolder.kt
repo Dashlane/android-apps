@@ -9,8 +9,6 @@ import com.dashlane.R
 import com.dashlane.autofill.api.changepause.view.ChangePauseViewTypeProviderFactory
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class ChangePauseHolder(v: View) : EfficientViewHolder<ChangePauseViewTypeProviderFactory.PauseSetting>(v) {
     private val settingsTitle: TextView = v.findViewById(R.id.setting_title)
     private val settingsDescription: TextView = v.findViewById(R.id.setting_description)

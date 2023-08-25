@@ -9,8 +9,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 enum class CopyField(
     internal val syncObjectType: SyncObjectType,
     internal val contentMapper: CopyFieldContentMapper<out SummaryObject, out SyncObject, out Any>,

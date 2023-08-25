@@ -6,8 +6,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-
-
 suspend fun <T : ViewTypeProvider> DashlaneRecyclerAdapter<T>.populateItemsAsync(list: List<T>) {
     val diffResult = withContext(Dispatchers.Default) {
         DiffUtil.calculateDiff(AdapterViewTypeProviderDiffCallback(objects, list))

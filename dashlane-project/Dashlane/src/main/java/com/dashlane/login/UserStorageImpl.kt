@@ -7,32 +7,27 @@ import com.dashlane.authentication.UserStorage
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.Username
-import com.dashlane.usersupportreporter.UserSupportFileLogger
 import com.dashlane.util.installlogs.DataLossTrackingLogger
 import javax.inject.Inject
-
-
 
 class UserStorageImpl @Inject constructor(
     private val dataReset: LoginDataReset,
     private val userAccountStorage: UserAccountStorageImpl,
-    private val userSupportFileLogger: UserSupportFileLogger,
     private val userPreferencesManager: UserPreferencesManager,
     private val deviceInfoRepository: DeviceInfoRepository
 ) : UserStorage {
     override suspend fun clearUser(login: String, reason: String) {
-        userSupportFileLogger.add(reason)
         dataReset.clearData(Username.ofEmail(login), DataLossTrackingLogger.Reason.PASSWORD_CHANGED)
     }
 
     override fun getUser(login: String): UserStorage.UserDevice? {
         val userAccountInfo = userAccountStorage[login]
         return if (userAccountInfo == null) {
-            userSupportFileLogger.add("No local user found for: '$login'")
             null
         } else {
             val accessKey = userPreferencesManager.preferencesFor(login).accessKey
                 ?: deviceInfoRepository.deviceId
+                ?: return null
             UserStorage.UserDevice(
                 login,
                 userAccountInfo.securitySettings.toSecurityFeatures(),

@@ -7,8 +7,6 @@ import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 
-
-
 class SettingsGeneralBackupList(
     context: Context,
     backupCoordinator: BackupCoordinator,
@@ -22,8 +20,8 @@ class SettingsGeneralBackupList(
         override val header = backupHeader
         override val title = context.getString(R.string.setting_backup_export)
         override val description = context.getString(R.string.setting_backup_export_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) = true
+        override fun isEnable() = true
+        override fun isVisible() = true
 
         override fun onClick(context: Context) = sensibleSettingsClickHelper.perform(
             context = context,
@@ -38,9 +36,9 @@ class SettingsGeneralBackupList(
         override val header = backupHeader
         override val title = context.getString(R.string.setting_backup_import)
         override val description = context.getString(R.string.setting_backup_import_description)
-        override fun isEnable(context: Context) = true
-        override fun isVisible(context: Context) =
-            backupExportItem.isVisible(context)
+        override fun isEnable() = true
+        override fun isVisible() =
+            backupExportItem.isVisible()
 
         override fun onClick(context: Context) = backupCoordinator.startImport()
     }

@@ -30,14 +30,11 @@ class SsoLockDataProvider @Inject constructor(
     inAppLoginManager,
     sessionManager,
     bySessionUsageLogRepository
-), SsoLockContract.DataProvider {
+),
+SsoLockContract.DataProvider {
     override val username = sessionManager.session?.userId.orEmpty()
 
     override val loginHistory: List<String> by lazy { globalPreferencesManager.getUserListHistory() }
-
-    override fun onShow() = Unit
-
-    override fun onBack() = Unit
 
     override suspend fun getSsoInfo(): SsoInfo {
         val session = sessionManager.session ?: throw SsoLockContract.NoSessionLoadedException()

@@ -4,12 +4,11 @@ import android.content.Context;
 
 import com.dashlane.abtesting.OfflineExperimentReporter;
 import com.dashlane.announcements.AnnouncementCenter;
-import com.dashlane.autofill.api.monitorlog.MonitorAutofillIssuesSessionStartTrigger;
 import com.dashlane.braze.BrazeWrapper;
 import com.dashlane.breach.BreachManager;
 import com.dashlane.core.DataSync;
 import com.dashlane.core.sharing.SharingDao;
-import com.dashlane.crashreport.CrashReporter;
+import com.dashlane.debug.DaDaDa;
 import com.dashlane.events.AppEvents;
 import com.dashlane.featureflipping.FeatureFlipManager;
 import com.dashlane.inappbilling.BillingManager;
@@ -40,8 +39,6 @@ import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider;
 import com.dashlane.ui.util.DialogHelper;
 import com.dashlane.update.AppUpdateInstaller;
 import com.dashlane.useractivity.AggregateUserActivity;
-import com.dashlane.usersupportreporter.UserSupportFileLogger;
-import com.dashlane.debug.DaDaDa;
 import com.dashlane.util.ThreadHelper;
 import com.dashlane.util.Toaster;
 import com.dashlane.util.clipboard.ClipboardCopy;
@@ -50,8 +47,6 @@ import com.dashlane.util.notification.NotificationHelper;
 import com.dashlane.util.userfeatures.UserFeaturesChecker;
 
 import dagger.hilt.android.EntryPointAccessors;
-
-
 
 public class SingletonProvider {
 
@@ -85,10 +80,6 @@ public class SingletonProvider {
         return getComponent().getNotificationHelper();
     }
 
-    public static UserSupportFileLogger getUserSupportFileLogger() {
-        return getComponent().getUserSupportFileLogger();
-    }
-
     public static PasswordStrengthEvaluator getPasswordStrengthEvaluator() {
         return getComponent().getPasswordStrengthEvaluator();
     }
@@ -115,10 +106,6 @@ public class SingletonProvider {
 
     public static ThreadHelper getThreadHelper() {
         return getComponent().getThreadHelper();
-    }
-
-    public static CrashReporter getCrashReporter() {
-        return getComponent().getCrashReporter();
     }
 
     public static AggregateUserActivity getAggregateUserActivity() {
@@ -199,14 +186,6 @@ public class SingletonProvider {
 
     public static OffersLogger getOffersLogger() {
         return getComponent().getOffersLogger();
-    }
-
-    public static MonitorAutofillIssuesSessionStartTrigger getMonitorAutofillIssuesSessionStartTrigger() {
-        return new MonitorAutofillIssuesSessionStartTrigger(
-                getComponent().getMonitorAutofillIssues(),
-                getComponent().getMonitorAutofillIssuesLogger(),
-                getComponent().getSessionCoroutineScopeRepository()
-        );
     }
 
     public static void setSingletonComponent(SingletonComponentProxy component) {

@@ -5,8 +5,6 @@ import androidx.appcompat.widget.SwitchCompat
 import com.dashlane.R
 import com.dashlane.util.getThemeAttrResourceId
 
-
-
 object SwitchInputProvider {
 
     fun create(
@@ -17,7 +15,6 @@ object SwitchInputProvider {
         editable: Boolean = false,
         switchAction: (Boolean) -> Unit = { _ -> }
     ): SwitchCompat {
-
         return SwitchCompat(context).apply {
             isFocusable = editable
             isActivated = editable

@@ -1,5 +1,3 @@
-
-
 package com.github.devnied.emvnfccard.parser.impl;
 
 import com.github.devnied.emvnfccard.enums.CommandEnum;
@@ -20,33 +18,22 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
-
-
 
 public abstract class AbstractParser implements IParser {
 
-    
-
     public static final int UNKNOW = -1;
 
-    
-
     protected final WeakReference<EmvTemplate> template;
-
-    
 
     protected AbstractParser(EmvTemplate pTemplate) {
         template = new WeakReference<EmvTemplate>(pTemplate);
     }
 
-    
-
     protected byte[] selectAID(final byte[] pAid) throws CommunicationException {
         return template.get().getProvider().transceive(new CommandApdu(CommandEnum.SELECT, pAid, 0).toBytes());
     }
-
-    
 
     protected String extractApplicationLabel(final byte[] pData) {
         String label = null;
@@ -63,8 +50,6 @@ public abstract class AbstractParser implements IParser {
         return label;
     }
 
-    
-
     protected void extractBankData(final byte[] pData) {
         
         byte[] bic = TlvUtil.getValue(pData, EmvTags.BANK_IDENTIFIER_CODE);
@@ -77,8 +62,6 @@ public abstract class AbstractParser implements IParser {
             template.get().getCard().setIban(new String(iban));
         }
     }
-
-    
 
     protected void extractCardHolderName(final byte[] pData) {
         
@@ -94,13 +77,9 @@ public abstract class AbstractParser implements IParser {
         }
     }
 
-    
-
     protected byte[] getLogEntry(final byte[] pSelectResponse) {
         return TlvUtil.getValue(pSelectResponse, EmvTags.LOG_ENTRY, EmvTags.VISA_LOG_ENTRY);
     }
-
-    
 
     protected int getTransactionCounter() throws CommunicationException {
         int ret = UNKNOW;
@@ -115,8 +94,6 @@ public abstract class AbstractParser implements IParser {
         }
         return ret;
     }
-
-    
 
     protected int getLeftPinTry() throws CommunicationException {
         int ret = UNKNOW;
@@ -133,8 +110,6 @@ public abstract class AbstractParser implements IParser {
         return ret;
     }
 
-    
-
     protected List<TagAndLength> getLogFormat() throws CommunicationException {
         List<TagAndLength> ret = new ArrayList<TagAndLength>();
         
@@ -146,9 +121,7 @@ public abstract class AbstractParser implements IParser {
         return ret;
     }
 
-    
-
-    protected List<EmvTransactionRecord> extractLogEntry(final byte[] pLogEntry) throws CommunicationException {
+    protected List<EmvTransactionRecord> extractLogEntry(final byte[] pLogEntry, Calendar pNow) throws CommunicationException {
         List<EmvTransactionRecord> listRecord = new ArrayList<EmvTransactionRecord>();
         
         if (template.get().getConfig().readTransactions && pLogEntry != null) {
@@ -163,7 +136,7 @@ public abstract class AbstractParser implements IParser {
                     if (ResponseUtils.isSucceed(response)) {
                         try {
                             EmvTransactionRecord record = new EmvTransactionRecord();
-                            record.parse(response, tals);
+                            record.parse(response, tals, pNow);
 
                             if (record.getAmount() != null) {
                                 

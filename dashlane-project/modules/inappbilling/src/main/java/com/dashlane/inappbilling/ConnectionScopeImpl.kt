@@ -20,8 +20,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 
-
-
 class ConnectionScopeImpl(
     private val billingClient: BillingClient,
     private val purchaseChannel: Channel<ServiceResult>

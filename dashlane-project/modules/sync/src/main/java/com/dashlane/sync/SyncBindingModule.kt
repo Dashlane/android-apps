@@ -22,31 +22,33 @@ import com.dashlane.sync.util.SyncLogs
 import com.dashlane.sync.util.SyncLogsImpl
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
-
-
+@InstallIn(SingletonComponent::class)
 @Module
-internal abstract class SyncBindingModule {
+abstract class SyncBindingModule {
 
-    @SyncScope
+    @Singleton
     @Binds
     abstract fun bindSyncRepository(impl: SyncRepositoryImpl): SyncRepository
 
     @Binds
     abstract fun bindSyncServices(impl: SyncServicesImpl): SyncServices
 
-    @SyncScope
+    @Singleton
     @Binds
     abstract fun bindTreatProblemManager(impl: TreatProblemManagerImpl): TreatProblemManager
 
     @Binds
     abstract fun bindDeduplication(impl: SyncDeduplicationImpl): SyncDeduplication
 
-    @SyncScope
+    @Singleton
     @Binds
     abstract fun bindSyncLogs(impl: SyncLogsImpl): SyncLogs
 
-    @SyncScope
+    @Singleton
     @Binds
     abstract fun bindSyncMerger(impl: SyncMergerImpl): SyncMerger
 
@@ -56,7 +58,7 @@ internal abstract class SyncBindingModule {
     @Binds
     abstract fun bindChronologicalSync(iml: ChronologicalSyncImpl): ChronologicalSync
 
-    @SyncScope
+    @Singleton
     @Binds
     abstract fun bindSyncCryptoChanger(impl: SyncCryptoChangerImpl): SyncCryptoChanger
 

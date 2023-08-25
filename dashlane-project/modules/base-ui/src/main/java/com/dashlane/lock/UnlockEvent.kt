@@ -3,36 +3,23 @@ package com.dashlane.lock
 import android.annotation.SuppressLint
 import android.os.Parcelable
 import com.dashlane.event.AppEvent
-import com.dashlane.vault.model.DataIdentifierId
 import kotlinx.parcelize.Parcelize
-
-
 
 @SuppressLint("ParcelCreator")
 @Parcelize
 data class UnlockEvent(private val success: Boolean, val reason: Reason) : Parcelable, AppEvent {
 
-    
-
     fun isSuccess() = success
 
-    
-
     interface Reason : Parcelable {
-
-        
 
         @SuppressLint("ParcelCreator")
         @Parcelize
         class Unknown : Reason
 
-        
-
         @SuppressLint("ParcelCreator")
         @Parcelize
         class AppAccess : Reason
-
-        
 
         @SuppressLint("ParcelCreator")
         @Parcelize
@@ -43,31 +30,21 @@ data class UnlockEvent(private val success: Boolean, val reason: Reason) : Parce
             }
         }
 
-        
-
         @SuppressLint("ParcelCreator")
         @Parcelize
-        data class OpenItem(@DataIdentifierId.Def val itemType: Int, val itemUid: String) : Reason
-
-        
+        data class OpenItem(val xmlObjectName: String, val itemUid: String) : Reason
 
         @SuppressLint("ParcelCreator")
         @Parcelize
         data class AccessFromExternalComponent(val itemUid: String?) : Reason
 
-        
-
         @SuppressLint("ParcelCreator")
         @Parcelize
         class AccessFromAutofillApi : Reason
 
-        
-
         @SuppressLint("ParcelCreator")
         @Parcelize
         class AccessFromFollowUpNotification : Reason
-
-        
 
         @SuppressLint("ParcelCreator")
         @Parcelize

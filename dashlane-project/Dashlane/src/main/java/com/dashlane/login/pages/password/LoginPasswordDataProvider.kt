@@ -1,7 +1,7 @@
 package com.dashlane.login.pages.password
 
 import android.content.Intent
-import com.dashlane.accountrecovery.AccountRecovery
+import com.dashlane.accountrecoverykey.AccountRecoveryStatus
 import com.dashlane.authentication.AuthenticationDeviceCredentialsInvalidException
 import com.dashlane.authentication.AuthenticationEmptyPasswordException
 import com.dashlane.authentication.AuthenticationException
@@ -9,11 +9,12 @@ import com.dashlane.authentication.AuthenticationInvalidPasswordException
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
+import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.core.DataSync
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
-import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.help.newIntent
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.limitations.DeviceLimitActivityListener
@@ -26,7 +27,7 @@ import com.dashlane.login.LoginStrategy.Strategy.DEVICE_LIMIT
 import com.dashlane.login.LoginStrategy.Strategy.ENFORCE_2FA
 import com.dashlane.login.LoginStrategy.Strategy.MONOBUCKET
 import com.dashlane.login.LoginSuccessIntentFactory
-import com.dashlane.login.UserAccountStatus
+import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockPass
 import com.dashlane.login.pages.ChangeAccountHelper
@@ -34,8 +35,6 @@ import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginLockBaseDataProvider
 import com.dashlane.login.pages.password.LoginPasswordContract.InvalidPasswordException
 import com.dashlane.login.pages.password.LoginPasswordContract.InvalidPasswordException.InvalidReason
-import com.dashlane.performancelogger.TimeToLoadLocalLogger
-import com.dashlane.performancelogger.TimeToLoadRemoteLogger
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
@@ -46,45 +45,42 @@ import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
 import com.dashlane.session.SessionResult
 import com.dashlane.session.Username
-import com.dashlane.session.isServerKeyNotNull
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.usersupportreporter.UserSupportFileLogger
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.util.installlogs.DataLossTrackingLogger
-import com.dashlane.util.logD
+import com.dashlane.util.usagelogs.ViewLogger
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
-
-
 
 class LoginPasswordDataProvider @Inject constructor(
     private val successIntentFactory: LoginSuccessIntentFactory,
     private val dataReset: LoginDataReset,
-    private val userSupportFileLogger: UserSupportFileLogger,
     private val initialization: LoginNewUserInitialization,
     private val loggerFactory: LoginPasswordLogger.Factory,
-    private val deviceInfoRepository: DeviceInfoRepository,
     private val userPreferencesManager: UserPreferencesManager,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val loginStrategy: LoginStrategy,
-    private val accountRecovery: AccountRecovery,
+    private val biometricRecovery: BiometricRecovery,
     private val sessionManager: SessionManager,
     private val sessionRestorer: SessionRestorer,
     private val cryptoObjectHelper: CryptoObjectHelper,
     private val passwordRepository: AuthenticationPasswordRepository,
     private val changeAccountHelper: ChangeAccountHelper,
-    private val performanceRemoteLogger: TimeToLoadRemoteLogger,
-    private val performanceLocalLogger: TimeToLoadLocalLogger,
     private val deviceLimitActivityListener: DeviceLimitActivityListener,
     private val enforce2faLimiter: Enforce2faLimiter,
+    private val dataSync: DataSync,
+    private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
+    private val viewLogger: ViewLogger,
     lockManager: LockManager,
     inAppLoginManager: InAppLoginManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
+    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
 ) : LoginLockBaseDataProvider<LoginPasswordContract.Presenter>(
-    lockManager, successIntentFactory, inAppLoginManager,
-    sessionManager, bySessionUsageLogRepository
+    lockManager,
+    successIntentFactory,
+    inAppLoginManager,
+    sessionManager,
+    bySessionUsageLogRepository
 ),
     LoginPasswordContract.DataProvider {
 
@@ -94,6 +90,8 @@ class LoginPasswordDataProvider @Inject constructor(
             registeredUserDevice?.let { logger = loggerFactory.create(it, it.toVerification()) }
         }
 
+    var authTicket: String? = null
+
     private lateinit var logger: LoginPasswordLogger
 
     override val username: String
@@ -101,48 +99,32 @@ class LoginPasswordDataProvider @Inject constructor(
 
     override val loginHistory: List<String> by lazy { globalPreferencesManager.getUserListHistory() }
 
-    override val canMakeAccountRecovery: Boolean
-        get() = accountRecovery.isSetUpForUser(username) &&
-                sessionRestorer.canRestoreSession(
-                    username,
-                    registeredUserDevice!!.serverKey,
-                    acceptLoggedOut = true
-                ) &&
-                
-                cryptoObjectHelper.getEncryptCipher(CryptoObjectHelper.BiometricsSeal(username)) is CryptoObjectHelper.CipherInitResult.Success
+    override val canMakeBiometricRecovery: Boolean
+        get() = biometricRecovery.isSetUpForUser(username) &&
+            sessionRestorer.canRestoreSession(
+                username,
+                registeredUserDevice!!.serverKey,
+                acceptLoggedOut = true
+            ) &&
+            
+            cryptoObjectHelper.getEncryptCipher(CryptoObjectHelper.BiometricsSeal(username)) is CryptoObjectHelper.CipherInitResult.Success
 
-    override fun onShow() = logger.logLand(lockSetting.allowBypass)
-
-    override fun onBack() = logger.logBack()
-
-    override fun loginIssuesClicked() = logger.logLoginIssuesClicked()
-    override fun loginHelpShown() = logger.logLoginIssuesShown()
-    override fun onClickForgotButton() = logger.logPasswordForgot()
     override fun onPromptBiometricForRecovery() {
-        accountRecovery.logger.logPromptBiometricForRecovery(UsageLogConstant.ViewType.login)
+        biometricRecovery.logger.logPromptBiometricForRecovery(UsageLogConstant.ViewType.login)
         userPreferencesManager.isMpResetRecoveryStarted = true
     }
 
-    override fun onGoToChangeMP() = accountRecovery.logger.logGoToChangeMP(UsageLogConstant.ViewType.login)
-
-    override fun passwordVisibilityToggled(passwordShown: Boolean) = logger.logPasswordVisibilityToggle(passwordShown)
+    override fun onGoToChangeMP() = biometricRecovery.logger.logGoToChangeMP(UsageLogConstant.ViewType.login)
 
     override fun loginHelp(): Intent {
-        logger.logLoginHelp()
-        return HelpCenterLink.ARTICLE_CANNOT_LOGIN.newIntent(presenter.context!!, false)
+        return HelpCenterLink.ARTICLE_CANNOT_LOGIN.newIntent(presenter.context!!, viewLogger, false)
     }
 
     override fun passwordForgotten(): Intent {
-        logger.logPasswordHelp()
-        return HelpCenterLink.ARTICLE_FORGOT_PASSWORD.newIntent(presenter.context!!, false)
+        return HelpCenterLink.ARTICLE_FORGOT_PASSWORD.newIntent(presenter.context!!, viewLogger, false)
     }
 
     override suspend fun changeAccount(email: String?): Intent {
-        if (email == null) {
-            logger.logAccountChange()
-        } else {
-            logger.logAccountSwitch()
-        }
         return changeAccountHelper.execute(email)
     }
 
@@ -161,14 +143,18 @@ class LoginPasswordDataProvider @Inject constructor(
         }
     }
 
-    override fun getChangeMPIntent(): Intent? = if (accountRecovery.isFeatureAvailable) {
-        successIntentFactory.createAccountRecoveryIntent()
+    override fun getChangeMPIntent(): Intent? = if (biometricRecovery.isFeatureAvailable) {
+        successIntentFactory.createBiometricRecoveryIntent()
     } else {
         null
     }
 
+    override fun getAccountRecoveryKeyIntent(): Intent? {
+        return registeredUserDevice?.let { successIntentFactory.createAccountRecoveryKeyIntent(it, authTicket) }
+    }
+
     override suspend fun validatePassword(password: CharSequence, leaveAfterSuccess: Boolean):
-            LoginPasswordContract.SuccessfulLogin {
+        LoginPasswordContract.SuccessfulLogin {
         if (password.isEmpty()) {
             handleEmptyPassword()
         }
@@ -176,32 +162,35 @@ class LoginPasswordDataProvider @Inject constructor(
         sessionManager.session
             ?.takeIf { it.userId == device.login }
             ?.let { return validateSessionPassword(AppKey.Password(password, device.serverKey)) }
-        logLoadAccountStart()
         return try {
             val result = passwordRepository.validate(device, password.encodeUtf8ToObfuscated())
             if (result is AuthenticationPasswordRepository.Result.Remote) {
                 
                 registeredUserDevice = result.registeredUserDevice
-                logger.logRegisteredWithBackupToken()
             }
             handlePasswordSuccess(result, leaveAfterSuccess)
         } catch (e: AuthenticationException) {
-            if (device is RegisteredUserDevice.ToRestore) {
-                
-                
-                logger.logRegisterWithBackupTokenError()
-            }
             when (e) {
                 is AuthenticationEmptyPasswordException -> handleEmptyPassword(e)
                 is AuthenticationInvalidPasswordException -> handleInvalidPasswordError(e)
                 is AuthenticationDeviceCredentialsInvalidException -> handleRemoteDeletion(e)
-                else -> handleNetworkError(e)
+                else -> {
+                    handleNetworkError(e)
+                }
             }
         }
     }
 
+    override suspend fun getAccountRecoveryKeyStatus(): AccountRecoveryStatus {
+        return registeredUserDevice?.let {
+            loginAccountRecoveryKeyRepository.getAccountRecoveryStatus(it)
+                .getOrElse { throwable ->
+                    AccountRecoveryStatus(false)
+                }
+        } ?: AccountRecoveryStatus(false)
+    }
+
     override fun askMasterPasswordLater() {
-        logger.logAskMasterPasswordLater()
         lockManager.resetLockoutTime()
     }
 
@@ -227,6 +216,7 @@ class LoginPasswordDataProvider @Inject constructor(
                 result,
                 leaveAfterSuccess
             )
+
             is AuthenticationPasswordRepository.Result.Remote -> handleRemotePasswordSuccess(result)
         }
 
@@ -234,7 +224,6 @@ class LoginPasswordDataProvider @Inject constructor(
         result: AuthenticationPasswordRepository.Result.Local,
         leaveAfterSuccess: Boolean
     ): LoginPasswordContract.SuccessfulLogin {
-        logD { "Validated local account UKI" }
         val sessionResult = sessionManager.loadSession(
             Username.ofEmail(username),
             result.password,
@@ -268,7 +257,7 @@ class LoginPasswordDataProvider @Inject constructor(
         val successfulLogin = handleSuccessfulLogin(result, intent)
 
         if (!shouldLaunchInitialSync) {
-            DataSync.sync(UsageLogCode134.Origin.LOGIN)
+            dataSync.sync(Trigger.LOGIN)
         }
 
         return successfulLogin
@@ -280,6 +269,7 @@ class LoginPasswordDataProvider @Inject constructor(
             strategy == DEVICE_LIMIT -> successIntentFactory.createDeviceLimitIntent(loginStrategy.devices)
             strategy == MONOBUCKET && userPreferencesManager.ukiRequiresMonobucketConfirmation ->
                 successIntentFactory.createMonobucketIntent(loginStrategy.monobucketHelper.getMonobucketOwner()!!)
+
             strategy == ENFORCE_2FA -> successIntentFactory.createEnforce2faLimitActivityIntent()
             else -> successIntentFactory.createLoginBiometricSetupIntent()
         }
@@ -322,7 +312,6 @@ class LoginPasswordDataProvider @Inject constructor(
         result: AuthenticationPasswordRepository.Result.Remote,
         session: Session
     ): LoginPasswordContract.SuccessfulLogin {
-        logger.logUserStatus(result.userExistsStatus, deviceInfoRepository.anonymousDeviceId)
         
         deviceLimitActivityListener.isFirstLogin = true
         enforce2faLimiter.isFirstLogin = true
@@ -334,6 +323,7 @@ class LoginPasswordDataProvider @Inject constructor(
                     userPreferencesManager.ukiRequiresMonobucketConfirmation = true
                     successIntentFactory.createMonobucketIntent(loginStrategy.monobucketHelper.getMonobucketOwner()!!)
                 }
+
                 ENFORCE_2FA -> successIntentFactory.createEnforce2faLimitActivityIntent()
                 else -> successIntentFactory.createLoginBiometricSetupIntent()
             }
@@ -345,10 +335,7 @@ class LoginPasswordDataProvider @Inject constructor(
         credentials: AuthenticationPasswordRepository.Result,
         intent: Intent?
     ): LoginPasswordContract.SuccessfulLogin {
-        logD { "Password validated, login was successful." }
-        logger.logPasswordSuccess(presenter.activity!!.intent)
         val username = credentials.login
-        userSupportFileLogger.add("mp correct: $username")
         lockManager.unlock(LockPass.ofPassword(credentials.password))
         return LoginPasswordContract.SuccessfulLogin(intent)
     }
@@ -359,8 +346,7 @@ class LoginPasswordDataProvider @Inject constructor(
     }
 
     private fun handleInvalidPasswordError(cause: AuthenticationInvalidPasswordException): Nothing {
-        userSupportFileLogger.add("mp error: $username")
-        if (canMakeAccountRecovery) {
+        if (canMakeBiometricRecovery) {
             logger.logPasswordInvalidWithRecovery()
         } else {
             logger.logPasswordInvalid()
@@ -371,7 +357,6 @@ class LoginPasswordDataProvider @Inject constructor(
     private suspend fun handleRemoteDeletion(
         cause: AuthenticationDeviceCredentialsInvalidException
     ): Nothing {
-        logger.logAccountReset()
         dataReset.clearData(
             Username.ofEmail(username),
             when {
@@ -388,15 +373,6 @@ class LoginPasswordDataProvider @Inject constructor(
         throw LoginBaseContract.OfflineException(e)
     }
 
-    private fun logLoadAccountStart() {
-        val device = registeredUserDevice ?: return
-        if (device is RegisteredUserDevice.Remote) {
-            performanceRemoteLogger.logStart()
-        } else if (device is RegisteredUserDevice.Local) {
-            performanceLocalLogger.logStart()
-        }
-    }
-
     private fun createMigrationToSsoMemberIntent() = migrationToSsoMemberInfoProvider?.invoke()?.run {
         successIntentFactory.createMigrationToSsoMemberIntent(
             login = login,
@@ -407,20 +383,13 @@ class LoginPasswordDataProvider @Inject constructor(
     }
 }
 
-val AuthenticationPasswordRepository.Result.userExistsStatus: UserAccountStatus
-    get() = when {
-        securityFeatures.contains(SecurityFeature.EMAIL_TOKEN) -> UserAccountStatus.YES
-        securityFeatures.contains(SecurityFeature.TOTP) ->
-            if (password.isServerKeyNotNull) UserAccountStatus.YES_OTP_LOGIN else UserAccountStatus.YES_OTP_NEWDEVICE
-        else -> UserAccountStatus.YES 
-    }
-
 private fun RegisteredUserDevice.toVerification() = when (this) {
     is RegisteredUserDevice.Local -> if (isServerKeyRequired) {
         VerificationMode.OTP2
     } else {
         VerificationMode.NONE
     }
+
     is RegisteredUserDevice.ToRestore -> VerificationMode.EMAIL_TOKEN
     is RegisteredUserDevice.Remote -> when {
         SecurityFeature.TOTP in securityFeatures -> VerificationMode.OTP1

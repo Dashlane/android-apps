@@ -6,6 +6,7 @@ import com.dashlane.debug.DaDaDa
 import com.dashlane.server.api.UserAgent.Companion.PARTNER
 import com.dashlane.server.api.UserAgent.Companion.PLATFORM
 import com.dashlane.server.api.UserAgentProvider
+import com.dashlane.util.Constants
 import javax.inject.Inject
 
 class UserAgentProviderImpl @Inject constructor(private val dadada: DaDaDa) : UserAgentProvider {
@@ -17,4 +18,6 @@ class UserAgentProviderImpl @Inject constructor(private val dadada: DaDaDa) : Us
         get() = PARTNER
     override val platform: String
         get() = PLATFORM
+    override val language: String
+        get() = Constants.getOSLang()
 }

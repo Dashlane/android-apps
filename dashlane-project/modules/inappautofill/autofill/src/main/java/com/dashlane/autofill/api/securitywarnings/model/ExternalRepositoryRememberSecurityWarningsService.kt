@@ -11,8 +11,6 @@ import com.dashlane.vault.model.urlForUsageLog
 import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
 
-
-
 class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
     private val repository: RememberSecurityWarningsRepository
 ) : RememberSecurityWarningsService {
@@ -69,7 +67,8 @@ class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
             },
             urlDomainFlow = {
                 Item.UrlMatchItem(it)
-            })
+            }
+        )
     }
 
     private fun buildSource(formSource: AutoFillFormSource): Source? {

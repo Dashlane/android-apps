@@ -34,8 +34,11 @@ fun ItemGroup.getUserGroupMembers(
     return groups?.filter {
         it.groupId in groupIds
     }?.let { result ->
-        if (onlyAcceptedOrPending) result.filter { it.isAcceptedOrPending }
-        else result
+        if (onlyAcceptedOrPending) {
+            result.filter { it.isAcceptedOrPending }
+        } else {
+            result
+        }
     } ?: emptyList()
 }
 
@@ -68,8 +71,6 @@ fun ItemGroup.isUserAccepted(username: String): Boolean =
 fun ItemGroup.isUserAcceptedOrPending(username: String): Boolean =
     getUser(username)?.isAcceptedOrPending == true
 
-
-
 fun ItemGroup.canLostAccess(login: String, userGroups: List<UserGroup>): Boolean {
     val userGroupMembers = getUserGroupMembers(userGroups, true)
     if (userGroupMembers.isNotEmpty()) {
@@ -77,8 +78,6 @@ fun ItemGroup.canLostAccess(login: String, userGroups: List<UserGroup>): Boolean
     }
     return canLostAccessBecauseOfUsers(login)
 }
-
-
 
 private fun ItemGroup.canLostAccessBecauseOfUsers(login: String): Boolean {
     val me = getUser(login) ?: return true

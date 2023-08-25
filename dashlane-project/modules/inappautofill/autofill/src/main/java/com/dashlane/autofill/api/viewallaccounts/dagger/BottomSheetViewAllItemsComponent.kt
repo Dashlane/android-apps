@@ -6,8 +6,6 @@ import com.dashlane.autofill.api.viewallaccounts.view.AutofillViewAllItemsActivi
 import dagger.BindsInstance
 import dagger.Component
 
-
-
 @BottomSheetViewAllItemsScope
 @Component(
     modules = [

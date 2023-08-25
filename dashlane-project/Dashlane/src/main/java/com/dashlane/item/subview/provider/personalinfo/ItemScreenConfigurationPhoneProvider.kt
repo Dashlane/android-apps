@@ -31,8 +31,6 @@ import com.dashlane.vault.model.isNotSemanticallyNull
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
-
-
 class ItemScreenConfigurationPhoneProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     mainDataAccessor: MainDataAccessor,
@@ -40,8 +38,10 @@ class ItemScreenConfigurationPhoneProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider(
-    teamspaceAccessor, mainDataAccessor.getDataCounter(),
-    sessionManager, bySessionUsageLogRepository
+    teamspaceAccessor,
+    mainDataAccessor.getDataCounter(),
+    sessionManager,
+    bySessionUsageLogRepository
 ) {
 
     @Suppress("UNCHECKED_CAST")
@@ -155,8 +155,10 @@ class ItemScreenConfigurationPhoneProvider(
     ): ItemSubView<*> {
         val phoneTypeHeader = context.getString(R.string.type)
         val phoneTypeList = SyncObject.Phone.Type.values().map { context.getString(it.getStringId()) }
-        val selectedType = (item.syncObject.type
-            ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE).let { context.getString(it.getStringId()) }
+        val selectedType = (
+            item.syncObject.type
+            ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE
+        ).let { context.getString(it.getStringId()) }
         return when {
             editMode -> ItemEditValueListSubView(
                 phoneTypeHeader,

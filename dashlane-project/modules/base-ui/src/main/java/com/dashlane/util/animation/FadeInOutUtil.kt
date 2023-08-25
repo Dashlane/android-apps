@@ -14,7 +14,8 @@ fun View?.fadeOut() {
                     super.onAnimationEnd(animation)
                     this@fadeOut.visibility = View.GONE
                 }
-            })
+            }
+        )
 }
 
 fun View?.fadeIn() {

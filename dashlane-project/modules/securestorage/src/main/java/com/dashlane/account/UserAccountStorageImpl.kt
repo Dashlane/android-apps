@@ -8,11 +8,8 @@ import com.dashlane.session.Username
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import javax.inject.Inject
 
-
-
 class UserAccountStorageImpl @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
-    private val dataLossTrackingListener: UserAccountStorage.DataLossTrackingListener? = null,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val deviceInfoRepository: DeviceInfoRepository
 ) : UserAccountStorage {
@@ -30,17 +27,14 @@ class UserAccountStorageImpl @Inject constructor(
         val newAccessKey = userAccountInfo.accessKey
         if (oldAccessKey.isNullOrEmpty()) {
             
-            dataLossTrackingListener?.logUserSupportFile("Initialize access key")
             preferences.accessKey = newAccessKey
         } else {
             
             if (oldAccessKey != newAccessKey) {
                 if (allowOverwriteAccessKey) {
                     
-                    dataLossTrackingListener?.logUserSupportFile("Force overwrite access key")
                     preferences.accessKey = newAccessKey
                 } else {
-                    dataLossTrackingListener?.logUserSupportFile("Attempted to overwrite access key")
                     val illegalStateException = IllegalStateException("Attempted to overwrite access key")
                     throw illegalStateException
                 }
@@ -54,23 +48,20 @@ class UserAccountStorageImpl @Inject constructor(
         userSecureStorageManager.storeSecretKey(session, session.secretKey)
     }
 
-    
-
     override fun get(username: Username): UserAccountInfo? {
         val ukiStored = userSecureStorageManager.isSecretKeyStored(username)
-        dataLossTrackingListener?.logUserSupportFile("read local data for '$username', uki: '$ukiStored'")
         return if (ukiStored) {
             val preferences = userPreferencesManager.preferencesFor(username)
             val userIsOTP2 = preferences.getBoolean(ConstantsPrefs.OTP2SECURITY)
             
             val securitySettingsFlags = preferences.getLong(ConstantsPrefs.SECURITY_SETTINGS).toInt()
             val securitySettings = if (securitySettingsFlags == 0) null else UserSecuritySettings(securitySettingsFlags)
-            val accessKey = preferences.accessKey ?: deviceInfoRepository.deviceId
+            val accessKey = preferences.accessKey ?: deviceInfoRepository.deviceId ?: return null
 
-            dataLossTrackingListener?.logUserSupportFile(
-                "account info for '$username', " +
-                        "userIsOTP2: $userIsOTP2, " +
-                        "null accessKey in preferences? ${preferences.accessKey == null}"
+                "account info for '$username'," +
+                    " userIsOTP2: $userIsOTP2, " +
+                    "null accessKey in preferences? ${preferences.accessKey == null}",
+                logToUserSupportFile = true
             )
             UserAccountInfo(username.email, userIsOTP2, securitySettings, accessKey)
         } else {

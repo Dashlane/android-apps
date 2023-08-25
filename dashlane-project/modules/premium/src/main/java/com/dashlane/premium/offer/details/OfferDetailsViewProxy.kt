@@ -103,8 +103,6 @@ internal class OfferDetailsViewProxy(
         }
     }
 
-    
-
     private fun showOfferDetails(offerDetails: OfferDetails) {
         setItems(warning = offerDetails.warning, benefits = offerDetails.benefits)
         setProducts(offerDetails)

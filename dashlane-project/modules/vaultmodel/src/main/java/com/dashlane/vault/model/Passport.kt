@@ -26,7 +26,8 @@ fun createPassport(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.Passport>.copySyncObject(builder: SyncObject.Passport.Builder.() -> Unit = {}):

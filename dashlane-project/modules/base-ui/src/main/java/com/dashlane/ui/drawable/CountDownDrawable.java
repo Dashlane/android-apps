@@ -13,8 +13,6 @@ import android.graphics.drawable.Drawable;
 import com.dashlane.ui.R;
 
 
-
-
 public class CountDownDrawable extends Drawable implements Animatable, Runnable {
 
     private final RectF mRectTemp = new RectF();

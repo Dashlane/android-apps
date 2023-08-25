@@ -3,18 +3,21 @@ package com.dashlane.autofill.api.changepause.presenter
 import com.dashlane.autofill.api.changepause.ChangePauseContract
 import com.dashlane.autofill.api.changepause.model.ChangePauseModel
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
+import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 class ChangePausePresenter @Inject constructor(
-    private val dataProvider: ChangePauseContract.DataProvider
+    private val dataProvider: ChangePauseContract.DataProvider,
+    @FragmentLifecycleCoroutineScope
+    private val coroutineScope: CoroutineScope,
+    @MainCoroutineDispatcher
+    private val mainDispatcher: CoroutineDispatcher
 ) : ChangePauseContract.Presenter, ChangePauseContract.DataProvider.Responses {
     private var view: ChangePauseContract.View? = null
-    private var viewCoroutineScope: CoroutineScope? = null
 
     init {
         dataProvider.bindResponses(this)
@@ -22,13 +25,12 @@ class ChangePausePresenter @Inject constructor(
 
     private var actionDoneAfterView: Boolean = false
 
-    override fun setView(view: ChangePauseContract.View, viewCoroutineScope: CoroutineScope) {
+    override fun setView(view: ChangePauseContract.View) {
         this.view = view
-        this.viewCoroutineScope = viewCoroutineScope
         actionDoneAfterView = false
     }
 
-    override fun onResume() {
+    override fun onResume(autoFillFormSource: AutoFillFormSource) {
         updateView {
             val actionDoneAfterView = this.actionDoneAfterView
             this.actionDoneAfterView = true
@@ -43,15 +45,15 @@ class ChangePausePresenter @Inject constructor(
                 it.updatePause(actionsSourcesModel)
             } else {
                 it.startLoading()
-                dataProvider.loadPause()
+                dataProvider.loadPause(autoFillFormSource)
             }
         }
     }
 
-    override fun onTogglePause() {
+    override fun onTogglePause(autoFillFormSource: AutoFillFormSource) {
         updateView {
             it.startLoading()
-            dataProvider.togglePause()
+            dataProvider.togglePause(autoFillFormSource)
         }
     }
 
@@ -89,13 +91,9 @@ class ChangePausePresenter @Inject constructor(
         }
     }
 
-    
-
     private fun updateView(block: suspend (ChangePauseContract.View) -> Unit = {}) {
         val view = this.view ?: return
-        val viewScope = this.viewCoroutineScope ?: return
-
-        viewScope.launch(Dispatchers.Main) {
+        coroutineScope.launch(mainDispatcher) {
             block(view)
         }
     }

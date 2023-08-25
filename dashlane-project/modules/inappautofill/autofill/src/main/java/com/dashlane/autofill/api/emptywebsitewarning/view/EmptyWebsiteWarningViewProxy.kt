@@ -38,7 +38,8 @@ class EmptyWebsiteWarningViewProxy @Inject constructor(
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View? {
         val view = inflater.inflate(
-            R.layout.bottom_sheet_empty_website_warning_dialog_fragment, container,
+            R.layout.bottom_sheet_empty_website_warning_dialog_fragment,
+            container,
             false
         )
         initView(view)
@@ -56,7 +57,6 @@ class EmptyWebsiteWarningViewProxy @Inject constructor(
                 accountName.text = result.title
                 accountEmail.text = result.login
             }
-            presenter.onDisplay(website)
         }
     }
 
@@ -76,7 +76,6 @@ class EmptyWebsiteWarningViewProxy @Inject constructor(
     }
 
     override fun onCancel() {
-        presenter.onCancel(this.website)
         emptyWebsiteWarningActivity.onNoResult()
     }
 
@@ -89,14 +88,12 @@ class EmptyWebsiteWarningViewProxy @Inject constructor(
             }
             val toastMessage = emptyWebsiteWarningActivity.applicationContext?.getString(
                 R.string.autofill_empty_website_toast,
-                result.title
+                result.syncObject.title
             )
             toaster.show(toastMessage, Toast.LENGTH_SHORT)
             emptyWebsiteWarningActivity.onAutofillResult(result)
         }
     }
-
-    
 
     private fun handleError() {
         toaster.show(R.string.error, Toast.LENGTH_SHORT)

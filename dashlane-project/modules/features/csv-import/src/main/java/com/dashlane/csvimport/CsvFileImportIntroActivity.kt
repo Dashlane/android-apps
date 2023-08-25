@@ -21,7 +21,6 @@ import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.useractivity.log.inject.UserActivityComponent
-import com.dashlane.useractivity.log.usage.UsageLogCode57
 import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.util.ActivityResultContractCompat
 import com.dashlane.util.setCurrentPageView
@@ -59,7 +58,7 @@ class CsvFileImportIntroActivity : DashlaneActivity() {
                     finish()
                 }
                 Intents.CSV_IMPORT_RESULT_ADD_INDIVIDUALLY -> {
-                    navigator.goToCredentialAddStep1(UsageLogCode57.Sender.MANUAL_AFTER_NO_CHROME_CREDENTIAL_FOUND.code)
+                    navigator.goToCredentialAddStep1(null)
                     finish()
                 }
             }
@@ -87,7 +86,7 @@ class CsvFileImportIntroActivity : DashlaneActivity() {
         val getContentResultLauncher = registerForActivityResult(object : ActivityResultContractCompat<Unit>() {
             override fun createIntent(context: Context, input: Unit): Intent =
                 Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = "text/*"
+                    type = "\1/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                     putExtra(Intent.EXTRA_LOCAL_ONLY, true)
                 }

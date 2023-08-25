@@ -15,8 +15,6 @@ import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import javax.inject.Inject
 
-
-
 class HasEnforced2FaLimitUseCaseImpl @Inject constructor(
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
     private val auth2faSettingsService: Auth2faSettingsService,
@@ -28,7 +26,7 @@ class HasEnforced2FaLimitUseCaseImpl @Inject constructor(
     override suspend fun invoke(session: Session, hasTotpSetupFallback: Boolean?): Boolean {
         return if (hasFeature && teamspaceAccessorProvider.get().is2FAEnforced()) {
             try {
-                !hasTotpSetup(session)
+                shouldEnforce2FA(session)
             } catch (e: DashlaneApiException) {
                 
                 hasTotpSetupFallback == false
@@ -39,13 +37,13 @@ class HasEnforced2FaLimitUseCaseImpl @Inject constructor(
     }
 
     @Throws(DashlaneApiException::class)
-    private suspend fun hasTotpSetup(session: Session): Boolean {
+    private suspend fun shouldEnforce2FA(session: Session): Boolean {
         val response = auth2faSettingsService.execute(userAuthorization = session.authorization)
         return when (response.data.type) {
-            TOTP_LOGIN -> true
-            TOTP_DEVICE_REGISTRATION -> true
-            EMAIL_TOKEN -> false
+            TOTP_LOGIN -> false
+            TOTP_DEVICE_REGISTRATION -> false
             SSO -> false
+            EMAIL_TOKEN -> true
         }
     }
 }

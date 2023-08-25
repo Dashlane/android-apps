@@ -4,8 +4,6 @@ import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 
-
-
 interface AutofillFormSourcesStrings {
     val applicationTypeString: String
     val websiteTypeString: String

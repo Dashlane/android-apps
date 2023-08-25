@@ -25,9 +25,9 @@ import com.dashlane.util.graphics.RoundRectDrawable
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.xml.domain.SyncObject
-import com.dashlane.xml.domain.SyncObjectType
-
-
+import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices
+import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps
+import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices.AssociatedDomains
 
 abstract class ItemScreenConfigurationProvider(
     teamspaceAccessor: TeamspaceAccessor,
@@ -36,11 +36,7 @@ abstract class ItemScreenConfigurationProvider(
     bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
 ) {
 
-    
-
     open val logger: Logger = BaseLogger(teamspaceAccessor, dataCounter, sessionManager, bySessionUsageLogRepository)
-
-    
 
     abstract fun createScreenConfiguration(
         context: Context,
@@ -50,8 +46,6 @@ abstract class ItemScreenConfigurationProvider(
         canDelete: Boolean,
         listener: ItemEditViewContract.View.UiUpdateListener
     ): ScreenConfiguration
-
-    
 
     fun hasEnoughDataToSave(
         itemToSave: VaultItem<*>,
@@ -66,8 +60,6 @@ abstract class ItemScreenConfigurationProvider(
         }
         return true
     }
-
-    
 
     open fun gatherFromUi(
         item: VaultItem<*>,
@@ -86,7 +78,9 @@ abstract class ItemScreenConfigurationProvider(
         return updatedItem
     }
 
-    @Suppress("UNCHECKED_CAST")
+    open fun gatherCollectionsFromUi(collectionSubView: ItemCollectionListSubView?) =
+        collectionSubView?.value?.value ?: emptyList()
+
     private fun updateItemFromSubView(updatedItem: VaultItem<*>, subView: ItemSubView<*>): VaultItem<*>? {
         return when (subView) {
             is ItemEditValueSubView -> subView.updateValue(updatedItem)
@@ -95,8 +89,12 @@ abstract class ItemScreenConfigurationProvider(
                 subView.linkedWebsites,
                 subView.linkedApps
             )
-            is EmptyLinkedServicesSubView -> updateLinkedServices(updatedItem, emptyList(), emptyList())
-            is ItemSubViewWithActionWrapper -> updateItemFromSubView(updatedItem, subView.itemSubView)
+
+            is EmptyLinkedServicesSubView -> updateLinkedServices(updatedItem)
+            is ItemSubViewWithActionWrapper -> updateItemFromSubView(
+                updatedItem,
+                subView.itemSubView
+            )
             else -> null
         }
     }
@@ -104,20 +102,27 @@ abstract class ItemScreenConfigurationProvider(
     @Suppress("UNCHECKED_CAST")
     private fun updateLinkedServices(
         item: VaultItem<*>,
-        temporaryWebsites: List<SyncObject.Authentifiant.LinkedServices.AssociatedDomains>?,
-        temporaryApps: List<SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps>?,
+        temporaryWebsites: List<AssociatedDomains>? = null,
+        temporaryApps: List<AssociatedAndroidApps>? = null
     ): VaultItem<SyncObject.Authentifiant>? {
-        if (item.syncObjectType == SyncObjectType.AUTHENTIFIANT) {
-            item as VaultItem<SyncObject.Authentifiant>
-            val linkedServices = SyncObject.Authentifiant.LinkedServices(temporaryApps, temporaryWebsites)
-            return item.copySyncObject {
-                this.linkedServices = linkedServices
-            }
+        item as? VaultItem<SyncObject.Authentifiant> ?: return null
+        val linkedServices = if (temporaryApps == null && temporaryWebsites == null) {
+            null
+        } else {
+            LinkedServices(temporaryApps, temporaryWebsites)
         }
-        return null
-    }
+        return when {
+            linkedServices == null && (
+                item.syncObject.linkedServices == null || item.syncObject.linkedServices == LinkedServices(
+                null,
+                null
+            )
+            ) -> item
 
-    
+            item.syncObject.linkedServices == linkedServices -> item
+            else -> item.copySyncObject { this.linkedServices = linkedServices }
+        }
+    }
 
     open fun onSetupEnd(
         context: Context,
@@ -129,27 +134,17 @@ abstract class ItemScreenConfigurationProvider(
         
     }
 
-    
-
     protected open fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         return true
     }
 
-    
-
     open fun saveAdditionalData() = bundleOf()
 
-    
-
     open fun restoreAdditionalData(data: Bundle) = Unit 
-
-    
 
     fun createMenus(): List<MenuAction> {
         return mutableListOf()
     }
-
-    
 
     fun createDefaultHeaderIcon(
         context: Context,

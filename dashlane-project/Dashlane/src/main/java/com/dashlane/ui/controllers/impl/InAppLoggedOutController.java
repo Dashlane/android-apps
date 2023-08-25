@@ -7,19 +7,14 @@ import com.dashlane.ui.DashlaneBubble;
 import com.dashlane.ui.DashlaneInAppLoggedOut;
 import com.dashlane.ui.controllers.interfaces.DashlaneBubbleController;
 import com.dashlane.ui.utils.DashlaneSubwindowPositionUtils;
-import com.dashlane.useractivity.log.install.InstallLogRepository;
-import com.dashlane.useractivity.log.inject.UserActivityComponent;
-import com.dashlane.useractivity.log.install.InstallLogCode42;
 
 import wei.mark.standout.StandOutWindow;
 import wei.mark.standout.ui.Window;
 
-
-
 public class InAppLoggedOutController implements DashlaneBubbleController {
 
     private boolean isWindowOpened = false;
-    private String mPackageName;
+    private final String mPackageName;
 
     public InAppLoggedOutController(String mPackageName) {
         super();
@@ -30,9 +25,6 @@ public class InAppLoggedOutController implements DashlaneBubbleController {
     public boolean onBubbleClicked(Context context, int id, Window window) {
         if (isWindowOpened) {
             isWindowOpened = false;
-
-            log(context, InstallLogCode42.Action.CLOSE_WEBCARD);
-
             StandOutWindow.closeAll(context, DashlaneInAppLoggedOut.class);
         } else {
             isWindowOpened = true;
@@ -47,15 +39,8 @@ public class InAppLoggedOutController implements DashlaneBubbleController {
             StandOutWindow.sendData(context, DashlaneInAppLoggedOut.class, DashlaneInAppLoggedOut.WINDOW_ID, 0,
                                     packageNameForwarder, DashlaneBubble.class, id);
 
-            log(context, InstallLogCode42.Action.CLIC_IMPALA);
         }
         return true;
-    }
-
-    private void log(Context context, InstallLogCode42.Action action) {
-        InstallLogRepository installLogRepository =
-                UserActivityComponent.Companion.invoke(context).getInstallLogRepository();
-        new InAppLoggedOutControllerLogger(installLogRepository).log(mPackageName, action);
     }
 
     @Override

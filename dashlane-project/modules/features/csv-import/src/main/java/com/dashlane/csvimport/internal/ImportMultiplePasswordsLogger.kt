@@ -6,8 +6,6 @@ import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.useractivity.log.usage.UsageLogRepository
 import javax.inject.Inject
 
-
-
 class ImportMultiplePasswordsLogger(
     private val usageLogRepository: UsageLogRepository?,
     private val origin: UsageLogCode75.Origin? = null,

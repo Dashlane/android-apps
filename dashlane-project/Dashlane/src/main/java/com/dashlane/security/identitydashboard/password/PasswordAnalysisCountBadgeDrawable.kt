@@ -15,8 +15,6 @@ import com.dashlane.R
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-
-
 class PasswordAnalysisCountBadgeDrawable(
     context: Context,
     indicator: Int,
@@ -25,7 +23,8 @@ class PasswordAnalysisCountBadgeDrawable(
 
     private val textPaint = TextPaint().apply {
         textSize = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_SP, 12F,
+            TypedValue.COMPLEX_UNIT_SP,
+            12F,
             context.resources.displayMetrics
         )
         color = context.getColor(
@@ -50,11 +49,13 @@ class PasswordAnalysisCountBadgeDrawable(
     private val textToDisplay = indicator.toString()
     private val textWidth = textPaint.measureText(textToDisplay)
     private val textMarginTopBottom = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP, 3F,
+        TypedValue.COMPLEX_UNIT_DIP,
+        3F,
         context.resources.displayMetrics
     )
     private val textMarginLeftRight = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP, 6F,
+        TypedValue.COMPLEX_UNIT_DIP,
+        6F,
         context.resources.displayMetrics
     )
 

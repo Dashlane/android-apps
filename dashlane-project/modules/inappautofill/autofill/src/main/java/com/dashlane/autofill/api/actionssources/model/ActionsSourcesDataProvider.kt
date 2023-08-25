@@ -4,26 +4,19 @@ import com.dashlane.autofill.api.actionssources.AutofillActionsSourcesLogger
 import com.dashlane.autofill.api.internal.ApplicationFormSourceDeviceStatus
 import com.dashlane.autofill.api.internal.AutofillFormSourcesStrings
 import com.dashlane.autofill.api.pause.services.RemovePauseContract
-import com.dashlane.autofill.api.rememberaccount.model.FormSourcesDataProvider
 import com.dashlane.autofill.api.util.formSourceIdentifier
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.core.helpers.PackageSignatureStatus
-import com.dashlane.ext.application.KnownApplication
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import java.util.Locale
 import javax.inject.Inject
 
-
-
 class ActionsSourcesDataProvider @Inject constructor(
-    private val formSourcesDataProvider: FormSourcesDataProvider,
     private val removePauseContract: RemovePauseContract,
     private val autofillFormSourcesStrings: AutofillFormSourcesStrings,
     private val applicationFormSourceDeviceStatus: ApplicationFormSourceDeviceStatus,
-    private val actionsSourcesLogger: AutofillActionsSourcesLogger,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val actionsSourcesLogger: AutofillActionsSourcesLogger
 ) {
 
     private val items: MutableList<ActionedFormSource> = mutableListOf()
@@ -53,28 +46,17 @@ class ActionsSourcesDataProvider @Inject constructor(
     }
 
     internal suspend fun getAllFormSource(): List<ActionedFormSource> {
-        val linkedFormSources =
-            if (userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.LINKED_WEBSITES_IN_CONTEXT)) {
-                listOf()
-            } else {
-                formSourcesDataProvider.getAllLinkedFormSources().map { it.autoFillFormSource }
-            }
         val pauseFormSources = removePauseContract.getAllPausedFormSources().map { it.autoFillFormSource }
-
-        return pauseFormSources.union(linkedFormSources)
-            .map {
-                val icon = it.getIcon()
-                if (icon is ActionedFormSourceIcon.IncorrectSignatureIcon) {
-                    ActionedFormSource(it, it.formSourceIdentifier, it.getKind(), it.getIcon())
-                } else {
-                    ActionedFormSource(it, it.getTitle(), it.getKind(), it.getIcon())
-                }
+        return pauseFormSources.map {
+            val icon = it.getIcon()
+            if (icon is ActionedFormSourceIcon.IncorrectSignatureIcon) {
+                ActionedFormSource(it, it.formSourceIdentifier, it.getKind(), it.getIcon())
+            } else {
+                ActionedFormSource(it, it.getTitle(), it.getKind(), it.getIcon())
             }
-            .filterNot {
-                it.icon is ActionedFormSourceIcon.NotInstalledApplicationIcon
-            }
-            .sortedBy { it.title.lowercase(Locale.getDefault()) }
-            .toList()
+        }.filterNot {
+            it.icon is ActionedFormSourceIcon.NotInstalledApplicationIcon
+        }.sortedBy { it.title.lowercase(Locale.getDefault()) }.toList()
     }
 
     private fun AutoFillFormSource.getTitle(): String {
@@ -94,11 +76,7 @@ class ActionsSourcesDataProvider @Inject constructor(
 
     private fun ApplicationFormSource.getIcon(): ActionedFormSourceIcon {
         val applicationInfo = applicationFormSourceDeviceStatus.getApplicationInfo(this)
-            ?: return ActionedFormSourceIcon.NotInstalledApplicationIcon(
-                KnownApplication.getKnownApplication(
-                    this.packageName
-                )
-            )
+            ?: return ActionedFormSourceIcon.NotInstalledApplicationIcon()
 
         val signatureAssessment = applicationFormSourceDeviceStatus.getSignatureAssessment(this)
 

@@ -21,7 +21,8 @@ fun createCompany(
             this.nafCode = nafcode
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        })
+        }
+    )
 }
 
 fun VaultItem<SyncObject.Company>.copySyncObject(builder: SyncObject.Company.Builder.() -> Unit = {}):

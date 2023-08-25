@@ -9,32 +9,18 @@ import com.dashlane.util.isSemanticallyNull
 import java.time.LocalDate
 import java.time.YearMonth
 
-
-
 interface DataIdentifierListTextFactory {
-
-    
 
     data class StatusText(val text: String, val isWarning: Boolean = false, val textToHighlight: String? = null)
 
-    
-
     fun getLine1(): StatusText
-
-    
 
     fun getLine2(default: StatusText): StatusText
 
-    
-
     fun getLine2FromField(field: SearchField<*>): StatusText?
-
-    
 
     fun LocalDate.getIdentityStatusText(context: Context, number: String?, default: StatusText): StatusText =
         getIdentityStatusText(context, isExpired(), isExpiringSoon(), number, default)
-
-    
 
     fun YearMonth.getIdentityStatusText(context: Context, number: String?, default: StatusText): StatusText =
         getIdentityStatusText(context, isExpired(), isExpiringSoon(), number, default)

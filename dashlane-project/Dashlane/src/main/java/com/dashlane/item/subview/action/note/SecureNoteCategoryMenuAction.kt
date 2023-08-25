@@ -22,8 +22,6 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import java.util.Collections
 
-
-
 class SecureNoteCategoryMenuAction(
     private val context: Context,
     private val genericDataQuery: GenericDataQuery,
@@ -47,7 +45,8 @@ class SecureNoteCategoryMenuAction(
         val selectedCat = allCategories.indexOfFirst { it.id == selectedCategory }
         val dialog = BottomSheetListDialogFragment().apply {
             adapter = SecureNoteCategoryArrayAdapter(
-                activity, R.layout.list_item_secure_note_category,
+                activity,
+                R.layout.list_item_secure_note_category,
                 allCategories.toTypedArray(),
                 if (selectedCat == -1) 0 else selectedCat
             )
@@ -60,7 +59,6 @@ class SecureNoteCategoryMenuAction(
     }
 
     private fun getSecureNoteCategories(context: Context): List<SummaryObject.SecureNoteCategory> {
-
         return mutableListOf<SummaryObject.SecureNoteCategory>().apply {
             add(
                 createSecureNoteCategory(

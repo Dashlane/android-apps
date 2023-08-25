@@ -33,8 +33,6 @@ fun computeStatusBarColor(@ColorInt color: Int): Int {
     return Color.HSVToColor(Color.alpha(color), hsv)
 }
 
-
-
 fun Activity.setLightStatusBar(light: Boolean) {
     WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = light
 }

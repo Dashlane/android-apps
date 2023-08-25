@@ -5,11 +5,7 @@ import com.dashlane.sync.repositories.ServerCredentials
 import com.dashlane.sync.repositories.SyncRepository
 import com.dashlane.sync.vault.SyncVault
 
-
-
 interface TreatProblemManager {
-
-    
 
     suspend fun execute(
         serverCredentials: ServerCredentials,

@@ -15,8 +15,6 @@ import android.widget.LinearLayout;
 import com.dashlane.R;
 import com.dashlane.locking.animations.pincode.PinCodeDotsTranslations;
 
-
-
 public class PinCodeView extends LinearLayout {
 
     private static final int PIN_CODE_LENGTH = 4;

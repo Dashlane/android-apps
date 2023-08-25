@@ -13,7 +13,8 @@ import com.dashlane.util.getThemeAttrColor
 import com.skocken.presentation.viewproxy.BaseViewProxy
 import kotlin.properties.Delegates
 
-abstract class LoginBaseSubViewProxy<T : LoginBaseContract.Presenter>(rootView: View) : BaseViewProxy<T>(rootView),
+abstract class LoginBaseSubViewProxy<T : LoginBaseContract.Presenter>(rootView: View) :
+    BaseViewProxy<T>(rootView),
     LoginBaseContract.View {
 
     val root: ConstraintLayout = findViewByIdEfficient(R.id.view_login_root)!!
@@ -100,7 +101,8 @@ abstract class LoginBaseSubViewProxy<T : LoginBaseContract.Presenter>(rootView: 
             clearError()
         } else {
             errorTextView?.run {
-                setTextColor(context.getThemeAttrColor(R.attr.colorError))
+                
+                setTextColor(context.getColor(R.color.text_danger_quiet_dark_mode))
                 visibility = View.VISIBLE
                 text = error
             }

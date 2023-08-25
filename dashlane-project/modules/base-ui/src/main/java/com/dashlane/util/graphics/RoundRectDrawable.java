@@ -83,8 +83,6 @@ public class RoundRectDrawable extends Drawable implements BackgroundColorDrawab
             strokeColor = Color.WHITE;
         }
 
-        mStrokePaint.setColor(ColorUtils.setAlphaComponent(strokeColor, 0x1a 
-));
 
         invalidateSelf();
     }

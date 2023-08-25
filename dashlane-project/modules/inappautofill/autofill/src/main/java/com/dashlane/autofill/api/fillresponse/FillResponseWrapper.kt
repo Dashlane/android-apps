@@ -9,8 +9,6 @@ import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
 import java.util.LinkedList
 
-
-
 internal class FillResponseWrapper(
     val saveInfo: SaveInfo?,
     var clientState: Bundle?,
@@ -46,8 +44,6 @@ internal class FillResponseWrapper(
             setFooter(remoteViews)
         }
     }
-
-    
 
     class Builder(
         internal val inlineSpecs: LinkedList<InlinePresentationSpec>?,
@@ -188,8 +184,6 @@ internal class FillResponseWrapper(
         private const val FILL_RESPONSE_VISIBLE_CELLS = 3
     }
 }
-
-
 
 fun <E> LinkedList<E>.popOrLast(): E =
     if (this.size > 1) {

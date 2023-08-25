@@ -7,8 +7,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.widgets.view.empty.EmptyScreenConfiguration
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 data class DarkWebEmptyItem(private val emptyScreenConfiguration: EmptyScreenConfiguration) :
     DashlaneRecyclerAdapter.ViewTypeProvider {
 

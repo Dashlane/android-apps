@@ -1,5 +1,6 @@
 package com.dashlane.security.identitydashboard.password
 
+import com.dashlane.debug.DaDaDa
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
@@ -10,7 +11,6 @@ import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.manager.TeamspaceManagerWeakListener
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.debug.DaDaDa
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
@@ -25,7 +25,8 @@ class PasswordAnalysisDataProvider @Inject constructor(
     private val dadada: DaDaDa,
     private val sessionManager: SessionManager,
     private val teamspaceRepository: TeamspaceManagerRepository
-) : BaseDataProvider<PasswordAnalysisContract.Presenter>(), PasswordAnalysisContract.DataProvider,
+) : BaseDataProvider<PasswordAnalysisContract.Presenter>(),
+PasswordAnalysisContract.DataProvider,
     TeamspaceManager.Listener {
 
     private val credentialDataQuery: CredentialDataQuery

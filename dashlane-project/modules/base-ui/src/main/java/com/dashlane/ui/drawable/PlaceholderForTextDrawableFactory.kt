@@ -10,8 +10,6 @@ import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.graphics.TextDrawable
 import java.util.Locale
 
-
-
 object PlaceholderForTextDrawableFactory {
     @JvmStatic
     fun buildDrawable(

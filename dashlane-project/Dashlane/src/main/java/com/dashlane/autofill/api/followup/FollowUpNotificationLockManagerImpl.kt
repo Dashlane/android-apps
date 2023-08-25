@@ -3,7 +3,7 @@ package com.dashlane.autofill.api.followup
 import android.content.Context
 import com.dashlane.followupnotification.api.FollowUpNotificationLockManager
 import com.dashlane.login.lock.LockManager
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -14,8 +14,8 @@ import javax.inject.Inject
 class FollowUpNotificationLockManagerImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     val lockManager: LockManager
@@ -26,7 +26,7 @@ class FollowUpNotificationLockManagerImpl @Inject constructor(
         onUnlockSuccessful: () -> Unit
     ) {
         if (lockManager.isLocked) {
-            globalCoroutineScope.launch(mainCoroutineDispatcher) {
+            applicationCoroutineScope.launch(mainCoroutineDispatcher) {
                 val lock = lockManager.showLockActivityForFollowUpNotification(context)
                 if (lock?.isSuccess() == true) {
                     onUnlockSuccessful()

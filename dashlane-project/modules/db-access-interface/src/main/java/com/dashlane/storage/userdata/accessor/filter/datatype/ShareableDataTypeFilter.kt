@@ -1,10 +1,8 @@
 package com.dashlane.storage.userdata.accessor.filter.datatype
 
-import com.dashlane.vault.util.SyncObjectTypeUtils
 import com.dashlane.xml.domain.SyncObjectType
-
-
+import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
 
 object ShareableDataTypeFilter : DataTypeFilter {
-    override val dataTypes = SyncObjectTypeUtils.SHAREABLE.toTypedArray()
+    override val dataTypes = SHAREABLE.toTypedArray()
 }

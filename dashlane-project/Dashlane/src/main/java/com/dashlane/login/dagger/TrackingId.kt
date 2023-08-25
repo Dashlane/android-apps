@@ -2,8 +2,6 @@ package com.dashlane.login.dagger
 
 import javax.inject.Qualifier
 
-
-
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 @Target(

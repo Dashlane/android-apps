@@ -11,8 +11,6 @@ import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.session.AppKey
 import okio.Source
 
-
-
 internal class FlexibleDecryptionEngine(
     private val cryptography: Cryptography,
     private val key: ObfuscatedByteArray

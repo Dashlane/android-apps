@@ -5,11 +5,7 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import java.util.regex.Pattern
 
-
-
 private val pattern: Pattern by lazy { Pattern.compile("%1\\\$(?:\\.\\d+)?[a-z]") }
-
-
 
 fun Resources.getFormattedSpannable(resId: Int, formatValue: Any, spanList: List<Any>):
         SpannableStringBuilder {

@@ -1,7 +1,6 @@
 package com.dashlane.ui.premium.inappbilling.service
 
 import android.text.format.DateUtils
-import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.network.tools.authorization
 import com.dashlane.premium.offer.common.StoreOffersManager
 import com.dashlane.premium.offer.common.StoreOffersManager.UserNotLoggedException
@@ -9,24 +8,16 @@ import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.payments.StoreOffersService
 import com.dashlane.server.api.endpoints.payments.StoreOffersService.Request.Platform.PLAYSTORE_SUBSCRIPTION
 import com.dashlane.server.api.exceptions.DashlaneApiException
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.AccountStatusRepository
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
-
-
 @Singleton
 class StoreOffersCache(
     private val storeOffersService: StoreOffersService,
-    private val accountStatusRepository: AccountStatusRepository,
     private val sessionManager: SessionManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val deviceInfoRepository: DeviceInfoRepository
 ) : StoreOffersManager {
     private var lastOperation: LastOperation? = null
     private var prefetchJob: Job? = null
@@ -59,8 +50,6 @@ class StoreOffersCache(
         return fetchProducts(user)
     }
 
-    
-
     fun flushCache() {
         prefetchJob?.cancel()
         prefetchJob = null
@@ -73,20 +62,7 @@ class StoreOffersCache(
         val response = storeOffersService.execute(user, request)
 
         lastOperation = LastOperation(username = user.login, storeOffers = response.data)
-        log(response.data)
         return response.data
-    }
-
-    private fun log(storeOffers: StoreOffersService.Data) {
-        val session = sessionManager.session ?: return
-        val usageLogRepository = bySessionUsageLogRepository[session] ?: return
-        StoreOffersUL53(
-            session = session,
-            accountStatusRepository = accountStatusRepository,
-            usageLogRepository = usageLogRepository,
-            deviceInfoRepository = deviceInfoRepository
-        )
-            .send(storeOffers)
     }
 
     private data class LastOperation(

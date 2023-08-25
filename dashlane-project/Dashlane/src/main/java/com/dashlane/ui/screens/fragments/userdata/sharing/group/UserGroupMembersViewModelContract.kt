@@ -3,17 +3,11 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.group
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingUserGroupUser
 import kotlinx.coroutines.flow.Flow
 
-
-
 interface UserGroupMembersViewModelContract {
     val userGroupId: String
     val uiState: Flow<UIState>
 
-    
-
     fun reloadData()
-
-    
 
     fun pullToRefresh()
 

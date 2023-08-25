@@ -24,7 +24,6 @@ import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.readonly.EmptyLinkedServicesSubView
 import com.dashlane.item.subview.readonly.ItemAuthenticatorReadSubView
 import com.dashlane.item.subview.readonly.ItemClickActionSubView
-import com.dashlane.item.subview.readonly.ItemExpandableListSubView
 import com.dashlane.item.subview.readonly.ItemInfoboxSubView
 import com.dashlane.item.subview.readonly.ItemLinkedServicesSubView
 import com.dashlane.item.subview.readonly.ItemMetaReadValueDateTimeSubView
@@ -38,9 +37,9 @@ import com.dashlane.item.subview.readonly.ItemReadValueRawSubView
 import com.dashlane.item.subview.readonly.ItemReadValueTextSubView
 import com.dashlane.item.subview.view.AuthenticatorViewProvider
 import com.dashlane.item.subview.view.ButtonInputProvider
+import com.dashlane.item.subview.view.CollectionListViewProvider
 import com.dashlane.item.subview.view.DatePickerInputProvider
 import com.dashlane.item.subview.view.EditTextInputProvider
-import com.dashlane.item.subview.view.ExpandableListProvider
 import com.dashlane.item.subview.view.InfoboxViewProvider
 import com.dashlane.item.subview.view.MetaTextViewProvider
 import com.dashlane.item.subview.view.PasswordSafetyViewProvider
@@ -55,8 +54,6 @@ import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrDrawable
 import com.dashlane.util.getThemeAttrResourceId
-
-
 
 class ViewFactory(private val activity: AppCompatActivity) {
     fun makeView(itemSubView: ItemSubView<*>): View {
@@ -88,8 +85,8 @@ class ViewFactory(private val activity: AppCompatActivity) {
             is ItemReadSpaceSubView -> createReadSpaceSubView(itemSubView)
             is ItemEditValueRawSubView -> createItemEditValueRawSubView(itemSubView)
             is ItemReadValueRawSubView -> createItemReadValueRawSubView(itemSubView)
-            is ItemExpandableListSubView -> createExpandableListReadSubView(itemSubView)
             is ItemInfoboxSubView -> createInfoboxSubView(itemSubView)
+            is ItemCollectionListSubView -> createItemCollectionListSubView(itemSubView)
             else -> throw IllegalArgumentException("Unknown item type: ${itemSubView::class.java}")
         }
     }
@@ -99,8 +96,12 @@ class ViewFactory(private val activity: AppCompatActivity) {
 
     private fun createReadValueTextSubView(item: ItemReadValueTextSubView) =
         TextInputLayoutProvider.create(
-            activity, item.header, item.value, protected = item.protected,
-            allowReveal = item.allowReveal, multiline = item.multiline,
+            activity,
+            item.header,
+            item.value,
+            protected = item.protected,
+            allowReveal = item.allowReveal,
+            multiline = item.multiline,
             coloredCharacter = item.coloredCharacter
         ).apply {
             addOnFieldVisibilityToggleListener {
@@ -129,7 +130,10 @@ class ViewFactory(private val activity: AppCompatActivity) {
 
     private fun createReadValueNumberSubView(item: ItemReadValueNumberSubView) =
         TextInputLayoutProvider.create(
-            activity, item.header, item.value, protected = item.protected
+            activity,
+            item.header,
+            item.value,
+            protected = item.protected
         ).apply {
             if (item.protected) {
                 addOnFieldVisibilityToggleListener {
@@ -140,7 +144,11 @@ class ViewFactory(private val activity: AppCompatActivity) {
 
     private fun createEditValueNumberSubView(item: ItemEditValueNumberSubView) =
         TextInputLayoutProvider.create(
-            activity, item.hint, item.value, true, item.protected,
+            activity,
+            item.hint,
+            item.value,
+            true,
+            item.protected,
             suggestions = item.suggestions
         ).apply {
             editText!!.apply {
@@ -261,9 +269,6 @@ class ViewFactory(private val activity: AppCompatActivity) {
             AuthenticatorViewProvider.create(activity, activity.getString(item.title), item.value!!)
         }
 
-    private fun createExpandableListReadSubView(item: ItemExpandableListSubView) =
-        ExpandableListProvider.create(activity, item.value, item.summary, item.showListListener)
-
     private fun createInfoboxSubView(item: ItemInfoboxSubView) =
         InfoboxViewProvider.create(
             activity = activity,
@@ -315,4 +320,7 @@ class ViewFactory(private val activity: AppCompatActivity) {
             )
         }
     }
+
+    private fun createItemCollectionListSubView(item: ItemCollectionListSubView) =
+        CollectionListViewProvider.create(activity, item)
 }

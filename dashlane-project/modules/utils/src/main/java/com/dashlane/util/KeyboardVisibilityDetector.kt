@@ -6,15 +6,14 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.Window
 
-
-
 class KeyboardVisibilityDetector(
     private val activity: Activity,
     private val listener: Listener
 ) : ViewTreeObserver.OnGlobalLayoutListener {
 
     constructor(activity: Activity, keyboardOverview: ((Int) -> Unit)?, keyboardHidden: (() -> Unit)?) :
-            this(activity,
+            this(
+                activity,
                 object : Listener {
                     override fun onKeyboardOverView(keyboardHeight: Int) {
                         keyboardOverview?.invoke(keyboardHeight)

@@ -6,8 +6,6 @@ import androidx.annotation.Keep
 import com.dashlane.breach.Breach
 import kotlinx.parcelize.Parcelize
 
-
-
 @SuppressLint("ParcelCreator")
 @Keep
 @Parcelize

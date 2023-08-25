@@ -11,19 +11,11 @@ interface ChangeMasterPasswordContract {
 
     interface DataProvider : Base.IDataProvider {
 
-        
-
         val progressStateFlow: StateFlow<MasterPasswordChanger.Progress>
-
-        
 
         suspend fun clearChannel()
 
-        
-
         suspend fun updateMasterPassword(newPassword: ObfuscatedByteArray, origin: ChangeMasterPasswordOrigin)
-
-        
 
         suspend fun migrateToMasterPasswordUser(password: ObfuscatedByteArray, authTicket: String)
     }

@@ -11,8 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.collection.SparseArrayCompat;
 import androidx.recyclerview.widget.DiffUtil;
 
-
-
 public class DashlaneRecyclerAdapter<T extends DashlaneRecyclerAdapter.ViewTypeProvider>
         extends EfficientRecyclerAdapter<T> {
 

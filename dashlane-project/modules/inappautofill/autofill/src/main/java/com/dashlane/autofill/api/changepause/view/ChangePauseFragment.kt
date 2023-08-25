@@ -5,46 +5,46 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.dashlane.autofill.api.changepause.AutofillApiChangePauseComponent
-import com.dashlane.autofill.api.changepause.dagger.DaggerChangePauseFragmentComponent
-import com.dashlane.autofill.api.internal.AutofillApiComponent
+import com.dashlane.autofill.api.changepause.ChangePauseContract
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
+import com.dashlane.util.Toaster
 import com.dashlane.util.getParcelableCompat
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
+@AndroidEntryPoint
 class ChangePauseFragment : Fragment() {
 
+    private lateinit var viewProxy: ChangePauseViewProxy
+
     @Inject
-    lateinit var viewProxy: ChangePauseViewProxy
+    lateinit var presenter: ChangePauseContract.Presenter
+
+    @Inject
+    lateinit var changePauseViewTypeProviderFactory: ChangePauseViewTypeProviderFactory
+
+    @Inject
+    lateinit var toaster: Toaster
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initActivityComponent()
+        val autoFillFormSource =
+            arguments?.getParcelableCompat<AutoFillFormSource>(FORM_SOURCE) ?: return
+        viewProxy = ChangePauseViewProxy(
+            this,
+            presenter,
+            changePauseViewTypeProviderFactory,
+            toaster,
+            autoFillFormSource
+        )
+        presenter.setView(viewProxy)
     }
 
-    private fun initActivityComponent() {
-        val fragmentActivity = this.activity ?: return
-        val autoFillFormSource = arguments?.getParcelableCompat<AutoFillFormSource>(FORM_SOURCE) ?: return
-
-        val viewModel = ViewModelProvider(
-            fragmentActivity,
-            ChangePauseViewModel.Factory(fragmentActivity.application, autoFillFormSource)
-        ).get(ChangePauseViewModel::class.java)
-
-        val activityComponent = DaggerChangePauseFragmentComponent.factory()
-            .create(
-                AutofillApiComponent(fragmentActivity.application),
-                AutofillApiChangePauseComponent(fragmentActivity.application),
-                viewModel.component,
-                this
-            )
-        activityComponent.inject(this)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return viewProxy.setContentView(inflater, container)
     }
 

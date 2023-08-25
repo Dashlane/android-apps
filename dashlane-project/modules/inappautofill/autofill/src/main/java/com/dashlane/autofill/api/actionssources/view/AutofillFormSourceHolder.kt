@@ -10,8 +10,6 @@ import com.dashlane.ui.drawable.PlaceholderForTextDrawableFactory
 import com.dashlane.util.getThemeAttrColor
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-
-
 class AutofillFormSourceHolder(v: View) : EfficientViewHolder<AutofillFormSourceViewTypeProviderFactory.AutofillFormSourceWrapper>(v) {
     private var authentifiantTitle: TextView = v.findViewById(R.id.item_title)
     private var authentifiantSubtitle: TextView = v.findViewById(R.id.item_subtitle)

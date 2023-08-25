@@ -19,8 +19,6 @@ class DarkWebMonitoringPagerAdapter(
     private val resolvedItems: List<DashlaneRecyclerAdapter.ViewTypeProvider>
 ) : PagerAdapter() {
 
-    
-
     private val pendingAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
     private val resolvedAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
 
@@ -65,8 +63,6 @@ class DarkWebMonitoringPagerAdapter(
         recyclerView.adapter?.notifyItemChanged(position)
         activity.invalidateOptionsMenu()
     }
-
-    
 
     @SuppressLint("NotifyDataSetChanged")
     fun resetToggledItem() {

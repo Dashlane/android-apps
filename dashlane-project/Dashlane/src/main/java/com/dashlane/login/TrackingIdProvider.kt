@@ -5,8 +5,6 @@ import androidx.fragment.app.FragmentActivity
 import com.dashlane.login.TrackingIdProvider.TRACKING_ID
 import java.util.UUID
 
-
-
 object TrackingIdProvider {
 
     const val TRACKING_ID = "trackingSessionId"

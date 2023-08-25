@@ -17,11 +17,8 @@ import com.dashlane.ui.adapters.text.factory.DataIdentifierTypeTextFactory
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.util.ViewTypeUtils
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.desktopId
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
-
-
 
 class SharedVaultItemWrapper constructor(
     context: Context,
@@ -112,7 +109,7 @@ class SharedVaultItemWrapper constructor(
             )
 
         fun comparator(): Comparator<SharedVaultItemWrapper> = compareBy(
-            { it.sharedItem.item.syncObjectType.desktopId },
+            { it.sharedItem.item.syncObjectType.xmlObjectName },
             { it.title },
             { it.description }
         )
@@ -125,14 +122,14 @@ fun List<MultiColumnViewTypeProvider>.addHeaders(context: Context) =
             (it as? SharedVaultItemWrapper)?.sharedItem?.item?.syncObjectType == SyncObjectType.AUTHENTIFIANT
         }.takeIf { it != -1 }?.also { index ->
             HeaderItem(
-                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.AUTHENTIFIANT.desktopId))
+                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.AUTHENTIFIANT))
             ).also { add(index, it) }
         }
         indexOfFirst {
             (it as? SharedVaultItemWrapper)?.sharedItem?.item?.syncObjectType == SyncObjectType.SECURE_NOTE
         }.takeIf { it != -1 }?.also { index ->
             HeaderItem(
-                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.SECURE_NOTE.desktopId))
+                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.SECURE_NOTE))
             ).also { add(index, it) }
         }
     }

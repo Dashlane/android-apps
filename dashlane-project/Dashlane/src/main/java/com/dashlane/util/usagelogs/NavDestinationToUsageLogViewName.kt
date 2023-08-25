@@ -3,17 +3,18 @@ package com.dashlane.util.usagelogs
 import androidx.navigation.NavDestination
 import com.dashlane.R
 import com.dashlane.useractivity.log.usage.UsageLogConstant
+import javax.inject.Inject
 
-
-
-class NavDestinationToUsageLogViewName {
+class NavDestinationToUsageLogViewName @Inject constructor() {
     fun convert(destination: NavDestination): String? {
         return if (destinationIsBlacklisted(destination)) {
             null
-        } else getViewName(destination)
+        } else {
+            getViewName(destination)
+        }
     }
 
-    fun destinationIsBlacklisted(destination: NavDestination): Boolean {
+    private fun destinationIsBlacklisted(destination: NavDestination): Boolean {
         return destination.id == R.id.nav_share_user_groups
     }
 

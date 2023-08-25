@@ -4,8 +4,6 @@ import com.dashlane.security.identitydashboard.SecurityScore.Companion.D
 import com.dashlane.security.identitydashboard.SecurityScore.Companion.X
 import kotlin.math.pow
 
-
-
 class SecurityScore {
 
     companion object {
@@ -14,8 +12,6 @@ class SecurityScore {
         private const val M = 1.0f
         private const val N = 1.0f
         private const val D = 0.6f
-
-        
 
         fun getSecurityScore(
             allCorrupted: Int,

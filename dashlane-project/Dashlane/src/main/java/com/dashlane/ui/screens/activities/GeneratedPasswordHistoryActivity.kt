@@ -33,15 +33,15 @@ import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
 @AndroidEntryPoint
 class GeneratedPasswordHistoryActivity : DashlaneActivity() {
 
     @Inject
     lateinit var vaultItemLogger: VaultItemLogger
 
-    private val viewLogger = ViewLogger()
+    @Inject
+    lateinit var viewLogger: ViewLogger
+
     private val revealedIds = mutableSetOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {

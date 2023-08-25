@@ -48,8 +48,6 @@ public class MergeCursor extends AbstractCursor {
 
     @Override
     public boolean onMove(int oldPosition, int newPosition) {
-        
-
         mCursor = null;
         int cursorStartPos = 0;
         int length = mCursors.length;
@@ -65,8 +63,6 @@ public class MergeCursor extends AbstractCursor {
 
             cursorStartPos += mCursors[i].getCount();
         }
-
-        
 
         if (mCursor != null) {
             boolean ret = mCursor.moveToPosition(newPosition - cursorStartPos);

@@ -14,8 +14,6 @@ import java.util.Locale;
 
 import androidx.core.content.res.ResourcesCompat;
 
-
-
 public class TeamspaceIconDrawable extends TextDrawable {
 
     private static final float TEXT_SIZE_FACTOR = 0.5f;

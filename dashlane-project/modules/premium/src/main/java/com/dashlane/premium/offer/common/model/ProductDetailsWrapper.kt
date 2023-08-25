@@ -45,8 +45,6 @@ sealed class ProductDetailsWrapper {
         val pricingPhases: List<PricingPhase>,
         val tags: List<String>
     ) {
-        
-
         val idTag: String?
             get() = tags.firstOrNull {
                 it.startsWith("id-")

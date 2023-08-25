@@ -7,8 +7,6 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import javax.inject.Inject
 
-
-
 class NumberOfRunsActivityListener @Inject constructor(private val userPreferencesManager: UserPreferencesManager) :
     AbstractActivityLifecycleListener() {
     override fun onFirstLoggedInActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

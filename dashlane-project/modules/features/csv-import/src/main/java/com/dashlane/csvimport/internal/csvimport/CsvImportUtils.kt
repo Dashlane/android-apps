@@ -7,19 +7,17 @@ import com.dashlane.core.helpers.toSyncObject
 import com.dashlane.csvimport.ImportAuthentifiantHelper
 import com.dashlane.csvimport.internal.CsvSchema
 import com.dashlane.csvimport.internal.csvLineSequence
-import com.dashlane.ext.application.KnownApplication
+import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.util.isValidEmail
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
-import java.io.InputStream
 import okio.ByteString.Companion.decodeBase64
+import java.io.InputStream
 
 
 private const val CSV_FIRST_LINES_THRESHOLD = 3
-
-
 
 internal fun selectFields(
     inputStreamProvider: () -> InputStream
@@ -49,8 +47,6 @@ private fun hasCoherentColumnSize(lines: List<List<String>>): Boolean {
     return firstLineSize > 1 && lines.all { it.size == firstLineSize }
 }
 
-
-
 internal fun Iterable<CsvAuthentifiant>.filterNew(
     existing: List<SyncObject.Authentifiant>
 ): List<CsvAuthentifiant> =
@@ -77,10 +73,9 @@ private data class AuthentifiantIdentifier(
     private val password: String?
 )
 
-
-
 internal fun newCsvAuthentifiant(
     linkedServicesHelper: LinkedServicesHelper,
+    knownApplicationProvider: KnownApplicationProvider,
     fields: List<String>,
     types: List<CsvSchema.FieldType?>,
     appNameFromPackage: (String) -> String?
@@ -104,16 +99,22 @@ internal fun newCsvAuthentifiant(
     if (url == null || username == null || password == null) return null
 
     return if (url.startsWith("android://")) {
-        newAuthentifiantForApp(linkedServicesHelper, url, username, password, appNameFromPackage)
+        newAuthentifiantForApp(
+            linkedServicesHelper,
+            knownApplicationProvider,
+            url,
+            username,
+            password,
+            appNameFromPackage
+        )
     } else {
         newAuthentifiantForWebsite(url, username, password)
     }
 }
 
-
-
 private fun newAuthentifiantForApp(
     linkedServicesHelper: LinkedServicesHelper,
+    knownApplicationProvider: KnownApplicationProvider,
     url: String,
     username: String,
     password: String,
@@ -128,7 +129,7 @@ private fun newAuthentifiantForApp(
         linkedServicesHelper.addSignatureToLinkedServices(appSignatures, null)
     }
 
-    val website = KnownApplication.getPrimaryWebsite(packageName)
+    val website = knownApplicationProvider.getKnownApplication(packageName)?.mainDomain
 
     return CsvAuthentifiant(
         appSignatures = linkedServices?.toAppSignature(),

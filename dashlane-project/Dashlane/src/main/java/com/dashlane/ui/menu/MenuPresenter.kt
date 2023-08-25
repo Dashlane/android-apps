@@ -7,8 +7,6 @@ import com.skocken.presentation.presenter.BasePresenter
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class MenuPresenter @Inject constructor(
     navigator: Navigator,

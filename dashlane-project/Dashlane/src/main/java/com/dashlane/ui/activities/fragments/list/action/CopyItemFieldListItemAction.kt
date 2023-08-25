@@ -8,8 +8,6 @@ import com.dashlane.vault.clipboard.VaultItemCopyUtil
 import com.dashlane.vault.clipboard.VaultItemCopyUtil.handleCopy
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 class CopyItemFieldListItemAction(private val item: SummaryObject, private val itemContainer: ItemListContext) :
     ListItemAction {
 

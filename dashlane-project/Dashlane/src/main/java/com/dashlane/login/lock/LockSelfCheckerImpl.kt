@@ -8,14 +8,12 @@ import com.dashlane.session.SessionManager
 import com.dashlane.useractivity.log.usage.UsageLogCode35
 import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.usersupportreporter.UserSupportFileLogger
 import javax.inject.Inject
 
 class LockSelfCheckerImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockTypeManager: LockTypeManager,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val userSupportFileLogger: UserSupportFileLogger,
     private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
 ) : LockSelfChecker {
 
@@ -42,17 +40,14 @@ class LockSelfCheckerImpl @Inject constructor(
         resetIsCredentialsEmpty()
     }
 
-    
-
     private fun isValidStatus(@LockTypeManager.LockType lockType: Int): Boolean {
-        if (lockType != LockTypeManager.LOCK_TYPE_PIN_CODE && lockType != LockTypeManager.LOCK_TYPE_BIOMETRIC)
+        if (lockType != LockTypeManager.LOCK_TYPE_PIN_CODE && lockType != LockTypeManager.LOCK_TYPE_BIOMETRIC) {
             return true
+        }
 
         
         return !isCredentialsEmpty
     }
-
-    
 
     private fun verification(session: Session, @LockTypeManager.LockType lockType: Int) {
         val type = when (lockType) {
@@ -74,12 +69,10 @@ class LockSelfCheckerImpl @Inject constructor(
     }
 
     private fun logSuccess(session: Session, lockType: String) {
-        userSupportFileLogger.add("LockSelfChecker re-save credentials success")
         log(session, lockType, "reSaveSuccess")
     }
 
     private fun logFailure(session: Session, lockType: String) {
-        userSupportFileLogger.add("LockSelfChecker re-save fails, reset lockType to MP")
         log(session, lockType, "reSaveFailed")
     }
 

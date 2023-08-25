@@ -3,8 +3,6 @@ package com.dashlane.lock
 import kotlinx.coroutines.CompletableDeferred
 import java.lang.ref.WeakReference
 
-
-
 class UnlockEventCoroutineListener constructor(lockWatcher: LockWatcher) {
 
     private val unlockDeferredResult = CompletableDeferred<UnlockEvent>()
@@ -13,8 +11,6 @@ class UnlockEventCoroutineListener constructor(lockWatcher: LockWatcher) {
         
         Listener(lockWatcher, this)
     }
-
-    
 
     suspend fun await(): UnlockEvent {
         return unlockDeferredResult.await()

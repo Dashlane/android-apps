@@ -3,25 +3,17 @@ package com.dashlane.autofill.api.fillresponse
 import android.content.Context
 import android.view.View
 import android.widget.RemoteViews
-import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.model.AuthentifiantItemToFill
-import com.dashlane.autofill.api.model.AuthentifiantSummaryItemToFill
 import com.dashlane.autofill.api.model.CreditCardItemToFill
-import com.dashlane.autofill.api.model.CreditCardSummaryItemToFill
 import com.dashlane.autofill.api.model.EmailItemToFill
 import com.dashlane.autofill.api.model.ItemToFill
-import com.dashlane.autofill.api.model.TextItemToFill
-import com.dashlane.autofill.formdetector.AutoFillFormType
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
-import com.dashlane.vault.model.loginForUi
-import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.summary.toSummary
+import com.dashlane.autofill.api.model.OtpItemToFill
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 internal interface RemoteViewProvider {
-    fun forItem(item: ItemToFill, summary: AutoFillHintSummary): RemoteViews?
+    fun forItem(item: ItemToFill): RemoteViews?
     fun forOtp(): RemoteViews
     fun forLogout(): RemoteViews
     fun forViewAllItems(): RemoteViews
@@ -30,32 +22,21 @@ internal interface RemoteViewProvider {
     fun forCreateAccount(): RemoteViews
     fun forChangePassword(): RemoteViews
     fun forScrolling(): RemoteViews
-    fun forEmptyWebsite(item: AuthentifiantSummaryItemToFill, packageName: String): RemoteViews?
+    fun forEmptyWebsite(item: AuthentifiantItemToFill): RemoteViews?
     fun emptyView(): RemoteViews
 }
 
-
-
 internal open class RemoteViewProviderImpl @Inject constructor(
     @ApplicationContext
-    private val applicationContext: Context,
-    private val authentifiantResult: AutofillAnalyzerDef.IAutofillSecurityApplication
+    private val applicationContext: Context
 ) : RemoteViewProvider {
 
-    override fun forItem(item: ItemToFill, summary: AutoFillHintSummary): RemoteViews? {
+    override fun forItem(item: ItemToFill): RemoteViews? {
         return when (item) {
-            is AuthentifiantItemToFill -> forAuthentifiant(item.primaryItem.toSummary(), summary.packageName)
-            is AuthentifiantSummaryItemToFill -> forAuthentifiant(item.primaryItem, summary.packageName)
-            is CreditCardItemToFill -> forCreditCard(item.primaryItem.toSummary())
-            is CreditCardSummaryItemToFill -> forCreditCard(item.primaryItem)
-            is EmailItemToFill -> forEmail(item.primaryItem)
-            is TextItemToFill -> {
-                if (summary.formType == AutoFillFormType.OTP) {
-                    forOtp()
-                } else {
-                    null
-                }
-            }
+            is AuthentifiantItemToFill -> forAuthentifiant(item)
+            is CreditCardItemToFill -> forCreditCard(item)
+            is EmailItemToFill -> forEmail(item)
+            is OtpItemToFill -> forOtp()
         }
     }
 
@@ -74,23 +55,14 @@ internal open class RemoteViewProviderImpl @Inject constructor(
     override fun forPause(): RemoteViews =
         createRemoteView(applicationContext.packageName, R.layout.list_dashlane_pause_item)
 
-    private fun forCreditCard(item: SummaryObject.PaymentCreditCard): RemoteViews =
+    private fun forCreditCard(item: CreditCardItemToFill): RemoteViews =
         createRemoteViews(item.cardNumberObfuscate, item.name)
 
-    private fun forAuthentifiant(item: SummaryObject.Authentifiant, packageName: String): RemoteViews {
-        val signatureVerification = authentifiantResult.getSignatureVerification(applicationContext, packageName, item)
+    private fun forAuthentifiant(item: AuthentifiantItemToFill): RemoteViews =
+        createRemoteViews(item.login, item.title)
 
-        return createRemoteViews(item.loginForUi, item.title).apply {
-            if (signatureVerification.isIncorrect()) {
-                setViewVisibility(R.id.autofillUnsecureWarning, View.VISIBLE)
-            } else {
-                setViewVisibility(R.id.autofillUnsecureWarning, View.GONE)
-            }
-        }
-    }
-
-    private fun forEmail(item: SummaryObject.Email): RemoteViews =
-        createRemoteViews(item.email, item.emailName)
+    private fun forEmail(item: EmailItemToFill): RemoteViews =
+        createRemoteViews(item.email, item.name)
 
     private fun createRemoteViews(line1: String?, line2: String?): RemoteViews {
         return createRemoteView(applicationContext.packageName, R.layout.list_item_autofill_api).apply {
@@ -119,8 +91,7 @@ internal open class RemoteViewProviderImpl @Inject constructor(
         return createRemoteView(applicationContext.packageName, R.layout.list_item_scrolling)
     }
 
-    override fun forEmptyWebsite(item: AuthentifiantSummaryItemToFill, packageName: String) =
-        forAuthentifiant(item.primaryItem, packageName)
+    override fun forEmptyWebsite(item: AuthentifiantItemToFill) = forAuthentifiant(item)
 
     override fun emptyView() = RemoteViews(applicationContext.packageName, 0)
 

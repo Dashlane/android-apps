@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.core.DataSync
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
@@ -18,8 +19,6 @@ import com.dashlane.sharing.model.isAccepted
 import com.dashlane.teamspaces.manager.TeamspaceAccessor.FeatureCall
 import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.ui.screens.fragments.userdata.sharing.AcceptSharingUL57
-import com.dashlane.useractivity.log.usage.UsageLogCode134
 import com.dashlane.useractivity.log.usage.UsageLogCode80
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +34,7 @@ class SharingCenterViewModel @Inject constructor(
     private val teamspaceRepository: TeamspaceManagerRepository,
     private val navigator: Navigator,
     private val appEvents: AppEvents,
-    private val logger: AcceptSharingUL57
+    private val dataSync: DataSync
 ) : ViewModel(), SharingCenterViewModelContract, TeamspaceManager.Listener {
     private val session: Session?
         get() = sessionManager.session
@@ -153,7 +152,7 @@ class SharingCenterViewModel @Inject constructor(
     }
 
     override fun refresh() {
-        DataSync.sync(UsageLogCode134.Origin.MANUAL)
+        dataSync.sync(Trigger.MANUAL)
     }
 
     override fun onClickNewShare(activity: Fragment) {
@@ -171,7 +170,8 @@ class SharingCenterViewModel @Inject constructor(
             Teamspace.Feature.SHARING_DISABLED,
             object : FeatureCall {
                 override fun startFeature() = action()
-            })
+            }
+        )
     }
 
     override fun onUserClicked(user: SharingContact.User) =
@@ -202,7 +202,6 @@ class SharingCenterViewModel @Inject constructor(
             }.onFailure {
                 uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestFailure)
             }.onSuccess {
-                logger.send(invite.item)
                 uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess)
                 reloadData()
             }

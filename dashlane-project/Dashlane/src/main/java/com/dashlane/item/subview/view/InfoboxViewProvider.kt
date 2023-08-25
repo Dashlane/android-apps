@@ -9,8 +9,6 @@ import com.dashlane.design.component.compat.view.InfoboxLargeView
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.ui.widgets.view.StepInfoBox
 
-
-
 object InfoboxViewProvider {
 
     fun create(

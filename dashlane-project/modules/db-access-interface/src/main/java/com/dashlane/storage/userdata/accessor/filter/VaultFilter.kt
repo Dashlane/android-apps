@@ -24,8 +24,6 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.xml.domain.SyncObjectType
 
-
-
 data class VaultFilter(
     override var dataTypeFilter: DataTypeFilter = AllDataTypeFilter,
     override var uidFilter: UidFilter = NoUidFilter,
@@ -33,8 +31,13 @@ data class VaultFilter(
     override var lockFilter: LockFilter = DefaultLockFilter,
     override var statusFilter: StatusFilter = DefaultStatusFilter,
     override var sharingFilter: SharingFilter = NoSharingFilter,
-) : BaseFilter, EditableDataTypeFilter, EditableSpaceFilter, EditableUidFilter, EditableLockFilter,
-    EditableStatusFilter, EditableSharingPermissionFilter {
+) : BaseFilter,
+EditableDataTypeFilter,
+EditableSpaceFilter,
+EditableUidFilter,
+EditableLockFilter,
+    EditableStatusFilter,
+EditableSharingPermissionFilter {
 
     constructor(uid: String, dataType: SyncObjectType? = null) :
             this(

@@ -10,15 +10,11 @@ import dagger.Lazy
 import org.json.JSONArray
 import javax.inject.Inject
 
-
-
 class TeamspaceUpdater @Inject constructor(
     private val sessionManager: SessionManager,
     private val teamspaceManagerRepository: TeamspaceManagerRepository,
     private val forceCategorizationManager: Lazy<TeamspaceForceCategorizationManager>
 ) {
-
-    
 
     fun processAndSaveTeamspaces(teamspaces: JSONArray?) {
         teamspaces ?: return 

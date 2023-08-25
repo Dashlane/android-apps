@@ -9,8 +9,6 @@ import android.graphics.drawable.Drawable
 import android.util.SparseIntArray
 import androidx.annotation.ColorInt
 
-
-
 fun shouldDarkenColor(color: Int): Boolean {
     return getBrightness(color) >= 200
 }
@@ -119,8 +117,6 @@ private fun approximateColor(pixelColor: Int): Int {
 private fun roundToDecade(value: Int): Int {
     return Math.round(value / 10f) * 10
 }
-
-
 
 fun darkenColorByAmount(color: Int, amount: Float): Int {
     val red = (Color.red(color) * (1 - amount) / 255 * 255).toInt()

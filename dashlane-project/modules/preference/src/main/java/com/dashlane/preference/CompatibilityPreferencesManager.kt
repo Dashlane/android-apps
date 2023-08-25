@@ -2,8 +2,6 @@ package com.dashlane.preference
 
 import android.content.SharedPreferences
 
-
-
 @Suppress("SharedPreferencesSecurity")
 class CompatibilityPreferencesManager internal constructor(private val sharedPreferences: SharedPreferences) {
 

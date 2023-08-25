@@ -18,8 +18,6 @@ import androidx.navigation.NavDestination;
 import static com.dashlane.ui.menu.item.MenuItemDef.IDataProvider;
 import static com.dashlane.ui.menu.item.MenuItemDef.IPresenter;
 
-
-
 public class MenuItemDataProvider extends BaseDataProvider<IPresenter> implements IDataProvider {
 
     private final Navigator mNavigator;

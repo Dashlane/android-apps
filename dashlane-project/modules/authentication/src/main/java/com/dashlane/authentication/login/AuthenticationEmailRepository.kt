@@ -12,8 +12,6 @@ import com.dashlane.authentication.AuthenticationUnknownException
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.UnauthenticatedUser
 
-
-
 interface AuthenticationEmailRepository {
     @Throws(
         AuthenticationEmptyEmailException::class,
@@ -30,28 +28,20 @@ interface AuthenticationEmailRepository {
     sealed class Result {
         abstract val ssoInfo: SsoInfo?
 
-        
-
         data class RequiresPassword(
             val registeredUserDevice: RegisteredUserDevice,
             override val ssoInfo: SsoInfo? = null
         ) : Result()
-
-        
 
         data class RequiresServerKey(
             val secondFactor: AuthenticationSecondFactor.Totp,
             override val ssoInfo: SsoInfo?
         ) : Result()
 
-        
-
         data class RequiresSso(
             val login: String,
             override val ssoInfo: SsoInfo
         ) : Result()
-
-        
 
         sealed class RequiresDeviceRegistration : Result() {
             data class SecondFactor(

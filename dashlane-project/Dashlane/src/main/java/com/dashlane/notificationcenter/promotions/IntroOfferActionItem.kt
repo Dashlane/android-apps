@@ -13,8 +13,6 @@ import com.dashlane.premium.offer.common.model.IntroOfferType
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.drawable.CircleDrawable
 
-
-
 class IntroOfferActionItem(
     override val actionItemsRepository: NotificationCenterRepository,
     private val introOfferType: IntroOfferType

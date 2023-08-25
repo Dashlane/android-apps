@@ -9,8 +9,6 @@ import com.dashlane.ui.R
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.getThemeAttrColor
 
-
-
 @SuppressLint("ViewConstructor")
 class ScreenOverLockProtectionView(
     activity: DashlaneActivity,

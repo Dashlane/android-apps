@@ -17,8 +17,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-
-
 open class NotificationCenterViewProxy(rootView: View, private val displaySectionHeader: Boolean) :
     BaseViewProxy<NotificationCenterDef.Presenter>(rootView),
     NotificationCenterDef.View {
@@ -85,7 +83,9 @@ open class NotificationCenterViewProxy(rootView: View, private val displaySectio
             override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
                 if (viewHolder is ActionItemEmptyItemViewHolder ||
                     viewHolder is HeaderItem.ViewHolder
-                ) return 0
+                ) {
+                    return 0
+                }
 
                 return super.getMovementFlags(recyclerView, viewHolder)
             }

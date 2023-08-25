@@ -24,7 +24,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthenticatorDashboardFragment : AbstractContentFragment() {
-
     private val viewModel by viewModels<AuthenticatorDashboardViewModel>()
     private val args: AuthenticatorDashboardFragmentArgs by navArgs()
 
@@ -44,6 +43,9 @@ class AuthenticatorDashboardFragment : AbstractContentFragment() {
     @Inject
     lateinit var clipboardCopy: ClipboardCopy
 
+    @Inject
+    lateinit var authenticatorLogger: AuthenticatorLogger
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -62,7 +64,8 @@ class AuthenticatorDashboardFragment : AbstractContentFragment() {
             navigator,
             view,
             viewModel,
-            backPressedCallback
+            backPressedCallback,
+            authenticatorLogger
         ) { clipboardCopy.copyToClipboard(this, sensitiveData = false, autoClear = true) }
         return view
     }

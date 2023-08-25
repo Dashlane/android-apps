@@ -13,8 +13,6 @@ import java.util.Locale;
 
 import androidx.annotation.StringRes;
 
-
-
 public class TextUtil {
 
     private TextUtil() {
@@ -108,8 +106,6 @@ public class TextUtil {
     }
 
     
-
-    
     @SuppressWarnings("squid:S3776")
     public static int compareAlphaNumeric(String s1, String s2) {
 
@@ -151,8 +147,6 @@ public class TextUtil {
         return s1Length - s2Length;
     }
 
-    
-
     public static int sumStringByChar(String target) {
         if (!StringUtils.isNotSemanticallyNull(target)) {
             return 0;
@@ -167,8 +161,6 @@ public class TextUtil {
     private static boolean isDigit(char ch) {
         return ch >= 48 && ch <= 57;
     }
-
-    
 
     private static String getChunk(String s, int slength, int marker) {
         StringBuilder chunk = new StringBuilder();

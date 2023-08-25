@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BinaryNode
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 
-
-
 internal data class CoseSign1(
     val protectedHeader: ByteArray,
     val payload: ByteArray,

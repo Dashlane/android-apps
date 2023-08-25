@@ -4,23 +4,14 @@ import android.content.Context
 import com.adjust.sdk.Adjust
 import com.adjust.sdk.AdjustConfig
 import com.adjust.sdk.AdjustEvent
-import com.dashlane.abtesting.LocalAbTest
-import com.dashlane.abtesting.LocalAbTestManager
-import com.dashlane.abtesting.LocalVariant.ADJUST_TRACKING_ANONYMOUS_DEVICE_ID
-import com.dashlane.abtesting.LocalVariant.ADJUST_TRACKING_INSTALLATION_ID
-import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.util.Constants
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class AdjustWrapper @Inject constructor(
-    private val globalPreferencesManager: GlobalPreferencesManager,
-    private val deviceInfoRepository: DeviceInfoRepository,
-    private val localAbTestManager: LocalAbTestManager
+    private val globalPreferencesManager: GlobalPreferencesManager
 ) {
     private var isInit = false
 
@@ -38,22 +29,12 @@ class AdjustWrapper @Inject constructor(
         isInit = true
     }
 
-    
-
     private fun setTrackingId() {
-        val anonymousIdStrategy = createAnonymousIdStrategy()
         val installationIdStrategy = createInstallationIdStrategy()
-        when {
-            anonymousIdStrategy.isSelected -> anonymousIdStrategy.addSessionCallbackParameter()
-            installationIdStrategy.isSelected -> installationIdStrategy.addSessionCallbackParameter()
-            else -> {
-                when (localAbTestManager.getVariant(LocalAbTest.ADJUST_ID_MIGRATION)) {
-                    ADJUST_TRACKING_ANONYMOUS_DEVICE_ID ->
-                        selectTrackingIdStrategy(anonymousIdStrategy)
-                    ADJUST_TRACKING_INSTALLATION_ID ->
-                        selectTrackingIdStrategy(installationIdStrategy)
-                }
-            }
+        if (installationIdStrategy.isSelected) {
+            installationIdStrategy.addSessionCallbackParameter()
+        } else {
+            selectTrackingIdStrategy(installationIdStrategy)
         }
     }
 
@@ -62,21 +43,6 @@ class AdjustWrapper @Inject constructor(
         strategy.sendInstallEvent()
         strategy.isSelected = true
     }
-
-    
-
-    private fun createAnonymousIdStrategy(): AdjustTrackingIdStrategy {
-        val anonymousDeviceId =
-            deviceInfoRepository.anonymousDeviceId
-        return AdjustTrackingIdStrategy(
-            id = anonymousDeviceId,
-            preferencesKey = "install_receiver_adjust_sent_for_$anonymousDeviceId",
-            sessionCallbackParameterKey = "anonymousComputerId",
-            installEventPartnerParameterKey = "anonymousDeviceId"
-        )
-    }
-
-    
 
     private fun createInstallationIdStrategy(): AdjustTrackingIdStrategy {
         val installationTrackingId =
@@ -95,8 +61,6 @@ class AdjustWrapper @Inject constructor(
         private val sessionCallbackParameterKey: String,
         private val installEventPartnerParameterKey: String
     ) {
-        
-
         var isSelected: Boolean
             get() = globalPreferencesManager.getBoolean(preferencesKey)
             set(value) {
@@ -107,14 +71,11 @@ class AdjustWrapper @Inject constructor(
             Adjust.addSessionCallbackParameter(sessionCallbackParameterKey, id)
         }
 
-        
-
         fun sendInstallEvent() {
             val event = AdjustEvent(Constants.MARKETING.ADJUST_EVENT_INSTALL)
             try {
                 event.addPartnerParameter(installEventPartnerParameterKey, id)
             } catch (e: Exception) {
-                Log.v(e)
             }
             Adjust.trackEvent(event)
         }

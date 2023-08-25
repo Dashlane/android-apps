@@ -4,8 +4,6 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.io.Writer
 
-
-
 class ExceptionSafePrintWriter(out: Writer) : PrintWriter(out) {
     override fun println(x: Any?) {
         if (x is Throwable) {
@@ -17,8 +15,6 @@ class ExceptionSafePrintWriter(out: Writer) : PrintWriter(out) {
         }
     }
 }
-
-
 
 fun Throwable.stackTraceToSafeString(): String {
     val stringWriter = StringWriter()

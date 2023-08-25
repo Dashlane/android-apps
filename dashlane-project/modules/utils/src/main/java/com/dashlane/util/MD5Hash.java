@@ -4,8 +4,6 @@ import androidx.annotation.Nullable;
 import kotlin.text.Charsets;
 import okio.ByteString;
 
-
-
 @SuppressWarnings("WeakHashAlgorithm")
 public class MD5Hash {
     private MD5Hash() {

@@ -7,6 +7,8 @@ import android.net.http.SslError
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.dashlane.authentication.sso.GetSsoInfoResult
@@ -15,13 +17,11 @@ import com.dashlane.url.toUrlDomain
 import com.dashlane.url.toUrlDomainOrNull
 import org.intellij.lang.annotations.Language
 
-
-
 class NitroSsoWebView(
     context: Context,
     trustedDomain: UrlDomain,
     redirectionUrl: String,
-    onSamlIntercepted: (String) -> Unit,
+    onSamlResponse: (String) -> Unit,
     onError: (GetSsoInfoResult.Error) -> Unit
 ) : WebView(context) {
 
@@ -29,7 +29,7 @@ class NitroSsoWebView(
         context = context,
         trustedDomain = "dashlane.com".toUrlDomain(),
         redirectionUrl = "",
-        onSamlIntercepted = {},
+        onSamlResponse = {},
         onError = {}
     )
 
@@ -43,15 +43,40 @@ class NitroSsoWebView(
             settings.javaScriptEnabled = true
 
             addJavascriptInterface(
-                SamlCatcherJavascriptInterface(onSamlIntercepted),
+                SamlCatcherJavascriptInterface(
+                    onSamlResponse = onSamlResponse,
+                    onError = onError
+                ),
                 JS_INTERFACE
             )
             webChromeClient = LimitedWebChromeClient()
             webViewClient = object : WebViewClient() {
 
-                override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+                override fun onReceivedSslError(
+                    view: WebView?,
+                    handler: SslErrorHandler?,
+                    error: SslError?
+                ) {
                     handler?.cancel()
                     onError(GetSsoInfoResult.Error.UnauthorizedNavigation)
+                }
+
+                override fun shouldInterceptRequest(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): WebResourceResponse? {
+                    return if (request?.url.toString() == redirectionUrl) {
+                        post {
+                            view?.evaluateJavascript(
+                                "javascript:${readSamlResponse(redirectionUrl)}",
+                                null
+                            )
+                        }
+                        
+                        return WebResourceResponse("text/html", "utf-8", "".byteInputStream())
+                    } else {
+                        super.shouldInterceptRequest(view, request)
+                    }
                 }
 
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -59,23 +84,27 @@ class NitroSsoWebView(
                         onError(GetSsoInfoResult.Error.UnauthorizedNavigation)
                         return
                     }
-                    view?.evaluateJavascript(
-                        "javascript:${getSamlInterceptionScript(redirectionUrl)}",
-                        null
-                    )
                 }
             }
         }
     }
 
-    internal class SamlCatcherJavascriptInterface(private val webviewCallback: (String) -> Unit) {
+    internal class SamlCatcherJavascriptInterface(
+        private val onSamlResponse: (String) -> Unit,
+        private val onError: (GetSsoInfoResult.Error) -> Unit
+    ) {
 
         @JavascriptInterface
         fun init() = Unit
 
         @JavascriptInterface
         fun onSamlResponseIntercepted(samlResponse: String) {
-            webviewCallback(samlResponse)
+            onSamlResponse(samlResponse)
+        }
+
+        @JavascriptInterface
+        fun onMissingSamlResponse() {
+            onError(GetSsoInfoResult.Error.SamlResponseNotFound)
         }
     }
 
@@ -83,41 +112,24 @@ class NitroSsoWebView(
 
         private const val JS_INTERFACE = "Android"
 
-        
-
         @Language("JS")
-        private fun getSamlInterceptionScript(redirectionUrl: String): String = """
+        private fun readSamlResponse(redirectionUrl: String): String = """
             $JS_INTERFACE.init();
             
+            const form = document.querySelector('form[action="$redirectionUrl"]');
             
-            const config = { attributes: true, childList: true, subtree: true, attributeFilter: ["form"] };
-            
-            
-            const callback = (mutationList, observer) => {
-                for (const mutation of mutationList) {
-                    if (mutation.type === 'childList') {
-                        const form = document.querySelector('form[action="$redirectionUrl"]');
-                        
-                        if (form) {
-                            $JS_INTERFACE.onSamlResponseIntercepted(form.children.SAMLResponse.value);
-                            form.remove(); 
-                        }
-                    }
-                }
-            };
-            
-            
-            const observer = new MutationObserver(callback);
-            
-            observer.observe(window.document, config);
+            if (form) {
+                $JS_INTERFACE.onSamlResponseIntercepted(form.children.SAMLResponse.value);
+                form.remove(); 
+            } else {
+                $JS_INTERFACE.onMissingSamlResponse();
+            }
         """.trimIndent()
     }
 }
 
-
-
 private fun String?.isUrlAllowed(trustedDomain: UrlDomain): Boolean {
-    val domain: UrlDomain = this?.toUrlDomainOrNull() ?: return false
+    val domain: UrlDomain = this?.toUrlDomainOrNull()?.root ?: return false
 
-    return trustedDomain.root == domain.root
+    return domain == trustedDomain.root || domain == "dashlane.com".toUrlDomain()
 }

@@ -11,8 +11,6 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
-
-
 class GeneratedPasswordQueryImpl @Inject constructor(
     private val dataStorageProvider: DataStorageProvider,
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>

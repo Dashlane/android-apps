@@ -11,10 +11,8 @@ import com.dashlane.lock.UnlockEventCoroutineListener
 import com.dashlane.login.LoginActivity
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.security.DashlaneIntent
-import com.dashlane.util.DevUtil
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.desktopId
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
@@ -48,11 +46,10 @@ class LockNavigationHelperImpl @Inject constructor(
         @LockHelper.LockPrompt lockPrompt: Int,
         customMessage: String?
     ) {
-        val intent = getIntentLock(context, reason, lockPrompt, customMessage)
-        DevUtil.startActivityOrDefaultErrorMessage(context, intent)
+        context.startActivity(getIntentLock(context, reason, lockPrompt, customMessage))
     }
 
-    override fun showLockForAccountReset(
+    override fun showLockForBiometricRecovery(
         activity: Activity,
         requestCode: Int,
         customMessage: String?,
@@ -70,73 +67,83 @@ class LockNavigationHelperImpl @Inject constructor(
         activity.startActivityForResult(intent, requestCode)
     }
 
-    
-
     override suspend fun showAndWaitLockActivityForItem(context: Context, item: SummaryObject): UnlockEvent? {
         val message = messageHelper.getMessageUnlockForItem(context, item)
-        val itemType = item.syncObjectType.desktopId
+        val itemType = item.syncObjectType
         val itemUid = item.id
 
-        val reason = UnlockEvent.Reason.OpenItem(itemType, itemUid)
+        val reason = UnlockEvent.Reason.OpenItem(itemType.xmlObjectName, itemUid)
         return showAndWaitLockActivityForReason(context, reason, LockHelper.PROMPT_LOCK_FOR_ITEM, message)
     }
 
     override fun showLockActivityToSetPinCode(context: Context, isReset: Boolean) {
-        val lock = Intent(context, LoginActivity::class.java)
-        lock.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        lock.putExtra(LockSetting.EXTRA_IS_LOCK_CANCELABLE, true)
-        lock.putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_SET, true)
-        lock.putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_RESET, isReset)
-        DevUtil.startActivityOrDefaultErrorMessage(context, lock)
+        val lockIntent = Intent(context, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(LockSetting.EXTRA_IS_LOCK_CANCELABLE, true)
+            putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_SET, true)
+            putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_RESET, isReset)
+        }
+        context.startActivity(lockIntent)
     }
 
     override fun showLockActivity(context: Context) {
-        val lock = Intent(context, LoginActivity::class.java)
-        lock.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        lock.putExtra(LockSetting.EXTRA_IS_LOCK_CANCELABLE, false)
-        lock.putExtra(LockSetting.EXTRA_LOCK_TYPE, lockTypeManager.getLockType())
-        lock.putExtra(LockSetting.EXTRA_LOCK_REASON, UnlockEvent.Reason.AppAccess())
-        DevUtil.startActivityOrDefaultErrorMessage(context, lock)
+        val lockIntent = Intent(context, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(LockSetting.EXTRA_IS_LOCK_CANCELABLE, false)
+            putExtra(LockSetting.EXTRA_LOCK_TYPE, lockTypeManager.getLockType())
+            putExtra(LockSetting.EXTRA_LOCK_REASON, UnlockEvent.Reason.AppAccess())
+        }
+        context.startActivity(lockIntent)
     }
 
     override fun showLockActivityForAutofillApi(context: Context) {
         val reason = UnlockEvent.Reason.AccessFromAutofillApi()
-        val intent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent
-            .FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or Intent.FLAG_ACTIVITY_NO_HISTORY
-        intent.putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
-        intent.putExtra(LockSetting.EXTRA_AS_DIALOG, true)
-        DevUtil.startActivityOrDefaultErrorMessage(context, intent, false)
+        val lockIntent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
+                    Intent.FLAG_ACTIVITY_NO_HISTORY
+            putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
+            putExtra(LockSetting.EXTRA_AS_DIALOG, true)
+        }
+        context.startActivity(lockIntent)
     }
 
     override suspend fun showLockActivityForFollowUpNotification(context: Context): UnlockEvent? {
         val lockWatcher = UnlockEventCoroutineListener(lockWatcher)
 
         val reason = UnlockEvent.Reason.AccessFromFollowUpNotification()
-        val intent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent
-            .FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or Intent.FLAG_ACTIVITY_NO_HISTORY
-        intent.putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
-        intent.putExtra(LockSetting.EXTRA_AS_DIALOG, true)
-        DevUtil.startActivityOrDefaultErrorMessage(context, intent, false)
+        val lockIntent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
+                    Intent.FLAG_ACTIVITY_NO_HISTORY
+            putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
+            putExtra(LockSetting.EXTRA_AS_DIALOG, true)
+        }
+        context.startActivity(lockIntent)
         return tryOrNull { withTimeout(30_000) { lockWatcher.await() } }
     }
 
     override fun showLockActivityForInAppLogin(context: Context, itemUID: String?) {
         val reason = UnlockEvent.Reason.AccessFromExternalComponent(itemUID)
-        val intent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent
-            .FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or Intent.FLAG_ACTIVITY_NO_HISTORY
-        intent.putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
-        DevUtil.startActivityOrDefaultErrorMessage(context, intent, false)
+        val lockIntent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
+                    Intent.FLAG_ACTIVITY_NO_HISTORY
+            putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
+        }
+        context.startActivity(lockIntent)
     }
 
     override fun logoutAndCallLoginScreenForInAppLogin(context: Context) {
-        val loginActivityIntent = DashlaneIntent.newInstance(context, LoginActivity::class.java)
-        loginActivityIntent.putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
-        loginActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        loginActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        DevUtil.startActivityOrDefaultErrorMessage(context, loginActivityIntent, false)
+        val loginActivityIntent = DashlaneIntent.newInstance(context, LoginActivity::class.java).apply {
+            putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        context.startActivity(loginActivityIntent)
     }
 
     private fun getIntentLock(

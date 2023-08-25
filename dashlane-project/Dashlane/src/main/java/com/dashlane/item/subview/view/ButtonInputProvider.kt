@@ -9,8 +9,6 @@ import com.dashlane.design.iconography.IconToken
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 
-
-
 object ButtonInputProvider {
 
     fun create(

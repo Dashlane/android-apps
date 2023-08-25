@@ -1,7 +1,5 @@
 package com.dashlane.autofill.api.securitywarnings.data
 
-
-
 internal interface SecurityWarningJsonToPreferences {
     val incorrectJson: SecurityWarningsJson
     val unknownJson: SecurityWarningsJson

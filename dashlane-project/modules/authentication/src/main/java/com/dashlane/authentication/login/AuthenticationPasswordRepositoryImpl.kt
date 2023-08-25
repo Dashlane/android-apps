@@ -42,14 +42,14 @@ import com.dashlane.session.Username
 import com.dashlane.session.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.serializer.XmlException
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import java.time.Instant
-import java.util.concurrent.TimeUnit
 
 class AuthenticationPasswordRepositoryImpl(
     private val userStorage: UserStorage,
@@ -124,15 +124,9 @@ class AuthenticationPasswordRepositoryImpl(
     }
 
     private enum class DeviceValidity {
-        
-
         VALID,
 
-        
-
         REVOKED,
-
-        
 
         UNRECOGNIZED
     }
@@ -238,21 +232,27 @@ class AuthenticationPasswordRepositoryImpl(
         }
     }
 
-    
-
     private suspend fun validateToRestoreUser(
         userDevice: RegisteredUserDevice.ToRestore,
         vaultKey: AppKey.Password
     ): AuthenticationPasswordRepository.Result {
-
         val backupToken = try {
             cryptography.createVaultDecryptionEngine(vaultKey.toVaultKey())
                 .use { it.decryptBackupToken(userDevice.cipheredBackupToken.asEncryptedBase64()) }
         } catch (e: CryptographyException) {
             throw AuthenticationDeviceCredentialsInvalidException(isValidPassword = false, cause = e)
         }
+        val registeredDevice: RegisteredUserDevice.Remote = registerExtraDevice(userDevice.login, backupToken, userDevice.securityFeatures)
+        return validateRemoteUser(registeredDevice, vaultKey)
+    }
+
+    private suspend fun registerExtraDevice(
+        login: String,
+        backupToken: String,
+        securityFeatures: Set<SecurityFeature>
+    ): RegisteredUserDevice.Remote {
         val request = AuthRegistrationExtraDeviceService.Request(
-            login = userDevice.login,
+            login = login,
             device = AuthRegistrationDevice(
                 osCountry = deviceRegistrationInfo.osCountry,
                 temporary = false,
@@ -275,14 +275,13 @@ class AuthenticationPasswordRepositoryImpl(
         val data = response.data
         val encryptedSettings = data.settings.content!!
         val settingsDate = data.settings.backupDate.toInstant()
-        val registeredDevice = data.toRegisteredUserDevice(
-            login = userDevice.login,
-            securityFeatures = userDevice.securityFeatures,
+        
+        return data.toRegisteredUserDevice(
+            login = login,
+            securityFeatures = securityFeatures,
             encryptedSettings = encryptedSettings,
             settingsDate = settingsDate
         )
-        
-        return validateRemoteUser(registeredDevice, vaultKey)
     }
 }
 

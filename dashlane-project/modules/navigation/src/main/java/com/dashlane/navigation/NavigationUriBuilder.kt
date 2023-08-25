@@ -3,8 +3,6 @@ package com.dashlane.navigation
 import android.net.Uri
 import com.dashlane.useractivity.log.UserActivityLog
 
-
-
 class NavigationUriBuilder private constructor(private var builder: Uri.Builder) {
 
     constructor() : this(Uri.Builder())

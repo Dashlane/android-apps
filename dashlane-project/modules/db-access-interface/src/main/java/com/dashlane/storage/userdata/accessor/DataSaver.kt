@@ -5,11 +5,7 @@ import com.dashlane.xml.domain.SyncObject
 
 interface DataSaver {
 
-    
-
      suspend fun save(item: VaultItem<*>) = save(listOf(item))
-
-    
 
     suspend fun save(items: List<VaultItem<*>>): Boolean {
         return save(
@@ -21,11 +17,7 @@ interface DataSaver {
         ).isNotEmpty()
     }
 
-    
-
     suspend fun <T : SyncObject> save(saveRequest: SaveRequest<T>): List<VaultItem<*>>
-
-    
 
     suspend fun forceDelete(item: VaultItem<*>): Boolean
 

@@ -5,8 +5,6 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import android.view.Window
 
-
-
 fun Window.isOutOfBounds(context: Context, motionEvent: MotionEvent): Boolean {
     val x = motionEvent.x.toInt()
     val y = motionEvent.y.toInt()

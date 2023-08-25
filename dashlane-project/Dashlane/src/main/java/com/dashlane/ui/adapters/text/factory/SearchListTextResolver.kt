@@ -32,14 +32,14 @@ class SearchListTextResolver(identityUtil: IdentityUtil = IdentityUtil(Singleton
         val secondaryLine = getTextFactory(context, item).getLine2FromField(searchField)
             ?: return super.getLine2(context, item)
 
-        return DataIdentifierListTextFactory.StatusText(secondaryLine.text.ignoreEscapedCharacter().focusOn(targetText),
+        return DataIdentifierListTextFactory.StatusText(
+            secondaryLine.text.ignoreEscapedCharacter().focusOn(targetText),
             secondaryLine.isWarning,
             targetText
         )
     }
 
     private fun String.focusOn(targetText: String): String {
-
         val startIndex = this.indexOf(targetText, ignoreCase = true)
         if (startIndex <= PREFIX_CROPPING_THRESHOLD) return this
 

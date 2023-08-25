@@ -85,7 +85,8 @@ class BarCodeCaptureActivity : DashlaneActivity() {
         previewView = findViewById(R.id.preview_view)
         cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         ViewModelProvider(
-            this, ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
         )[CameraXViewModel::class.java]
             .processCameraProvider
             .observe(this) { provider: ProcessCameraProvider? ->
@@ -135,8 +136,7 @@ class BarCodeCaptureActivity : DashlaneActivity() {
         previewUseCase!!.setSurfaceProvider(previewView.surfaceProvider)
 
         try {
-            cameraProvider!!.bindToLifecycle(
-this,
+                this,
                 cameraSelector,
                 previewUseCase
             )
@@ -174,8 +174,7 @@ this,
         }
 
         try {
-            cameraProvider!!.bindToLifecycle(
-this,
+                this,
                 cameraSelector,
                 analysisUseCase
             )
@@ -199,9 +198,12 @@ this,
                 val codes = barcodes.mapNotNull {
                     it.rawValue
                 }
-                setResult(Activity.RESULT_OK, Intent().apply {
+                setResult(
+                    Activity.RESULT_OK,
+                    Intent().apply {
                     putExtra(RESULT_EXTRA_BARCODE_VALUES, codes.toTypedArray())
-                })
+                }
+                )
                 finish()
             }
             .addOnFailureListener {
@@ -216,8 +218,6 @@ this,
 
     private fun createInputImage(imageProxy: ImageProxy) =
         InputImage.fromMediaImage(imageProxy.image!!, imageProxy.imageInfo.rotationDegrees)
-
-    
 
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)

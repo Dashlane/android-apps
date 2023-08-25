@@ -5,8 +5,6 @@ import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 interface VaultList {
     interface ViewModel {
         fun onRefresh()
@@ -20,8 +18,6 @@ interface VaultList {
             sortMode: VaultListDataProvider.UnboundedListSortMode,
             context: Context
         ): List<DashlaneRecyclerAdapter.ViewTypeProvider>
-
-        
 
         suspend fun generateViewTypeProviderHighlightList(
             items: List<SummaryObject>,

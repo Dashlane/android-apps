@@ -4,8 +4,6 @@ import android.view.View
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-
-
 class ViewVisibilityDelegate(val view: View, val invisible: Int) : ReadWriteProperty<Any, Boolean> {
 
     override fun getValue(thisRef: Any, property: KProperty<*>): Boolean = view.visibility == View.VISIBLE

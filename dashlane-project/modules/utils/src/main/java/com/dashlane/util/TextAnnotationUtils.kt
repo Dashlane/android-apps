@@ -11,14 +11,11 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.UnderlineSpan
 import androidx.annotation.StringRes
 
-
-
 fun Context.getTextAnnotatedFormatted(
     @StringRes textResId: Int,
     vararg actions: TextAnnotationProcessor =
         getAllDashlaneTextAnnotationProcessors()
 ): CharSequence {
-
     val original = getText(textResId) as SpannedString
     val result = SpannableString(original)
 
@@ -45,14 +42,10 @@ private fun getAllDashlaneTextAnnotationProcessors() =
         UnderlineTextAnnotationProcessor
     )
 
-
-
 interface TextAnnotationProcessor {
 
     fun getSpan(key: String, value: String): CharacterStyle?
 }
-
-
 
 object DashlaneColorTextAnnotationProcessor : TextAnnotationProcessor {
 
@@ -66,8 +59,6 @@ object DashlaneColorTextAnnotationProcessor : TextAnnotationProcessor {
         return ForegroundColorSpan(color)
     }
 }
-
-
 
 object UnderlineTextAnnotationProcessor : TextAnnotationProcessor {
 

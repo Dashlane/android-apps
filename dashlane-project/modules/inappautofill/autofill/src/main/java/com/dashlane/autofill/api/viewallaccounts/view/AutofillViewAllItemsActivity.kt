@@ -11,13 +11,12 @@ import androidx.navigation.fragment.findNavController
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountErrors
 import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountResultHandler
-import com.dashlane.autofill.api.model.AuthentifiantItemToFill
+import com.dashlane.autofill.api.model.toItemToFill
 import com.dashlane.autofill.api.navigation.AutofillBottomSheetNavigator
 import com.dashlane.autofill.api.navigation.AutofillBottomSheetNavigatorImpl
 import com.dashlane.autofill.api.navigation.AutofillNavigatorImpl
 import com.dashlane.autofill.api.rememberaccount.AutofillApiRememberAccountComponent
 import com.dashlane.autofill.api.request.autofill.logger.getAutofillApiOrigin
-import com.dashlane.autofill.api.securitywarnings.view.IncorrectSecurityWarningDialogFragment
 import com.dashlane.autofill.api.ui.AutoFillResponseActivity
 import com.dashlane.autofill.api.ui.AutofillFeature
 import com.dashlane.autofill.api.unlockfill.UnlockedAuthentifiant
@@ -25,7 +24,6 @@ import com.dashlane.autofill.api.viewallaccounts.AutofillApiViewAllAccountsCompo
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.bottomnavigation.NavigableBottomSheetDialogFragment
-import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.util.runIfNull
@@ -36,14 +34,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
-
-
 @AndroidEntryPoint
 class AutofillViewAllItemsActivity :
     SearchAuthentifiantDialogResponse,
     AutofillCreateAccountResultHandler,
     CoroutineScope,
-    IncorrectSecurityWarningDialogFragment.Actions,
     AutoFillResponseActivity() {
 
     private lateinit var summaryPackageName: String
@@ -70,7 +65,6 @@ class AutofillViewAllItemsActivity :
             component.autofillFormSourcesStrings,
             component.toaster,
             viewAllAccountsComponent.viewAllAccountSelectionNotifier,
-            viewAllAccountsComponent.userFeaturesChecker,
             apiRememberAccountComponent.formSourcesDataProvider
         )
     }
@@ -99,8 +93,6 @@ class AutofillViewAllItemsActivity :
         }
     }
 
-    
-
     fun getNavigableFragment(): Fragment? {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.autofill_nav_host_fragment) as NavHostFragment
@@ -116,15 +108,6 @@ class AutofillViewAllItemsActivity :
             finish()
             return
         }
-        if (isFirstRun) {
-            viewAllAccountsLogger.onClickToViewAllAccounts(
-                getAutofillApiOrigin(forKeyboardAutofill),
-                summaryPackageName,
-                summaryWebDomain,
-                intent.getBooleanExtra(EXTRA_HAD_CREDENTIALS, false)
-            )
-        }
-
         performLoginAndUnlock {
             openBottomSheetAuthentifiantsListDialog()
         }
@@ -151,11 +134,6 @@ class AutofillViewAllItemsActivity :
             val formSource = summary?.formSource.runIfNull {
                 finish()
             } ?: return
-            val itemToFill = AuthentifiantItemToFill(
-                primaryItem = authentifiant,
-                lastUsedDate = authentifiant.syncObject.modificationDatetime
-                    ?: authentifiant.syncObject.creationDatetime
-            )
             viewAllAccountsLogger.onSelectFromViewAllAccount(
                 origin = getAutofillApiOrigin(forKeyboardAutofill),
                 packageName = summaryPackageName,
@@ -165,26 +143,14 @@ class AutofillViewAllItemsActivity :
                 itemListContext = itemListContext
             )
             securityWarningsViewProxy.dealWithSecurityBeforeFill(
-                UnlockedAuthentifiant(
-                    formSource,
-                    itemToFill
-                )
+                UnlockedAuthentifiant(formSource, authentifiant.toItemToFill())
             )
         }
     }
 
-    override fun incorrectDialogPositiveAction(doNotShowAgainChecked: Boolean, domain: Domain) =
-        securityWarningsViewProxy.incorrectDialogPositiveAction(doNotShowAgainChecked, domain)
-
-    override fun incorrectDialogNegativeAction(domain: Domain) =
-        securityWarningsViewProxy.incorrectDialogNegativeAction(domain)
-
-    override fun incorrectDialogCancelAction(domain: Domain) =
-        securityWarningsViewProxy.incorrectDialogCancelAction(domain)
-
     override fun onFinishWithResult(result: VaultItem<SyncObject.Authentifiant>) {
         finishWithResult(
-            itemToFill = AuthentifiantItemToFill(primaryItem = result, lastUsedDate = result.locallyViewedDate),
+            itemToFill = result.toItemToFill(),
             autofillFeature = AutofillFeature.CREATE_ACCOUNT,
             matchType = MatchType.CREATED_PASSWORD 
         )

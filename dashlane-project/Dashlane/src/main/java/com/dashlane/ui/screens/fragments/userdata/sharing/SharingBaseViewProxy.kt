@@ -13,8 +13,6 @@ import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
 import com.dashlane.ui.widgets.view.RecyclerViewFloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 
-
-
 open class SharingBaseViewProxy(
     private val fragment: Fragment,
     view: View

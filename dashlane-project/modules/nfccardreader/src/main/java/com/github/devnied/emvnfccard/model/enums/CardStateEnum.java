@@ -1,8 +1,4 @@
-
-
 package com.github.devnied.emvnfccard.model.enums;
-
-
 
 public enum CardStateEnum implements IKeyEnum {
 

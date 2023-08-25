@@ -2,8 +2,6 @@ package com.dashlane.providers.contacts;
 
 import java.util.ArrayList;
 
-
-
 public class Contact {
     public String id;
     public String name;

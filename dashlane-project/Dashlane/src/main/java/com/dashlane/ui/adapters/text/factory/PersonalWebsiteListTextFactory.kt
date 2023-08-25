@@ -2,8 +2,8 @@ package com.dashlane.ui.adapters.text.factory
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.search.fields.PersonalWebsiteField
 import com.dashlane.search.SearchField
+import com.dashlane.search.fields.PersonalWebsiteField
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
@@ -16,8 +16,11 @@ class PersonalWebsiteListTextFactory(
 
     override fun getLine1(): StatusText {
         return StatusText(
-            if (item.name.isNotSemanticallyNull())
-                item.name!! else context.getString(ITEM_TYPE_NAME_ID)
+            if (item.name.isNotSemanticallyNull()) {
+                item.name!!
+            } else {
+                context.getString(ITEM_TYPE_NAME_ID)
+            }
         )
     }
 

@@ -10,8 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-
-
 suspend fun ContentResolver.getFileName(uri: Uri): String? = withContext(Dispatchers.IO) {
     var result: String? = null
     if (uri.scheme == "content") {

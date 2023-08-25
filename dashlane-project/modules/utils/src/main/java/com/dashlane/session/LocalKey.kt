@@ -6,8 +6,6 @@ import com.dashlane.cryptography.use
 import okio.ByteString
 import java.io.Closeable
 
-
-
 class LocalKey : Closeable, Cloneable {
 
     private val _cryptographyKey: CryptographyKey.Raw32
@@ -41,8 +39,6 @@ class LocalKey : Closeable, Cloneable {
     override fun hashCode(): Int =
         _cryptographyKey.hashCode()
 }
-
-
 
 fun LocalKey.hex(): String =
     cryptographyKeyBytes.use(ObfuscatedByteArray::toByteArray).use(ByteString::of).hex()

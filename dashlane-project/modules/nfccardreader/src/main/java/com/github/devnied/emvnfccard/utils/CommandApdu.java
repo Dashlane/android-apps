@@ -3,8 +3,6 @@ package com.github.devnied.emvnfccard.utils;
 import com.github.devnied.emvnfccard.enums.CommandEnum;
 
 
-
-
 public class CommandApdu {
 
 	protected int mCla = 0x00;

@@ -20,8 +20,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class AppUpdateInstaller @Inject constructor(
     @ApplicationContext
@@ -51,8 +49,6 @@ class AppUpdateInstaller @Inject constructor(
         }
     }
 
-    
-
     fun installUpdate(activity: DashlaneActivity) {
         activity.lifecycleScope.launch(mainCoroutineDispatcher) {
             if (!updateNeeded()) return@launch
@@ -65,14 +61,10 @@ class AppUpdateInstaller @Inject constructor(
         }
     }
 
-    
-
     private suspend fun checkForUpdates() {
         if (availableUpdate != null) return
         availableUpdate = appUpdateManager.requestAppUpdateInfo()
     }
-
-    
 
     private suspend fun updateNeeded(): Boolean = tryOrNull {
         if (availableUpdate == null) checkForUpdates()

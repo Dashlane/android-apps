@@ -24,8 +24,6 @@ import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 
-
-
 class AppUpdateNeededActivityListener @Inject constructor(
     private val sessionManager: SessionManager,
     private val appEvents: AppEvents,

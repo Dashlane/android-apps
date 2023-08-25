@@ -5,8 +5,6 @@ import com.dashlane.util.tryOrNull
 import com.dashlane.xml.domain.SyncObject
 import java.util.UUID
 
-
-
 val VaultItem<*>.hasBeenSaved: Boolean
     get() = id != 0L || syncObject.creationDatetime != null
 

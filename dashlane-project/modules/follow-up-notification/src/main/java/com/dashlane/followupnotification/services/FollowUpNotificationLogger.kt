@@ -3,8 +3,6 @@ package com.dashlane.followupnotification.services
 import com.dashlane.followupnotification.domain.FollowUpNotificationsTypes
 import com.dashlane.util.clipboard.vault.CopyField
 
-
-
 interface FollowUpNotificationLogger {
     fun showFollowUp(followUpType: FollowUpNotificationsTypes, copyField: CopyField?)
     fun dismissFollowUp(followUpType: FollowUpNotificationsTypes)

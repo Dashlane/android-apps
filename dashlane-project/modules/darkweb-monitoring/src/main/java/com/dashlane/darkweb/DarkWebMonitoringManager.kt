@@ -16,8 +16,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
 class DarkWebMonitoringManager @Inject constructor(
     callFactory: Call.Factory,
@@ -34,8 +32,6 @@ class DarkWebMonitoringManager @Inject constructor(
     private val gson = Gson()
     private var cache: Cache? = null
 
-    
-
     suspend fun optIn(email: String): String {
         val session = sessionManager.session ?: return ERROR_UNKNOWN
         val emails = JSONArray().put(email)
@@ -51,8 +47,6 @@ class DarkWebMonitoringManager @Inject constructor(
         }
         return resultCode
     }
-
-    
 
     suspend fun optOut(email: String): Boolean {
         val session = sessionManager.session ?: return false
@@ -71,15 +65,11 @@ class DarkWebMonitoringManager @Inject constructor(
         }
     }
 
-    
-
     suspend fun getEmailsWithStatus(): List<DarkWebEmailStatus>? {
         invalidateCacheIfUsernameChanged()
         refreshEmailStatusRemote()
         return cache?.emailsStatus
     }
-
-    
 
     suspend fun getBreaches(lastUpdateDate: Long): Pair<Long, List<BreachWithOriginalJson>>? {
         val session = sessionManager.session ?: return null
@@ -87,7 +77,8 @@ class DarkWebMonitoringManager @Inject constructor(
 
         val breachesContent = tryOrNull {
             darkWebService.getBreaches(
-                login, session.uki,
+                login,
+                session.uki,
                 includeDisabled = true,
                 wantsDetails = true,
                 lastUpdateDate = lastUpdateDate
@@ -147,13 +138,12 @@ class DarkWebMonitoringManager @Inject constructor(
             val originalJson = it.toString()
             val breach = gson.fromJson(it, Breach::class.java)
             BreachWithOriginalJson(
-                breach, originalJson,
+                breach,
+                originalJson,
                 passwords = passwords?.get(breach.id)
             )
         }
     }
-
-    
 
     private class Cache(
         val sessionId: String,

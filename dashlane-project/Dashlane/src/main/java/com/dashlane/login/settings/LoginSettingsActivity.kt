@@ -4,26 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Window
 import com.dashlane.R
-import com.dashlane.login.LoginSsoLoggerConfigProvider
 import com.dashlane.login.dagger.TrackingId
-import com.dashlane.login.lock.LockSetting
-import com.dashlane.login.sso.LoginSsoLogger
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.install.InstallLogCode69
-import com.dashlane.useractivity.log.usage.getUsageLogCode2SenderFromOrigin
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LoginSettingsActivity : DashlaneActivity(), LoginSsoLoggerConfigProvider {
-
-    override val ssoLoggerConfig
-        get() = LoginSsoLogger.Config(
-            trackingId,
-            InstallLogCode69.Type.LOGIN,
-            intent.getStringExtra(LockSetting.EXTRA_DOMAIN),
-            getUsageLogCode2SenderFromOrigin(intent)
-        )
+class LoginSettingsActivity : DashlaneActivity() {
 
     @Inject
     lateinit var loginSettingsPresenter: LoginSettingsPresenter

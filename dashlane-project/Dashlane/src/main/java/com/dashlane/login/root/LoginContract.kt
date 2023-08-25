@@ -21,66 +21,40 @@ import com.dashlane.login.pages.totp.LoginTotpContract
 import com.dashlane.login.sso.MigrationToSsoMemberInfo
 import com.skocken.presentation.definition.Base
 
-
-
 interface LoginContract {
 
     interface LoginViewProxy : Base.IView {
 
-        
-
         fun transitionTo(presenter: LoginBaseContract.Presenter)
 
-        
-
         fun transition(from: LoginBaseContract.Presenter?, to: LoginBaseContract.Presenter)
+
+        fun transitionToCompose()
     }
 
     interface Presenter : Base.IPresenter {
-        
-
         fun onCreate(savedInstanceState: Bundle?)
-
-        
 
         fun onSaveInstanceState(outState: Bundle)
 
-        
-
         fun onBackPressed(): Boolean
-
-        
 
         var showProgress: Boolean
 
-        
-
         fun onDestroy()
-
-        
 
         fun onStart()
 
-        
-
         fun onPrimaryFactorCancelOrLogout()
 
-        
-
         fun onPrimaryFactorTooManyAttempts()
-
-        
 
         fun onUseMasterPasswordClicked()
     }
 
-    
-
     interface DataProvider : Base.IDataProvider {
 
         val layoutInflater: LayoutInflater
-
-        
 
         val currentUserInfo: UserAccountInfo?
 
@@ -99,6 +73,7 @@ interface LoginContract {
 
         fun createPasswordDataProvider(
             registeredUserDevice: RegisteredUserDevice,
+            authTicket: String?,
             migrationToSsoMemberInfo: MigrationToSsoMemberInfo?,
             topicLock: String?,
             allowBypass: Boolean
@@ -114,11 +89,7 @@ interface LoginContract {
 
         fun isAlreadyLoggedIn(): Boolean
 
-        
-
         fun forceMasterPasswordUnlock(unlockReason: UnlockEvent.Reason?): Boolean
-
-        
 
         fun canDelayMasterPasswordUnlock(): Boolean
     }

@@ -5,8 +5,6 @@ import android.os.Bundle;
 
 import wei.mark.standout.ui.Window;
 
-
-
 public interface DashlaneBubblePositionController {
 
     void animateWindowToPosition(Context context, final Window window, Bundle positionBundle);

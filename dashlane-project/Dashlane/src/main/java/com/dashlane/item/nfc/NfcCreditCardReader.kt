@@ -1,5 +1,6 @@
 package com.dashlane.item.nfc
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
@@ -9,8 +10,10 @@ import com.github.devnied.emvnfccard.model.EmvCard
 import com.github.devnied.emvnfccard.parser.EmvTemplate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Calendar
 
 object NfcCreditCardReader {
+    @SuppressLint("JavaUtilDateUsage")
     suspend fun readCard(intent: Intent): EmvCard? = withContext(Dispatchers.Default) {
         if (intent.action == NfcAdapter.ACTION_TECH_DISCOVERED) {
             val tag = intent.getParcelableExtraCompat<Tag>(NfcAdapter.EXTRA_TAG)
@@ -27,7 +30,7 @@ object NfcCreditCardReader {
                         .setConfig(config)
                         .setProvider(provider)
                         .build()
-                    return@withContext parser.readEmvCard()
+                    return@withContext parser.readEmvCard(Calendar.getInstance())
                 }
             }
         }

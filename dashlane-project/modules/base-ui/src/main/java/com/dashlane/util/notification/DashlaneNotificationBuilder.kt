@@ -12,8 +12,6 @@ import androidx.core.content.ContextCompat
 import com.dashlane.ui.R
 import com.dashlane.util.toBitmap
 
-
-
 class DashlaneNotificationBuilder constructor(private val mContext: Context) {
     val notificationBuilder: NotificationCompat.Builder =
         NotificationCompat.Builder(mContext, NotificationHelper.DEFAULT_CHANNEL)
@@ -118,6 +116,7 @@ class DashlaneNotificationBuilder constructor(private val mContext: Context) {
         notificationBuilder.setUsesChronometer(true)
         notificationBuilder.setExtras(Bundle())
         notificationBuilder.setChronometerCountDown(countdown)
+        notificationBuilder.setTimeoutAfter(delayInMillis)
         return this
     }
 

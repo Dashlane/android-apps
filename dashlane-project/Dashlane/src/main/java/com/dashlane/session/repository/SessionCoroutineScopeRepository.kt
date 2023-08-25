@@ -10,15 +10,12 @@ import kotlinx.coroutines.cancel
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-
 @Singleton
-class SessionCoroutineScopeRepository @Inject constructor() : SessionObserver,
+class SessionCoroutineScopeRepository @Inject constructor() :
+    SessionObserver,
     BySessionRepository<CoroutineScope> {
 
     private val coroutineScopePerSession = mutableMapOf<Session, CoroutineScope>()
-
-    
 
     fun sessionInitializing(session: Session) {
         coroutineScopePerSession[session] = InternalCoroutineScope(SupervisorJob())

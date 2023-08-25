@@ -9,8 +9,6 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlinx.parcelize.Parcelize
 
-
-
 class ChecklistGroup @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -79,8 +77,6 @@ class ChecklistGroup @JvmOverloads constructor(
             (findViewById<View>(viewId) as? GetStartedStepView)?.setExpanded(value = false, animate = true)
         }
     }
-
-    
 
     private fun View.enforceId() {
         if (id == View.NO_ID) {

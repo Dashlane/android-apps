@@ -11,19 +11,11 @@ internal enum class CurrentPlanType {
 
     ADVANCED,
 
-    
-
     ESSENTIALS,
-
-    
 
     PREMIUM_FREE_FOR_LIFE,
 
-    
-
     PREMIUM_FREE_OF_CHARGE,
-
-    
 
     PREMIUM,
 

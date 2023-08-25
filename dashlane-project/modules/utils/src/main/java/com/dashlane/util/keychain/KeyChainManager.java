@@ -23,15 +23,11 @@ import javax.crypto.NoSuchPaddingException;
 
 import androidx.annotation.Nullable;
 
-
-
 public class KeyChainManager {
     private KeyStore mKeyStore;
 
     private KeyChainManager() {
     }
-
-    
 
     @Nullable
     public static KeyChainManager createInstance() {
@@ -43,8 +39,6 @@ public class KeyChainManager {
             return null;
         }
     }
-
-    
 
     @Nullable
     public String encryptBytes(String alias, byte[] bytes) throws KeyChainException {
@@ -73,8 +67,6 @@ public class KeyChainManager {
         }
 
     }
-
-    
 
     @Nullable
     public byte[] decryptString(String alias, String encrypted) throws KeyChainException {
@@ -112,8 +104,6 @@ public class KeyChainManager {
 
     }
 
-    
-
     private boolean initKeyStore() {
         
         
@@ -125,8 +115,6 @@ public class KeyChainManager {
             return false;
         }
     }
-
-    
 
     public void loadKeyForUser(String userAlias) throws KeyChainException {
         try {

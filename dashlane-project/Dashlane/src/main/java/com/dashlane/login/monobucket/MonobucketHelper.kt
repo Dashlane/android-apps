@@ -7,8 +7,6 @@ import com.dashlane.server.api.endpoints.devices.ListDevicesService
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability
 
-
-
 class MonobucketHelper(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val listDevicesData: ListDevicesService.Data
@@ -17,8 +15,6 @@ class MonobucketHelper(
     fun getMonobucketOwner(): Device? {
         val isPremiumUser = userFeaturesChecker.has(Capability.SYNC)
         if (isPremiumUser) return null
-
-        
 
         return getBucketOwner()
     }

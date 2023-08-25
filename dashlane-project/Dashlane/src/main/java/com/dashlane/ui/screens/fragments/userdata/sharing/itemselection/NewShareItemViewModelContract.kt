@@ -6,8 +6,6 @@ import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-
-
 interface NewShareItemViewModelContract {
     val ulFrom: UsageLogCode80.From?
     val uiState: Flow<UIState>
@@ -16,8 +14,6 @@ interface NewShareItemViewModelContract {
     fun onClickNewShare()
     fun onItemSelected(uid: String, type: SyncObjectType)
     fun onItemUnSelected(uid: String, type: SyncObjectType)
-    fun onBackPressed()
-    fun onCreated()
 
     data class SelectionState(
         val accountsToShare: List<String>,

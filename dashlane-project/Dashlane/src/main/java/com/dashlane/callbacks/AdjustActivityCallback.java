@@ -6,8 +6,6 @@ import android.os.Bundle;
 
 import com.adjust.sdk.Adjust;
 
-
-
 public class AdjustActivityCallback implements Application.ActivityLifecycleCallbacks {
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {

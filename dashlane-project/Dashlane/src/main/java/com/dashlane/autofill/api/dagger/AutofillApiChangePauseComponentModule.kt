@@ -8,10 +8,11 @@ import com.dashlane.autofill.api.changepause.view.ChangePauseViewTypeProviderFac
 import com.dashlane.autofill.core.AutofillApiApiChangePauseLoggerImpl
 import dagger.Binds
 import dagger.Module
-
-
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 
 @Module
+@InstallIn(ActivityComponent::class)
 internal abstract class AutofillApiChangePauseComponentModule {
     @Binds
     abstract fun bindsAutofillApiChangePauseLogger(impl: AutofillApiApiChangePauseLoggerImpl): AutofillApiChangePauseLogger

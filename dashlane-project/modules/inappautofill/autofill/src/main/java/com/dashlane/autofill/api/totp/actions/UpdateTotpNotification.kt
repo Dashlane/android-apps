@@ -10,8 +10,6 @@ import com.dashlane.autofill.api.totp.services.AutofillApiTotpService
 import com.dashlane.autofill.api.totp.services.TotpNotificationDisplayService
 import com.dashlane.autofill.api.totp.services.TotpNotificationUpdateService
 
-
-
 class UpdateTotpNotification(
     private val autofillTotp: AutofillApiTotpService,
     private val totpRepository: TotpNotificationRepository,
@@ -84,7 +82,8 @@ class UpdateTotpNotification(
     ) {
         updateTotpNotification(totpNotification, totpResult)
         totpNotificationDisplayService.display(
-            totpNotificationId, totpNotification.credential.title,
+            totpNotificationId,
+            totpNotification.credential.title,
             totpResult.code,
             totpResult.timeRemainingMilliseconds
         )
@@ -102,7 +101,8 @@ class UpdateTotpNotification(
     ) {
         updateTotpNotification(totpNotification, totpResult)
         totpNotificationDisplayService.updateWithNewCode(
-            totpNotificationId, totpNotification.credential.title,
+            totpNotificationId,
+            totpNotification.credential.title,
             totpResult.code,
             totpResult.timeRemainingMilliseconds
         )
@@ -120,7 +120,8 @@ class UpdateTotpNotification(
     ) {
         updateTotpNotification(totpNotification, totpResult)
         totpNotificationDisplayService.updateWithSafeguardCode(
-            totpNotificationId, totpNotification.credential.title,
+            totpNotificationId,
+            totpNotification.credential.title,
             totpResult.code,
             totpResult.timeRemainingMilliseconds
         )

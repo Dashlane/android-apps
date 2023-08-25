@@ -53,8 +53,6 @@ class BreachServiceImpl constructor(
         return BreachWithOriginalJson(breach, originalJson)
     }
 
-    
-
     private fun mergeBreaches(vararg lists: List<BreachWithOriginalJson>?): List<BreachWithOriginalJson> {
         return lists.filterNotNull()
             .flatten()
@@ -76,8 +74,6 @@ class BreachServiceImpl constructor(
         }
     }
 
-    
-
     interface BreachQueryService {
 
         @POST("/1/breaches/get")
@@ -97,8 +93,6 @@ class BreachServiceImpl constructor(
             val breaches: List<JsonObject>?
         )
     }
-
-    
 
     interface BreachEntriesService {
         @GET

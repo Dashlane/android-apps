@@ -1,6 +1,7 @@
 package com.dashlane.autofill.api.fillresponse
 
 import android.content.Context
+import android.graphics.BlendMode
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.autofill.InlinePresentation
@@ -8,61 +9,40 @@ import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import androidx.core.content.ContextCompat.getColor
+import androidx.core.graphics.drawable.toIcon
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.api.model.AuthentifiantSummaryItemToFill
-import com.dashlane.autofill.api.model.CreditCardSummaryItemToFill
+import com.dashlane.autofill.api.model.AuthentifiantItemToFill
+import com.dashlane.autofill.api.model.CreditCardItemToFill
 import com.dashlane.autofill.api.model.EmailItemToFill
 import com.dashlane.autofill.api.model.ItemToFill
+import com.dashlane.autofill.api.model.OtpItemToFill
 import com.dashlane.autofill.api.util.AutofillNavigationService
-import com.dashlane.vault.model.loginForUi
-import com.dashlane.vault.model.titleForList
-import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.ui.VaultItemImageHelper
+import com.dashlane.util.toBitmap
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 internal interface InlinePresentationProvider {
-    
-
     fun forItem(item: ItemToFill, spec: InlinePresentationSpec?): InlinePresentation?
-
-    
 
     fun forLogout(spec: InlinePresentationSpec?): InlinePresentation?
 
-    
-
     fun forOnBoarding(spec: InlinePresentationSpec?): InlinePresentation?
-
-    
 
     fun forViewAllItems(spec: InlinePresentationSpec?): InlinePresentation?
 
-    
-
     fun forViewAllItemsOnEmptyResults(spec: InlinePresentationSpec?): InlinePresentation?
-
-    
 
     fun forPause(spec: InlinePresentationSpec?): InlinePresentation?
 
-    
-
     fun forAddAccount(spec: InlinePresentationSpec?): InlinePresentation?
-
-    
 
     fun forChangePassword(spec: InlinePresentationSpec?): InlinePresentation?
 
-    
-
-    fun forSmsOtp(spec: InlinePresentationSpec?): InlinePresentation?
-
-    
+    fun forOtp(spec: InlinePresentationSpec?): InlinePresentation?
 
     fun forPinnedItem(spec: InlinePresentationSpec?): InlinePresentation?
 }
-
-
 
 @RequiresApi(Build.VERSION_CODES.R)
 internal class InlinePresentationProviderImpl @Inject constructor(
@@ -71,7 +51,6 @@ internal class InlinePresentationProviderImpl @Inject constructor(
 ) : InlinePresentationProvider {
 
     private val longPressIntent = navigationService.getLongPressActionOnInline()
-    private val inlineStringProvider = InlineSuggestionStringProvider(applicationContext)
 
     private val iconViewAllAccount
         get() = Icon.createWithResource(applicationContext, R.drawable.ic_inline_view_all_account).applyTint()
@@ -85,15 +64,19 @@ internal class InlinePresentationProviderImpl @Inject constructor(
         get() = Icon.createWithResource(applicationContext, R.drawable.ic_inline_sms_otp).applyTint()
     private val iconOnBoarding
         get() = Icon.createWithResource(applicationContext, R.drawable.ic_inline_onboarding).applyTint()
+    private val iconLogin
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_inline_login).applyTint()
+    private val iconEmail
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_inline_email).applyTint()
 
     override fun forItem(
         item: ItemToFill,
         spec: InlinePresentationSpec?
     ) = when (item) {
-        is AuthentifiantSummaryItemToFill -> forAuthentifiant(item.primaryItem, spec)
-        is CreditCardSummaryItemToFill -> forCreditCard(item.primaryItem, spec)
-        is EmailItemToFill -> forEmail(item.primaryItem, spec)
-        else -> null
+        is AuthentifiantItemToFill -> forAuthentifiant(item, spec)
+        is CreditCardItemToFill -> forCreditCard(item, spec)
+        is EmailItemToFill -> forEmail(item, spec)
+        is OtpItemToFill -> forOtp(spec)
     }
 
     override fun forLogout(spec: InlinePresentationSpec?): InlinePresentation? {
@@ -141,7 +124,7 @@ internal class InlinePresentationProviderImpl @Inject constructor(
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
 
-    override fun forSmsOtp(spec: InlinePresentationSpec?): InlinePresentation? {
+    override fun forOtp(spec: InlinePresentationSpec?): InlinePresentation? {
         spec ?: return null
 
         val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
@@ -158,50 +141,48 @@ internal class InlinePresentationProviderImpl @Inject constructor(
         return createInlinePresentation(inlineContent = sliceBuilder.build(), spec = spec, isPinned = true)
     }
 
-    
-
     private fun forCreditCard(
-        item: SummaryObject.PaymentCreditCard,
+        item: CreditCardItemToFill,
         spec: InlinePresentationSpec?
     ): InlinePresentation? {
         spec ?: return null
 
-        val title = inlineStringProvider.getCreditCardTitle(item)
-        val subTitle = inlineStringProvider.getCreditCardSubtitle(item)
         val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
-        sliceBuilder.setTitle(title)
-        sliceBuilder.setSubtitle(subTitle)
+        val icon = VaultItemImageHelper.getCreditCardIcon(applicationContext, item.color).toBitmap().toIcon().apply {
+            setTintBlendMode(BlendMode.DST)
+        }
+        sliceBuilder.setStartIcon(icon)
+        sliceBuilder.setTitle(item.cardNumberObfuscate)
+        sliceBuilder.setSubtitle(
+            item.name ?: item.cardTypeName ?: applicationContext.getString(R.string.inline_credit_card_fallback_title)
+        )
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
-
-    
 
     private fun forAuthentifiant(
-        item: SummaryObject.Authentifiant,
+        item: AuthentifiantItemToFill,
         spec: InlinePresentationSpec?
     ): InlinePresentation? {
         spec ?: return null
 
         val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
-        sliceBuilder.setTitle(inlineStringProvider.getAuthentifiantTitle(item))
-        sliceBuilder.setSubtitle(inlineStringProvider.getAuthentifiantSubtitle(item))
+        sliceBuilder.setTitle(item.login ?: applicationContext.getString(R.string.inline_account_fallback_title))
+        sliceBuilder.setSubtitle(item.title ?: "")
+        sliceBuilder.setStartIcon(iconLogin)
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
-
-    
 
     private fun forEmail(
-        item: SummaryObject.Email,
+        item: EmailItemToFill,
         spec: InlinePresentationSpec?
     ): InlinePresentation? {
         spec ?: return null
 
         val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
-        sliceBuilder.setTitle(inlineStringProvider.getEmailTitle(item))
+        sliceBuilder.setTitle(item.email ?: applicationContext.getString(R.string.inline_email_fallback_title))
+        sliceBuilder.setStartIcon(iconEmail)
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
-
-    
 
     private fun createViewAllAccountsInline(spec: InlinePresentationSpec?): InlinePresentation? {
         spec ?: return null
@@ -212,8 +193,6 @@ internal class InlinePresentationProviderImpl @Inject constructor(
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
 
-    
-
     private fun createInlinePresentation(
         inlineContent: InlineSuggestionUi.Content,
         spec: InlinePresentationSpec,
@@ -223,25 +202,4 @@ internal class InlinePresentationProviderImpl @Inject constructor(
     }
 
     private fun Icon.applyTint(): Icon = setTint(getColor(applicationContext, R.color.text_brand_standard))
-
-    
-
-    internal class InlineSuggestionStringProvider(private val context: Context) {
-
-        fun getCreditCardTitle(item: SummaryObject.PaymentCreditCard) =
-            item.cardNumberLastFourDigits?.let { "**** $it" } ?: ""
-
-        fun getCreditCardSubtitle(item: SummaryObject.PaymentCreditCard) = item.name
-            ?: item.creditCardTypeName
-            ?: context.getString(R.string.inline_credit_card_fallback_title)
-
-        fun getAuthentifiantTitle(item: SummaryObject.Authentifiant) =
-            item.loginForUi ?: context.getString(R.string.inline_account_fallback_title)
-
-        fun getAuthentifiantSubtitle(item: SummaryObject.Authentifiant) =
-            item.titleForList ?: ""
-
-        fun getEmailTitle(item: SummaryObject.Email) =
-            item.email ?: context.getString(R.string.inline_email_fallback_title)
-    }
 }

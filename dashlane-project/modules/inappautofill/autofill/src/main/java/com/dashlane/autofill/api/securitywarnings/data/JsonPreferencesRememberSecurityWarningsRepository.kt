@@ -4,8 +4,6 @@ import com.dashlane.autofill.api.securitywarnings.model.RememberSecurityWarning
 import com.dashlane.autofill.api.securitywarnings.model.RememberSecurityWarningsRepository
 import com.dashlane.core.helpers.SignatureVerification
 
-
-
 class JsonPreferencesRememberSecurityWarningsRepository constructor(
     preferencesManager: SecurityWarningsPreferencesManagerWrapper
 ) : RememberSecurityWarningsRepository {

@@ -6,8 +6,6 @@ import com.dashlane.autofill.api.fillresponse.ChangePasswordActionIntentProvider
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import javax.inject.Inject
 
-
-
 class AutofillChangePasswordActivityIntentProvider @Inject constructor() : ChangePasswordActionIntentProvider {
 
     override fun getChangePasswordIntentSender(

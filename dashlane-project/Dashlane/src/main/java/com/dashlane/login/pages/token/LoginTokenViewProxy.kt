@@ -18,11 +18,11 @@ import com.dashlane.login.CodeInputViewHelper
 import com.dashlane.login.pages.LoginBaseSubViewProxy
 import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.getThemeAttrColor
-import com.dashlane.util.logW
 import com.dashlane.util.registerExportedReceiverCompat
 import com.google.android.material.textfield.TextInputLayout
 
-class LoginTokenViewProxy(view: View) : LoginBaseSubViewProxy<LoginTokenContract.Presenter>(view),
+class LoginTokenViewProxy(view: View) :
+    LoginBaseSubViewProxy<LoginTokenContract.Presenter>(view),
     LoginTokenContract.ViewProxy {
 
     private val tokenLayout = findViewByIdEfficient<TextInputLayout>(R.id.view_login_token_layout)!!
@@ -78,8 +78,6 @@ class LoginTokenViewProxy(view: View) : LoginBaseSubViewProxy<LoginTokenContract
         tokenView.requestFocus()
     }
 
-    
-
     private fun TextView.restoreExpirationHint() {
         setTextColor(context.getThemeAttrColor(R.attr.colorOnBackground))
         text = tokenExpirationHint
@@ -100,7 +98,6 @@ class LoginTokenViewProxy(view: View) : LoginBaseSubViewProxy<LoginTokenContract
                     try {
                         context.unregisterReceiver(it)
                     } catch (e: Exception) {
-                        logW(throwable = e) { "broadcastReceiver couldn't be unregistered" }
                     }
                     broadcastReceiver = null
                 }

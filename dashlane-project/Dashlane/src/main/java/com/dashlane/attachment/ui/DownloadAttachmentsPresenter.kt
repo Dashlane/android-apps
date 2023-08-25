@@ -5,20 +5,13 @@ import com.dashlane.attachment.VaultItemLogAttachmentHelper
 import com.dashlane.securefile.Attachment
 import com.dashlane.securefile.DownloadFileContract
 import com.dashlane.securefile.FileSecurity
-import com.dashlane.securefile.SecureFileLogger
-import com.dashlane.securefile.extensions.getSecureFileInfo
-import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
-
 class DownloadAttachmentsPresenter(
     private val coroutineScope: CoroutineScope,
-    private val dataQuery: VaultDataQuery,
-    private val logger: SecureFileLogger,
     private val vaultItemLogAttachmentHelper: VaultItemLogAttachmentHelper
 ) : BasePresenter<DownloadFileContract.DataProvider, DownloadFileContract.ViewProxy>(),
     DownloadFileContract.Presenter {
@@ -44,7 +37,6 @@ class DownloadAttachmentsPresenter(
     }
 
     override fun notifyFileDownloaded(attachment: Attachment, secureFileInfoAnonymousId: String?) {
-        logger.logDownloadSuccess(secureFileInfoAnonymousId)
         viewOrNull?.showFileDownloaded(attachment)
     }
 
@@ -55,7 +47,6 @@ class DownloadAttachmentsPresenter(
             attachment,
             context.getString(R.string.download_file_generic_error, attachment.filename)
         )
-        logger.logDownloadError(secureFileInfoAnonymousId, "download_error")
     }
 
     override fun notifyFileAccessError(attachment: Attachment, secureFileInfoAnonymousId: String?) {
@@ -65,11 +56,6 @@ class DownloadAttachmentsPresenter(
             attachment,
             context.getString(R.string.download_file_access_error)
         )
-        logger.logDownloadError(secureFileInfoAnonymousId, "download_accessError")
-    }
-
-    override fun notifyFileDownloadStarted(attachment: Attachment, secureFileInfoAnonymousId: String?) {
-        logger.logDownloadStart(secureFileInfoAnonymousId)
     }
 
     override fun notifyFileDownloadProgress(
@@ -82,7 +68,6 @@ class DownloadAttachmentsPresenter(
 
     override fun onAttachmentOpened(attachment: Attachment) {
         coroutineScope.launch(Dispatchers.Main) {
-            logger.logOpen(dataQuery.getSecureFileInfo(attachment.id!!)?.anonymousId)
             vaultItemLogAttachmentHelper.logView()
         }
     }

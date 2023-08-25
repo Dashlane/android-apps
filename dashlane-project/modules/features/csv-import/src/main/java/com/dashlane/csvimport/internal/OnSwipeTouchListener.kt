@@ -6,12 +6,12 @@ import android.view.MotionEvent
 import android.view.View
 import kotlin.math.abs
 
-
-
 internal abstract class OnSwipeTouchListener(
     context: Context
 ) : View.OnTouchListener {
-    private val detector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+    private val detector = GestureDetector(
+        context,
+        object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent) = true
 
         override fun onFling(
@@ -38,7 +38,8 @@ internal abstract class OnSwipeTouchListener(
         } catch (_: Throwable) {
             false
         }
-    })
+    }
+    )
 
     final override fun onTouch(v: View?, event: MotionEvent) = detector.onTouchEvent(event)
 

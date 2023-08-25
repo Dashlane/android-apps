@@ -5,21 +5,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.performancelogger.TimeToLoadLocalLogger
-import com.dashlane.performancelogger.TimeToLoadRemoteLogger
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MonobucketActivity : DashlaneActivity() {
-
-    @Inject
-    lateinit var timeToLoadRemoteLogger: TimeToLoadRemoteLogger
-
-    @Inject
-    lateinit var timeToLoadLocalLogger: TimeToLoadLocalLogger
 
     private val viewModel: MonobucketViewModel by viewModels()
 
@@ -34,22 +25,14 @@ class MonobucketActivity : DashlaneActivity() {
             setCurrentPageView(page = AnyPage.PAYWALL_DEVICE_SYNC_LIMIT)
         }
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 
             }
-        })
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        clearLoadAccountLogger()
-    }
-
-    private fun clearLoadAccountLogger() {
-        timeToLoadLocalLogger.clear()
-        timeToLoadRemoteLogger.clear()
+        }
+        )
     }
 
     companion object {

@@ -16,16 +16,15 @@ internal class BenefitsBuilder(
     private val capabilities: StoreOffer.Capabilities,
     private val userFeaturesChecker: UserFeaturesChecker
 ) {
+    internal fun build(isFamily: Boolean) = buildAllBenefits(isFamily).filterNotNull()
 
-    internal fun build() = buildAllBenefits().filterNotNull()
-
-    internal fun buildAllBenefits() = listOf(
+    internal fun buildAllBenefits(isFamily: Boolean) = listOf(
         getBundleType(),
         getStoringPasswordLimit(),
         getDevicesSyncLimit(),
         getAutofill(),
         getSecurityAlerts(),
-        getWifiProtection(),
+        getWifiProtection(isFamily),
         getDocumentStorage(),
         get2FAType(),
         getSharingPasswordLimit(),
@@ -54,7 +53,10 @@ internal class BenefitsBuilder(
             if (capability.enabled) {
                 val rawPasswordLimit = capability.info?.get(INFO_STORE_PASSWORDS_LIMIT) as? Number
                 val passwordLimit = rawPasswordLimit?.toInt() ?: return@let null
-                StringText(R.string.benefit_store_passwords_limited_arg, StringArg(passwordLimit.toString()))
+                StringText(
+                    R.string.benefit_store_passwords_limited_arg,
+                    StringArg(passwordLimit.toString())
+                )
             } else {
                 StringText(R.string.benefit_store_passwords_unlimited)
             }
@@ -82,15 +84,22 @@ internal class BenefitsBuilder(
             null
         }
 
-    private fun getWifiProtection() =
+    private fun getWifiProtection(isFamily: Boolean) =
         capabilities.secureWiFi
             ?.takeIf { it.enabled && userFeaturesChecker.canShowVpn() }
-            ?.let { StringText(R.string.benefit_vpn) }
+            ?.let {
+                if (isFamily) {
+                    StringText(R.string.benefit_vpn_family)
+                } else {
+                    StringText(R.string.benefit_vpn)
+                }
+            }
 
     private fun getDocumentStorage() =
         capabilities.secureFiles?.takeIf { it.enabled }?.let { capability ->
             val quotaInfo = capability.info?.get(INFO_SECURE_FILES_QUOTA) as? Map<*, *>?
-            val maxQuotaInBytes = quotaInfo?.get(INFO_SECURE_FILES_QUOTA_MAX) as? Number ?: return@let null
+            val maxQuotaInBytes =
+                quotaInfo?.get(INFO_SECURE_FILES_QUOTA_MAX) as? Number ?: return@let null
             val maxQuotaInGb = maxQuotaInBytes.toDouble().div(2.0.pow(30))
             val formattedValue = DecimalFormat("#.##").format(maxQuotaInGb)
             StringText(R.string.benefit_secure_files, StringArg(formattedValue))
@@ -101,7 +110,10 @@ internal class BenefitsBuilder(
             if (capability.enabled) {
                 val rawSharingLimit = capability.info?.get(INFO_SHARING_LIMIT) as? Number
                 val sharingLimit = rawSharingLimit?.toInt() ?: return@let null
-                StringText(R.string.benefit_password_sharing_limited, StringArg(sharingLimit.toString()))
+                StringText(
+                    R.string.benefit_password_sharing_limited,
+                    StringArg(sharingLimit.toString())
+                )
             } else {
                 StringText(R.string.benefit_password_sharing_unlimited)
             }

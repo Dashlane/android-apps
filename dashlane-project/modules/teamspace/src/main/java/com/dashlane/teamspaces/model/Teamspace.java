@@ -2,12 +2,6 @@ package com.dashlane.teamspaces.model;
 
 import android.graphics.Color;
 
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
-import androidx.annotation.VisibleForTesting;
-
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
@@ -17,7 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+import androidx.annotation.VisibleForTesting;
 
 public class Teamspace {
 
@@ -60,6 +58,7 @@ public class Teamspace {
 
     private List<String> mTeamsDomains;
 
+    @Nullable
     public String getTeamId() {
         return mTeamId;
     }
@@ -157,6 +156,7 @@ public class Teamspace {
     }
 
     @Status
+    @Nullable
     public String getStatus() {
         return mStatus;
     }
@@ -222,8 +222,6 @@ public class Teamspace {
         return mTeamsDomains;
     }
 
-    
-
     @NonNull
     public List<String> getDomainsToExcludeNow() {
         if (!Status.REVOKED.equals(mStatus)
@@ -234,8 +232,6 @@ public class Teamspace {
             return getDomains();
         }
     }
-
-    
 
     public boolean canBeDisplay() {
         return Type.COMBINED != mType
@@ -276,7 +272,13 @@ public class Teamspace {
         return mIsSsoUser;
     }
 
-    
+    public boolean isCollectSensitiveDataAuditLogsEnabled() {
+        if (mInfo == null) {
+            return false;
+        }
+        Object collectEnable = mInfo.get("collectSensitiveDataAuditLogsEnabled");
+        return collectEnable instanceof Boolean && (Boolean) collectEnable;
+    }
 
     @Override
     public boolean equals(@Nullable Object o) {

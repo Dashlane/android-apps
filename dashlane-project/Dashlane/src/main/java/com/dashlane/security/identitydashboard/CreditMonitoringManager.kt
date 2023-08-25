@@ -7,8 +7,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
-
-
 class CreditMonitoringManager @Inject constructor(
     callFactory: okhttp3.Call.Factory,
     private val sessionManager: SessionManager
@@ -20,8 +18,6 @@ class CreditMonitoringManager @Inject constructor(
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(CreditMonitoringService::class.java)
-
-    
 
     suspend fun getLink(): String? {
         val session = sessionManager.session ?: return ERROR_UNKNOWN

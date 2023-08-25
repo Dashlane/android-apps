@@ -2,8 +2,6 @@ package com.dashlane.util.inject.qualifiers
 
 import javax.inject.Qualifier
 
-
-
 @MustBeDocumented
 @Qualifier
 @Target(

@@ -15,8 +15,6 @@ import com.dashlane.util.notification.NotificationUtilsKt;
 import androidx.core.app.NotificationCompat;
 import wei.mark.standout.StandOutWindow;
 
-
-
 public abstract class AbstractDashlaneSubwindow extends StandOutWindow {
 
     public static final String DATA_POSX = "data_posx";

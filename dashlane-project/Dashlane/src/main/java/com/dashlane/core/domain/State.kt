@@ -3,8 +3,6 @@ package com.dashlane.core.domain
 import com.dashlane.regioninformation.geographicalstates.GeographicalStatesRepositoryImpl
 import com.dashlane.xml.domain.utils.Country
 
-
-
 data class State(
     val country: String,
     val level: Int,

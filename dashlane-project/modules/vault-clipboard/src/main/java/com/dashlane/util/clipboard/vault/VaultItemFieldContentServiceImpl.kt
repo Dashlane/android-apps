@@ -10,8 +10,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
-
-
 class VaultItemFieldContentServiceImpl @Inject constructor(
     private val mainDataAccessor: MainDataAccessor,
     private val enumerationsContent: VaultItemVisibleCopyEdgeCases

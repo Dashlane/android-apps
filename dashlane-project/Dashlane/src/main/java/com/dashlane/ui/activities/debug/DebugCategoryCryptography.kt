@@ -8,8 +8,6 @@ import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.session.Session
 import com.dashlane.util.MD5Hash
 
-
-
 internal class DebugCategoryCryptography(debugActivity: Activity, session: Session) :
     AbstractDebugCategory(debugActivity) {
 
@@ -25,11 +23,10 @@ internal class DebugCategoryCryptography(debugActivity: Activity, session: Sessi
             return base64.decodeBase64ToUtf8String().substring(0, 50)
         }
 
-    internal override fun getName(): String {
-        return "Cryptography Status"
-    }
+    override val name: String
+        get() = "Cryptography Status"
 
-    internal override fun addSubItems(group: PreferenceGroup) {
+    override fun addSubItems(group: PreferenceGroup) {
         addPreferenceButton(group, "CryptoUserPayload:", cryptoUserPayload, null)
 
         addPreferenceButton(group, "Local Key cryptography payload:", localKeyCipherPayload, null)

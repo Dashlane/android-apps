@@ -11,13 +11,14 @@ class CharacterColor(private val context: Context) {
         getColor(charSequence[index])?.run {
             charSequence.setSpan(
                 ForegroundColorSpan(this),
-                index, min(index + 1, charSequence.length),
+                index,
+                min(index + 1, charSequence.length),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
     }
 
-    private fun getColor(char: Char): Int? {
+    private fun getColor(char: Char): Int {
         return when {
             Character.isDigit(char) -> getColorDigit(context)
             Character.isLetter(char) -> getColorLetter(context)

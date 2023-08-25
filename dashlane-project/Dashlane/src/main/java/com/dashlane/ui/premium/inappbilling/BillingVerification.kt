@@ -9,7 +9,7 @@ import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.util.inject.qualifiers.GlobalCoroutineScope
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -19,30 +19,27 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
-
-
 @Singleton
 class BillingVerification @Inject constructor(
-    @GlobalCoroutineScope
-    private val globalCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
     private val verifyReceiptService: VerifyReceiptService,
     private val billingManager: BillingManager,
-    private val logger: OffersLogger
+    private val logger: OffersLogger,
+    private val refreshPremiumAfterPurchase: RefreshPremiumAfterPurchase
 ) {
     private var lastVerifyPurchases: Long = 0
 
     val session: Session?
         get() = sessionManager.session
 
-    
-
     fun verifyAndConsumePurchaseIfNeeded() {
         if (shouldSkip()) {
             return
         }
         logger.logVerifyingReceiptOnHomeStarted()
-        globalCoroutineScope.launch {
+        applicationCoroutineScope.launch {
             when (val serviceResult = billingManager.withServiceConnection { queryPurchases(Dispatchers.IO) }) {
                 is ServiceResult.Success.Purchases -> {
                     
@@ -55,8 +52,6 @@ class BillingVerification @Inject constructor(
             }
         }
     }
-
-    
 
     suspend fun verifyAndConsumePurchase(
         purchase: Purchase,
@@ -79,7 +74,7 @@ class BillingVerification @Inject constructor(
             errorListener.invoke()
             null
         }
-        RefreshPremiumAfterPurchase.execute(errorListener)
+        refreshPremiumAfterPurchase.execute(errorListener)
         if (verifyReceipt?.success != true) {
             UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.receiptFailedValidation)
             errorListener.invoke()
@@ -107,18 +102,12 @@ class BillingVerification @Inject constructor(
         )
     }
 
-    
-
     private suspend fun consume(purchase: Purchase) {
         billingManager.withServiceConnection { consume(purchase.purchaseToken) }
     }
 
-    
-
     private suspend fun acknowledge(purchase: Purchase) =
         billingManager.withServiceConnection { acknowledge(purchase.purchaseToken) }
-
-    
 
     private suspend fun verifyReceipt(
         purchase: Purchase,
@@ -146,8 +135,6 @@ class BillingVerification @Inject constructor(
         lastVerifyPurchases = System.currentTimeMillis()
         return false
     }
-
-    
 
     private fun Purchase.isAcknowledgedCompat() = JSONObject(originalJson).optBoolean("acknowledged", false)
 

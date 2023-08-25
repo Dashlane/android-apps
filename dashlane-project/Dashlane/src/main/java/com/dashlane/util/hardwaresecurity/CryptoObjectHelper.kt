@@ -5,8 +5,6 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import androidx.annotation.CheckResult
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.usersupportreporter.UserSupportFileLogger
-import com.dashlane.util.stackTraceToSafeString
 import java.security.InvalidKeyException
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -21,14 +19,9 @@ private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
 private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
 private const val PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
 
-
-
 class CryptoObjectHelper @Inject constructor(
-    val userSupportFileLogger: UserSupportFileLogger,
     private val userPreferencesManager: UserPreferencesManager
 ) {
-
-    
 
     @CheckResult
     fun createEncryptionKey(keyStoreKey: KeyStoreKey, isUserAuthenticationRequired: Boolean) = try {
@@ -48,13 +41,8 @@ class CryptoObjectHelper @Inject constructor(
         )
         keyGenerator.generateKey()
     } catch (e: Throwable) {
-        userSupportFileLogger.add(
-            "[CryptoObjectHelper] Encryption Key can't be generated, exception is: ${e.stackTraceToSafeString()}"
-        )
         null
     }
-
-    
 
     fun deleteEncryptionKey(keyStoreKey: KeyStoreKey) {
         val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
@@ -64,17 +52,12 @@ class CryptoObjectHelper @Inject constructor(
         }
     }
 
-    
-
     @CheckResult
     fun getEncryptCipher(keyStoreKey: KeyStoreKey): CipherInitResult = getCipher(keyStoreKey, Cipher.ENCRYPT_MODE)
 
-    
-
     @CheckResult
-    fun getDecryptCipher(keyStoreKey: KeyStoreKey, iv: GCMParameterSpec): CipherInitResult = getCipher(keyStoreKey, Cipher.DECRYPT_MODE, iv)
-
-    
+    fun getDecryptCipher(keyStoreKey: KeyStoreKey, iv: GCMParameterSpec): CipherInitResult =
+        getCipher(keyStoreKey, Cipher.DECRYPT_MODE, iv)
 
     @CheckResult
     fun challengeAuthentication(cipher: Cipher): CryptoChallengeResult {
@@ -82,17 +65,12 @@ class CryptoObjectHelper @Inject constructor(
             cipher.doFinal()
             CryptoChallengeResult.Success
         } catch (e: Throwable) {
-            userSupportFileLogger.add(
-                "[CryptoObjectHelper] Cryptographic Key is not properly stored, exception is: ${e.stackTraceToSafeString()}"
-            )
             CryptoChallengeResult.Failure(
                 e,
                 "Cryptographic Key is not properly stored, Biometric Authentication can't be securely used"
             )
         }
     }
-
-    
 
     fun encrypt(keyStoreKey: KeyStoreKey, data: ByteArray): ByteArray? {
         return when (val cipherInitResult = getEncryptCipher(keyStoreKey)) {
@@ -105,8 +83,6 @@ class CryptoObjectHelper @Inject constructor(
             }
         }
     }
-
-    
 
     fun decrypt(keyStoreKey: KeyStoreKey, data: ByteArray): ByteArray? {
         val iv = data.sliceArray(0 until GCM_IV_LENGTH)
@@ -121,7 +97,11 @@ class CryptoObjectHelper @Inject constructor(
 
     private fun getCipher(keyStoreKey: KeyStoreKey, opMode: Int, iv: GCMParameterSpec? = null): CipherInitResult {
         
-        if (keyStoreKey is BiometricsSeal && !userPreferencesManager.biometricSealPaddingMigrationAttempt) migrateEncryptionKey(keyStoreKey)
+        if (keyStoreKey is BiometricsSeal && !userPreferencesManager.biometricSealPaddingMigrationAttempt) {
+            migrateEncryptionKey(
+            keyStoreKey
+        )
+        }
 
         val cipher = try {
             Cipher.getInstance("$ALGORITHM/$BLOCK_MODE/$PADDING")
@@ -162,26 +142,16 @@ class CryptoObjectHelper @Inject constructor(
     }
 
     sealed class CipherInitResult {
-        
-
         class Success(val cipher: Cipher) : CipherInitResult()
 
-        
-
         open class Failure(val throwable: Throwable? = null, val errorMessage: String? = null) : CipherInitResult()
-
-        
 
         class InvalidatedKeyError(throwable: Throwable? = null, errorMessage: String? = null) :
             Failure(throwable, errorMessage)
     }
 
     sealed class CryptoChallengeResult {
-        
-
         object Success : CryptoChallengeResult()
-
-        
 
         class Failure(val throwable: Throwable? = null, val errorMessage: String) : CryptoChallengeResult()
     }

@@ -18,7 +18,6 @@ import androidx.fragment.app.FragmentManager;
 import com.dashlane.R;
 import com.dashlane.core.premium.PremiumStatus;
 import com.dashlane.dagger.singleton.SingletonProvider;
-import com.dashlane.logger.ExceptionLog;
 import com.dashlane.preference.ConstantsPrefs;
 import com.dashlane.preference.UserPreferencesManager;
 import com.dashlane.session.Session;
@@ -30,8 +29,6 @@ import com.dashlane.ui.activities.HomeActivity;
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment;
 
 import java.lang.ref.WeakReference;
-
-
 
 @SuppressWarnings("java:S110")
 public class SpaceRevokedDialog extends NotificationDialogFragment {
@@ -153,7 +150,6 @@ public class SpaceRevokedDialog extends NotificationDialogFragment {
                 return ((LinearLayout) parent).getChildAt(0);
             }
         } catch (Exception ex) {
-            ExceptionLog.v(ex);
         }
         return null;
     }

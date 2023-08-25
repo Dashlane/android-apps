@@ -11,15 +11,11 @@ import com.dashlane.xml.domain.SyncObject
 import java.time.Instant
 
 interface AuthenticationSsoRepository {
-    
-
     @Throws(
         AuthenticationNetworkException::class,
         AuthenticationUnknownException::class
     )
     suspend fun getSsoInfo(login: String, accessKey: String): SsoInfo
-
-    
 
     @Throws(
         AuthenticationInvalidSsoException::class,

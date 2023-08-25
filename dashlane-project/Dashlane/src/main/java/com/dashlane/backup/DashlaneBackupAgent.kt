@@ -16,8 +16,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.time.Instant
 
-
-
 @Suppress("UNUSED")
 class DashlaneBackupAgent : BackupAgent() {
 

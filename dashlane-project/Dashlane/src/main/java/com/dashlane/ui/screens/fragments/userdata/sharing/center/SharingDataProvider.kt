@@ -5,8 +5,6 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.vault.summary.SummaryObject
 
-
-
 interface SharingDataProvider {
     suspend fun getItemGroups(): List<ItemGroup>
     suspend fun getUserGroups(): List<UserGroup>

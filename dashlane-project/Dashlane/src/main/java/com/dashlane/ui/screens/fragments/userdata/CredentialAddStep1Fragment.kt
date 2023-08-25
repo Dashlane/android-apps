@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.core.popularWebsitesToIconWrappers
 import com.dashlane.csvimport.internal.ImportMultiplePasswordsLogger
+import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.iconcrawler.mapIconWrappersToUrlDomainIcons
 import com.dashlane.loaders.InstalledAppAndPopularWebsiteLoader
@@ -48,7 +49,8 @@ import kotlinx.coroutines.channels.consumeEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CredentialAddStep1Fragment : AbstractContentFragment(),
+class CredentialAddStep1Fragment :
+    AbstractContentFragment(),
     InstalledAppAndPopularWebsiteLoader.Listener,
     EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider> {
 
@@ -70,6 +72,9 @@ class CredentialAddStep1Fragment : AbstractContentFragment(),
     @JvmField
     @Inject
     var usageLogRepository: UsageLogRepository? = null
+
+    @Inject
+    lateinit var knownApplicationProvider: KnownApplicationProvider
 
     private lateinit var websiteUrlInput: TextInputLayout
     private lateinit var recyclerView: MultiColumnRecyclerView
@@ -145,26 +150,32 @@ class CredentialAddStep1Fragment : AbstractContentFragment(),
                 importLogger.logImportMethodsDisplayed()
             }
         }
-
+        
+        
+        @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.csv).setOnClickListener {
             importLogger.logImportMethodsFromCsvClicked()
             navigator.goToCsvImportIntro()
         }
 
+        @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.chrome).setOnClickListener {
             importLogger.logImportMethodsFromChromeClicked()
             navigator.goToChromeImportIntro(UsageLogCode75.Origin.IMPORT_MULTIPLE_PASSWORDS.code)
         }
 
+        @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.computer).setOnClickListener {
             importLogger.logImportMethodsFromM2dClicked()
             navigator.goToM2wImportIntro(UsageLogCode94.Origin.IMPORT_MULTIPLE_PASSWORDS.code)
         }
 
+        @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.backup).setOnClickListener {
             backupCoordinator.startImport()
         }
 
+        @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.password_manager).setOnClickListener {
             importLogger.logImportMethodsFromCompetitorClicked()
             navigator.goToCompetitorImportIntro()
@@ -199,7 +210,7 @@ class CredentialAddStep1Fragment : AbstractContentFragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         showLoader()
-        InstalledAppAndPopularWebsiteLoader(this, this).start()
+        InstalledAppAndPopularWebsiteLoader(this, this, knownApplicationProvider).start()
     }
 
     private fun goToNextStep(getUrlFromInput: Boolean, url: String?) {
@@ -215,10 +226,10 @@ class CredentialAddStep1Fragment : AbstractContentFragment(),
         hideKeyboard(view)
     }
 
-    override fun onLoadFinished(popularWebsites: List<String>?) {
+    override fun onLoadFinished(result: List<String>?) {
         iconAndroidRepository
-            .get(popularWebsitesToIconWrappers(popularWebsites).mapIconWrappersToUrlDomainIcons())
-        this.popularWebsites = popularWebsites ?: emptyList()
+            .get(popularWebsitesToIconWrappers(result).mapIconWrappersToUrlDomainIcons())
+        this.popularWebsites = result ?: emptyList()
         suggestionsActor.trySend(websiteUrlInput.editText?.text?.toString().orEmpty())
     }
 

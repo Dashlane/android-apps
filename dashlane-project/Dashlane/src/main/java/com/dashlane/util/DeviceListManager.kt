@@ -14,8 +14,6 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-
-
 class DeviceListManager(
     coroutineContext: CoroutineContext,
     private val session: Session,

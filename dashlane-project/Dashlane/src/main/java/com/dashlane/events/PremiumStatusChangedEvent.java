@@ -6,8 +6,6 @@ import com.dashlane.event.AppEvent;
 
 import java.util.Objects;
 
-
-
 public class PremiumStatusChangedEvent implements AppEvent {
 
     private PremiumStatus mPreviousStatus;

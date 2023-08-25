@@ -126,7 +126,8 @@ class SharingCenterViewProxy(
                 onClickAccept = { viewModel.acceptUserGroup(invite) },
                 onClickDecline = {
                     SharingConfirmationDialogDeclineUserGroupInvite.newInstance(
-                        context, invite.userGroup.groupId
+                        context,
+                        invite.userGroup.groupId
                     ).show(fragmentManager, SharingConfirmationDialogDeclineUserGroupInvite.TAG)
                 },
             )
@@ -141,7 +142,8 @@ class SharingCenterViewProxy(
             },
             onClickDecline = {
                 SharingConfirmationDeclineGroupInvite.newInstance(
-                    context, invite.itemGroup.groupId
+                    context,
+                    invite.itemGroup.groupId
                 ).show(fragmentManager, SharingConfirmationDeclineGroupInvite.TAG)
             },
         )

@@ -9,8 +9,6 @@ import com.dashlane.session.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
-
-
 class LoginNewUserInitialization @Inject constructor(
     private val sessionInitializer: SessionInitializer
 ) {

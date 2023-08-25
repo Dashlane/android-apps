@@ -1,30 +1,32 @@
 package com.dashlane.autofill.api.pause.view
 
-import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
-import com.dashlane.autofill.api.internal.AutofillApiComponent
-import com.dashlane.autofill.api.pause.AutofillApiPauseComponent
-import com.dashlane.autofill.api.pause.dagger.BottomSheetAskPauseDialogFragmentComponent
-import com.dashlane.autofill.api.pause.dagger.DaggerBottomSheetAskPauseDialogFragmentComponent
+import com.dashlane.autofill.api.pause.AskPauseContract
+import com.dashlane.util.Toaster
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
-
+@AndroidEntryPoint
 class BottomSheetAskPauseDialogFragment : BottomSheetDialogFragment() {
 
+    private lateinit var viewProxy: BottomSheetAskPauseViewProxy
+
     @Inject
-    lateinit var viewProxy: BottomSheetAskPauseViewProxy
+    lateinit var presenter: AskPauseContract.Presenter
 
-    private lateinit var activityComponent: BottomSheetAskPauseDialogFragmentComponent
+    @Inject
+    lateinit var toaster: Toaster
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = super.onCreateDialog(savedInstanceState).also {
-        initActivityComponent()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val openInDashlane = arguments?.getBoolean(EXTRA_OPEN_IN_DASHLANE, false) ?: false
+        viewProxy = BottomSheetAskPauseViewProxy(this, presenter, toaster, openInDashlane)
+        presenter.setView(viewProxy)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -32,7 +34,11 @@ class BottomSheetAskPauseDialogFragment : BottomSheetDialogFragment() {
         viewProxy.onDialogCreated()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return viewProxy.createView(inflater, container)
     }
 
@@ -46,35 +52,8 @@ class BottomSheetAskPauseDialogFragment : BottomSheetDialogFragment() {
         super.onCancel(dialog)
     }
 
-    private fun initActivityComponent() {
-        val application = this.activity?.application ?: return
-
-        val openInDashlane = openInDashlane()
-
-        val viewModel = ViewModelProvider(
-            this,
-            AutofillPauseViewModel.Factory(application, openInDashlane)
-        ).get(AutofillPauseViewModel::class.java)
-
-        activityComponent = DaggerBottomSheetAskPauseDialogFragmentComponent.factory()
-            .create(
-                AutofillApiComponent(application),
-                AutofillApiPauseComponent(application),
-                viewModel.component,
-                this,
-                openInDashlane
-            )
-        activityComponent.inject(this)
-    }
-
-    private fun openInDashlane(): Boolean {
-        return arguments?.getBoolean(EXTRA_OPEN_IN_DASHLANE, false) ?: false
-    }
-
     companion object {
         const val PAUSE_DIALOG_TAG = "pause_dialog"
-
-        
 
         private const val EXTRA_OPEN_IN_DASHLANE = "extra_open_in_dashlane"
 

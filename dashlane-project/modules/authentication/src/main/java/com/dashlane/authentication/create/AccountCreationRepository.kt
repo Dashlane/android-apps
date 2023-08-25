@@ -11,8 +11,6 @@ import com.dashlane.session.AppKey
 import com.dashlane.session.VaultKey
 import com.dashlane.xml.domain.SyncObject
 
-
-
 interface AccountCreationRepository {
     @Throws(
         AuthenticationInvalidLoginException::class,

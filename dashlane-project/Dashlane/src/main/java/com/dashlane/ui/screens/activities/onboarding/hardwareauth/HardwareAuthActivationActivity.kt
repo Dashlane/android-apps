@@ -17,8 +17,6 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Mode
 import com.dashlane.hermes.generated.definitions.Reason
 import com.dashlane.hermes.generated.events.user.AskAuthentication
-import com.dashlane.logger.Log
-import com.dashlane.logger.v
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
@@ -42,8 +40,6 @@ import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-
 
 class HardwareAuthActivationActivity : DashlaneActivity() {
     @Inject
@@ -120,13 +116,15 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
 
     private fun processAuthenticationResult(result: BiometricAuthModule.Result) {
         session?.takeIf {
-            result !is BiometricAuthModule.Result.Success &&
+            result !is BiometricAuthModule.Result.StrongBiometricSuccess &&
+                result !is BiometricAuthModule.Result.WeakBiometricSuccess &&
                 result !is BiometricAuthModule.Result.AuthenticationFailure
         }
             ?.let { biometricAuthModule.deleteEncryptionKeyForBiometrics(it.userId) }
 
         when (result) {
-            is BiometricAuthModule.Result.Success -> {
+            is BiometricAuthModule.Result.StrongBiometricSuccess,
+            is BiometricAuthModule.Result.WeakBiometricSuccess -> {
                 sendUsageLog(UsageLogConstant.LockType.fingerPrint, "accept_save_mpwd")
 
                 
@@ -145,6 +143,7 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
 
                 setResultOkAndFinish(isSuccessful = true)
             }
+
             is BiometricAuthModule.Result.Canceled -> finish()
             is BiometricAuthModule.Result.Error -> {
                 toaster.show(
@@ -153,11 +152,13 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
                 )
                 setResultOkAndFinish(isSuccessful = false)
             }
+
             is BiometricAuthModule.Result.BiometricNotEnrolled -> showRegisterDialog("0x00001")
             is BiometricAuthModule.Result.SecurityHasChanged,
             is BiometricAuthModule.Result.AuthenticationFailure -> {
                 toaster.show(R.string.error_during_hardware_authentication, Toast.LENGTH_LONG)
             }
+
             else -> Unit
         }
     }
@@ -199,7 +200,6 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
                     intent.addCategory(Intent.CATEGORY_DEFAULT)
                     startActivity(intent)
                 } catch (e: Exception) {
-                    Log.v(e)
                 }
             }
             .setOnCancelListener { finish() }
@@ -207,19 +207,17 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
     }
 
     private suspend fun showBiometricPrompt(username: String) {
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(getString(R.string.onboarding_dialog_auth_required_hardware_module_google_fp_title))
             .setNegativeButtonText(getString(R.string.onboarding_dialog_auth_required_hardware_module_google_fp_button))
             .setConfirmationRequired(false)
-            .setAllowedAuthenticators(biometricAuthModule.getPromptAuthenticator())
-            .build()
 
         logRepository.queueEvent(AskAuthentication(Mode.BIOMETRIC, Reason.EDIT_SETTINGS))
 
         biometricAuthModule.startHardwareAuthentication(
             activity = this@HardwareAuthActivationActivity,
             username = username,
-            promptInfo = promptInfo
+            promptInfoBuilder = promptInfoBuilder
         )
             .collect { result -> processAuthenticationResult(result) }
     }

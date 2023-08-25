@@ -11,8 +11,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-
-
 @Module
 class RetrofitModule {
 
@@ -21,8 +19,6 @@ class RetrofitModule {
     @LegacyWebservicesApi
     fun getRetrofit(callFactory: Call.Factory): Retrofit =
         createRetrofit(DashlaneUrls.URL_WEBSERVICES, callFactory)
-
-    
 
     @Provides
     @Streaming
@@ -53,8 +49,6 @@ class RetrofitModule {
         }
     }
 }
-
-
 
 @Qualifier
 annotation class LegacyWebservicesApi

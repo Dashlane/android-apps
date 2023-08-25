@@ -12,7 +12,11 @@ fun SharingCryptographyHelper.generateItemsUpload(
     val itemKeyEncrypted: String =
         encryptItemKey(itemKey.toByteArray(), groupKey)
     val encryptedContent: String = encryptItemContent(item.content, itemKey) ?: return null
-    val itemUpload =
-        ItemUpload(itemId = ItemUpload.ItemId(item.itemId), itemKey = itemKeyEncrypted, content = encryptedContent)
+    val itemUpload = ItemUpload(
+        ItemUpload.ItemId(item.itemId),
+        itemType = item.itemType,
+        itemKey = itemKeyEncrypted,
+        content = encryptedContent
+    )
     return listOf(itemUpload)
 }

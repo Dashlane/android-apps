@@ -9,8 +9,6 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
-
-
 public abstract class DataLoaderForDataListFragment
         extends DataLoaderForUi<List<DashlaneRecyclerAdapter.ViewTypeProvider>> {
 
