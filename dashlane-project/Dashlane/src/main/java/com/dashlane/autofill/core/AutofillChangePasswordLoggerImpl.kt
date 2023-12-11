@@ -1,6 +1,6 @@
 package com.dashlane.autofill.core
 
-import com.dashlane.autofill.api.changepassword.AutofillChangePasswordLogger
+import com.dashlane.autofill.changepassword.AutofillChangePasswordLogger
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.definitions.ItemId

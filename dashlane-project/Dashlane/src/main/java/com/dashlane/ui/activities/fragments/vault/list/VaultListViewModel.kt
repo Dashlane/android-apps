@@ -12,7 +12,6 @@ import com.dashlane.events.registerAsFlow
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.activities.fragments.vault.ScrollToTopEvent
-import com.dashlane.ui.activities.fragments.vault.Vault
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.activities.fragments.vault.list.VaultListDataProvider.BoundedListSortMode
 import com.dashlane.ui.activities.fragments.vault.list.VaultListDataProvider.UnboundedListSortMode
@@ -26,13 +25,15 @@ import com.dashlane.ui.widgets.view.empty.SecureNotesEmptyScreen
 import com.dashlane.ui.widgets.view.empty.VaultAllItemsEmptyScreen
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.VaultItemLogClickListener
 import com.dashlane.vault.VaultItemLogger
-import com.dashlane.vault.model.urlForUsageLog
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,7 +42,6 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @HiltViewModel
 class VaultListViewModel @Inject constructor(
@@ -50,15 +50,15 @@ class VaultListViewModel @Inject constructor(
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
-    val logger: Vault.Logger,
     val appEvents: AppEvents,
     val navigator: Navigator,
     vaultItemLogger: VaultItemLogger,
     private val dataSync: DataSync,
     @field:SuppressLint("StaticFieldLeak") @ApplicationContext private val context: Context,
+    private val userFeaturesChecker: UserFeaturesChecker,
     savedStateHandle: SavedStateHandle
 ) : ViewModel(),
-VaultList.ViewModel,
+    VaultList.ViewModel,
     EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider> {
 
     private val filter: Filter =
@@ -95,8 +95,6 @@ VaultList.ViewModel,
         position: Int
     ) {
         if (item is VaultItemViewTypeProvider) {
-            val website: String? = (item.summaryObject as? SummaryObject.Authentifiant)?.urlForUsageLog
-            logger.logClickOpenItem(item.itemListContext, website, filter)
             navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.xmlObjectName)
         }
     }
@@ -109,7 +107,10 @@ VaultList.ViewModel,
             }
 
             val allItemsFiltered = withContext(defaultCoroutineDispatcher) {
-                allItems.filter { filter.contains(it.syncObjectType) }
+                allItems.filter {
+                    filter.contains(it.syncObjectType) &&
+                            (it.syncObjectType != SyncObjectType.PASSKEY || userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.PASSKEY_IN_UI))
+                }
             }
 
             if (allItemsFiltered.isEmpty()) {

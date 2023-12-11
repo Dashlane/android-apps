@@ -10,6 +10,9 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemUpload
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupInvite
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserUpload
+import com.dashlane.server.api.pattern.AliasFormat
+import com.dashlane.server.api.pattern.UserIdFormat
+import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
@@ -74,8 +77,8 @@ class CreateItemGroupRequestBuilder @Inject constructor(
             ?: throw RequestBuilderException.CreateItemRequestException("Can't get userPublicKey")
         userUploads.add(
             UserUpload(
-                userId = UserUpload.UserId(login),
-                alias = UserUpload.Alias(alias),
+                userId = UserIdFormat(login),
+                alias = AliasFormat(alias),
                 permission = Permission.ADMIN,
                 proposeSignature = sharingCryptography.generateProposeSignature(login, groupKey),
                 acceptSignature = acceptSignature,
@@ -89,7 +92,7 @@ class CreateItemGroupRequestBuilder @Inject constructor(
         for (groupToInvite in groups) {
             val userGroup = groupToInvite.userGroup
             val userGroupId = userGroup.groupId
-            val privateKey: SharingKeys.Private? = sharingCryptography.getPrivateKey(userGroup, login)
+            val privateKey: SharingKeys.Private? = sharingCryptography.getUserGroupPrivateKey(userGroup, login)
             val acceptSignatureGroup: String = sharingCryptography.generateAcceptationSignature(
                 itemGroupUid,
                 groupKey,
@@ -101,7 +104,7 @@ class CreateItemGroupRequestBuilder @Inject constructor(
             ) ?: throw RequestBuilderException.CreateItemRequestException("Impossible to generate groupKeyEncrypted")
             groupUploads.add(
                 UserGroupInvite(
-                    groupId = UserGroupInvite.GroupId(userGroupId),
+                    groupId = UuidFormat(userGroupId),
                     permission = groupToInvite.permission,
                     proposeSignature = sharingCryptography.generateProposeSignature(userGroupId, groupKey),
                     acceptSignature = acceptSignatureGroup,
@@ -115,7 +118,7 @@ class CreateItemGroupRequestBuilder @Inject constructor(
                 groupCryptographyKey
             ) ?: throw RequestBuilderException.CreateItemRequestException("Impossible to generateItemsUpload")
         return CreateItemGroupService.Request(
-            groupId = CreateItemGroupService.Request.GroupId(itemGroupUid),
+            groupId = UuidFormat(itemGroupUid),
             users = userUploads,
             groups = groupUploads.takeUnless { it.isEmpty() },
             items = itemsUpload,
@@ -132,8 +135,8 @@ class CreateItemGroupRequestBuilder @Inject constructor(
         val alias = userToInvite.alias
         return if (userToInvite.publicKey == null) {
             UserUpload(
-                userId = UserUpload.UserId(alias),
-                alias = UserUpload.Alias(alias),
+                userId = UserIdFormat(alias),
+                alias = AliasFormat(alias),
                 permission = userToInvite.permission,
                 proposeSignature = sharingCryptography.generateProposeSignature(alias, groupKey),
                 acceptSignature = null, 
@@ -142,8 +145,8 @@ class CreateItemGroupRequestBuilder @Inject constructor(
             )
         } else {
             UserUpload(
-                userId = UserUpload.UserId(userId),
-                alias = UserUpload.Alias(alias),
+                userId = UserIdFormat(userId),
+                alias = AliasFormat(alias),
                 permission = userToInvite.permission,
                 proposeSignature = sharingCryptography.generateProposeSignature(alias, groupKey),
                 acceptSignature = null, 

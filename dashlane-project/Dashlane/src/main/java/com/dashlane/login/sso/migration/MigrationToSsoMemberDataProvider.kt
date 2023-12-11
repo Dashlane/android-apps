@@ -2,10 +2,12 @@ package com.dashlane.login.sso.migration
 
 import android.content.Context
 import android.content.Intent
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
 import com.dashlane.authentication.SsoServerKeyFactory
 import com.dashlane.authentication.login.AuthenticationAuthTicketHelper
 import com.dashlane.authentication.sso.utils.UserSsoInfo
 import com.dashlane.cryptography.decodeBase64ToByteArray
+import com.dashlane.hermes.generated.definitions.DeleteKeyReason
 import com.dashlane.login.LoginSuccessIntentFactory
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockPass
@@ -27,7 +29,8 @@ class MigrationToSsoMemberDataProvider @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val successIntentFactory: LoginSuccessIntentFactory,
     private val lockManager: LockManager,
-    private val intent: Intent
+    private val intent: Intent,
+    private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
 ) : BaseDataProvider<MigrationToSsoMemberContract.Presenter>(),
     MigrationToSsoMemberContract.DataProvider {
 
@@ -53,6 +56,7 @@ class MigrationToSsoMemberDataProvider @Inject constructor(
 
         val shouldLaunchInitialSync = userPreferencesManager.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
 
+        accountRecoveryKeyRepository.disableRecoveryKey(DeleteKeyReason.VAULT_KEY_CHANGED)
         lockManager.unlock(LockPass.ofPassword(ssoKey))
 
         return if (shouldLaunchInitialSync) {

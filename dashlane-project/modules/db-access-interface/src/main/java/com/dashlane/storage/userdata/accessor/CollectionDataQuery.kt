@@ -14,4 +14,6 @@ interface CollectionDataQuery : DataQuery<SummaryObject.Collection, CollectionFi
     fun queryById(id: String): VaultItem<SyncObject.Collection>?
 
     fun queryByIds(ids: List<String>): List<VaultItem<SyncObject.Collection>>
+
+    fun queryVaultItemsWithCollectionId(id: String): List<SummaryObject>
 }

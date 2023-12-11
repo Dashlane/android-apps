@@ -3,7 +3,6 @@ package com.dashlane.ui.activities.fragments.vault
 import android.app.Activity
 import android.view.View
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.ui.activities.fragments.vault.HiddenImpala.ClickType.LONG
 import com.dashlane.ui.activities.fragments.vault.HiddenImpala.ClickType.SHORT
 import com.dashlane.ui.util.DialogHelper
@@ -11,10 +10,7 @@ import com.dashlane.util.SnackbarUtils
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
-class HiddenImpala(
-    private val activity: Activity,
-    private val logger: Vault.Logger
-) {
+class HiddenImpala(private val activity: Activity) {
 
     enum class ClickType {
         SHORT,
@@ -75,7 +71,6 @@ class HiddenImpala(
     }
 
     private fun unlockImpala() {
-        logger.logHiddenImpala()
         DialogHelper()
             .builder(activity)
             .setTitle(R.string.hidden_impala_title)
@@ -86,14 +81,9 @@ class HiddenImpala(
     }
 
     companion object {
-        @JvmStatic
         fun configureForHomeActivity(activity: Activity) {
-            val singletonComponent = SingletonProvider.getComponent()
-            val bySessionUsageLogRepository = singletonComponent.bySessionUsageLogRepository
-            val sessionManager = singletonComponent.sessionManager
-            val vaultLogger = VaultLogger(bySessionUsageLogRepository, sessionManager)
             val toolbar = activity.findViewById<View>(R.id.toolbar)
-            val hiddenImpala = HiddenImpala(activity, vaultLogger)
+            val hiddenImpala = HiddenImpala(activity)
             toolbar.setOnClickListener { hiddenImpala.onClick() }
             toolbar.setOnLongClickListener {
                 hiddenImpala.onLongClick()

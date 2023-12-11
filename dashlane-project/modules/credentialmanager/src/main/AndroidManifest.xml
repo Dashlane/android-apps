@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name="com.dashlane.credentialmanager.ui.CredentialManagerActivity"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.dashlane.credentialmanager.CREATE_CREDENTIAL_MANAGER" />
+                <action android:name="com.dashlane.credentialmanager.GET_CREDENTIAL_MANAGER" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="com.dashlane.credentialmanager.DashlaneCredentialProviderService"
+            android:exported="false"
+            android:label="Dashlane"
+            android:permission="android.permission.BIND_CREDENTIAL_PROVIDER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.credentials.CredentialProviderService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.credentials.provider"
+                android:resource="@xml/provider" />
+        </service>
+    </application>
+</manifest>

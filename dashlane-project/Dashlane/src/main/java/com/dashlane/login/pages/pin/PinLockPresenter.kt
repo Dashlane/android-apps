@@ -5,34 +5,34 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.pages.LoginLockBasePresenter
 import com.dashlane.login.root.LoginPresenter
 import com.dashlane.ui.screens.settings.WarningRememberMasterPasswordDialog
 import com.dashlane.ui.widgets.PinCodeKeyboardView
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.util.Toaster
+import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 class PinLockPresenter(
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
     lockManager: LockManager,
-    sso: Boolean
+    sso: Boolean,
+    toaster: Toaster,
+    private val warningRememberMasterPasswordDialog: WarningRememberMasterPasswordDialog,
 ) : LoginLockBasePresenter<PinLockContract.DataProvider, PinLockContract.ViewProxy>(
-    rootPresenter,
-    coroutineScope,
-    lockManager
+    rootPresenter = rootPresenter,
+    coroutineScope = coroutineScope,
+    lockManager = lockManager,
+    toaster = toaster
 ),
-PinLockContract.Presenter {
+    PinLockContract.Presenter {
 
-    override val lockTypeName: String = UsageLogConstant.LockType.pin
+    override val lockTypeName: Int = LockTypeManager.LOCK_TYPE_PIN_CODE
 
     private var endAnimationExpectedTimestamp: Long = 0
 
@@ -58,7 +58,7 @@ PinLockContract.Presenter {
 
     
     private val onUseMasterPasswordClicked = View.OnClickListener {
-        rootPresenter.onUseMasterPasswordClicked()
+        rootPresenter.onBiometricNegativeClicked()
     }
 
     private val pinLockKeyboardListener: PinCodeKeyboardView.PinCodeKeyboardListener =
@@ -80,40 +80,25 @@ PinLockContract.Presenter {
     }
 
     override fun onRequestReenterPin() {
-        SingletonProvider.getToaster()
-            .show(
-                context?.getString(R.string.please_re_enter_your_pin_code_to_confirm),
-                Toast.LENGTH_LONG,
-                Toaster.Position.TOP
-            )
+        toaster.show(
+            context?.getString(R.string.please_re_enter_your_pin_code_to_confirm),
+            Toast.LENGTH_LONG,
+            Toaster.Position.TOP
+        )
     }
 
     override fun newPinConfirmed(disableAnimationEffect: Boolean) {
         val animationDuration = view.animateSuccess(disableAnimationEffect)
         endAnimationExpectedTimestamp = System.currentTimeMillis() + animationDuration
         
-        WarningRememberMasterPasswordDialog().showIfNecessary(
-            context,
-            LockTypeManager.LOCK_TYPE_PIN_CODE,
-            object : WarningRememberMasterPasswordDialog.ConfirmRememberMasterPasswordListener {
-                override fun onMasterPasswordRememberedIfPossible() {
-                    onNewPinConfirmedAndMasterPasswordStored()
-                }
-
-                override fun onRememberMasterPasswordDeclined() {
-                    activity?.finish()
-                }
-            }
+        warningRememberMasterPasswordDialog.showIfNecessary(
+            context = view.context,
+            onMasterPasswordRememberedIfPossible = ::onNewPinConfirmedAndMasterPasswordStored,
+            onRememberMasterPasswordDeclined = { activity?.finish() }
         )
     }
 
     private fun onNewPinConfirmedAndMasterPasswordStored() {
-        provider.log(
-            UsageLogCode35(
-                type = UsageLogConstant.ViewType.pin,
-                action = UsageLogConstant.ActionType.pinCodeSetSuccessful
-            )
-        )
         provider.savePinValue()
 
         val timeLeftBeforeEndAnimation = max(0, endAnimationExpectedTimestamp - System.currentTimeMillis())
@@ -147,15 +132,7 @@ PinLockContract.Presenter {
     }
 
     override fun onUnlockError() {
-        val failedAttempts = lockManager.getFailUnlockAttemptCount()
-
-        view.setTextError(
-            resources!!.getQuantityString(
-                R.plurals.failed_attempt,
-                failedAttempts,
-                failedAttempts
-            )
-        )
+        setFailedAttempts()
         clearInput()
         animateError()
     }
@@ -193,11 +170,15 @@ PinLockContract.Presenter {
                 logOutResId to onUseMasterPasswordClicked
             }
 
-            initLogoutButton(context.getString(logoutResId), listener)
+            if (provider.canUseMasterPassword()) {
+                initLogoutButton(context.getString(logoutResId), listener)
+            } else {
+                hideLogoutButton()
+            }
         }
 
         initTopicAndQuestion()
-        initFailedAttempts()
+        setFailedAttempts()
         checkPinCodeComplete()
     }
 
@@ -227,7 +208,7 @@ PinLockContract.Presenter {
         }
     }
 
-    private fun initFailedAttempts() {
+    private fun setFailedAttempts() {
         val failedAttempts = lockManager.getFailUnlockAttemptCount()
         if (failedAttempts > 0) {
             view.setTextError(

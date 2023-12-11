@@ -55,20 +55,24 @@ class LoginTotpPresenter(
 
     override fun onCodeCompleted() {
         if (visible) {
-            validateTotp(true)
+            validateTotp(totp = view.totpText, auto = true, isRecoveryCode = false)
         }
     }
 
+    override fun onRecoveryCodeInput(code: String) {
+        validateTotp(totp = code, auto = true, isRecoveryCode = true)
+    }
+
     override fun onNextClicked() {
-        validateTotp(false)
+        validateTotp(totp = view.totpText, auto = false, isRecoveryCode = false)
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
-    private fun validateTotp(auto: Boolean) {
+    private fun validateTotp(totp: String, auto: Boolean, isRecoveryCode: Boolean) {
         launch(start = CoroutineStart.UNDISPATCHED) {
             rootPresenter.showProgress = true
             try {
-                provider.validateTotp(view.totpText, auto)
+                provider.validateTotp(totp, auto, isRecoveryCode)
             } catch (e: LoginBaseContract.OfflineException) {
                 notifyOffline()
             } finally {
@@ -87,10 +91,12 @@ class LoginTotpPresenter(
         useU2fAuthenticationIfAvailable()
     }
 
-    override fun notifyTotpError(lockedOut: Boolean) {
+    override fun notifyTotpError(lockedOut: Boolean, isRecoveryCode: Boolean) {
         rootPresenter.showProgress = false
         if (lockedOut) {
             view.showError(R.string.totp_failed_locked_out)
+        } else if (isRecoveryCode) {
+            view.showRecoveryCodeError()
         } else {
             view.showError(R.string.totp_failed)
         }

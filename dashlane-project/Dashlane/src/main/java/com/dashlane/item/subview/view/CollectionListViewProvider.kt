@@ -29,14 +29,24 @@ import com.dashlane.ui.widgets.view.CategoryChipList
 
 object CollectionListViewProvider {
 
-    fun create(
-        context: Context,
-        item: ItemCollectionListSubView
-    ): View {
+    fun create(context: Context, item: ItemCollectionListSubView): View {
         (item.teamspaceView as? ItemEditSpaceSubView)?.addValueChangedListener(object :
             ValueChangeManager.Listener<Teamspace> {
             override fun onValueChanged(origin: Any, newValue: Teamspace) {
                 item.value.value = emptyList()
+                
+                
+                
+                
+                
+                
+                item.header.value = when (item.header.value) {
+                    context.getString(R.string.collections_header_business_item_edit) ->
+                        context.getString(R.string.collections_header_personal_item_edit)
+                    context.getString(R.string.collections_header_personal_item_edit) ->
+                        context.getString(R.string.collections_header_business_item_edit)
+                    else -> context.getString(R.string.collections_header_item_edit)
+                }
             }
         })
         return ComposeView(context).apply {
@@ -49,14 +59,12 @@ object CollectionListViewProvider {
     }
 
     @Composable
-    fun ItemEditCollectionList(
-        item: ItemCollectionListSubView
-    ) {
+    fun ItemEditCollectionList(item: ItemCollectionListSubView) {
         val collections = item.value
         DashlaneTheme {
             Column(modifier = Modifier.padding(start = 3.75.dp)) {
                 Text(
-                    text = item.header,
+                    text = item.header.value,
                     color = DashlaneTheme.colors.textNeutralQuiet,
                     style = DashlaneTheme.typography.bodyHelperRegular
                 )
@@ -64,13 +72,15 @@ object CollectionListViewProvider {
 
                 if (collections.value.isNotEmpty()) {
                     CategoryChipList {
-                        collections.value.forEach { label ->
+                        collections.value.forEach { (label, shared) ->
                             CategoryChip(
                                 label = label,
-                                editMode = item.editMode,
+                                editMode = !shared && item.editMode,
+                                shared = shared,
                                 onClick = {
-                                    if (item.editMode) {
-                                        item.value.value = collections.value.filterNot { it == label }
+                                    if (!shared && item.editMode) {
+                                        item.value.value =
+                                            collections.value.filterNot { it.first == label }
                                     }
                                 }
                             )
@@ -87,13 +97,13 @@ object CollectionListViewProvider {
     @Composable
     private fun ButtonAddCollection(
         item: ItemCollectionListSubView,
-        collections: List<String>
+        collections: List<Pair<String, Boolean>>
     ) {
         ButtonMedium(
             onClick = {
-                item.listener.openCollectionSelector(
+                item.listener?.openCollectionSelector(
                     fromViewOnly = !item.editMode,
-                    temporaryCollections = collections,
+                    temporaryCollections = collections.filter { !it.second }.map { it.first },
                     spaceId = item.teamspaceView?.value?.teamId ?: PersonalTeamspace.teamId ?: ""
                 )
             },

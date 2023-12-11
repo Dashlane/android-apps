@@ -1,6 +1,6 @@
 package com.dashlane.vault
 
-import com.dashlane.autofill.api.pause.services.PausedFormSourcesProvider
+import com.dashlane.autofill.pause.services.PausedFormSourcesProvider
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.events.AppEvents
@@ -29,14 +29,14 @@ import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.xml.domain.SyncObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class VaultReportLogger @Inject constructor(
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
@@ -51,8 +51,6 @@ class VaultReportLogger @Inject constructor(
     private val knownApplicationProvider: KnownApplicationProvider,
     private val collectionsReportProvider: CollectionsReportProvider
 ) {
-    private val credentialDataQuery get() = mainDataAccessor.getCredentialDataQuery()
-    private val genericDataQuery get() = mainDataAccessor.getGenericDataQuery()
     private val vaultDataQuery get() = mainDataAccessor.getVaultDataQuery()
     private val dataCounter get() = mainDataAccessor.getDataCounter()
 
@@ -103,7 +101,7 @@ class VaultReportLogger @Inject constructor(
                     specificDataType(FILTER_PASSWORD.syncObjectTypes)
                     specificSpace(teamspace)
                 }
-            ).map { it.syncObject as SyncObject.Authentifiant }
+            )
             val totalSecureNotes = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
@@ -134,9 +132,6 @@ class VaultReportLogger @Inject constructor(
             )
 
             val evaluatorResult = authentifiantSecurityEvaluator.computeResult(
-                credentialDataQuery = credentialDataQuery,
-                genericDataQuery = genericDataQuery,
-                vaultDataQuery = vaultDataQuery,
                 teamspace = teamspace,
                 ignoreUserLock = true
             )
@@ -156,8 +151,11 @@ class VaultReportLogger @Inject constructor(
                 passwordsCompromisedCount = passwordCompromised.count(),
                 passwordsWeakCount = passwordsWeak.count(),
                 passwordsExcludedCount = evaluatorResult.authentifiantsIgnored.count(),
-                securityScore = (evaluatorResult.securityScore.coerceIn(0f, 1f) * 100).roundToInt(),
-                passwordsWithOtpCount = credentials.count { !it.password.isNullOrEmpty() && (!it.otpSecret.isNullOrEmpty() || !it.otpUrl.isNullOrEmpty()) },
+                securityScore = evaluatorResult.securityScore?.let { score ->
+                    (score.value.coerceIn(0f, 1f) * 100).roundToInt()
+                },
+                passwordsWithOtpCount = credentials.mapNotNull { it.syncObject as? SyncObject.Authentifiant }
+                    .count { !it.password.isNullOrEmpty() && (!it.otpSecret.isNullOrEmpty() || !it.otpUrl.isNullOrEmpty()) },
                 passwordChangerCompatibleCredentialsCount = 0,
                 domainsWithoutAutofillCount = computeDomainsWithoutAutofillCount(),
                 passwordsWithAutologinDisabledCount = computeDomainsWithoutAutofillCount(),

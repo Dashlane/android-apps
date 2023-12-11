@@ -15,7 +15,6 @@ import javax.inject.Inject
 @HiltViewModel
 internal class BackupViewModel @Inject constructor(
     private val secureArchiveManager: SecureArchiveManager,
-    private val backupLogger: BackupLogger,
     private val crashReporter: CrashReporter,
     savedStateHandle: SavedStateHandle
 ) : ViewModel(), BackupViewModelContract {
@@ -24,18 +23,12 @@ internal class BackupViewModel @Inject constructor(
 
     override val state = MutableStateFlow<BackupViewState>(BackupViewState.Idle)
 
-    init {
-        backupLogger.logPopupDisplayed(operation.toLogWhich())
-    }
-
     override fun onPasswordChanged() {
         
         state.value = BackupViewState.Idle
     }
 
     override fun onBackupLaunch(password: String) {
-        backupLogger.logPopupActionClicked(operation.toLogWhich())
-
         state.value = BackupViewState.Processing
         viewModelScope.launch {
             state.value = try {
@@ -52,7 +45,6 @@ internal class BackupViewModel @Inject constructor(
                 when (t) {
                     is CancellationException -> throw t
                     is SecureArchiveManager.InvalidPassword -> {
-                        backupLogger.logPopupWrongPassword(operation.toLogWhich())
                         BackupViewState.InvalidPasswordError
                     }
                     is SecureArchiveManager.FallbackToSharingArchive -> {
@@ -75,7 +67,6 @@ internal class BackupViewModel @Inject constructor(
     }
 
     override fun onBackupCancel() {
-        backupLogger.logPopupCancelClicked(operation.toLogWhich())
         state.value = BackupViewState.Cancelled
     }
 }
@@ -101,8 +92,3 @@ private val displayableDataTypes = setOf(
 
 private fun List<VaultItem<*>>.countDisplayableDataType() =
     count { it.syncObjectType in displayableDataTypes }
-
-private fun BackupOperation.toLogWhich() = when (this) {
-    BackupOperation.Export -> BackupLogger.Which.EXPORT
-    is BackupOperation.Import -> BackupLogger.Which.IMPORT
-}

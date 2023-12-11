@@ -32,12 +32,12 @@
     <string name="create_account_settings_title">Make Dashlane fast and easy</string>
     <string name="create_account_settings_biometric">Biometric unlock</string>
     <string name="create_account_settings_biometric_desc">Unlock Dashlane with one look or touch</string>
-    <string name="create_account_settings_resetmp">Master Password reset</string>
+    <string name="create_account_settings_resetmp">Biometric recovery</string>
     <string name="create_account_settings_resetmp_desc">In case you forget it</string>
     <string name="create_account_settings_info_cta">How it works</string>
     <string name="create_account_settings_info_back">Back</string>
-    <string name="create_account_settings_info_description">If you turn on &lt;b&gt;Biometric unlock&lt;/b&gt; or &lt;b&gt;Master Password reset&lt;/b&gt; we\'ll encrypt your Master Password and store it on your device. It remains encrypted from everyone, including us.&lt;br/&gt;&lt;br/&gt;Note: &lt;b&gt;Master Password reset&lt;/b&gt; needs &lt;b&gt;Biometric unlock&lt;/b&gt; enabled to work.</string>
-    <string name="create_account_settings_warning_toast">Master Password reset needs Biometric unlock enabled to work.</string>
+    <string name="create_account_settings_info_description">If you turn on &lt;b&gt;biometric unlock&lt;/b&gt; or &lt;b&gt;biometric recovery&lt;/b&gt; we\'ll encrypt your Master Password and store it on your device. It remains encrypted from everyone, including us.&lt;br/&gt;&lt;br/&gt;Note: &lt;b&gt;Biometric recovery&lt;/b&gt; needs &lt;b&gt;biometric unlock&lt;/b&gt; turned on to work.</string>
+    <string name="create_account_settings_warning_toast">Biometric recovery needs biometric unlock turned on to work.</string>
 
     <string name="create_account_cta_continue">Continue</string>
 </resources>

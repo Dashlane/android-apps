@@ -5,10 +5,11 @@ import android.app.backup.BackupDataInput
 import android.app.backup.BackupDataOutput
 import android.os.ParcelFileDescriptor
 import com.dashlane.cryptography.encodeUtf8ToByteArray
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.debug.DebugEntryPoint
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.util.toInt
 import com.dashlane.util.tryOrNull
+import dagger.hilt.android.EntryPointAccessors
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -18,6 +19,9 @@ import java.time.Instant
 
 @Suppress("UNUSED")
 class DashlaneBackupAgent : BackupAgent() {
+
+    private val globalPreferencesManager: GlobalPreferencesManager
+        get() = EntryPointAccessors.fromApplication<DebugEntryPoint>(applicationContext).globalPreferencesManager
 
     companion object {
         private const val KEY_LAST_LOGGED_IN_USER = "lastLoggedInUser"
@@ -32,24 +36,23 @@ class DashlaneBackupAgent : BackupAgent() {
     override fun onBackup(oldState: ParcelFileDescriptor, data: BackupDataOutput, newState: ParcelFileDescriptor) {
         val lastBackupTime =
             tryOrNull { DataInputStream(FileInputStream(oldState.fileDescriptor)).use { it.readLong() } } ?: 0L
-        val prefManager = SingletonProvider.getGlobalPreferencesManager()
-        val lastModificationTime = prefManager.lastModificationTime
+
+        val lastModificationTime = globalPreferencesManager.lastModificationTime
 
         
         if (lastBackupTime != lastModificationTime) {
             
-            backupGlobalPreferences(prefManager, data)
+            backupGlobalPreferences(globalPreferencesManager, data)
         }
         saveLocalState(lastModificationTime, newState)
     }
 
     override fun onRestore(data: BackupDataInput, appVersionCode: Int, newState: ParcelFileDescriptor) {
-        val prefManager = SingletonProvider.getGlobalPreferencesManager()
         var backupToken: String? = null
         var backupTokenDate: Instant? = null
         while (data.readNextHeader()) {
             when (val key = data.key) {
-                in PREFERENCES_KEY_LIST_TO_RESTORE -> restoreGlobalPreference(prefManager, key, data)
+                in PREFERENCES_KEY_LIST_TO_RESTORE -> restoreGlobalPreference(globalPreferencesManager, key, data)
                 
                 
                 
@@ -60,9 +63,9 @@ class DashlaneBackupAgent : BackupAgent() {
             }
         }
         
-        val user = prefManager.getDefaultUsername()
+        val user = globalPreferencesManager.getDefaultUsername()
         if (backupToken != null && backupTokenDate != null && user != null) {
-            prefManager.setCipheredBackupToken(user, backupToken, backupTokenDate)
+            globalPreferencesManager.setCipheredBackupToken(user, backupToken, backupTokenDate)
         }
         saveLocalState(System.currentTimeMillis(), newState)
     }

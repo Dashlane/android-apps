@@ -72,7 +72,10 @@ fun ScreenConfiguration.toBundle(): Bundle {
 
     bundle.putStringArray("itemSubviews", subviewValues)
     itemSubViews.filterIsInstance<ItemCollectionListSubView>().firstOrNull()?.let { collectionSubview ->
-        bundle.putStringArray("itemCollections", collectionSubview.value.value.toTypedArray())
+        val nonSharedCollections = collectionSubview.value.value
+            .filter { (_, shared) -> !shared }
+            .map { (name, _) -> name }
+        bundle.putStringArray("itemCollections", nonSharedCollections.toTypedArray())
     }
     return bundle
 }
@@ -120,7 +123,7 @@ private fun ScreenConfiguration.restoreSubViews(
             is ItemCollectionListSubView -> {
                 collectionsToRestore?.let { names ->
                     subview.notifyValueChanged(
-                        mutableStateOf(names.toList())
+                        mutableStateOf(names.map { it to false })
                     )
                 }
             }

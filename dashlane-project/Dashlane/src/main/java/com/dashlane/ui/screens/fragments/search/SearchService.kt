@@ -60,7 +60,7 @@ class SearchServiceImpl @Inject constructor(
     }
 
     override fun navigateToSettings(settingsId: String?, origin: String?) {
-        navigator.goToSettings(settingsId = settingsId, origin = origin)
+        navigator.goToSettings(settingsId = settingsId)
     }
 
     override fun popBackStack() {
@@ -70,8 +70,8 @@ class SearchServiceImpl @Inject constructor(
     override fun getVaultItemLogger(): VaultItemLogger = vaultItemLogger
 
     override fun provideFabViewProxy(layout: View): FabViewProxy = VaultFabViewProxy(
-        layout,
-        teamspaceAccessor,
-        navigator
+        rootView = layout,
+        teamspaceManager = teamspaceAccessor,
+        navigator = navigator
     )
 }

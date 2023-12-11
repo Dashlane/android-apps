@@ -16,7 +16,7 @@
         android:layout_height="@dimen/fragment_lock_pincode_pin_area_item_dot_size"
         android:layout_centerInParent="true"
         android:src="@drawable/background_circle"
-        app:tint="?attr/colorAccentOnPrimary"
+        app:tint="@color/text_brand_quiet"
         />
 
     <View

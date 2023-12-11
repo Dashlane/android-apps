@@ -2,7 +2,6 @@ package com.dashlane.item.subview.provider.id
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.inapplogin.UsageLogCode35Action
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -13,15 +12,11 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -32,15 +27,9 @@ import java.time.LocalDate
 class ItemScreenConfigurationDriverLicenseProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -99,23 +88,27 @@ class ItemScreenConfigurationDriverLicenseProvider(
             createNumberField(subViewFactory, context, item, editMode),
             
             createIdDateField(
+                context,
                 item,
                 editMode,
                 listener,
                 item.syncObject.deliveryDate,
                 context.getString(R.string.issue_date),
                 CopyField.DriverLicenseIssueDate,
-                VaultItem<*>::copyForUpdatedDeliveryDate
+                VaultItem<*>::copyForUpdatedDeliveryDate,
+                vaultItemCopy
             ),
             
             createIdDateField(
+                context,
                 item,
                 editMode,
                 listener,
                 item.syncObject.expireDate,
                 context.getString(R.string.expiery_date),
                 CopyField.DriverLicenseExpirationDate,
-                VaultItem<*>::copyForUpdatedExpirationDate
+                VaultItem<*>::copyForUpdatedExpirationDate,
+                vaultItemCopy
             ),
             createTeamspaceField(subViewFactory, item),
             
@@ -149,14 +142,12 @@ class ItemScreenConfigurationDriverLicenseProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 numberView,
-                CopyAction(item.toSummary(), CopyField.DriverLicenseNumber, action = {
-                    logger.log(
-                        UsageLogCode35(
-                            type = UsageLogCode11.Type.DRIVER_LICENCE.code,
-                            action = UsageLogCode35Action.COPY_NUMBER
-                        )
-                    )
-                })
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.DriverLicenseNumber,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -181,7 +172,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
         override fun fullName(item: VaultItem<SyncObject.DriverLicence>) = item.syncObject.fullname
 
         override fun withFullName(item: VaultItem<SyncObject.DriverLicence>, fullName: String?):
-                VaultItem<SyncObject.DriverLicence> = item.copySyncObject { fullname = fullName }
+            VaultItem<SyncObject.DriverLicence> = item.copySyncObject { fullname = fullName }
 
         override fun gender(item: VaultItem<SyncObject.DriverLicence>): SyncObject.Gender? = item.syncObject.sex
 
@@ -194,12 +185,12 @@ class ItemScreenConfigurationDriverLicenseProvider(
         override fun birthDate(item: VaultItem<SyncObject.DriverLicence>) = item.syncObject.dateOfBirth
 
         override fun withBirthDate(item: VaultItem<SyncObject.DriverLicence>, birthDate: LocalDate?):
-                VaultItem<SyncObject.DriverLicence> = item.copySyncObject { dateOfBirth = birthDate }
+            VaultItem<SyncObject.DriverLicence> = item.copySyncObject { dateOfBirth = birthDate }
 
         override fun linkedIdentity(item: VaultItem<SyncObject.DriverLicence>) = item.syncObject.linkedIdentity
 
         override fun withLinkedIdentity(item: VaultItem<SyncObject.DriverLicence>, identity: String?):
-                VaultItem<SyncObject.DriverLicence> =
+            VaultItem<SyncObject.DriverLicence> =
             item.copySyncObject { linkedIdentity = identity }
     }
 }

@@ -6,21 +6,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.net.toUri
 import com.bumptech.glide.Glide
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.braze.databinding.FragmentInAppMessageBinding
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
-import com.dashlane.braze.R
-import com.dashlane.design.component.compat.view.ButtonMediumView
 import com.dashlane.url.toUrlDomain
 import com.dashlane.url.toUrlDomainOrNull
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class BrazePopupDialogFragment : NotificationDialogFragment() {
-    private val announcementCenter = SingletonProvider.getAnnouncementCenter()
-    private val navigator = SingletonProvider.getNavigator()
-
     private val messageId: String
         get() = requireArguments().getString(ARG_ID, "")
 
@@ -30,42 +25,39 @@ class BrazePopupDialogFragment : NotificationDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         inflater ?: return null
-        val view = inflater.inflate(R.layout.fragment_in_app_message, container, false)
-        view.apply {
-            arguments?.getString(ARG_BANNER_URL)?.let { bannerUrl ->
-                findViewById<ImageView>(R.id.dialog_banner)?.let { imageView ->
-                    Glide.with(imageView.context)
-                        .load(bannerUrl)
-                        .fitCenter()
-                        .into(imageView)
-                }
-            }
-            findViewById<TextView>(R.id.dialog_title)?.text = arguments?.getString(ARG_TITLE)
-            findViewById<TextView>(R.id.dialog_text)?.text = arguments?.getString(ARG_MESSAGE)
+        val binding = FragmentInAppMessageBinding.inflate(layoutInflater)
+        arguments?.getString(ARG_BANNER_URL)?.let { bannerUrl ->
+            val imageView = binding.dialogBanner
+            Glide.with(imageView.context)
+                .load(bannerUrl)
+                .fitCenter()
+                .into(imageView)
+        }
+        binding.dialogTitle.text = arguments?.getString(ARG_TITLE)
+        binding.dialogText.text = arguments?.getString(ARG_MESSAGE)
 
-            findViewById<ButtonMediumView>(R.id.dialog_positive_button)?.apply {
-                text = arguments?.getString(ARG_POSITIVE_BUTTON_TEXT)
-                onClick = {
-                    navigateSecurely(arguments?.getString(ARG_POSITIVE_BUTTON_URI))
-                    onClickPositiveButton()
-                    dismiss()
-                }
-            }
-
-            arguments?.getString(ARG_NEGATIVE_BUTTON_TEXT)?.let {
-                findViewById<ButtonMediumView>(R.id.dialog_negative_button)?.apply {
-                    text = it
-                    onClick = {
-                        navigateSecurely(arguments?.getString(ARG_NEGATIVE_BUTTON_URI))
-                        onClickNegativeButton()
-                        dismiss()
-                    }
-                    isEnabled = true
-                    visibility = View.VISIBLE
-                }
+        binding.dialogPositiveButton.apply {
+            text = arguments?.getString(ARG_POSITIVE_BUTTON_TEXT)
+            onClick = {
+                navigateSecurely(arguments?.getString(ARG_POSITIVE_BUTTON_URI))
+                onClickPositiveButton()
+                dismiss()
             }
         }
-        return view
+
+        arguments?.getString(ARG_NEGATIVE_BUTTON_TEXT)?.let {
+            binding.dialogNegativeButton.apply {
+                text = it
+                onClick = {
+                    navigateSecurely(arguments?.getString(ARG_NEGATIVE_BUTTON_URI))
+                    onClickNegativeButton()
+                    dismiss()
+                }
+                isEnabled = true
+                visibility = View.VISIBLE
+            }
+        }
+        return binding.root
     }
 
     override fun onCancel(dialog: DialogInterface) {

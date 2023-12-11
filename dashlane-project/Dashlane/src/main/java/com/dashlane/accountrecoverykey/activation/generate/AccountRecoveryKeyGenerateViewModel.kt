@@ -2,21 +2,43 @@ package com.dashlane.accountrecoverykey.activation.generate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.hermes.LogRepository
+import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.BrowseComponent
+import com.dashlane.hermes.generated.definitions.CreateKeyErrorName
+import com.dashlane.hermes.generated.definitions.FlowStep
+import com.dashlane.hermes.generated.events.user.CreateAccountRecoveryKey
+import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.util.clipboard.ClipboardCopy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AccountRecoveryKeyGenerateViewModel @Inject constructor(
-    private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository
+    userPreferencesManager: UserPreferencesManager,
+    private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
+    private val clipboardCopy: ClipboardCopy,
+    private val logRepository: LogRepository
 ) : ViewModel() {
 
-    private val stateFlow =
-        MutableStateFlow<AccountRecoveryKeyGenerateState>(AccountRecoveryKeyGenerateState.Initial(AccountRecoveryKeyGenerateData()))
-    val uiState = stateFlow.asStateFlow()
+    private val stateFlow: MutableStateFlow<AccountRecoveryKeyGenerateState>
+    val uiState: StateFlow<AccountRecoveryKeyGenerateState>
+
+    init {
+        val accountType = UserAccountInfo.AccountType.fromString(userPreferencesManager.accountType)
+        stateFlow = MutableStateFlow(AccountRecoveryKeyGenerateState.Initial(AccountRecoveryKeyGenerateData(accountType = accountType)))
+        uiState = stateFlow.asStateFlow()
+    }
+
+    init {
+        logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY_STORE)
+    }
 
     fun viewStarted() {
         viewModelScope.launch {
@@ -29,6 +51,7 @@ class AccountRecoveryKeyGenerateViewModel @Inject constructor(
                         stateFlow.emit(AccountRecoveryKeyGenerateState.KeyGenerated(newData))
                     }
                     .onFailure {
+                        logRepository.queueEvent(CreateAccountRecoveryKey(flowStep = FlowStep.ERROR, createKeyErrorName = CreateKeyErrorName.UNKNOWN))
                         stateFlow.emit(AccountRecoveryKeyGenerateState.Error(stateFlow.value.data))
                     }
             } else {
@@ -39,6 +62,10 @@ class AccountRecoveryKeyGenerateViewModel @Inject constructor(
 
     fun retryClicked() {
         viewStarted()
+    }
+
+    fun copy(text: String) {
+        clipboardCopy.copyToClipboard(data = text, sensitiveData = true)
     }
 
     fun continueClicked() {

@@ -1,119 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/view_login_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center_horizontal"
-    android:layout_marginBottom="@dimen/spacing_small"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:maxWidth="@dimen/size_480dp"
-    tools:context="com.dashlane.login.LoginActivity"
-    >
+    android:fillViewport="true">
 
-    <include layout="@layout/include_login_base_content" />
+    <androidx.constraintlayout.widget.ConstraintLayout
 
-    <Button
-        android:id="@+id/btn_push"
-        style="?borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_normal"
-        android:layout_marginBottom="@dimen/spacing_normal"
-        android:visibility="invisible"
-        app:autoSizeMaxTextSize="14sp"
-        app:autoSizeMinTextSize="10sp"
-        app:autoSizeTextType="uniform"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/next_button_barrier"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constrainedWidth="true"
-        tools:text="@string/request_duo_challenge_button"
-        tools:visibility="visible"
-        />
-
-    
-
-    <FrameLayout
-        android:id="@+id/frame_login_totp"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:id="@+id/view_login_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingLeft="@dimen/spacing_big"
-        app:layout_constraintBottom_toBottomOf="@id/barrier"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        >
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingBottom="@dimen/spacing_normal"
+        tools:context="com.dashlane.login.LoginActivity">
 
-        <ImageView
-            android:id="@+id/view_totp_u2f_key"
-            android:layout_width="wrap_content"
+        <include layout="@layout/include_login_base_content" />
+
+        
+        <FrameLayout
+            android:id="@+id/frame_login_totp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="end|center_vertical"
-            android:layout_marginStart="@dimen/spacing_big"
-            android:layout_marginEnd="@dimen/spacing_big"
-            android:layout_marginBottom="12dp"
-            android:background="?selectableItemBackground"
-            android:tintMode="src_in"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_u2f_key"
-            app:tint="?colorOnBackground"
-            tools:visibility="visible"
-            />
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingLeft="20dp"
+            android:paddingRight="@dimen/spacing_big"
+            app:layout_constraintBottom_toBottomOf="@id/barrier"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/view_login_totp_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:errorEnabled="false"
-            app:helperText="@string/otp_enabled_token_desc"
-            >
-
-            
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/view_login_totp"
+            <ImageView
+                android:id="@+id/view_totp_u2f_key"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="-8dp"
-                android:imeOptions="actionNext"
-                android:inputType="number"
-                android:letterSpacing="1.0"
-                android:lines="1"
-                android:maxLength="6"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:text="000000"
-                android:textSize="24sp"
-                tools:ignore="HardcodedText"
-                />
-            
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="@dimen/spacing_big"
+                android:layout_marginBottom="12dp"
+                android:background="?selectableItemBackground"
+                android:tintMode="src_in"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_u2f_key"
+                app:tint="?colorOnBackground"
+                tools:visibility="visible" />
 
-    </FrameLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/view_login_totp_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:errorEnabled="false"
+                app:helperText="@string/otp_enabled_token_desc">
 
-    
-    <TextView
-        android:id="@+id/error_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_big"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:layout_marginEnd="@dimen/spacing_big"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:textAppearance="?textAppearanceBody2"
-        android:textColor="?colorError"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/frame_login_totp"
-        tools:text="@string/request_u2f_verification_fail"
-        tools:visibility="visible"
-        />
+                
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/view_login_totp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="-4dp"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:letterSpacing="1.0"
+                    android:lines="1"
+                    android:maxLength="6"
+                    android:text="000000"
+                    android:textSize="24sp"
+                    tools:ignore="HardcodedText" />
+                
+            </com.google.android.material.textfield.TextInputLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </FrameLayout>
+
+        
+        <TextView
+            android:id="@+id/error_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_big"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_big"
+            android:textAppearance="?textAppearanceBody2"
+            android:textColor="?colorError"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frame_login_totp"
+            tools:text="@string/request_u2f_verification_fail"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/btn_recovery"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:text="@string/login_totp_use_recovery_code"
+            app:autoSizeMaxTextSize="14sp"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@+id/btn_push"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/error_text_view"
+            app:layout_constraintVertical_bias="0" />
+
+        <Button
+            android:id="@+id/btn_push"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:visibility="invisible"
+            app:autoSizeMaxTextSize="14sp"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_recovery"
+            tools:text="@string/login_totp_use_dashlane_authenticator"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

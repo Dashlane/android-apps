@@ -15,6 +15,8 @@ import com.dashlane.R
 import com.dashlane.core.domain.sharing.SharingPermission
 import com.dashlane.core.domain.sharing.toSharingPermission
 import com.dashlane.core.domain.sharing.toUserPermission
+import com.dashlane.listeners.edittext.NoLockEditTextWatcher
+import com.dashlane.login.lock.LockManager
 import com.dashlane.ui.adapters.sharing.SharingContactFilteredArrayAdapter
 import com.dashlane.ui.dialogs.fragment.WaiterDialogFragment
 import com.dashlane.ui.screens.fragments.sharing.dialog.SharingPermissionInfoDialogFragment
@@ -29,6 +31,7 @@ class NewSharePeopleViewProxy(
     private val fragment: Fragment,
     view: View,
     private val viewModel: NewSharePeopleViewModelContract,
+    lockManager: LockManager
 ) {
     private val coroutineScope: CoroutineScope
         get() = fragment.lifecycle.coroutineScope
@@ -41,6 +44,8 @@ class NewSharePeopleViewProxy(
 
     private val emailAddresses: SharingContactAutocompleteTextView =
         view.findViewById(R.id.email_addresses_tokens)
+
+    private val noLockWatcher = NoLockEditTextWatcher(lockManager)
 
     init {
         val ctaChangePermission = view.findViewById<TextView>(R.id.permission_change)
@@ -96,13 +101,16 @@ class NewSharePeopleViewProxy(
                 ?: return@setFragmentResultListener
             viewModel.onPermissionChanged(permission.toUserPermission())
         }
+
+        
+        emailAddresses.addTextChangedListener(noLockWatcher)
     }
 
     private fun onSuccessForResult() {
-       fragment.activity?.apply {
-           setResult(Activity.RESULT_OK)
-           finish()
-       }
+        fragment.activity?.apply {
+            setResult(Activity.RESULT_OK)
+            finish()
+        }
     }
 
     fun onClickShare() {
@@ -158,6 +166,10 @@ class NewSharePeopleViewProxy(
             .setMessage(context.getString(descriptionResId))
             .setCancelable(true)
             .show()
+    }
+
+    fun onDestroy() {
+        emailAddresses.addTextChangedListener(noLockWatcher)
     }
 
     companion object {

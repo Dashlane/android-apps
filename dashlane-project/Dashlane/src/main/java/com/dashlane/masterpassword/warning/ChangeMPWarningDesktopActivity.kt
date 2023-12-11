@@ -7,39 +7,50 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.core.view.get
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.databinding.ActivityWarningBinding
 import com.dashlane.lock.LockHelper
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.masterpassword.ChangeMasterPasswordActivity
 import com.dashlane.masterpassword.ChangeMasterPasswordLogoutHelper
 import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
+import com.dashlane.session.SessionManager
+import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.util.findContentParent
 import com.dashlane.util.getParcelableExtraCompat
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.userfeatures.UserFeaturesChecker
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ChangeMPWarningDesktopActivity : DashlaneActivity() {
 
     private lateinit var origin: ChangeMasterPasswordOrigin
 
-    private val sessionManager
-        get() = SingletonProvider.getSessionManager()
+    @Inject
+    lateinit var sessionManager: SessionManager
 
-    private val usageLogRepository
-        get() = sessionManager.session?.let { SingletonProvider.getComponent().bySessionUsageLogRepository[it] }
+    @Inject
+    lateinit var logoutHelper: ChangeMasterPasswordLogoutHelper
 
-    private val logoutHelper
-        get() = ChangeMasterPasswordLogoutHelper(sessionManager)
+    @Inject
+    lateinit var userFeatureChecker: UserFeaturesChecker
 
-    private val userFeatureChecker: UserFeaturesChecker
-        get() = SingletonProvider.getUserFeatureChecker()
+    @Inject
+    lateinit var lockRepository: LockRepository
+
+    @ApplicationCoroutineScope
+    @Inject
+    lateinit var applicationScope: CoroutineScope
+
+    @MainCoroutineDispatcher
+    @Inject
+    lateinit var mainDispatcher: CoroutineDispatcher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,7 +111,6 @@ class ChangeMPWarningDesktopActivity : DashlaneActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        sendUsageLog35("back")
 
         if (origin.fromLogin) {
             logoutHelper.logout(this)
@@ -109,10 +119,7 @@ class ChangeMPWarningDesktopActivity : DashlaneActivity() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun onChangeMPClicked() {
-        sendUsageLog35("goToChangeMP")
-
         val changeMasterPasswordActivityIntent = ChangeMasterPasswordActivity.newIntent(this, origin, true)
 
         if (origin.fromLogin) {
@@ -122,9 +129,9 @@ class ChangeMPWarningDesktopActivity : DashlaneActivity() {
             
             
             
-            GlobalScope.launch(Dispatchers.Main) {
-                SingletonProvider.getComponent().lockRepository
-                    .getLockManager(SingletonProvider.getSessionManager().session!!)
+            applicationScope.launch(mainDispatcher) {
+                lockRepository
+                    .getLockManager(sessionManager.session!!)
                     .showAndWaitLockActivityForReason(
                         this@ChangeMPWarningDesktopActivity,
                         UnlockEvent.Reason.WithCode(
@@ -136,30 +143,19 @@ class ChangeMPWarningDesktopActivity : DashlaneActivity() {
                     )?.takeIf { unlockEvent ->
                         val reason = unlockEvent.reason
                         unlockEvent.isSuccess() &&
-                                reason is UnlockEvent.Reason.WithCode &&
-                                reason.requestCode == UNLOCK_EVENT_CODE
+                            reason is UnlockEvent.Reason.WithCode &&
+                            reason.requestCode == UNLOCK_EVENT_CODE
                     }?.let { startActivity(changeMasterPasswordActivityIntent) }
             }
         }
     }
 
     private fun onCancelButtonClicked() {
-        sendUsageLog35("cancel")
-
         if (origin.fromLogin) {
             logoutHelper.logout(this)
         } else {
             finish()
         }
-    }
-
-    private fun sendUsageLog35(action: String) {
-        usageLogRepository?.enqueue(
-            UsageLogCode35(
-                type = UsageLogConstant.ViewType.CHANGE_MASTER_PASSWORD_MULTIPLE_DEVICES_WARNING,
-                action = action
-            )
-        )
     }
 
     companion object {

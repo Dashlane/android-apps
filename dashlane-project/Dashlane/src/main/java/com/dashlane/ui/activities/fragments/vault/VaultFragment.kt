@@ -9,16 +9,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.notification.badge.NotificationBadgeActor
 import com.dashlane.notification.badge.NotificationBadgeListener
+import com.dashlane.session.SessionManager
+import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.fab.FabDef
 import com.dashlane.ui.fab.FabPresenter
 import com.dashlane.ui.fab.VaultFabViewProxy
+import com.dashlane.util.inject.OptionalProvider
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
@@ -27,6 +29,12 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
 
     @Inject
     lateinit var notificationBadgeActor: NotificationBadgeActor
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var teamSpaceAccessor: OptionalProvider<TeamspaceAccessor>
 
     private var fabPresenter: FabDef.IPresenter? = null
 
@@ -39,11 +47,11 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
             it.onCreate(arguments, savedInstanceState)
         }
 
-        fabPresenter = FabPresenter().apply {
+        fabPresenter = FabPresenter(navigator).apply {
             val fabViewProxy = VaultFabViewProxy(
-                layout,
-                SingletonProvider.getComponent().teamspaceAccessor,
-                SingletonProvider.getNavigator()
+                rootView = layout,
+                teamspaceManager = teamSpaceAccessor,
+                navigator = navigator
             )
             setView(fabViewProxy)
 

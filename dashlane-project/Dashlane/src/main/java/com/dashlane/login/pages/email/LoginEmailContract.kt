@@ -43,7 +43,7 @@ interface LoginEmailContract {
 
         fun showOtpPage(secondFactor: AuthenticationSecondFactor.Totp)
 
-        fun showSecretTransferQRPage()
+        fun showSecretTransferQRPage(email: String?)
 
         fun showPasswordStep(registeredUserDevice: RegisteredUserDevice)
 

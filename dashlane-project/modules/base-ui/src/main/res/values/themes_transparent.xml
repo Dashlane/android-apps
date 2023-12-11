@@ -19,13 +19,7 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
-    <style name="Theme.Dashlane.LockedOut.Transparent.Modal" parent="Theme.Dashlane.LockedOut">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
+    <style name="Theme.Dashlane.Transparent.Modal" parent="Theme.Dashlane.Transparent">
+        <item name="android:windowIsFloating">false</item>
     </style>
 </resources>

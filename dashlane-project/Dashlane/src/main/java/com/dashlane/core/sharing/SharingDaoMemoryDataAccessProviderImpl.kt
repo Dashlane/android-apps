@@ -14,7 +14,7 @@ class SharingDaoMemoryDataAccessProviderImpl @Inject constructor(
                 init()
             }
 
-    fun createForRaclette(): SharingDaoMemoryDataAccessRacletteImpl {
+    private fun createForRaclette(): SharingDaoMemoryDataAccessRacletteImpl {
         return SharingDaoMemoryDataAccessRacletteImpl(
             sessionManager = sessionManager,
             userDataRepository = userDataRepository,

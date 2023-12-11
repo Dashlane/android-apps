@@ -1,6 +1,6 @@
 package com.dashlane.ui.activities.debug
 
-import android.app.Activity
+import android.content.Context
 import android.widget.Toast
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.preference.PreferenceGroup
@@ -10,11 +10,13 @@ import com.dashlane.R
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.ToasterImpl
+import dagger.hilt.android.qualifiers.ActivityContext
+import javax.inject.Inject
 
-internal class DebugCategoryDevOption(
-    debugActivity: Activity,
-    private val deviceInfoRepository: DeviceInfoRepository
-) : AbstractDebugCategory(debugActivity) {
+internal class DebugCategoryDevOption @Inject constructor(
+    @ActivityContext override val context: Context,
+    val deviceInfoRepository: DeviceInfoRepository
+) : AbstractDebugCategory() {
 
     override val name: String
         get() = "Dev options"
@@ -32,9 +34,9 @@ internal class DebugCategoryDevOption(
         
         
         val prefKey = "install_receiver_adjust_sent_for_$anonymousDeviceId"
-        val prefs = PreferenceManager.getDefaultSharedPreferences(debugActivity)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val referer = prefs.getString(prefKey, null)
-        ToasterImpl(debugActivity).show("Referer: $referer", Toast.LENGTH_LONG)
+        ToasterImpl(context).show("Referer: $referer", Toast.LENGTH_LONG)
         addPreferenceButton(
             group,
             "Read all SharedPreferences"
@@ -43,7 +45,7 @@ internal class DebugCategoryDevOption(
             prefs.all.forEach { (key, value) ->
                 sb.append("-- '").append(key).append("': ").append(value).append("\n")
             }
-            DialogHelper().builder(ContextThemeWrapper(debugActivity, R.style.Theme_Dashlane))
+            DialogHelper().builder(ContextThemeWrapper(context, R.style.Theme_Dashlane))
                 .setTitle("Debug SharedPreferences")
                 .setMessage(sb.toString())
                 .show()

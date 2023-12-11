@@ -9,6 +9,7 @@ private const val ENFORCEMENT_DISABLED = "disabled"
 interface TeamspaceAccessor {
     var current: Teamspace?
     val all: List<Teamspace>
+    val onlyBusinessSpaces: List<Teamspace>
     val revokedAndDeclinedSpaces: List<Teamspace>
     fun isCurrent(id: String): Boolean
     fun get(id: String): Teamspace?

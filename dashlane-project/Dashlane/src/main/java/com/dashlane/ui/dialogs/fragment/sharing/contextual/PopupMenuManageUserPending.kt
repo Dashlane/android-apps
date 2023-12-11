@@ -9,6 +9,7 @@ import com.dashlane.R
 class PopupMenuManageUserPending(
     context: Context,
     anchor: View,
+    isItemInCollection: Boolean,
     private val onResendInvite: () -> Unit,
     private val onCancelInvite: () -> Unit
 ) : PopupMenu(context, anchor), PopupMenu.OnMenuItemClickListener {
@@ -24,6 +25,7 @@ class PopupMenuManageUserPending(
 
     init {
         menuInflater.inflate(R.menu.sharing_action_user_pending_menu, menu)
+        setupContextualMenuForCollections(context, isItemInCollection)
         setOnMenuItemClickListener(this)
     }
 }

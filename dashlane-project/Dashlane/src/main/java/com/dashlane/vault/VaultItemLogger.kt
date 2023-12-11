@@ -212,7 +212,7 @@ class VaultItemLogger @Inject constructor(
 
 fun SyncObjectType.toItemTypeOrNull() = when (this) {
     SyncObjectType.ADDRESS -> ItemType.ADDRESS
-    SyncObjectType.AUTHENTIFIANT -> ItemType.CREDENTIAL
+    SyncObjectType.AUTHENTIFIANT, SyncObjectType.PASSKEY -> ItemType.CREDENTIAL
     SyncObjectType.BANK_STATEMENT -> ItemType.BANK_STATEMENT
     SyncObjectType.COMPANY -> ItemType.COMPANY
     SyncObjectType.DRIVER_LICENCE -> ItemType.DRIVER_LICENCE
@@ -229,7 +229,7 @@ fun SyncObjectType.toItemTypeOrNull() = when (this) {
     SyncObjectType.SECURE_NOTE -> ItemType.SECURE_NOTE
     SyncObjectType.SECURITY_BREACH -> ItemType.SECURITY_BREACH
     SyncObjectType.SOCIAL_SECURITY_STATEMENT -> ItemType.SOCIAL_SECURITY
-    SyncObjectType.AUTH_CATEGORY, SyncObjectType.DATA_CHANGE_HISTORY, SyncObjectType.SECURE_FILE_INFO, SyncObjectType.SECURE_NOTE_CATEGORY, SyncObjectType.SETTINGS, SyncObjectType.PASSKEY, SyncObjectType.COLLECTION -> null
+    SyncObjectType.AUTH_CATEGORY, SyncObjectType.DATA_CHANGE_HISTORY, SyncObjectType.SECURE_FILE_INFO, SyncObjectType.SECURE_NOTE_CATEGORY, SyncObjectType.SETTINGS, SyncObjectType.COLLECTION -> null
 }
 
 fun SyncObjectType.toItemType() = toItemTypeOrNull() ?: throw IllegalStateException("No ItemType for $this")

@@ -16,8 +16,5 @@
     <dimen name="fragment_lock_pincode_pin_area_item_width">64dp</dimen>
     <dimen name="fragment_lock_pincode_pin_area_item_height">48dp</dimen>
 
-
-    <dimen name="fragment_lock_pincode_landscape_header_margin_top">67dp</dimen>
     <dimen name="fragment_lock_pincode_landscape_keyboard_width">224dp</dimen>
-    <dimen name="fragment_lock_pincode_logout_landscape_margin_top">43.5dp</dimen>
 </resources>

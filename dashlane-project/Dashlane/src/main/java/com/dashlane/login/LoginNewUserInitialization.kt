@@ -1,9 +1,10 @@
 package com.dashlane.login
 
-import com.dashlane.session.SessionInitializer
-import com.dashlane.session.SessionResult
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.session.AppKey
 import com.dashlane.session.LocalKey
+import com.dashlane.session.SessionInitializer
+import com.dashlane.session.SessionResult
 import com.dashlane.session.Username
 import com.dashlane.session.VaultKey
 import com.dashlane.xml.domain.SyncObject
@@ -12,7 +13,7 @@ import javax.inject.Inject
 class LoginNewUserInitialization @Inject constructor(
     private val sessionInitializer: SessionInitializer
 ) {
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "kotlin:S107") 
     suspend fun initializeSession(
         username: String,
         appKey: AppKey,
@@ -25,7 +26,8 @@ class LoginNewUserInitialization @Inject constructor(
         remoteKey: VaultKey.RemoteKey? = null,
         deviceAnalyticsId: String,
         userAnalyticsId: String,
-        loginMode: LoginMode
+        loginMode: LoginMode,
+        accountType: UserAccountInfo.AccountType
     ): SessionResult {
         return sessionInitializer.createSession(
             username = Username.ofEmail(username),
@@ -39,7 +41,8 @@ class LoginNewUserInitialization @Inject constructor(
             remoteKey = remoteKey,
             deviceAnalyticsId = deviceAnalyticsId,
             userAnalyticsId = userAnalyticsId,
-            loginMode = loginMode
+            loginMode = loginMode,
+            accountType = accountType
         )
     }
 }

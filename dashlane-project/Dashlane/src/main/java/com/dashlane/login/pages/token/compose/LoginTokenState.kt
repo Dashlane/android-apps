@@ -6,6 +6,7 @@ sealed class LoginTokenState {
     abstract val data: LoginTokenData
 
     data class Initial(override val data: LoginTokenData) : LoginTokenState()
+    data class DebugToken(override val data: LoginTokenData) : LoginTokenState()
     data class Loading(override val data: LoginTokenData) : LoginTokenState()
     data class Success(
         override val data: LoginTokenData,

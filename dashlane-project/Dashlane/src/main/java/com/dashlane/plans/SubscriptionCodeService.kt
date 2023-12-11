@@ -2,8 +2,6 @@ package com.dashlane.plans
 
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
-
-import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
@@ -11,7 +9,10 @@ import retrofit2.http.POST
 interface SubscriptionCodeService {
     @FormUrlEncoded
     @POST("/3/premium/getSubscriptionCode")
-    fun getSubscriptionCode(@Field("login") login: String, @Field("uki") uki: String): Call<SubscriptionCodeResponse>
+    suspend fun getSubscriptionCode(
+        @Field("login") login: String,
+        @Field("uki") uki: String
+    ): SubscriptionCodeResponse
 
     class SubscriptionCodeResponse {
         @SerializedName("code")
@@ -22,7 +23,5 @@ interface SubscriptionCodeService {
 
         @SerializedName("content")
         val content: JsonObject? = null
-
-        val subscriptionCode: String? by lazy { content?.get("subscriptionCode")?.asString }
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="credential_manager_create_passkey">Create a new passkey</string>
+    
+    <string name="credential_manager_create_passkey_description">Save your passkey into Dashlane and use it securely from any platform</string>
+    
+    <string name="credential_manager_create_password">Create a new password</string>
+    
+    <string name="credential_manager_create_password_description">Save your password into Dashlane and use it securely from any platform</string>
+    
+    <string name="credential_manager_locked">Dashlane is locked</string>
+</resources>

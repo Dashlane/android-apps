@@ -10,12 +10,18 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dashlane.R
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.network.webservices.authentication.GetTokenService
+import com.dashlane.notification.model.TokenJsonProvider
+import com.dashlane.notification.model.TokenNotificationHandler
+import com.dashlane.preference.GlobalPreferencesManager
+import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.Constants
 import com.dashlane.util.Toaster
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,7 +30,13 @@ class TokenReceiverActivityListener @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockRepository: LockRepository,
     private val toaster: Toaster,
-    private val getTokenService: GetTokenService
+    private val legacyTokenService: GetTokenService,
+    @ApplicationContext
+    private val context: Context,
+    private val tokenJsonProvider: TokenJsonProvider,
+    private val preferencesManager: UserPreferencesManager,
+    private val globalPreferencesManager: GlobalPreferencesManager,
+    private val clock: Clock
 ) : AbstractActivityLifecycleListener() {
 
     private var receiver: NewTokenReceiver? = null
@@ -77,7 +89,21 @@ class TokenReceiverActivityListener @Inject constructor(
         Constants.GCM.TokenShouldNotify[username] = tokenGcmShouldNotify
 
         if (tokenGcmShouldNotify) {
-            TokenChecker(getTokenService).checkAndDisplayTokenIfNeeded(activity, username, session.uki)
+            val tokenNotificationHandler = TokenNotificationHandler(
+                context = context,
+                message = pushToken.fcmMessage,
+                tokenJsonProvider = tokenJsonProvider,
+                sessionManager = sessionManager,
+                preferencesManager = preferencesManager,
+                legacyTokenService = legacyTokenService,
+                globalPreferencesManager = globalPreferencesManager,
+                clock = clock
+            )
+            TokenChecker(legacyTokenService, tokenNotificationHandler).checkAndDisplayTokenIfNeeded(
+                activity,
+                username,
+                session.uki
+            )
         }
     }
 

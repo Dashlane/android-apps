@@ -3,13 +3,16 @@ package com.dashlane.item.subview.action
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.item.subview.Action
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.vault.summary.SummaryObject
 
-open class NewShareAction(private val summaryObject: SummaryObject) : Action {
+open class NewShareAction(
+    private val summaryObject: SummaryObject,
+    private val teamspaceManager: TeamspaceManager?
+) : Action {
     override val text: Int = R.string.share_from_services_menu_title
 
     override val icon: Int = R.drawable.ic_share
@@ -31,9 +34,7 @@ open class NewShareAction(private val summaryObject: SummaryObject) : Action {
         activity: FragmentActivity,
         callback: TeamspaceAccessor.FeatureCall
     ) {
-        val session = SingletonProvider.getSessionManager().session ?: return
-        val teamManager = SingletonProvider.getComponent().teamspaceRepository.getTeamspaceManager(session) ?: return
-        teamManager.startFeatureOrNotify(activity, Teamspace.Feature.SHARING_DISABLED, callback)
+        teamspaceManager?.startFeatureOrNotify(activity, Teamspace.Feature.SHARING_DISABLED, callback)
     }
 
     companion object {

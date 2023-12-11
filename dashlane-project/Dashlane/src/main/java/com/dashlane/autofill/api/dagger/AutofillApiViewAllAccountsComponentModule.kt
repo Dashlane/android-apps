@@ -2,25 +2,24 @@ package com.dashlane.autofill.api.dagger
 
 import com.dashlane.autofill.api.AuthentifiantSearchViewTypeProviderFactoryImpl
 import com.dashlane.autofill.api.AutofillSearchUsingLoader
-import com.dashlane.autofill.api.rememberaccount.services.TriggerRememberViewAllAccount
-import com.dashlane.autofill.api.viewallaccounts.services.ViewAllAccountSelectionNotifier
-import com.dashlane.autofill.api.viewallaccounts.model.AutofillSearch
-import com.dashlane.autofill.api.viewallaccounts.view.AuthentifiantSearchViewTypeProviderFactory
+import com.dashlane.autofill.rememberaccount.services.TriggerRememberViewAllAccount
+import com.dashlane.autofill.viewallaccounts.AutofillSearch
+import com.dashlane.autofill.viewallaccounts.services.ViewAllAccountSelectionNotifier
+import com.dashlane.autofill.viewallaccounts.view.AuthentifiantSearchViewTypeProviderFactory
 import dagger.Binds
 import dagger.Module
-import javax.inject.Singleton
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 
 @Module
+@InstallIn(ActivityComponent::class)
 abstract class AutofillApiViewAllAccountsComponentModule {
-    @Singleton
     @Binds
     abstract fun bindsAutofillSearch(impl: AutofillSearchUsingLoader): AutofillSearch
 
-    @Singleton
     @Binds
     abstract fun bindsAuthentifiantSearchViewTypeProviderFactory(impl: AuthentifiantSearchViewTypeProviderFactoryImpl): AuthentifiantSearchViewTypeProviderFactory
 
-    @Singleton
     @Binds
     abstract fun bindsViewAllAccountSelectionNotifier(impl: TriggerRememberViewAllAccount): ViewAllAccountSelectionNotifier
 }

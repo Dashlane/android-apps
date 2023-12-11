@@ -1,5 +1,6 @@
 package com.dashlane.session.repository
 
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.settings.SettingsManager
@@ -13,6 +14,7 @@ interface UserDataRepository : BySessionRepository<SettingsManager> {
     suspend fun sessionInitializing(
         session: Session,
         userSettings: SyncObject.Settings?,
+        accountType: UserAccountInfo.AccountType,
         allowOverwriteAccessKey: Boolean
     )
 }

@@ -4,6 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
 import com.dashlane.core.DataSync
+import com.dashlane.hermes.LogRepository
+import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.BrowseComponent
+import com.dashlane.hermes.generated.definitions.CreateKeyErrorName
+import com.dashlane.hermes.generated.definitions.FlowStep
+import com.dashlane.hermes.generated.events.user.CreateAccountRecoveryKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,27 +24,38 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class AccountRecoveryKeyConfirmViewModel @Inject constructor(
     private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
+    private val logRepository: LogRepository,
     private val dataSync: DataSync
 ) : ViewModel() {
 
     private val stateFlow = MutableStateFlow<AccountRecoveryKeyConfirmState>(AccountRecoveryKeyConfirmState.Initial(AccountRecoveryKeyConfirmData()))
     val uiState = stateFlow.asStateFlow()
 
+    init {
+        logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY_CONFIRM)
+    }
+
     fun confirmClicked(accountRecoveryKey: String) {
         flow<AccountRecoveryKeyConfirmState> {
             val keyConfirmed = accountRecoveryKeyRepository.confirmRecoveryKey(accountRecoveryKey.replace("-", ""))
 
-            if (!keyConfirmed) throw InvalidKeyException
+            if (!keyConfirmed) {
+                throw InvalidKeyException
+            }
 
             val syncSuccess = dataSync.awaitSync()
 
-            if (!syncSuccess) throw IllegalStateException("")
+            if (!syncSuccess) throw IllegalStateException("Sync error when confirming ARK")
 
             accountRecoveryKeyRepository.confirmActivation()
-                .onSuccess { emit(AccountRecoveryKeyConfirmState.KeyConfirmed(stateFlow.value.data)) }
+                .onSuccess {
+                    logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY_SUCCESS)
+                    emit(AccountRecoveryKeyConfirmState.KeyConfirmed(stateFlow.value.data))
+                }
                 .onFailure { throw it }
         }
             .catch { throwable ->
+                logRepository.queueEvent(CreateAccountRecoveryKey(flowStep = FlowStep.ERROR, createKeyErrorName = CreateKeyErrorName.UNKNOWN))
                 val errorState = when (throwable) {
                     is InvalidKeyException -> AccountRecoveryKeyConfirmState.KeyError(stateFlow.value.data.copy(accountRecoveryKey = accountRecoveryKey))
                     else -> AccountRecoveryKeyConfirmState.SyncError(stateFlow.value.data.copy(accountRecoveryKey = accountRecoveryKey))
@@ -69,8 +86,21 @@ class AccountRecoveryKeyConfirmViewModel @Inject constructor(
         viewModelScope.launch { stateFlow.emit(AccountRecoveryKeyConfirmState.Done(stateFlow.value.data)) }
     }
 
-    fun hasNavigated() {
-        viewModelScope.launch { stateFlow.emit(AccountRecoveryKeyConfirmState.KeyConfirmed(stateFlow.value.data)) }
+    fun cancelClicked() {
+        viewModelScope.launch {
+            logRepository.queueEvent(CreateAccountRecoveryKey(flowStep = FlowStep.CANCEL))
+            stateFlow.emit(AccountRecoveryKeyConfirmState.Cancel(stateFlow.value.data))
+        }
+    }
+
+    fun onBackPressed() {
+        viewModelScope.launch {
+            if (stateFlow.value is AccountRecoveryKeyConfirmState.KeyConfirmed) {
+                stateFlow.emit(AccountRecoveryKeyConfirmState.Done(stateFlow.value.data))
+            } else {
+                stateFlow.emit(AccountRecoveryKeyConfirmState.Back(stateFlow.value.data))
+            }
+        }
     }
 
     object InvalidKeyException : Exception()

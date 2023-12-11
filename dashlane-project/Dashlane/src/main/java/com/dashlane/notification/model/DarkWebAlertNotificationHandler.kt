@@ -4,22 +4,25 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
 import com.dashlane.notification.FcmMessage
 import com.dashlane.notification.appendBreachNotificationExtra
 import com.dashlane.notification.getJsonData
+import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.SplashScreenActivity
 import com.dashlane.util.clearTask
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.notification.buildNotification
 
-class DarkWebAlertNotificationHandler(context: Context, message: FcmMessage) :
+class DarkWebAlertNotificationHandler(
+    context: Context,
+    message: FcmMessage,
+    private val fcmHelper: FcmHelper,
+    private val globalPreferencesManager: GlobalPreferencesManager
+) :
     AbstractNotificationHandler(context, message) {
-
-    private val fcmHelper: FcmHelper by lazy { SingletonProvider.getFcmHelper() }
 
     init {
         parseMessage()
@@ -27,7 +30,7 @@ class DarkWebAlertNotificationHandler(context: Context, message: FcmMessage) :
     }
 
     override fun handlePushNotification() {
-        if (!isForLastLoggedInUser) return
+        if (!isForLastLoggedInUser(globalPreferencesManager.getLastLoggedInUser())) return
 
         val (title, message) = when (fcmMessage.code) {
             FcmCode.DARK_WEB_SETUP_COMPLETE -> {

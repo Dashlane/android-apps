@@ -1,6 +1,7 @@
 package com.dashlane.endoflife
 
 import android.app.Activity
+import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.PopupAnnouncement
 import com.dashlane.announcements.displayers.SystemPopupDisplayer
 import com.dashlane.announcements.modules.EndOfLifeAnnouncementModule
@@ -9,12 +10,15 @@ import com.dashlane.login.LoginInfo
 import com.dashlane.server.api.endpoints.platforms.AppVersionStatusService
 import com.dashlane.session.Session
 import com.dashlane.ui.endoflife.EndOfLife
+import com.dashlane.ui.util.DialogHelper
 import javax.inject.Inject
 
 class EndOfLifeObserver @Inject constructor(
     private val service: AppVersionStatusService,
     private val module: EndOfLifeAnnouncementModule,
-    private val endOfLifeModuleProvider: EndOfLifeModuleProvider
+    private val endOfLifeModuleProvider: EndOfLifeModuleProvider,
+    private val dialogHelper: DialogHelper,
+    private val announcementCenter: AnnouncementCenter
 ) : EndOfLife {
 
     override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
@@ -50,9 +54,6 @@ class EndOfLifeObserver @Inject constructor(
             endOfLifeModuleProvider.createSystemPopupContent(data) ?: return
         val announcement = PopupAnnouncement(EndOfLifeAnnouncementModule.ID, content)
         endOfLifeModuleProvider.addDisplayCondition(announcement, data)
-        SystemPopupDisplayer().display(
-            activity,
-            announcement
-        )
+        SystemPopupDisplayer(dialogHelper, announcementCenter).display(activity, announcement)
     }
 }

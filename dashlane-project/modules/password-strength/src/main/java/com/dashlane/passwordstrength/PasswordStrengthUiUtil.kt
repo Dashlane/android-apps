@@ -2,6 +2,7 @@ package com.dashlane.passwordstrength
 
 import android.content.Context
 import androidx.annotation.ColorRes
+import com.dashlane.design.component.PasswordStrengthIndicator
 
 fun PasswordStrength.getShortTitle(context: Context): String =
     score.getShortTitle(context)
@@ -34,6 +35,14 @@ fun PasswordStrengthScore.getYourPasswordIsLabel(context: Context): String = whe
     PasswordStrengthScore.SOMEWHAT_GUESSABLE -> context.getString(R.string.your_password_strength_is_medium)
     PasswordStrengthScore.VERY_GUESSABLE -> context.getString(R.string.your_password_strength_is_low)
     PasswordStrengthScore.TOO_GUESSABLE -> context.getString(R.string.your_password_strength_is_very_low)
+}
+
+fun PasswordStrengthScore.getPasswordStrengthIndicator(): PasswordStrengthIndicator.Strength = when (this) {
+    PasswordStrengthScore.TOO_GUESSABLE -> PasswordStrengthIndicator.Strength.WEAKEST
+    PasswordStrengthScore.VERY_GUESSABLE -> PasswordStrengthIndicator.Strength.WEAK
+    PasswordStrengthScore.SOMEWHAT_GUESSABLE -> PasswordStrengthIndicator.Strength.ACCEPTABLE
+    PasswordStrengthScore.SAFELY_UNGUESSABLE -> PasswordStrengthIndicator.Strength.GOOD
+    PasswordStrengthScore.VERY_UNGUESSABLE -> PasswordStrengthIndicator.Strength.STRONG
 }
 
 @get:ColorRes

@@ -83,9 +83,9 @@ class LoginEmailPresenter(
         rootPresenter.showDashlaneAuthenticatorPage(secondFactor)
     }
 
-    override fun showSecretTransferQRPage() {
+    override fun showSecretTransferQRPage(email: String?) {
         rootPresenter.showProgress = false
-        rootPresenter.showSecretTransferQRPage()
+        rootPresenter.showSecretTransferQRPage(email)
     }
 
     override fun onNextClicked() {

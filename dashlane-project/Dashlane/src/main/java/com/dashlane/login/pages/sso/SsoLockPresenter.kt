@@ -14,11 +14,12 @@ import com.dashlane.authentication.sso.GetUserSsoInfoActivity
 import com.dashlane.login.LoginLogger
 import com.dashlane.login.LoginMode
 import com.dashlane.login.lock.LockManager
+import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.pages.LoginLockBasePresenter
 import com.dashlane.login.pages.LoginSwitchAccountUtil
 import com.dashlane.login.root.LoginPresenter
 import com.dashlane.login.sso.LoginSsoActivity.Companion.KEY_RESULT
-import com.dashlane.useractivity.log.usage.UsageLogConstant
+import com.dashlane.util.Toaster
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.getWindowSizeWithoutStatusBar
@@ -28,18 +29,20 @@ import kotlinx.coroutines.channels.actor
 private const val SSO_EXCEPTION_MESSAGE = "SSO session exception"
 
 class SsoLockPresenter(
+    private val loginLogger: LoginLogger,
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
     lockManager: LockManager,
-    private val loginLogger: LoginLogger
+    toaster: Toaster
 ) : LoginLockBasePresenter<SsoLockContract.DataProvider, SsoLockContract.ViewProxy>(
-    rootPresenter,
-    coroutineScope,
-    lockManager
+    rootPresenter = rootPresenter,
+    coroutineScope = coroutineScope,
+    lockManager = lockManager,
+    toaster = toaster
 ),
-SsoLockContract.Presenter {
-    override val lockTypeName: String
-        get() = UsageLogConstant.LockType.sso
+    SsoLockContract.Presenter {
+    override val lockTypeName: Int
+        get() = LockTypeManager.LOCK_TYPE_UNSPECIFIED
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private val actor = actor<suspend () -> Unit> {

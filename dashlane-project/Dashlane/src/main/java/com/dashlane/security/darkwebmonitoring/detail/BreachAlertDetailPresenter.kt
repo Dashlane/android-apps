@@ -222,8 +222,7 @@ class BreachAlertDetailPresenter @Inject constructor(
             navigator.goToGuidedPasswordChange(
                 itemId,
                 domain,
-                email,
-                origin = "tray_security_dashboard"
+                email
             )
         } else {
             
@@ -232,8 +231,7 @@ class BreachAlertDetailPresenter @Inject constructor(
 
     private fun viewAffectedAccounts() {
         navigator.goToPasswordAnalysisFromBreach(
-            breachWrapper.publicBreach.id,
-            "tray_security_dashboard"
+            breachWrapper.publicBreach.id
         )
     }
 

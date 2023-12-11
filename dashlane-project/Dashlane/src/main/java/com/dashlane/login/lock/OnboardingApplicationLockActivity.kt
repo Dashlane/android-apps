@@ -13,10 +13,10 @@ import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.login.LoginActivity
 import com.dashlane.preference.ConstantsPrefs
+import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.SecurityHelper
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
@@ -42,6 +42,15 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
     @Inject
     lateinit var biometricRecovery: BiometricRecovery
 
+    @Inject
+    lateinit var lockTypeManager: LockTypeManager
+
+    @Inject
+    lateinit var securityHelper: SecurityHelper
+
+    @Inject
+    lateinit var userPreferencesManager: UserPreferencesManager
+
     private lateinit var presenter: Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,26 +62,20 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
             return
         }
 
-        setTheme(
-            if (fromUse2fa) {
-                R.style.Theme_Dashlane_Modal
-            } else {
-                R.style.Theme_Dashlane_Login_LockedOut
-            }
-        )
-
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_intro)
 
         
-        SingletonProvider.getUserPreferencesManager()
-            .putLong(ConstantsPrefs.LOCK_POPUP_LATEST_TIMESTAMP, System.currentTimeMillis())
+        userPreferencesManager.putLong(
+            ConstantsPrefs.LOCK_POPUP_LATEST_TIMESTAMP,
+            System.currentTimeMillis()
+        )
 
         presenter = Presenter(
-            SingletonProvider.getLockManager(),
+            lockTypeManager,
             biometricAuthModule,
-            SingletonProvider.getSecurityHelper(),
+            securityHelper,
             biometricRecovery,
             nextIntent,
             fromUse2fa
@@ -242,7 +245,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
                     buildList {
                         add(nextIntent.clearTop())
 
-                        if (biometricEnabled && biometricRecovery.isFeatureAvailable) {
+                        if (biometricEnabled && biometricRecovery.isFeatureAvailable()) {
                             add(MasterPasswordResetIntroActivity.newIntent(this@run))
                         }
                     }.toTypedArray()

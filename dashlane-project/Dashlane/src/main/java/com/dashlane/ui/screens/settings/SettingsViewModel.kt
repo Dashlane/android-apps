@@ -26,6 +26,7 @@ class SettingsViewModel @Inject constructor(
     appEvents: AppEvents,
     settingsRootList: RootSettingsList,
     savedStateHandle: SavedStateHandle,
+    private val userSettingsLogRepository: UserSettingsLogRepository,
     private val logRepository: LogRepository,
     private val use2faSettingStateHolder: Use2faSettingStateHolder
 ) : ViewModel(), SettingsViewModelContract {
@@ -66,7 +67,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun logUserSettingsIfChanged() {
-        val userSettings = UserSettingsLogRepository().get()
+        val userSettings = userSettingsLogRepository.get()
 
         if (currentUserSettings == userSettings) return
 

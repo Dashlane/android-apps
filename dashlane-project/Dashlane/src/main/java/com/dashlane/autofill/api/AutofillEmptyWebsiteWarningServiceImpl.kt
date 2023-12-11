@@ -1,6 +1,6 @@
 package com.dashlane.autofill.api
 
-import com.dashlane.autofill.api.emptywebsitewarning.AutofillEmptyWebsiteWarningService
+import com.dashlane.autofill.emptywebsitewarning.AutofillEmptyWebsiteWarningService
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject

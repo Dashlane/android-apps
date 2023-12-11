@@ -1,6 +1,7 @@
 package com.dashlane.createaccount
 
 import android.view.LayoutInflater
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.AuthenticationException
 import com.dashlane.authentication.AuthenticationExpiredVersionException
 import com.dashlane.createaccount.pages.CreateAccountBaseContract
@@ -12,7 +13,6 @@ import com.dashlane.createaccount.pages.email.CreateAccountEmailContract
 import com.dashlane.createaccount.pages.email.CreateAccountEmailDataProvider
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.login.root.LoginContract
-import com.dashlane.settings.biometric.BiometricSettingsLogger
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.log.AttributionsLogDataProvider
 import com.skocken.presentation.provider.BaseDataProvider
@@ -32,7 +32,6 @@ class CreateAccountDataProvider @Inject constructor(
     private val createEmailDataProvider: Provider<CreateAccountEmailDataProvider>,
     private val createChoosePasswordDataProvider: Provider<CreateAccountChoosePasswordDataProvider>,
     private val createConfirmPasswordDataProvider: Provider<CreateAccountConfirmPasswordDataProvider>,
-    override val biometricSettingsLogger: BiometricSettingsLogger,
     private val logger: CreateAccountLogger,
     private val accountCreator: AccountCreator,
     private val createAccountSuccessIntentFactory: CreateAccountSuccessIntentFactory,
@@ -47,6 +46,7 @@ class CreateAccountDataProvider @Inject constructor(
     override suspend fun createAccount(
         username: String,
         masterPassword: ObfuscatedByteArray,
+        accountType: UserAccountInfo.AccountType,
         termsState: AccountCreator.TermsState,
         biometricEnabled: Boolean,
         resetMpEnabled: Boolean
@@ -59,11 +59,12 @@ class CreateAccountDataProvider @Inject constructor(
                 }
 
                 accountCreator.createAccount(
-                    username,
-                    masterPassword,
-                    termsState,
-                    biometricEnabled,
-                    resetMpEnabled
+                    username = username,
+                    password = masterPassword,
+                    accountType = accountType,
+                    termsState = termsState,
+                    biometricEnabled = biometricEnabled,
+                    resetMpEnabled = resetMpEnabled
                 )
 
                 val advertisingInfo =

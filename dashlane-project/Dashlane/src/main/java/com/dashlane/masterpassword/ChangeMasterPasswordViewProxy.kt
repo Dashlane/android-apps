@@ -10,6 +10,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.listeners.edittext.NoLockEditTextWatcher
+import com.dashlane.login.lock.LockManager
 import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.PasswordStrengthHorizontalIndicatorView
 import com.dashlane.passwordstrength.textColorRes
@@ -19,7 +20,7 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class ChangeMasterPasswordViewProxy(activity: Activity) :
+class ChangeMasterPasswordViewProxy(activity: Activity, lockManager: LockManager) :
     BaseViewProxy<ChangeMasterPasswordPresenter>(activity),
     ChangeMasterPasswordContract.View {
 
@@ -50,7 +51,7 @@ class ChangeMasterPasswordViewProxy(activity: Activity) :
             presenter.onTipsClicked()
         }
 
-        passwordEditText.addTextChangedListener(NoLockEditTextWatcher())
+        passwordEditText.addTextChangedListener(NoLockEditTextWatcher(lockManager))
 
         passwordEditText.addTextChangedListener {
             afterTextChanged {

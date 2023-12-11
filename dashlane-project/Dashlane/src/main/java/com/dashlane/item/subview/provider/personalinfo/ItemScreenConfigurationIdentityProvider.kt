@@ -12,14 +12,10 @@ import com.dashlane.item.subview.edit.ItemEditValueDateSubView
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.readonly.ItemReadValueDateSubView
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.ui.adapters.text.factory.toIdentityFormat
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.isNotSemanticallyNull
+import com.dashlane.util.toIdentityFormat
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.getStringId
@@ -28,16 +24,8 @@ import java.time.LocalDate
 
 class ItemScreenConfigurationIdentityProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
-    dataCounter: DataCounter,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    dataCounter,
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -59,10 +47,10 @@ class ItemScreenConfigurationIdentityProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         itemToSave as VaultItem<SyncObject.Identity>
         return itemToSave.syncObject.firstName?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.lastName?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.middleName?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.pseudo?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.birthPlace?.trim().isNotSemanticallyNull()
+            itemToSave.syncObject.lastName?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.middleName?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.pseudo?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.birthPlace?.trim().isNotSemanticallyNull()
     }
 
     private fun createHeader(
@@ -145,7 +133,7 @@ class ItemScreenConfigurationIdentityProvider(
         listener: ItemEditViewContract.View.UiUpdateListener
     ): ItemSubView<*> {
         val birthLocalDate = item.syncObject.birthDate
-        val formattedString = birthLocalDate?.toIdentityFormat()
+        val formattedString = birthLocalDate?.toIdentityFormat(context)
 
         return if (editMode) {
             ItemEditValueDateSubView(
@@ -157,7 +145,7 @@ class ItemScreenConfigurationIdentityProvider(
                 addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                     override fun onValueChanged(origin: Any, newValue: LocalDate?) {
                         val subView = this@apply
-                        subView.formattedDate = newValue?.toIdentityFormat()
+                        subView.formattedDate = newValue?.toIdentityFormat(context)
                         subView.value = newValue
                         listener.notifySubViewChanged(this@apply)
                     }

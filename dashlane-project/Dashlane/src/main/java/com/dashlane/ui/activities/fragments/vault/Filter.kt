@@ -23,10 +23,12 @@ enum class Filter(
         SyncObjectType.PHONE,
         SyncObjectType.SOCIAL_SECURITY_STATEMENT,
         SyncObjectType.SECURE_NOTE,
-        SyncObjectType.BANK_STATEMENT
+        SyncObjectType.BANK_STATEMENT,
+        SyncObjectType.PASSKEY
     ),
     FILTER_PASSWORD(
-        SyncObjectType.AUTHENTIFIANT
+        SyncObjectType.AUTHENTIFIANT,
+        SyncObjectType.PASSKEY
     ),
     FILTER_SECURE_NOTE(
         SyncObjectType.SECURE_NOTE

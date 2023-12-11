@@ -106,7 +106,7 @@ class LockManager @Inject constructor(
         setUnlockTimestampToNow()
     }
 
-    fun lock() {
+    override fun lock() {
         lockWithoutEvents()
         sendLockEvent()
     }

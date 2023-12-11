@@ -4,10 +4,15 @@ import android.content.Context
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
+import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.xml.domain.SyncObjectType
 
 class CategoryHeaderProvider(private val categoriesTitles: Map<SyncObjectType, String?>) : HeaderProvider {
-    override fun getHeaderFor(context: Context, viewTypeProvider: ViewTypeProvider): String? {
+    override fun getHeaderFor(
+        context: Context,
+        viewTypeProvider: ViewTypeProvider,
+        identityNameHolderService: IdentityNameHolderService
+    ): String? {
         if (viewTypeProvider !is VaultItemViewTypeProvider) {
             return null
         }

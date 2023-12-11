@@ -1,14 +1,15 @@
 package com.dashlane.ui.adapters.text.factory
 
 import android.content.Context
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.search.SearchField
 import com.dashlane.util.ignoreEscapedCharacter
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityUtil
+import com.dashlane.vault.util.IdentityNameHolderService
+import javax.inject.Inject
 
-class SearchListTextResolver(identityUtil: IdentityUtil = IdentityUtil(SingletonProvider.getMainDataAccessor())) :
-    DataIdentifierListTextResolver(identityUtil) {
+class SearchListTextResolver @Inject constructor(
+    identityNameHolderService: IdentityNameHolderService
+) : DataIdentifierListTextResolver(identityNameHolderService) {
 
     fun getHighlightedLine1(
         context: Context,

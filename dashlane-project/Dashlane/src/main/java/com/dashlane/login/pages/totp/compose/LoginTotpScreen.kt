@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.widgets.compose.GenericCodeInputContent
 
 @Composable
@@ -72,7 +72,7 @@ fun LoginTotpContent(
 @Preview
 @Composable
 fun LoginTotpContentPreview() {
-    DashlaneTheme(darkTheme = true) {
+    DashlanePreview {
         LoginTotpContent(
             login = "randomemail@provider.com",
             onOtpComplete = {},

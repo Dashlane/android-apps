@@ -4,11 +4,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
+import com.dashlane.csvimport.csvimport.view.CsvImportActivity
 import com.dashlane.navigation.NavigationHelper.Destination
 import com.dashlane.navigation.NavigationUriBuilder
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.usage.UsageLogCode75
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.getParcelableExtraCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,13 +42,11 @@ class CsvSendActionHandler : DashlaneActivity() {
                 val intent = if (hasSession) {
                     CsvImportActivity.newIntent(
                         this@CsvSendActionHandler,
-                        uri,
-                        UsageLogCode75.Origin.FROM_THIRD_PARTY
+                        uri
                     )
                 } else {
                     Intent(Intent.ACTION_VIEW).apply {
                         data = NavigationUriBuilder()
-                            .origin(UsageLogCode75.Origin.FROM_THIRD_PARTY.code)
                             .host(Destination.MainPath.CSV_IMPORT)
                             .appendQueryParameter(Destination.PathQueryParameters.CsvImport.URI, copiedUri().toString())
                             .build()

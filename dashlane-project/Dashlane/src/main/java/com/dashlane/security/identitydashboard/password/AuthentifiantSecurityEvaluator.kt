@@ -7,8 +7,7 @@ import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.security.identitydashboard.SecurityScore
 import com.dashlane.similarpassword.GroupOfPassword
 import com.dashlane.similarpassword.SimilarPassword
-import com.dashlane.storage.userdata.accessor.CredentialDataQuery
-import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.manager.DataIdentifierSpaceCategorization
@@ -20,8 +19,8 @@ import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.JsonSerialization
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.Cache
+import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.util.time.TimeMeasurement
 import com.dashlane.util.tryOrNull
@@ -29,59 +28,40 @@ import com.dashlane.vault.model.leakedPasswordsSet
 import com.dashlane.vault.model.toVaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
-import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @Singleton
 class AuthentifiantSecurityEvaluator @Inject constructor(
-    @ApplicationCoroutineScope
-    applicationCoroutineScope: CoroutineScope,
+    @IoCoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
     private val similarPassword: SimilarPassword,
     @Cache
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
     private val jsonSerialization: JsonSerialization,
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
-    private val urlDomainRegistryFactory: UrlDomainRegistryFactory
+    private val urlDomainRegistryFactory: UrlDomainRegistryFactory,
+    private val mainDataAccessor: MainDataAccessor
 ) {
-
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    private val actor = applicationCoroutineScope.actor<ComputeRequest>(capacity = UNLIMITED) {
-        for (request in channel) {
-            val result = computeResult(
-                getAuthentifiants(
-                    request.vaultDataQuery,
-                    request.ignoreUserLock
-                ).map { it.toAnalyzedAuthentifiant() },
-                getSecurityBreaches(
-                    request.vaultDataQuery,
-                    request.ignoreUserLock
-                ).distinctBy { it.breachId },
-                request.teamspace
-            )
-            request.callback.invoke(result)
-        }
-    }
+    private val vaultDataQuery: VaultDataQuery
+        get() = mainDataAccessor.getVaultDataQuery()
 
     suspend fun computeResult(
-        credentialDataQuery: CredentialDataQuery,
-        genericDataQuery: GenericDataQuery,
-        vaultDataQuery: VaultDataQuery,
         teamspace: Teamspace,
         ignoreUserLock: Boolean = false
-    ): Result = suspendCoroutine {
-        actor.trySend(
-            ComputeRequest(
-                credentialDataQuery,
+    ): Result = withContext(ioDispatcher) {
+        computeResult(
+            getAuthentifiants(
                 vaultDataQuery,
-                genericDataQuery,
-                teamspace,
                 ignoreUserLock
-            ) { result -> it.resume(result) }
+            ).map { it.toAnalyzedAuthentifiant() },
+            getSecurityBreaches(
+                vaultDataQuery,
+                ignoreUserLock
+            ).distinctBy { it.breachId },
+            teamspace
         )
     }
 
@@ -95,8 +75,10 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         val timeMeasurement = TimeMeasurement("SecurityEvaluator")
         val passwordsAllSpaces = getPasswordsForAllSpaces(itemsAllSpaces)
         val spaceCategorization =
-            teamspaceAccessorProvider.get()?.let { DataIdentifierSpaceCategorization(it, teamspace) }
-        val items = itemsAllSpaces.filter { spaceCategorization?.canBeDisplay(it.item.toVaultItem()) == true }
+            teamspaceAccessorProvider.get()
+                ?.let { DataIdentifierSpaceCategorization(it, teamspace) }
+        val items =
+            itemsAllSpaces.filter { spaceCategorization?.canBeDisplay(it.item.toVaultItem()) == true }
         val allDomainsUrls = items.mapNotNull { it.navigationUrl }
         timeMeasurement.tick("filter1")
         val groupOfPasswordsAllSpaces =
@@ -109,7 +91,11 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         val passwordsToMeasureStrength = toCheckAuthentifiants.map { it.password }
         timeMeasurement.tick("filter2")
         val strengthByPasswords =
-            runCatching { passwordStrengthEvaluator.associatePasswordsWithPasswordStrengthScore(passwordsToMeasureStrength) }.getOrDefault(emptyMap())
+            runCatching {
+                passwordStrengthEvaluator.associatePasswordsWithPasswordStrengthScore(
+                    passwordsToMeasureStrength
+                )
+            }.getOrDefault(emptyMap())
         timeMeasurement.tick("measureStrength")
         toCheckAuthentifiants.forEach { item ->
             item.password
@@ -120,13 +106,18 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         }
         val totalAccount = toCheckAuthentifiants.count()
         val authentifiantsByStrength =
-            getAuthentifiantsByStrength(countByPasswordStrength, toCheckAuthentifiants, strengthByPasswords)
+            getAuthentifiantsByStrength(
+                countByPasswordStrength,
+                toCheckAuthentifiants,
+                strengthByPasswords
+            )
         val authentifiantsBySimilarity = getAuthentifiantsBySimilarity(
             groupOfPasswordsAllSpaces,
             toCheckAuthentifiantsAllSpaces,
             toCheckAuthentifiants
         )
-        val authentifiantsBySecurityBreach = getAuthentifiantsBySecurityBreach(securityBreaches, toCheckAuthentifiants)
+        val authentifiantsBySecurityBreach =
+            getAuthentifiantsBySecurityBreach(securityBreaches, toCheckAuthentifiants)
         timeMeasurement.tick("mapping")
         
         val authentifiantCorrupted: Set<AnalyzedAuthentifiant>
@@ -143,7 +134,8 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         timeMeasurement.tick("loadSensitiveDomains")
         val importantCorrupted =
             authentifiantCorrupted.count {
-                sensitiveDomainCached[it.navigationUrl?.toUrlDomainOrNull()]?.isDataSensitive ?: false
+                sensitiveDomainCached[it.navigationUrl?.toUrlDomainOrNull()]?.isDataSensitive
+                    ?: false
             }
         
         val securityScore = getSecurityScore(allCorrupted, importantCorrupted, totalAccount)
@@ -176,8 +168,12 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
     ) = toCheckAuthentifiants
         .count { authentifiantToCheck ->
             authentifiantsByStrength.none { it.authentifiants.contains(authentifiantToCheck) } &&
-                    authentifiantsBySimilarity.none { it.authentifiants.contains(authentifiantToCheck) } &&
-                    authentifiantsBySecurityBreach.none { it.authentifiants.contains(authentifiantToCheck) }
+                authentifiantsBySimilarity.none { it.authentifiants.contains(authentifiantToCheck) } &&
+                authentifiantsBySecurityBreach.none {
+                    it.authentifiants.contains(
+                        authentifiantToCheck
+                    )
+                }
         }
 
     private fun getAuthentifiantsBySecurityBreach(
@@ -233,41 +229,45 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
             ?.let { GroupOfAuthentifiant(strength, it) }
     }
 
-    private fun getPasswordsForAllSpaces(itemsAllSpaces: List<AnalyzedAuthentifiant>) = itemsAllSpaces.mapNotNull {
-        it.password.takeIf { !it.isBlank() }
-    }
+    private fun getPasswordsForAllSpaces(itemsAllSpaces: List<AnalyzedAuthentifiant>) =
+        itemsAllSpaces.mapNotNull {
+            it.password.takeIf { !it.isBlank() }
+        }
 
-    private fun extractAuthentifiant(items: List<GroupOfAuthentifiant<*>>) = items.map { it.authentifiants }.flatten()
+    private fun extractAuthentifiant(items: List<GroupOfAuthentifiant<*>>) =
+        items.map { it.authentifiants }.flatten()
 
     private fun extractBreach(securityBreach: SyncObject.SecurityBreach) =
         tryOrNull { jsonSerialization.fromJson(securityBreach.content, Breach::class.java) }
 
-    private fun getAuthentifiants(vaultDataQuery: VaultDataQuery, ignoreUserLock: Boolean) =
-        
-        vaultDataQuery.queryAll(
-            vaultFilter {
-            if (ignoreUserLock) ignoreUserLock()
-            specificDataType(SyncObjectType.AUTHENTIFIANT)
-        }
-        ).mapNotNull {
-            val syncObject = it.syncObject as SyncObject.Authentifiant
+    private suspend fun getAuthentifiants(vaultDataQuery: VaultDataQuery, ignoreUserLock: Boolean) =
+        withContext(ioDispatcher) {
+            
+            vaultDataQuery.queryAll(
+                vaultFilter {
+                    if (ignoreUserLock) ignoreUserLock()
+                    specificDataType(SyncObjectType.AUTHENTIFIANT)
+                }
+            ).mapNotNull {
+                val syncObject = it.syncObject as SyncObject.Authentifiant
 
-            if (!syncObject.password.isNullOrEmpty()) {
-                syncObject
-            } else {
-                null
+                if (!syncObject.password.isNullOrEmpty()) {
+                    syncObject
+                } else {
+                    null
+                }
             }
         }
 
-    private fun getSecurityBreaches(
+    private suspend fun getSecurityBreaches(
         vaultDataQuery: VaultDataQuery,
         ignoreUserLock: Boolean
-    ): List<SyncObject.SecurityBreach> {
+    ): List<SyncObject.SecurityBreach> = withContext(ioDispatcher) {
         val filter = vaultFilter {
             if (ignoreUserLock) ignoreUserLock()
             specificDataType(SyncObjectType.SECURITY_BREACH)
         }
-        return vaultDataQuery.queryAll(filter).mapNotNull {
+        vaultDataQuery.queryAll(filter).mapNotNull {
             it.syncObject as? SyncObject.SecurityBreach
         }
     }
@@ -287,8 +287,9 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
     private fun byLogin(): Comparator<AnalyzedAuthentifiant> {
         return compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) { it.loginForUi }
     }
+
     data class Result(
-        val securityScore: Float,
+        val securityScore: SecurityScore?,
         val totalCredentials: Int,
         val totalSafeCredentials: Int,
         val authentifiantsByStrength: List<GroupOfAuthentifiant<PasswordStrengthScore>>,
@@ -303,13 +304,4 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         const val MIN_SIZE_FOR_REUSED = 2
         val MIN_STRENGTH_SCORE_FOR_DASHBOARD = PasswordStrengthScore.VERY_GUESSABLE
     }
-
-    data class ComputeRequest(
-        val credentialDataQuery: CredentialDataQuery,
-        val vaultDataQuery: VaultDataQuery,
-        val genericDataQuery: GenericDataQuery,
-        val teamspace: Teamspace,
-        val ignoreUserLock: Boolean,
-        val callback: (Result) -> Unit
-    )
 }

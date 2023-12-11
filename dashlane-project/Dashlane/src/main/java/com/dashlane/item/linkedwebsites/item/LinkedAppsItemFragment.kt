@@ -50,9 +50,11 @@ class LinkedAppsItemFragment : AbstractContentFragment() {
                 viewModel.state.collect {
                     appsAdapter.populateItems(it.viewProvider)
                     it.actionOpenApp?.let { packageName ->
-                        val launchIntent = requireActivity().packageManager.getLaunchIntentForPackage(packageName)
-                        startActivity(launchIntent)
-                        viewModel.onAppOpened()
+                        requireActivity().packageManager.getLaunchIntentForPackage(packageName)
+                            ?.let { intent ->
+                                startActivity(intent)
+                                viewModel.onAppOpened()
+                            }
                     }
                     it.actionOpenStore?.let { packageName ->
                         launchPlayStoreApplication(packageName)

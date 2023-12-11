@@ -5,6 +5,7 @@ import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
 import com.dashlane.vault.util.hasAttachments
@@ -18,6 +19,7 @@ import javax.inject.Inject
 
 class NewShareItemDataProvider @Inject constructor(
     private val mainDataAccessor: MainDataAccessor,
+    private val identityNameHolderService: IdentityNameHolderService,
     @IoCoroutineDispatcher
     private val ioDispatcher: CoroutineDispatcher,
 ) {
@@ -45,7 +47,7 @@ class NewShareItemDataProvider @Inject constructor(
     suspend fun loadAccounts(queryFilter: String? = null): List<SummaryObject.Authentifiant> {
         return deferred.await().filterIsInstance<SummaryObject.Authentifiant>().filter {
             match(it, queryFilter)
-        }.sortedWith(comparatorAlphabeticAuthentifiant())
+        }.sortedWith(comparatorAlphabeticAuthentifiant(identityNameHolderService))
     }
 
     suspend fun loadSecureNotes(queryFilter: String? = null): List<SummaryObject.SecureNote> {

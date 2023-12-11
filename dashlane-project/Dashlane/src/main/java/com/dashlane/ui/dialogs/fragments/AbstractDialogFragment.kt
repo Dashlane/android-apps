@@ -7,7 +7,6 @@ import com.dashlane.ui.fragments.BaseDialogFragment
 abstract class AbstractDialogFragment : BaseDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        retainInstance = true
         setStyle(STYLE_NO_TITLE, 0)
     }
 

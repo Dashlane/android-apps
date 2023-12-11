@@ -37,7 +37,8 @@ fun createAuthentifiant(
     passwordModificationDate: Instant? = null,
     isChecked: Boolean = false,
     linkedServices: SyncObject.Authentifiant.LinkedServices? = null,
-    isFavorite: Boolean = false
+    isFavorite: Boolean = false,
+    spaceId: String? = null
 ): VaultItem<SyncObject.Authentifiant> {
     return dataIdentifier.toVaultItem(
         SyncObject.Authentifiant {
@@ -62,6 +63,7 @@ fun createAuthentifiant(
             this.checked = isChecked
             this.linkedServices = linkedServices
             this.isFavorite = isFavorite
+            this.spaceId = spaceId
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
         }

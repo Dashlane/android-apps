@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Resources
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
 import com.dashlane.accountrecoverykey.AccountRecoveryStatus
@@ -13,7 +14,6 @@ import com.dashlane.activatetotp.DownloadAuthenticatorAppIntroActivity
 import com.dashlane.authenticator.isAuthenticatorAppInstalled
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.BiometricRecoveryIntroActivity
-import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.disabletotp.DisableTotpActivity
 import com.dashlane.disabletotp.DisableTotpEnforcedIntroActivity
 import com.dashlane.login.lock.LockManager
@@ -21,10 +21,8 @@ import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.lock.OnboardingApplicationLockActivity
 import com.dashlane.navigation.Navigator
 import com.dashlane.security.SecurityHelper
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.session.serverKeyUtf8Bytes
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.manager.TeamspaceRestrictionNotificator
 import com.dashlane.teamspaces.manager.is2FAEnforced
@@ -38,9 +36,6 @@ import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingLoadable
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clearTop
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
@@ -60,15 +55,13 @@ class SettingsSecurityApplicationLockList(
     private val dialogHelper: DialogHelper,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     private val biometricRecovery: BiometricRecovery,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     use2faSettingStateHolder: Use2faSettingStateHolder,
     activateTotpLogger: ActivateTotpLogger,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val teamspaceNotificator: TeamspaceRestrictionNotificator
 ) {
-
-    private val teamspaceNotificator = TeamspaceRestrictionNotificator()
 
     private val appLockHeader =
         SettingHeader(context.getString(R.string.settings_app_lock))
@@ -81,7 +74,7 @@ class SettingsSecurityApplicationLockList(
         override val title = context.getString(R.string.settings_use_pincode)
         override val description = context.getString(R.string.setting_use_pincode_description)
         override fun isEnable() = true
-        override fun isVisible() = true
+        override fun isVisible() = isAccountTypeMasterPassword()
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) =
             getLockType(lockManager) == LockTypeManager.LOCK_TYPE_PIN_CODE
@@ -95,35 +88,39 @@ class SettingsSecurityApplicationLockList(
                 
                 runIfBiometricRecoveryDeactivationAcknowledged(context) {
                     sensibleSettingsClickHelper.perform(context = context) {
-                        lockManager.showLockActivityToSetPinCode(context, false)
+                        lockManager.showLockActivityToSetPinCode(context)
                     }
                 }
             } else {
                 
-
-                bySessionUsageLogRepository[sessionManager.session]?.apply {
-                    enqueue(
-                        UsageLogCode35(
-                            type = UsageLogConstant.ViewType.pin,
-                            action = UsageLogConstant.ActionType.setupUseMasterPasswordSelected
-                        )
-                    )
-                    enqueue(
-                        UsageLogCode35(
-                            type = UsageLogConstant.ViewType.settings,
-                            action = UsageLogConstant.ActionType.usePinCodeOff
-                        )
-                    )
-                    enqueue(
-                        UsageLogCode35(
-                            type = UsageLogConstant.ViewType.settings,
-                            action = UsageLogConstant.ActionType.storeMasterPasswordOff
-                        )
-                    )
-                }
                 lockManager.setLockType(LockTypeManager.LOCK_TYPE_MASTER_PASSWORD)
                 listener?.onSettingsInvalidate()
             }
+        }
+
+        private fun isAccountTypeMasterPassword(): Boolean {
+            return sessionManager.session?.username
+                ?.let { username -> userAccountStorage[username]?.accountType }
+                .let { accountType -> accountType is UserAccountInfo.AccountType.MasterPassword }
+        }
+    }
+
+    private val changePinCodeItem = object : SettingItem, SettingChange.Listenable {
+
+        override var listener: SettingChange.Listener? = null
+        override val id = "pin-change"
+        override val header = appLockHeader
+        override val title = context.getString(R.string.settings_change_pincode)
+        override val description = context.getString(R.string.settings_change_pincode_description)
+        override fun isEnable() = true
+        override fun isVisible() = isPinLockEnabled()
+        override fun onClick(context: Context) = sensibleSettingsClickHelper.perform(context = context) {
+            lockManager.showLockActivityToSetPinCode(context)
+        }
+
+        private fun isPinLockEnabled(): Boolean {
+            val accountType = sessionManager.session?.username?.let { username -> userAccountStorage[username]?.accountType }
+            return (accountType is UserAccountInfo.AccountType.InvisibleMasterPassword || lockManager.getLockType() == LockTypeManager.LOCK_TYPE_PIN_CODE)
         }
     }
 
@@ -179,30 +176,10 @@ class SettingsSecurityApplicationLockList(
         }
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
-            val session = sessionManager.session ?: return
             sensibleSettingsClickHelper.perform(
                 context = context,
                 masterPasswordRecommended = enable
-            ) {
-                val ulAction = if (enable) {
-                    sessionCredentialsSaver.saveServerKey(
-                        serverKey = session.appKey.serverKeyUtf8Bytes?.use(ObfuscatedByteArray::toByteArray),
-                        localKey = session.localKey,
-                        username = session.username
-                    )
-                    UsageLogConstant.ActionType.disable2FAOn
-                } else {
-                    sessionCredentialsSaver.removeServerKey(session.username)
-                    UsageLogConstant.ActionType.disable2FAOff
-                }
-                bySessionUsageLogRepository[sessionManager.session]
-                    ?.enqueue(
-                        UsageLogCode35(
-                            type = UsageLogConstant.ViewType.settings,
-                            action = ulAction
-                        )
-                    )
-            }
+            ) {}
         }
 
         private fun isOtp2() = sessionManager.session
@@ -236,13 +213,6 @@ class SettingsSecurityApplicationLockList(
                 masterPasswordRecommended = enable
             ) {
                 lockManager.setItemUnlockableByPinOrFingerprint(enable)
-                bySessionUsageLogRepository[sessionManager.session]
-                    ?.enqueue(
-                        UsageLogCode35(
-                            type = "pin",
-                            action = if (enable) "usePinToUnlockItemsON" else "usePinToUnlockItemsOFF"
-                        )
-                    )
             }
         }
     }
@@ -292,17 +262,6 @@ class SettingsSecurityApplicationLockList(
                 context = context,
                 masterPasswordRecommended = !enable
             ) {
-                bySessionUsageLogRepository[sessionManager.session]
-                    ?.enqueue(
-                        UsageLogCode35(
-                            type = UsageLogConstant.ViewType.settings,
-                            action = if (enable) {
-                                UsageLogConstant.ActionType.lockOnExitOn
-                            } else {
-                                UsageLogConstant.ActionType.lockOnExitOff
-                            }
-                        )
-                    )
                 lockManager.setLockOnExit(enable)
             }
         }
@@ -353,26 +312,6 @@ class SettingsSecurityApplicationLockList(
                         .takeIf { it > 0 }
                         ?.let { Duration.ofSeconds(it.toLong()) }
                     lockManager.lockTimeout = timeOutValue
-                    (
-                        when (timeOutValue) {
-                        null -> UsageLogConstant.ActionType.autoLockTimeNever
-                        Duration.ofSeconds(5) -> UsageLogConstant.ActionType.autoLockTime5s
-                        Duration.ofSeconds(30) -> UsageLogConstant.ActionType.autoLockTime30s
-                        Duration.ofMinutes(1) -> UsageLogConstant.ActionType.autoLockTime1m
-                        Duration.ofMinutes(3) -> UsageLogConstant.ActionType.autoLockTime3m
-                        Duration.ofMinutes(5) -> UsageLogConstant.ActionType.autoLockTime5m
-                        Duration.ofMinutes(15) -> UsageLogConstant.ActionType.autoLockTime15m
-                        else -> null
-                    }
-                    )?.let {
-                        bySessionUsageLogRepository[sessionManager.session]
-                            ?.enqueue(
-                                UsageLogCode35(
-                                    type = UsageLogConstant.ViewType.settings,
-                                    action = it
-                                )
-                            )
-                    }
                     listener?.onSettingsInvalidate()
                 }
         }
@@ -396,7 +335,7 @@ class SettingsSecurityApplicationLockList(
                 context.getString(R.string.account_recovery_setting_description)
 
             override fun isEnable() = true
-            override fun isVisible() = biometricRecovery.isFeatureAvailable
+            override fun isVisible() = biometricRecovery.isFeatureAvailable()
 
             override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
 
@@ -411,10 +350,7 @@ class SettingsSecurityApplicationLockList(
                         .setTitle(R.string.account_recovery_deactivation_title)
                         .setMessage(R.string.account_recovery_deactivation_message)
                         .setPositiveButton(R.string.account_recovery_deactivation_positive_cta) { _, _ ->
-                            biometricRecovery.setFeatureEnabled(
-                                false,
-                                UsageLogConstant.ViewType.settings
-                            )
+                            biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
                             listener?.onSettingsInvalidate()
                         }
                         .setNegativeButton(
@@ -435,7 +371,7 @@ class SettingsSecurityApplicationLockList(
                                 .clearTop()
                         )
                     } else {
-                        biometricRecovery.setFeatureEnabled(true, UsageLogConstant.ViewType.settings)
+                        biometricRecovery.setBiometricRecoveryFeatureEnabled(true)
                     }
                 }
             }
@@ -447,8 +383,13 @@ class SettingsSecurityApplicationLockList(
             override val id = "account-recovery"
             override val header = appLockHeader
             override val title = context.getString(R.string.account_recovery_key_setting_title)
-            override val description get() =
-                if (checkStatus()?.enabled == true) context.getString(R.string.account_recovery_key_setting_description_on) else context.getString(R.string.account_recovery_key_setting_description_off)
+            override val description
+                get() =
+                    if (checkStatus()?.enabled == true) {
+                        context.getString(R.string.account_recovery_key_setting_description_on)
+                    } else {
+                        context.getString(R.string.account_recovery_key_setting_description_off)
+                    }
 
             override fun isEnable() = true
             override fun isVisible() = checkStatus()?.visible ?: false
@@ -473,7 +414,7 @@ class SettingsSecurityApplicationLockList(
                 .setTitle(R.string.account_recovery_biometric_deactivation_title)
                 .setMessage(R.string.account_recovery_biometric_deactivation_message)
                 .setPositiveButton(R.string.account_recovery_biometric_deactivation_positive_cta) { _, _ ->
-                    biometricRecovery.setFeatureEnabled(false, UsageLogConstant.ViewType.settings)
+                    biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
                     action()
                 }
                 .setNegativeButton(
@@ -559,6 +500,7 @@ class SettingsSecurityApplicationLockList(
 
     fun getAll() = listOf(
         lockPinCodeItem,
+        changePinCodeItem,
         lockFingerprintItem,
         use2faItem,
         biometricRecoveryItem,

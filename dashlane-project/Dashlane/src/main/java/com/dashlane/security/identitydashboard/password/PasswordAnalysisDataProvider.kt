@@ -3,11 +3,8 @@ package com.dashlane.security.identitydashboard.password
 import com.dashlane.debug.DaDaDa
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.manager.TeamspaceManagerWeakListener
 import com.dashlane.teamspaces.model.Teamspace
@@ -29,12 +26,6 @@ class PasswordAnalysisDataProvider @Inject constructor(
 PasswordAnalysisContract.DataProvider,
     TeamspaceManager.Listener {
 
-    private val credentialDataQuery: CredentialDataQuery
-        get() = mainDataAccessor.getCredentialDataQuery()
-    private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
-    private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
     private val dataSaver: DataSaver
         get() = mainDataAccessor.getDataSaver()
 
@@ -76,11 +67,6 @@ PasswordAnalysisContract.DataProvider,
         val teamspace = sessionManager.session?.let {
             teamspaceRepository.getTeamspaceManager(it)?.current
         } ?: return null
-        return authentifiantSecurityEvaluator.computeResult(
-            credentialDataQuery,
-            genericDataQuery,
-            vaultDataQuery,
-            teamspace
-        )
+        return authentifiantSecurityEvaluator.computeResult(teamspace)
     }
 }

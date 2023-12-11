@@ -49,13 +49,19 @@ import com.dashlane.item.subview.view.SpinnerInputProvider
 import com.dashlane.item.subview.view.SpinnerNoDefaultInputProvider
 import com.dashlane.item.subview.view.SwitchInputProvider
 import com.dashlane.item.subview.view.TextInputLayoutProvider
+import com.dashlane.login.lock.LockManager
+import com.dashlane.util.Toaster
 import com.dashlane.util.addOnFieldVisibilityToggleListener
 import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrDrawable
 import com.dashlane.util.getThemeAttrResourceId
 
-class ViewFactory(private val activity: AppCompatActivity) {
+class ViewFactory(
+    private val activity: AppCompatActivity,
+    private val toaster: Toaster,
+    private val lockManager: LockManager
+) {
     fun makeView(itemSubView: ItemSubView<*>): View {
         return when (itemSubView) {
             is ItemLinkedServicesSubView -> createLinkedServicesTextSubView(itemSubView)
@@ -66,15 +72,11 @@ class ViewFactory(private val activity: AppCompatActivity) {
             is ItemReadValueDateSubView -> createReadDateSubview(itemSubView)
             is ItemEditValueDateSubView -> createEditDateSubview(itemSubView)
             is ItemMetaReadValueDateTimeSubView -> createMetaDateTimeSubview(itemSubView)
-            is ItemEditPasswordWithStrengthSubView -> createEditPasswordWithStrengthSubview(
-                itemSubView
-            )
+            is ItemEditPasswordWithStrengthSubView -> createEditPasswordWithStrengthSubview(itemSubView)
             is ItemEditValueBooleanSubView -> createEditValueBooleanSubview(itemSubView)
             is ItemReadValueBooleanSubView -> createReadValueBooleanSubview(itemSubView)
             is ItemEditValueListSubView -> createEditValueListSubview(itemSubView)
-            is ItemEditValueListNonDefaultSubView -> createEditValueListNonDefaultSubview(
-                itemSubView
-            )
+            is ItemEditValueListNonDefaultSubView -> createEditValueListNonDefaultSubview(itemSubView)
             is ItemReadValueListSubView -> createReadValueListSubview(itemSubView)
             is ItemPasswordSafetySubView -> createPasswordSafetySubview(itemSubView)
             is ItemEditValueTextSubView -> createEditValueTextSubView(itemSubView)
@@ -97,6 +99,7 @@ class ViewFactory(private val activity: AppCompatActivity) {
     private fun createReadValueTextSubView(item: ItemReadValueTextSubView) =
         TextInputLayoutProvider.create(
             activity,
+            lockManager,
             item.header,
             item.value,
             protected = item.protected,
@@ -111,8 +114,15 @@ class ViewFactory(private val activity: AppCompatActivity) {
 
     private fun createEditValueTextSubView(item: ItemEditValueTextSubView) =
         TextInputLayoutProvider.create(
-            activity, item.hint, item.value, true, item.protected,
-            item.allowReveal, item.suggestions, multiline = item.multiline,
+            activity,
+            lockManager,
+            item.hint,
+            item.value,
+            true,
+            item.protected,
+            item.allowReveal,
+            item.suggestions,
+            multiline = item.multiline,
             coloredCharacter = item.coloredCharacter
         ).apply {
             editText!!.addTextChangedListener {
@@ -131,6 +141,7 @@ class ViewFactory(private val activity: AppCompatActivity) {
     private fun createReadValueNumberSubView(item: ItemReadValueNumberSubView) =
         TextInputLayoutProvider.create(
             activity,
+            lockManager,
             item.header,
             item.value,
             protected = item.protected
@@ -145,6 +156,7 @@ class ViewFactory(private val activity: AppCompatActivity) {
     private fun createEditValueNumberSubView(item: ItemEditValueNumberSubView) =
         TextInputLayoutProvider.create(
             activity,
+            lockManager,
             item.hint,
             item.value,
             true,
@@ -177,7 +189,7 @@ class ViewFactory(private val activity: AppCompatActivity) {
         }
 
     private fun createItemReadValueRawSubView(item: ItemReadValueRawSubView) =
-        EditTextInputProvider.create(activity, item.hint, item.value, item.textSize, false).apply {
+        EditTextInputProvider.create(activity, lockManager, item.hint, item.value, item.textSize, false).apply {
             addTextChangedListener {
                 afterTextChanged {
                     val newValue = it.toString()
@@ -187,7 +199,7 @@ class ViewFactory(private val activity: AppCompatActivity) {
         }
 
     private fun createItemEditValueRawSubView(item: ItemEditValueRawSubView) =
-        EditTextInputProvider.create(activity, item.hint, item.value, item.textSize, true).apply {
+        EditTextInputProvider.create(activity, lockManager, item.hint, item.value, item.textSize, true).apply {
             addTextChangedListener {
                 afterTextChanged {
                     val newValue = it.toString()
@@ -200,13 +212,13 @@ class ViewFactory(private val activity: AppCompatActivity) {
         SwitchInputProvider.create(activity, item.header, item.description, item.value, false)
 
     private fun createEditSpaceSubView(item: ItemEditSpaceSubView) =
-        SpaceSelectorProvider.create(activity, item.value, item.values, true, item) { selectedIndex ->
+        SpaceSelectorProvider.create(activity, item.value, item.values, true, item, toaster) { selectedIndex ->
             val newValue = item.values[selectedIndex]
             item.notifyValueChanged(newValue)
         }
 
     private fun createReadSpaceSubView(item: ItemReadSpaceSubView) =
-        SpaceSelectorProvider.create(activity, item.value, item.values, false, null)
+        SpaceSelectorProvider.create(activity, item.value, item.values, false, null, toaster)
 
     private fun createEditValueListSubview(item: ItemEditValueListSubView) =
         SpinnerInputProvider.create(activity, item.title, item.value, item.values, true, item) { selectedIndex ->
@@ -215,7 +227,7 @@ class ViewFactory(private val activity: AppCompatActivity) {
         }
 
     private fun createEditValueListNonDefaultSubview(item: ItemEditValueListNonDefaultSubView) =
-        SpinnerNoDefaultInputProvider.create(activity, item.title, item.value, item.values) { newValue ->
+        SpinnerNoDefaultInputProvider.create(activity, lockManager, item.title, item.value, item.values) { newValue ->
             item.notifyValueChanged(newValue)
         }
 
@@ -228,10 +240,10 @@ class ViewFactory(private val activity: AppCompatActivity) {
     }
 
     private fun createReadDateSubview(item: ItemReadValueDateSubView) =
-        DatePickerInputProvider.create(activity, item.hint, item.formattedDate)
+        DatePickerInputProvider.create(activity, lockManager, item.hint, item.formattedDate)
 
     private fun createEditDateSubview(item: ItemEditValueDateSubView) =
-        DatePickerInputProvider.create(activity, item.hint, item.formattedDate).apply {
+        DatePickerInputProvider.create(activity, lockManager, item.hint, item.formattedDate).apply {
             DatePickerInputProvider.setClickListener(
                 activity = activity,
                 textInputLayout = this,

@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.biometric.BiometricManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.WorkManager
+import com.dashlane.util.notification.NotificationHelper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -70,6 +71,12 @@ object ApplicationContextModule {
     @Provides
     fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager? =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+
+    @Provides
+    fun provideNotificationHelper(
+        @ApplicationContext context: Context,
+        notificationManager: NotificationManager?
+    ): NotificationHelper = NotificationHelper(context, notificationManager)
 
     @Provides
     fun provideClipboardManager(@ApplicationContext context: Context): ClipboardManager? =

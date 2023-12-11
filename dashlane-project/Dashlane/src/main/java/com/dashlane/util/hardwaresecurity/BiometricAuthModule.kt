@@ -10,51 +10,56 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
+import com.dashlane.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.DashlaneIntent
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.screens.activities.onboarding.hardwareauth.HardwareAuthActivationActivity
 import com.dashlane.ui.screens.activities.onboarding.hardwareauth.OnboardingHardwareAuthActivity
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.singleTop
 import dagger.Lazy
+import java.security.ProviderException
+import java.util.concurrent.Executor
+import javax.crypto.Cipher
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import java.security.ProviderException
-import java.util.concurrent.Executor
-import javax.crypto.Cipher
-import javax.inject.Inject
 
+@Singleton
 class BiometricAuthModule @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val sessionManager: SessionManager,
     private val cryptoObjectHelper: CryptoObjectHelper,
     private val biometricRecovery: Lazy<BiometricRecovery>,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val accountStorage: UserAccountStorage,
-    private val biometricManager: BiometricManager
+    private val userAccountStorage: UserAccountStorage,
+    private val biometricManager: BiometricManager,
+    private val developerInfoLogger: DeveloperInfoLogger
 ) {
 
-    var referrer: String? = null
-        get() = if (field == null) UsageLogConstant.LockSubAction.fromApp else field
-    val logger = AuthModuleLogger(ConstantsPrefs.USE_GOOGLE_FINGERPRINT, sessionManager, bySessionUsageLogRepository)
     private var biometricPrompt: BiometricPrompt? = null
 
     private var executor: CancellableHandlerExecutor? = null
 
-    private val sso get() = sessionManager.session?.let { accountStorage[it.username]?.sso } == true
+    private fun isSSO(): Boolean {
+        return sessionManager.session?.let { userAccountStorage[it.username]?.sso } == true
+    }
 
-    fun isHardwareSupported(): Boolean = biometricManager.isCanAuthenticateHardwareExists(BIOMETRIC_STRONG or BIOMETRIC_WEAK)
+    private fun isMPLess(): Boolean {
+        return sessionManager.session?.let { userAccountStorage[it.username]?.accountType } is UserAccountInfo.AccountType.InvisibleMasterPassword
+    }
+
+    fun isHardwareSupported(): Boolean =
+        biometricManager.isCanAuthenticateHardwareExists(BIOMETRIC_STRONG or BIOMETRIC_WEAK)
 
     fun getBiometricActivationStatus(): BiometricActivationStatus {
         val enabledStrong = biometricManager.isCanAuthenticateSuccess(BIOMETRIC_STRONG)
@@ -90,16 +95,18 @@ class BiometricAuthModule @Inject constructor(
         cryptoObjectHelper.deleteEncryptionKey(keyStoreKey = CryptoObjectHelper.BiometricsSeal(username))
     }
 
-    fun logRegisterBiometrics() {
-        logger.logUsageStartRegisterProcess()
-    }
-
     fun startHardwareAuthentication(activity: FragmentActivity): Flow<Result> {
         val username = sessionManager.session?.userId ?: return emptyFlow()
 
+        val negativeText = when {
+            isSSO() -> R.string.sso_lock_use_sso
+            isMPLess() -> R.string.biometric_prompt_pin_fallback
+            else -> R.string.fragment_lock_pin_button_use_master_password
+        }
+
         val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(activity.getString(R.string.window_biometric_unlock_hardware_module_google_fp_title))
-            .setNegativeButtonText(activity.getString(if (sso) R.string.sso_lock_use_sso else R.string.fragment_lock_pin_button_use_master_password))
+            .setNegativeButtonText(activity.getString(negativeText))
             .setConfirmationRequired(false)
             .setSubtitle(username)
 
@@ -120,9 +127,12 @@ class BiometricAuthModule @Inject constructor(
         val biometricActivationStatus = getBiometricActivationStatus()
         return when (val biometricStatus = checkBiometricStatus(username, biometricActivationStatus)) {
             is Result.BiometricEnrolled -> {
-                val promptInfo = promptInfoBuilder.setAllowedAuthenticators(getPromptAuthenticator(biometricActivationStatus)).build()
+                val promptInfo =
+                    promptInfoBuilder.setAllowedAuthenticators(getPromptAuthenticator(biometricActivationStatus))
+                        .build()
                 startBiometricPrompt(activity, promptInfo, biometricStatus.cipher, cancelOnNegativeAction)
             }
+
             else -> flowOf(biometricStatus)
         }
     }
@@ -149,22 +159,19 @@ class BiometricAuthModule @Inject constructor(
     fun enableFeature() {
         if (!isHardwareSetUp()) return
         userPreferencesManager.putBoolean(ConstantsPrefs.USE_GOOGLE_FINGERPRINT, true)
-        logger.logUsageStartFeature()
     }
 
     fun disableFeature() {
         if (!isHardwareSetUp()) return
         userPreferencesManager.putBoolean(ConstantsPrefs.USE_GOOGLE_FINGERPRINT, false)
-        logger.logUsageStopFeature()
     }
 
     fun startOnboarding(context: Context) {
-        if (biometricRecovery.get().isFeatureAvailable) {
+        if (biometricRecovery.get().isFeatureAvailable()) {
             val successIntent = MasterPasswordResetIntroActivity.newIntent(context)
             context.startActivity(HardwareAuthActivationActivity.newIntent(context, successIntent).singleTop())
         } else {
             context.startActivity(DashlaneIntent.newInstance(context, OnboardingHardwareAuthActivity::class.java))
-            logger.logUsageStartOnboarding()
         }
     }
 
@@ -183,6 +190,7 @@ class BiometricAuthModule @Inject constructor(
         return when (biometricActivationStatus) {
             BiometricActivationStatus.NOT_ENABLED,
             BiometricActivationStatus.INSUFFICIENT_STRENGTH -> -1
+
             BiometricActivationStatus.ENABLED_WEAK -> BIOMETRIC_WEAK
             BiometricActivationStatus.ENABLED_STRONG -> BIOMETRIC_STRONG
         }
@@ -196,7 +204,17 @@ class BiometricAuthModule @Inject constructor(
         return when (biometricActivationStatus) {
             BiometricActivationStatus.ENABLED_WEAK -> Result.BiometricEnrolled(null)
             BiometricActivationStatus.ENABLED_STRONG -> {
-                val cipherResult = cryptoObjectHelper.getEncryptCipher(CryptoObjectHelper.BiometricsSeal(username))
+                val cipherResult =
+                    cryptoObjectHelper.getEncryptCipher(CryptoObjectHelper.BiometricsSeal(username)) { action, message, exceptionType ->
+                        
+                        
+                        
+                        developerInfoLogger.log(
+                            action = action,
+                            message = message,
+                            exceptionType = exceptionType
+                        )
+                    }
                 return if (cipherResult !is CryptoObjectHelper.CipherInitResult.Success) {
                     when (cipherResult) {
                         is CryptoObjectHelper.CipherInitResult.InvalidatedKeyError -> {
@@ -204,12 +222,14 @@ class BiometricAuthModule @Inject constructor(
                             
                             Result.SecurityHasChanged
                         }
+
                         else -> Result.BiometricNotEnrolled
                     }
                 } else {
                     Result.BiometricEnrolled(cipherResult.cipher)
                 }
             }
+
             else -> Result.BiometricNotEnrolled
         }
     }
@@ -230,29 +250,39 @@ class BiometricAuthModule @Inject constructor(
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
                     
-                    sessionManager.session?.let { logger.logUsageAuthFailure(referrer) }
-                    
                     when (errorCode) {
                         BiometricPrompt.ERROR_NEGATIVE_BUTTON -> {
                             if (cancelOnNegativeAction) {
                                 trySendBlocking(Result.Canceled(false))
                             } else {
-                                trySendBlocking(Result.UseMasterPasswordClicked)
+                                trySendBlocking(Result.UserCancelled)
                             }
                         }
+
                         BiometricPrompt.ERROR_USER_CANCELED -> trySendBlocking(Result.Canceled(true))
                         BiometricPrompt.ERROR_TIMEOUT -> trySendBlocking(Result.Canceled(false))
                         BiometricPrompt.ERROR_LOCKOUT, BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> {
+                            
                             biometricPrompt?.cancelAuthentication()
-                            trySendBlocking(Result.Error(BiometricError.HardwareLockout(errorCode, errString.toString())))
+                            trySendBlocking(
+                                Result.Error(
+                                    BiometricError.HardwareLockout(
+                                        errorCode,
+                                        errString.toString()
+                                    )
+                                )
+                            )
                         }
+
                         BiometricPrompt.ERROR_CANCELED -> {
                             
                         }
+
                         BiometricPrompt.ERROR_NO_BIOMETRICS -> {
                             
                             trySendBlocking(Result.BiometricNotEnrolled)
                         }
+
                         else -> {
                             trySendBlocking(Result.Error(BiometricError.HardwareError(errorCode, errString.toString())))
                         }
@@ -269,10 +299,16 @@ class BiometricAuthModule @Inject constructor(
 
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    logger.logUsageAuthSuccess(referrer)
                     
                     val cryptoObject = result.cryptoObject
                     if (cipher != null && cryptoObject == null) {
+                        
+                        
+                        
+                        developerInfoLogger.log(
+                            action = "null_crypto_object_on_strong_biometrics",
+                            message = "Biometric authentication failed"
+                        )
                         trySendBlocking(Result.AuthenticationFailure)
                     } else if (cryptoObject != null) {
                         trySendBlocking(Result.StrongBiometricSuccess(cryptoObject))
@@ -318,7 +354,7 @@ class BiometricAuthModule @Inject constructor(
 
         object SecurityHasChanged : Result()
 
-        object UseMasterPasswordClicked : Result()
+        object UserCancelled : Result()
     }
 
     sealed class BiometricError {

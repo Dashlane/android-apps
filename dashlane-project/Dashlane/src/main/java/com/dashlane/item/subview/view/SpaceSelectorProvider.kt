@@ -11,9 +11,10 @@ import com.dashlane.R
 import com.dashlane.item.subview.ValueChangeManager
 import com.dashlane.item.subview.edit.ItemEditSpaceSubView
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.ui.adapters.TeamspaceSpinnerAdapter
-import com.dashlane.ui.util.SpinnerUtil
+import com.dashlane.teamspaces.adapter.TeamspaceSpinnerAdapter
+import com.dashlane.teamspaces.adapter.SpinnerUtil
 import com.dashlane.ui.widgets.Notificator
+import com.dashlane.util.Toaster
 
 object SpaceSelectorProvider {
 
@@ -23,6 +24,7 @@ object SpaceSelectorProvider {
         values: List<Teamspace>,
         editable: Boolean = false,
         item: ItemEditSpaceSubView?,
+        toaster: Toaster,
         selectionAction: ((Int) -> Unit)? = null
     ): LinearLayout {
         val view = SpinnerInputProvider.create(
@@ -37,10 +39,20 @@ object SpaceSelectorProvider {
         )
 
         if (editable && item != null) {
-            updateEnableState(activity, view, item.changeEnable)
+            updateEnableState(
+                activity = activity,
+                view = view,
+                enable = item.changeEnable,
+                toaster = toaster
+            )
             item.enableValueChangeManager.addValueChangedListener(object : ValueChangeManager.Listener<Boolean> {
                 override fun onValueChanged(origin: Any, newValue: Boolean) {
-                    updateEnableState(activity, view, newValue)
+                    updateEnableState(
+                        activity = activity,
+                        view = view,
+                        enable = newValue,
+                        toaster = toaster
+                    )
                 }
             })
         }
@@ -48,23 +60,34 @@ object SpaceSelectorProvider {
         return view
     }
 
-    private fun updateEnableState(activity: FragmentActivity, view: LinearLayout, enable: Boolean) {
-        foundSpinner(view)?.let { setEnable(it, enable, activity) }
+    private fun updateEnableState(activity: FragmentActivity, view: LinearLayout, enable: Boolean, toaster: Toaster) {
+        foundSpinner(view)?.let {
+            setEnable(
+                activity = activity,
+                spinner = it,
+                editable = enable,
+                toaster = toaster
+            )
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setEnable(it: Spinner, editable: Boolean, activity: FragmentActivity) {
-        val adapter = it.adapter as TeamspaceSpinnerAdapter
+    private fun setEnable(activity: FragmentActivity, spinner: Spinner, editable: Boolean, toaster: Toaster) {
+        val adapter = spinner.adapter as TeamspaceSpinnerAdapter
 
         if (editable) {
-            SpinnerUtil.enableSpinner(it)
+            SpinnerUtil.enableSpinner(spinner)
             adapter.isDisabled = false
         } else {
-            SpinnerUtil.disableSpinner(it)
-            it.isEnabled = true
-            it.setOnTouchListener { _, motionEvent ->
+            SpinnerUtil.disableSpinner(spinner)
+            spinner.isEnabled = true
+            spinner.setOnTouchListener { _, motionEvent ->
                 if (motionEvent.action == MotionEvent.ACTION_UP) {
-                    showDisabledTeamspaceNotification(activity, adapter.getItem(it.selectedItemPosition)!!)
+                    showDisabledTeamspaceNotification(
+                        activity = activity,
+                        teamspace = adapter.getItem(spinner.selectedItemPosition)!!,
+                        toaster = toaster
+                    )
                 }
                 true
             }
@@ -83,11 +106,16 @@ object SpaceSelectorProvider {
         return null
     }
 
-    private fun showDisabledTeamspaceNotification(activity: FragmentActivity, teamspace: Teamspace) {
+    private fun showDisabledTeamspaceNotification(activity: FragmentActivity, teamspace: Teamspace, toaster: Toaster) {
         val message = activity.getString(
             R.string.teamspace_forced_categorisation_restricted_domain_with_spacename,
             teamspace.teamName
         )
-        Notificator.customErrorDialogMessage(activity, null, message, false)
+        Notificator(toaster).customErrorDialogMessage(
+            activity = activity,
+            topic = null,
+            message = message,
+            shouldCloseCaller = false
+        )
     }
 }

@@ -2,8 +2,14 @@ package com.dashlane.accountrecoverykey.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
 import com.dashlane.core.DataSync
+import com.dashlane.hermes.LogRepository
+import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.BrowseComponent
+import com.dashlane.hermes.generated.definitions.DeleteKeyReason
+import com.dashlane.preference.UserPreferencesManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +23,9 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AccountRecoveryKeyDetailSettingViewModel @Inject constructor(
+    private val userPreferencesManager: UserPreferencesManager,
     private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
+    private val logRepository: LogRepository,
     private val dataSync: DataSync,
 ) : ViewModel() {
 
@@ -25,9 +33,14 @@ class AccountRecoveryKeyDetailSettingViewModel @Inject constructor(
         MutableStateFlow<AccountRecoveryKeyDetailSettingState>(AccountRecoveryKeyDetailSettingState.Initial(AccountRecoveryKeyDetailSettingData()))
     val uiState = stateFlow.asStateFlow()
 
+    init {
+        logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY)
+    }
+
     fun viewStarted() {
         viewModelScope.launch {
-            stateFlow.emit(AccountRecoveryKeyDetailSettingState.Loading(stateFlow.value.data))
+            val accountType = UserAccountInfo.AccountType.fromString(userPreferencesManager.accountType)
+            stateFlow.emit(AccountRecoveryKeyDetailSettingState.Loading(stateFlow.value.data.copy(accountType = accountType)))
             accountRecoveryKeyRepository.getAccountRecoveryStatusAsync()
                 .await()
                 .onSuccess { stateFlow.emit(AccountRecoveryKeyDetailSettingState.DetailedSettings(stateFlow.value.data.copy(enabled = it.enabled))) }
@@ -39,6 +52,7 @@ class AccountRecoveryKeyDetailSettingViewModel @Inject constructor(
             if (checked) {
                 stateFlow.emit(AccountRecoveryKeyDetailSettingState.GoToIntro(stateFlow.value.data))
             } else {
+                logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY_DISABLE)
                 stateFlow.emit(AccountRecoveryKeyDetailSettingState.ConfirmationDisableDialog(stateFlow.value.data.copy(isDialogDisplayed = true)))
             }
         }
@@ -46,7 +60,7 @@ class AccountRecoveryKeyDetailSettingViewModel @Inject constructor(
 
     fun confirmDisable() {
         flow<AccountRecoveryKeyDetailSettingState> {
-            accountRecoveryKeyRepository.disableRecoveryKey()
+            accountRecoveryKeyRepository.disableRecoveryKey(DeleteKeyReason.SETTING_DISABLED)
             dataSync.awaitSync()
             accountRecoveryKeyRepository.getAccountRecoveryStatusAsync().await()
                 .onSuccess {

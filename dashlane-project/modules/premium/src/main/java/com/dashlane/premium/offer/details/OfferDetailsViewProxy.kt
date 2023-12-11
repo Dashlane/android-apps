@@ -63,8 +63,8 @@ internal class OfferDetailsViewProxy(
         setupToolbar(activity as AppCompatActivity, viewModel.titleResId)
 
         fragment.lifecycleScope.launch {
-            viewModel.currentPageViewFlow.collect { (page, fromAutofill) ->
-                activity.setCurrentPageView(page, fromAutofill)
+            viewModel.currentPageViewFlow.collect { page ->
+                activity.setCurrentPageView(page)
             }
         }
         fragment.lifecycleScope.launch {
@@ -166,19 +166,16 @@ internal class OfferDetailsViewProxy(
                             offerToken = product.priceInfo.subscriptionOfferToken,
                             updateReference = product.update
                         )
-                        val billingServiceResult =
-                            viewModel.onBillingServiceResult(serviceResult, product)
-                        if (billingServiceResult != null) {
+                        val purchase = viewModel.onBillingServiceResult(serviceResult, product)
+                        if (purchase != null) {
                             
-                            val (purchase, userLockedOut) = billingServiceResult
                             viewModel.purchaseCheckingCoordinator.openPlayStorePurchaseChecking(
                                 context = context,
                                 sku = product.productId,
                                 currencyCode = priceInfo.currencyCode,
                                 price = priceInfo.baseOfferPriceValue,
                                 purchaseOriginalJson = purchase.originalJson,
-                                signature = purchase.signature,
-                                userLockedOut = userLockedOut
+                                signature = purchase.signature
                             )
                             activity.finish()
                         }

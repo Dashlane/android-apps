@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dashlane.core.premium.PremiumType.Type;
-import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.preference.ConstantsPrefs;
 import com.dashlane.preference.UserPreferencesManager;
 import com.dashlane.premium.enddate.FormattedEndDate;
@@ -47,11 +46,10 @@ public class PremiumStatus implements FormattedEndDateProvider {
     private static final String JSON_KEY_PLAYSTORE_SUBSCRIPTION_INFO = "playStoreSubscriptionInfo";
     private static final String JSON_KEY_AUTO_RENEW_INFO = "autoRenewInfo";
     private static final String JSON_KEY_PLAN_TYPE = "planType";
+    private final Clock mClock;
     private String mServerValue;
-
     private boolean mIsRefreshed = false;
     private boolean mIsAutoRenew;
-
     private String mPremiumExpiryDate;
     private PremiumType mPremiumType;
     private PremiumPlan mPremiumPlan;
@@ -62,32 +60,28 @@ public class PremiumStatus implements FormattedEndDateProvider {
     private List<FamilyMembership> mFamilyMemberships;
     private PlayStoreSubscriptionInfo mPlayStoreSubscriptionInfo;
     private AutoRenewInfo mAutoRenewInfo;
-
     private JSONArray mTeamspaces;
     private JSONArray mCapabilities;
     
     private long mStorageRemaining;
     private long mStorageMax;
-    private Clock mClock;
 
-    public PremiumStatus() {
+    public PremiumStatus(Clock clock) {
         mPremiumType = new PremiumType();
         mPremiumPlan = new PremiumPlan();
         mIsAutoRenew = false;
         mFamilyMemberships = null;
         mAutoRenewInfo = new AutoRenewInfo();
-        mClock = SingletonProvider.getComponent().getClock();
+        mClock = clock;
     }
 
-    public PremiumStatus(String response, boolean fresh) {
-        this(response,
-                fresh,
-                SingletonProvider.getComponent().getClock(),
-                SingletonProvider.getSessionManager().getSession(),
-                SingletonProvider.getUserPreferencesManager());
-    }
-
-    public PremiumStatus(String response, boolean fresh, Clock clock, Session session, UserPreferencesManager userPreferencesManager) {
+    public PremiumStatus(
+        String response,
+        boolean fresh,
+        Clock clock,
+        Session session,
+        UserPreferencesManager userPreferencesManager
+    ) {
         mServerValue = response;
         mIsRefreshed = fresh;
         mIsAutoRenew = false;
@@ -186,9 +180,9 @@ public class PremiumStatus implements FormattedEndDateProvider {
 
     public boolean hasExpiryDateField() {
         return mPremiumType.getType() == Type.CURRENT_PREMIUM ||
-               mPremiumType.getType() == Type.CANCELED_PREMIUM ||
-               mPremiumType.getType() == Type.TRIAL ||
-               mPremiumType.getType() == Type.GRACE;
+            mPremiumType.getType() == Type.CANCELED_PREMIUM ||
+            mPremiumType.getType() == Type.TRIAL ||
+            mPremiumType.getType() == Type.GRACE;
     }
 
     private long remainingDaysForServer() {
@@ -313,7 +307,7 @@ public class PremiumStatus implements FormattedEndDateProvider {
         }
         if (status.has(JSON_KEY_FAMILY_MEMBERSHIP)) {
             mFamilyMemberships =
-                    FamilyMembership.fromJsonArray(status.getJSONArray(PremiumStatus.JSON_KEY_FAMILY_MEMBERSHIP));
+                FamilyMembership.fromJsonArray(status.getJSONArray(PremiumStatus.JSON_KEY_FAMILY_MEMBERSHIP));
         }
         if (status.has(JSON_KEY_PLAYSTORE_SUBSCRIPTION_INFO)) {
             mPlayStoreSubscriptionInfo = PlayStoreSubscriptionInfo.from(status, JSON_KEY_PLAYSTORE_SUBSCRIPTION_INFO);
@@ -378,9 +372,9 @@ public class PremiumStatus implements FormattedEndDateProvider {
         if (mPremiumType.getType() == Type.FREE && !premiumReminderExist) {
             preferencesManager.putBoolean(ConstantsPrefs.SHOW_PREMIUM_REMINDER, true);
             preferencesManager.putLong(ConstantsPrefs.TIMESTAMP_NEXT_PREMIUM_REMINDER,
-                    System.currentTimeMillis()
-                            + Constants.NB_DAYS_BEFORE_REMINDER_PREMIUM
-                            * DateUtils.DAY_IN_MILLIS);
+                System.currentTimeMillis()
+                    + Constants.NB_DAYS_BEFORE_REMINDER_PREMIUM
+                    * DateUtils.DAY_IN_MILLIS);
         }
     }
 }

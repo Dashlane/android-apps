@@ -14,7 +14,7 @@
         android:gravity="center_horizontal"
         android:maxLines="1"
         android:textAppearance="?textAppearanceHeadline2"
-        android:textColor="?colorTextCatchy"
+        android:textColor="@color/text_neutral_catchy"
         tools:text="Enter your PIN Code"
         />
 
@@ -25,7 +25,7 @@
         android:layout_marginTop="@dimen/fragment_lock_pincode_header_line2_margin_top"
         android:gravity="center_horizontal"
         android:textAppearance="?textAppearanceSubtitle1"
-        android:textColor="?colorOnBackgroundMedium"
+        android:textColor="@color/text_neutral_quiet"
         tools:text="Logged in as randomemail@provider.com"
         />
 

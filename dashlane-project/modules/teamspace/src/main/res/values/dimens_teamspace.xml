@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="teamspace_icon_size_normal">24dp</dimen>
+    <dimen name="teamspace_icon_size_small">16dp</dimen>
+    <dimen name="teamspace_icon_size_edit_selector">18dp</dimen>
+</resources>

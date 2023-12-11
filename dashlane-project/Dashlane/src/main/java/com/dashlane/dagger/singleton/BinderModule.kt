@@ -34,6 +34,8 @@ import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.lock.LockTypeManagerImpl
 import com.dashlane.login.lock.LockWatcherImpl
 import com.dashlane.masterpassword.MasterPasswordChangerImpl
+import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.NavigatorImpl
 import com.dashlane.permission.PermissionsManager
 import com.dashlane.permission.PermissionsManagerImpl
 import com.dashlane.premium.offer.common.InAppBillingDebugPreference
@@ -53,12 +55,6 @@ import com.dashlane.ui.premium.inappbilling.InAppBillingDebugPreferenceImpl
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.ui.screens.settings.Use2faSettingStateRefresher
 import com.dashlane.ui.screens.settings.WindowConfigurationImpl
-import com.dashlane.useractivity.AggregateUserActivity
-import com.dashlane.useractivity.AggregateUserActivityAccountInformationProvider
-import com.dashlane.useractivity.AggregateUserActivityLogSender
-import com.dashlane.useractivity.AggregateUserActivityRepository
-import com.dashlane.useractivity.AggregateUserActivityTeamInformationProvider
-import com.dashlane.useractivity.log.aggregate.BaseAggregateLogSender
 import com.dashlane.util.AppSync
 import com.dashlane.util.Toaster
 import com.dashlane.util.ToasterImpl
@@ -73,6 +69,9 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 interface BinderModule {
+    @Binds
+    fun bindNavigator(navigator: NavigatorImpl): Navigator
+
     @Binds
     fun bindSharingKeysHelper(impl: SharingKeysHelperImpl): SharingKeysHelper
 
@@ -144,18 +143,6 @@ interface BinderModule {
 
     @Binds
     fun bindSharingSync(impl: SharingSyncImpl): SharingSync
-
-    @Binds
-    fun bindAggregateUserActivityAccountInformationProvider(impl: AggregateUserActivityAccountInformationProvider): AggregateUserActivity.AccountInformationProvider
-
-    @Binds
-    fun bindAggregateUserActivityRepository(impl: AggregateUserActivityRepository): AggregateUserActivity.Repository
-
-    @Binds
-    fun bindAggregateLogSender(impl: AggregateUserActivityLogSender): BaseAggregateLogSender
-
-    @Binds
-    fun bindAggregateUserActivityTeamInformationProvider(impl: AggregateUserActivityTeamInformationProvider): AggregateUserActivity.TeamInformationProvider
 
     @Binds
     fun bindBillingManager(impl: BillingManagerImpl): BillingManager

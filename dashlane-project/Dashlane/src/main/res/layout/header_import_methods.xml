@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:text="@string/fragment_credential_create_step1_add_multiple_passwords"
-        android:textColor="?colorOnPrimarySurface"
+        android:textColor="@color/text_neutral_catchy"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/collapse_arrow"

@@ -1,6 +1,8 @@
 package com.dashlane.storage.userdata.accessor
 
 import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
+import com.dashlane.storage.userdata.accessor.filter.genericFilter
+import com.dashlane.storage.userdata.accessor.filter.uid.SpecificUidFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.asVaultItemOfClassOrNull
@@ -37,12 +39,21 @@ class CollectionDataQueryImpl @Inject constructor(
     override fun queryByIds(ids: List<String>): List<VaultItem<SyncObject.Collection>> =
         vaultDataQuery.queryAll(
             vaultFilter {
-            val filter = createFilter()
-            spaceFilter = filter
-            dataTypeFilter = filter
-            specificUid(ids)
-        }
+                val filter = createFilter()
+                spaceFilter = filter
+                dataTypeFilter = filter
+                specificUid(ids)
+            }
         ).filterIsInstance<VaultItem<SyncObject.Collection>>()
+
+    override fun queryVaultItemsWithCollectionId(id: String): List<SummaryObject> {
+        val collection = queryById(id)
+        return genericDataQuery.queryAll(
+            genericFilter {
+                uidFilter = SpecificUidFilter(collection?.syncObject?.vaultItems?.mapNotNull { it.id } ?: emptyList())
+            }
+        )
+    }
 
     override fun createFilter() = CollectionFilter()
 

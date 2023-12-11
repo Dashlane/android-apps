@@ -23,7 +23,7 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.usage.UsageLogConstant
+import com.dashlane.util.Toaster
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.showToaster
 import kotlinx.coroutines.CoroutineScope
@@ -32,21 +32,23 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class BiometricPresenter(
+    private val userPreferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val sessionCredentialsSaver: SessionCredentialsSaver,
+    private val loginLogger: LoginLogger,
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
     lockManager: LockManager,
-    val userPreferencesManager: UserPreferencesManager,
-    val sessionManager: SessionManager,
-    val sessionCredentialsSaver: SessionCredentialsSaver,
-    val loginLogger: LoginLogger
+    toaster: Toaster
 ) : LoginLockBasePresenter<BiometricContract.DataProvider, BiometricContract.ViewProxy>(
-    rootPresenter,
-    coroutineScope,
-    lockManager
+    rootPresenter = rootPresenter,
+    coroutineScope = coroutineScope,
+    lockManager = lockManager,
+    toaster = toaster
 ),
 BiometricContract.Presenter {
 
-    override val lockTypeName: String = UsageLogConstant.LockType.fingerPrint
+    override val lockTypeName: Int = LockTypeManager.LOCK_TYPE_BIOMETRIC
 
     override fun onNextClicked() {
         
@@ -154,9 +156,9 @@ BiometricContract.Presenter {
                     forceLogout(null)
                 }
             }
-            is BiometricAuthModule.Result.UseMasterPasswordClicked -> {
+            is BiometricAuthModule.Result.UserCancelled -> {
                 (activity as? DashlaneActivity)?.lifecycle?.removeObserver(lifecycleObserver)
-                rootPresenter.onUseMasterPasswordClicked()
+                rootPresenter.onBiometricNegativeClicked()
             }
             is BiometricAuthModule.Result.Canceled -> onHardwareAuthenticationCanceled(result.userPressedBack)
             is BiometricAuthModule.Result.AuthenticationFailure -> {
@@ -177,15 +179,12 @@ BiometricContract.Presenter {
                 
                 val context = activity?.applicationContext
 
-                
-                providerOrNull?.logUsageLogCode75(UsageLogConstant.LockAction.logout)
-
                 if (context != null) {
                     lockManager.setLockType(LockTypeManager.LOCK_TYPE_MASTER_PASSWORD)
                     sessionManager.session?.username.let(sessionCredentialsSaver::deleteSavedCredentials)
                     userPreferencesManager.putBoolean(ConstantsPrefs.INVALIDATED_BIOMETRIC, true)
                 }
-                forceLogout(null, true)
+                forceLogout(null)
             }
         }
     }
@@ -212,14 +211,17 @@ BiometricContract.Presenter {
                 activity?.finish()
                 return
             }
-            provider.biometricAuthModule.logger.logUsageLogoutFromBiometrics()
-        } else {
-            provider.biometricAuthModule.logger.logUsageCancelAuthorisation()
         }
         rootPresenter.onPrimaryFactorCancelOrLogout()
     }
 
-    private fun forceLogout(errorMessage: CharSequence?, logSent: Boolean = false) {
-        logoutTooManyAttempts(errorMessage, logSent)
+    private fun forceLogout(errorMessage: CharSequence?) {
+        if (provider.isAccountTypeMasterPassword()) {
+            logoutTooManyAttempts(errorMessage)
+        } else {
+            
+            provider.biometricAuthModule.stopHardwareAuthentication()
+            rootPresenter.onBiometricNegativeClicked()
+        }
     }
 }

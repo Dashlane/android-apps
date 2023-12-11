@@ -11,6 +11,8 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.objectType
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,6 +28,10 @@ class DataSaverImpl @Inject constructor(
         get() = dataStorageProvider.vaultDataQuery
     private val databaseItemSaver: DatabaseItemSaver
         get() = dataStorageProvider.itemSaver
+
+    
+    private val _savedItemFlow = MutableSharedFlow<Unit>()
+    override val savedItemFlow = _savedItemFlow.asSharedFlow()
 
     override suspend fun <T : SyncObject> save(saveRequest: DataSaver.SaveRequest<T>): List<VaultItem<*>> {
         if (saveRequest.itemsToSave.isEmpty()) return emptyList()
@@ -74,6 +80,8 @@ class DataSaverImpl @Inject constructor(
 
         
         val savedDataChangeHistories = dataChangeHistorySaver.save(dataChangeHistoryItems)
+
+        _savedItemFlow.emit(Unit)
 
         return savedRegularItems + savedDataChangeHistories
     }

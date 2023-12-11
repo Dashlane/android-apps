@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_dialog_set_topic">Choose a PIN</string>
+    <string name="pin_dialog_set_question">to unlock Dashlane after inactivity</string>
+
+    
+    <string name="pin_setup_screen_choose">Choose a PIN</string>
+    
+    <string name="pin_setup_screen_confirm">Confirm your PIN</string>
+</resources>

@@ -5,6 +5,7 @@ import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.exception.NotLoggedInException
 import com.dashlane.network.tools.authorization
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.DeleteItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemContent
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
@@ -14,16 +15,19 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.model.getCollectionDownloads
 import com.dashlane.sharing.model.getMaxPermission
 import com.dashlane.sharing.model.getMaxStatus
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.getUserGroupMembers
 import com.dashlane.sharing.model.getUserPermission
+import com.dashlane.sharing.model.hasCollectionsAcceptedOrPending
 import com.dashlane.sharing.model.hasUserGroupsAcceptedOrPending
 import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.isAlone
 import com.dashlane.sharing.util.GroupKeyLazy
 import com.dashlane.sharing.util.GroupVerification
+import com.dashlane.sharing.util.ProposeSignatureVerification
 import com.dashlane.sharing.util.SharingCryptographyHelper
 import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
@@ -35,6 +39,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@Suppress("LargeClass")
 class SharingItemUpdater @Inject constructor(
     private val sharingCryptographyHelper: SharingCryptographyHelper,
     private val dataStorageProvider: DataStorageProvider,
@@ -43,7 +48,8 @@ class SharingItemUpdater @Inject constructor(
     private val sharingDaoMemoryDataAccessProvider: SharingDaoMemoryDataAccessProvider,
     private val autoAcceptItemGroup: AutoAcceptItemGroup,
     private val sharingInvitePublicKeyUser: SharingInvitePublicKeyUser,
-    private val deleteItemGroupService: DeleteItemGroupService
+    private val deleteItemGroupService: DeleteItemGroupService,
+    private val proposeSignatureVerification: ProposeSignatureVerification
 ) {
 
     private val sharingDao: SharingDao
@@ -56,10 +62,15 @@ class SharingItemUpdater @Inject constructor(
 
     @Throws(NotLoggedInException::class)
     suspend fun update(request: SharingItemUpdaterRequest) {
-        val session = sessionManager.session ?: throw NotLoggedInException("Unable to apply the sharing request")
+        val session = sessionManager.session
+            ?: throw NotLoggedInException("Unable to apply the sharing request")
         if (!sharingDao.databaseOpen) throw NotLoggedInException("The database is not open")
 
-        val groupVerification = GroupVerification(sharingCryptographyHelper, session.userId)
+        val groupVerification = GroupVerification(
+            session.userId,
+            sharingCryptographyHelper,
+            proposeSignatureVerification
+        )
         mutex.withLock {
             withContext(Dispatchers.IO) {
                 val memory: SharingDaoMemoryDataAccess = sharingDaoMemoryDataAccessProvider.create()
@@ -91,28 +102,49 @@ class SharingItemUpdater @Inject constructor(
 
         val myUserGroups = loadMyUserGroups(memory, login)
 
-        val itemGroups =
-            saveItemGroups(memory, groupVerification, request.itemGroupUpdates, myUserGroups)
+        
+        saveCollections(memory, groupVerification, myUserGroups, request.collectionUpdates)
+        memory.deleteCollections(request.collectionsDeletionIds)
+
+        val myCollections = loadMyCollections(memory, login, myUserGroups)
+
+        val itemGroups = saveItemGroups(
+            memory,
+            groupVerification,
+            request.itemGroupUpdates,
+            myUserGroups,
+            myCollections
+        )
         sharingDao.deleteItemGroups(memory, request.itemGroupsDeletionIds)
 
         val itemContents = request.itemContentUpdates
         val itemGroupsFilter = getItemGroupsToUpdate(memory, itemContents, itemGroups)
 
         val updatedGroups1 = itemGroupsFilter.map {
-            it.updateItemsWithinItemGroup(memory, itemContents, myUserGroups, session)
+            it.updateItemsWithinItemGroup(
+                memory,
+                itemContents,
+                myUserGroups,
+                myCollections,
+                session
+            )
         }
 
         
-        val updatedGroups2 = invitePublicKeyUsers(session, itemGroupsFilter, myUserGroups)
+        
+        val updatedGroups2 =
+            invitePublicKeyUsers(session, itemGroupsFilter, myUserGroups, myCollections)
 
-        val allUpdatedGroups = (updatedGroups1 + updatedGroups2)
+        val allUpdatedGroups = updatedGroups1 + (updatedGroups2.first to updatedGroups2.second)
         val itemGroupsUpdated = allUpdatedGroups.map { it.first }.flatten()
         val userGroupsUpdated = allUpdatedGroups.map { it.second }.flatten()
-        if (itemGroupsUpdated.isNotEmpty() || userGroupsUpdated.isNotEmpty()) {
+        val collectionsUpdated = updatedGroups2.third
+        if (itemGroupsUpdated.isNotEmpty() || userGroupsUpdated.isNotEmpty() || collectionsUpdated.isNotEmpty()) {
             
             val newRequest = SharingItemUpdaterRequest(
                 itemGroupUpdates = itemGroupsUpdated,
-                userGroupUpdates = userGroupsUpdated
+                userGroupUpdates = userGroupsUpdated,
+                collectionUpdates = collectionsUpdated
             )
             update(memory, newRequest, session, groupVerification, iteration + 1)
         }
@@ -122,14 +154,14 @@ class SharingItemUpdater @Inject constructor(
         memory: SharingDaoMemoryDataAccess,
         itemContentsToUpdate: List<ItemContent>,
         myUserGroups: List<UserGroup>,
+        myCollections: List<Collection>,
         session: Session
     ): Pair<List<ItemGroup>, List<UserGroup>> {
         val login = session.userId
         val userDownload = getUser(login)
 
         
-        
-        if (!hasUserGroupsAcceptedOrPending(myUserGroups) && (userDownload == null || !userDownload.isAcceptedOrPending)) {
+        if (isNotForMe(myUserGroups, userDownload, myCollections)) {
             
             sharingDao.deleteLocallyItemGroupAndItems(memory, this)
             return emptyPairListGroup()
@@ -144,32 +176,57 @@ class SharingItemUpdater @Inject constructor(
             return emptyPairListGroup()
         }
 
-        return updateItemsFromContent(memory, session, itemContentsToUpdate, userDownload, myUserGroups)
+        return updateItemsFromContent(
+            memory,
+            session,
+            itemContentsToUpdate,
+            userDownload,
+            myUserGroups,
+            myCollections
+        )
     }
+
+    private fun ItemGroup.isNotForMe(
+        myUserGroups: List<UserGroup>,
+        userDownload: UserDownload?,
+        myCollections: List<Collection>
+    ) = !hasUserGroupsAcceptedOrPending(myUserGroups) &&
+        (userDownload == null || !userDownload.isAcceptedOrPending) &&
+        !hasCollectionsAcceptedOrPending(myCollections)
 
     private suspend fun ItemGroup.updateItemsFromContent(
         memory: SharingDaoMemoryDataAccess,
         session: Session,
         itemContentsToUpdate: List<ItemContent>,
         userDownload: UserDownload?,
-        myUserGroups: List<UserGroup>
+        myUserGroups: List<UserGroup>,
+        myCollections: List<Collection>
     ): Pair<List<ItemGroup>, List<UserGroup>> {
-        if (userDownload == null && myUserGroups.isEmpty()) {
+        if (userDownload == null && myUserGroups.isEmpty() && myCollections.isEmpty()) {
             return emptyPairListGroup()
         }
         val login = session.userId
-        val groupKey = GroupKeyLazy.newInstance(this, login, myUserGroups, sharingCryptographyHelper)
-            ?: return emptyPairListGroup()
+        val groupKey = GroupKeyLazy.newInstance(
+            this,
+            login,
+            myUserGroups,
+            myCollections,
+            sharingCryptographyHelper
+        ) ?: return emptyPairListGroup()
 
         val myUserGroupsMember = getUserGroupMembers(myUserGroups)
-        val maxStatus = getMaxStatus(userDownload, myUserGroupsMember)
-        val maxPermission = getMaxPermission(userDownload, myUserGroupsMember)
+        val myCollectionDownloads = getCollectionDownloads(myCollections)
+
+        val maxStatus = getMaxStatus(userDownload, myUserGroupsMember, myCollectionDownloads)
+        val maxPermission =
+            getMaxPermission(userDownload, myUserGroupsMember, myCollectionDownloads)
 
         
         val updatedGroups = autoAcceptIfNecessary(session, myUserGroups)
 
         items?.forEach { item ->
-            val updatedItem = itemContentsToUpdate.save(memory, item, groupKey, maxPermission, maxStatus)
+            val updatedItem =
+                itemContentsToUpdate.save(memory, item, groupKey, maxPermission, maxStatus)
 
             if (!updatedItem && Status.ACCEPTED == maxStatus) {
                 
@@ -278,8 +335,14 @@ class SharingItemUpdater @Inject constructor(
     private suspend fun invitePublicKeyUsers(
         session: Session,
         itemGroups: List<ItemGroup>,
-        myUserGroupsAcceptedOrPending: List<UserGroup>
-    ): Pair<List<ItemGroup>, List<UserGroup>> = sharingInvitePublicKeyUser.execute(session, itemGroups, myUserGroupsAcceptedOrPending)
+        myUserGroupsAcceptedOrPending: List<UserGroup>,
+        myCollectionsAcceptedOrPending: List<Collection>
+    ) = sharingInvitePublicKeyUser.execute(
+        session,
+        itemGroups,
+        myUserGroupsAcceptedOrPending,
+        myCollectionsAcceptedOrPending
+    )
 
     private suspend fun ItemGroup.deleteItemGroupRemotelyAndKeepItems(
         memory: SharingDaoMemoryDataAccess,
@@ -317,14 +380,26 @@ class SharingItemUpdater @Inject constructor(
         }.also { memory.saveUserGroups(it) }
     }
 
+    private fun saveCollections(
+        memory: SharingDaoMemoryDataAccess,
+        groupVerification: GroupVerification,
+        myUserGroups: List<UserGroup>,
+        list: List<Collection>
+    ): List<Collection> {
+        return list.filter { collection ->
+            groupVerification.isValid(collection, myUserGroups)
+        }.also { memory.saveCollections(it) }
+    }
+
     private fun saveItemGroups(
         memory: SharingDaoMemoryDataAccess,
         groupVerification: GroupVerification,
         itemGroups: List<ItemGroup>,
-        myUserGroups: List<UserGroup>
+        myUserGroups: List<UserGroup>,
+        myCollections: List<Collection>
     ): List<ItemGroup> {
         return itemGroups.filter { itemGroup ->
-            groupVerification.isValid(itemGroup, myUserGroups)
+            groupVerification.isValid(itemGroup, myUserGroups, myCollections)
         }.also { memory.saveItemGroups(it) }
     }
 
@@ -355,7 +430,18 @@ class SharingItemUpdater @Inject constructor(
         return plus(toAdd)
     }
 
-    private fun loadMyUserGroups(memory: SharingDaoMemoryDataAccess, userId: String): List<UserGroup> {
+    private fun loadMyUserGroups(
+        memory: SharingDaoMemoryDataAccess,
+        userId: String
+    ): List<UserGroup> {
         return memory.loadUserGroupsAcceptedOrPending(userId)
+    }
+
+    private fun loadMyCollections(
+        memory: SharingDaoMemoryDataAccess,
+        userId: String,
+        myUserGroupsAcceptedOrPending: List<UserGroup>
+    ): List<Collection> {
+        return memory.loadCollectionsAcceptedOrPending(userId, myUserGroupsAcceptedOrPending)
     }
 }

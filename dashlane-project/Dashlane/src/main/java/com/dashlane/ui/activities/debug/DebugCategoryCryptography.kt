@@ -1,24 +1,32 @@
 package com.dashlane.ui.activities.debug
 
-import android.app.Activity
 import android.content.Context
 import androidx.preference.PreferenceGroup
 import com.dashlane.cryptography.decodeBase64ToUtf8String
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.session.Session
+import com.dashlane.session.SessionManager
+import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.util.MD5Hash
+import dagger.hilt.android.qualifiers.ActivityContext
+import javax.inject.Inject
 
-internal class DebugCategoryCryptography(debugActivity: Activity, session: Session) :
-    AbstractDebugCategory(debugActivity) {
+internal class DebugCategoryCryptography @Inject constructor(
+    @ActivityContext override val context: Context,
+    val sessionManager: SessionManager,
+    userCryptographyRepository: UserCryptographyRepository
+) : AbstractDebugCategory() {
 
-    private val cryptoUserPayload =
-        SingletonProvider.getComponent().userCryptographyRepository.getCryptographyMarker(session)?.value ?: ""
+    private val session: Session
+        get() = sessionManager.session!!
+
+    private val cryptoUserPayload = userCryptographyRepository.getCryptographyMarker(session)?.value ?: ""
     private val userLogin = session.userId
 
     private val localKeyCipherPayload: String?
         get() {
             val storeName = MD5Hash.hash(userLogin) + ".mp"
-            val prefs = SingletonProvider.getContext().getSharedPreferences(storeName, Context.MODE_PRIVATE)
+            val prefs =
+                context.applicationContext.getSharedPreferences(storeName, Context.MODE_PRIVATE)
             val base64 = prefs.getString("lk", null) ?: return null
             return base64.decodeBase64ToUtf8String().substring(0, 50)
         }

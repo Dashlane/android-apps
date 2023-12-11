@@ -1,6 +1,7 @@
 package com.dashlane.sharing
 
 import com.dashlane.server.api.Authorization
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemContent
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
@@ -12,7 +13,8 @@ interface SharingSyncCommunicator {
         session: Authorization.User,
         itemUids: List<String>,
         itemGroupUids: List<String>,
-        userGroupUids: List<String>
+        userGroupUids: List<String>,
+        collectionUids: List<String>
     ): GetSharingResult
 
     suspend fun updateItems(
@@ -23,9 +25,10 @@ interface SharingSyncCommunicator {
     data class GetSharingResult(
         val itemGroups: List<ItemGroup>,
         val itemContents: List<ItemContent>,
-        val userGroups: List<UserGroup>
+        val userGroups: List<UserGroup>,
+        val collections: List<Collection>
     ) {
         val isEmptyResult: Boolean
-            get() = itemGroups.isEmpty() && userGroups.isEmpty() && itemContents.isEmpty()
+            get() = itemGroups.isEmpty() && userGroups.isEmpty() && itemContents.isEmpty() && collections.isEmpty()
     }
 }

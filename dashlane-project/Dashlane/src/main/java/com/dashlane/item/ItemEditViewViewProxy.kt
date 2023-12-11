@@ -27,7 +27,6 @@ import com.dashlane.authenticator.AuthenticatorIntro.Companion.RESULT_OTP
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.item.AuthenticatorViewProxy
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.item.BaseUiUpdateListener.Companion.BOTTOM_SHEET_DIALOG_TAG
@@ -56,9 +55,11 @@ import com.dashlane.item.subview.view.ButtonInputProvider
 import com.dashlane.item.subview.view.DatePickerInputProvider
 import com.dashlane.item.subview.view.SpinnerInputProvider
 import com.dashlane.navigation.Navigator
+import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.borderColorRes
 import com.dashlane.passwordstrength.getShortTitle
 import com.dashlane.passwordstrength.textColorRes
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
 import com.dashlane.ui.credential.passwordgenerator.StrengthLevelUpdater
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
@@ -87,7 +88,9 @@ class ItemEditViewViewProxy(
     private val viewFactory: ViewFactory,
     private val lifecycleOwner: LifecycleOwner,
     private val navigator: Navigator,
-    private val authenticatorLogger: AuthenticatorLogger
+    private val authenticatorLogger: AuthenticatorLogger,
+    private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
+    private val vaultDataQuery: VaultDataQuery
 ) :
     BaseViewProxy<ItemEditViewContract.Presenter>(activity),
     ItemEditViewContract.View {
@@ -392,7 +395,9 @@ class ItemEditViewViewProxy(
                     is ItemPasswordSafetySubView -> {
                         passwordSafety = CredentialViewPasswordSafety.newInstance(
                             it,
-                            lifecycleOwner.lifecycleScope
+                            lifecycleOwner.lifecycleScope,
+                            passwordStrengthEvaluator,
+                            vaultDataQuery
                         )
                         configurePasswordSafetySubView(itemSubView, isEditMode)
                     }
@@ -523,7 +528,7 @@ class ItemEditViewViewProxy(
         }
 
         strengthLevelUpdater?.updateWith(
-            SingletonProvider.getPasswordStrengthEvaluator(),
+            passwordStrengthEvaluator,
             itemSubView.value
         ) { strength ->
             resetPasswordScoreJob?.cancel()

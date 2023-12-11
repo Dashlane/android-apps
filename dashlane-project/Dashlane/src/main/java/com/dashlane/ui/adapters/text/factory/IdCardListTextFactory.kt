@@ -2,21 +2,21 @@ package com.dashlane.ui.adapters.text.factory
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.search.fields.IdCardField
 import com.dashlane.search.SearchField
+import com.dashlane.search.fields.IdCardField
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityUtil
+import com.dashlane.vault.util.IdentityNameHolderService
 
 class IdCardListTextFactory(
     private val context: Context,
     private val item: SummaryObject.IdCard,
-    private val identityUtil: IdentityUtil
+    private val identityNameHolderService: IdentityNameHolderService
 ) : DataIdentifierListTextFactory {
 
     override fun getLine1(): StatusText {
-        val title = identityUtil.getOwner(item)
+        val title = identityNameHolderService.getOwner(item)
         val incomplete = context.getString(ITEM_TYPE_NAME_ID)
         if (title.isSemanticallyNull()) {
             return StatusText(incomplete)

@@ -5,6 +5,8 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UpdateItemGroupMembersService
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserUpdate
+import com.dashlane.server.api.pattern.UserIdFormat
+import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
@@ -34,14 +36,15 @@ class UpdateItemGroupMembersRequestBuilder @Inject constructor(
         return withContext(defaultCoroutineDispatcher) {
             val login = session?.userId
                 ?: throw RequestBuilderException.AcceptItemGroupRequestException("session is null")
-            val groupKey: CryptographyKey.Raw32 = sharingCryptography.getGroupKey(
+            val groupKey: CryptographyKey.Raw32 = sharingCryptography.getItemGroupKey(
                 itemGroup,
                 login,
-                mMyUserGroupsAcceptedOrPending
+                mMyUserGroupsAcceptedOrPending,
+                emptyList()
             ) ?: throw RequestBuilderException.AcceptItemGroupRequestException("groupKey is null")
 
             UpdateItemGroupMembersService.Request(
-                groupId = UpdateItemGroupMembersService.Request.GroupId(itemGroup.groupId),
+                groupId = UuidFormat(itemGroup.groupId),
                 revision = itemGroup.revision,
                 users = users.map {
                     createUserUpdate(it, groupKey)
@@ -55,7 +58,7 @@ class UpdateItemGroupMembersRequestBuilder @Inject constructor(
         groupKey: CryptographyKey.Raw32
     ) = UserUpdate(
         permission = userToUpdate.permission,
-        userId = UserUpdate.UserId(userToUpdate.userId),
+        userId = UserIdFormat(userToUpdate.userId),
         groupKey = sharingCryptography.generateGroupKeyEncrypted(
             groupKey,
             userToUpdate.publicKey

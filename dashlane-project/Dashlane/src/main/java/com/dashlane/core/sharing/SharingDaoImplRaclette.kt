@@ -7,11 +7,13 @@ import com.dashlane.database.Id
 import com.dashlane.database.MemorySummaryRepository
 import com.dashlane.database.SharingRepository
 import com.dashlane.database.VaultObjectRepository
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.sharing.model.isAcceptedOrPending
+import com.dashlane.sharing.model.toCollections
 import com.dashlane.sharing.model.toItemGroup
 import com.dashlane.sharing.model.toItemGroups
 import com.dashlane.sharing.model.toUserGroups
@@ -27,6 +29,8 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.manager.getSuggestedTeamspace
 import com.dashlane.useractivity.RacletteLogger
 import com.dashlane.util.inject.OptionalProvider
+import com.dashlane.vault.model.copyWithLock
+import com.dashlane.vault.model.copyWithSpaceId
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
@@ -80,6 +84,8 @@ class SharingDaoImplRaclette @Inject constructor(
                     .map { it.groupId to it.revision.toLong() }
                 SharingDataType.ITEM -> sharingRepository.loadItemContents()
                     .map { it.itemId to it.timestamp }
+                SharingDataType.COLLECTION -> sharingRepository.loadCollections()
+                    .map { it.uuid to it.revision }
             }
         }
 
@@ -160,6 +166,11 @@ class SharingDaoImplRaclette @Inject constructor(
             val found = it.users.find { user -> user.userId == userId } ?: return@filter false
             found.isAcceptedOrPending
         }
+    }
+
+    override fun loadAllCollection(): List<Collection> {
+        val sharingRepository = sharingRepository ?: return emptyList()
+        return sharingRepository.loadCollections().toCollections()
     }
 
     override suspend fun deleteItemGroups(
@@ -243,7 +254,15 @@ class SharingDaoImplRaclette @Inject constructor(
         id: String,
         dataType: SyncObjectType
     ): DataIdentifierExtraDataWrapper<SyncObject>? =
-        dataSyncDaoRaclette.getItemWithExtraData(id)?.toDataIdentifierExtraDataWrapper()
+        dataSyncDaoRaclette.getItemWithExtraData(id)?.let { vaultItemBackupWrapper ->
+            
+            
+            
+            val vaultItem = vaultItemBackupWrapper.vaultItem
+                .copyWithLock(false)
+                .copyWithSpaceId(null)
+            vaultItemBackupWrapper.copy(vaultItem = vaultItem)
+        }?.toDataIdentifierExtraDataWrapper()
 
     private fun getDirtyItemIds(): List<String>? {
         val memorySummaryRepository = memorySummaryRepository ?: return null

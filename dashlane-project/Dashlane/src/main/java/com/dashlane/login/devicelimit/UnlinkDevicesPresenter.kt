@@ -10,10 +10,7 @@ import com.dashlane.login.LoginIntents
 import com.dashlane.login.devicelimit.UnlinkDevicesActivity.Companion.EXTRA_DEVICES
 import com.dashlane.login.progress.LoginSyncProgressActivity
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
-import com.dashlane.useractivity.log.usage.UsageLogCode75
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.getParcelableArrayCompat
 import com.dashlane.util.setCurrentPageView
 import javax.inject.Inject
@@ -22,7 +19,6 @@ import com.dashlane.hermes.generated.events.user.CallToAction as UserCallToActio
 class UnlinkDevicesPresenter @Inject constructor(
     private val activity: Activity,
     private val sessionManager: SessionManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val userPreferencesManager: UserPreferencesManager,
     private val logRepository: LogRepository
 ) : UnlinkDevicesContract.Presenter {
@@ -45,7 +41,6 @@ class UnlinkDevicesPresenter @Inject constructor(
         devices = extraDevices
             .filterNot { it.id == myDeviceId }
             .sortedByDescending { it.lastActivityDate }
-        sendUsageLog("seen", devices.size.toString())
         if (savedInstanceState == null) {
             activity.setCurrentPageView(page = AnyPage.PAYWALL_DEVICE_SYNC_LIMIT_UNLINK_DEVICE)
         }
@@ -58,7 +53,6 @@ class UnlinkDevicesPresenter @Inject constructor(
 
     override fun onUnlink(selectedDevices: List<Device>) {
         userPreferencesManager.isOnLoginPaywall = false
-        sendUsageLog("unlink", selectedDevices.size.toString())
         logUserAction(chosenAction = CallToAction.UNLINK)
         val intent = LoginIntents.createSettingsActivityIntent(activity, false).apply {
             putExtra(
@@ -71,25 +65,12 @@ class UnlinkDevicesPresenter @Inject constructor(
     }
 
     override fun onCancelUnlink() {
-        sendUsageLog("cancel_unlink")
         logUserAction(chosenAction = null)
         activity.finish()
     }
 
     override fun onBackPressed() {
         logUserAction(chosenAction = null)
-    }
-
-    private fun sendUsageLog(action: String, subAction: String? = null) {
-        bySessionUsageLogRepository[sessionManager.session]
-            ?.enqueue(
-                UsageLogCode75(
-                    type = "device_sync_limit",
-                    subtype = "unlink_screen",
-                    action = action,
-                    subaction = subAction
-                )
-            )
     }
 
     private fun logUserAction(chosenAction: CallToAction?) =

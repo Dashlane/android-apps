@@ -1,6 +1,6 @@
 package com.dashlane.core
 
-import com.dashlane.async.BroadcastManager
+import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.breach.BreachManager
 import com.dashlane.core.sync.DataSyncHelper
 import com.dashlane.hermes.generated.definitions.Trigger
@@ -12,6 +12,7 @@ import com.dashlane.session.SessionObserver
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
 import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
 import com.dashlane.teamspaces.manager.SpaceDeletedNotifier
+import com.dashlane.useractivity.UserActivitySender
 import com.dashlane.util.AppSync
 import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
@@ -24,7 +25,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
@@ -53,7 +54,9 @@ class DataSync @Inject constructor(
     private val teamspaceForceCategorizationManager: TeamspaceForceCategorizationManager,
     private val breachManager: BreachManager,
     private val dataSyncNotification: DataSyncNotification,
-    private val logsSender: LogsSender
+    private val logsSender: LogsSender,
+    private val syncBroadcastManager: SyncBroadcastManager,
+    private val userActivitySender: UserActivitySender
 ) : AppSync, SessionObserver {
     private var syncBlocked = false
 
@@ -101,11 +104,11 @@ class DataSync @Inject constructor(
         forceCommandsFlow.tryEmit(origin)
     }
 
-    suspend fun awaitSync(origin: Trigger = Trigger.SAVE):
-            Boolean {
+    suspend fun awaitSync(origin: Trigger = Trigger.SAVE): Boolean {
         _dataSyncState.resetReplayCache()
         forceCommandsFlow.emit(origin)
-        return _dataSyncState.filterIsInstance<DataSyncState.Idle>()
+        return _dataSyncState
+            .filter { state -> state is DataSyncState.Idle.Success || state is DataSyncState.Idle.Failure }
             .first() == DataSyncState.Idle.Success
     }
 
@@ -161,12 +164,15 @@ class DataSync @Inject constructor(
         spaceDeletedNotifier.sendIfNeeded(session)
         breachManager.refreshIfNecessary(false)
         dataSyncNotification.hideSyncNotification()
+        userActivitySender.sendIfNeeded()
         logsSender.flushLogs()
     }
 
     private fun onSyncFailure(exception: Throwable, origin: Trigger) {
         dataSyncNotification.hideSyncNotification()
-        if (exception is OfflineException) BroadcastManager.sendOfflineSyncFailedBroadcast(origin)
+        if (exception is OfflineException) {
+            syncBroadcastManager.sendOfflineSyncFailedBroadcast(origin)
+        }
         logsSender.flushLogs()
     }
 

@@ -90,7 +90,7 @@ class IdentityDashboardPasswordHealthItem(
             val result = item.futureSecurityScoreResult?.await() ?: return
 
             
-            val securityScore = result.securityScore
+            val securityScore = result.securityScore?.value ?: -1.0f
             scoreViewProxy.showProgress(securityScore)
             scoreViewProxy.setLabel(context.getString(R.string.password_health_score_label))
 

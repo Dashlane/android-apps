@@ -9,6 +9,7 @@ import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
@@ -19,9 +20,12 @@ import com.dashlane.sharing.model.isAccepted
 import com.dashlane.teamspaces.manager.TeamspaceAccessor.FeatureCall
 import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode80
+import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,7 +38,8 @@ class SharingCenterViewModel @Inject constructor(
     private val teamspaceRepository: TeamspaceManagerRepository,
     private val navigator: Navigator,
     private val appEvents: AppEvents,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
+    private val userFeaturesChecker: UserFeaturesChecker
 ) : ViewModel(), SharingCenterViewModelContract, TeamspaceManager.Listener {
     private val session: Session?
         get() = sessionManager.session
@@ -42,13 +47,18 @@ class SharingCenterViewModel @Inject constructor(
     private val teamspaceManager: TeamspaceManager?
         get() = teamspaceRepository[session]
 
-    private val dataFlow =
-        MutableStateFlow<Pair<List<ItemGroup>, List<UserGroup>>>(Pair(emptyList(), emptyList()))
+    private val dataFlow = MutableStateFlow(Data())
 
     private val uiStateData = MutableStateFlow(SharingCenterViewModelContract.UIState.Data())
 
-    override val uiState: MutableStateFlow<SharingCenterViewModelContract.UIState> =
-        MutableStateFlow(SharingCenterViewModelContract.UIState.Loading)
+    override val uiState: MutableSharedFlow<SharingCenterViewModelContract.UIState> =
+        MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    private val canDisplayCollectionInvitations: Boolean
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_2)
+
+    private val canDisplaySharedCollections: Boolean
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)
 
     init {
         teamspaceManager?.subscribeListener(this)
@@ -56,8 +66,8 @@ class SharingCenterViewModel @Inject constructor(
             reloadData()
         }
         viewModelScope.launch {
-            dataFlow.collect { (itemGroups, userGroups) ->
-                display(itemGroups, userGroups)
+            dataFlow.collect { data ->
+                display(data.itemGroups, data.userGroups, data.collections)
             }
         }
         reloadData()
@@ -75,6 +85,14 @@ class SharingCenterViewModel @Inject constructor(
         sendDeclineItemGroupRequest(itemGroup = item.itemGroup, summaryObject = item.item)
     }
 
+    override fun declineCollection(collectionId: String) {
+        val collection = uiStateData.value.collectionInvites.find {
+            it.collection.uuid == collectionId
+        }?.collection ?: return
+        uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestLoading)
+        sendDeclineCollectionRequest(collection)
+    }
+
     private fun sendDeclineItemGroupRequest(
         itemGroup: ItemGroup,
         summaryObject: SummaryObject
@@ -85,7 +103,7 @@ class SharingCenterViewModel @Inject constructor(
             }.onFailure {
                 uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestFailure)
             }.onSuccess {
-                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess)
+                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess())
                 reloadData()
             }
         }
@@ -106,27 +124,65 @@ class SharingCenterViewModel @Inject constructor(
             }.onFailure {
                 uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestFailure)
             }.onSuccess {
-                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess)
+                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess())
                 reloadData()
             }
         }
     }
 
-    private fun display(itemGroups: List<ItemGroup>, userGroups: List<UserGroup>) {
+    private fun sendDeclineCollectionRequest(collection: Collection) {
+        viewModelScope.launch {
+            runCatching {
+                dataProvider.declineCollectionInvite(collection, true)
+            }.onFailure {
+                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestFailure)
+            }.onSuccess {
+                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess())
+                reloadData()
+            }
+        }
+    }
+
+    private fun display(
+        itemGroups: List<ItemGroup>,
+        userGroups: List<UserGroup>,
+        collections: List<Collection>
+    ) {
         val login = session?.username?.email ?: return
         val myUserGroups = userGroups.filter { it.getUser(login)?.isAccepted == true }
         val myUserGroupsIds = myUserGroups.map { it.groupId }
+        val myCollections =
+            if (canDisplaySharedCollections) {
+                collections.filter { collection ->
+                    collection.getUser(login)?.isAccepted == true || collection.userGroups?.find {
+                        it.uuid in myUserGroupsIds
+                    }?.isAccepted == true
+                }
+            } else {
+                emptyList()
+            }
         val myItemGroups = itemGroups.filter { itemGroup ->
-            itemGroup.getUser(login)?.isAccepted == true || itemGroup.groups?.find { it.groupId in myUserGroupsIds }?.isAccepted == true
+            itemGroup.collections?.any {
+                myCollections.any { collection ->
+                    collection.uuid == it.uuid && (
+                        collection.getUser(login)?.isAccepted == true ||
+                            collection.userGroups?.find { it.uuid in myUserGroupsIds }?.isAccepted == true
+                        )
+                }
+            } == true || itemGroup.getUser(login)?.isAccepted == true ||
+                itemGroup.groups?.find { it.groupId in myUserGroupsIds }?.isAccepted == true
         }
         val itemInvites = creator.getItemInvites(itemGroups)
         val userGroupInvites = creator.getUserGroupInvites(userGroups)
-        val userGroupsToDisplay = creator.getUserGroupsToDisplay(myUserGroups, myItemGroups)
-        val usersToDisplay = creator.getUsersToDisplay(myItemGroups)
+        val collectionInvites = creator.getCollectionInvites(collections)
+        val userGroupsToDisplay =
+            creator.getUserGroupsToDisplay(myUserGroups, myItemGroups, myCollections)
+        val usersToDisplay = creator.getUsersToDisplay(myItemGroups, myCollections)
         if (isDataNotEmpty(usersToDisplay, userGroupsToDisplay, itemInvites, userGroupInvites)) {
             val data = SharingCenterViewModelContract.UIState.Data(
                 itemInvites = itemInvites,
                 userGroupInvites = userGroupInvites,
+                collectionInvites = collectionInvites,
                 users = usersToDisplay,
                 userGroups = userGroupsToDisplay
             )
@@ -147,7 +203,18 @@ class SharingCenterViewModel @Inject constructor(
 
     override fun reloadData() {
         viewModelScope.run {
-            launch { dataFlow.tryEmit(dataProvider.getItemGroups() to dataProvider.getUserGroups()) }
+            launch {
+                val data = Data(
+                    dataProvider.getItemGroups(),
+                    dataProvider.getUserGroups(),
+                    if (canDisplayCollectionInvitations) {
+                        dataProvider.getCollections()
+                    } else {
+                        emptyList()
+                    }
+                )
+                dataFlow.tryEmit(data)
+            }
         }
     }
 
@@ -157,7 +224,7 @@ class SharingCenterViewModel @Inject constructor(
 
     override fun onClickNewShare(activity: Fragment) {
         proceedItemIfTeamspaceAllows(activity.requireActivity()) {
-            navigator.goToNewShare(UsageLogCode80.From.SHARING_CENTER.code)
+            navigator.goToNewShare()
         }
     }
 
@@ -190,7 +257,7 @@ class SharingCenterViewModel @Inject constructor(
     ) = Unit
 
     override fun onChange(teamspace: Teamspace?) =
-        display(dataFlow.value.first, dataFlow.value.second)
+        display(dataFlow.value.itemGroups, dataFlow.value.userGroups, dataFlow.value.collections)
 
     override fun onTeamspacesUpdate() = Unit
 
@@ -202,7 +269,7 @@ class SharingCenterViewModel @Inject constructor(
             }.onFailure {
                 uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestFailure)
             }.onSuccess {
-                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess)
+                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess())
                 reloadData()
             }
         }
@@ -216,9 +283,41 @@ class SharingCenterViewModel @Inject constructor(
             }.onFailure {
                 uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestFailure)
             }.onSuccess {
-                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestSuccess)
+                uiState.tryEmit(
+                    SharingCenterViewModelContract.UIState.RequestSuccess(
+                        invite.userGroup.name
+                    )
+                )
                 reloadData()
+                
+                refresh()
             }
         }
     }
+
+    override fun acceptCollection(invite: SharingContact.CollectionInvite) {
+        uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestLoading)
+        viewModelScope.launch {
+            runCatching {
+                dataProvider.acceptCollectionInvite(invite.collection, true)
+            }.onFailure {
+                uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestFailure)
+            }.onSuccess {
+                uiState.tryEmit(
+                    SharingCenterViewModelContract.UIState.RequestSuccess(
+                        invite.collection.name
+                    )
+                )
+                reloadData()
+                
+                refresh()
+            }
+        }
+    }
+
+    data class Data(
+        val itemGroups: List<ItemGroup> = emptyList(),
+        val userGroups: List<UserGroup> = emptyList(),
+        val collections: List<Collection> = emptyList()
+    )
 }

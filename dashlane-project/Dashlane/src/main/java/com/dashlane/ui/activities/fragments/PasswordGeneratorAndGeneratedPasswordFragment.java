@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.Fragment;
+
 import com.dashlane.R;
 import com.dashlane.hermes.generated.definitions.AnyPage;
 import com.dashlane.passwordstrength.PasswordStrength;
@@ -18,8 +20,6 @@ import com.dashlane.ui.util.ActionBarUtil;
 import com.dashlane.util.PageViewUtil;
 import com.dashlane.vault.model.VaultItem;
 import com.dashlane.xml.domain.SyncObject;
-
-import androidx.fragment.app.Fragment;
 
 public class PasswordGeneratorAndGeneratedPasswordFragment extends AbstractContentFragment implements
                                                                                            PasswordGenerationCallback {
@@ -80,15 +80,6 @@ public class PasswordGeneratorAndGeneratedPasswordFragment extends AbstractConte
                 (PasswordGeneratorFragment) getFragmentManager().findFragmentByTag(PasswordGeneratorFragment.TAG);
         if (pgf != null) {
             pgf.refreshPreviouslyGeneratedPasswordButton();
-        }
-    }
-
-    @Override
-    public void passwordGeneratedColor(int color) {
-        mActionBarColor = color;
-        DashlaneActivity activity = (DashlaneActivity) getActivity();
-        if (activity instanceof MenuContainer) {
-            activity.getActionBarUtil().setActionBarColor(color);
         }
     }
 

@@ -18,14 +18,14 @@ internal interface OfferDetailsViewModelContract {
 
     val offerDetailsFlow: Flow<OfferDetails?>
 
-    val currentPageViewFlow: Flow<Pair<AnyPage, Boolean>>
+    val currentPageViewFlow: Flow<AnyPage>
 
     val purchaseCheckingCoordinator: PurchaseCheckingCoordinator
 
     fun onInAppPurchaseStarted(product: OfferDetails.Product)
 
-    fun onPurchaseDone(product: OfferDetails.Product, purchase: Purchase, userLockedOut: Boolean)
-    fun onBillingServiceResult(serviceResult: ServiceResult, product: OfferDetails.Product): Pair<Purchase, Boolean>?
+    fun onPurchaseDone(product: OfferDetails.Product, purchase: Purchase)
+    fun onBillingServiceResult(serviceResult: ServiceResult, product: OfferDetails.Product): Purchase?
 
     suspend fun getBillingServiceConnection(): ConnectionScope?
 }

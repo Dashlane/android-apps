@@ -7,7 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dashlane.R
-import com.dashlane.ui.activities.fragments.list.wrapper.toItemWrapper
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.vault.provider.FirstLetterHeaderProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.HeaderItem
@@ -17,6 +17,7 @@ import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
 import com.dashlane.ui.widgets.view.empty.SharingItemSelectionEmptyScreen
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +27,9 @@ class SharingNewShareItemViewProxy(
     private val lifecycle: Lifecycle,
     view: View,
     private val viewModel: NewShareItemViewModelContract,
-    private val dataType: SyncObjectType
+    private val dataType: SyncObjectType,
+    private val itemWrapperProvider: ItemWrapperProvider,
+    private val identityNameHolderService: IdentityNameHolderService
 ) {
     private val context: Context = view.context
     private val list = view.findViewById<MultiColumnRecyclerView>(R.id.recyclerview)
@@ -80,19 +83,15 @@ class SharingNewShareItemViewProxy(
     }
 
     private suspend fun displayList(data: List<SummaryObject>) {
-        val vaultItemsList =
-            mutableListOf<DashlaneRecyclerAdapter.ViewTypeProvider>()
+        val vaultItemsList = mutableListOf<DashlaneRecyclerAdapter.ViewTypeProvider>()
         var lastHeader: String? = null
 
         data.forEach { summaryObject ->
             val selected = summaryObject.id in viewModel.selectionState.value.secureNotesToShare ||
-                    summaryObject.id in viewModel.selectionState.value.accountsToShare
+                summaryObject.id in viewModel.selectionState.value.accountsToShare
 
             val viewTypeProvider =
-                summaryObject.toItemWrapperSelectable(
-                    ItemListContext.Container.NONE.asListContext(),
-                    selected
-                )
+                summaryObject.toItemWrapperSelectable(ItemListContext.Container.NONE.asListContext(), selected)
             viewTypeProvider ?: return@forEach
             lastHeader = vaultItemsList.addHeaderIfNeeded(
                 context,
@@ -108,7 +107,7 @@ class SharingNewShareItemViewProxy(
                     if (item is ItemWrapperSelectable<*>) {
                         val tb =
                             view.findViewById<CompoundButton>(R.id.checkbox).also { it.toggle() }
-                        val vaultItem: SummaryObject = item.itemObject
+                        val vaultItem: SummaryObject = item.summaryObject
 
                         val uid = vaultItem.id
                         if (tb.isChecked) {
@@ -127,7 +126,7 @@ class SharingNewShareItemViewProxy(
         lastHeader: String?,
         item: DashlaneRecyclerAdapter.ViewTypeProvider
     ): String {
-        val newHeader = FirstLetterHeaderProvider.getHeaderFor(context, item)
+        val newHeader = FirstLetterHeaderProvider.getHeaderFor(context, item, identityNameHolderService)
         if (lastHeader == null || lastHeader != newHeader) {
             add(HeaderItem(newHeader))
         }
@@ -138,7 +137,7 @@ class SharingNewShareItemViewProxy(
         container: ItemListContext,
         isSelected: Boolean
     ): DashlaneRecyclerAdapter.ViewTypeProvider? =
-        this.toItemWrapper(container)?.let { vault ->
+        itemWrapperProvider(this, container)?.let { vault ->
             ItemWrapperSelectable(vault).also { it.isSelect = isSelected }
         }
 }

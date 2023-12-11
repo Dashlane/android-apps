@@ -44,9 +44,9 @@ import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import java.time.Month
 import java.time.Year
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @Suppress("LargeClass")
 class AutoFillDataBaseAccess @Inject constructor(
@@ -171,7 +171,8 @@ class AutoFillDataBaseAccess @Inject constructor(
         website: String?,
         login: String,
         password: String,
-        packageName: String?
+        packageName: String?,
+        spaceId: String?
     ): VaultItem<SyncObject.Authentifiant>? {
         if (!isLoggedIn) return null
 
@@ -188,7 +189,8 @@ class AutoFillDataBaseAccess @Inject constructor(
             dataIdentifier = CommonDataIdentifierAttrsImpl(
                 syncState = SyncState.MODIFIED,
                 creationDate = createTimestamp,
-                userModificationDate = createTimestamp
+                userModificationDate = createTimestamp,
+                teamSpaceId = spaceId
             ),
             title = title,
             deprecatedUrl = website,

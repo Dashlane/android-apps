@@ -1,5 +1,6 @@
 package com.dashlane.teamspaces.manager
 
+import android.content.Context
 import androidx.annotation.ColorRes
 import androidx.annotation.MainThread
 import androidx.annotation.StringRes
@@ -7,26 +8,33 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.settings.SettingsManager
 import com.dashlane.teamspaces.CombinedTeamspace
 import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
-import com.dashlane.teamspaces.db.TeamspaceUsageLogSpaceChanged
 import com.dashlane.teamspaces.manager.TeamspaceAccessor.FeatureCall
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.util.Constants
-import com.dashlane.util.ThreadHelper
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.userfeatures.UserFeaturesChecker
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.Locale
 
 class TeamspaceManager(
+    val context: Context,
     val dataProvider: SpaceAnonIdDataProvider,
     private val settingsManager: SettingsManager,
-    teamspaceUsageLogSpaceChanged: TeamspaceUsageLogSpaceChanged?
+    private val restrictionNotificator: TeamspaceRestrictionNotificator,
+    private val coroutineScope: CoroutineScope,
+    private val mainDispatcher: CoroutineDispatcher,
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val userPreferencesManager: UserPreferencesManager,
+    revokedDetector: RevokedDetector,
 ) : TeamspaceAccessor {
     private val defaultTeamspace = CombinedTeamspace
 
@@ -44,12 +52,9 @@ class TeamspaceManager(
             notifyAllChangeListeners()
         }
 
-    private val teamspaceNotifier = TeamspaceRestrictionNotificator()
-
     init {
-        subscribeListener(RevokedDetector())
+        subscribeListener(revokedDetector)
         initEmbeddedTeamspace()
-        subscribeListener(teamspaceUsageLogSpaceChanged)
     }
 
     fun init(data: List<Teamspace>?, forceCategorizationManager: TeamspaceForceCategorizationManager) {
@@ -87,6 +92,9 @@ class TeamspaceManager(
 
     override val all: List<Teamspace>
         get() = joinedTeamspaces.filterNotNull().toList()
+
+    override val onlyBusinessSpaces: List<Teamspace>
+        get() = all - CombinedTeamspace - PersonalTeamspace
 
     override val revokedAndDeclinedSpaces: List<Teamspace>
         get() = _revokedAndDeclinedSpaces.filterNotNull().toList()
@@ -135,24 +143,20 @@ class TeamspaceManager(
     }
 
     private fun notifyAllUpdateListeners() {
-        if (!ThreadHelper.isMainThread()) {
-            SingletonProvider.getThreadHelper().runOnMainThread { notifyAllUpdateListeners() }
-            return
-        }
-        val listeners: Set<Listener> = HashSet(listeners)
-        for (reference in listeners) {
-            reference.onTeamspacesUpdate()
+        coroutineScope.launch(mainDispatcher) {
+            val listeners: Set<Listener> = HashSet(listeners)
+            for (reference in listeners) {
+                reference.onTeamspacesUpdate()
+            }
         }
     }
 
     private fun notifyAllChangeListeners() {
-        if (!ThreadHelper.isMainThread()) {
-            SingletonProvider.getThreadHelper().runOnMainThread { notifyAllChangeListeners() }
-            return
-        }
-        val listeners: Set<Listener> = HashSet(listeners)
-        for (reference in listeners) {
-            reference.onChange(current)
+        coroutineScope.launch(mainDispatcher) {
+            val listeners: Set<Listener> = HashSet(listeners)
+            for (reference in listeners) {
+                reference.onChange(current)
+            }
         }
     }
 
@@ -161,7 +165,7 @@ class TeamspaceManager(
             val jsonDescriptor = JSONObject()
             jsonDescriptor.put(Constants.DEFAULT_TEAMSPACE_TYPE, teamspace.type)
             jsonDescriptor.put(Constants.DEFAULT_TEAMSPACE_ID, teamspace.teamId)
-            SingletonProvider.getUserPreferencesManager().putString(
+            userPreferencesManager.putString(
                 Constants.DEFAULT_TEAMSPACE,
                 jsonDescriptor.toString()
             )
@@ -176,12 +180,11 @@ class TeamspaceManager(
 
     private val defaultSpaceType: Teamspace
         get() {
-            val preferencesManager = SingletonProvider.getUserPreferencesManager()
             try {
-                if (!preferencesManager.exist(Constants.DEFAULT_TEAMSPACE)) {
+                if (!userPreferencesManager.exist(Constants.DEFAULT_TEAMSPACE)) {
                     return defaultTeamspace
                 }
-                val descriptor = preferencesManager.getString(Constants.DEFAULT_TEAMSPACE)
+                val descriptor = userPreferencesManager.getString(Constants.DEFAULT_TEAMSPACE)
                 val jsonDescriptor = JSONObject(descriptor)
                 val type = jsonDescriptor.getInt(Constants.DEFAULT_TEAMSPACE_TYPE)
                 val id = jsonDescriptor.optString(Constants.DEFAULT_TEAMSPACE_ID)
@@ -210,7 +213,6 @@ class TeamspaceManager(
     }
 
     private fun init(teamspace: Teamspace, @StringRes labelResId: Int, @ColorRes colorResId: Int) {
-        val context = SingletonProvider.getContext() ?: return
         val label = context.getString(labelResId)
         val color = ContextCompat.getColor(context, colorResId)
         teamspace.teamName = label
@@ -305,13 +307,11 @@ class TeamspaceManager(
     }
 
     private fun sendStatusUpdate(teamspace: Teamspace, previousStatus: String?) {
-        if (!ThreadHelper.isMainThread()) {
-            SingletonProvider.getThreadHelper().runOnMainThread { sendStatusUpdate(teamspace, previousStatus) }
-            return
-        }
-        val listeners: Set<Listener> = HashSet(listeners)
-        for (reference in listeners) {
-            reference.onStatusChanged(teamspace, previousStatus, teamspace.status)
+        coroutineScope.launch(mainDispatcher) {
+            val listeners: Set<Listener> = HashSet(listeners)
+            for (reference in listeners) {
+                reference.onStatusChanged(teamspace, previousStatus, teamspace.status)
+            }
         }
     }
 
@@ -337,14 +337,16 @@ class TeamspaceManager(
         @Teamspace.Feature feature: String?,
         featureCall: FeatureCall?
     ) {
-        if (Teamspace.Feature.SECURE_NOTES_DISABLED == feature && SingletonProvider.getUserFeatureChecker()
+        if (activity == null) return
+
+        if (Teamspace.Feature.SECURE_NOTES_DISABLED == feature && userFeaturesChecker
                 .has(UserFeaturesChecker.FeatureFlip.DISABLE_SECURE_NOTES)
         ) {
-            teamspaceNotifier.notifyFeatureRestricted(activity, feature)
+            restrictionNotificator.notifyFeatureRestricted(activity, feature)
             return
         }
         if (!isFeatureEnabled(feature!!)) {
-            teamspaceNotifier.notifyFeatureRestricted(activity, feature)
+            restrictionNotificator.notifyFeatureRestricted(activity, feature)
             return
         }
         featureCall!!.startFeature()

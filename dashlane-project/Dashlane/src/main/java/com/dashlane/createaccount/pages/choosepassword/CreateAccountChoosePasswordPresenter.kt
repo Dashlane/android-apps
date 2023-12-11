@@ -5,22 +5,22 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.dashlane.R
 import com.dashlane.createaccount.CreateAccountPresenter
 import com.dashlane.createaccount.pages.CreateAccountBasePresenter
-import com.dashlane.masterpassword.tips.MasterPasswordTipsActivity
-import com.dashlane.util.clearTop
 import com.dashlane.cryptography.ObfuscatedByteArray
+import com.dashlane.masterpassword.tips.MasterPasswordTipsActivity
 import com.dashlane.passwordstrength.PasswordStrength
+import com.dashlane.util.clearTop
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CreateAccountChoosePasswordPresenter(val presenter: CreateAccountPresenter) :
+class CreateAccountChoosePasswordPresenter(private val basePresenter: CreateAccountPresenter) :
     CreateAccountBasePresenter<CreateAccountChoosePasswordContract.DataProvider, CreateAccountChoosePasswordContract.ViewProxy>(),
     CreateAccountChoosePasswordContract.Presenter {
 
     override val nextEnabled: Boolean = true
 
     override val rootView: ConstraintLayout
-        get() = presenter.rootView
+        get() = basePresenter.rootView
 
     override fun onVisibilityChanged(visible: Boolean) {
         if (!visible) {
@@ -28,11 +28,15 @@ class CreateAccountChoosePasswordPresenter(val presenter: CreateAccountPresenter
         } else {
             updateTitle()
         }
+        
+        basePresenter.toggleMplessButtonVisibility(false)
     }
 
     override fun onPasswordChanged(password: CharSequence) {
         if (visible) {
-            view.showPasswordStrength(password.takeIf { it.isNotEmpty() }?.let { provider.getPasswordStrengthAsync(it) })
+            view.showPasswordStrength(
+                password.takeIf { it.isNotEmpty() }?.let { provider.getPasswordStrengthAsync(it) }
+            )
         }
     }
 
@@ -47,7 +51,7 @@ class CreateAccountChoosePasswordPresenter(val presenter: CreateAccountPresenter
 
     override fun notifySuccess(username: String, password: ObfuscatedByteArray) {
         view.showPasswordStrength(null)
-        presenter.showConfirmPasswordPage(username, password)
+        basePresenter.showConfirmPasswordPage(username, password)
     }
 
     override fun onNextClicked() {

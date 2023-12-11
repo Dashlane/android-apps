@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 class AddFirstPasswordPresenter @Inject constructor(
     dataProvider: AddFirstPassword.DataProvider,
-    val logger: AddFirstPasswordLogger,
     private val navigator: Navigator,
     private val dataSync: DataSync
 ) : BasePresenter<AddFirstPassword.DataProvider, AddFirstPassword.ViewProxy>(),
@@ -39,7 +38,6 @@ class AddFirstPasswordPresenter @Inject constructor(
         this.url = url
         view.setupToolbar(view.context.getImageDrawableByWebsiteUrl(url))
         prefillLogin()
-        logger.display()
 
         displayAutofillDemo = savedInstanceState?.getBoolean(EXTRA_DISPLAY_AUTOFILL_PROMPT) ?: false
         savedInstanceState?.getString(EXTRA_SAVED_LOGIN)?.let { savedLogin = it }
@@ -65,7 +63,6 @@ class AddFirstPasswordPresenter @Inject constructor(
     }
 
     override fun onButtonSecureClicked() {
-        logger.onClickSecureButton()
         context?.startActivity<FAQFirstPasswordActivity>(R.anim.slide_in_bottom, R.anim.no_animation) {}
     }
 
@@ -73,15 +70,12 @@ class AddFirstPasswordPresenter @Inject constructor(
         if (displayAutofillDemo) {
             return
         }
-
-        logger.onClickSaveButton()
         val credential = provider.createCredential(url, login, password)
         
         viewModelScope.launch(Dispatchers.Main) {
             if (provider.saveCredential(credential)) {
                 savedLogin = login
                 savedPassword = password.toSyncObfuscatedValue()
-                logger.onCredentialSaved(credential)
                 displayAutofillDemo = true
                 view.displayAutofillDemoPrompt()
                 dataSync.sync(Trigger.SAVE)
@@ -90,7 +84,6 @@ class AddFirstPasswordPresenter @Inject constructor(
     }
 
     override fun onButtonTryDemoClicked() {
-        logger.onClickTryDemo()
         activity?.let {
             val intent = AutofillDemoActivity.newIntent(it, url, savedLogin, savedPassword)
             it.startActivity(intent)
@@ -99,7 +92,6 @@ class AddFirstPasswordPresenter @Inject constructor(
     }
 
     override fun onButtonReturnHomeClicked() {
-        logger.onClickReturnHome()
         view.dismissAutofillDemoPrompt()
         navigator.goToPersonalPlanOrHome()
         activity?.finish()

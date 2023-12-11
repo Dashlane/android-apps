@@ -1,5 +1,6 @@
 package com.dashlane.session.repository
 
+import com.dashlane.braze.BrazeWrapper
 import com.dashlane.hermes.LogRepository
 import com.dashlane.login.LoginInfo
 import com.dashlane.login.LoginLogger
@@ -11,7 +12,6 @@ import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.braze.BrazeWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -35,7 +35,7 @@ class UserAccountInfoRepository @Inject constructor(
     }
 
     override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
-        sessionCoroutineScopeRepository.getCoroutineScope(session).launch(Dispatchers.Default) {
+        sessionCoroutineScopeRepository.getCoroutineScope(session)?.launch(Dispatchers.Default) {
             val refreshUserAccountInfo = getUserAccountInfo(session).let {
                 
                 it.publicUserId == null || it.creationDate == Instant.EPOCH || it.deviceAnalyticsId == null || it.userAnalyticsId == null

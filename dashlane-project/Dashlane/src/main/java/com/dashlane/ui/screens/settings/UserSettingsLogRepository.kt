@@ -1,7 +1,6 @@
 package com.dashlane.ui.screens.settings
 
 import com.dashlane.biometricrecovery.BiometricRecovery
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.hermes.generated.events.user.UserSettings
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.login.lock.LockManager
@@ -38,16 +37,4 @@ class UserSettingsLogRepository @Inject constructor(
             hasAutomaticTwoFactorAuthenticationTokenCopy = userPreferencesManager.getBoolean(ConstantsPrefs.HAS_AUTOMATIC_2FA_TOKEN_COPY)
         )
     }
-}
-
-@Suppress("FunctionNaming")
-fun UserSettingsLogRepository(): UserSettingsLogRepository {
-    val singletonComponent = SingletonProvider.getComponent()
-
-    return UserSettingsLogRepository(
-        lockManager = singletonComponent.lockManager,
-        inAppLoginManager = singletonComponent.inAppLoginManager,
-        biometricRecovery = singletonComponent.biometricRecovery,
-        userPreferencesManager = singletonComponent.userPreferencesManager
-    )
 }

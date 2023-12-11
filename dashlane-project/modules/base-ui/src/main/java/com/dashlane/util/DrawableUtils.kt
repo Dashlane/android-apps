@@ -6,7 +6,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import com.dashlane.ui.drawable.PlaceholderForTextDrawableFactory
-import com.dashlane.util.graphics.RemoteImageRoundRectDrawable
+import com.dashlane.util.graphics.CredentialRemoteDrawable
 
 fun Drawable.toBitmap(): Bitmap = when {
     this is BitmapDrawable -> bitmap
@@ -19,11 +19,11 @@ fun Drawable.toBitmap(): Bitmap = when {
 }
 
 fun Context.getImageDrawableByWebsiteUrl(title: String?, websiteUrl: String?): Drawable {
-    val drawable = RemoteImageRoundRectDrawable(
+    val drawable = CredentialRemoteDrawable(
         this,
         this.getThemeAttrColor(R.attr.colorPrimary)
     )
-    drawable.setPreferImageBackgroundColor(true)
+    drawable.preferImageBackgroundColor = true
     drawable.loadImage(websiteUrl, getPlaceholder(title))
     return drawable
 }

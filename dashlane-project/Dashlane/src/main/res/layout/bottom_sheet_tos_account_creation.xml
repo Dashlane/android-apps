@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:text="@string/create_account_tos_bottom_sheet_title"
         android:textAppearance="?textAppearanceHeadline2"
+        android:textColor="@color/text_neutral_catchy"
         app:layout_constraintBottom_toTopOf="@id/view_tos_offers"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

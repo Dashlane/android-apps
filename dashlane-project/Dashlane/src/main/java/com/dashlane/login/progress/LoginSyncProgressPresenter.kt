@@ -3,9 +3,8 @@ package com.dashlane.login.progress
 import android.app.Activity
 import android.content.Intent
 import com.dashlane.R
-import com.dashlane.async.BroadcastManager
+import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.core.sync.DataSyncStatus
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.login.Device
 import com.dashlane.login.LoginActivity
 import com.dashlane.login.LoginIntents
@@ -13,11 +12,12 @@ import com.dashlane.login.pages.password.InitialSync
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.devices.DeactivateDevicesService
 import com.dashlane.server.api.exceptions.DashlaneApiException
-import com.dashlane.session.Session
+import com.dashlane.session.SessionManager
 import com.dashlane.sync.repositories.SyncProgress
 import com.dashlane.util.Constants
 import com.dashlane.util.clearTask
 import com.dashlane.util.coroutines.DeferredViewModel
+import com.dashlane.util.stackTraceToSafeString
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,12 +32,13 @@ import kotlinx.coroutines.launch
 @Suppress("EXPERIMENTAL_API_USAGE")
 class LoginSyncProgressPresenter(
     private val activity: Activity,
-    private val session: Session,
+    private val sessionManager: SessionManager,
     private val viewProxy: LoginSyncProgressContract.ViewProxy,
     private val initialSync: InitialSync,
     private val devicesToUnregister: List<Device>,
     private val deactivateDevicesService: DeactivateDevicesService,
     private val viewModel: DeferredViewModel<Unit>,
+    private val syncBroadcastManager: SyncBroadcastManager,
     coroutineScope: CoroutineScope
 ) : LoginSyncProgressContract.Presenter, CoroutineScope by coroutineScope {
 
@@ -90,10 +91,10 @@ class LoginSyncProgressPresenter(
         val (progress, message) = when (syncProgress) {
             is SyncProgress.DecipherRemote ->
                 (syncProgress.progress * CHRONOLOGICAL_SYNC_PERCENT_HALF).toInt() to
-                        activity.getString(R.string.login_sync_progress_deciphering)
+                    activity.getString(R.string.login_sync_progress_deciphering)
             is SyncProgress.LocalSync ->
                 (CHRONOLOGICAL_SYNC_PERCENT_HALF + syncProgress.progress * CHRONOLOGICAL_SYNC_PERCENT_HALF).toInt() to
-                        activity.getString(R.string.login_sync_progress_saving)
+                    activity.getString(R.string.login_sync_progress_saving)
             SyncProgress.TreatProblem -> {
                 viewProxy.setMessage(activity.getString(R.string.login_sync_progress_finalizing))
                 finalizationActor.trySend(false)
@@ -109,12 +110,11 @@ class LoginSyncProgressPresenter(
     }
 
     private fun setCompletionSuccess() {
-        BroadcastManager.removeBufferedIntentFor(BroadcastManager.Broadcasts.PasswordBroadcast)
+        syncBroadcastManager.removePasswordBroadcastIntent()
         finalizationActor.trySend(true)
     }
 
     private suspend fun setCompletionError() {
-        val sessionManager = SingletonProvider.getComponent().sessionManager
         sessionManager.session?.let { sessionManager.destroySession(it, byUser = false, forceLogout = false) }
 
         val intent = Intent(activity, LoginActivity::class.java).apply {
@@ -174,9 +174,10 @@ class LoginSyncProgressPresenter(
     }
 
     private suspend fun unregisterDevices(): Boolean {
+        val session = sessionManager.session ?: return false
         if (devicesToUnregister.isNotEmpty()) {
             val devices = devicesToUnregister.filter { it.pairingGroupId == null }
-            val groups = devicesToUnregister.minus(devices)
+            val groups = devicesToUnregister.minus(devices.toSet())
             try {
                 deactivateDevicesService.execute(
                     session.authorization,

@@ -16,6 +16,7 @@ enum class MatchPosition {
 
 enum class ItemType {
     CREDENTIAL,
+    PASSKEY,
     BANK_STATEMENT,
     CREDIT_CARD,
     PAYPAL,

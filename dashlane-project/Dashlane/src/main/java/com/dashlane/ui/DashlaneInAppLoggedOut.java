@@ -10,15 +10,21 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.dashlane.R;
-import com.dashlane.dagger.singleton.SingletonProvider;
+import com.dashlane.lock.LockHelper;
 import com.dashlane.util.DeviceUtils;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import wei.mark.standout.StandOutWindow;
 import wei.mark.standout.constants.StandOutFlags;
 import wei.mark.standout.ui.Window;
 
+@AndroidEntryPoint
 public class DashlaneInAppLoggedOut extends AbstractDashlaneSubwindow implements View.OnClickListener {
 
+    @Inject
+    LockHelper lockHelper;
     public static final int WINDOW_ID = DashlaneInAppLoggedOut.class.hashCode();
     public static final String DATA_PACKAGE_NAME = "data_package_name";
 
@@ -98,7 +104,7 @@ public class DashlaneInAppLoggedOut extends AbstractDashlaneSubwindow implements
     @Override
     public void onClick(View v) {
         if (R.id.log_in_with_dashlane_yes == v.getId()) {
-            SingletonProvider.getComponent().getLockHelper().logoutAndCallLoginScreenForInAppLogin(this);
+            lockHelper.logoutAndCallLoginScreenForInAppLogin(this);
             new Handler().postDelayed(() -> StandOutWindow.closeAll(DashlaneInAppLoggedOut.this, DashlaneBubble.class), 750);
         }
         StandOutWindow.closeAll(this, DashlaneInAppLoggedOut.class);

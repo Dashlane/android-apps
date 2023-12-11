@@ -7,7 +7,6 @@ import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.SocialSecurityLogger
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
@@ -15,13 +14,11 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
@@ -35,23 +32,10 @@ import java.time.LocalDate
 class ItemScreenConfigurationSocialSecurityProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val vaultItemLogger: VaultItemLogger,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
-
-    override val logger = SocialSecurityLogger(
-        teamspaceAccessor,
-        mainDataAccessor.getDataCounter(),
-        sessionManager,
-        bySessionUsageLogRepository
-    )
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -159,16 +143,18 @@ class ItemScreenConfigurationSocialSecurityProvider(
             itemSubView?.let {
                 ItemSubViewWithActionWrapper(
                     it,
-                    CopyAction(item.toSummary(), CopyField.SocialSecurityNumber, action = {
-                        logger.logCopyNumber()
-                    })
+                    CopyAction(
+                        summaryObject = item.toSummary(),
+                        copyField = CopyField.SocialSecurityNumber,
+                        action = {},
+                        vaultItemCopy = vaultItemCopy
+                    )
                 )
             }
         }
     }
 
     private fun logRevealNumber(item: VaultItem<SyncObject.SocialSecurityStatement>) {
-        logger.logRevealNumber()
         vaultItemLogger.logRevealField(Field.SOCIAL_SECURITY_NUMBER, item.uid, ItemType.SOCIAL_SECURITY, null)
     }
 
@@ -177,7 +163,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
             item.syncObject.socialSecurityFullname
 
         override fun withFullName(item: VaultItem<SyncObject.SocialSecurityStatement>, fullName: String?):
-                VaultItem<SyncObject.SocialSecurityStatement> =
+            VaultItem<SyncObject.SocialSecurityStatement> =
             item.copySyncObject { socialSecurityFullname = fullName }
 
         override fun gender(item: VaultItem<SyncObject.SocialSecurityStatement>): SyncObject.Gender? =
@@ -192,13 +178,13 @@ class ItemScreenConfigurationSocialSecurityProvider(
         override fun birthDate(item: VaultItem<SyncObject.SocialSecurityStatement>) = item.syncObject.dateOfBirth
 
         override fun withBirthDate(item: VaultItem<SyncObject.SocialSecurityStatement>, birthDate: LocalDate?):
-                VaultItem<SyncObject.SocialSecurityStatement> = item.copySyncObject { dateOfBirth = birthDate }
+            VaultItem<SyncObject.SocialSecurityStatement> = item.copySyncObject { dateOfBirth = birthDate }
 
         override fun linkedIdentity(item: VaultItem<SyncObject.SocialSecurityStatement>) =
             item.syncObject.linkedIdentity
 
         override fun withLinkedIdentity(item: VaultItem<SyncObject.SocialSecurityStatement>, identity: String?):
-                VaultItem<SyncObject.SocialSecurityStatement> =
+            VaultItem<SyncObject.SocialSecurityStatement> =
             item.copySyncObject { linkedIdentity = identity }
     }
 }

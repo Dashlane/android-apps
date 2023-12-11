@@ -12,16 +12,16 @@
     <string name="and_accessibility_remove_category">Remove</string>
 
     
-    <string name="generic_error_title">Error</string>
+    <string name="generic_error_title">Something went wrong</string>
     
     <string name="generic_error_message">An unexpected error occurred. Please try again.</string>
     
-    <string name="generic_error_retry_button">Retry</string>
+    <string name="generic_error_retry_button">Try again</string>
     
     <string name="generic_error_cancel_button">Cancel</string>
 
     
-    <string name="collection_search_field_label">Category name</string>
+    <string name="collection_search_field_label">Collection name</string>
     
     <string name="collection_search_field_placeholder">Select or create...</string>
 </resources>

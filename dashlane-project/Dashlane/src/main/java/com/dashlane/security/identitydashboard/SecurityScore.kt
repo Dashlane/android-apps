@@ -4,7 +4,7 @@ import com.dashlane.security.identitydashboard.SecurityScore.Companion.D
 import com.dashlane.security.identitydashboard.SecurityScore.Companion.X
 import kotlin.math.pow
 
-class SecurityScore {
+class SecurityScore private constructor(val value: Float) {
 
     companion object {
         private const val MIN_SCORE = 0.2f
@@ -13,18 +13,27 @@ class SecurityScore {
         private const val N = 1.0f
         private const val D = 0.6f
 
+        fun ofValue(value: Float): SecurityScore? {
+            return if (value in MIN_SCORE..M) {
+                SecurityScore(value)
+            } else {
+                null
+            }
+        }
+
         fun getSecurityScore(
             allCorrupted: Int,
             importantCorrupted: Int,
             accountCount: Int
-        ): Float {
+        ): SecurityScore? {
             if (accountCount < X) {
-                return -1.0f
+                return null
             }
 
-            val important = D * (1.0f - importantCorrupted.toFloat() / accountCount.toFloat()).pow(N)
+            val important =
+                D * (1.0f - importantCorrupted.toFloat() / accountCount.toFloat()).pow(N)
             val base = (1.0f - D) * (1.0f - allCorrupted.toFloat() / accountCount.toFloat()).pow(M)
-            return MIN_SCORE + (1 - MIN_SCORE) * (important + base)
+            return ofValue(MIN_SCORE + (1 - MIN_SCORE) * (important + base))
         }
     }
 }

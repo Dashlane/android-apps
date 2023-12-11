@@ -1,8 +1,9 @@
 package com.dashlane.util;
 
+import android.content.Context;
+
 import com.dashlane.BuildConfig;
 import com.dashlane.R;
-import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.notification.model.TokenNotificationHandler;
 import com.dashlane.xml.domain.SyncObjectType;
 
@@ -11,24 +12,21 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class Constants {
-    static final String URL_VALID_REGEX = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;" +
-                                          "]*[-a-zA-Z0-9+&@#/%=~_|]";
-
     public static final int NB_DAYS_BEFORE_REMINDER_PREMIUM = 7;
     public static final String DEFAULT_TEAMSPACE = "default_space";
     public static final String DEFAULT_TEAMSPACE_TYPE = "default_space_type";
     public static final String DEFAULT_TEAMSPACE_ID = "default_space_id";
-
+    public static final long PREMIUM_NEW_DEVICE_RECURRING_DELAY_MS = TimeUnit.DAYS.toMillis(15);
+    public static final int PREMIUM_NEW_DEVICE_RECURRING_MAX_COUNT = 3;
+    static final String URL_VALID_REGEX = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;" +
+        "]*[-a-zA-Z0-9+&@#/%=~_|]";
     private Constants() {
         
     }
 
-    public static final long PREMIUM_NEW_DEVICE_RECURRING_DELAY_MS = TimeUnit.DAYS.toMillis(15);
-    public static final int PREMIUM_NEW_DEVICE_RECURRING_MAX_COUNT = 3;
-
-    public static String getLang() {
+    public static String getLang(Context context) {
         try {
-            return SingletonProvider.getContext().getString(R.string.language_iso_639_1);
+            return context.getString(R.string.language_iso_639_1);
         } catch (Exception e) {
             return "EN";
         }
@@ -120,8 +118,9 @@ public class Constants {
         public static final String CLEAR_GCM_NOTIFICATION = "com.dashlane.gcm.CLEAR_NOTIFICATIONS";
 
         public static final HashMap<String, TokenNotificationHandler> Token =
-                new HashMap<String, TokenNotificationHandler>();
+            new HashMap<String, TokenNotificationHandler>();
         public static final HashMap<String, Boolean> TokenShouldNotify = new HashMap<String, Boolean>();
+
         private GCM() {
             
         }
@@ -140,26 +139,26 @@ public class Constants {
     public static class MENU_ORDERS {
 
         public static final SyncObjectType[] IDS_ORDER = new SyncObjectType[]{
-                SyncObjectType.ID_CARD,
-                SyncObjectType.PASSPORT,
-                SyncObjectType.DRIVER_LICENCE,
-                SyncObjectType.SOCIAL_SECURITY_STATEMENT,
-                SyncObjectType.FISCAL_STATEMENT
+            SyncObjectType.ID_CARD,
+            SyncObjectType.PASSPORT,
+            SyncObjectType.DRIVER_LICENCE,
+            SyncObjectType.SOCIAL_SECURITY_STATEMENT,
+            SyncObjectType.FISCAL_STATEMENT
         };
 
         public static final SyncObjectType[] CONTACTS_ORDER = new SyncObjectType[]{
-                SyncObjectType.IDENTITY,
-                SyncObjectType.EMAIL,
-                SyncObjectType.PHONE,
-                SyncObjectType.ADDRESS,
-                SyncObjectType.COMPANY,
-                SyncObjectType.PERSONAL_WEBSITE
+            SyncObjectType.IDENTITY,
+            SyncObjectType.EMAIL,
+            SyncObjectType.PHONE,
+            SyncObjectType.ADDRESS,
+            SyncObjectType.COMPANY,
+            SyncObjectType.PERSONAL_WEBSITE
         };
 
         public static final SyncObjectType[] PAYMENTS_ORDER = new SyncObjectType[]{
-                SyncObjectType.PAYMENT_CREDIT_CARD,
-                SyncObjectType.PAYMENT_PAYPAL,
-                SyncObjectType.BANK_STATEMENT
+            SyncObjectType.PAYMENT_CREDIT_CARD,
+            SyncObjectType.PAYMENT_PAYPAL,
+            SyncObjectType.BANK_STATEMENT
         };
 
         private MENU_ORDERS() {

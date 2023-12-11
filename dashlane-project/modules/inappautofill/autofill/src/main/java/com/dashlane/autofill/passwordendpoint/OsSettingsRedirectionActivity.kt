@@ -1,11 +1,11 @@
 package com.dashlane.autofill.passwordendpoint
 
 import androidx.appcompat.app.AppCompatActivity
-import com.dashlane.autofill.api.internal.AutofillApiComponent
+import com.dashlane.autofill.internal.AutofillApiEntryPoint
 
 open class OsSettingsRedirectionActivity : AppCompatActivity() {
-    private val autofillComponent: AutofillApiComponent
-        get() = AutofillApiComponent(this)
+    private val autofillComponent: AutofillApiEntryPoint
+        get() = AutofillApiEntryPoint(this)
 
     protected val navigationService by lazy { autofillComponent.navigationService }
 }

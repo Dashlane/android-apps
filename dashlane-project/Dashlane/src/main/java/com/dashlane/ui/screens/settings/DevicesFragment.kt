@@ -12,7 +12,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.endpoints.devices.ListDevicesService.Data.Device
@@ -133,7 +132,7 @@ class DevicesFragment : AbstractContentFragment() {
             .append(getString(R.string.device_name))
             .append("\n")
             .append(device.name)
-        val deviceId = SingletonProvider.getSessionManager().session!!.deviceId
+        val deviceId = sessionManager.session!!.deviceId
         val isCurrentDevice = deviceId == device.id
         if (isCurrentDevice) {
             devInfo.append("\n").append(getString(R.string.device_this_device).uppercase(Locale.getDefault()))
@@ -145,11 +144,11 @@ class DevicesFragment : AbstractContentFragment() {
             .append("\n\n")
             .append(getString(R.string.device_created))
             .append("\n")
-            .append(device.formattedCreationDate)
+            .append(device.formattedCreationDate(requireContext()))
             .append("\n\n")
             .append(getString(R.string.device_lastupdate))
             .append("\n")
-            .append(device.formattedUpdateDate)
+            .append(device.formattedUpdateDate(requireContext()))
         var deleteDevice: String? = getString(R.string.delete_device)
         if (isCurrentDevice) {
             deleteDevice = null

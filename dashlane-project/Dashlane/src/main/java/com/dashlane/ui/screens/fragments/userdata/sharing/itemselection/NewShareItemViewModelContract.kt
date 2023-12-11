@@ -1,13 +1,11 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.itemselection
 
-import com.dashlane.useractivity.log.usage.UsageLogCode80
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface NewShareItemViewModelContract {
-    val ulFrom: UsageLogCode80.From?
     val uiState: Flow<UIState>
     val selectionState: StateFlow<SelectionState>
     fun onQueryChange(query: String = ""): Boolean

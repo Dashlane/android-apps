@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="paywall_intro_upgrade_premium_cta">Upgrade to Premium</string>
+    
+    <string name="paywall_intro_buy_premium_cta">Buy Premium</string>
+    
+    <string name="paywall_intro_buy_advance_cta">Buy Advanced</string>
+
     <string name="paywall_intro_see_plan_options_cta">See plan options</string>
     <string name="paywall_intro_close_cta">Cancel</string>
 
-    <string name="paywall_intro_dwm_title">Dark Web Monitoring is a Premium feature</string>
-    <string name="paywall_intro_dwm_message">Upgrade to our Premium plan to monitor and protect yourself against hacks and data breaches.</string>
+    <string name="paywall_intro_dwm_title">Upgrade to get access to Dark Web Monitoring</string>
+    
+    <string name="paywall_intro_dwm_message_1">24/7 dark web scanning</string>
+    
+    <string name="paywall_intro_dwm_message_2">Security alerts and breaches reports</string>
+    
+    <string name="paywall_intro_dwm_message_3">Help with securing your logins</string>
 
-    <string name="paywall_intro_vpn_third_party_title">VPN is a Premium feature</string>
-    <string name="paywall_intro_vpn_third_party_message">We’ve partnered with Hotspot Shield to offer Premium users the fastest virtual private network (VPN) on the market.</string>
+    <string name="paywall_intro_vpn_third_party_title">Get access to the fastest VPN on the market</string>
+    
+    <string name="paywall_intro_vpn_third_party_message_1">Stream and download with Hotspot Shield, the “world’s fastest VPN”</string>
+    
+    <string name="paywall_intro_vpn_third_party_message_2">Stay anonymous and protected with military-grade encryption</string>
+    
+    <string name="paywall_intro_vpn_third_party_message_3">Unlock worldwide content with over 115+ virtual locations</string>
+    
+    <string name="paywall_intro_vpn_learn_more_cta">Learn more about hotspot shield</string>
+
     <string name="paywall_intro_vpn_third_party_title_in_trial">VPN isn’t available during your trial</string>
     <string name="paywall_intro_vpn_third_party_message_in_trial">Upgrade to our Premium plan to browse privately and securely online with a virtual private network (VPN).</string>
 

@@ -6,7 +6,6 @@ import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorageImpl
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.lock.LockSetting
 import com.dashlane.login.lock.LockTypeManager
@@ -26,6 +25,7 @@ import com.dashlane.login.pages.token.LoginTokenDataProvider
 import com.dashlane.login.pages.totp.LoginTotpContract
 import com.dashlane.login.pages.totp.LoginTotpDataProvider
 import com.dashlane.login.sso.MigrationToSsoMemberInfo
+import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
@@ -50,7 +50,8 @@ class LoginDataProvider @Inject constructor(
     private val lockTypeManager: LockTypeManager,
     private val sessionManager: SessionManager,
     private val sessionRestorer: SessionRestorer,
-    private val userPreferencesManager: UserPreferencesManager
+    private val userPreferencesManager: UserPreferencesManager,
+    private val globalPreferencesManager: GlobalPreferencesManager
 ) : BaseDataProvider<LoginContract.Presenter>(), LoginContract.DataProvider {
 
     override lateinit var lockSetting: LockSetting
@@ -65,7 +66,7 @@ class LoginDataProvider @Inject constructor(
 
     override val currentUserInfo: UserAccountInfo?
         get() {
-            val user = SingletonProvider.getGlobalPreferencesManager().getDefaultUsername()
+            val user = globalPreferencesManager.getDefaultUsername()
             return if (user == null) null else userAccountStorage[user]
         }
 

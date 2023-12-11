@@ -21,8 +21,11 @@ import com.dashlane.util.generateUniqueIdentifier
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.toVaultItem
 import com.dashlane.xml.XmlBackup
+import com.dashlane.xml.XmlTransaction
+import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.toObject
 import com.dashlane.xml.domain.toTransaction
@@ -79,7 +82,6 @@ class SecureArchiveManager @Inject constructor(
         savedItems
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext") 
     suspend fun export(password: String): List<VaultItem<*>> = withContext(Dispatchers.Default) {
         if (password.isEmpty()) throw InvalidPassword()
 
@@ -130,24 +132,55 @@ class SecureArchiveManager @Inject constructor(
     }
 
     private fun readSecureArchive(uri: Uri): XmlArchive? = tryOrNull {
-        context.contentResolver.openInputStream(uri)?.reader()?.use { reader ->
-            archiveReader.read(reader)
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            inputStream.reader().use { archiveReader.read(it) }
         }
     }
 
     private fun XmlBackup.generateNewVaultList(): List<VaultItem<*>> {
-        return toTransactionList().mapNotNull { transactionXml ->
-            SyncObjectType.forXmlNameOrNull(transactionXml.type)
-                ?.takeUnless { it == SyncObjectType.SETTINGS }
-                ?.let { type ->
+        val oldToNewIds = mutableMapOf<String, String>()
+        val transactionList = toTransactionList()
+        return transactionList.mapNotNull { transactionXml ->
+            SyncObjectType.forXmlNameOrNull(transactionXml.type)?.takeUnless {
+                    
+                    
+                    it == SyncObjectType.SETTINGS || it == SyncObjectType.COLLECTION
+                }?.let { type ->
                     val syncObject = transactionXml.toObject(type)
+                    val newId = generateUniqueIdentifier()
+                    
+                    syncObject.id?.let { oldToNewIds[it] = newId }
                     syncObject.toVaultItem(
-                        overrideUid = generateUniqueIdentifier(),
+                        overrideUid = newId,
                         overrideAnonymousUid = generateUniqueIdentifier(),
                         syncState = SyncState.MODIFIED
                     )
                 }
-        }
+        } + collectionsWithItemLinkUpdated(transactionList, oldToNewIds)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun collectionsWithItemLinkUpdated(
+        transactionList: List<XmlTransaction>,
+        oldToNewIds: Map<String, String>
+    ) = transactionList.mapNotNull { transactionXml ->
+        SyncObjectType.forXmlNameOrNull(transactionXml.type)
+            ?.takeIf { it == SyncObjectType.COLLECTION }?.let { type ->
+                val collection = transactionXml.toObject(type).toVaultItem(
+                    overrideUid = generateUniqueIdentifier(),
+                    overrideAnonymousUid = generateUniqueIdentifier(),
+                    syncState = SyncState.MODIFIED
+                ) as VaultItem<SyncObject.Collection>
+                collection.copySyncObject {
+                    val newVaultItems = vaultItems?.mapNotNull newVaultItem@{ vaultItem ->
+                        val newId = vaultItem.id?.let { oldToNewIds[vaultItem.id] }
+                        
+                            ?: return@newVaultItem null
+                        vaultItem.copy { id = newId }
+                    }
+                    vaultItems = newVaultItems
+                }
+            }
     }
 
     private fun List<VaultItem<*>>.toSyncBackupWithIdsList(): Pair<XmlBackup, MutableList<String>> {
@@ -186,8 +219,9 @@ class SecureArchiveManager @Inject constructor(
             SyncObjectType.SECURE_NOTE,
             SyncObjectType.SECURE_FILE_INFO,
             SyncObjectType.SECURE_NOTE_CATEGORY,
-            SyncObjectType.AUTH_CATEGORY,
-            SyncObjectType.AUTHENTIFIANT
+            SyncObjectType.AUTHENTIFIANT,
+            SyncObjectType.COLLECTION,
+            SyncObjectType.PASSKEY
         )
     }
 }

@@ -7,14 +7,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.lock.LockHelper
 import com.dashlane.navigation.Navigator
+import com.dashlane.permission.PermissionsManager
 import com.dashlane.ui.ActivityLifecycleListener
+import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.applyScreenshotAllowedFlag
-import com.dashlane.ui.component.UiPartComponent
+import com.dashlane.ui.component.UiPartEntryPoint
 import com.dashlane.ui.disableAutoFill
 import com.dashlane.ui.util.ActionBarUtil
 import com.dashlane.util.CurrentPageViewLogger
-import kotlinx.coroutines.CoroutineScope
+import dagger.hilt.android.EntryPointAccessors
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
 
 abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPageViewLogger.Owner {
 
@@ -29,18 +32,26 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
     open val applicationLockedOrLogout: Boolean
         get() = lockHelper.isLockedOrLogout()
 
-    lateinit var uiPartComponent: UiPartComponent
-        private set
-
     val navigator: Navigator
-        get() = uiPartComponent.navigator
+        get() = uiPartEntryPoint.navigator
 
     val lockHelper: LockHelper
-        get() = uiPartComponent.lockHelper
+        get() = uiPartEntryPoint.lockHelper
+
+    val permissionsManager: PermissionsManager
+        get() = uiPartEntryPoint.permissionsManager
+
+    val screenshotPolicy: ScreenshotPolicy
+        get() = uiPartEntryPoint.screenshotPolicy
 
     private val lifecycleListener: ActivityLifecycleListener
-        get() = uiPartComponent.activityLifecycleListener
+        get() = uiPartEntryPoint.activityLifecycleListener
 
+    private val uiPartEntryPoint: UiPartEntryPoint
+        get() = EntryPointAccessors.fromApplication(
+            this,
+            UiPartEntryPoint::class.java
+        )
     private var wasLock = false
 
     val actionBarUtil: ActionBarUtil by lazy { ActionBarUtil(this) }
@@ -48,8 +59,7 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
     override val currentPageViewLogger by lazy { CurrentPageViewLogger(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        uiPartComponent = UiPartComponent.invoke(this)
-        window?.applyScreenshotAllowedFlag(uiPartComponent.screenshotPolicy)
+        window?.applyScreenshotAllowedFlag(screenshotPolicy)
         disableAutoFill()
         super.onCreate(savedInstanceState)
     }
@@ -77,7 +87,7 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        uiPartComponent.permissionsManager.onRequestPermissionResult(this, permissions, requestCode, grantResults)
+        permissionsManager.onRequestPermissionResult(this, permissions, requestCode, grantResults)
     }
 
     open fun onApplicationUnlocked() {

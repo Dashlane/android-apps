@@ -43,14 +43,14 @@ public class PinCodeView extends LinearLayout {
         }
     }
 
-    public void setPinsVisible(int pinCount, int underLineFocusedColor, int underLineDefaultColor) {
+    public void setPinsVisible(int pinCount, int underlineFilledColor, int underLineFocusedColor, int underLineDefaultColor) {
         for (int i = 0; i < getChildCount(); i++) {
             View dotView = getDotView(i);
             View underlineView = getUnderlineView(i);
             boolean hasValue = i < pinCount;
             if (hasValue) {
                 dotView.setVisibility(View.VISIBLE);
-                underlineView.setBackgroundColor(underLineFocusedColor);
+                underlineView.setBackgroundColor(underlineFilledColor);
             } else {
                 dotView.setVisibility(View.INVISIBLE);
                 if (i == pinCount) {

@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -114,6 +115,9 @@ class GetStartedStepView @JvmOverloads constructor(
         if (expanded != value) {
             expanded = value
             updateExpandState(value, animate, duration)
+        }
+        if (expanded) {
+            subtitle.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
         }
     }
 

@@ -46,7 +46,7 @@ class LoginDashlaneAuthenticatorViewProxy(view: View) :
             loaderView.addValueCallback(
                 KeyPath("load 2", "**"),
                 LottieProperty.STROKE_COLOR
-            ) { context.getColor(R.color.text_inverse_standard) }
+            ) { context.getColor(R.color.text_brand_standard) }
             loaderView.addValueCallback(
                 KeyPath("load 3", "**"),
                 LottieProperty.STROKE_COLOR

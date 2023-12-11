@@ -17,14 +17,21 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import com.bumptech.glide.Glide
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.announcements.AnnouncementCenter
+import com.dashlane.navigation.Navigator
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isNullOrEmpty
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 open class NotificationDialogFragment : AbstractDialogFragment() {
 
-    private val dialogHelper = SingletonProvider.getDialogHelper()
-    private val announcementCenter = SingletonProvider.getAnnouncementCenter()
+    @Inject
+    lateinit var announcementCenter: AnnouncementCenter
+
+    @Inject
+    lateinit var navigator: Navigator
 
     var clicker: TwoButtonClicker? = null
     var title: String? = null
@@ -200,7 +207,7 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
         }
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse(deepLink)
-        SingletonProvider.getNavigator().handleDeepLink(intent)
+        navigator.handleDeepLink(intent)
     }
 
     interface TwoButtonClicker {

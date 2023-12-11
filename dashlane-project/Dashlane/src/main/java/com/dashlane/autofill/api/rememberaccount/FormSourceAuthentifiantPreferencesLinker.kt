@@ -1,6 +1,6 @@
 package com.dashlane.autofill.api.rememberaccount
 
-import com.dashlane.autofill.api.rememberaccount.services.FormSourceAuthentifiantLinker
+import com.dashlane.autofill.rememberaccount.services.FormSourceAuthentifiantLinker
 import com.dashlane.preference.GlobalPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -12,12 +12,13 @@ import com.dashlane.login.LoginLogger
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyActivity
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockSetting
+import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginLockBasePresenter
 import com.dashlane.login.pages.LoginSwitchAccountUtil
 import com.dashlane.login.pages.password.LoginPasswordContract.InvalidPasswordException.InvalidReason
 import com.dashlane.login.root.LoginPresenter
-import com.dashlane.useractivity.log.usage.UsageLogConstant
+import com.dashlane.util.Toaster
 import com.dashlane.util.coroutines.DeferredViewModel
 import com.dashlane.util.getFormattedSpannable
 import com.dashlane.util.getWindowSizeWithoutStatusBar
@@ -34,21 +35,23 @@ import kotlinx.coroutines.launch
 
 @Suppress("LargeClass")
 class LoginPasswordPresenter(
+    private val passwordValidationHolder: DeferredViewModel<LoginPasswordContract.SuccessfulLogin>,
+    private val loginLogger: LoginLogger,
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
-    private val passwordValidationHolder: DeferredViewModel<LoginPasswordContract.SuccessfulLogin>,
     lockManager: LockManager,
-    private val loginLogger: LoginLogger
+    toaster: Toaster
 ) : LoginLockBasePresenter<LoginPasswordContract.DataProvider, LoginPasswordContract.ViewProxy>(
-    rootPresenter,
-    coroutineScope,
-    lockManager
+    rootPresenter = rootPresenter,
+    coroutineScope = coroutineScope,
+    lockManager = lockManager,
+    toaster = toaster
 ),
-LoginPasswordContract.Presenter {
+    LoginPasswordContract.Presenter {
 
     private var unlockBiometricRecovery: CompletableDeferred<Unit>? = null
 
-    override val lockTypeName: String = UsageLogConstant.LockType.master
+    override val lockTypeName: Int = LockTypeManager.LOCK_TYPE_MASTER_PASSWORD
 
     private sealed class Command {
         object Login : Command()
@@ -133,7 +136,6 @@ LoginPasswordContract.Presenter {
             if (resultCode == Activity.RESULT_OK) {
                 provider.getChangeMPIntent()?.let {
                     activity?.startActivity(it)
-                    provider.onGoToChangeMP()
                 }
             } else if (!provider.lockSetting.isLoggedIn) {
                 
@@ -143,7 +145,8 @@ LoginPasswordContract.Presenter {
         } else if (requestCode == RESULT_FOR_ACCOUNT_RECOVERY_KEY) {
             if (resultCode == Activity.RESULT_OK) {
                 coroutineScope.launch {
-                    val password = data?.getSerializableExtra(LoginAccountRecoveryKeyActivity.ACCOUNT_RECOVERY_PASSWORD_RESULT) as? ObfuscatedByteArray
+                    val password =
+                        data?.getSerializableExtra(LoginAccountRecoveryKeyActivity.ACCOUNT_RECOVERY_PASSWORD_RESULT) as? ObfuscatedByteArray
                     password?.let { login(it.decodeUtf8ToString()) }
                 }
             } else if (!provider.lockSetting.isLoggedIn) {

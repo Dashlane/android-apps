@@ -15,34 +15,43 @@ import androidx.annotation.RequiresApi
 import androidx.autofill.inline.UiVersions
 import androidx.compose.ui.platform.AndroidUiDispatcher.Companion.Main
 import com.dashlane.autofill.AutoFillBlackListImpl
+import com.dashlane.autofill.AutofillAnalyzerDef
+import com.dashlane.autofill.FillRequestHandler
 import com.dashlane.autofill.accessibility.AccessibilityApiServiceDetector
 import com.dashlane.autofill.accessibility.AccessibilityApiServiceDetectorImpl
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.api.dagger.AutofillApiInternalComponent
-import com.dashlane.autofill.api.internal.AutofillApiComponent
-import com.dashlane.autofill.api.internal.AutofillLimiter
-import com.dashlane.autofill.api.request.save.SaveRequestActivity
 import com.dashlane.autofill.api.util.AutofillValueFactoryAndroidImpl
 import com.dashlane.autofill.formdetector.AutoFillHintsExtractor
 import com.dashlane.autofill.formdetector.AutofillPackageNameAcceptor
 import com.dashlane.autofill.formdetector.BrowserDetectionHelper
+import com.dashlane.autofill.internal.AutofillLimiter
+import com.dashlane.autofill.request.save.SaveRequestActivity
+import com.dashlane.logger.developerinfo.DeveloperInfoLogger
+import com.dashlane.util.stackTraceToSafeString
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
+@AndroidEntryPoint
 class AutoFillAPIService : AutofillService(), CoroutineScope {
 
-    private val component: AutofillApiComponent by lazy(LazyThreadSafetyMode.NONE) {
-        AutofillApiComponent(this)
-    }
+    @Inject
+    lateinit var databaseAccess: AutofillAnalyzerDef.DatabaseAccess
 
-    private val componentInternal: AutofillApiInternalComponent by lazy(LazyThreadSafetyMode.NONE) {
-        AutofillApiInternalComponent(this)
-    }
+    @Inject
+    lateinit var userPreferencesAccess: AutofillAnalyzerDef.IUserPreferencesAccess
 
-    private val autofillLimiter: AutofillLimiter
-        get() = component.autofillLimiter
+    @Inject
+    lateinit var fillRequestHandler: FillRequestHandler
+
+    @Inject
+    lateinit var autofillLimiter: AutofillLimiter
+
+    @Inject
+    lateinit var developerInfoLogger: DeveloperInfoLogger
 
     private val job = Job()
 
@@ -80,19 +89,15 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
         cancellationSignal: CancellationSignal,
         callback: FillCallback
     ) {
-        val inlineSpecs: List<InlinePresentationSpec>? =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && canUseInlineAutofill(request)) {
-                request.inlineSuggestionsRequest!!.inlinePresentationSpecs
-            } else {
-                null
-            }
+        val inlineSpecs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && canUseInlineAutofill(request)) {
+            request.inlineSuggestionsRequest!!.inlinePresentationSpecs
+        } else {
+            null
+        }
 
         val mBlacklistPackages = AutoFillBlackListImpl()
         val autofillValueFactory = AutofillValueFactoryAndroidImpl()
-        val packageNameAcceptor = AutofillPackageNameAcceptor(
-            mBlacklistPackages,
-            accessibilityApiServiceDetector
-        )
+        val packageNameAcceptor = AutofillPackageNameAcceptor(mBlacklistPackages, accessibilityApiServiceDetector)
         val autoFillHintsExtractor = AutoFillHintsExtractor(autofillValueFactory, packageNameAcceptor)
 
         launch(Main) {
@@ -105,6 +110,11 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
                     request.getFocusAutofillId()
                 )
             } catch (e: Exception) {
+                developerInfoLogger.log(
+                    action = "autofill_error",
+                    message = e.message,
+                    exceptionType = e.stackTraceToSafeString()
+                )
                 respondSuccess(callback)
             }
         }
@@ -112,8 +122,7 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun canUseInlineAutofill(request: FillRequest): Boolean {
-        val style =
-            request.inlineSuggestionsRequest?.inlinePresentationSpecs?.get(0)?.style ?: return false
+        val style = request.inlineSuggestionsRequest?.inlinePresentationSpecs?.get(0)?.style ?: return false
 
         
         return hasInlineAutofillEnabled() && UiVersions.getVersions(style)
@@ -121,7 +130,7 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
     }
 
     private fun hasInlineAutofillEnabled() =
-        component.userPreferencesAccess.hasKeyboardAutofillEnabled()
+        userPreferencesAccess.hasKeyboardAutofillEnabled()
 
     private fun respondSuccess(
         callback: FillCallback,
@@ -151,7 +160,7 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
         }
 
         val fillResponse = summary?.let {
-            componentInternal.fillRequestHandler.getFillResponse(
+            fillRequestHandler.getFillResponse(
                 this@AutoFillAPIService,
                 request.clientState,
                 summary,
@@ -173,7 +182,8 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
             mBlacklistPackages,
             accessibilityApiServiceDetector
         )
-        val autoFillHintsExtractor = AutoFillHintsExtractor(autofillValueFactory, packageNameAcceptor)
+        val autoFillHintsExtractor =
+            AutoFillHintsExtractor(autofillValueFactory, packageNameAcceptor)
 
         
         val summary = autoFillHintsExtractor.extract(request)
@@ -184,7 +194,13 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            callback.onSuccess(SaveRequestActivity.getSaveRequestPendingIntent(this, summary, request))
+            callback.onSuccess(
+                SaveRequestActivity.getSaveRequestPendingIntent(
+                    this,
+                    summary,
+                    request
+                )
+            )
         } else {
             SaveRequestActivity.getSaveRequestIntent(this, summary, request)
             
@@ -194,7 +210,7 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onSavedDatasetsInfoRequest(callback: SavedDatasetsInfoCallback) {
-        val numberOfPasswords: Int = component.databaseAccess.authentifiantCount
+        val numberOfPasswords: Int = databaseAccess.authentifiantCount
         if (numberOfPasswords != -1) {
             callback.onSuccess(
                 setOf(

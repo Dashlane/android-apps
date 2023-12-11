@@ -2,6 +2,7 @@ package com.dashlane.login
 
 import android.app.Activity
 import android.content.Intent
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.login.devicelimit.UnlinkDevicesActivity
 import com.dashlane.login.monobucket.MonobucketActivity
@@ -49,8 +50,12 @@ class LoginSuccessIntentFactory @Inject constructor(
         )
     }
 
-    fun createAccountRecoveryKeyIntent(registeredUserDevice: RegisteredUserDevice, authTicket: String?): Intent {
-        return LoginIntents.createAccountRecoveryKeyIntent(activity, registeredUserDevice, authTicket)
+    fun createAccountRecoveryKeyIntent(
+        registeredUserDevice: RegisteredUserDevice,
+        accountType: UserAccountInfo.AccountType,
+        authTicket: String?
+    ): Intent {
+        return LoginIntents.createAccountRecoveryKeyIntent(activity, registeredUserDevice, accountType, authTicket)
     }
 
     fun createLoginSsoIntent(

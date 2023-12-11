@@ -5,11 +5,15 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.help.HelpCenterLink
+import com.dashlane.help.newIntent
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.Mode
 import com.dashlane.hermes.generated.definitions.VerificationMode
@@ -25,6 +29,7 @@ import com.dashlane.login.pages.email.LoginEmailContract
 import com.dashlane.login.pages.email.LoginEmailPresenter
 import com.dashlane.login.pages.password.LoginPasswordContract
 import com.dashlane.login.pages.password.LoginPasswordPresenter
+import com.dashlane.login.pages.pin.PinErrorBottomSheet
 import com.dashlane.login.pages.pin.PinLockPresenter
 import com.dashlane.login.pages.sso.SsoLockContract
 import com.dashlane.login.pages.sso.SsoLockPresenter
@@ -33,25 +38,29 @@ import com.dashlane.login.pages.totp.LoginTotpPresenter
 import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory
 import com.dashlane.login.sso.MigrationToSsoMemberInfo
 import com.dashlane.login.toSecurityFeatures
-import com.dashlane.navigation.NavigationUtils
+import com.dashlane.navigation.Navigator
+import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.endoflife.EndOfLife
+import com.dashlane.ui.screens.settings.WarningRememberMasterPasswordDialog
 import com.dashlane.ui.util.FinishingActivity
+import com.dashlane.util.Toaster
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.getParcelableArrayCompat
 import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setCurrentPageView
 import com.skocken.presentation.presenter.BasePresenter
-import java.util.Deque
-import java.util.LinkedList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import java.util.Deque
+import java.util.LinkedList
 
 @Suppress("LargeClass")
 class LoginPresenter(
@@ -64,7 +73,11 @@ class LoginPresenter(
     private val contactSsoAdministratorDialogFactory: ContactSsoAdministratorDialogFactory,
     private val allowSkipEmail: Boolean,
     private val loginLogger: LoginLogger,
-    private val endOfLife: EndOfLife
+    private val endOfLife: EndOfLife,
+    private val toaster: Toaster,
+    private val navigator: Navigator,
+    private val warningRememberMasterPasswordDialog: WarningRememberMasterPasswordDialog,
+    private val globalPreferencesManager: GlobalPreferencesManager
 ) : BasePresenter<LoginContract.DataProvider, LoginContract.LoginViewProxy>(),
     LoginContract.Presenter {
 
@@ -95,7 +108,7 @@ class LoginPresenter(
                     }
                 }
                 credentials.otp2 -> skipEmailPage()
-                SingletonProvider.getGlobalPreferencesManager().isUserLoggedOut -> {
+                globalPreferencesManager.isUserLoggedOut -> {
                     if (allowSkipEmail) {
                         showPasswordPage(
                             RegisteredUserDevice.Local(
@@ -220,8 +233,8 @@ class LoginPresenter(
         loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.AUTHENTICATOR_APP))
     }
 
-    fun showSecretTransferQRPage() {
-        view.transitionToCompose()
+    fun showSecretTransferQRPage(email: String?) {
+        view.transitionToCompose(email)
     }
 
     private fun createDashlaneAuthenticatorPresenter(secondFactor: AuthenticationSecondFactor): LoginDashlaneAuthenticatorPresenter {
@@ -266,7 +279,7 @@ class LoginPresenter(
         if (provider.lockSetting.isLockCancelable) {
             cancelUnlock()
         } else {
-            NavigationUtils.logoutAndCallLoginScreen(context!!)
+            navigator.logoutAndCallLoginScreen(context!!)
         }
     }
 
@@ -282,10 +295,19 @@ class LoginPresenter(
         cancelUnlockAndLogout()
     }
 
-    override fun onUseMasterPasswordClicked() {
-        switchLayoutToMainLockIfNeeded()
-        logAskUsePrimaryFactor()
-        showMainLock(false)
+    override fun onBiometricNegativeClicked() {
+        when (provider.currentUserInfo?.accountType) {
+            UserAccountInfo.AccountType.InvisibleMasterPassword -> {
+                switchLayoutToMainLockIfNeeded()
+                showPinLockPage()
+            }
+            UserAccountInfo.AccountType.MasterPassword,
+            null -> {
+                switchLayoutToMainLockIfNeeded()
+                logAskUsePrimaryFactor()
+                showMainLock(false)
+            }
+        }
     }
 
     private fun switchLayoutToMainLockIfNeeded() {
@@ -303,7 +325,36 @@ class LoginPresenter(
     private fun cancelUnlockAndLogout() {
         provider.lockSetting.isLoggedIn = false
         cancelUnlock(false)
-        NavigationUtils.logoutAndCallLoginScreen(context!!, allowSkipEmail = true)
+        val isAccountMasterPassword =
+            provider.currentUserInfo?.accountType == UserAccountInfo.AccountType.MasterPassword
+
+        if (isAccountMasterPassword) {
+            navigator.logoutAndCallLoginScreen(context!!, allowSkipEmail = allowSkipEmail)
+        } else {
+            
+            viewModelScope.launch {
+                sessionManager.session?.let {
+                    sessionManager.destroySession(
+                        it,
+                        true
+                    )
+                }
+            }
+            val bottomSheet = PinErrorBottomSheet(object : PinErrorBottomSheet.Actions {
+                override fun goToLogin() {
+                    navigator.logoutAndCallLoginScreen(context!!, allowSkipEmail = allowSkipEmail)
+                }
+
+                override fun goToSupport() {
+                    activity?.startActivity(
+                        HelpCenterLink.ARTICLE_CANNOT_LOGIN.newIntent(
+                            context = context!!
+                        )
+                    )
+                }
+            })
+            bottomSheet.show((activity as FragmentActivity).supportFragmentManager, "PIN_ERROR")
+        }
     }
 
     fun showPrimaryFactorStep(registeredUserDevice: RegisteredUserDevice, authTicket: String?) {
@@ -324,7 +375,7 @@ class LoginPresenter(
             registeredUserDevice = registeredUserDevice,
             authTicket = authTicket,
             clearPreviousState = true,
-            topicLock = if (showForRemember) context!!.getString(R.string.login_enter_mp_remember_title) else null,
+            topicLock = if (showForRemember) context!!.getString(R.string.login_enter_mp_remember_title) else null, 
             allowBypass = showForRemember && provider.canDelayMasterPasswordUnlock()
         )
         pagesStateHelper.addedPage(presenter, registeredUserDevice)
@@ -375,11 +426,12 @@ class LoginPresenter(
             passwordValidationHolder.deferred = null
         }
         return LoginPasswordPresenter(
-            this,
-            createChildCoroutineScope(),
-            passwordValidationHolder,
-            lockManager,
-            loginLogger
+            rootPresenter = this,
+            coroutineScope = createChildCoroutineScope(),
+            passwordValidationHolder = passwordValidationHolder,
+            lockManager = lockManager,
+            loginLogger = loginLogger,
+            toaster = toaster
         ).apply {
             setProvider(dataProvider)
         }
@@ -393,6 +445,8 @@ class LoginPresenter(
 
         if (userInfo.sso) {
             showSsoLockPage()
+        } else if (userInfo.accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) {
+            showPinLockPage()
         } else {
             showPasswordPage(
                 registeredUserDevice = RegisteredUserDevice.Local(
@@ -415,10 +469,12 @@ class LoginPresenter(
     private fun createPinLockPresenter(): PinLockPresenter {
         val dataProvider = provider.createPinLockDataProvider()
         return PinLockPresenter(
-            this,
-            createChildCoroutineScope(),
-            lockManager,
-            provider.currentUserInfo?.sso == true
+            rootPresenter = this,
+            coroutineScope = createChildCoroutineScope(),
+            lockManager = lockManager,
+            sso = provider.currentUserInfo?.sso == true,
+            toaster = toaster,
+            warningRememberMasterPasswordDialog = warningRememberMasterPasswordDialog
         ).apply {
             setProvider(dataProvider)
         }
@@ -433,13 +489,14 @@ class LoginPresenter(
     private fun createBiometricPresenter(): BiometricPresenter {
         val dataProvider = provider.createBiometricDataProvider()
         return BiometricPresenter(
-            this,
-            createChildCoroutineScope(),
-            lockManager,
-            userPreferencesManager,
-            sessionManager,
-            sessionCredentialsSaver,
-            loginLogger = loginLogger
+            rootPresenter = this,
+            coroutineScope = createChildCoroutineScope(),
+            lockManager = lockManager,
+            userPreferencesManager = userPreferencesManager,
+            sessionManager = sessionManager,
+            sessionCredentialsSaver = sessionCredentialsSaver,
+            loginLogger = loginLogger,
+            toaster = toaster
         ).apply {
             setProvider(dataProvider)
         }
@@ -455,10 +512,11 @@ class LoginPresenter(
         val dataProvider = provider.createSsoLockDataProvider()
 
         return SsoLockPresenter(
-            this,
-            createChildCoroutineScope(),
-            lockManager,
-            loginLogger
+            rootPresenter = this,
+            coroutineScope = createChildCoroutineScope(),
+            lockManager = lockManager,
+            loginLogger = loginLogger,
+            toaster = toaster
         ).apply { setProvider(dataProvider) }
     }
 
@@ -540,7 +598,10 @@ class LoginPresenter(
                     LoginEmailPresenter::class.java.name -> createEmailPresenter()
                     LoginTokenPresenter::class.java.name -> createTokenPresenter(state as AuthenticationSecondFactor.EmailToken)
                     LoginTotpPresenter::class.java.name -> createTotpPresenter(state as AuthenticationSecondFactor.Totp)
-                    LoginPasswordPresenter::class.java.name -> createPasswordPresenter(state as RegisteredUserDevice, null)
+                    LoginPasswordPresenter::class.java.name -> createPasswordPresenter(
+                        state as RegisteredUserDevice,
+                        null
+                    )
                     BiometricPresenter::class.java.name -> createBiometricPresenter()
                     PinLockPresenter::class.java.name -> createPinLockPresenter()
                     SsoLockPresenter::class.java.name -> createSsoLockPresenter()

@@ -13,12 +13,10 @@ import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.core.popularWebsitesToIconWrappers
-import com.dashlane.csvimport.internal.ImportMultiplePasswordsLogger
 import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.iconcrawler.mapIconWrappersToUrlDomainIcons
 import com.dashlane.loaders.InstalledAppAndPopularWebsiteLoader
-import com.dashlane.navigation.Navigator
 import com.dashlane.securearchive.BackupCoordinator
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.CounterFilter
@@ -34,19 +32,15 @@ import com.dashlane.ui.widgets.view.ExpandableCardView
 import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
 import com.dashlane.url.icon.UrlDomainIconAndroidRepository
 import com.dashlane.url.registry.UrlDomainRegistryFactory
-import com.dashlane.useractivity.log.usage.UsageLogCode57
-import com.dashlane.useractivity.log.usage.UsageLogCode75
-import com.dashlane.useractivity.log.usage.UsageLogCode94
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.DeviceUtils.hideKeyboard
 import com.dashlane.util.setCurrentPageView
 import com.google.android.material.textfield.TextInputLayout
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class CredentialAddStep1Fragment :
@@ -61,17 +55,10 @@ class CredentialAddStep1Fragment :
     lateinit var urlDomainRegistryFactory: UrlDomainRegistryFactory
 
     @Inject
-    lateinit var navigator: Navigator
-
-    @Inject
     lateinit var iconAndroidRepository: UrlDomainIconAndroidRepository
 
     @Inject
     lateinit var mainDataAccessor: MainDataAccessor
-
-    @JvmField
-    @Inject
-    var usageLogRepository: UsageLogRepository? = null
 
     @Inject
     lateinit var knownApplicationProvider: KnownApplicationProvider
@@ -90,11 +77,6 @@ class CredentialAddStep1Fragment :
                     DefaultStatusFilter
                 )
             ) == 0
-
-    private val importLogger = ImportMultiplePasswordsLogger(
-        usageLogRepository,
-        originStr = "mainMenu"
-    )
 
     private var popularWebsites: List<String> = emptyList()
 
@@ -145,29 +127,16 @@ class CredentialAddStep1Fragment :
             expandableCardView.setExpanded(args.expandImportOptions, false)
         }
 
-        expandableCardView.setOnExpandListener { expanded ->
-            if (expanded) {
-                importLogger.logImportMethodsDisplayed()
-            }
-        }
         
         
         @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.csv).setOnClickListener {
-            importLogger.logImportMethodsFromCsvClicked()
             navigator.goToCsvImportIntro()
         }
 
         @Suppress("MissingInflatedId")
-        view.findViewById<View>(R.id.chrome).setOnClickListener {
-            importLogger.logImportMethodsFromChromeClicked()
-            navigator.goToChromeImportIntro(UsageLogCode75.Origin.IMPORT_MULTIPLE_PASSWORDS.code)
-        }
-
-        @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.computer).setOnClickListener {
-            importLogger.logImportMethodsFromM2dClicked()
-            navigator.goToM2wImportIntro(UsageLogCode94.Origin.IMPORT_MULTIPLE_PASSWORDS.code)
+            navigator.goToM2wImportIntro()
         }
 
         @Suppress("MissingInflatedId")
@@ -177,7 +146,6 @@ class CredentialAddStep1Fragment :
 
         @Suppress("MissingInflatedId")
         view.findViewById<View>(R.id.password_manager).setOnClickListener {
-            importLogger.logImportMethodsFromCompetitorClicked()
             navigator.goToCompetitorImportIntro()
         }
 
@@ -254,7 +222,7 @@ class CredentialAddStep1Fragment :
         }
 
         activity?.onBackPressed()
-        navigator.goToCreateAuthentifiant(UsageLogCode57.Sender.MANUAL.code, url ?: "")
+        navigator.goToCreateAuthentifiant(url ?: "")
     }
 
     private fun showLoader() {

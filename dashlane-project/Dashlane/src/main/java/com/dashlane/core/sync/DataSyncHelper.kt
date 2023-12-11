@@ -2,7 +2,7 @@ package com.dashlane.core.sync
 
 import androidx.annotation.StringRes
 import com.dashlane.R
-import com.dashlane.async.BroadcastManager
+import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.core.premium.PremiumStatusManager
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.LogRepository
@@ -43,7 +43,8 @@ class DataSyncHelper @Inject constructor(
     private val logRepository: LogRepository,
     private val syncVault: SyncVaultImplRaclette,
     private val syncRepository: SyncRepository,
-    private val legacyCryptoMigrationHelper: LegacyCryptoMigrationHelper
+    private val legacyCryptoMigrationHelper: LegacyCryptoMigrationHelper,
+    private val syncBroadcastManager: SyncBroadcastManager
 ) {
 
     @OptIn(ObsoleteCoroutinesApi::class)
@@ -133,7 +134,7 @@ class DataSyncHelper @Inject constructor(
             } catch (ignored: SyncRepository.SyncException) {
             }
         }
-        BroadcastManager.sendSyncFinishedBroadcast(origin)
+        syncBroadcastManager.sendSyncFinishedBroadcast(origin)
     }
 
     private fun handleSyncError(
@@ -146,11 +147,11 @@ class DataSyncHelper @Inject constructor(
             is DashlaneApiHttp400InvalidRequestException.UnknownUserDeviceKey -> {
                 
                 
-                BroadcastManager.sendPasswordErrorBroadcast()
+                syncBroadcastManager.sendPasswordErrorBroadcast()
             }
 
             else -> {
-                BroadcastManager.sendSyncFailedBroadcast(origin)
+                syncBroadcastManager.sendSyncFailedBroadcast(origin)
             }
         }
     }

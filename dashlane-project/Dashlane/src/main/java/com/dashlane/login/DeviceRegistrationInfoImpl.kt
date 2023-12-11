@@ -36,7 +36,7 @@ class DeviceRegistrationInfoImpl @Inject constructor(
         get() = DeviceUtils.getDeviceCountry(context)
 
     override val language: String
-        get() = Constants.getLang()
+        get() = Constants.getLang(context)
 
     override val osLanguage: String
         get() = Constants.getOSLang()

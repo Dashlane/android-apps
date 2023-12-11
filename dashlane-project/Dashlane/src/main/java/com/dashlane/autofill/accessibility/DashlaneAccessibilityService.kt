@@ -14,6 +14,7 @@ import com.dashlane.autofill.core.AutoFillDataBaseAccess
 import com.dashlane.autofill.core.AutofillUsageLog
 import com.dashlane.autofill.formdetector.BrowserDetectionHelper
 import com.dashlane.core.helpers.PackageNameSignatureHelper
+import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.resolveActivityCompat
@@ -50,6 +51,9 @@ class DashlaneAccessibilityService : AccessibilityService() {
     @Inject
     lateinit var notificationHelper: NotificationHelper
 
+    @Inject
+    lateinit var inAppLoginManager: InAppLoginManager
+
     override fun onCreate() {
         super.onCreate()
         homePackage = getMainHomeActivityPackageName(this)
@@ -58,8 +62,13 @@ class DashlaneAccessibilityService : AccessibilityService() {
         val analysisResultFiller = LoginFormFiller(autofillUsageLog)
         val autoFillBlackList = AutoFillBlackListImpl(arrayOf(homePackage))
 
-        val alwaysOnUiManager =
-            AlwaysOnUiManager(this, analysisResultFiller, notificationHelper, autofillUsageLog, databaseAccess)
+        val alwaysOnUiManager = AlwaysOnUiManager(
+            this,
+            analysisResultFiller,
+            autofillUsageLog,
+            databaseAccess,
+            inAppLoginManager
+        )
         val alwaysOnEventHandler = AlwaysOnEventHandler(
             alwaysOnUiManager,
             autoFillBlackList,

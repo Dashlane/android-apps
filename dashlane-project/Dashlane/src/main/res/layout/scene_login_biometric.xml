@@ -8,7 +8,6 @@
     android:layout_height="match_parent"
     android:maxWidth="@dimen/size_480dp"
     tools:context="com.dashlane.login.LoginActivity"
-    android:theme="@style/Theme.Dashlane.Login.LockedOut"
     >
     
     <ImageView
@@ -20,7 +19,7 @@
         android:src="@drawable/logo_lock_up"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="?colorTextCatchy"
+        app:tint="?attr/colorBiometricText"
         />
 
     <TextView
@@ -33,7 +32,7 @@
         android:layout_marginRight="@dimen/spacing_big"
         android:text="@string/unlock_biometrics"
         android:textAppearance="?textAppearanceHeadline2"
-        android:textColor="?colorTextCatchy"
+        android:textColor="?attr/colorBiometricText"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/logo"
@@ -67,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
-            android:textColor="?colorTextCatchy"
+            android:textColor="?attr/colorBiometricText"
             android:transitionName="email"
             android:paddingEnd="@dimen/spacing_huge"
             android:background="@null"

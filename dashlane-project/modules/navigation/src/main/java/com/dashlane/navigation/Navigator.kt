@@ -1,6 +1,7 @@
 package com.dashlane.navigation
 
 import android.annotation.TargetApi
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -14,36 +15,35 @@ interface Navigator {
     val currentDestination: NavDestination?
 
     
-    fun goToHome(origin: String? = null, filter: String? = null)
-    fun goToActionCenter(origin: String? = null)
-    fun goToPasswordGenerator(origin: String? = null)
+    fun goToHome(filter: String? = null)
+    fun goToActionCenter()
+    fun goToPasswordGenerator()
 
-    fun goToPasswordSharing(origin: String? = null)
-    fun goToIdentityDashboard(origin: String? = null)
-    fun goToDarkWebMonitoring(origin: String? = null)
-    fun goToVpn(origin: String? = null)
-    fun goToSettings(settingsId: String? = null, origin: String? = null)
-    fun goToHelpCenter(origin: String? = null)
-    fun goToSecretTransfer(settingsId: String? = null, origin: String? = null)
-    fun goToAccountRecoveryKey(settingsId: String? = null, origin: String? = null)
-    fun goToPersonalPlanOrHome(origin: String? = null)
-    fun goToOffers(origin: String? = null, offerType: String? = null)
+    fun goToPasswordSharing()
+    fun goToIdentityDashboard()
+    fun goToDarkWebMonitoring()
+    fun goToVpn()
+    fun goToCollectionsList()
+    fun goToSettings(settingsId: String? = null)
+    fun goToHelpCenter()
+    fun goToSecretTransfer(settingsId: String? = null)
+    fun goToAccountRecoveryKey(settingsId: String? = null)
+    fun goToPersonalPlanOrHome()
+    fun goToOffers(offerType: String? = null)
 
-    
-    fun goToInAppLoginIntro(origin: String = "autofill_extensions")
-    fun goToInAppLogin(origin: String? = null, onBoardingType: Serializable? = null)
+    fun goToInAppLoginIntro()
+    fun goToInAppLogin(onBoardingType: Serializable? = null)
     fun goToSearch(query: String? = null)
-    fun goToPaywall(type: String, origin: String? = null)
+    fun goToPaywall(type: String)
 
     @TargetApi(Build.VERSION_CODES.P)
     fun goToGuidedPasswordChange(
         itemId: String,
         domain: String,
-        username: String? = null,
-        origin: String? = null
+        username: String? = null
     )
 
-    fun goToCurrentPlan(origin: String)
+    fun goToCurrentPlan()
 
     fun goToAuthenticator(otpUri: Uri? = null)
     fun goToAuthenticatorSuggestions(hasSetupOtpCredentials: Boolean)
@@ -55,14 +55,13 @@ interface Navigator {
     fun goToActionCenterSectionDetails(section: String)
 
     
-    fun goToPasswordAnalysisFromBreach(breachId: String, origin: String? = null)
-    fun goToPasswordAnalysisFromIdentityDashboard(origin: String? = null, tab: String? = null)
+    fun goToPasswordAnalysisFromBreach(breachId: String)
+    fun goToPasswordAnalysisFromIdentityDashboard(tab: String? = null)
 
     
     fun goToItem(uid: String, type: String)
     fun goToCreateItem(type: String)
     fun goToCreateAuthentifiant(
-        sender: String?,
         url: String,
         requestCode: Int? = null,
         successIntent: Intent? = null,
@@ -73,22 +72,43 @@ interface Navigator {
 
     fun goToCollectionSelectorFromItemEdit(fromViewOnly: Boolean, temporaryCollections: List<String>, spaceId: String)
 
-    fun goToCredentialAddStep1(sender: String?, expandImportOptions: Boolean = false, successIntent: Intent? = null)
+    fun goToCredentialAddStep1(expandImportOptions: Boolean = false, successIntent: Intent? = null)
     fun goToCredentialFromPasswordAnalysis(uid: String)
+
+    
+    fun goToCollectionDetails(
+        collectionId: String,
+        businessSpace: Boolean,
+        sharedCollection: Boolean,
+        shareAllowed: Boolean
+    )
+
+    fun goToCollectionDetailsFromCollectionsList(
+        collectionId: String,
+        businessSpace: Boolean,
+        sharedCollection: Boolean,
+        shareAllowed: Boolean
+    )
+
+    fun goToCollectionAddFromCollectionsList()
+    fun goToCollectionEditFromCollectionsList(collectionId: String)
+    fun goToCollectionShareFromCollectionList(collectionId: String)
+    fun goToCollectionEditFromCollectionDetail(collectionId: String)
+    fun goToCollectionShareFromCollectionDetail(collectionId: String)
 
     
     fun goToSectionDetailsFromActionCenter(section: String)
 
     
     fun goToManageDevicesFromSettings()
-    fun goToAutofillPauseAndLinkedFromSettings(origin: String? = null)
+    fun goToAutofillPauseAndLinkedFromSettings()
     fun goToDashlaneLabs()
 
     
-    fun goToBreachAlertDetail(breachWrapper: Parcelable, origin: String? = null)
+    fun goToBreachAlertDetail(breachWrapper: Parcelable)
 
     
-    fun goToNewShare(origin: String)
+    fun goToNewShare()
     fun goToSharePeopleSelection(
         selectedPasswords: Array<String> = emptyArray(),
         selectedNotes: Array<String> = emptyArray(),
@@ -96,7 +116,7 @@ interface Navigator {
     )
 
     fun goToShareUsersForItems(uid: String)
-    fun goToPasswordSharingFromActionCenter(origin: String? = null, needsRefresh: Boolean = false)
+    fun goToPasswordSharingFromActionCenter(needsRefresh: Boolean = false)
     fun goToPasswordSharingFromPeopleSelection()
     fun goToPeopleSelectionFromNewShare(
         selectedPasswords: Array<String> = emptyArray(),
@@ -119,8 +139,7 @@ interface Navigator {
 
     
     fun goToCsvImportIntro()
-    fun goToChromeImportIntro(origin: String)
-    fun goToM2wImportIntro(origin: String)
+    fun goToM2wImportIntro()
     fun goToCompetitorImportIntro()
 
     
@@ -138,7 +157,7 @@ interface Navigator {
     fun goToManageDashlaneNotificationsSystem()
 
     
-    fun logoutAndCallLoginScreen()
+    fun logoutAndCallLoginScreen(context: Context? = null, allowSkipEmail: Boolean = false)
 
     
     fun goToWebView(url: String)

@@ -6,6 +6,6 @@
     <string name="general_notifications_settings_title">General notifications</string>
     <string name="general_notifications_settings_description">Manage your Dashlane notifications</string>
 
-    <string name="follow_up_settings_title">Quick access notification</string>
+    <string name="follow_up_settings_title">Copy and paste notification</string>
     <string name="follow_up_settings_description">When you’re copying info in Dashlane, we’ll hold the rest of the info in the notification panel</string>
 </resources>

@@ -43,18 +43,15 @@
             tools:text="facebook"
             />
 
-        <com.rd.PageIndicatorView
+        <com.google.android.material.tabs.TabLayout
             android:id="@+id/page_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/custom_csv_import_vertical_spacing"
             android:layout_marginBottom="16dp"
-            app:piv_animationType="worm"
-            app:piv_autoVisibility="false"
-            app:piv_padding="4dp"
-            app:piv_radius="3dp"
-            app:piv_selectedColor="@color/container_expressive_brand_catchy_idle"
-            app:piv_unselectedColor="@color/container_expressive_neutral_quiet_idle"
+            app:tabBackground="@drawable/tab_selector"
+            app:tabGravity="center"
+            app:tabIndicatorHeight="0dp"
             />
 
         <androidx.recyclerview.widget.RecyclerView

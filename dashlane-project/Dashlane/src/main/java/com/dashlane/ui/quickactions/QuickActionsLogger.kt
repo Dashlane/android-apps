@@ -6,8 +6,8 @@ import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.definitions.DropdownType
 import com.dashlane.hermes.generated.events.user.OpenVaultItemDropdown
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.adapter.util.toHighlight
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.toHighlight
 import com.dashlane.vault.toItemType
 import javax.inject.Inject
 

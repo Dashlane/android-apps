@@ -11,34 +11,34 @@ import androidx.annotation.StyleRes
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.debug.DaDaDa
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.hermes.LogRepository
-import com.dashlane.lock.UnlockEvent.Reason.AppAccess
-import com.dashlane.lock.UnlockEvent.Reason.PairAuthenticatorApp
 import com.dashlane.login.dagger.TrackingId
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockSetting
 import com.dashlane.login.lock.LockSetting.Companion.buildFrom
-import com.dashlane.login.pages.secrettransfer.LoginSecretTransferScreen
-import com.dashlane.login.pages.secrettransfer.LoginSecretTransferViewModel
+import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation
 import com.dashlane.login.pages.totp.u2f.NfcServiceDetectorImpl
 import com.dashlane.login.root.LoginDataProvider
 import com.dashlane.login.root.LoginPresenter
 import com.dashlane.login.root.LoginViewProxy
 import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory
+import com.dashlane.navigation.Navigator
+import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.applyScreenshotAllowedFlag
 import com.dashlane.ui.disableAutoFill
 import com.dashlane.ui.endoflife.EndOfLife
+import com.dashlane.ui.screens.settings.WarningRememberMasterPasswordDialog
+import com.dashlane.util.Toaster
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import javax.inject.Inject
@@ -48,9 +48,6 @@ class LoginActivity : DashlaneActivity() {
 
     @Inject
     lateinit var nfcServiceProvider: NfcServiceDetectorImpl
-
-    @Inject
-    lateinit var screenshotPolicy: ScreenshotPolicy
 
     @Inject
     @TrackingId
@@ -83,7 +80,8 @@ class LoginActivity : DashlaneActivity() {
             lockSetting = buildFrom(extras)
         }
 
-        currentThemeResId = savedInstanceState?.getInt(CURRENT_THEME_RES_ID) ?: getAppropriateTheme(lockSetting)
+        currentThemeResId =
+            savedInstanceState?.getInt(CURRENT_THEME_RES_ID) ?: getAppropriateTheme(lockSetting)
         setTheme(currentThemeResId)
         super.onCreate(savedInstanceState)
         this.disableAutoFill()
@@ -109,12 +107,7 @@ class LoginActivity : DashlaneActivity() {
 
     @StyleRes
     internal fun getAppropriateTheme(lockSetting: LockSetting): Int {
-        
-        val isLockedOut =
-            SingletonProvider.getSessionManager().session == null || lockSetting.unlockReason is AppAccess || lockSetting.unlockReason is PairAuthenticatorApp
         val themeResId: Int = when {
-            isLockedOut && lockSetting.shouldThemeAsDialog -> R.style.Theme_Dashlane_Login_LockedOut_Dialog
-            isLockedOut -> R.style.Theme_Dashlane_Login_LockedOut_TranslucentWindow
             lockSetting.shouldThemeAsDialog -> R.style.Theme_Dashlane_Login_Dialog
             else -> R.style.Theme_Dashlane_Login_TranslucentWindow
         }
@@ -125,7 +118,8 @@ class LoginActivity : DashlaneActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         
         
-        val loginHostFragment = supportFragmentManager.fragments.firstOrNull()?.childFragmentManager?.fragments?.firstOrNull() as? LoginHostFragment
+        val loginHostFragment =
+            supportFragmentManager.fragments.firstOrNull()?.childFragmentManager?.fragments?.firstOrNull() as? LoginHostFragment
         loginHostFragment?.onActivityResult(requestCode, resultCode, data)
     }
 }
@@ -157,6 +151,21 @@ class LoginHostFragment : Fragment() {
     @Inject
     lateinit var lockManager: LockManager
 
+    @Inject
+    lateinit var toaster: Toaster
+
+    @Inject
+    lateinit var navigator: Navigator
+
+    @Inject
+    lateinit var warningRememberMasterPasswordDialog: WarningRememberMasterPasswordDialog
+
+    @Inject
+    lateinit var globalPreferencesManager: GlobalPreferencesManager
+
+    @Inject
+    lateinit var dadada: DaDaDa
+
     lateinit var loginPresenter: LoginPresenter
 
     private val extras: Bundle?
@@ -174,7 +183,8 @@ class LoginHostFragment : Fragment() {
         }
         dataProvider.lockSetting = lockSetting
 
-        val allowSkipEmail = requireActivity().intent.getBooleanExtra(LoginActivity.ALLOW_SKIP_EMAIL, false)
+        val allowSkipEmail =
+            requireActivity().intent.getBooleanExtra(LoginActivity.ALLOW_SKIP_EMAIL, false)
         loginPresenter = LoginPresenter(
             viewModelProvider = ViewModelProvider(this),
             parentJob = (requireActivity() as DashlaneActivity).coroutineContext[Job]!!,
@@ -185,28 +195,36 @@ class LoginHostFragment : Fragment() {
             contactSsoAdministratorDialogFactory = contactSsoAdministratorDialogFactory,
             allowSkipEmail = allowSkipEmail,
             loginLogger = LoginLoggerImpl(logRepository, lockSetting.unlockReason),
-            endOfLife = endOfLife
+            endOfLife = endOfLife,
+            toaster = toaster,
+            navigator = navigator,
+            warningRememberMasterPasswordDialog = warningRememberMasterPasswordDialog,
+            globalPreferencesManager = globalPreferencesManager
         )
 
         activity?.onBackPressedDispatcher?.let {
             it.addCallback(
                 this,
                 object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (!loginPresenter.onBackPressed()) it.onBackPressed()
+                    override fun handleOnBackPressed() {
+                        if (!loginPresenter.onBackPressed()) it.onBackPressed()
+                    }
                 }
-            }
             )
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_login_host, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val viewProxy = LoginViewProxy(view)
+        val viewProxy = LoginViewProxy(view, dadada)
         loginPresenter.apply {
             setProvider(dataProvider)
             setView(viewProxy)
@@ -239,16 +257,30 @@ class LoginHostFragment : Fragment() {
 @AndroidEntryPoint
 class LoginComposeFragment : Fragment() {
 
-    private val loginSecretTransferViewModel: LoginSecretTransferViewModel by viewModels()
+    val args: LoginComposeFragmentArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val email: String? = args.email
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                DashlaneTheme(darkTheme = true) {
-                    LoginSecretTransferScreen(
-                        viewModel = loginSecretTransferViewModel,
-                        navController = this@LoginComposeFragment.findNavController()
+                DashlaneTheme {
+                    LoginSecretTransferNavigation(
+                        email = email,
+                        onSuccess = {
+                            activity?.run {
+                                startActivity(LoginIntents.createProgressActivityIntent(this))
+                                finish()
+                            }
+                        },
+                        onCancel = {
+                            this@LoginComposeFragment.findNavController().popBackStack()
+                        }
                     )
                 }
             }

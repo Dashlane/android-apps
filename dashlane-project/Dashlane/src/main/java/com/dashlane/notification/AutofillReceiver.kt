@@ -4,15 +4,21 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.notification.creator.AutoFillNotificationCreator
+import com.dashlane.preference.GlobalPreferencesManager
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AutofillReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var preferenceManager: GlobalPreferencesManager
+
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.getBooleanExtra(NOTIFICATION_NOT_NOW_EXTRA, false)
         if (!action) return
 
-        val preferenceManager = SingletonProvider.getComponent().globalPreferencesManager
         preferenceManager.incrementAutofillNotificationDismiss()
 
         if (preferenceManager.getAutofillNotificationDismissCount() >= AutoFillNotificationCreator.DISMISSAL_THRESHOLD) {

@@ -10,9 +10,6 @@ internal class M2wIntroPresenter :
     BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
     IntroScreenContract.Presenter {
 
-    var logger: M2wIntroLogger? = null
-    var origin: String? = null
-
     override fun onViewChanged() {
         super.onViewChanged()
         viewOrNull?.apply {
@@ -25,13 +22,7 @@ internal class M2wIntroPresenter :
     }
 
     override fun onClickPositiveButton() {
-        logger?.logNext()
-
-        val origin = this.origin ?: return
-
-        activity?.startActivityForResult<M2wConnectActivity>(M2wConnectActivity.REQUEST_CODE) {
-            M2wIntentCoordinator.putConnectActivityExtras(this, origin)
-        }
+        activity?.startActivityForResult<M2wConnectActivity>(M2wConnectActivity.REQUEST_CODE)
     }
 
     override fun onClickNegativeButton() {

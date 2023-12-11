@@ -4,7 +4,8 @@ import android.content.Context
 import androidx.core.content.ContextCompat
 import com.dashlane.util.getPlaceholder
 import com.dashlane.util.getThemeAttrColor
-import com.dashlane.util.graphics.RemoteImageDrawableWithDominantColorBorders
+import com.dashlane.util.graphics.CredentialRemoteDrawable
+import com.dashlane.util.graphics.PasskeyRemoteDrawable
 import com.dashlane.util.graphics.RoundRectDrawable
 import com.dashlane.vault.model.getColorId
 import com.dashlane.vault.model.getColorResource
@@ -17,21 +18,22 @@ import com.dashlane.xml.domain.SyncObjectType
 object VaultItemImageHelper {
     fun getIconDrawableFromSyncObject(
         context: Context,
-        syncObject: SyncObject,
-        dominantColorListener: (Int) -> Unit = { _ -> }
+        syncObject: SyncObject
     ): RoundRectDrawable? {
-        return getIconDrawableFromSummaryObject(context, syncObject.toSummary(), dominantColorListener)
+        return getIconDrawableFromSummaryObject(context, syncObject.toSummary())
     }
 
     fun getIconDrawableFromSummaryObject(
         context: Context,
         summaryObject: SummaryObject,
-        dominantColorListener: (Int) -> Unit = { _ -> }
     ): RoundRectDrawable? {
         return when (summaryObject) {
             is SummaryObject.Authentifiant -> {
                 val url = summaryObject.navigationUrl ?: summaryObject.url
-                getAuthentifiantIcon(context, url, summaryObject.title, dominantColorListener)
+                getAuthentifiantIcon(context, url, summaryObject.title)
+            }
+            is SummaryObject.Passkey -> {
+                getPasskeyIcon(context, summaryObject.rpId, summaryObject.rpId)
             }
             is SummaryObject.SecureNote ->
                 getSecureNoteIcon(
@@ -141,19 +143,23 @@ object VaultItemImageHelper {
         }
     }
 
-    fun getAuthentifiantIcon(
-        context: Context,
-        url: String?,
-        title: String?,
-        dominantColorListener: (Int) -> Unit = { _ -> }
-    ): RoundRectDrawable {
-        val urlIconDrawable = RemoteImageDrawableWithDominantColorBorders(
+    fun getAuthentifiantIcon(context: Context, url: String?, title: String?): RoundRectDrawable {
+        val urlIconDrawable = CredentialRemoteDrawable(
             context,
-            context.getThemeAttrColor(R.attr.colorPrimary),
-            dominantColorListener
+            context.getThemeAttrColor(R.attr.colorPrimary)
         ).apply {
-            setPreferImageBackgroundColor(true)
+            preferImageBackgroundColor = true
         }
+        val placeholder = context.getPlaceholder(title)
+        urlIconDrawable.loadImage(url, placeholder)
+        return urlIconDrawable
+    }
+
+    private fun getPasskeyIcon(context: Context, url: String?, title: String?): RoundRectDrawable {
+        val urlIconDrawable = PasskeyRemoteDrawable(
+            context,
+            context.getThemeAttrColor(R.attr.colorPrimary)
+        )
         val placeholder = context.getPlaceholder(title)
         urlIconDrawable.loadImage(url, placeholder)
         return urlIconDrawable
@@ -161,7 +167,7 @@ object VaultItemImageHelper {
 
     private fun createRoundedImage(context: Context, color: Int, icon: Int): RoundRectDrawable {
         return RoundRectDrawable.newWithImage(context, color, icon).apply {
-            setPreferImageBackgroundColor(true)
+            preferImageBackgroundColor = true
         }
     }
 }

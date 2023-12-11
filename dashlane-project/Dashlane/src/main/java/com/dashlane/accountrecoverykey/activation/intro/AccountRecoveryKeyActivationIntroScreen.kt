@@ -1,76 +1,119 @@
 package com.dashlane.accountrecoverykey.activation.intro
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.design.component.ButtonLayout
-import com.dashlane.design.component.ButtonMedium
+import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
-import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.design.theme.color.Intensity
+import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.ui.widgets.compose.GenericInfoContent
 
+@Suppress("kotlin:S1172") 
 @Composable
 fun AccountRecoveryKeyActivationIntroScreen(
     modifier: Modifier = Modifier,
-    onGenerateKeyClicked: () -> Unit
+    viewModel: AccountRecoveryKeyActivationIntroViewModel,
+    onBackPressed: () -> Unit,
+    onGenerateKeyClicked: () -> Unit,
+    onCancelClicked: () -> Unit = {},
+    userCanSkip: Boolean,
+    userCanExitFlow: Boolean
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .weight(1f),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.ic_key),
-                contentDescription = null,
-            )
-            Text(
-                text = stringResource(id = R.string.account_recovery_key_activation_intro_title),
-                style = DashlaneTheme.typography.titleSectionLarge,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-            )
-            Text(
-                text = stringResource(id = R.string.account_recovery_key_activation_intro_description),
-                style = DashlaneTheme.typography.bodyStandardRegular,
-                color = DashlaneTheme.colors.textNeutralStandard,
-            )
-        }
-        ButtonMedium(
-            modifier = Modifier
-                .align(Alignment.End),
-            onClick = onGenerateKeyClicked,
-            intensity = Intensity.Catchy,
-            layout = ButtonLayout.TextOnly(
-                text = stringResource(id = R.string.account_recovery_key_activation_intro_button)
-            )
+    BackHandler(enabled = !userCanExitFlow) {
+        viewModel.onBackPressed()
+        onBackPressed()
+    }
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    AccountRecoveryKeyActivationIntroContent(
+        modifier = modifier,
+        accountType = uiState.data.accountType,
+        onPrimaryButtonClicked = onGenerateKeyClicked,
+        onSecondaryButtonClicked = viewModel::showSkipAlertDialog,
+        isSecondaryButtonVisible = userCanSkip
+    )
+
+    if (uiState is AccountRecoveryKeyActivationIntroState.SkipAlertDialogVisible) {
+        SkipAlertDialog(
+            onDismissRequest = viewModel::hideSkipAlertDialog,
+            confirmButtonClick = onCancelClicked,
+            dismissButtonClick = viewModel::hideSkipAlertDialog
+        )
+    }
+}
+
+@Composable
+fun AccountRecoveryKeyActivationIntroContent(
+    modifier: Modifier = Modifier,
+    accountType: UserAccountInfo.AccountType,
+    onPrimaryButtonClicked: () -> Unit,
+    onSecondaryButtonClicked: () -> Unit = {},
+    isSecondaryButtonVisible: Boolean,
+) {
+    GenericInfoContent(
+        modifier = modifier,
+        icon = painterResource(id = R.drawable.ic_recovery_key_outlined),
+        title = stringResource(id = R.string.account_recovery_key_activation_intro_title),
+        description = when (accountType) {
+            UserAccountInfo.AccountType.InvisibleMasterPassword -> stringResource(id = R.string.account_recovery_key_activation_intro_mpless_description)
+            UserAccountInfo.AccountType.MasterPassword -> stringResource(id = R.string.account_recovery_key_activation_intro_description)
+        },
+        textPrimary = stringResource(id = R.string.account_recovery_key_activation_intro_button),
+        onClickPrimary = onPrimaryButtonClicked,
+        textSecondary = if (isSecondaryButtonVisible) stringResource(id = R.string.account_recovery_key_activation_skip_button) else null,
+        onClickSecondary = if (isSecondaryButtonVisible) onSecondaryButtonClicked else null
+    )
+}
+
+@Composable
+fun SkipAlertDialog(
+    onDismissRequest: () -> Unit,
+    confirmButtonClick: () -> Unit,
+    dismissButtonClick: () -> Unit
+) {
+    Dialog(
+        title = stringResource(id = R.string.account_recovery_key_activation_skip_alert_dialog_title),
+        description = {
+            Text(text = stringResource(id = R.string.account_recovery_key_activation_skip_alert_dialog_description))
+        },
+        onDismissRequest = onDismissRequest,
+        mainActionClick = confirmButtonClick,
+        mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.account_recovery_key_activation_skip_alert_dialog_positive_button)),
+        additionalActionClick = dismissButtonClick,
+        additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.account_recovery_key_activation_skip_alert_dialog_negative_button))
+    )
+}
+
+@Preview
+@Composable
+fun AccountRecoveryKeyActivationIntroContentPreview() {
+    DashlanePreview {
+        AccountRecoveryKeyActivationIntroContent(
+            accountType = UserAccountInfo.AccountType.MasterPassword,
+            onPrimaryButtonClicked = {},
+            onSecondaryButtonClicked = {},
+            isSecondaryButtonVisible = false
         )
     }
 }
 
 @Preview
 @Composable
-fun AccountRecoveryKeyActivationIntroContentPreview() {
-    DashlaneTheme { AccountRecoveryKeyActivationIntroScreen(onGenerateKeyClicked = {}) }
+fun SkipAlertDialogPreview() {
+    DashlanePreview {
+        SkipAlertDialog(
+            onDismissRequest = {},
+            confirmButtonClick = {},
+            dismissButtonClick = {}
+        )
+    }
 }

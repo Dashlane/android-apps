@@ -17,7 +17,7 @@
         android:src="@drawable/logo_lock_up"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/text_inverse_catchy"
+        app:tint="@color/oddity_brand"
         />
 
     
@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="false"
-            android:textColor="@color/text_inverse_catchy"
+            android:textColor="@color/text_neutral_catchy"
             android:transitionName="email"
             tools:ignore="LabelFor,TextFields"
             tools:text="randomemail@provider.com"
@@ -89,7 +89,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="barrier_guidelines,view_login_finish,btn_push,btn_where_is"
+        app:constraint_referenced_ids="barrier_guidelines,view_login_finish,btn_recovery,btn_push,btn_where_is"
         />
 
     <androidx.constraintlayout.widget.Guideline

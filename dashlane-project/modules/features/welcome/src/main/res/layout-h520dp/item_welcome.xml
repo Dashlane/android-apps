@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:breakStrategy="high_quality"
                 android:gravity="center"
-                android:textColor="@color/text_inverse_catchy"
+                android:textColor="@color/text_neutral_catchy"
                 tools:text="@string/welcome_trust_title" />
 
             <TextView
@@ -67,7 +67,7 @@
                 android:layout_marginBottom="8dp"
                 android:breakStrategy="high_quality"
                 android:gravity="center"
-                android:textColor="@color/text_inverse_standard"
+                android:textColor="@color/text_neutral_standard"
                 tools:text="@string/welcome_trust_description" />
         </LinearLayout>
 

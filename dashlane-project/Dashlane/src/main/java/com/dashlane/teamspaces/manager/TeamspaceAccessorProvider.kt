@@ -11,7 +11,7 @@ class TeamspaceAccessorProvider @Inject constructor(
     private val teamspaceRepository: TeamspaceManagerRepository
 ) : OptionalProvider<TeamspaceAccessor> {
 
-    override fun get(): TeamspaceAccessor? {
+    override fun get(): TeamspaceManager? {
         return tryOrNull { teamspaceRepository.getTeamspaceManager(sessionManager.session!!) }
     }
 }

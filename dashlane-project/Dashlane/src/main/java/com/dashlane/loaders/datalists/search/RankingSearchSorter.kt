@@ -78,6 +78,7 @@ fun SyncObjectType.toSearchItemType(): ItemType = when (this) {
     SyncObjectType.IDENTITY -> ItemType.IDENTITY
     SyncObjectType.PERSONAL_WEBSITE -> ItemType.PERSONAL_WEBSITE
     SyncObjectType.PHONE -> ItemType.PHONE_NUMBER
+    SyncObjectType.PASSKEY -> ItemType.PASSKEY
     else -> {
         ItemType.UNSUPPORTED
     }

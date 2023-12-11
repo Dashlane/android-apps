@@ -12,7 +12,6 @@ import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.login.pages.LoginBaseSubViewProxy
 import com.dashlane.login.pages.LoginSwitchAccountUtil
 import com.dashlane.util.addTextChangedListener
-import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId
 import com.dashlane.util.graphics.TextFitDrawable
 import com.dashlane.util.toUpperCaseToDisplay
@@ -216,7 +215,7 @@ class LoginPasswordViewProxy(view: View) :
         endIconMode = END_ICON_CUSTOM
         endIconDrawable = TextFitDrawable(
             text = resources.getString(R.string.login_password_forgot_button).toUpperCaseToDisplay(),
-            textColor = context.getThemeAttrColor(R.attr.colorAccentOnPrimary),
+            textColor = context.getColor(R.color.text_brand_standard),
             textSize = textSize,
             typeface = typeface
         )

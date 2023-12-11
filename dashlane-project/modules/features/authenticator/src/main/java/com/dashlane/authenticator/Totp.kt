@@ -21,13 +21,13 @@ data class Totp(
     override val url: String? = null
 ) : Otp(digits, algorithm, user, secret, issuer, url), Parcelable {
 
-    override fun getPin(timeOrCounter: Long?): Pin? {
+    override fun getPin(timeOrCounterMillis: Long?): Pin? {
         val totpCounter = TotpCounter(period.toLong())
-        val time = timeOrCounter ?: System.currentTimeMillis()
-        val currentInterval = totpCounter.getValueAtTime(time / 1000)
+        val timeMillis = timeOrCounterMillis ?: System.currentTimeMillis()
+        val currentInterval = totpCounter.getValueAtTime(timeMillis / 1000)
         val currentPin = computePin(secret, currentInterval) ?: return null
         val interval = Duration.ofSeconds(period.toLong())
-        val remaining = Duration.ofMillis((currentInterval + 1) * interval.toMillis() - time)
+        val remaining = Duration.ofMillis((currentInterval + 1) * interval.toMillis() - timeMillis)
         return Pin(
             code = currentPin,
             refreshInterval = interval,

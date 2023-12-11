@@ -2,16 +2,13 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
 import android.content.Context
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.isVisible
 import com.dashlane.R
+import com.dashlane.databinding.SharingPendingInvitationLayoutBinding
 import com.dashlane.sharing.model.getUser
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
-import com.dashlane.util.getThemeAttrColor
-import com.dashlane.util.graphics.RoundRectDrawable
+import com.dashlane.ui.drawable.CircleDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class SharingInvitationUserGroup(
@@ -45,10 +42,10 @@ class SharingInvitationUserGroup(
 
     class ItemViewHolder(itemView: View) :
         EfficientViewHolder<SharingInvitationUserGroup>(itemView) {
+        private val viewBinding = SharingPendingInvitationLayoutBinding.bind(view)
         override fun updateView(context: Context, item: SharingInvitationUserGroup?) {
             item ?: return
-            (findViewByIdEfficient<View>(R.id.sharing_pending_invite_title) as TextView?)!!.text =
-                item.displayTitle
+            viewBinding.sharingPendingInviteTitle.text = item.displayTitle
             updateViewUserGroup(context, item)
         }
 
@@ -56,29 +53,29 @@ class SharingInvitationUserGroup(
             context: Context,
             item: SharingInvitationUserGroup
         ) {
-            val accept = findViewByIdEfficient<Button>(R.id.sharing_pending_invite_btn_accept)
-            val refuse = findViewByIdEfficient<Button>(R.id.sharing_pending_invite_btn_refuse)
+            val accept = viewBinding.sharingPendingInviteBtnAccept
+            val refuse = viewBinding.sharingPendingInviteBtnRefuse
 
             val pendingInvite = item.groupInvite
             val userGroup = pendingInvite.userGroup
-
-            val image = RoundRectDrawable(context, context.getThemeAttrColor(R.attr.colorSecondary))
-            image.image = AppCompatResources.getDrawable(context, R.drawable.ic_sharing_user_group)
-            findViewByIdEfficient<ImageView>(R.id.sharing_pending_invite_icon)?.setImageDrawable(
-                image
-            )
-
+            viewBinding.sharingPendingInviteIconRound.apply {
+                setImageDrawable(
+                    CircleDrawable.with(
+                        context = context,
+                        backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
+                        drawableRes = R.drawable.ic_group_outlined,
+                        drawableTintColorRes = R.color.text_brand_standard
+                    )
+                )
+                isVisible = true
+            }
+            viewBinding.sharingPendingInviteIcon.isVisible = false
             val userDownload = userGroup.getUser(item.groupInvite.login)
             if (userDownload != null) {
-                findViewByIdEfficient<TextView>(R.id.sharing_pending_invite_description)?.text =
-                    item.displaySubtitle
+                viewBinding.sharingPendingInviteDescription.text = item.displaySubtitle
             }
-            accept?.setOnClickListener {
-                item.onClickAccept()
-            }
-            refuse?.setOnClickListener {
-                item.onClickDecline()
-            }
+            accept.setOnClickListener { item.onClickAccept() }
+            refuse.setOnClickListener { item.onClickDecline() }
         }
 
         override fun isClickable(): Boolean {

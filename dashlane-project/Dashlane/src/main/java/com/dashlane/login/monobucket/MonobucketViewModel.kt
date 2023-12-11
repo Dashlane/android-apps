@@ -7,11 +7,8 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.CallToAction
 import com.dashlane.login.Device
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
-import com.dashlane.useractivity.log.usage.UsageLogCode75
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +24,6 @@ class MonobucketViewModel @Inject constructor(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val sessionManager: SessionManager,
     storeOffersCache: StoreOffersCache,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val logRepository: LogRepository
 ) : ViewModel(), MonobucketViewModelContract {
 
@@ -47,17 +43,14 @@ class MonobucketViewModel @Inject constructor(
     }
 
     override fun onUpgradePremium() {
-        sendUsageLog("see_premium")
         logUserActionStep1(chosenAction = CallToAction.ALL_OFFERS)
     }
 
     override fun onUnlinkPreviousDevice() {
-        sendUsageLog("unlink_previous")
         logUserActionStep1(chosenAction = CallToAction.UNLINK)
     }
 
     override fun onConfirmUnregisterDevice() {
-        sendConfirmationUsageLog("unlink")
         logUserActionStep2(chosenAction = CallToAction.UNLINK)
 
         userPreferencesManager.ukiRequiresMonobucketConfirmation = false
@@ -66,35 +59,17 @@ class MonobucketViewModel @Inject constructor(
     }
 
     override fun onCancelUnregisterDevice() {
-        sendConfirmationUsageLog("cancel_unlink")
         logUserActionStep2(chosenAction = null)
         mutableState.tryEmit(MonobucketState.CanceledUnregisterDevice)
     }
 
     override fun onLogOut() {
-        sendUsageLog("logout")
         logUserActionStep1(chosenAction = null)
         viewModelScope.launch {
             userPreferencesManager.isOnLoginPaywall = false
             sessionManager.session?.let { sessionManager.destroySession(it, false) }
             mutableState.tryEmit(MonobucketState.UserLoggedOut)
         }
-    }
-
-    override fun onShow() = sendUsageLog("seen")
-
-    private fun sendUsageLog(action: String) = sendUsageLog("mono_menu", action)
-
-    private fun sendConfirmationUsageLog(action: String) = sendUsageLog("unlink_menu", action)
-
-    private fun sendUsageLog(subtype: String, action: String) {
-        bySessionUsageLogRepository[sessionManager.session]?.enqueue(
-            UsageLogCode75(
-                type = "mono_test",
-                subtype = subtype,
-                action = action
-            )
-        )
     }
 
     private fun logUserActionStep1(chosenAction: CallToAction?) =

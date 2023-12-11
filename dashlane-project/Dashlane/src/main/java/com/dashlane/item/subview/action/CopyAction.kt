@@ -6,14 +6,15 @@ import com.dashlane.R
 import com.dashlane.item.subview.Action
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.util.clipboard.vault.CopyField
-import com.dashlane.vault.clipboard.VaultItemCopyUtil
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.summary.SummaryObject
 
 open class CopyAction(
     private val summaryObject: SummaryObject,
     private val copyField: CopyField,
     private val action: (Activity) -> Unit = {},
-    private val itemListContext: ItemListContext? = null
+    private val itemListContext: ItemListContext? = null,
+    private val vaultItemCopy: VaultItemCopyService
 ) : Action {
 
     override val icon: Int = -1
@@ -28,9 +29,14 @@ open class CopyAction(
 
     private fun doCopy(activity: Activity) {
         if (itemListContext != null) {
-            VaultItemCopyUtil.handleCopy(summaryObject, copyField, itemListContext)
+            vaultItemCopy.handleCopy(
+                item = summaryObject,
+                copyField = copyField,
+                updateLocalUsage = true,
+                updateFrequentSearch = true
+            )
         } else {
-            VaultItemCopyUtil.handleCopy(summaryObject, copyField)
+            vaultItemCopy.handleCopy(item = summaryObject, copyField = copyField)
         }
         action.invoke(activity)
     }

@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_root_decision"
-        android:name="com.dashlane.autofill.api.navigation.AutofillBottomSheetRootFragment">
+        android:name="com.dashlane.autofill.navigation.AutofillBottomSheetRootFragment">
         <action
             android:id="@+id/to_nav_create_account"
             app:destination="@+id/nav_create_account"
@@ -22,8 +22,8 @@
 
     <fragment
         android:id="@+id/nav_all_accounts"
-        android:name="com.dashlane.autofill.api.viewallaccounts.view.BottomSheetAuthentifiantsSearchAndFilterDialogFragment"
-        tools:layout="@layout/bottom_sheet_authentifiant_list_dialog_fragment">
+        android:name="com.dashlane.autofill.viewallaccounts.view.ViewAllItemsDialogFragment"
+        tools:layout="@layout/view_all_items_dialog_fragment">
         <action
             android:id="@+id/create_account_from_all_accounts"
             app:destination="@id/nav_create_account"
@@ -42,7 +42,7 @@
 
     <fragment
         android:id="@+id/nav_create_account"
-        android:name="com.dashlane.autofill.api.createaccount.BottomSheetCreateAccountDialogFragment"
+        android:name="com.dashlane.autofill.createaccount.view.CreateAccountDialogFragment"
         tools:layout="@layout/bottom_sheet_create_account_layout">
         <argument
             android:name="args_webpage"
@@ -58,7 +58,7 @@
 
     <fragment
         android:id="@+id/nav_change_password"
-        android:name="com.dashlane.autofill.api.changepassword.BottomSheetChangePasswordDialogFragment"
+        android:name="com.dashlane.autofill.changepassword.ChangePasswordDialogFragment"
         tools:layout="@layout/bottom_sheet_create_account_layout">
         <argument
             android:name="args_webpage"
@@ -74,7 +74,7 @@
 
     <fragment
         android:id="@+id/nav_link_service"
-        android:name="com.dashlane.autofill.api.rememberaccount.view.AutofillLinkServiceFragment"
+        android:name="com.dashlane.autofill.rememberaccount.view.AutofillLinkServiceFragment"
         tools:layout="@layout/bottom_sheet_link_service">
         <argument
             android:name="form_source"

@@ -24,7 +24,7 @@
             android:lines="2"
             android:text="@string/create_account_settings_title"
             android:textAppearance="?textAppearanceHeadline2"
-            android:textColor="@color/text_inverse_catchy"
+            android:textColor="@color/text_neutral_catchy"
             app:layout_constraintTop_toTopOf="parent"
             />
 

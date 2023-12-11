@@ -1,6 +1,7 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.group
 
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
@@ -8,6 +9,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
 import com.dashlane.core.domain.sharing.toUserPermission
 import com.dashlane.sharing.model.isUserGroupSolitaryAdmin
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.adapter.util.populateItemsAsync
 import com.dashlane.ui.dialogs.fragment.sharing.confirmation.SharingConfirmationDialogRevoke
 import com.dashlane.ui.dialogs.fragment.sharing.contextual.PopupMenuManageUserAccepted
@@ -26,6 +28,7 @@ class UserGroupItemsViewProxy(
     fragment: Fragment,
     view: View,
     private val viewModel: UserGroupItemsViewModelContract,
+    private val itemWrapperProvider: ItemWrapperProvider
 ) : SharingBaseViewProxy(fragment, view) {
 
     init {
@@ -71,6 +74,7 @@ class UserGroupItemsViewProxy(
                 SharedVaultItemWrapper(
                     context,
                     it,
+                    itemWrapperProvider = itemWrapperProvider,
                     onPendingMenuClick = { _, _ -> },
                     onAcceptedMenuClick = { view, item ->
                         
@@ -97,6 +101,7 @@ class UserGroupItemsViewProxy(
         loadingView.visibility = View.GONE
         refreshLayout.isRefreshing = false
         list.visibility = View.VISIBLE
+        permissionInfobox.isVisible = state.items.any { it.isItemInCollection }
     }
 
     private fun showDialogSolitaryAdmin() {
@@ -115,6 +120,7 @@ class UserGroupItemsViewProxy(
             context,
             view,
             isAdmin = sharedItem.isMemberAdmin,
+            isItemInCollection = sharedItem.isItemInCollection,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUserGroup(
                     context,

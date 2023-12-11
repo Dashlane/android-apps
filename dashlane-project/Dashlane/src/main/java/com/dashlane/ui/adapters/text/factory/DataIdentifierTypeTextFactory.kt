@@ -26,6 +26,7 @@ object DataIdentifierTypeTextFactory {
             SyncObjectType.SECURE_NOTE -> R.string.datatype_secure_note
             SyncObjectType.SECURE_NOTE_CATEGORY -> R.string.datatype_secure_note_category
             SyncObjectType.BANK_STATEMENT -> R.string.datatype_bank_statement
+            SyncObjectType.PASSKEY -> R.string.datatype_passkey
             else -> 0
         }
     }

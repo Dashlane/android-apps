@@ -20,7 +20,7 @@
             android:id="@+id/toolbar"
             style="@style/Widget.Dashlane.Toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_alignParentTop="true"
             android:layout_gravity="center_vertical"
             />
@@ -37,7 +37,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="?actionBarSize"
+            android:paddingTop="?android:attr/actionBarSize"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             >
 
@@ -55,14 +55,11 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <com.dashlane.ui.menu.DashlaneMenuView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/menu_frame"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="left"
-        android:background="?colorSurface"
-        android:clickable="true"
         android:fitsSystemWindows="true"
-        android:focusable="true"
         />
 </androidx.drawerlayout.widget.DrawerLayout>

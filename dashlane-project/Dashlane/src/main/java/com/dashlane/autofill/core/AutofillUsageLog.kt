@@ -2,13 +2,10 @@ package com.dashlane.autofill.core
 
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.AutofillOrigin
-import com.dashlane.autofill.AutofillOrigin.AUTO_FILL_API
 import com.dashlane.autofill.AutofillOrigin.INLINE_AUTOFILL_KEYBOARD
 import com.dashlane.autofill.AutofillOrigin.IN_APP_LOGIN
-import com.dashlane.autofill.api.fillresponse.relatedOnlyByLinkedDomains
-import com.dashlane.autofill.api.ui.AutofillFeature
-import com.dashlane.autofill.api.util.AutofillLogUtil
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.autofill.ui.AutofillFeature
+import com.dashlane.autofill.util.AutofillLogUtil
 import com.dashlane.ext.application.TrustedBrowserApplication
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.Sha256Hash
@@ -25,26 +22,14 @@ import com.dashlane.hermes.generated.events.anonymous.AutofillSuggestAnonymous
 import com.dashlane.hermes.generated.events.anonymous.PerformAutofillAnonymous
 import com.dashlane.hermes.generated.events.user.AutofillSuggest
 import com.dashlane.hermes.generated.events.user.PerformAutofill
-import com.dashlane.login.lock.LockTypeManager
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.url.UrlDomain
-import com.dashlane.useractivity.log.usage.UsageLogCode5
-import com.dashlane.useractivity.log.usage.UsageLogCode75
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import javax.inject.Inject
 import com.dashlane.hermes.generated.definitions.AutofillOrigin as HermesAutofillOrigin
 
 @Suppress("LargeClass")
 class AutofillUsageLog @Inject constructor(
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val logRepository: LogRepository
-) : AutofillAnalyzerDef.IAutofillUsageLog, AutofillLegacyLogger(
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+) : AutofillAnalyzerDef.IAutofillUsageLog {
 
     private var lastLoginFormFoundPackage: String? = null
 
@@ -100,14 +85,6 @@ class AutofillUsageLog @Inject constructor(
         )
     }
 
-    override fun onClickToAutoFillCredentialButLock(@AutofillOrigin origin: Int, itemUrl: String?) {
-        onClickToAutoFillButLock(UsageLogConstant.LockAction.unlock, itemUrl)
-    }
-
-    override fun onClickToAutoFillCreditCardButLock(@AutofillOrigin origin: Int) {
-        onClickToAutoFillButLock(UsageLogConstant.LockAction.unlockCreditCard, null)
-    }
-
     override fun onAutoFillCredentialDone(
         @AutofillOrigin origin: Int,
         packageName: String,
@@ -126,23 +103,6 @@ class AutofillUsageLog @Inject constructor(
             matchType = matchType,
             fieldsFilled = FieldsFilled(credential = 1),
             formType = FormType.LOGIN
-        )
-
-        val credentialOrigin = when {
-            autofillFeature == AutofillFeature.VIEW_ALL_ACCOUNTS -> UsageLogCode5.CredentialOrigin.VIEW_ALL_ACCOUNTS
-            websiteUrlDomain.relatedOnlyByLinkedDomains(itemUrlDomain) -> UsageLogCode5.CredentialOrigin.ASSOCIATED_WEBSITE
-            else -> UsageLogCode5.CredentialOrigin.CLASSIC
-        }
-
-        log(
-            UsageLogCode5(
-                type = getTypeUsage5(origin),
-                packageName = packageName,
-                website = websiteUrlDomain?.value,
-                vaultItemWebsite = itemUrlDomain?.value,
-                authentication = 1,
-                credentialOrigin = credentialOrigin
-            )
         )
     }
 
@@ -205,15 +165,6 @@ class AutofillUsageLog @Inject constructor(
             fieldsFilled = FieldsFilled(creditCard = 1),
             formType = FormType.PAYMENT
         )
-
-        log(
-            UsageLogCode5(
-                type = getTypeUsage5(origin),
-                packageName = packageName,
-                website = websiteUrlDomain?.value,
-                paymentMeanCreditcard = 1
-            )
-        )
     }
 
     override fun onAutoFillEmailDone(
@@ -234,24 +185,6 @@ class AutofillUsageLog @Inject constructor(
             fieldsFilled = FieldsFilled(email = 1),
             formType = FormType.LOGIN
         )
-
-        log(
-            UsageLogCode5(
-                type = getTypeUsage5(origin),
-                packageName = packageName,
-                website = websiteUrlDomain?.value,
-                email = 1
-            )
-        )
-    }
-
-    private fun getTypeUsage5(@AutofillOrigin origin: Int): UsageLogCode5.Type? {
-        return when (origin) {
-            AUTO_FILL_API -> UsageLogCode5.Type.ANDROID_AUTOFILL_API
-            IN_APP_LOGIN -> UsageLogCode5.Type.ANDROID_IN_APP_LOGIN
-            INLINE_AUTOFILL_KEYBOARD -> UsageLogCode5.Type.ANDROID_AUTOFILL_API_KEYBOARD
-            else -> null
-        }
     }
 
     private fun onShowList(
@@ -291,32 +224,6 @@ class AutofillUsageLog @Inject constructor(
                 webcardItemTotalCount = totalCount,
                 vaultTypeList = listOf(itemType),
                 isNativeApp = isNativeApp
-            )
-        )
-    }
-
-    private fun onClickToAutoFillButLock(action: String, itemUrl: String?) {
-        val lockType = SingletonProvider.getSessionManager().session?.let {
-            SingletonProvider.getComponent()
-                .lockRepository
-                .getLockManager(it)
-                .getLockType()
-        }
-        val lockTypeStr =
-            when (lockType) {
-                LockTypeManager.LOCK_TYPE_BIOMETRIC -> UsageLogConstant.LockType.fingerPrint
-                LockTypeManager.LOCK_TYPE_MASTER_PASSWORD -> UsageLogConstant.LockType.master
-                LockTypeManager.LOCK_TYPE_PIN_CODE -> UsageLogConstant.LockType.pin
-                else -> "?"
-            }
-
-        log(
-            UsageLogCode75(
-                action = action,
-                subaction = UsageLogConstant.LockSubAction.from3rdParty,
-                type = UsageLogConstant.LockAction.lock,
-                subtype = lockTypeStr,
-                website = itemUrl
             )
         )
     }

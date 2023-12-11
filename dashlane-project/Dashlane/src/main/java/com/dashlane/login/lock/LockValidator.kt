@@ -1,5 +1,6 @@
 package com.dashlane.login.lock
 
+import com.dashlane.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.session.SessionManager
 import com.dashlane.session.userKeyBytes
 import com.dashlane.storage.securestorage.UserSecureStorageManager
@@ -9,7 +10,8 @@ import javax.inject.Inject
 class LockValidator @Inject constructor(
     private val sessionManager: SessionManager,
     private val userSecureStorageManager: UserSecureStorageManager,
-    private val cryptoObjectHelper: CryptoObjectHelper
+    private val cryptoObjectHelper: CryptoObjectHelper,
+    private val developerInfoLogger: DeveloperInfoLogger
 ) {
     private val expectedPin: String?
         get() = sessionManager.session?.let(userSecureStorageManager::readPin)
@@ -30,7 +32,18 @@ class LockValidator @Inject constructor(
 
     private fun checkBiometric(pass: LockPass.BiometricPass): Boolean {
         return pass.cryptoObject.cipher
-            ?.let { cryptoObjectHelper.challengeAuthentication(it) }
+            ?.let {
+                cryptoObjectHelper.challengeAuthentication(it) { exceptionType ->
+                    
+                    
+                    
+                    developerInfoLogger.log(
+                        action = "authentication_challenge_error",
+                        message = "Cryptographic Key is not properly stored",
+                        exceptionType = exceptionType
+                    )
+                }
+            }
             ?.let { it is CryptoObjectHelper.CryptoChallengeResult.Success }
             ?: false
     }

@@ -37,6 +37,7 @@
             android:layout_marginTop="@dimen/spacing_normal"
             android:background="?selectableItemBackgroundBorderless"
             android:src="@drawable/ic_trust_faq_cancel"
+            android:contentDescription="@string/and_accessibility_back_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/text_neutral_quiet"

@@ -1,5 +1,6 @@
 package com.dashlane.accountrecoverykey.setting
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,16 +14,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
+import com.dashlane.design.component.ButtonLayout
+import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.Toggle
 import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.ui.widgets.compose.AlertDialog
+import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.widgets.compose.CircularProgressIndicator
+
+const val ARK_TOGGLE_TEST_TAG = "arkToggle"
 
 @Composable
 fun AccountRecoveryKeyDetailSettingScreen(
@@ -49,6 +59,7 @@ fun AccountRecoveryKeyDetailSettingScreen(
 
     AccountRecoveryKeyDetailSettingContent(
         modifier = modifier,
+        accountType = uiState.data.accountType,
         isLoading = uiState is AccountRecoveryKeyDetailSettingState.Loading,
         isConfirmationDisableDialog = uiState.data.isDialogDisplayed,
         enabled = uiState.data.enabled,
@@ -59,8 +70,10 @@ fun AccountRecoveryKeyDetailSettingScreen(
 }
 
 @Composable
+@OptIn(ExperimentalComposeUiApi::class)
 fun AccountRecoveryKeyDetailSettingContent(
     modifier: Modifier = Modifier,
+    accountType: UserAccountInfo.AccountType,
     isLoading: Boolean,
     isConfirmationDisableDialog: Boolean,
     enabled: Boolean,
@@ -70,6 +83,7 @@ fun AccountRecoveryKeyDetailSettingContent(
 ) {
     Column(
         modifier = modifier
+            .semantics { testTagsAsResourceId = true }
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
@@ -91,18 +105,27 @@ fun AccountRecoveryKeyDetailSettingContent(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = stringResource(id = R.string.account_recovery_key_detailed_setting_description),
+                    text = when (accountType) {
+                        UserAccountInfo.AccountType.InvisibleMasterPassword -> stringResource(id = R.string.account_recovery_key_detailed_setting_mpless_description)
+                        UserAccountInfo.AccountType.MasterPassword -> stringResource(id = R.string.account_recovery_key_detailed_setting_description)
+                    },
                     style = DashlaneTheme.typography.bodyReducedRegular,
                     color = DashlaneTheme.colors.textNeutralStandard,
                 )
             }
-            if (isLoading) {
-                CircularProgressIndicator(Modifier.size(28.dp))
-            } else {
-                Toggle(
-                    checked = enabled,
-                    onCheckedChange = { onToggleClicked(it) },
-                )
+            Box(
+                modifier = Modifier.weight(0.2f),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(Modifier.size(28.dp))
+                } else {
+                    Toggle(
+                        modifier = modifier.testTag(ARK_TOGGLE_TEST_TAG),
+                        checked = enabled,
+                        onCheckedChange = { onToggleClicked(it) },
+                    )
+                }
             }
         }
     }
@@ -120,23 +143,15 @@ fun DisableARKAlertDialog(
     confirmButtonClick: () -> Unit,
     dismissButtonClick: () -> Unit
 ) {
-    AlertDialog(
-        title = {
-            Text(
-                text = stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_title),
-                style = DashlaneTheme.typography.titleSectionMedium,
-            )
+    Dialog(
+        title = stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_title),
+        description = {
+            Text(text = stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_description))
         },
-        text = {
-            Text(
-                text = stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_description),
-                style = DashlaneTheme.typography.bodyStandardRegular,
-            )
-        },
-        confirmButtonText = stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_positive_button),
-        confirmButtonClick = confirmButtonClick,
-        dismissButtonText = stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_negative_button),
-        dismissButtonClick = dismissButtonClick,
+        mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_positive_button)),
+        mainActionClick = confirmButtonClick,
+        additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.account_recovery_key_detailed_disable_dialog_negative_button)),
+        additionalActionClick = dismissButtonClick,
         onDismissRequest = dismissButtonClick
     )
 }
@@ -144,8 +159,9 @@ fun DisableARKAlertDialog(
 @Preview
 @Composable
 fun AccountRecoveryKeyDetailSettingContentPreview() {
-    DashlaneTheme {
+    DashlanePreview {
         AccountRecoveryKeyDetailSettingContent(
+            accountType = UserAccountInfo.AccountType.InvisibleMasterPassword,
             isLoading = false,
             isConfirmationDisableDialog = false,
             enabled = true,
@@ -159,7 +175,7 @@ fun AccountRecoveryKeyDetailSettingContentPreview() {
 @Preview
 @Composable
 fun DisableARKAlertDialogPreview() {
-    DashlaneTheme {
+    DashlanePreview {
         DisableARKAlertDialog(
             confirmButtonClick = { },
             dismissButtonClick = {}

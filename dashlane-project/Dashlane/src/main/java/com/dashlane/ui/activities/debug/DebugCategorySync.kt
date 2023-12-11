@@ -3,22 +3,30 @@ package com.dashlane.ui.activities.debug
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.preference.PreferenceGroup
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.permission.PermissionsManager
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
 import com.dashlane.util.FileUtils
 import com.dashlane.util.showToaster
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
+import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-internal class DebugCategorySync(debugActivity: Activity) : AbstractDebugCategory(debugActivity) {
+internal class DebugCategorySync @Inject constructor(
+    @ActivityContext override val context: Context,
+    val permissionsManager: PermissionsManager,
+    val mainDataAccessor: MainDataAccessor
+) : AbstractDebugCategory() {
 
     override val name: String
         get() = "Sync"
@@ -36,32 +44,40 @@ internal class DebugCategorySync(debugActivity: Activity) : AbstractDebugCategor
             return
         }
 
-        val list = SingletonProvider.getMainDataAccessor()
+        val list = mainDataAccessor
             .getVaultDataQuery()
             .queryAll(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.DATA_CHANGE_HISTORY)))
             .mapNotNull { it.syncObject as? SyncObject.DataChangeHistory }
         val html = list.joinToString("\n") { changeHistory -> changeHistory.html() }
 
         GlobalScope.launch(Dispatchers.Main) {
-            val uri = FileUtils.writeFileToPublicFolder(debugActivity, "data_history.html", "text/html") { stream ->
+            val uri = FileUtils.writeFileToPublicFolder(
+                context,
+                "data_history.html",
+                "text/html"
+            ) { stream ->
                 stream.writer().use { writer -> writer.write(html) }
             }
 
             val browserIntent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "text/html")
             }
-            runCatching { debugActivity.startActivity(browserIntent) }
+            runCatching { context.startActivity(browserIntent) }
                 .onFailure {
-                    debugActivity.showToaster("${it::class.java.simpleName} - ${it.message}", Toast.LENGTH_SHORT)
+                    context.showToaster(
+                        "${it::class.java.simpleName} - ${it.message}",
+                        Toast.LENGTH_SHORT
+                    )
                 }
         }
     }
 
     @SuppressLint("NewApi")
     private fun filePermissionsMissing(): Boolean {
-        val denied = !SingletonProvider.getPermissionsManager().isAllowedToWriteToPublicFolder()
+        context as Activity
+        val denied = !permissionsManager.isAllowedToWriteToPublicFolder()
         if (denied) {
-            debugActivity.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
+            context.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
         }
         return denied
     }

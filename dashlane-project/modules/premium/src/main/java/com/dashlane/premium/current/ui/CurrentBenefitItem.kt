@@ -18,7 +18,7 @@ internal class CurrentBenefitItem(
     DiffUtilComparator<TextResource> {
 
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> =
-        DashlaneRecyclerAdapter.ViewType<CurrentBenefitItem>(
+        DashlaneRecyclerAdapter.ViewType(
             R.layout.current_plan_benefit_item,
             ViewHolder::class.java
         )

@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import com.dashlane.hermes.generated.definitions.CallToAction as CallToActionValue
 
 class OffersLoggerImpl @Inject constructor(
-    fromAutofillResolver: OffersFromAutofillResolver,
     private val logRepository: LogRepository,
 ) : OffersLogger {
 
@@ -23,9 +22,8 @@ class OffersLoggerImpl @Inject constructor(
             field = value
         }
 
-    private val currentPageViewChannel = Channel<Pair<AnyPage, Boolean>>(capacity = Channel.UNLIMITED)
+    private val currentPageViewChannel = Channel<AnyPage>(capacity = Channel.UNLIMITED)
     override val currentPageViewFlow = currentPageViewChannel.receiveAsFlow()
-    private var fromAutofill = fromAutofillResolver.isFromAutofill(origin = origin.orEmpty())
 
     override fun showOfferList(
         productPeriodicity: ProductPeriodicity?,
@@ -34,7 +32,7 @@ class OffersLoggerImpl @Inject constructor(
     ) {
         hasChosenAction = false
         val page = if (hasIntroOffers) AnyPage.AVAILABLE_PLANS_INTRODUCTORY_OFFERS else AnyPage.AVAILABLE_PLANS
-        currentPageViewChannel.trySend(page to fromAutofill)
+        currentPageViewChannel.trySend(page)
         this.displayedOffers = displayedOffers
     }
 
@@ -69,7 +67,7 @@ class OffersLoggerImpl @Inject constructor(
         offerType: OfferType,
         hasIntroOffers: Boolean
     ) {
-        currentPageViewChannel.trySend(offerType.toPage(hasIntroOffers) to fromAutofill)
+        currentPageViewChannel.trySend(offerType.toPage(hasIntroOffers))
     }
 
     override fun logOpenStore(

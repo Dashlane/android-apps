@@ -1,7 +1,7 @@
 package com.dashlane.autofill.api
 
 import android.content.Context
-import com.dashlane.autofill.api.internal.AutofillFormSourcesStrings
+import com.dashlane.autofill.internal.AutofillFormSourcesStrings
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.ext.application.ExternalApplication

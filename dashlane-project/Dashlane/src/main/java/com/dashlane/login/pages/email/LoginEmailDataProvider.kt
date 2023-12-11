@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorageImpl
 import com.dashlane.account.UserSecuritySettings
 import com.dashlane.authentication.AuthenticationAccountNotFoundException
@@ -32,6 +33,7 @@ import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginBaseDataProvider
 import com.dashlane.login.sso.toMigrationToSsoMemberInfo
 import com.dashlane.preference.GlobalPreferencesManager
+import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.server.api.endpoints.account.AccountExistsService
 import com.dashlane.util.Toaster
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
@@ -164,8 +166,16 @@ class LoginEmailDataProvider @Inject constructor(
                     isAuthenticatorEnabled = secondFactor.isAuthenticatorEnabled
                 )
 
+                val accountType = when (userStatus.accountType) {
+                    AccountType.MASTERPASSWORD -> UserAccountInfo.AccountType.MasterPassword
+                    AccountType.INVISIBLEMASTERPASSWORD -> UserAccountInfo.AccountType.InvisibleMasterPassword
+                }
+
+                userAccountStorage.saveAccountType(login, accountType)
                 userAccountStorage.saveSecuritySettings(login, securitySettings)
-                if (secondFactor.isAuthenticatorEnabled) {
+                if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) {
+                    presenter.showSecretTransferQRPage(login)
+                } else if (secondFactor.isAuthenticatorEnabled) {
                     presenter.showAuthenticatorPage(secondFactor)
                 } else {
                     presenter.showTokenPage(secondFactor)

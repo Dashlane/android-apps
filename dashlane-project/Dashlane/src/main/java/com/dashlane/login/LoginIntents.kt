@@ -1,8 +1,10 @@
 package com.dashlane.login
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyActivity
 import com.dashlane.login.devicelimit.DeviceLimitActivity
@@ -67,14 +69,18 @@ object LoginIntents {
         }
     }
 
-    fun createAccountRecoveryKeyIntent(activity: Activity, registeredUserDevice: RegisteredUserDevice, authTicket: String?): Intent {
-        return LoginAccountRecoveryKeyActivity.newIntent(activity).apply {
-            putExtra(LoginAccountRecoveryKeyActivity.EXTRA_REGISTERED_USER_DEVICE, registeredUserDevice)
-            putExtra(LoginAccountRecoveryKeyActivity.AUTH_TICKET, authTicket)
-            clearTask()
-            val intent = activity.intent
-            copyOriginExtras(intent)
-        }
+    fun createAccountRecoveryKeyIntent(
+        context: Context,
+        registeredUserDevice: RegisteredUserDevice,
+        accountType: UserAccountInfo.AccountType,
+        authTicket: String?
+    ): Intent {
+        return LoginAccountRecoveryKeyActivity.newIntent(context)
+            .apply {
+                putExtra(LoginAccountRecoveryKeyActivity.EXTRA_REGISTERED_USER_DEVICE, registeredUserDevice)
+                putExtra(LoginAccountRecoveryKeyActivity.ACCOUNT_TYPE, accountType.toString())
+                putExtra(LoginAccountRecoveryKeyActivity.AUTH_TICKET, authTicket)
+            }
     }
 
     fun createMigrationToSsoMemberIntent(

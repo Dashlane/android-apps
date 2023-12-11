@@ -12,7 +12,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.debug.DaDaDa
 import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.login.CodeInputViewHelper
 import com.dashlane.login.pages.LoginBaseSubViewProxy
@@ -21,7 +21,7 @@ import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.registerExportedReceiverCompat
 import com.google.android.material.textfield.TextInputLayout
 
-class LoginTokenViewProxy(view: View) :
+class LoginTokenViewProxy(view: View, private val dadada: DaDaDa) :
     LoginBaseSubViewProxy<LoginTokenContract.Presenter>(view),
     LoginTokenContract.ViewProxy {
 
@@ -117,7 +117,7 @@ class LoginTokenViewProxy(view: View) :
                     context.registerExportedReceiverCompat(it, IntentFilter("com.dashlane.dadada.DEBUG_SECURITY_CODE"))
                 }
 
-                SingletonProvider.getDaDaDa().refreshSecurityCode(context, username)
+                dadada.refreshSecurityCode(context, username)
             }
         }
         tokenLayout.addOnAttachStateChangeListener(listener)

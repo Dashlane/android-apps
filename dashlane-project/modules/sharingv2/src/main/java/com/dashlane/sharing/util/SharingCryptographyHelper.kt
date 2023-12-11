@@ -14,15 +14,17 @@ import com.dashlane.cryptography.decryptRsaBase64OrNull
 import com.dashlane.cryptography.encryptByteArrayToBase64String
 import com.dashlane.cryptography.encryptRsaToBase64StringOrNull
 import com.dashlane.cryptography.encryptUtf8ToBase64String
+import com.dashlane.cryptography.generateSharingKeysOrNull
 import com.dashlane.cryptography.signRsaToBase64StringOrNull
 import com.dashlane.cryptography.verifySignatureRsaBase64OrDefault
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
-import com.dashlane.server.api.endpoints.sharinguserdevice.UserDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
-import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupMember
 import com.dashlane.sharing.SharingKeysHelper
+import com.dashlane.sharing.model.getCollectionDownload
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.getUserGroupMember
+import com.dashlane.sharing.model.isCollectionAcceptedOrPending
 import com.dashlane.sharing.model.isUserAcceptedOrPending
 import com.dashlane.sharing.model.isUserGroupAcceptedOrPending
 import com.dashlane.util.generateUniqueIdentifier
@@ -30,7 +32,7 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import javax.inject.Inject
 
-class SharingCryptographyHelper @Inject internal constructor(
+class SharingCryptographyHelper @Inject constructor(
     private val cryptography: Cryptography,
     private val sharingCryptography: SharingCryptography,
     private val sharingKeysHelper: SharingKeysHelper,
@@ -45,7 +47,10 @@ class SharingCryptographyHelper @Inject internal constructor(
     fun decryptGroupKey(encryptedGroupKey: String?): CryptographyKey.Raw32? =
         decryptGroupKey(encryptedGroupKey, userPrivateKey)
 
-    fun decryptGroupKey(encryptedGroupKey: String?, privateKey: SharingKeys.Private?): CryptographyKey.Raw32? {
+    fun decryptGroupKey(
+        encryptedGroupKey: String?,
+        privateKey: SharingKeys.Private?
+    ): CryptographyKey.Raw32? {
         if (encryptedGroupKey == null || privateKey == null) return null
         val bytes = sharingCryptography.decryptRsaBase64OrNull(
             encryptedGroupKey.asSharingEncryptedBase64(),
@@ -79,12 +84,27 @@ class SharingCryptographyHelper @Inject internal constructor(
             }
     }
 
-    fun getPrivateKey(userGroup: UserGroup?, login: String): SharingKeys.Private? {
-        if (userGroup == null) return null
-        val userGroupKey = decryptGroupKey(userGroup, login)
+    fun getUserGroupPrivateKey(userGroup: UserGroup, login: String): SharingKeys.Private? {
+        val userGroupKey = getUserGroupKey(userGroup, login) ?: return null
         val privateKeyEncrypted = userGroup.privateKey
-        if (userGroupKey == null) return null
         return cryptography.createDecryptionEngine(userGroupKey)
+            .use { decryptionEngine ->
+                decryptionEngine.decryptBase64ToUtf8StringOrNull(
+                    privateKeyEncrypted.asEncryptedBase64(),
+                    compressed = false
+                )
+            }
+            ?.let(SharingKeys::Private)
+    }
+
+    fun getCollectionPrivateKey(
+        collection: Collection,
+        myUserGroups: List<UserGroup>,
+        login: String
+    ): SharingKeys.Private? {
+        val privateKeyEncrypted = collection.privateKey
+        val collectionKey = getCollectionKey(collection, myUserGroups, login) ?: return null
+        return cryptography.createDecryptionEngine(collectionKey)
             .use { decryptionEngine ->
                 decryptionEngine.decryptBase64ToUtf8StringOrNull(
                     privateKeyEncrypted.asEncryptedBase64(),
@@ -127,12 +147,25 @@ class SharingCryptographyHelper @Inject internal constructor(
     fun newGroupUid(): String =
         generateUniqueIdentifier()
 
-    fun encryptItemKey(data: ByteArray, key: CryptographyKey.Raw32): String =
+    fun newCollectionSharingKey() = sharingCryptography.generateSharingKeysOrNull()
+
+    fun encryptItemKey(data: CryptographyKey.Raw32, key: CryptographyKey.Raw32) =
         cryptography.createKwc5EncryptionEngine(key)
             .use { encryptionEngine ->
-                encryptionEngine.encryptByteArrayToBase64String(data, compressed = false)
-            }
-            .value
+                encryptionEngine.encryptByteArrayToBase64String(
+                    data.toByteArray(),
+                    compressed = false
+                )
+            }.value
+
+    fun encryptPrivateKey(data: SharingKeys.Private, key: CryptographyKey.Raw32) =
+        cryptography.createKwc5EncryptionEngine(key)
+            .use { encryptionEngine ->
+                encryptionEngine.encryptUtf8ToBase64String(
+                    data.value,
+                    compressed = false
+                )
+            }.value
 
     fun generateAcceptationSignature(
         groupId: String?,
@@ -149,7 +182,10 @@ class SharingCryptographyHelper @Inject internal constructor(
         val acceptSignatureToEncrypt = getAcceptSignatureToEncrypt(groupId, groupKey)
         if (acceptSignatureToEncrypt.isEmpty()) return null
         val signature =
-            sharingCryptography.signRsaToBase64StringOrNull(acceptSignatureToEncrypt, privateKey)?.value
+            sharingCryptography.signRsaToBase64StringOrNull(
+                acceptSignatureToEncrypt,
+                privateKey
+            )?.value
         return signature ?: ""
     }
 
@@ -166,10 +202,10 @@ class SharingCryptographyHelper @Inject internal constructor(
             false
         } else {
             sharingCryptography.verifySignatureRsaBase64OrDefault(
-            acceptSignatureToEncrypt,
-            acceptSignatureEncrypted.asSharingSignatureBase64(),
-            signaturePublicKey
-        )
+                acceptSignatureToEncrypt,
+                acceptSignatureEncrypted.asSharingSignatureBase64(),
+                signaturePublicKey
+            )
         }
     }
 
@@ -209,51 +245,112 @@ class SharingCryptographyHelper @Inject internal constructor(
         return sharingCryptography.encryptRsaToBase64StringOrNull(groupKey, publicKey)?.value
     }
 
-    fun getUserGroupKey(userGroup: UserGroup, login: String): CryptographyKey.Raw32? =
-        getGroupKey(userGroup.getUser(login))
-
-    fun getItemGroupKey(itemGroup: ItemGroup?, login: String): CryptographyKey.Raw32? {
-        if (itemGroup == null) return null
-        return getGroupKey(itemGroup.getUser(login))
+    fun getItemGroupKeyFromCollection(
+        itemGroup: ItemGroup,
+        collection: Collection,
+        myUserGroups: List<UserGroup>,
+        userId: String
+    ): CryptographyKey.Raw32? {
+        val collectionPrivateKey = getCollectionPrivateKey(collection, myUserGroups, userId) ?: return null
+        val collectionDownload = itemGroup.getCollectionDownload(collection.uuid) ?: return null
+        return decryptGroupKey(collectionDownload.itemGroupKey, collectionPrivateKey)
     }
 
-    fun getItemGroupKey(itemGroup: ItemGroup?, userGroup: UserGroup, privateKey: SharingKeys.Private?): CryptographyKey.Raw32? {
-        if (itemGroup == null) return null
-        return getGroupKey(itemGroup.getUserGroupMember(userGroup.groupId), privateKey)
+    fun getItemGroupKeyFromUserGroup(
+        itemGroup: ItemGroup,
+        userGroup: UserGroup,
+        userId: String
+    ): CryptographyKey.Raw32? {
+        val userGroupPrivateKey = getUserGroupPrivateKey(userGroup, userId) ?: return null
+        val userGroupMember = itemGroup.getUserGroupMember(userGroup.groupId) ?: return null
+        return decryptGroupKey(userGroupMember.groupKey, userGroupPrivateKey)
     }
 
-    fun getGroupKey(itemGroup: ItemGroup, userId: String, myUserGroups: List<UserGroup>?): CryptographyKey.Raw32? {
-        var groupKeyDecrypted: CryptographyKey.Raw32? = null
+    fun getItemGroupKeyFromUser(
+        itemGroup: ItemGroup,
+        userId: String
+    ): CryptographyKey.Raw32? {
+        val userDownload = itemGroup.getUser(userId) ?: return null
+        return decryptGroupKey(userDownload.groupKey, userPrivateKey)
+    }
 
-        
-        
+    fun getItemGroupKey(
+        itemGroup: ItemGroup,
+        userId: String,
+        myUserGroups: List<UserGroup>,
+        myCollections: List<Collection>,
+    ): CryptographyKey.Raw32? {
+        val myUserGroupIdInItemGroup =
+            itemGroup.groups?.map { it.groupId }?.intersect(myUserGroups.map { it.groupId }.toSet()) ?: emptySet()
+
+        val myCollectionIdsInItemGroup =
+            itemGroup.collections?.map { it.uuid }?.intersect(myCollections.map { it.uuid }.toSet()) ?: emptySet()
+
         if (itemGroup.isUserAcceptedOrPending(userId)) {
-            groupKeyDecrypted = getGroupKey(itemGroup.getUser(userId))
-        } else if (myUserGroups != null) {
-            for (userGroup in myUserGroups) {
+            getItemGroupKeyFromUser(itemGroup, userId)?.also { return it }
+        }
+        if (myUserGroupIdInItemGroup.isNotEmpty()) {
+            myUserGroups.filter { it.groupId in myUserGroupIdInItemGroup }.forEach { userGroup ->
                 if (itemGroup.isUserGroupAcceptedOrPending(userGroup.groupId)) {
-                    val privateKey = getPrivateKey(userGroup, userId)
-                    groupKeyDecrypted = getItemGroupKey(itemGroup, userGroup, privateKey)
-                    return groupKeyDecrypted
+                    getItemGroupKeyFromUserGroup(itemGroup, userGroup, userId)?.also { return it }
                 }
             }
         }
-        return groupKeyDecrypted
+        if (myCollectionIdsInItemGroup.isNotEmpty()) {
+            myCollections.filter { it.uuid in myCollectionIdsInItemGroup }.forEach { collection ->
+                if (itemGroup.isCollectionAcceptedOrPending(collection.uuid)) {
+                    getItemGroupKeyFromCollection(itemGroup, collection, myUserGroups, userId)?.also { return it }
+                }
+            }
+        }
+        return null
     }
 
-    private fun getGroupKey(userDownload: UserDownload?): CryptographyKey.Raw32? {
-        if (userDownload == null) return null
-        return decryptGroupKey(userDownload.groupKey)
-    }
-
-    private fun getGroupKey(userGroupMember: UserGroupMember?, privateKey: SharingKeys.Private?): CryptographyKey.Raw32? {
-        if (userGroupMember == null) return null
-        return decryptGroupKey(userGroupMember.groupKey, privateKey)
-    }
-
-    private fun decryptGroupKey(userGroup: UserGroup, login: String): CryptographyKey.Raw32? {
+    fun getUserGroupKey(userGroup: UserGroup, login: String): CryptographyKey.Raw32? {
         val userDownload = userGroup.getUser(login) ?: return null
         return decryptGroupKey(userDownload.groupKey, userPrivateKey)
+    }
+
+    fun getCollectionKeyFromUser(
+        collection: Collection,
+        login: String
+    ): CryptographyKey.Raw32? {
+        val userCollectionDownload = collection.getUser(login) ?: return null
+        return decryptGroupKey(userCollectionDownload.collectionKey, userPrivateKey)
+    }
+
+    fun getCollectionKeyFromUserGroup(
+        collection: Collection,
+        myUserGroups: List<UserGroup>,
+        login: String
+    ): CryptographyKey.Raw32? {
+        val userGroupCollectionDownloads = collection.userGroups ?: return null
+        val ids =
+            userGroupCollectionDownloads.map { it.uuid } intersect myUserGroups.map { it.groupId }
+                .toSet()
+        userGroupCollectionDownloads.filter { it.uuid in ids }
+            .forEach { userGroupCollectionDownload ->
+                val userGroup = myUserGroups.find { it.groupId == userGroupCollectionDownload.uuid }
+                    ?: return@forEach
+                val privateKey = getUserGroupPrivateKey(userGroup, login) ?: return@forEach
+                decryptGroupKey(
+                    userGroupCollectionDownload.collectionKey,
+                    privateKey
+                )?.also { return it }
+            }
+        return null
+    }
+
+    private fun getCollectionKey(
+        collection: Collection,
+        myUserGroups: List<UserGroup>,
+        login: String
+    ): CryptographyKey.Raw32? {
+        return getCollectionKeyFromUser(collection, login) ?: getCollectionKeyFromUserGroup(
+            collection,
+            myUserGroups,
+            login
+        )
     }
 
     private fun getAcceptSignatureToEncrypt(groupId: String?, groupKey: ByteArray?): ByteArray {

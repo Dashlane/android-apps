@@ -1,7 +1,5 @@
 package com.dashlane.ui.activities.fragments.vault.dagger
 
-import com.dashlane.ui.activities.fragments.vault.Vault
-import com.dashlane.ui.activities.fragments.vault.VaultLogger
 import com.dashlane.ui.activities.fragments.vault.list.VaultList
 import com.dashlane.ui.activities.fragments.vault.list.VaultListDataProvider
 import dagger.Binds
@@ -14,7 +12,4 @@ import dagger.hilt.android.components.ViewModelComponent
 abstract class VaultListModule {
     @Binds
     abstract fun bindVaultListDataProvider(dataProvider: VaultListDataProvider): VaultList.DataProvider
-
-    @Binds
-    abstract fun bindVaultLogger(logger: VaultLogger): Vault.Logger
 }

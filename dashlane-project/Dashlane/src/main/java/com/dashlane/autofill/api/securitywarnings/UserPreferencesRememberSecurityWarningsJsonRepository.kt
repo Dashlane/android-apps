@@ -1,8 +1,8 @@
 package com.dashlane.autofill.api.securitywarnings
 
-import com.dashlane.autofill.api.securitywarnings.data.JsonPreferencesRememberSecurityWarningsRepository
-import com.dashlane.autofill.api.securitywarnings.data.SecurityWarningsPreferencesManagerWrapper
-import com.dashlane.autofill.api.securitywarnings.model.RememberSecurityWarningsRepository
+import com.dashlane.autofill.securitywarnings.data.JsonPreferencesRememberSecurityWarningsRepository
+import com.dashlane.autofill.securitywarnings.data.SecurityWarningsPreferencesManagerWrapper
+import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsRepository
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import javax.inject.Inject

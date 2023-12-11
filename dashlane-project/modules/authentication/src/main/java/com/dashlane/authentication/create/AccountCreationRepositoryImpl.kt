@@ -29,6 +29,7 @@ import com.dashlane.cryptography.decodeBase64ToByteArray
 import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.forXml
 import com.dashlane.server.api.DashlaneTime
+import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.server.api.endpoints.Platform
 import com.dashlane.server.api.endpoints.account.CreateAccountResult
 import com.dashlane.server.api.endpoints.account.CreateAccountService
@@ -59,15 +60,16 @@ class AccountCreationRepositoryImpl(
     override suspend fun createAccount(
         login: String,
         passwordUtf8Bytes: ObfuscatedByteArray,
+        accountType: AccountType,
         termsOfService: TermsOfService,
         withRemoteKey: Boolean,
         withLegacyCrypto: Boolean
-    ): AccountCreationRepository.Result =
-        withContext(Dispatchers.Default) { createAccountImpl(login, passwordUtf8Bytes, termsOfService, withRemoteKey, withLegacyCrypto) }
+    ): AccountCreationRepository.Result = createAccountImpl(login, passwordUtf8Bytes, accountType, termsOfService, withRemoteKey, withLegacyCrypto)
 
     private suspend fun createAccountImpl(
         login: String,
         password: ObfuscatedByteArray,
+        accountType: AccountType,
         termsOfService: TermsOfService,
         withRemoteKey: Boolean,
         withLegacyCrypto: Boolean
@@ -84,22 +86,24 @@ class AccountCreationRepositoryImpl(
         val (request, remoteKey) = if (withRemoteKey) {
             val rk = remoteKeyFactory.generateRemoteKey()
             createRequestWithRemoteKey(
-                login,
-                requestLogin,
-                settings,
-                sharingKeys,
-                vaultKey,
-                termsOfService,
-                rk
+                login = login,
+                loginRequest = requestLogin,
+                accountType = accountType,
+                settings = settings,
+                sharingKeys = sharingKeys,
+                vaultKey = vaultKey,
+                termsOfService = termsOfService,
+                remoteKey = rk
             ) to rk
         } else {
             createRequest(
-                login,
-                requestLogin,
-                settings,
-                sharingKeys,
-                vaultKey,
-                termsOfService
+                login = login,
+                loginRequest = requestLogin,
+                accountType = accountType,
+                settings = settings,
+                sharingKeys = sharingKeys,
+                vaultKey = vaultKey,
+                termsOfService = termsOfService
             ) to null
         }
         val response = try {
@@ -120,17 +124,28 @@ class AccountCreationRepositoryImpl(
     private fun createRequest(
         login: String,
         loginRequest: CreateAccountService.Request.Login,
+        accountType: AccountType,
         settings: Settings,
         sharingKeys: SharingKeys,
         vaultKey: VaultKey.Password,
         termsOfService: TermsOfService
     ) = cryptography.createPasswordEncryptionEngine(vaultKey, settings).use { encryptionEngine ->
-        createRequest(encryptionEngine, settings, login, sharingKeys, loginRequest, termsOfService, remoteKeys = null)
+        createRequest(
+            encryptionEngine = encryptionEngine,
+            settings = settings,
+            login = login,
+            sharingKeys = sharingKeys,
+            loginRequest = loginRequest,
+            accountType = accountType,
+            termsOfService = termsOfService,
+            remoteKeys = null
+        )
     }
 
     private fun createRequestWithRemoteKey(
         login: String,
         loginRequest: CreateAccountService.Request.Login,
+        accountType: AccountType,
         settings: Settings,
         sharingKeys: SharingKeys,
         vaultKey: VaultKey.Password,
@@ -138,12 +153,13 @@ class AccountCreationRepositoryImpl(
         remoteKey: VaultKey.RemoteKey
     ) = cryptography.createRemoteKeyEncryptionEngine(remoteKey).use { encryptionEngine ->
         createRequest(
-            encryptionEngine,
-            settings,
-            login,
-            sharingKeys,
-            loginRequest,
-            termsOfService,
+            encryptionEngine = encryptionEngine,
+            settings = settings,
+            login = login,
+            sharingKeys = sharingKeys,
+            loginRequest = loginRequest,
+            accountType = accountType,
+            termsOfService = termsOfService,
             remoteKeys = listOf(
                 CreateAccountService.Request.RemoteKey(
                     type = CreateAccountService.Request.RemoteKey.Type.MASTER_PASSWORD,
@@ -161,6 +177,7 @@ class AccountCreationRepositoryImpl(
         login: String,
         sharingKeys: SharingKeys,
         loginRequest: CreateAccountService.Request.Login,
+        accountType: AccountType,
         termsOfService: TermsOfService,
         remoteKeys: List<CreateAccountService.Request.RemoteKey>?
     ) = CreateAccountService.Request(
@@ -168,6 +185,7 @@ class AccountCreationRepositoryImpl(
         country = deviceRegistrationInfo.country,
         appVersion = deviceRegistrationInfo.appVersion,
         contactEmail = CreateAccountService.Request.ContactEmail(login),
+        accountType = accountType,
         origin = deviceRegistrationInfo.installOrigin,
         sharingKeys = CreateAccountSharingKeys(
             publicKey = sharingKeys.public.value,

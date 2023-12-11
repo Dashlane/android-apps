@@ -1,11 +1,11 @@
 package com.dashlane.notificationcenter
 
 import android.content.Context
-import android.text.format.DateUtils
+import com.dashlane.account.UserAccountInfo
+import com.dashlane.account.UserAccountStorage
 import com.dashlane.announcements.modules.trialupgraderecommendation.TrialUpgradeRecommendationModule
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
-import com.dashlane.csvimport.OnboardingChromeImportUtils
 import com.dashlane.darkweb.DarkWebEmailStatus
 import com.dashlane.darkweb.DarkWebMonitoringManager
 import com.dashlane.debug.DeveloperUtilities
@@ -19,6 +19,7 @@ import com.dashlane.notificationcenter.view.ActionItemSection
 import com.dashlane.notificationcenter.view.ActionItemType
 import com.dashlane.notificationcenter.view.AlertActionItem
 import com.dashlane.notificationcenter.view.NotificationItem
+import com.dashlane.notificationcenter.view.SharingActionItemCollection
 import com.dashlane.notificationcenter.view.SharingActionItemItemGroup
 import com.dashlane.notificationcenter.view.SharingActionItemUserGroup
 import com.dashlane.preference.UserPreferencesManager
@@ -32,20 +33,20 @@ import com.dashlane.security.SecurityHelper
 import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.AccountStatusRepository
-import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.tryOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import java.time.Instant
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import javax.inject.Inject
 
 @Suppress("LargeClass")
 class NotificationCenterRepositoryImpl @Inject constructor(
@@ -61,12 +62,13 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val securityHelper: SecurityHelper,
     private val biometricAuthModule: BiometricAuthModule,
-    private val userDataRepository: UserDataRepository,
     private val biometricRecovery: BiometricRecovery,
     private val accountStatusRepository: AccountStatusRepository,
     private val darkWebMonitoringManager: DarkWebMonitoringManager,
     private val storeOffersManager: StoreOffersManager,
-    private val storeOffersFormatter: StoreOffersFormatter
+    private val storeOffersFormatter: StoreOffersFormatter,
+    private val userAccountStorage: UserAccountStorage,
+    @DefaultCoroutineDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher
 ) : NotificationCenterRepository {
 
     private val hasBiometric
@@ -84,7 +86,7 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     }
 
     override fun markAsRead(item: NotificationItem) {
-        setRead(item, true)
+        setRead(item)
     }
 
     override suspend fun loadAll(): List<NotificationItem> = coroutineScope {
@@ -101,9 +103,9 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     @Suppress("EXPERIMENTAL_API_USAGE")
     override suspend fun load(section: ActionItemSection, limit: Int?): List<NotificationItem> {
         val types = actionItemTypes[section] ?: return listOf()
-        return withContext(Dispatchers.Default) {
+        return withContext(defaultCoroutineDispatcher) {
             types.map { type ->
-                createActionItem(type, section, limit).filterNotNull().filterNotDismissed()
+                createActionItem(type, limit).filterNotNull().filterNotDismissed()
             }.flatten()
         }
     }
@@ -126,8 +128,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     }
 
     private fun createActionItemTypes(): Map<ActionItemSection, Set<ActionItemType>> {
-        val isChromeImportForGettingStarted = isChromeImportForGettingStarted()
-
         val gettingStartedItemTypes = mutableSetOf(
             ActionItemType.AUTO_FILL,
             ActionItemType.PIN_CODE,
@@ -137,13 +137,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         )
 
         val whatIsNewItemTypes = mutableSetOf<ActionItemType>()
-
-        if (isChromeImportForGettingStarted) {
-            gettingStartedItemTypes.add(ActionItemType.CHROME_IMPORT)
-        } else {
-            whatIsNewItemTypes.add(ActionItemType.CHROME_IMPORT)
-        }
-
         whatIsNewItemTypes.add(ActionItemType.AUTHENTICATOR_ANNOUNCEMENT)
 
         val yourAccountItemTypes = setOf(
@@ -161,21 +154,18 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         )
     }
 
-    private suspend fun createActionItem(
-        type: ActionItemType,
-        section: ActionItemSection,
-        limit: Int?
-    ): List<NotificationItem?> {
+    private suspend fun createActionItem(type: ActionItemType, limit: Int?): List<NotificationItem?> {
         return when (type) {
             ActionItemType.AUTO_FILL -> listOf(createAutoFillItem())
             ActionItemType.BIOMETRIC, ActionItemType.PIN_CODE -> listOf(createSecureLockItem(type))
             ActionItemType.ZERO_PASSWORD -> listOf(createZeroPasswordItem())
             ActionItemType.BREACH_ALERT -> loadBreachItems(limit)
             ActionItemType.SHARING -> loadSharingItems()
-            ActionItemType.CHROME_IMPORT -> listOf(createChromeImportItem(section))
             ActionItemType.ACCOUNT_RECOVERY -> listOf(createBiometricRecoveryItem())
             ActionItemType.FREE_TRIAL_STARTED -> listOf(createFreeTrialStartedItem())
-            ActionItemType.TRIAL_UPGRADE_RECOMMENDATION -> listOf(createTrialUpgradeRecommendationItem())
+            ActionItemType.TRIAL_UPGRADE_RECOMMENDATION -> listOf(
+                createTrialUpgradeRecommendationItem()
+            )
             ActionItemType.AUTHENTICATOR_ANNOUNCEMENT -> listOf(createAuthenticatorAnnouncementItem())
             ActionItemType.INTRODUCTORY_OFFERS -> createPromotionItems()
         }
@@ -191,11 +181,11 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             null
         }
 
-    private fun createChromeImportItem(section: ActionItemSection): ActionItem? =
-        if (meetConditionChromeImport()) ActionItem.ChromeImportActionItem(this, section) else null
-
     private fun createBiometricRecoveryItem(): ActionItem? = if (meetConditionBiometricRecovery()) {
-        ActionItem.BiometricRecoveryActionItem(this, lockType == LockTypeManager.LOCK_TYPE_BIOMETRIC)
+        ActionItem.BiometricRecoveryActionItem(
+            this,
+            lockType == LockTypeManager.LOCK_TYPE_BIOMETRIC
+        )
     } else {
         null
     }
@@ -228,8 +218,9 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private suspend fun createPromotionItems(): List<NotificationItem> {
         val pendingOffers = loadStoreOffers().map { storeOffer ->
             val offerType = storeOffer.offerType
-            val introOffers = listOf(storeOffer.monthly?.productDetails, storeOffer.yearly?.productDetails)
-                .filterIsInstance<ProductDetailsWrapper.IntroductoryOfferProduct>()
+            val introOffers =
+                listOf(storeOffer.monthly?.productDetails, storeOffer.yearly?.productDetails)
+                    .filterIsInstance<ProductDetailsWrapper.IntroductoryOfferProduct>()
 
             introOffers.mapNotNull { productDetails ->
                 productDetails.toPromotionType(offerType)?.let { offerData ->
@@ -279,22 +270,10 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private fun meetConditionAutoFill(): Boolean =
         !inAppLoginManager.isEnableForApp() && !DeveloperUtilities.isManaged(context)
 
-    private fun meetConditionChromeImport(): Boolean {
-        return OnboardingChromeImportUtils.hasChromeExport(context) &&
-            !userPreferencesManager.hasStartedChromeImport
-    }
-
     private fun meetConditionBiometricRecovery(): Boolean = securityHelper.isDeviceSecured() &&
         hasBiometric &&
-        biometricRecovery.isFeatureAvailable &&
+        biometricRecovery.isFeatureAvailable() &&
         !biometricRecovery.isFeatureEnabled
-
-    private fun isChromeImportForGettingStarted(): Boolean {
-        val creationTimestampSeconds = sessionManager.session?.let {
-            userDataRepository.getSettingsManager(it).getSettings().accountCreationDatetime
-        } ?: 0
-        return System.currentTimeMillis() - creationTimestampSeconds * 1000 < DELAY_CHROME_IMPORT_ACCOUNT_CREATION
-    }
 
     private fun meetConditionZeroPassword(): Boolean {
         val passwordCount = mainDataAccessor.getCredentialDataQuery()
@@ -317,10 +296,11 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     }
 
     private fun meetConditionAuthenticatorAnnouncement() =
-        !userPreferencesManager.isAuthenticatorGetStartedDisplayed
+        !userPreferencesManager.isAuthenticatorGetStartedDisplayed &&
+            sessionManager.session?.username?.let { userAccountStorage[it]?.accountType is UserAccountInfo.AccountType.MasterPassword } ?: true
 
     private suspend fun loadBreachItems(limit: Int?): List<AlertActionItem> {
-        val list = withContext(Dispatchers.Default) { breachLoader.getBreachesWrapper(limit) }
+        val list = withContext(defaultCoroutineDispatcher) { breachLoader.getBreachesWrapper(limit) }
         return list.map { breachWrapper ->
             AlertActionItem(actionItemsRepository = this, breachWrapper = breachWrapper)
         }
@@ -328,7 +308,7 @@ class NotificationCenterRepositoryImpl @Inject constructor(
 
     private suspend fun loadSharingItems(): List<NotificationItem> {
         val list = sharingLoader.loadAllInvitations()
-        return list.first.map { invite ->
+        return list.itemGroupInvitations.map { invite ->
             SharingActionItemItemGroup(
                 actionItemsRepository = this,
                 sharing = invite,
@@ -338,8 +318,18 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             ).apply {
                 this.firstDisplayedDate = getOrInitCreationDate(this)
             }
-        } + list.second.map { invite ->
+        } + list.userGroupInvitations.map { invite ->
             SharingActionItemUserGroup(
+                actionItemsRepository = this,
+                sharing = invite,
+                xmlConverter = sharingXmlConverter,
+                dataStorageProvider = dataStorageProvider,
+                sessionManager = sessionManager
+            ).apply {
+                this.firstDisplayedDate = getOrInitCreationDate(this)
+            }
+        } + list.collectionInvitations.map { invite ->
+            SharingActionItemCollection(
                 actionItemsRepository = this,
                 sharing = invite,
                 xmlConverter = sharingXmlConverter,
@@ -358,8 +348,8 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             }
         } ?: listOf()
 
-    private fun setRead(item: NotificationItem, value: Boolean) =
-        userPreferencesManager.putBoolean("$PREFERENCE_READ${item.trackingKey}", value)
+    private fun setRead(item: NotificationItem) =
+        userPreferencesManager.putBoolean("$PREFERENCE_READ${item.trackingKey}", true)
 
     private fun getFirstDisplayedDate(trackingKey: String) =
         userPreferencesManager.getLong("$PREFERENCE_CREATION_DATE$trackingKey", -1)
@@ -383,8 +373,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         private const val PREFERENCE_DISMISS = "action_item_dismiss_"
         private const val PREFERENCE_READ = "action_item_read_"
         private const val PREFERENCE_CREATION_DATE = "action_item_creation_date_"
-        private const val DELAY_CHROME_IMPORT_ACCOUNT_CREATION =
-            48 * DateUtils.HOUR_IN_MILLIS 
 
         fun setDismissed(
             userPreferencesManager: UserPreferencesManager,

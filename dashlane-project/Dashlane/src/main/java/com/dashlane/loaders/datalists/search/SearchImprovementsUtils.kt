@@ -1,6 +1,7 @@
 package com.dashlane.loaders.datalists.search
 
 import android.content.Context
+import com.dashlane.R
 import com.dashlane.ext.application.KnownLinkedDomains
 import com.dashlane.search.ItemType
 import com.dashlane.search.Match
@@ -17,6 +18,7 @@ import com.dashlane.search.fields.EmailField
 import com.dashlane.search.fields.FiscalStatementField
 import com.dashlane.search.fields.IdCardField
 import com.dashlane.search.fields.IdentityField
+import com.dashlane.search.fields.PasskeyField
 import com.dashlane.search.fields.PassportField
 import com.dashlane.search.fields.PaypalField
 import com.dashlane.search.fields.PersonalWebsiteField
@@ -44,11 +46,12 @@ import com.dashlane.ui.adapters.text.factory.SocialSecurityStatementListTextFact
 import com.dashlane.url.toUrlDomain
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityUtil
+import com.dashlane.vault.util.IdentityNameHolderService
 
+@Suppress("LargeClass")
 class SearchImprovementsUtils(
     private val textResolver: DataIdentifierListTextResolver,
-    private val identityUtil: IdentityUtil
+    private val identityNameHolderService: IdentityNameHolderService
 ) {
 
     @Suppress("LongMethod")
@@ -92,6 +95,35 @@ class SearchImprovementsUtils(
             { item, query ->
                 item.asCredential()
                     ?.userSelectedUrl?.toMatchOrNull(query, CredentialField.USER_SELECTED_URL)
+            }
+        ),
+        ItemType.PASSKEY to listOf(
+            { item, query ->
+                textResolver.getLine1(context, item as SummaryObject.Passkey).text.toMatchOrNull(
+                    query,
+                    PasskeyField.TITLE
+                )
+            },
+            { _, query ->
+                context.getString(R.string.datatype_passkey).toMatchOrNull(query, PasskeyField.ITEM_TYPE_NAME)
+            },
+            { item, query ->
+                item.asPasskey()?.userDisplayName?.toMatchOrNull(
+                    query,
+                    PasskeyField.USERNAME
+                )
+            },
+            { item, query ->
+                item.asPasskey()?.note?.toMatchOrNull(
+                    query,
+                    PasskeyField.NOTE
+                )
+            },
+            { item, query ->
+                item.asPasskey()?.rpId?.toMatchOrNull(
+                    query,
+                    PasskeyField.WEBSITE
+                )
             }
         ),
 
@@ -165,7 +197,7 @@ class SearchImprovementsUtils(
                     }
                 }
             }
-    ),
+        ),
 
         
         ItemType.DRIVER_LICENCE to listOf(
@@ -190,10 +222,10 @@ class SearchImprovementsUtils(
                     .toMatchOrNull(query, FiscalStatementField.ITEM_TYPE_NAME)
             },
             { item, query ->
-                item.asFiscalStatement()?.let { identityUtil.getOwner(it) }
+                item.asFiscalStatement()?.let { identityNameHolderService.getOwner(it) }
                     ?.toMatchOrNull(query, FiscalStatementField.FULL_NAME)
             }
-    ),
+        ),
 
         ItemType.ID_CARD to listOf(
             { item, query ->
@@ -332,6 +364,7 @@ class SearchImprovementsUtils(
     }
 
     private fun Any.asCredential(): SummaryObject.Authentifiant? = this as? SummaryObject.Authentifiant
+    private fun Any.asPasskey(): SummaryObject.Passkey? = this as? SummaryObject.Passkey
     private fun Any.asBankStatement(): SummaryObject.BankStatement? = this as? SummaryObject.BankStatement
     private fun Any.asCreditCard(): SummaryObject.PaymentCreditCard? = this as? SummaryObject.PaymentCreditCard
     private fun Any.asPaypal(): SummaryObject.PaymentPaypal? = this as? SummaryObject.PaymentPaypal

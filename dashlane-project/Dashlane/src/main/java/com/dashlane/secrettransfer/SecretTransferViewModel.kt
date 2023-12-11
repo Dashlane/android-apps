@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.account.UserAccountInfo
+import com.dashlane.account.UserAccountStorage
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.ObfuscatedByteArray
@@ -12,7 +14,7 @@ import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.encryptUtf8ToBase64String
 import com.dashlane.cryptography.jni.JniCryptography
 import com.dashlane.cryptography.toObfuscated
-import com.dashlane.login.pages.secrettransfer.LoginSecretTransferViewModel
+import com.dashlane.login.pages.secrettransfer.qrcode.QrCodeViewModel
 import com.dashlane.login.pages.secrettransfer.SecretTransferPayload
 import com.dashlane.login.pages.secrettransfer.SecretTransferPublicKey
 import com.dashlane.login.pages.secrettransfer.SecretTransferUri
@@ -57,6 +59,7 @@ class SecretTransferViewModel @Inject constructor(
     private val cryptography: Cryptography,
     private val moshi: Moshi,
     private val auth2faSettingsService: Auth2faSettingsService,
+    private val userAccountStorage: UserAccountStorage,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
@@ -132,7 +135,7 @@ class SecretTransferViewModel @Inject constructor(
         val symmetricKey = jniCryptography.deriveX25519SharedSecret(
             privateKey = privateKey,
             peerPublicKey = peerPublicKey,
-            salt = LoginSecretTransferViewModel.SALT.decodeBase64ToByteArray(),
+            salt = QrCodeViewModel.SALT.decodeBase64ToByteArray(),
             sharedInfo = byteArrayOf(),
             derivedKeySize = 64
         )?.toObfuscated() ?: throw SecretTransferException(SecretTransferError.CryptographicError)
@@ -160,10 +163,20 @@ class SecretTransferViewModel @Inject constructor(
         publicKey: String
     ) {
         val login = session.username.email
-        val (type, value) = when (val appKey = session.appKey) {
-            is AppKey.Password -> SecretTransferPayload.Type.MASTER_PASSWORD to appKey.passwordUtf8Bytes.decodeUtf8ToString()
-            is AppKey.SsoKey -> SecretTransferPayload.Type.SSO to appKey.cryptographyKeyBytes.toByteArray().encodeBase64ToString()
+
+        val value = when (val appKey = session.appKey) {
+            is AppKey.Password -> appKey.passwordUtf8Bytes.decodeUtf8ToString()
+            is AppKey.SsoKey -> appKey.cryptographyKeyBytes.toByteArray().encodeBase64ToString()
         }
+
+        val userAccountInfo = userAccountStorage[session.username]
+        val type = when {
+            userAccountInfo?.sso == true -> SecretTransferPayload.Type.SSO
+            userAccountInfo?.accountType is UserAccountInfo.AccountType.InvisibleMasterPassword -> SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD
+            userAccountInfo?.accountType is UserAccountInfo.AccountType.MasterPassword -> SecretTransferPayload.Type.MASTER_PASSWORD
+            else -> throw SecretTransferException(SecretTransferError.InvalidSession)
+        }
+
         val vaultKey = SecretTransferPayload.VaultKey(type, value)
         val secretTransferPayload = SecretTransferPayload(login = login, vaultKey = vaultKey, token = token)
         val jsonData = moshi.adapter(SecretTransferPayload::class.java).toJson(secretTransferPayload)

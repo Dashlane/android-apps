@@ -2,35 +2,34 @@ package com.dashlane.login.pages
 
 import android.widget.Toast
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.login.lock.LockManager
+import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.root.LoginPresenter
 import com.dashlane.ui.util.FinishingActivity
-import com.dashlane.useractivity.log.usage.UsageLogConstant
+import com.dashlane.util.Toaster
 import kotlinx.coroutines.CoroutineScope
 
 abstract class LoginLockBasePresenter<P : LoginLockBaseContract.DataProvider, Q : LoginLockBaseContract.ViewProxy>(
+    val lockManager: LockManager,
+    val toaster: Toaster,
     rootPresenter: LoginPresenter,
-    coroutineScope: CoroutineScope,
-    val lockManager: LockManager
+    coroutineScope: CoroutineScope
 ) : LoginBasePresenter<P, Q>(rootPresenter, coroutineScope), LoginLockBaseContract.Presenter {
 
-    override fun logoutTooManyAttempts(errorMessage: CharSequence?, logSent: Boolean) {
-        val toaster = SingletonProvider.getToaster()
-        if (!logSent) {
-            providerOrNull?.logUsageLogCode75(UsageLogConstant.LockAction.logout)
-        }
-        if (errorMessage != null) {
-            toaster.show(errorMessage, Toast.LENGTH_LONG)
-        } else {
-            val toastTextResId = when (lockTypeName) {
-                UsageLogConstant.LockType.fingerPrint -> R.string.lock_fingerprint_force_logout_fingerprint_incorrect_too_much
-                UsageLogConstant.LockType.pin -> R.string.lock_pincode_force_logout_pin_missed_too_much
-                UsageLogConstant.LockType.master -> R.string.lock_force_logout_password_incorrect_too_much
-                else -> null
-            }
-            if (toastTextResId != null) {
-                toaster.show(toastTextResId, Toast.LENGTH_LONG)
+    override fun logoutTooManyAttempts(errorMessage: CharSequence?, showToast: Boolean) {
+        if (showToast) {
+            if (errorMessage != null) {
+                toaster.show(errorMessage, Toast.LENGTH_LONG)
+            } else {
+                val toastTextResId = when (lockTypeName) {
+                    LockTypeManager.LOCK_TYPE_BIOMETRIC -> R.string.lock_fingerprint_force_logout_fingerprint_incorrect_too_much
+                    LockTypeManager.LOCK_TYPE_PIN_CODE -> R.string.lock_pincode_force_logout_pin_missed_too_much
+                    LockTypeManager.LOCK_TYPE_MASTER_PASSWORD -> R.string.lock_force_logout_password_incorrect_too_much
+                    else -> null
+                }
+                if (toastTextResId != null) {
+                    toaster.show(toastTextResId, Toast.LENGTH_LONG)
+                }
             }
         }
 

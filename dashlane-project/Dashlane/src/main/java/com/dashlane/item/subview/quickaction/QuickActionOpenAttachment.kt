@@ -3,12 +3,10 @@ package com.dashlane.item.subview.quickaction
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.item.subview.Action
 import com.dashlane.item.subview.action.showAttachments
 import com.dashlane.vault.model.getColorId
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.attachmentsAllowed
 import com.dashlane.vault.util.attachmentsCount
 import com.dashlane.xml.domain.SyncObject
 
@@ -31,9 +29,10 @@ class QuickActionOpenAttachment(private val summaryObject: SummaryObject.SecureN
     }
 
     companion object {
-        fun createAttachmentsAction(summaryObject: SummaryObject): QuickActionOpenAttachment? {
-            val userFeaturesChecker = SingletonProvider.getUserFeatureChecker()
-            if (summaryObject.attachmentsAllowed(userFeaturesChecker) && summaryObject is SummaryObject.SecureNote) {
+        fun createAttachmentsAction(
+            summaryObject: SummaryObject
+        ): QuickActionOpenAttachment? {
+            if (summaryObject is SummaryObject.SecureNote) {
                 return QuickActionOpenAttachment(summaryObject, summaryObject.attachmentsCount())
             }
             return null

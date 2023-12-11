@@ -126,7 +126,7 @@
             android:layout_weight="1"
             android:background="?selectableItemBackground"
             android:src="@drawable/backspace"
-            app:tint="?attr/colorAccentOnPrimary"
+            app:tint="@color/text_neutral_catchy"
             />
 
     </TableRow>

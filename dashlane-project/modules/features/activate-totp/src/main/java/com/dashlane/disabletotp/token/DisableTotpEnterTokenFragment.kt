@@ -23,8 +23,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 internal class DisableTotpEnterTokenFragment : Fragment() {
 
-    private val viewModel by viewModels<DisableTotpEnterTokenViewModel>()
-    private var dialogBuilder: DisableTotpRecoveryCodeAlertDialogBuilder? = null
+    private val viewModel by viewModels<TotpRecoveryCodeDialogViewModel>()
+    private var dialogBuilder: TotpRecoveryCodeAlertDialogBuilder? = null
     private var tokenWidth = 0
     private var _binding: FragmentDisableTotpEnterTokenBinding? = null
     private val binding get() = _binding!!
@@ -75,7 +75,7 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
             if (bundle.getBoolean(KEY_BACKUP_OTP_ERROR, false)) {
                 dialogBuilder?.apply {
                     getDialog()?.show()
-                    setIsError(true)
+                    setIsError(isError = true, errorMessage = getString(R.string.disable_totp_enter_token_recovery_dialog_backup_error))
                 }
             }
         }
@@ -83,10 +83,10 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
         lifecycleScope.launchWhenStarted {
             viewModel.sharedFlow.collect { state ->
                 when (state) {
-                    DisableTotpEnterTokenState.Error -> {
+                    SmsRecoveryCodeDialogState.Error -> {
                         findNavController().navigate(DisableTotpDeactivationFragmentDirections.goToDeactivationError())
                     }
-                    DisableTotpEnterTokenState.Success -> {
+                    SmsRecoveryCodeDialogState.Success -> {
                         show2FARecoveryEnterCodeDialog(requireContext().getString(R.string.disable_totp_enter_token_recovery_dialog_phone_backup_description))
                     }
                 }
@@ -145,10 +145,14 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
     }
 
     private fun show2FARecoveryEnterCodeDialog(message: String) {
-        dialogBuilder = DisableTotpRecoveryCodeAlertDialogBuilder(requireActivity()).apply {
+        dialogBuilder = TotpRecoveryCodeAlertDialogBuilder(requireActivity()).apply {
             create(
+                title = getString(R.string.disable_totp_enter_token_recovery_dialog_title),
                 message = message,
+                hint = getString(R.string.disable_totp_enter_token_recovery_dialog_backup_hint),
+                positiveText = getString(R.string.disable_totp_enter_token_recovery_dialog_backup_button_positive),
                 positiveAction = { recoveryCode: String -> next(otp = recoveryCode, isBackupCode = true) },
+                negativeText = getString(R.string.disable_totp_enter_token_recovery_dialog_backup_button_negative),
                 negativeAction = { },
             )
         }

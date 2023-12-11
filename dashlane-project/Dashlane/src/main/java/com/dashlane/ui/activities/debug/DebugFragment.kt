@@ -15,7 +15,16 @@ class DebugFragment : PreferenceFragmentCompat() {
     internal lateinit var debugCategoryAccountsManager: DebugCategoryAccountsManager
 
     @Inject
-    lateinit var deviceInfoRepository: DeviceInfoRepository
+    internal lateinit var debugCategorySync: DebugCategorySync
+
+    @Inject
+    internal lateinit var racletteDebugCategory: RacletteDebugCategory
+
+    @Inject
+    internal lateinit var deviceInfoRepository: DeviceInfoRepository
+
+    @Inject
+    internal lateinit var debugCategoryCryptography: DebugCategoryCryptography
 
     @Inject
     lateinit var sessionManager: SessionManager
@@ -27,11 +36,11 @@ class DebugFragment : PreferenceFragmentCompat() {
         if (BuildConfig.DEBUG) {
             DebugCategoryDevOption(activity, deviceInfoRepository).add(screen)
         }
-        sessionManager.session?.let { DebugCategoryCryptography(activity, it).add(screen) }
+        sessionManager.session?.let { debugCategoryCryptography.add(screen) }
 
         debugCategoryAccountsManager.add(screen)
-        DebugCategorySync(activity).add(screen)
-        RacletteDebugCategory(activity).add(screen)
+        debugCategorySync.add(screen)
+        racletteDebugCategory.add(screen)
         preferenceScreen = screen
     }
 }

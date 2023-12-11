@@ -2,38 +2,33 @@ package com.dashlane.teamspaces.db
 
 import androidx.annotation.WorkerThread
 import com.dashlane.hermes.generated.definitions.Action
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.Session
-import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.DataCounter
+import com.dashlane.sharing.model.isAccepted
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
-import com.dashlane.storage.userdata.accessor.filter.counterFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.storage.userdata.accessor.filter.space.NoRestrictionSpaceFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.teamspaces.db.TeamspaceForceCategorizationLogger.UsageLogCode11Wrapper
+import com.dashlane.teamspaces.CombinedTeamspace
+import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.manager.SpaceDeletedNotifier
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.manager.TeamspaceMatcher
 import com.dashlane.teamspaces.manager.matchForceDomains
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.useractivity.log.usage.getUsageLogNameFromType
+import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.model.urlForUsageLog
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
@@ -45,9 +40,8 @@ import javax.inject.Singleton
 class TeamspaceForceCategorizationManager @Inject constructor(
     @ApplicationCoroutineScope
     coroutineScope: CoroutineScope,
-    private val sessionManager: SessionManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val mainDataAccessor: MainDataAccessor,
+    private val sharingDataProvider: SharingDataProvider,
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
     private val spaceDeletedNotifier: SpaceDeletedNotifier,
     private val teamspaceForceDeletionSharingWorker: TeamspaceForceDeletionSharingWorker,
@@ -55,15 +49,13 @@ class TeamspaceForceCategorizationManager @Inject constructor(
 ) {
     private val dataSaver: DataSaver
         get() = mainDataAccessor.getDataSaver()
-    private val dataCounter: DataCounter
-        get() = mainDataAccessor.getDataCounter()
     private val vaultDataQuery: VaultDataQuery
         get() = mainDataAccessor.getVaultDataQuery()
     private val genericDataQuery: GenericDataQuery
         get() = mainDataAccessor.getGenericDataQuery()
 
     
-    @Suppress("EXPERIMENTAL_API_USAGE")
+    @OptIn(ObsoleteCoroutinesApi::class)
     private val actor =
         coroutineScope.actor<Unit>(context = Dispatchers.IO, capacity = Channel.CONFLATED) {
             consumeEach {
@@ -88,12 +80,6 @@ class TeamspaceForceCategorizationManager @Inject constructor(
 
         val result = moveVaultItems(teamspaces)
 
-        val dataCount: Map<SyncObjectType, Int> = getDataCount()
-
-        sessionManager.session?.apply {
-            sendUsageLog11ForcedItems(this, result.itemsForced, teamspaces, dataCount)
-            sendUsageLog11DeletedItems(this, result.itemsDeleted, teamspaces, dataCount)
-        }
         result.itemsDeleted.forEach {
             activityLogger.sendActivityLog(vaultItem = it, action = Action.DELETE)
         }
@@ -110,6 +96,7 @@ class TeamspaceForceCategorizationManager @Inject constructor(
         val itemsForced: MutableList<VaultItem<SyncObject>> = mutableListOf()
         val itemsDeleted: MutableList<VaultItem<SyncObject>> = mutableListOf()
         val idsSharedToRevoked: MutableList<String> = mutableListOf()
+        moveCollectionItemsToBusinessSpace(teamspaces, itemsForced)
         teamspaces.forEach { teamspace ->
             teamspace?.teamId ?: return@forEach
 
@@ -123,6 +110,32 @@ class TeamspaceForceCategorizationManager @Inject constructor(
             moveVaultItemsForTeamspace(teamspace, itemsForced, itemsDeleted, idsSharedToRevoked)
         }
         return Result(itemsForced, itemsDeleted, idsSharedToRevoked)
+    }
+
+    private suspend fun moveCollectionItemsToBusinessSpace(
+        teamspaces: List<Teamspace?>,
+        itemsForced: MutableList<VaultItem<SyncObject>>
+    ) {
+        val itemGroups = sharingDataProvider.getItemGroups()
+        val businessSpaceId = teamspaces
+            .minus(setOf(CombinedTeamspace, PersonalTeamspace))
+            .firstOrNull()
+            ?.teamId ?: return
+        val itemIdsToForce = itemGroups.mapNotNull { group ->
+            if (group.collections?.any { it.isAccepted } == true) group.items?.map { it.itemId } else null
+        }.flatten()
+        val vaultItems = getVaultItems(SyncObjectType.AUTHENTIFIANT, itemIdsToForce)
+        
+        val editedVaultItems = vaultItems.mapNotNull { item ->
+            if (item.syncObject.spaceId == businessSpaceId) return@mapNotNull null
+            item.copyWithAttrs {
+                teamSpaceId = businessSpaceId
+                syncState = SyncState.MODIFIED
+            }
+        }
+        
+        if (editedVaultItems.isNotEmpty()) dataSaver.save(editedVaultItems)
+        itemsForced.addAll(editedVaultItems)
     }
 
     private suspend fun moveVaultItemsForTeamspace(
@@ -158,70 +171,6 @@ class TeamspaceForceCategorizationManager @Inject constructor(
                     idsSharedToRevoked.addAll(getUidsSharedItemForceCategorization(itemsShouldForced))
                 }
             }
-        }
-    }
-
-    private fun sendUsageLog11ForcedItems(
-        session: Session,
-        itemsForced: List<VaultItem<SyncObject>>,
-        spaces: List<Teamspace>,
-        dataCount: Map<SyncObjectType, Int>
-    ) {
-        sendUsageLog11(session, itemsForced, spaces, false, dataCount)
-    }
-
-    private fun sendUsageLog11DeletedItems(
-        session: Session,
-        itemsDeleted: List<VaultItem<SyncObject>>,
-        spaces: List<Teamspace>,
-        dataCount: Map<SyncObjectType, Int>
-    ) {
-        sendUsageLog11(session, itemsDeleted, spaces, true, dataCount)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun sendUsageLog11(
-        session: Session,
-        items: List<VaultItem<SyncObject>>,
-        spaces: List<Teamspace>,
-        isDeleted: Boolean,
-        dataCount: Map<SyncObjectType, Int>
-    ) {
-        val userDataRepository = bySessionUsageLogRepository[session] ?: return
-        val logger = TeamspaceForceCategorizationLogger(userDataRepository)
-
-        items.forEach { item ->
-            val annonSpaceId = spaces.find { item.syncObject.spaceId == it.teamId }?.anonTeamId
-            val logCode11: UsageLogCode11Wrapper = logger.newLog()
-                .setSpaceId(annonSpaceId)
-                .setType(getUsageLogNameFromType(item.syncObjectType))
-                .setItemId(item.anonymousId)
-                .setFrom(
-                    if (isDeleted) {
-                        UsageLogCode11.From.REMOTE_DELETE.code
-                    } else {
-                        UsageLogCode11.From.FORCED_CATEGORIZATION.code
-                    }
-                )
-                .setAction(
-                    if (isDeleted) {
-                        UsageLogCode11.Action.REMOVE
-                    } else {
-                        UsageLogCode11.Action.EDIT
-                    }
-                )
-                .setCounter(
-                    if (isDeleted) {
-                        dataCount[item.syncObjectType] 
-                    } else {
-                        null
-                    }
-                )
-
-            if (item.syncObjectType == SyncObjectType.AUTHENTIFIANT) {
-                logCode11.setWebsite((item as VaultItem<SyncObject.Authentifiant>).syncObject.urlForUsageLog)
-            }
-            logCode11.send()
         }
     }
 
@@ -371,20 +320,6 @@ class TeamspaceForceCategorizationManager @Inject constructor(
             allStatusFilter()
         }
         return vaultDataQuery.queryAll(vaultFilter)
-    }
-
-    private fun getDataCount(): Map<SyncObjectType, Int> {
-        val map: MutableMap<SyncObjectType, Int> = mutableMapOf()
-        val dataTypes = TeamspaceMatcher.DATA_TYPE_TO_MATCH
-        dataTypes.forEach {
-            val filter = counterFilter {
-                specificDataType(it)
-                noSpaceFilter()
-                ignoreUserLock()
-            }
-            map[it] = dataCounter.count(filter)
-        }
-        return map
     }
 
     private fun markNotifyServerContentDeletedIfRequire(teamspaces: List<Teamspace>) {

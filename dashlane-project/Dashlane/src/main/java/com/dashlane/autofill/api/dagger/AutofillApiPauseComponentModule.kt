@@ -1,12 +1,12 @@
 package com.dashlane.autofill.api.dagger
 
 import com.dashlane.autofill.api.PreferencesPausedFormSourcesRepository
-import com.dashlane.autofill.api.pause.services.MutexPausedFormSourcesProvider
-import com.dashlane.autofill.api.pause.services.PausedFormSourcesProvider
-import com.dashlane.autofill.api.pause.services.PausedFormSourcesRepository
-import com.dashlane.autofill.api.pause.services.PausedFormSourcesStrings
-import com.dashlane.autofill.api.pause.services.PausedFormSourcesStringsRepository
-import com.dashlane.autofill.api.pause.services.RemovePauseContract
+import com.dashlane.autofill.pause.services.MutexPausedFormSourcesProvider
+import com.dashlane.autofill.pause.services.PausedFormSourcesProvider
+import com.dashlane.autofill.pause.services.PausedFormSourcesRepository
+import com.dashlane.autofill.pause.services.PausedFormSourcesStrings
+import com.dashlane.autofill.pause.services.PausedFormSourcesStringsRepository
+import com.dashlane.autofill.pause.services.RemovePauseContract
 import dagger.Binds
 import dagger.Module
 import javax.inject.Singleton

@@ -48,7 +48,7 @@ class SharingItemSelectionTabFragment : AbstractContentFragment() {
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.ID_SEARCH_VIEW -> mSearchView.setQuery("", false)
+            R.id.ID_SEARCH_VIEW -> searchView?.setQuery("", false)
             else -> super.onClick(v)
         }
     }
@@ -59,6 +59,6 @@ class SharingItemSelectionTabFragment : AbstractContentFragment() {
         inflater.inflate(R.menu.main_menu, menu)
         val searchItem = menu.findItem(R.id.action_search)
         setupSearchView(searchItem.actionView as SearchView)
-        mSearchView?.queryHint = getString(R.string.search)
+        searchView?.queryHint = getString(R.string.search)
     }
 }

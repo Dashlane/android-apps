@@ -12,9 +12,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.design.component.ButtonLayout
+import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.ui.widgets.compose.AlertDialog
+import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.widgets.compose.GenericCodeInputContent
 
 @Composable
@@ -47,6 +49,7 @@ fun LoginTokenScreen(
     LoginTotpContent(
         modifier = modifier,
         login = login,
+        otp = (uiState as? LoginTokenState.DebugToken)?.data?.token,
         isLoading = uiState is LoginTokenState.Loading,
         errorMessage = errorMessage,
         isTokenError = (uiState as? LoginTokenState.Error)?.error is LoginTokenError.InvalidToken,
@@ -60,6 +63,7 @@ fun LoginTokenScreen(
 fun LoginTotpContent(
     modifier: Modifier = Modifier,
     login: String,
+    otp: String? = null,
     isLoading: Boolean,
     errorMessage: String?,
     isTokenError: Boolean,
@@ -72,6 +76,7 @@ fun LoginTotpContent(
         modifier = modifier,
         text = stringResource(id = R.string.receive_sec_code),
         login = login,
+        otp = otp,
         isLoading = isLoading,
         errorMessage = errorMessage,
         isTokenError = isTokenError,
@@ -91,23 +96,15 @@ fun EmailCodeHelpAlertDialog(
     confirmButtonClick: () -> Unit,
     dismissButtonClick: () -> Unit
 ) {
-    AlertDialog(
-        title = {
-            Text(
-                text = stringResource(id = R.string.login_token_where_is_popup_title),
-                style = DashlaneTheme.typography.titleSectionMedium,
-            )
+    Dialog(
+        title = stringResource(id = R.string.login_token_where_is_popup_title),
+        description = {
+            Text(text = stringResource(id = R.string.login_token_where_is_popup_message),)
         },
-        text = {
-            Text(
-                text = stringResource(id = R.string.login_token_where_is_popup_message),
-                style = DashlaneTheme.typography.bodyStandardRegular,
-            )
-        },
-        confirmButtonText = stringResource(id = R.string.login_token_where_is_popup_resend),
-        confirmButtonClick = confirmButtonClick,
-        dismissButtonText = stringResource(id = R.string.close),
-        dismissButtonClick = dismissButtonClick,
+        mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_token_where_is_popup_resend)),
+        mainActionClick = confirmButtonClick,
+        additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.close)),
+        additionalActionClick = dismissButtonClick,
         onDismissRequest = dismissButtonClick
     )
 }
@@ -115,7 +112,7 @@ fun EmailCodeHelpAlertDialog(
 @Preview
 @Composable
 fun LoginTotpContentPreview() {
-    DashlaneTheme(darkTheme = true) {
+    DashlanePreview {
         LoginTotpContent(
             login = "randomemail@provider.com",
             isLoading = true,

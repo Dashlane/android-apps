@@ -2,6 +2,7 @@ package com.dashlane.ui.screens.settings.list.general
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.account.UserAccountStorage
 import com.dashlane.core.DataSync
 import com.dashlane.followupnotification.domain.FollowUpNotificationSettings
 import com.dashlane.hermes.LogRepository
@@ -14,16 +15,12 @@ import com.dashlane.navigation.Navigator
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.securearchive.BackupCoordinator
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.DarkThemeHelper
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import kotlinx.coroutines.CoroutineScope
@@ -41,13 +38,13 @@ class RootSettingsGeneralList(
     backupCoordinator: BackupCoordinator,
     sessionManager: SessionManager,
     darkThemeHelper: DarkThemeHelper,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     logRepository: LogRepository,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     userPreferencesManager: UserPreferencesManager,
     globalPreferencesManager: GlobalPreferencesManager,
     followUpNotificationSettings: FollowUpNotificationSettings,
-    dataSync: DataSync
+    dataSync: DataSync,
+    userAccountStorage: UserAccountStorage
 ) {
 
     private val settingsGeneralAutoLoginList = SettingsGeneralAutoLoginList(
@@ -65,9 +62,11 @@ class RootSettingsGeneralList(
     )
 
     private val settingsGeneralBackupList = SettingsGeneralBackupList(
-        context,
-        backupCoordinator,
-        sensibleSettingsClickHelper
+        context = context,
+        backupCoordinator = backupCoordinator,
+        sensibleSettingsClickHelper = sensibleSettingsClickHelper,
+        sessionManager = sessionManager,
+        userAccountStorage = userAccountStorage
     )
 
     private val displayHeader = SettingHeader(context.getString(R.string.settings_display_category))
@@ -82,17 +81,6 @@ class RootSettingsGeneralList(
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = darkThemeHelper.isSettingEnabled
         override fun onCheckChanged(context: Context, enable: Boolean) {
-            bySessionUsageLogRepository[sessionManager.session]
-                ?.enqueue(
-                    UsageLogCode35(
-                        type = UsageLogConstant.ViewType.settings,
-                        action = if (enable) {
-                            UsageLogConstant.ActionType.darkThemeOn
-                        } else {
-                            UsageLogConstant.ActionType.darkThemeOff
-                        }
-                    )
-                )
             darkThemeHelper.isSettingEnabled = enable
         }
     }

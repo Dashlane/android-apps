@@ -11,6 +11,7 @@ import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.AuthenticationUnknownException
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.UnauthenticatedUser
+import com.dashlane.server.api.endpoints.AccountType
 
 interface AuthenticationEmailRepository {
     @Throws(
@@ -46,6 +47,7 @@ interface AuthenticationEmailRepository {
         sealed class RequiresDeviceRegistration : Result() {
             data class SecondFactor(
                 val secondFactor: AuthenticationSecondFactor,
+                val accountType: AccountType,
                 override val ssoInfo: SsoInfo?
             ) : RequiresDeviceRegistration()
 

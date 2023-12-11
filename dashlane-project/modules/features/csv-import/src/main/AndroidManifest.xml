@@ -1,20 +1,12 @@
-<manifest package="com.dashlane.csvimport"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
         <activity
-            android:name=".CsvFileImportIntroActivity"
-            android:theme="@style/Theme.Dashlane.Modal"
-            />
+            android:name=".intro.CsvFileImportIntroActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
 
         <activity
-            android:name=".OnboardingChromeImportActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.Dashlane.Modal"
-            />
-
-        <activity
-            android:name=".CsvImportActivity"
+            android:name=".csvimport.view.CsvImportActivity"
             android:theme="@style/Theme.Dashlane.NoActionBar"
             />
 
@@ -32,7 +24,7 @@
         </activity>
 
         <activity
-            android:name=".CustomCsvImportActivity"
+            android:name=".matchcsvfields.MatchCsvFieldsActivity"
             android:theme="@style/Theme.Dashlane.NoActionBar"
             />
     </application>

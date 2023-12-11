@@ -7,13 +7,14 @@ import com.dashlane.R
 import com.dashlane.breach.Breach
 import com.dashlane.breach.BreachManager
 import com.dashlane.breach.BreachWithOriginalJson
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmMessage
 import com.dashlane.notification.appendBreachNotificationExtra
+import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.security.identitydashboard.breach.BreachLoader
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.SplashScreenActivity
 import com.dashlane.util.clearTask
 import com.dashlane.util.notification.NotificationHelper
@@ -29,12 +30,12 @@ import kotlinx.coroutines.withContext
 class PublicBreachAlertNotificationHandler(
     context: Context,
     message: FcmMessage,
+    private val globalPreferencesManager: GlobalPreferencesManager,
+    private val breachManager: BreachManager,
+    private val breachLoader: BreachLoader,
+    private val sessionManager: SessionManager,
     private val gson: Gson = Gson()
 ) : AbstractNotificationHandler(context, message) {
-
-    private val breachManager: BreachManager by lazy { SingletonProvider.getBreachManager() }
-    private val breachLoader: BreachLoader by lazy { SingletonProvider.getComponent().breachLoader }
-    private val sessionManager by lazy { SingletonProvider.getSessionManager() }
 
     init {
         parseMessage()
@@ -43,7 +44,7 @@ class PublicBreachAlertNotificationHandler(
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun handlePushNotification() {
-        if (!isForLastLoggedInUser) return
+        if (!isForLastLoggedInUser(globalPreferencesManager.getLastLoggedInUser())) return
 
         
         if (sessionManager.session == null) {
@@ -76,11 +77,12 @@ class PublicBreachAlertNotificationHandler(
     }
 
     private fun createNotification(context: Context, count: Int) {
-        val notificationIntent = DashlaneIntent.newInstance(context, SplashScreenActivity::class.java).apply {
-            putExtra(NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION, true)
-            appendBreachNotificationExtra()
-            clearTask()
-        }
+        val notificationIntent =
+            DashlaneIntent.newInstance(context, SplashScreenActivity::class.java).apply {
+                putExtra(NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION, true)
+                appendBreachNotificationExtra()
+                clearTask()
+            }
 
         val pendingIntent = PendingIntent.getActivity(
             context,

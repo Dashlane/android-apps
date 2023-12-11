@@ -3,6 +3,7 @@ package com.dashlane.ui.activities.fragments.vault.list
 import android.content.Context
 import com.dashlane.core.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.activities.fragments.vault.provider.CategoryHeaderProvider
@@ -16,20 +17,23 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.ItemListContext.Container
 import com.dashlane.ui.adapter.ItemListContext.Section
 import com.dashlane.ui.adapters.text.factory.DataIdentifierTypeTextFactory
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.mostRecentAccessTime
+import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.vault.util.comparatorAlphabeticAllVisibleItems
 import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
 import com.dashlane.xml.domain.SyncObjectType
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 class VaultListDataProvider @Inject constructor(
-    val userFeaturesChecker: UserFeaturesChecker,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
+    private val itemWrapperProvider: ItemWrapperProvider,
+    private val identityNameHolderService: IdentityNameHolderService,
+    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : VaultList.DataProvider {
 
     private val recentComparator = compareByDescending<SummaryObject> { it.mostRecentAccessTime }
@@ -54,7 +58,7 @@ class VaultListDataProvider @Inject constructor(
         filter: Filter,
         sortMode: UnboundedListSortMode,
         context: Context
-    ): List<DashlaneRecyclerAdapter.ViewTypeProvider> = withContext(Dispatchers.Default) {
+    ): List<DashlaneRecyclerAdapter.ViewTypeProvider> = withContext(defaultDispatcher) {
         val itemListContext = filter.toItemListContext(sortMode.toSection())
         summaryToViewTypeProvider(
             items.sort(sortMode, filter),
@@ -69,7 +73,7 @@ class VaultListDataProvider @Inject constructor(
         filter: Filter,
         sortMode: BoundedListSortMode,
         context: Context
-    ): List<DashlaneRecyclerAdapter.ViewTypeProvider> = withContext(Dispatchers.Default) {
+    ): List<DashlaneRecyclerAdapter.ViewTypeProvider> = withContext(defaultDispatcher) {
         val itemListContext = filter.toItemListContext(sortMode.toSection())
         summaryToViewTypeProvider(
             items.sortBoundedList(sortMode),
@@ -109,11 +113,11 @@ class VaultListDataProvider @Inject constructor(
         when (sortMode) {
             UnboundedListSortMode.ALPHABETICAL -> when (filter) {
                 Filter.FILTER_PASSWORD ->
-                    sortedWith(compareBy(comparatorAlphabeticAuthentifiant()) { it as SummaryObject.Authentifiant })
+                    sortedWith(compareBy(comparatorAlphabeticAuthentifiant(identityNameHolderService)) { it })
                 Filter.FILTER_SECURE_NOTE ->
                     sortedWith(compareBy(comparatorAlphabeticSecureNote()) { it as SummaryObject.SecureNote })
                 Filter.ALL_VISIBLE_VAULT_ITEM_TYPES ->
-                    sortedWith(compareBy(comparatorAlphabeticAllVisibleItems()) { it })
+                    sortedWith(compareBy(comparatorAlphabeticAllVisibleItems(identityNameHolderService)) { it })
                 else -> this 
             }
             UnboundedListSortMode.MOST_RECENT -> sortedWith(recentComparator)
@@ -174,7 +178,11 @@ class VaultListDataProvider @Inject constructor(
         items.forEachIndexed { index, item ->
             
             val itemListContextWithPosition = itemListContext.copy(position = index, count = items.size)
-            val viewTypeProvider = VaultItemViewTypeProvider(item, itemListContextWithPosition)
+            val viewTypeProvider = VaultItemViewTypeProvider(
+                item,
+                itemListContextWithPosition,
+                itemWrapperProvider
+            )
             lastHeader = vaultItemsList.addHeaderIfNeeded(
                 context,
                 headerProvider,
@@ -220,7 +228,7 @@ class VaultListDataProvider @Inject constructor(
         lastHeader: String?,
         item: DashlaneRecyclerAdapter.ViewTypeProvider
     ): String? {
-        val newHeader = headerProvider.getHeaderFor(context, item)
+        val newHeader = headerProvider.getHeaderFor(context, item, identityNameHolderService)
         if (newHeader != null && (lastHeader == null || lastHeader != newHeader)) {
             add(HeaderItem(newHeader))
         }

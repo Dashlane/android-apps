@@ -3,8 +3,6 @@ package com.dashlane.ui.screens.fragments.userdata
 import android.view.View
 import android.widget.TextView
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
-import com.dashlane.passwordstrength.PasswordStrengthCache
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.passwordstrength.getPasswordStrengthScore
@@ -19,7 +17,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.util.SecurityBreachUtil.isCompromised
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +28,6 @@ import kotlinx.coroutines.withContext
 class CredentialViewPasswordSafety(
     rootView: View,
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
-    private val passwordStrengthCache: PasswordStrengthCache,
     private val vaultDataQuery: VaultDataQuery,
     private val similarPassword: SimilarPassword,
     private val coroutineScope: CoroutineScope
@@ -73,16 +69,12 @@ class CredentialViewPasswordSafety(
         refreshUI()
     }
 
-    private fun getPasswordStrengthScoreAsync(password: String): Deferred<PasswordStrengthScore?> {
-        
-        val passwordStrengthScore = passwordStrengthCache.scores[password]
-        return if (passwordStrengthScore == null) {
-            coroutineScope.async { runCatching { passwordStrengthEvaluator.getPasswordStrengthScore(password) }.getOrNull() }
-        } else {
-            
-            CompletableDeferred(passwordStrengthScore)
+    private fun getPasswordStrengthScoreAsync(password: String): Deferred<PasswordStrengthScore?> =
+        coroutineScope.async {
+            runCatching {
+                passwordStrengthEvaluator.getPasswordStrengthScore(password)
+            }.getOrNull()
         }
-    }
 
     private fun cancelGetDataJobs() {
         lastPasswordResult?.apply {
@@ -128,7 +120,8 @@ class CredentialViewPasswordSafety(
                     strengthTextView.visibility = View.GONE
                 } else {
                     val context = strengthTextView.context
-                    val strengthLabel = it.getShortTitle(context).toForegroundColorSpan(context.getColor(it.textColorRes))
+                    val strengthLabel =
+                        it.getShortTitle(context).toForegroundColorSpan(context.getColor(it.textColorRes))
                     strengthTextView.visibility = View.VISIBLE
                     strengthTextView.text = context.getStringFormatted(R.string.password_safety_strength, strengthLabel)
                 }
@@ -210,15 +203,16 @@ class CredentialViewPasswordSafety(
     }
 
     companion object {
-        fun newInstance(rootView: View, scope: CoroutineScope): CredentialViewPasswordSafety {
-            val strengthEvaluator = SingletonProvider.getPasswordStrengthEvaluator()
-            val strengthCache = SingletonProvider.getPasswordStrengthCache()
-            val valutDataQuery = SingletonProvider.getMainDataAccessor().getVaultDataQuery()
+        fun newInstance(
+            rootView: View,
+            scope: CoroutineScope,
+            passwordStrengthEvaluator: PasswordStrengthEvaluator,
+            vaultDataQuery: VaultDataQuery
+        ): CredentialViewPasswordSafety {
             return CredentialViewPasswordSafety(
                 rootView,
-                strengthEvaluator,
-                strengthCache,
-                valutDataQuery,
+                passwordStrengthEvaluator,
+                vaultDataQuery,
                 SimilarPassword(),
                 scope
             )

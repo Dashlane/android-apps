@@ -40,7 +40,7 @@ class GenericDataQueryImplRaclette @Inject constructor(
     override fun queryAll(filter: BaseFilter): List<SummaryObject> {
         if (lockHelper.get().forbidDataAccess(filter)) return emptyList()
         val memorySummaryRepository = memorySummaryRepository ?: return emptyList()
-        val databaseSummary = memorySummaryRepository.databaseSummary?.all
+        val databaseSummary = memorySummaryRepository.databaseSummary?.data
         val databaseDataChangeHistorySummary =
             memorySummaryRepository.databaseDataChangeHistorySummary?.data
         if (databaseSummary == null && databaseDataChangeHistorySummary == null) {

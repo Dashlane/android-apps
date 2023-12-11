@@ -11,6 +11,7 @@ class PopupMenuManageUserAccepted(
     context: Context,
     anchor: View,
     isAdmin: Boolean,
+    isItemInCollection: Boolean,
     private val onChangePermission: (SharingPermission) -> Unit,
     private val onAskRevokeUser: () -> Unit
 ) : PopupMenu(context, anchor), PopupMenu.OnMenuItemClickListener {
@@ -32,6 +33,7 @@ class PopupMenuManageUserAccepted(
         } else {
             menu.removeItem(R.id.revoke_admin)
         }
+        setupContextualMenuForCollections(context, isItemInCollection)
         setOnMenuItemClickListener(this)
     }
 }

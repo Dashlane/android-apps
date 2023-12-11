@@ -24,7 +24,8 @@ object NavControllerUtils {
         R.id.nav_vpn_third_party,
         R.id.nav_dark_web_monitoring,
         R.id.nav_authenticator_dashboard,
-        R.id.nav_authenticator_suggestions
+        R.id.nav_authenticator_suggestions,
+        R.id.nav_collections_list
     )
 
     fun NavController.setup(

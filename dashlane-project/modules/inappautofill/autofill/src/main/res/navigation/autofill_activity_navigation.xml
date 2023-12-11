@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/nav_wait_for_decision"
-        android:name="com.dashlane.autofill.api.navigation.WaitForNavigationDecisionFragment">
+        android:name="com.dashlane.autofill.navigation.WaitForNavigationDecisionFragment">
         <action
             android:id="@+id/to_nav_all_accounts_dialog"
             app:destination="@id/navigable_bottom_sheet_dialog_navigation"

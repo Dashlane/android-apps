@@ -19,8 +19,8 @@ import com.dashlane.login.pages.LoginBaseDataProvider
 import com.dashlane.login.pages.totp.u2f.U2fKeyDetector
 import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.tryOrNull
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 
 class LoginTotpDataProvider @Inject constructor(
     private val network: NetworkStateProvider,
@@ -47,7 +47,7 @@ class LoginTotpDataProvider @Inject constructor(
 
     private var u2fInProgress = false
 
-    override suspend fun validateTotp(otp: String, auto: Boolean) {
+    override suspend fun validateTotp(otp: String, auto: Boolean, isRecoveryCode: Boolean) {
         try {
             val result = secondFactoryRepository.validate(secondFactor, otp)
             handleTotpSuccess(
@@ -59,9 +59,10 @@ class LoginTotpDataProvider @Inject constructor(
                 is AuthenticationSecondFactorFailedException,
                 is AuthenticationAccountConfigurationChangedException -> handleTotpError(
                     auto = auto,
-                    lockedOut = false
+                    lockedOut = false,
+                    isRecoveryCode = isRecoveryCode
                 )
-                is AuthenticationLockedOutException -> handleTotpError(auto, lockedOut = true)
+                is AuthenticationLockedOutException -> handleTotpError(auto, lockedOut = true, isRecoveryCode = isRecoveryCode)
                 is AuthenticationOfflineException -> {
                     throw LoginBaseContract.OfflineException(e)
                 }
@@ -141,7 +142,8 @@ class LoginTotpDataProvider @Inject constructor(
                 is AuthenticationSecondFactorFailedException,
                 is AuthenticationAccountConfigurationChangedException -> handleTotpError(
                     auto = false,
-                    lockedOut = false
+                    lockedOut = false,
+                    isRecoveryCode = false
                 )
                 is AuthenticationOfflineException -> {
                     presenter.notifyOffline()
@@ -178,9 +180,9 @@ class LoginTotpDataProvider @Inject constructor(
         return challengeAnswer
     }
 
-    private fun handleTotpError(auto: Boolean, lockedOut: Boolean) {
+    private fun handleTotpError(auto: Boolean, lockedOut: Boolean, isRecoveryCode: Boolean) {
         logger.logInvalidTotp(auto)
-        presenter.notifyTotpError(lockedOut)
+        presenter.notifyTotpError(lockedOut, isRecoveryCode)
     }
 
     private fun handleTotpNetworkError() {

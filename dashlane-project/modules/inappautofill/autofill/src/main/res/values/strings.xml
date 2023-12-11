@@ -28,17 +28,6 @@
     <string name="autofill_do_not_show_again_pause_for_one_day">For 1 day</string>
     <string name="autofill_do_not_show_again_pause_permanent">Until I turn it back on</string>
 
-    <string name="autofill_totp_notification_first_display_title">Your code for \"%1$s\" is ready</string>
-    <string name="autofill_totp_notification_first_display_title_no_credential_name">Your code is ready</string>
-    <string name="autofill_totp_notification_first_display_text">Code: %1$s.\nCopy and paste it from here</string>
-    <string name="autofill_totp_notification_update_new_code_title">Here\'s your new code</string>
-    <string name="autofill_totp_notification_update_new_code_text">Code: %1$s.\nCopy and paste it from here</string>
-    <string name="autofill_totp_notification_code_copied_title">Your code is in your Clipboard</string>
-    <string name="autofill_totp_notification_code_copied_text">Copied code: %1$s.\nYou can paste it from here</string>
-    <string name="autofill_totp_notification_safeguard_code_title">Your last code expired</string>
-    <string name="autofill_totp_notification_safeguard_code_text">New code: %1$s.\nCopy and paste this new one</string>
-    <string name="autofill_totp_notification_dismiss_action">Close</string>
-    <string name="autofill_totp_notification_copy_action">Copy</string>
     <string name="autofill_totp_automatically_copy">2FA token copied</string>
 
     <string name="autofill_form_source_application">Application</string>

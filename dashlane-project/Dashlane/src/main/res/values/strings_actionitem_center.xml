@@ -13,9 +13,7 @@
     <string name="action_item_undo_dismiss_cta">Undo</string>
     <string name="action_item_zero_password_title">Getting started</string>
     <string name="action_item_zero_password_description">Storing logins is easy. Add your first one now and see.</string>
-    <string name="action_item_chrome_import_title">Retrieve your passwords and login details from Chrome</string>
-    <string name="action_item_chrome_import_description">Import the passwords and login details you have saved in Chrome to Dashlane.</string>
-    <string name="action_item_account_recovery_title">Enable Master Password reset</string>
+    <string name="action_item_account_recovery_title">Turn on biometric recovery</string>
     <string name="action_item_account_recovery_description">Make sure you can reset your Master Password if you ever forget it</string>
     <string name="action_item_free_trial_started_title">Your free trial has started!</string>
     <string name="action_item_free_trial_started_description">Try out Dashlane Premium for free.</string>
@@ -45,4 +43,5 @@
     <string name="action_item_sharing_invitation_item_description_secure_note">"%1$s has shared a Secure Note with you. Accept the invitation to view it."</string>
 
     <string name="action_item_sharing_invitation_group_description">%1$s has invited you to a group. Join it to get access to the group’s items.</string>
+    <string name="action_item_sharing_invitation_collection_description">%1$s has shared their %2$s collection with you. Accept the invitation to use it.</string>
 </resources>

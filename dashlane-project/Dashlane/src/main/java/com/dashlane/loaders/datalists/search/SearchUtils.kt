@@ -16,6 +16,15 @@ object SearchUtils {
                             query.match(item.email)
                     )
         },
+        SyncObjectType.PASSKEY to { item, query ->
+            item is SummaryObject.Passkey &&
+                    (
+                        query.match(item.rpId) ||
+                            query.match(item.userDisplayName) ||
+                            query.match(item.note) ||
+                            query.match(item.itemName)
+                    )
+        },
         SyncObjectType.SECURE_NOTE to { item, query ->
             item is SummaryObject.SecureNote &&
                     (

@@ -29,8 +29,6 @@ import com.dashlane.storage.DataStorageProvider
 import com.dashlane.sync.DataIdentifierExtraDataWrapper
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import com.dashlane.vault.model.copyWithLock
-import com.dashlane.vault.model.copyWithSpaceId
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
@@ -223,8 +221,7 @@ class NewSharePeopleDataProvider @Inject constructor(
         itemsUid.forEach { itemUid ->
             val itemGroup: ItemGroup? = getItemGroupFor(itemGroupsActual, itemUid)
             if (itemGroup == null) {
-                val s = getDataIdentifier(dataType, itemUid) ?: return@forEach
-                val dataIdentifierWrapper = preparedDataIdentifierForSharing(s)
+                val dataIdentifierWrapper = getDataIdentifier(dataType, itemUid) ?: return@forEach
                 val itemContent: String = getItemContent(dataIdentifierWrapper) ?: return@forEach
                 val itemType = dataType.toItemType() ?: return@forEach
                 val itemToShare = ItemToShare(itemUid, itemContent, itemType)
@@ -239,19 +236,6 @@ class NewSharePeopleDataProvider @Inject constructor(
 
     private fun getItemContent(item: DataIdentifierExtraDataWrapper<out SyncObject>): String? =
         xmlConverter.toXml(item)
-
-    private fun preparedDataIdentifierForSharing(
-        dataIdentifier: DataIdentifierExtraDataWrapper<out SyncObject>
-    ): DataIdentifierExtraDataWrapper<out SyncObject> {
-        return DataIdentifierExtraDataWrapper(
-            dataIdentifier.vaultItem.let {
-                it.copyWithSpaceId(null)
-                it.copyWithLock(false)
-            },
-            dataIdentifier.extraData,
-            dataIdentifier.backupDate
-        )
-    }
 
     private fun getDataIdentifier(
         dataType: SyncObjectType,

@@ -24,9 +24,6 @@ import com.dashlane.login.pages.totp.u2f.UsbServiceDetector
 import com.dashlane.login.pages.totp.u2f.UsbServiceDetectorImpl
 import com.dashlane.login.root.LoginContract
 import com.dashlane.login.root.LoginDataProvider
-import com.dashlane.login.settings.LogginSettingsLogger
-import com.dashlane.login.settings.LoginSettingsContract
-import com.dashlane.settings.biometric.BiometricSettingsLogger
 import dagger.Binds
 import dagger.Module
 
@@ -67,10 +64,4 @@ interface LoginBindingModule {
 
     @Binds
     fun bindSsoLockDataProvider(impl: SsoLockDataProvider): SsoLockContract.DataProvider
-
-    @Binds
-    fun bindLoginSettingsLogger(logger: LogginSettingsLogger): LoginSettingsContract.Logger
-
-    @Binds
-    fun bindBiometricSettingsLogger(logger: LogginSettingsLogger): BiometricSettingsLogger
 }

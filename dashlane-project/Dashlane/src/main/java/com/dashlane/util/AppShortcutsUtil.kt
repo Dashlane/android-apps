@@ -92,7 +92,7 @@ class AppShortcutsUtil @Inject constructor(
         .setIcon(IconCompat.createWithBitmap(createIcon(context, icon)))
         .setRank(rank)
         .setIntent(
-            createIntent(NavigationUriBuilder().appendPath(path).origin(ORIGIN).build())
+            createIntent(NavigationUriBuilder().appendPath(path).build())
         )
         .build()
 
@@ -109,8 +109,4 @@ class AppShortcutsUtil @Inject constructor(
         
         
         .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-
-    companion object {
-        private const val ORIGIN = "appShortcut"
-    }
 }

@@ -1,8 +1,10 @@
 package com.dashlane.ui.screens.settings.list
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
 import com.dashlane.activatetotp.ActivateTotpLogger
@@ -19,7 +21,6 @@ import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.invites.InviteFriendsIntentHelper
 import com.dashlane.login.lock.LockManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
-import com.dashlane.navigation.NavigationUtils
 import com.dashlane.navigation.Navigator
 import com.dashlane.network.inject.LegacyWebservicesApi
 import com.dashlane.network.webservices.GetSharingLinkService
@@ -30,12 +31,12 @@ import com.dashlane.premium.enddate.EndDateFormatter
 import com.dashlane.search.SearchableSettingItem
 import com.dashlane.securearchive.BackupCoordinator
 import com.dashlane.security.SecurityHelper
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.AccountStatusRepository
 import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.manager.TeamspaceRestrictionNotificator
 import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.activities.debug.DebugActivity
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
@@ -48,20 +49,15 @@ import com.dashlane.ui.screens.settings.list.general.RootSettingsGeneralList
 import com.dashlane.ui.screens.settings.list.help.RootSettingsHelpList
 import com.dashlane.ui.screens.settings.list.security.RootSettingsSecurityList
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.DarkThemeHelper
 import com.dashlane.util.IntentFactory
 import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.PackageUtilities.getAppVersionName
-import com.dashlane.util.ThreadHelper
 import com.dashlane.util.Toaster
-import com.dashlane.util.clipboard.ClipboardUtils
+import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.usagelogs.ViewLogger
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +67,11 @@ import javax.inject.Inject
 class RootSettingsList @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
+    private val userPreferencesManager: UserPreferencesManager,
+    private val daDaDa: DaDaDa,
+    private val navigator: Navigator,
+    private val toaster: Toaster,
+    private val sharingLinkService: GetSharingLinkService,
     userFeaturesChecker: UserFeaturesChecker,
     lockManager: LockManager,
     inAppLoginManager: InAppLoginManager,
@@ -78,15 +79,12 @@ class RootSettingsList @Inject constructor(
     sessionManager: SessionManager,
     teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
     screenshotPolicy: ScreenshotPolicy,
-    private val userPreferencesManager: UserPreferencesManager,
     globalPreferencesManager: GlobalPreferencesManager,
     @LegacyWebservicesApi retrofit: Retrofit,
     dialogHelper: DialogHelper,
     userAccountStorage: UserAccountStorage,
     sessionCredentialsSaver: SessionCredentialsSaver,
     cryptographyRepository: UserCryptographyRepository,
-    threadHelper: ThreadHelper,
-    private val daDaDa: DaDaDa,
     securityHelper: SecurityHelper,
     masterPasswordFeatureAccessChecker: ChangeMasterPasswordFeatureAccessChecker,
     backupCoordinator: BackupCoordinator,
@@ -95,10 +93,6 @@ class RootSettingsList @Inject constructor(
     darkThemeHelper: DarkThemeHelper,
     biometricRecovery: BiometricRecovery,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
-    private val navigator: Navigator,
-    private val toaster: Toaster,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val sharingLinkService: GetSharingLinkService,
     followUpNotificationSettings: FollowUpNotificationSettings,
     endDateFormatter: EndDateFormatter,
     logRepository: LogRepository,
@@ -107,7 +101,8 @@ class RootSettingsList @Inject constructor(
     dataSync: DataSync,
     networkStateProvider: NetworkStateProvider,
     accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
-    viewLogger: ViewLogger
+    teamspaceRestrictionNotificator: TeamspaceRestrictionNotificator,
+    clipboardCopy: ClipboardCopy
 ) {
 
     private val paramHeader = SettingHeader(context.getString(R.string.settings_category_advanced))
@@ -117,10 +112,11 @@ class RootSettingsList @Inject constructor(
         override val header = SettingHeader(context.getString(R.string.setting_premium_category))
         override val title: String
             get() = sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }
-                ?.let { PlansUtils.getTitle(context, it) } ?: context.getString(
-                R.string.plan_action_bar_title,
+                ?.let { PlansUtils.getTitle(context, it) }
+                ?: context.getString(
+                    R.string.plan_action_bar_title,
                     context.getString(R.string.plan_free_action_bar_title)
-            )
+                )
         override val description: String
             get() = sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }
                 ?.let { endDateFormatter.getLabel(it) } ?: context.getString(R.string.no_date_plan_subtitle)
@@ -136,13 +132,7 @@ class RootSettingsList @Inject constructor(
         override fun isVisible() = !isInTeam && !isFamilyInvitee
 
         override fun onClick(context: Context) {
-            bySessionUsageLogRepository[sessionManager.session]?.enqueue(
-                UsageLogCode35(
-                    type = UsageLogConstant.ViewType.goPremium,
-                    action = UsageLogConstant.PremiumAction.goPremiumFromSettings
-                )
-            )
-            navigator.goToCurrentPlan(origin = ORIGIN_SETTINGS)
+            navigator.goToCurrentPlan()
         }
     }
 
@@ -161,17 +151,16 @@ class RootSettingsList @Inject constructor(
         sessionCredentialsSaver = sessionCredentialsSaver,
         dialogHelper = dialogHelper,
         cryptographyRepository = cryptographyRepository,
-        threadHelper = threadHelper,
         rootHeader = paramHeader,
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
         masterPasswordFeatureAccessChecker = masterPasswordFeatureAccessChecker,
         biometricRecovery = biometricRecovery,
         toaster = toaster,
-        bySessionUsageLogRepository = bySessionUsageLogRepository,
         use2faSettingStateHolder = use2faSettingStateHolder,
         activateTotpLogger = activateTotpLogger,
         userFeaturesChecker = userFeaturesChecker,
-        accountRecoveryKeyRepository = accountRecoveryKeyRepository
+        accountRecoveryKeyRepository = accountRecoveryKeyRepository,
+        teamspaceRestrictionNotificator = teamspaceRestrictionNotificator
     )
 
     private val settingsGeneralList = RootSettingsGeneralList(
@@ -185,13 +174,13 @@ class RootSettingsList @Inject constructor(
         backupCoordinator = backupCoordinator,
         sessionManager = sessionManager,
         darkThemeHelper = darkThemeHelper,
-        bySessionUsageLogRepository = bySessionUsageLogRepository,
         logRepository = logRepository,
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
         userPreferencesManager = userPreferencesManager,
         globalPreferencesManager = globalPreferencesManager,
         followUpNotificationSettings = followUpNotificationSettings,
-        dataSync = dataSync
+        dataSync = dataSync,
+        userAccountStorage = userAccountStorage
     )
 
     private val settingsHelpList = RootSettingsHelpList(
@@ -199,9 +188,7 @@ class RootSettingsList @Inject constructor(
         navigator = navigator,
         rootHeader = paramHeader,
         crashReporter = crashReporter,
-        sessionManager = sessionManager,
-        bySessionUsageLogRepository = bySessionUsageLogRepository,
-        viewLogger = viewLogger
+        clipboardCopy = clipboardCopy
     )
 
     private val settingsSecretTransfer = object : SettingItem {
@@ -282,18 +269,31 @@ class RootSettingsList @Inject constructor(
         override fun isVisible() = true
 
         override fun onClick(context: Context) {
-            dialogHelper.builder(context).setTitle(R.string.logout).setMessage(R.string.log_out_of_dashlane_)
-                .setPositiveButton(R.string.yes) { dialogInterface, _ ->
-                    dialogInterface.dismiss()
-                    bySessionUsageLogRepository[sessionManager.session]?.enqueue(
-                        UsageLogCode35(
-                            type = UsageLogConstant.ViewType.MainMenu,
-                            action = UsageLogConstant.ActionType.logoutNow
-                        )
-                    )
-                    logRepository.queueEvent(Logout())
-                    NavigationUtils.logoutAndCallLoginScreen(context)
-                }.setNegativeButton(R.string.no, null).setCancelable(true).show()
+            val isPasswordlessAccount = sessionManager.session?.username
+                ?.let { username -> userAccountStorage[username]?.accountType }
+                .let { accountType -> accountType is UserAccountInfo.AccountType.InvisibleMasterPassword }
+
+            val onPositiveClick: (DialogInterface, Int) -> Unit = { dialogInterface, _ ->
+                dialogInterface.dismiss()
+                logRepository.queueEvent(Logout())
+                navigator.logoutAndCallLoginScreen(context)
+            }
+
+            if (isPasswordlessAccount) {
+                dialogHelper.builder(context, R.style.ThemeOverlay_Dashlane_DashlaneWarningDialog)
+                    .setTitle(R.string.log_out_dialog_title)
+                    .setMessage(R.string.log_out_dialog_description)
+                    .setPositiveButton(R.string.log_out_dialog_positive_button, onPositiveClick)
+                    .setNegativeButton(R.string.log_out_dialog_negative_button, null)
+            } else {
+                dialogHelper.builder(context, R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog)
+                    .setTitle(R.string.logout)
+                    .setMessage(R.string.log_out_of_dashlane_)
+                    .setPositiveButton(R.string.yes, onPositiveClick)
+                    .setNegativeButton(R.string.no, null)
+            }
+                .setCancelable(true)
+                .show()
         }
     }
 
@@ -307,7 +307,7 @@ class RootSettingsList @Inject constructor(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) {
-            ClipboardUtils.copyToClipboard(description, sensitiveData = false, autoClear = false)
+            clipboardCopy.copyToClipboard(description, sensitiveData = false, autoClear = false)
         }
     }
 
@@ -383,9 +383,5 @@ class RootSettingsList @Inject constructor(
 
             else -> listOf(SearchableSettingItemImpl(this, parents))
         }
-    }
-
-    companion object {
-        private const val ORIGIN_SETTINGS = "settings"
     }
 }

@@ -2,6 +2,8 @@ package com.dashlane.vault.model
 
 import com.dashlane.xml.domain.SyncObject
 
+const val COLLECTION_NAME_MAX_LENGTH = 40
+
 fun createCollection(
     dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(),
     name: String? = null,
@@ -28,3 +30,6 @@ fun VaultItem<SyncObject>.toCollectionVaultItem(): SyncObject.Collection.VaultIt
 
 fun VaultItem<SyncObject>.toCollectionDataType(): SyncObject.CollectionDataType? =
     SyncObject.CollectionDataType.values().firstOrNull { syncObjectType.xmlObjectName == it.value }
+
+fun String.toSanitizedCollectionName() =
+    lines().joinToString(separator = "").trim().take(COLLECTION_NAME_MAX_LENGTH).trim()

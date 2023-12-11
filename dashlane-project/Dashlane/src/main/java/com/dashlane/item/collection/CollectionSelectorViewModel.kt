@@ -10,12 +10,15 @@ import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
 import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.util.inject.OptionalProvider
+import com.dashlane.vault.model.COLLECTION_NAME_MAX_LENGTH
+import com.dashlane.vault.model.toSanitizedCollectionName
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.text.Collator
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,7 +45,7 @@ class CollectionSelectorViewModel @Inject constructor(
     }
 
     fun updateUserPrompt(prompt: String) {
-        userPrompt = prompt
+        userPrompt = prompt.take(COLLECTION_NAME_MAX_LENGTH)
         updateSuggestedCollections(prompt)
     }
 
@@ -54,9 +57,13 @@ class CollectionSelectorViewModel @Inject constructor(
 
     private fun updateSuggestedCollections(prompt: String) {
         val collections = getAllCollections()
-            .filterForPrompt(prompt)
+            .filterForPrompt(prompt.toSanitizedCollectionName())
             .filterNotLinkedToItem()
-            .sortedBy { it.name }
+            .sortedWith(
+                compareBy(Collator.getInstance()) {
+                    it.name
+                }
+            )
         _suggestedCollections.update {
             collections.toList()
         }

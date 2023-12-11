@@ -6,6 +6,7 @@ import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
@@ -30,12 +31,12 @@ internal suspend fun updateOtp(
     )?.let { item ->
         val updatedItem = item.copy(
             syncObject = item.syncObject.copy {
-            otpUrl = otp?.url?.toSyncObfuscatedValue()
+            otpUrl = otp?.url?.toSyncObfuscatedValue() ?: SyncObfuscatedValue("")
             otpSecret = if (otp?.isStandardOtp() == true) {
                 otp.secret?.toSyncObfuscatedValue()
             } else {
                 null
-            }
+            } ?: SyncObfuscatedValue("")
         }
         ).copyWithAttrs {
             syncState = SyncState.MODIFIED

@@ -1,7 +1,7 @@
 package com.dashlane.autofill
 
 import android.content.Context
-import com.dashlane.autofill.api.ui.AutofillFeature
+import com.dashlane.autofill.ui.AutofillFeature
 import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
 import com.dashlane.hermes.generated.definitions.MatchType
@@ -33,7 +33,8 @@ interface AutofillAnalyzerDef {
             website: String?,
             login: String,
             password: String,
-            packageName: String?
+            packageName: String?,
+            spaceId: String?
         ): VaultItem<SyncObject.Authentifiant>?
 
         suspend fun saveAuthentifiant(
@@ -104,8 +105,6 @@ interface AutofillAnalyzerDef {
             totalCount: Int
         )
 
-        fun onClickToAutoFillCredentialButLock(@AutofillOrigin origin: Int, itemUrl: String?)
-        fun onClickToAutoFillCreditCardButLock(@AutofillOrigin origin: Int)
         fun onAutoFillCredentialDone(
             @AutofillOrigin origin: Int,
             packageName: String,

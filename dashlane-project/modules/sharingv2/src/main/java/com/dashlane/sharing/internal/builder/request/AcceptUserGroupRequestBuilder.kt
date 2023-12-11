@@ -3,6 +3,7 @@ package com.dashlane.sharing.internal.builder.request
 import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptUserGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ProvisioningMethod
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
+import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
@@ -38,7 +39,7 @@ class AcceptUserGroupRequestBuilder @Inject constructor(
             AcceptUserGroupService.Request(
                 provisioningMethod = ProvisioningMethod.USER,
                 revision = userGroup.revision,
-                groupId = AcceptUserGroupService.Request.GroupId(userGroup.groupId),
+                groupId = UuidFormat(userGroup.groupId),
                 acceptSignature = acceptSignature
             )
         }

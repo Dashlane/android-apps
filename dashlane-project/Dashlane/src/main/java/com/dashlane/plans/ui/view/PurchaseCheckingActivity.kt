@@ -20,7 +20,6 @@ import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.premium.inappbilling.BillingVerification
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
-import com.dashlane.util.usagelogs.ViewLogger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -51,9 +50,6 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
     private lateinit var planId: String
     private lateinit var purchase: Purchase
 
-    @Inject
-    lateinit var viewLogger: ViewLogger
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_purchase_checking)
@@ -67,7 +63,6 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
         if (!checkingDone) {
             processPurchase()
         }
-        viewLogger.log("PurchaseConfirmation")
     }
 
     override fun onPause() {
@@ -168,12 +163,9 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
             purchaseOriginalJson: String,
             signature: String,
             currencyCode: String?,
-            totalPrice: Float?,
-            userLockedOut: Boolean
+            totalPrice: Float?
         ): Intent {
-            val activity =
-                if (userLockedOut) PurchaseCheckingActivityLockedOut::class.java else PurchaseCheckingActivity::class.java
-            return DashlaneIntent.newInstance(context, activity).apply {
+            return DashlaneIntent.newInstance(context, PurchaseCheckingActivity::class.java).apply {
                 putExtra(EXTRA_PURCHASED_PLAN_ID, purchasePlanId)
                 putExtra(EXTRA_PURCHASED_ORIGINAL_JSON, purchaseOriginalJson)
                 putExtra(EXTRA_PURCHASED_SIGNATURE, signature)

@@ -30,13 +30,4 @@ interface AddFirstPassword {
 
         val sessionEmail: String?
     }
-
-    interface Logger {
-        fun display()
-        fun onClickSecureButton()
-        fun onClickSaveButton()
-        fun onCredentialSaved(credential: VaultItem<SyncObject.Authentifiant>)
-        fun onClickTryDemo()
-        fun onClickReturnHome()
-    }
 }

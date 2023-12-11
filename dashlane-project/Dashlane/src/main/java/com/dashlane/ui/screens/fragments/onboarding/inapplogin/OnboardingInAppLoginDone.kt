@@ -46,7 +46,6 @@ class OnboardingInAppLoginDone : BaseUiFragment() {
         private val globalPreferenceManager: GlobalPreferencesManager
     ) : BasePresenter<IntroScreenContract.DataProvider?, IntroScreenContract.ViewProxy?>(),
         IntroScreenContract.Presenter {
-        private val logger = OnboardingInAppLoginLogger.invoke()
         override fun onViewChanged() {
             super.onViewChanged()
             val view = view
@@ -69,7 +68,6 @@ class OnboardingInAppLoginDone : BaseUiFragment() {
                 cancelAutofillNotificationWorkers(context)
                 globalPreferenceManager.saveActivatedAutofillOnce()
             }
-            logger.logDismissSuccessScreen(activityOrigin, onboardingType.usageLog95Type)
             activity!!.finish()
         }
 

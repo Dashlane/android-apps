@@ -11,9 +11,13 @@ class UserGroupMemberItem(
 
     override fun isContentTheSame(item: SharingContactItem): Boolean {
         return super.isContentTheSame(item) &&
-                item is UserGroupMemberItem &&
-                user.sharingStatusResource == item.user.sharingStatusResource
+            item is UserGroupMemberItem &&
+            user.sharingStatusResource == item.user.sharingStatusResource
     }
 
-    override fun getLine2(): String = context.getString(user.sharingStatusResource)
+    override fun getLine2(): String = if (user.sharingStatusResource > 0) {
+        context.getString(user.sharingStatusResource)
+    } else {
+        ""
+    }
 }

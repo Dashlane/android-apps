@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.navigation.NavigationConstants
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.util.getParcelableCompat
 import kotlinx.parcelize.Parcelize
 
@@ -13,7 +12,6 @@ data class LockSetting(
     var isLoggedIn: Boolean = false,
     val unlockReason: UnlockEvent.Reason? = null,
     val isPinSetter: Boolean = false,
-    val isPinSetterReset: Boolean = false,
     val isLockCancelable: Boolean = false,
     val lockType: Int = LockTypeManager.LOCK_TYPE_UNSPECIFIED,
     val topicLock: String? = null,
@@ -26,7 +24,6 @@ data class LockSetting(
 ) : Parcelable {
     companion object {
         const val EXTRA_LOCK_TYPE_IS_PIN_SET = "extra_lock_type_is_pin_set"
-        const val EXTRA_LOCK_TYPE_IS_PIN_RESET = "extra_lock_type_is_pin_reset"
         const val EXTRA_LOCK_TYPE = "extra_lock_type"
         const val EXTRA_SUB_TOPIC_LOCK = "extra_lock_sub_type"
 
@@ -38,15 +35,12 @@ data class LockSetting(
 
         const val EXTRA_REDIRECT_TO_HOME = "extra_redirect_to_home"
 
-        const val REQUEST_CODE = 8291
-
         @JvmStatic
         fun buildFrom(bundle: Bundle?): LockSetting = if (bundle != null) {
             val unlockReason = bundle.getParcelableCompat<UnlockEvent.Reason>(EXTRA_LOCK_REASON)
             LockSetting(
                 unlockReason = unlockReason,
                 isPinSetter = bundle.getBoolean(EXTRA_LOCK_TYPE_IS_PIN_SET, false),
-                isPinSetterReset = bundle.getBoolean(EXTRA_LOCK_TYPE_IS_PIN_RESET, false),
                 isLockCancelable = if (unlockReason != null) {
                     unlockReason !is UnlockEvent.Reason.AppAccess && unlockReason !is UnlockEvent.Reason.AccessFromAutofillApi
                 } else {
@@ -69,10 +63,5 @@ data class LockSetting(
                 NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN
             else -> null
         }
-    }
-
-    fun getLogReferrer(): String = when (lockReferrer) {
-        null -> UsageLogConstant.LockSubAction.fromApp
-        else -> UsageLogConstant.LockSubAction.from3rdParty
     }
 }

@@ -8,7 +8,6 @@ import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.CreditCardLogger
 import com.dashlane.item.nfc.NfcHelper
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
@@ -25,15 +24,13 @@ import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
 import com.dashlane.item.subview.readonly.ItemReadValueDateSubView
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.BankDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
@@ -66,23 +63,11 @@ import java.time.ZoneOffset
 class ItemScreenConfigurationCreditCardProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val vaultItemLogger: VaultItemLogger,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
-    override val logger = CreditCardLogger(
-        teamspaceAccessor,
-        mainDataAccessor.getDataCounter(),
-        sessionManager,
-        bySessionUsageLogRepository
-    )
     private var selectedColor: SyncObject.PaymentCreditCard.Color? = null
 
     
@@ -158,10 +143,7 @@ class ItemScreenConfigurationCreditCardProvider(
             
             listener.showNfcErrorDialog()
         } else {
-            listener.showNfcSuccessDialog(securityCodeSubView) {
-                logger.logNfcSuccessDialogClicked()
-            }
-            logger.logNfcSuccessDialogShown()
+            listener.showNfcSuccessDialog(securityCodeSubView)
         }
     }
 
@@ -346,7 +328,7 @@ class ItemScreenConfigurationCreditCardProvider(
         editMode: Boolean
     ): ItemSubView<*>? {
         val noneLabel = context.getString(R.string.none)
-        val addressList = initializeAddressList(noneLabel)
+        val addressList = initializeAddressList(context, noneLabel)
 
         return if (addressList.isNotEmpty()) {
             val selectedAddress = addressList.firstOrNull { it.second == item.syncObject.linkedBillingAddress }?.first
@@ -581,7 +563,11 @@ class ItemScreenConfigurationCreditCardProvider(
 
         return ItemSubViewWithActionWrapper(
             view,
-            CopyAction(item.toSummary(), CopyField.PaymentsExpirationDate)
+            CopyAction(
+                summaryObject = item.toSummary(),
+                copyField = CopyField.PaymentsExpirationDate,
+                vaultItemCopy = vaultItemCopy
+            )
         )
     }
 
@@ -606,9 +592,12 @@ class ItemScreenConfigurationCreditCardProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 securityCodeView,
-                CopyAction(item.toSummary(), CopyField.PaymentsSecurityCode, action = {
-                    logger.logCopySecurityCode()
-                })
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.PaymentsSecurityCode,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -634,11 +623,10 @@ class ItemScreenConfigurationCreditCardProvider(
             ItemSubViewWithActionWrapper(
                 cardNumberView,
                 CopyAction(
-                    item.toSummary(),
-                    CopyField.PaymentsNumber,
-                    action = {
-                    logger.logCopyCardNumber()
-                }
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.PaymentsNumber,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
                 )
             )
         }
@@ -662,7 +650,7 @@ class ItemScreenConfigurationCreditCardProvider(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun initializeAddressList(defaultLabel: String): List<Pair<String, String?>> {
+    private fun initializeAddressList(context: Context, defaultLabel: String): List<Pair<String, String?>> {
         val addressList = arrayListOf<Pair<String, String?>>()
         addressList.add(Pair(defaultLabel, null))
 
@@ -672,7 +660,7 @@ class ItemScreenConfigurationCreditCardProvider(
         addressDataIdentifierList.forEach { summaryObject ->
             summaryObject as SummaryObject.Address
             summaryObject.let {
-                addressList.add(Pair(it.getFullAddress(), it.id))
+                addressList.add(Pair(it.getFullAddress(context), it.id))
             }
         }
         return addressList
@@ -688,26 +676,20 @@ class ItemScreenConfigurationCreditCardProvider(
             val isNfcAvailable =
                 NfcHelper.isNfcAvailable(context) && NfcHelper.isNfcEnabled(context)
             if (isNfcAvailable) {
-                listener.showNfcPromptDialog {
-                    logger.logNfcDialogDismissed()
-                }
-                logger.logNfcDialogShown()
+                listener.showNfcPromptDialog()
             }
         }
     }
 
     private fun logRevealNotes(item: VaultItem<SyncObject.PaymentCreditCard>) {
-        logger.logRevealNotes()
         vaultItemLogger.logRevealField(Field.NOTE, item.uid, ItemType.CREDIT_CARD, null)
     }
 
     private fun logRevealCVV(item: VaultItem<SyncObject.PaymentCreditCard>) {
-        logger.logRevealCVV()
         vaultItemLogger.logRevealField(Field.SECURITY_CODE, item.uid, ItemType.CREDIT_CARD, null)
     }
 
     private fun logRevealCardNumber(item: VaultItem<SyncObject.PaymentCreditCard>) {
-        logger.logRevealCardNumber()
         vaultItemLogger.logRevealField(Field.CARD_NUMBER, item.uid, ItemType.CREDIT_CARD, null)
     }
 

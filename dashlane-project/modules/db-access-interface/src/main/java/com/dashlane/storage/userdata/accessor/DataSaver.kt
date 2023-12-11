@@ -2,8 +2,11 @@ package com.dashlane.storage.userdata.accessor
 
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
+import kotlinx.coroutines.flow.SharedFlow
 
 interface DataSaver {
+
+    val savedItemFlow: SharedFlow<Unit>
 
      suspend fun save(item: VaultItem<*>) = save(listOf(item))
 

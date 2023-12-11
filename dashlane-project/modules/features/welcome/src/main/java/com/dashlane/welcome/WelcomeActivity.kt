@@ -11,10 +11,11 @@ import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.endoflife.EndOfLife
 import com.dashlane.util.clearTop
 import com.dashlane.util.getParcelableExtraCompat
+import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class WelcomeActivity : DashlaneActivity() {
@@ -46,6 +47,7 @@ class WelcomeActivity : DashlaneActivity() {
     }
 
     private fun setupView(loginIntent: Intent, createAccountIntent: Intent) {
+        val indicator = findViewById<TabLayout>(R.id.indicator)
         findViewById<ViewPager>(R.id.view_pager).run {
             runCatching {
                 
@@ -71,6 +73,7 @@ class WelcomeActivity : DashlaneActivity() {
             )
             adapter = welcomeAdapter
             addOnPageChangeListener(welcomeAdapter)
+            indicator.setupWithViewPager(this)
         }
 
         findViewById<View>(R.id.button_login).setOnClickListener {

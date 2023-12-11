@@ -4,4 +4,6 @@
     <string name="autofill_create_account_save">Save</string>
     <string name="autofill_create_account_website">Website</string>
     <string name="autofill_create_account_email">Email</string>
+    
+    <string name="autofill_create_account_space">Space</string>
 </resources>

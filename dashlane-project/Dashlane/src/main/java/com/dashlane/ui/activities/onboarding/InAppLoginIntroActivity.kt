@@ -2,7 +2,6 @@ package com.dashlane.ui.activities.onboarding
 
 import android.app.Activity
 import android.os.Bundle
-import androidx.navigation.navArgs
 import com.dashlane.R
 import com.dashlane.navigation.Navigator
 import com.dashlane.notification.creator.AutoFillNotificationCreator
@@ -26,7 +25,6 @@ class InAppLoginIntroActivity : DashlaneActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_intro)
         presenter = Presenter(
-            navArgs<InAppLoginIntroActivityArgs>().value.origin,
             navigator,
             globalPreferencesManager
         )
@@ -38,7 +36,6 @@ class InAppLoginIntroActivity : DashlaneActivity() {
     }
 
     private class Presenter(
-        private val origin: String?,
         private val navigator: Navigator,
         private val globalPreferencesManager: GlobalPreferencesManager
     ) : BasePresenter<IntroScreenContract.DataProvider,
@@ -63,7 +60,7 @@ class InAppLoginIntroActivity : DashlaneActivity() {
             globalPreferencesManager.saveActivatedAutofillOnce()
             activity?.setResult(Activity.RESULT_OK)
 
-            navigator.goToInAppLogin(origin)
+            navigator.goToInAppLogin()
             activity?.finish()
         }
 

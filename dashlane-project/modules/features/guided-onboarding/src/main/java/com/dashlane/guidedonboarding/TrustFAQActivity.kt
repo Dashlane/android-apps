@@ -6,10 +6,17 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.StringRes
 import androidx.core.text.HtmlCompat
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.inject.UserActivityComponent
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class TrustFAQActivity : DashlaneActivity() {
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
     override var requireUserUnlock = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,17 +34,12 @@ class TrustFAQActivity : DashlaneActivity() {
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                finish()
-                overridePendingTransition(R.anim.no_animation, R.anim.slide_out_bottom)
+                override fun handleOnBackPressed() {
+                    finish()
+                    overridePendingTransition(R.anim.no_animation, R.anim.slide_out_bottom)
+                }
             }
-        }
         )
-
-        val userActivityComponent = UserActivityComponent(this)
-        val usageLogRepository = userActivityComponent.currentSessionUsageLogRepository
-        val logger = GuidedOnboardingUsageLogger(usageLogRepository)
-        logger.logDisplay("trust_faq")
     }
 
     private fun toHtml(@StringRes resId: Int) = HtmlCompat.fromHtml(getString(resId), HtmlCompat.FROM_HTML_MODE_LEGACY)

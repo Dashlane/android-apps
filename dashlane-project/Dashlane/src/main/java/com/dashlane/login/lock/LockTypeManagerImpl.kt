@@ -1,5 +1,6 @@
 package com.dashlane.login.lock
 
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.debug.DaDaDa
@@ -32,8 +33,6 @@ class LockTypeManagerImpl @Inject constructor(
 
     private val lockoutDays = 14L
 
-    private val sso get() = sessionManager.session?.let { userAccountStorage[it.username]?.sso } == true
-
     @LockTypeManager.LockType
     override fun getLockType(): Int {
         return getLockType(true)
@@ -57,7 +56,7 @@ class LockTypeManagerImpl @Inject constructor(
 
     @LockTypeManager.LockType
     override fun getLockType(@LockHelper.LockPrompt lockPrompt: Int): Int = when (lockPrompt) {
-        LockHelper.PROMPT_LOCK_FOR_SETTINGS -> !sso
+        LockHelper.PROMPT_LOCK_FOR_SETTINGS -> !isSSO() && !isMPLess()
         LockHelper.PROMPT_LOCK_FOR_ITEM -> !isItemUnlockableByPinOrFingerprint()
         else -> false
     }.let { forceMasterPassword ->
@@ -65,8 +64,13 @@ class LockTypeManagerImpl @Inject constructor(
     }
 
     override fun setLockType(@LockTypeManager.LockType lockType: Int) {
+        if (isMPLess()) {
+            setLockTypeForMPLess(lockType)
+            return
+        }
+
         
-        biometricRecovery.setFeatureEnabled(false, null)
+        biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
 
         var lock = lockType
         if (!securityHelper.allowedToUsePin()) {
@@ -75,7 +79,7 @@ class LockTypeManagerImpl @Inject constructor(
         val session = sessionManager.session ?: return
 
         preferenceManager.isPinCodeOn = lock == LockTypeManager.LOCK_TYPE_PIN_CODE
-        if (!preferenceManager.isPinCodeOn) {
+        if (!preferenceManager.isPinCodeOn && !isMPLess()) {
             userSecureStorageManager.wipePin(session.username)
         }
 
@@ -88,6 +92,23 @@ class LockTypeManagerImpl @Inject constructor(
             
             resetLockoutTime()
         }
+
+        val hardwareAuthShouldBeEnable = lock == LockTypeManager.LOCK_TYPE_BIOMETRIC
+        if (hardwareAuthShouldBeEnable != biometricAuthModule.isFeatureEnabled()) {
+            
+            if (hardwareAuthShouldBeEnable) {
+                biometricAuthModule.enableFeature()
+            } else {
+                biometricAuthModule.disableFeature()
+            }
+        }
+    }
+
+    private fun setLockTypeForMPLess(@LockTypeManager.LockType lockType: Int) {
+        biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
+        val lock = if (lockType == LockTypeManager.LOCK_TYPE_MASTER_PASSWORD) LockTypeManager.LOCK_TYPE_PIN_CODE else lockType
+
+        preferenceManager.isPinCodeOn = lock == LockTypeManager.LOCK_TYPE_PIN_CODE
 
         val hardwareAuthShouldBeEnable = lock == LockTypeManager.LOCK_TYPE_BIOMETRIC
         if (hardwareAuthShouldBeEnable != biometricAuthModule.isFeatureEnabled()) {
@@ -116,7 +137,11 @@ class LockTypeManagerImpl @Inject constructor(
     override fun shouldEnterMasterPassword(unlockReason: UnlockEvent.Reason?): Boolean {
         val askedAccountRecovery =
             unlockReason is UnlockEvent.Reason.WithCode && unlockReason.requestCode == LoginPasswordPresenter.UNLOCK_FOR_BIOMETRIC_RECOVERY
+
+        val accountType = sessionManager.session?.username?.let { userAccountStorage[it]?.accountType }
+
         return when {
+            accountType is UserAccountInfo.AccountType.InvisibleMasterPassword -> false
             askedAccountRecovery || getLockType() == LockTypeManager.LOCK_TYPE_MASTER_PASSWORD -> false
             daDaDa.isUserLockout -> true
             else -> {
@@ -128,5 +153,13 @@ class LockTypeManagerImpl @Inject constructor(
 
     override fun resetLockoutTime() {
         preferenceManager.credentialsSaveDate = Instant.now()
+    }
+
+    private fun isSSO(): Boolean {
+        return sessionManager.session?.let { userAccountStorage[it.username]?.sso } == true
+    }
+
+    private fun isMPLess(): Boolean {
+        return sessionManager.session?.let { userAccountStorage[it.username]?.accountType } is UserAccountInfo.AccountType.InvisibleMasterPassword
     }
 }

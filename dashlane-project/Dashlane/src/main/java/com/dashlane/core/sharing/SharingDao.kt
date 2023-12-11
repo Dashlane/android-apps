@@ -1,5 +1,6 @@
 package com.dashlane.core.sharing
 
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.storage.userdata.accessor.DataSaver
@@ -40,6 +41,9 @@ interface SharingDao {
     fun loadAllUserGroup(): List<UserGroup>
 
     fun loadUserGroupsAcceptedOrPending(userId: String): List<UserGroup>
+
+    fun loadAllCollection(): List<Collection>
+
     suspend fun saveAsLocalItem(
         identifier: String,
         extraData: String,

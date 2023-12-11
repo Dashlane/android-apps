@@ -49,14 +49,6 @@
         <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
     </style>
 
-    <style name="Widget.Dashlane.TextButton.Inverse" parent="Widget.Dashlane.TextButton">
-        <item name="android:textColor">@color/button_ternary_text_color_inverse</item>
-        <item name="iconTint">@color/button_ternary_text_color_inverse</item>
-        <item name="drawableTint">@color/button_ternary_text_color_inverse</item>
-        <item name="rippleColor">@color/button_ternary_ripple_color_inverse</item>
-        <item name="backgroundTint">@color/button_ternary_background_tint_inverse</item>
-    </style>
-
     <style name="Widget.Dashlane.TextButton.Dialog.Flush" parent="Widget.MaterialComponents.Button.TextButton.Dialog.Flush">
         <item name="android:textColor">@color/button_ternary_text_color</item>
         <item name="iconTint">@color/button_ternary_text_color</item>
@@ -95,11 +87,6 @@
         <item name="buttonTint">@color/checkbox_button_tint</item>
     </style>
 
-    <style name="Widget.Dashlane.Checkbox.Inverse" parent="Widget.MaterialComponents.CompoundButton.CheckBox">
-        <item name="android:textColor">?colorOnPrimary</item>
-        <item name="buttonTint">@color/checkbox_on_primary_button_tint</item>
-    </style>
-
     
     <style name="Widget.Dashlane.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
         <item name="android:textAppearance">?textAppearanceBody2</item>
@@ -107,10 +94,6 @@
         <item name="switchTextAppearance">?textAppearanceBody2</item>
         <item name="thumbTint">@color/switch_thumb_tint</item>
         <item name="trackTint">@color/switch_track_tint</item>
-    </style>
-
-    <style name="Widget.Dashlane.Switch.Inverse">
-        <item name="android:textColor">@color/text_inverse_catchy</item>
     </style>
 
     
@@ -134,28 +117,12 @@
         <item name="hintTextColor">@color/text_input_hint_color</item>
     </style>
 
-    <style name="Widget.Dashlane.TextInputLayout.Inverse">
-        <item name="endIconTint">@color/text_inverse_catchy</item>
-        <item name="startIconTint">@color/text_inverse_catchy</item>
-        <item name="passwordToggleTint">@color/text_inverse_catchy</item>
-
-        <item name="counterTextColor">@color/text_inverse_quiet</item>
-        <item name="counterOverflowTextColor">@color/text_danger_quiet_dark_mode</item>
-        <item name="errorTextColor">@color/text_danger_quiet_dark_mode</item>
-        <item name="helperTextTextColor">@color/text_inverse_quiet</item>
-        <item name="hintTextColor">@color/text_input_hint_color_inverse</item>
-    </style>
-
     <style name="Widget.Dashlane.EditText" parent="Widget.AppCompat.EditText">
         <item name="android:textAppearance">?textAppearanceBody1</item>
         <item name="android:textColor">@color/edit_text_text_color</item>
         <item name="android:backgroundTint">@color/edit_text_background_tint</item>
         <item name="theme">@style/ThemeOverlay.Dashlane.TextInputEditText</item>
         <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.TextInputEditText</item>
-    </style>
-
-    <style name="Widget.Dashlane.EditText.Inverse" parent="Widget.Dashlane.EditText">
-        <item name="android:textColor">@color/edit_text_text_color_inverse</item>
     </style>
 
     <style name="ThemeOverlay.Dashlane.TextInputEditText" parent="">
@@ -167,10 +134,6 @@
         <item name="android:textAppearance">?textAppearanceBody1</item>
         <item name="android:textColor">?colorOnSurface</item>
         <item name="android:backgroundTint">?colorControlActivated</item>
-    </style>
-
-    <style name="Widget.Dashlane.AutoCompleteTextView.OnPrimary" parent="Widget.AppCompat.AutoCompleteTextView">
-        <item name="android:textColor">?colorOnPrimary</item>
     </style>
 
     <style name="Widget.Dashlane.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -286,8 +249,8 @@
         <item name="rippleColor">@color/card_ripple_color</item>
     </style>
 
-    <style name="Widget.Dashlane.DashlaneWarningDialog.Button" parent="Widget.Dashlane.TextButton">
-        <item name="android:textColor">?colorError</item>
+    <style name="Widget.Dashlane.DashlaneWarningDialog.Button" parent="Widget.Dashlane.Button">
+        <item name="android:backgroundTint">?colorError</item>
     </style>
 
     <style name="Widget.Dashlane.RadioButton" parent="Widget.MaterialComponents.CompoundButton.RadioButton">

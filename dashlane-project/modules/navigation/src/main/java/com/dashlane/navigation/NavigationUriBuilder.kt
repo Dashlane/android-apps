@@ -1,7 +1,6 @@
 package com.dashlane.navigation
 
 import android.net.Uri
-import com.dashlane.useractivity.log.UserActivityLog
 
 class NavigationUriBuilder private constructor(private var builder: Uri.Builder) {
 
@@ -18,8 +17,6 @@ class NavigationUriBuilder private constructor(private var builder: Uri.Builder)
     }
 
     fun origin(origin: String) = appendQueryParameter("origin", origin)
-
-    fun origin(origin: UserActivityLog.Enum) = origin(origin.code)
 
     fun appendQueryParameter(key: String, value: String) = apply { builder.appendQueryParameter(key, value) }
 

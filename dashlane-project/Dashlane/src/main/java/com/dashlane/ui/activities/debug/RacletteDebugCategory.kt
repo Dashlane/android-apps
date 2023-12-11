@@ -2,19 +2,24 @@ package com.dashlane.ui.activities.debug
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.preference.PreferenceGroup
+import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.DecryptionEngine
 import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.cryptography.decryptFileToUtf8String
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.database.DatabaseProvider
+import com.dashlane.permission.PermissionsManager
 import com.dashlane.session.Session
+import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.RacletteDatabase
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.util.FileUtils
 import com.dashlane.util.showToaster
 import com.dashlane.vault.summary.groupBySyncObjectType
+import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -22,25 +27,29 @@ import kotlinx.coroutines.launch
 import okio.ByteString.Companion.encodeUtf8
 import org.json.JSONObject
 import java.io.File
+import javax.inject.Inject
 import kotlin.math.round
 
-internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCategory(debugActivity) {
-
-    private val userDatabaseRepository: UserDatabaseRepository
-        get() = SingletonProvider.getComponent().userDatabaseRepository
+internal class RacletteDebugCategory @Inject constructor(
+    @ActivityContext override val context: Context,
+    val userDatabaseRepository: UserDatabaseRepository,
+    val cryptography: Cryptography,
+    val databaseProvider: DatabaseProvider,
+    val sessionManager: SessionManager,
+    val permissionsManager: PermissionsManager
+) : AbstractDebugCategory() {
 
     private val session: Session
-        get() = SingletonProvider.getSessionManager().session!!
+        get() = sessionManager.session!!
 
     private val racletteDatabase: RacletteDatabase?
         get() = userDatabaseRepository.getRacletteDatabase(session)
 
     private val isRacletteDatabaseExist: Boolean
-        get() = SingletonProvider.getComponent().databaseProvider.exist(session.userId)
+        get() = databaseProvider.exist(session.userId)
 
     private val decryptionEngine: DecryptionEngine
-        get() = SingletonProvider.getComponent().cryptography
-            .createDecryptionEngine(session.localKey.cryptographyKey)
+        get() = cryptography.createDecryptionEngine(session.localKey.cryptographyKey)
 
     override fun addSubItems(group: PreferenceGroup) {
         addPreferenceCheckbox(
@@ -62,7 +71,7 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
     private fun addRacletteItems(group: PreferenceGroup, racletteDatabase: RacletteDatabase) {
         val databaseName = session.userId.encodeUtf8().sha256().hex() + ".aes"
 
-        val file = File(File(debugActivity.filesDir, "databases"), databaseName)
+        val file = File(File(context.filesDir, "databases"), databaseName)
         val content = File(file, "content")
         val summaries = File(content, "summaries")
         val sharing = File(content, "sharing")
@@ -72,10 +81,11 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
         val sharingItemGroupsFile = File(sharing, "item_groups.json.aes")
         val sharingUserGroupsFile = File(sharing, "user_groups.json.aes")
         val sharingItemContentsFile = File(sharing, "item_contents.json.aes")
+        val sharingCollectionsFile = File(sharing, "collection.json.aes")
 
         addSizeItems(file, group, summaryFile, syncSummaryFile, dataChangeHistorySummaryFile)
 
-        val decMemory = racletteDatabase.memorySummaryRepository.databaseSummary!!.all
+        val decMemory = racletteDatabase.memorySummaryRepository.databaseSummary!!.data
             .groupBySyncObjectType().toSortedMap().map {
                 "${it.key.xmlObjectName} ${it.value.size}"
             }.joinToString("\n")
@@ -102,13 +112,21 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
                 .size.toString()
         ) { showFile(sharingItemGroupsFile) }
 
+        val userGroups = racletteDatabase.sharingRepository
+            .loadUserGroups()
         addPreferenceButton(
             group,
             "Sharing UserGroups",
-            racletteDatabase.sharingRepository
-                .loadUserGroups()
-                .size.toString()
+            "${userGroups.size}\n${userGroups.joinToString("\n") { it.name }}"
         ) { showFile(sharingUserGroupsFile) }
+
+        val collections = racletteDatabase.sharingRepository
+            .loadCollections()
+        addPreferenceButton(
+            group,
+            "Sharing Collection",
+            "${collections.size}\n${collections.joinToString("\n") { it.name }}"
+        ) { showFile(sharingCollectionsFile) }
 
         addPreferenceButton(
             group,
@@ -158,7 +176,7 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
             ).let { JSONObject(it).toString(2) }
 
             val uri = FileUtils.writeFileToPublicFolder(
-                debugActivity,
+                context,
                 "${file.nameWithoutExtension}.html",
                 "text/html"
             ) { stream ->
@@ -168,9 +186,9 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
             val browserIntent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "text/html")
             }
-            runCatching { debugActivity.startActivity(browserIntent) }
+            runCatching { context.startActivity(browserIntent) }
                 .onFailure {
-                    debugActivity.showToaster(
+                    context.showToaster(
                         "${it::class.java.simpleName} - ${it.message}",
                         Toast.LENGTH_SHORT
                     )
@@ -180,10 +198,11 @@ internal class RacletteDebugCategory(debugActivity: Activity) : AbstractDebugCat
     }
 
     private fun filePermissionsMissing(): Boolean {
+        context as Activity
         val denied =
-            !SingletonProvider.getPermissionsManager().isAllowedToWriteToPublicFolder()
+            !permissionsManager.isAllowedToWriteToPublicFolder()
         if (denied) {
-            debugActivity.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
+            context.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
         }
         return denied
     }

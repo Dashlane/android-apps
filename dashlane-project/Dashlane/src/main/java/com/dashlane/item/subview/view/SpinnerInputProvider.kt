@@ -10,7 +10,7 @@ import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.item.subview.ValueChangeManager
 import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
-import com.dashlane.ui.util.SpinnerUtil
+import com.dashlane.teamspaces.adapter.SpinnerUtil
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId

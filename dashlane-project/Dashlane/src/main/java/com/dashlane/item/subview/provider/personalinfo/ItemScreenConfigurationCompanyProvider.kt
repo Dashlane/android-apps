@@ -9,12 +9,8 @@ import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -22,16 +18,8 @@ import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationCompanyProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
-    dataCounter: DataCounter,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    dataCounter,
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(

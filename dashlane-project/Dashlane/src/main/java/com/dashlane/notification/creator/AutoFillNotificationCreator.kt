@@ -5,11 +5,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.work.HiltWorker
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.debug.DaDaDa
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.navigation.NavigationHelper
@@ -18,11 +18,13 @@ import com.dashlane.notification.AutofillReceiver
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.SplashScreenActivity
-import com.dashlane.useractivity.log.usage.UsageLogCode95
+import com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingInAppLoginActivity
 import com.dashlane.util.clearTask
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.notification.buildNotification
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -142,12 +144,12 @@ class AutoFillNotificationCreator @Inject constructor(
         getWorkManagerDuration(DURATION_DAY_EXISTING_ACTIVE_USER, 19)
     }
 
-    class AutoFillNotificationWorker(
-        context: Context,
-        params: WorkerParameters
+    @HiltWorker
+    class AutoFillNotificationWorker @AssistedInject constructor(
+        @Assisted context: Context,
+        @Assisted params: WorkerParameters,
+        private val inAppLoginManager: InAppLoginManager
     ) : Worker(context, params) {
-
-        private val inAppLoginManager: InAppLoginManager by lazy { SingletonProvider.getComponent().inAppLoginManager }
 
         override fun doWork(): Result {
             if (!inAppLoginManager.hasAutofillApiDisabled()) return Result.success()
@@ -156,7 +158,7 @@ class AutoFillNotificationCreator @Inject constructor(
 
             val uri = NavigationUriBuilder()
                 .host(NavigationHelper.Destination.MainPath.IN_APP_LOGIN)
-                .origin(UsageLogCode95.From.REMINDER_NOTIFICATION)
+                .origin(OnboardingInAppLoginActivity.REMINDER_NOTIFICATION)
                 .build()
 
             val notificationIntent = DashlaneIntent.newInstance(context, SplashScreenActivity::class.java).apply {

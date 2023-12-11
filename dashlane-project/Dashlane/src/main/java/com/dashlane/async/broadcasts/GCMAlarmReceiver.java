@@ -4,19 +4,27 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.dashlane.dagger.singleton.SingletonProvider;
+import com.dashlane.notification.FcmHelper;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class GCMAlarmReceiver extends BroadcastReceiver {
+
+    @Inject
+    FcmHelper fcmHelper;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.hasExtra("notificationId")) {
             int id = intent.getIntExtra("notificationId", -1);
             if (id != -1) {
-                SingletonProvider.getFcmHelper().clearNotification(context, id);
+                fcmHelper.clearNotification(context, id);
                 return;
             }
         }
-        SingletonProvider.getFcmHelper().clearAllNotification(context);
+        fcmHelper.clearAllNotification(context);
     }
 }

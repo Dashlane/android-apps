@@ -12,8 +12,7 @@ class PurchaseCheckingCoordinatorImpl @Inject constructor() : PurchaseCheckingCo
         purchaseOriginalJson: String,
         signature: String,
         currencyCode: String,
-        price: Float,
-        userLockedOut: Boolean
+        price: Float
     ) {
         context.startActivity(
             PurchaseCheckingActivity.newIntentForPlayStorePurchase(
@@ -22,8 +21,7 @@ class PurchaseCheckingCoordinatorImpl @Inject constructor() : PurchaseCheckingCo
                 purchaseOriginalJson = purchaseOriginalJson,
                 signature = signature,
                 currencyCode = currencyCode,
-                totalPrice = price,
-                userLockedOut = userLockedOut
+                totalPrice = price
             )
         )
     }

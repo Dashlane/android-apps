@@ -11,19 +11,12 @@ import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.LoginActivity
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.NavigationConstants
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import javax.inject.Inject
 
 class LockManagerActivityListener @Inject constructor(
-    private val lockManager: LockManager,
-    private val sessionManager: SessionManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
+    private val lockManager: LockManager
 ) :
     AbstractActivityLifecycleListener(), LockWatcher.Listener {
 
@@ -82,14 +75,6 @@ class LockManagerActivityListener @Inject constructor(
         if (!sessionRestored) return
         
         lockManager.lockWithoutEvents()
-
-        bySessionUsageLogRepository[sessionManager.session]
-            ?.enqueue(
-                UsageLogCode35(
-                    type = UsageLogConstant.ViewType.Labs,
-                    action = UsageLogConstant.LabsAction.keep_session_alive_reinitialize.toString()
-                )
-            )
     }
 
     private fun activityUnlockFailed(activity: Activity): Boolean =

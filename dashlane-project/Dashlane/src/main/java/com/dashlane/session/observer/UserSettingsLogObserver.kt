@@ -6,8 +6,11 @@ import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 
-class UserSettingsLogObserver(private val logRepository: LogRepository) : SessionObserver {
+class UserSettingsLogObserver(
+    private val logRepository: LogRepository,
+    private val userSettingsLogRepository: UserSettingsLogRepository
+) : SessionObserver {
     override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
-        logRepository.queueEvent(UserSettingsLogRepository().get())
+        logRepository.queueEvent(userSettingsLogRepository.get())
     }
 }

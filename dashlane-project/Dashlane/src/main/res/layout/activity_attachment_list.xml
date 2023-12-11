@@ -12,7 +12,7 @@
             android:id="@+id/toolbar"
             style="@style/Widget.Dashlane.Toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize" />
+            android:layout_height="?android:attr/actionBarSize" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
         android:fadeScrollbars="true"
         android:gravity="center"
-        android:paddingTop="?actionBarSize"
+        android:paddingTop="?android:attr/actionBarSize"
         android:scrollbarStyle="outsideOverlay" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

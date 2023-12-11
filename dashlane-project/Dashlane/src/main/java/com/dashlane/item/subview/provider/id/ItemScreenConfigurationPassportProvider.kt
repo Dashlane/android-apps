@@ -2,7 +2,6 @@ package com.dashlane.item.subview.provider.id
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.inapplogin.UsageLogCode35Action
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -13,15 +12,11 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -32,15 +27,9 @@ import java.time.LocalDate
 class ItemScreenConfigurationPassportProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -99,25 +88,29 @@ class ItemScreenConfigurationPassportProvider(
             createNumberField(subViewFactory, context, item, editMode),
             
             createIdDateField(
+                context,
                 item,
                 editMode,
                 listener,
                 item.syncObject.deliveryDate,
                 context.getString(R.string.issue_date),
                 CopyField.PassportIssueDate,
-                VaultItem<*>::copyForUpdatedDeliveryDate
+                VaultItem<*>::copyForUpdatedDeliveryDate,
+                vaultItemCopy
             ),
             
             createPlaceField(subViewFactory, context, item),
             
             createIdDateField(
+                context,
                 item,
                 editMode,
                 listener,
                 item.syncObject.expireDate,
                 context.getString(R.string.expiery_date),
                 CopyField.PassportExpirationDate,
-                VaultItem<*>::copyForUpdatedExpireDate
+                VaultItem<*>::copyForUpdatedExpireDate,
+                vaultItemCopy
             ),
             
             createTeamspaceField(subViewFactory, item),
@@ -181,14 +174,12 @@ class ItemScreenConfigurationPassportProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 numberView,
-                CopyAction(item.toSummary(), CopyField.PassportNumber, action = {
-                    logger.log(
-                        UsageLogCode35(
-                            type = UsageLogCode11.Type.PASSPORT.code,
-                            action = UsageLogCode35Action.COPY_NUMBER
-                        )
-                    )
-                })
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.PassportNumber,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -198,7 +189,7 @@ private object PassportIdentityAdapter : IdentityAdapter<SyncObject.Passport> {
     override fun fullName(item: VaultItem<SyncObject.Passport>) = item.syncObject.fullname
 
     override fun withFullName(item: VaultItem<SyncObject.Passport>, fullName: String?):
-            VaultItem<SyncObject.Passport> = item.copySyncObject { fullname = fullName }
+        VaultItem<SyncObject.Passport> = item.copySyncObject { fullname = fullName }
 
     override fun gender(item: VaultItem<SyncObject.Passport>): SyncObject.Gender? = item.syncObject.sex
 
@@ -211,12 +202,12 @@ private object PassportIdentityAdapter : IdentityAdapter<SyncObject.Passport> {
     override fun birthDate(item: VaultItem<SyncObject.Passport>) = item.syncObject.dateOfBirth
 
     override fun withBirthDate(item: VaultItem<SyncObject.Passport>, birthDate: LocalDate?):
-            VaultItem<SyncObject.Passport> = item.copySyncObject { dateOfBirth = birthDate }
+        VaultItem<SyncObject.Passport> = item.copySyncObject { dateOfBirth = birthDate }
 
     override fun linkedIdentity(item: VaultItem<SyncObject.Passport>) = item.syncObject.linkedIdentity
 
     override fun withLinkedIdentity(item: VaultItem<SyncObject.Passport>, identity: String?):
-            VaultItem<SyncObject.Passport> =
+        VaultItem<SyncObject.Passport> =
         item.copySyncObject { linkedIdentity = identity }
 }
 

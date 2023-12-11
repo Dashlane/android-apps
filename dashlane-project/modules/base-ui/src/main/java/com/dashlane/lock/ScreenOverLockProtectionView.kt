@@ -46,7 +46,7 @@ class ScreenOverLockProtectionView(
 
     init {
         setBackgroundColor(
-            ContextThemeWrapper(context, R.style.Theme_Dashlane_LockedOut)
+            ContextThemeWrapper(context, R.style.Theme_Dashlane_Modal)
                 .getThemeAttrColor(android.R.attr.colorBackground)
         )
         isClickable = true

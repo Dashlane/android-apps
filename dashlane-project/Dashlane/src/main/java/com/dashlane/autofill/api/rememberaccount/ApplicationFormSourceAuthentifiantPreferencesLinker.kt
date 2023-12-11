@@ -1,7 +1,7 @@
 package com.dashlane.autofill.api.rememberaccount
 
 import androidx.annotation.VisibleForTesting
-import com.dashlane.autofill.api.rememberaccount.services.FormSourceAuthentifiantLinker
+import com.dashlane.autofill.rememberaccount.services.FormSourceAuthentifiantLinker
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.GlobalPreferencesManager
 import kotlinx.coroutines.Dispatchers

@@ -6,11 +6,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.login.Device
 import com.dashlane.login.LoginIntents
 import com.dashlane.login.pages.password.InitialSync
 import com.dashlane.server.api.DashlaneApi
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.getParcelableArrayCompat
@@ -25,6 +26,12 @@ class LoginSyncProgressActivity : DashlaneActivity() {
 
     @Inject
     lateinit var dashlaneApi: DashlaneApi
+
+    @Inject
+    lateinit var syncBroadcastManager: SyncBroadcastManager
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     private lateinit var loginSyncProgressPresenter: LoginSyncProgressPresenter
 
@@ -52,7 +59,7 @@ class LoginSyncProgressActivity : DashlaneActivity() {
         }
         val viewProxy = LoginSyncProgressViewProxy(this, initialMessage, lifecycleScope)
         val viewModel = ViewModelProvider(this).getDeferredViewModel<Unit>(VIEW_MODEL_TAG_SYNC)
-        val session = SingletonProvider.getSessionManager().session
+        val session = sessionManager.session
         if (session == null) {
             
             startActivity(LoginIntents.createLoginActivityIntent(this))
@@ -60,23 +67,24 @@ class LoginSyncProgressActivity : DashlaneActivity() {
             return
         }
         loginSyncProgressPresenter = LoginSyncProgressPresenter(
-            this,
-            session,
-            viewProxy,
-            initialSync,
-            devicesToUnregister,
-            dashlaneApi.endpoints.devices.deactivateDevicesService,
-            viewModel,
-            lifecycleScope
+            activity = this,
+            sessionManager = sessionManager,
+            viewProxy = viewProxy,
+            initialSync = initialSync,
+            devicesToUnregister = devicesToUnregister,
+            deactivateDevicesService = dashlaneApi.endpoints.devices.deactivateDevicesService,
+            viewModel = viewModel,
+            syncBroadcastManager = syncBroadcastManager,
+            coroutineScope = lifecycleScope
         ).also { viewProxy.presenter = it }
 
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                
+                override fun handleOnBackPressed() {
+                    
+                }
             }
-        }
         )
     }
 

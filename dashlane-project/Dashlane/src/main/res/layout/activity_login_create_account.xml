@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/view_login_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".createaccount.CreateAccountActivity"
-    >
+    tools:context=".createaccount.CreateAccountActivity">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
@@ -20,14 +18,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/logo"
@@ -40,7 +36,7 @@
                 app:layout_constraintBottom_toTopOf="@id/view_login_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/text_inverse_catchy"
+                app:tint="@color/oddity_brand"
                 />
 
             <com.dashlane.util.graphics.ViewAnimatorPager
@@ -60,26 +56,38 @@
                 tools:alpha="0.5"
                 tools:background="@android:color/white"
                 tools:ignore="MissingRegistered"
-                tools:minHeight="48dp"
-                />
+                tools:minHeight="48dp" />
             
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                >
+                android:paddingHorizontal="@dimen/spacing_normal">
 
                 <Button
                     android:id="@+id/view_next"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/spacing_normal"
-                    android:layout_marginBottom="@dimen/spacing_normal"
                     android:text="@string/create_account_cta_continue"
+                    app:layout_constraintBottom_toTopOf="@id/view_passwordless_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_goneMarginBottom="@dimen/spacing_normal" />
+
+                <Button
+                    android:id="@+id/view_passwordless_button"
+                    style="?borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_normal"
+                    android:text="@string/create_account_cta_passwordless"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintVertical_bias="1"
-                    />
+                    app:layout_constraintHorizontal_bias="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view_next"
+                    tools:visibility="visible" />
 
                 <ProgressBar
                     android:id="@+id/view_login_progress"
@@ -90,8 +98,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/view_next"
                     app:layout_constraintEnd_toEndOf="@id/view_next"
                     app:layout_constraintStart_toStartOf="@id/view_next"
-                    app:layout_constraintTop_toTopOf="@id/view_next"
-                    />
+                    app:layout_constraintTop_toTopOf="@id/view_next" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

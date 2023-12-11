@@ -9,7 +9,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class M2wConnectViewModel @Inject constructor(
-    val logger: M2wConnectLogger,
     val userPreferencesManager: UserPreferencesManager
 ) : ViewModel(), M2wConnectViewModelContract {
 
@@ -18,27 +17,21 @@ internal class M2wConnectViewModel @Inject constructor(
     override val finishM2W = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
 
     override fun onNext() {
-        logger.logDone()
         showConfirmPopupFlow.tryEmit(true)
     }
 
     override fun onConfirmSuccess() {
-        logger.logConfirmPopupYes()
         finishM2w(true)
     }
 
-    override fun onCancelConfirmPopup() {
-        logger.logConfirmPopupNo()
-    }
+    override fun onCancelConfirmPopup() = Unit
 
     override fun onConfirmationDialogDismissed() {
         showConfirmPopupFlow.tryEmit(false)
     }
 
     fun finishM2w(success: Boolean) {
-        if (!success) {
-            logger.logExit()
-        } else {
+        if (success) {
             userPreferencesManager.hasFinishedM2D = true
         }
         finishM2W.tryEmit(success)

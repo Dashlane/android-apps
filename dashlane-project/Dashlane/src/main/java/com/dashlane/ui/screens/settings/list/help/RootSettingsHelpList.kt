@@ -8,19 +8,14 @@ import com.dashlane.help.HelpCenterLink
 import com.dashlane.help.newIntent
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.ui.screens.settings.LicensesActivity
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
-import com.dashlane.useractivity.log.usage.UsageLogCode75
-import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.util.clipboard.ClipboardUtils
+import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.launchUrl
 import com.dashlane.util.safelyStartBrowserActivity
 import com.dashlane.util.startActivity
-import com.dashlane.util.usagelogs.ViewLogger
 import java.util.Locale
 
 @Suppress("UseDataClass")
@@ -29,9 +24,7 @@ class RootSettingsHelpList(
     navigator: Navigator,
     rootHeader: SettingHeader,
     crashReporter: CrashReporter,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    viewLogger: ViewLogger
+    clipboardCopy: ClipboardCopy
 ) {
     private val helpHeader =
         SettingHeader(context.getString(R.string.settings_category_help))
@@ -44,7 +37,9 @@ class RootSettingsHelpList(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) {
-            val intent = HelpCenterLink.Base.newIntent(context, viewLogger)
+            val intent = HelpCenterLink.Base.newIntent(
+                context = context
+            )
             context.safelyStartBrowserActivity(intent)
         }
     }
@@ -61,7 +56,7 @@ class RootSettingsHelpList(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) {
-            ClipboardUtils.copyToClipboard(description, sensitiveData = false, autoClear = false)
+            clipboardCopy.copyToClipboard(data = description, sensitiveData = false, autoClear = false)
         }
     }
 
@@ -73,13 +68,6 @@ class RootSettingsHelpList(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) {
-            bySessionUsageLogRepository[sessionManager.session]
-                ?.enqueue(
-                    UsageLogCode75(
-                        type = "helpCenter",
-                        action = "privacyPolicy"
-                    )
-                )
             context.launchUrl(Legal.URL_PRIVACY_POLICY)
         }
     }
@@ -92,13 +80,6 @@ class RootSettingsHelpList(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) {
-            bySessionUsageLogRepository[sessionManager.session]
-                ?.enqueue(
-                    UsageLogCode75(
-                        type = "helpCenter",
-                        action = "termsOfService"
-                    )
-                )
             context.launchUrl(Legal.URL_TERMS_OF_SERVICE)
         }
     }

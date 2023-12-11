@@ -1,14 +1,14 @@
 package com.dashlane.ui.activities.debug
 
-import android.app.Activity
+import android.content.Context
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 
-internal abstract class AbstractDebugCategory(val debugActivity: Activity) {
-
+internal abstract class AbstractDebugCategory {
+    abstract val context: Context
     abstract val name: String?
 
     fun add(group: PreferenceScreen) {
@@ -19,7 +19,7 @@ internal abstract class AbstractDebugCategory(val debugActivity: Activity) {
     abstract fun addSubItems(group: PreferenceGroup)
 
     private fun addCategory(group: PreferenceGroup, title: String?): PreferenceCategory {
-        val category = PreferenceCategory(debugActivity)
+        val category = PreferenceCategory(context)
         category.title = title
         group.addPreference(category)
         return category
@@ -39,7 +39,7 @@ internal abstract class AbstractDebugCategory(val debugActivity: Activity) {
         description: String?,
         clickListener: Preference.OnPreferenceClickListener?
     ) {
-        val preference = Preference(debugActivity)
+        val preference = Preference(context)
         preference.title = title
         preference.summary = description
         preference.onPreferenceClickListener = clickListener
@@ -54,7 +54,7 @@ internal abstract class AbstractDebugCategory(val debugActivity: Activity) {
         isSelectable: Boolean,
         clickListener: Preference.OnPreferenceClickListener?
     ) {
-        val preference = CheckBoxPreference(debugActivity)
+        val preference = CheckBoxPreference(context)
         preference.title = title
         preference.summary = description
         preference.isChecked = isChecked

@@ -2,7 +2,6 @@ package com.dashlane.item.subview.provider.id
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.inapplogin.UsageLogCode35Action
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -15,16 +14,11 @@ import com.dashlane.item.subview.edit.ItemEditValueTextSubView
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.vault.model.VaultItem
@@ -38,16 +32,9 @@ import java.time.LocalDate
 class ItemScreenConfigurationFiscalStatementProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    dataCounter: DataCounter,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    dataCounter,
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -69,7 +56,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         itemToSave as VaultItem<SyncObject.FiscalStatement>
         return itemToSave.syncObject.fiscalNumber?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.teledeclarantNumber?.trim().isNotSemanticallyNull()
+            itemToSave.syncObject.teledeclarantNumber?.trim().isNotSemanticallyNull()
     }
 
     private fun createHeader(
@@ -157,14 +144,12 @@ class ItemScreenConfigurationFiscalStatementProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 numberView,
-                CopyAction(item.toSummary(), CopyField.TaxNumber, action = {
-                    logger.log(
-                        UsageLogCode35(
-                            type = UsageLogCode11.Type.FISCAL.code,
-                            action = UsageLogCode35Action.COPY_NUMBER
-                        )
-                    )
-                })
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.TaxNumber,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -195,14 +180,12 @@ class ItemScreenConfigurationFiscalStatementProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 numberView,
-                CopyAction(item.toSummary(), CopyField.TaxNumber, action = {
-                    logger.log(
-                        UsageLogCode35(
-                            type = UsageLogCode11.Type.FISCAL.code,
-                            action = UsageLogCode35Action.COPY_NUMBER
-                        )
-                    )
-                })
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.TaxNumber,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -236,7 +219,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
         override fun fullName(item: VaultItem<SyncObject.FiscalStatement>) = item.syncObject.fullname
 
         override fun withFullName(item: VaultItem<SyncObject.FiscalStatement>, fullName: String?):
-                VaultItem<SyncObject.FiscalStatement> = item.copySyncObject { fullname = fullName }
+            VaultItem<SyncObject.FiscalStatement> = item.copySyncObject { fullname = fullName }
 
         override fun gender(item: VaultItem<SyncObject.FiscalStatement>): SyncObject.Gender? = null
 
@@ -248,12 +231,12 @@ class ItemScreenConfigurationFiscalStatementProvider(
         override fun birthDate(item: VaultItem<SyncObject.FiscalStatement>) = null
 
         override fun withBirthDate(item: VaultItem<SyncObject.FiscalStatement>, birthDate: LocalDate?):
-                VaultItem<SyncObject.FiscalStatement> = item.copySyncObject { }
+            VaultItem<SyncObject.FiscalStatement> = item.copySyncObject { }
 
         override fun linkedIdentity(item: VaultItem<SyncObject.FiscalStatement>) = item.syncObject.linkedIdentity
 
         override fun withLinkedIdentity(item: VaultItem<SyncObject.FiscalStatement>, identity: String?):
-                VaultItem<SyncObject.FiscalStatement> =
+            VaultItem<SyncObject.FiscalStatement> =
             item.copySyncObject { linkedIdentity = identity }
     }
 }

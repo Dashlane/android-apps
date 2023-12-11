@@ -42,6 +42,7 @@ import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.titleForListNormalized
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.summary.toSummary
+import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -338,7 +339,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         val oldOtpSecret = otpSecret
 
         otpUrl = otp?.url.toSyncObfuscatedValue()
-        otpSecret = otp?.takeIf { it.isStandardOtp() }?.secret?.toSyncObfuscatedValue()
+        otpSecret = otp?.takeIf { it.isStandardOtp() }?.secret?.toSyncObfuscatedValue() ?: SyncObfuscatedValue("")
 
             message = "Item Updated=${oldOtpUrl != otpUrl || oldOtpSecret != otpSecret}",
             logToUserSupportFile = true

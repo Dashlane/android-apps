@@ -17,9 +17,10 @@ import com.dashlane.item.subview.readonly.ItemReadValueListSubView
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.ui.adapters.text.factory.toIdentityFormat
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isSemanticallyNull
+import com.dashlane.util.toIdentityFormat
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.getLabelId
 import com.dashlane.vault.model.hasBeenSaved
@@ -162,7 +163,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
 ): ItemSubViewImpl<LocalDate?>? {
     val birthDateHint = context.getString(R.string.date_of_birth)
     val birthDateLocalDate = birthDate(item)
-    val birthDateFormatted = birthDateLocalDate?.toIdentityFormat()
+    val birthDateFormatted = birthDateLocalDate?.toIdentityFormat(context)
 
     return when {
         editMode -> ItemEditValueDateSubView(
@@ -175,7 +176,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
                 addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                     override fun onValueChanged(origin: Any, newValue: LocalDate?) {
                         val subView = origin as ItemEditValueDateSubView
-                        subView.formattedDate = newValue?.toIdentityFormat()
+                        subView.formattedDate = newValue?.toIdentityFormat(context)
                         subView.value = newValue
                         listener.notifySubViewChanged(subView)
                     }
@@ -270,15 +271,17 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
 }
 
 fun <T : SyncObject> createIdDateField(
+    context: Context,
     item: VaultItem<T>,
     editMode: Boolean,
     listener: ItemEditViewContract.View.UiUpdateListener,
     dateLocalDate: LocalDate?,
     dateHint: String,
     copyField: CopyField,
-    valueUpdate: (VaultItem<*>, LocalDate?) -> VaultItem<*>?
+    valueUpdate: (VaultItem<*>, LocalDate?) -> VaultItem<*>?,
+    vaultItemCopy: VaultItemCopyService
 ): ItemSubView<*>? {
-    val issueDateFormatted = dateLocalDate?.toIdentityFormat()
+    val issueDateFormatted = dateLocalDate?.toIdentityFormat(context)
     return when {
         editMode -> ItemEditValueDateSubView(
             dateHint,
@@ -289,7 +292,7 @@ fun <T : SyncObject> createIdDateField(
             addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                 override fun onValueChanged(origin: Any, newValue: LocalDate?) {
                     val subView = origin as ItemEditValueDateSubView
-                    subView.formattedDate = newValue?.toIdentityFormat()
+                    subView.formattedDate = newValue?.toIdentityFormat(context)
                     subView.value = newValue
                     listener.notifySubViewChanged(subView)
                 }
@@ -303,7 +306,7 @@ fun <T : SyncObject> createIdDateField(
                 dateLocalDate,
                 issueDateFormatted
             ),
-            CopyAction(item.toSummary(), copyField)
+            CopyAction(summaryObject = item.toSummary(), copyField = copyField, vaultItemCopy = vaultItemCopy)
         )
     }
 }

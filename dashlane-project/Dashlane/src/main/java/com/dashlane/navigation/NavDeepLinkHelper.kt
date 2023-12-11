@@ -45,26 +45,25 @@ class NavDeepLinkHelper(
             }
             isHomeFilter -> {
                 
-                navigator.goToHome(origin, host)
+                navigator.goToHome(host)
                 true
             }
             host == GET_PREMIUM -> {
-                handleGetPremiumDeeplink(pathSegments, origin)
+                handleGetPremiumDeeplink(pathSegments)
                 true
             }
             host == VPN -> {
-                navigator.goToVpn(origin)
+                navigator.goToVpn()
                 true
             }
             host == DARK_WEB_MONITORING -> {
                 
-                navigator.goToDarkWebMonitoring(origin)
+                navigator.goToDarkWebMonitoring()
                 true
             }
             host == DARK_WEB_MONITORING_PREMIUM_PROMPT -> {
                 navigator.goToPaywall(
-                    type = PaywallIntroType.DARK_WEB_MONITORING.toString(),
-                    origin = origin
+                    type = PaywallIntroType.DARK_WEB_MONITORING.toString()
                 )
                 true
             }
@@ -97,7 +96,7 @@ class NavDeepLinkHelper(
             path == SecondaryPath.Items.NEW -> {
                 when (dataType) {
                     SyncObjectType.AUTHENTIFIANT -> {
-                        navigator.goToCredentialAddStep1(origin)
+                        navigator.goToCredentialAddStep1()
                     }
                     else -> {
                         navigator.goToCreateItem(dataType.xmlObjectName)
@@ -133,14 +132,14 @@ class NavDeepLinkHelper(
         }
     }
 
-    private fun handleGetPremiumDeeplink(pathSegments: List<String>, origin: String?) {
+    private fun handleGetPremiumDeeplink(pathSegments: List<String>) {
         val offerType = when {
             pathSegments.contains(GetPremium.ESSENTIALS_OFFER) -> OfferType.ADVANCED
             pathSegments.contains(GetPremium.PREMIUM_OFFER) -> OfferType.PREMIUM
             pathSegments.contains(GetPremium.FAMILY_OFFER) -> OfferType.FAMILY
             else -> null
         }
-        navigator.goToOffers(origin, offerType?.toString())
+        navigator.goToOffers(offerType?.toString())
     }
 
     private fun overrideOtpDeepLink(uri: Uri): Boolean {

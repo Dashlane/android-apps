@@ -9,7 +9,7 @@ import com.dashlane.R
 import com.dashlane.util.CheckedDelegate
 import com.dashlane.util.showToaster
 
-class BiometricSettingsHelperImpl(val rootView: View, val logger: BiometricSettingsLogger) : BiometricSettingsHelper {
+class BiometricSettingsHelperImpl(val rootView: View) : BiometricSettingsHelper {
     private val biometricSetting = rootView.findViewById<View>(R.id.setting_biometric)!!
     private val biometricToggle = biometricSetting.findViewById<SwitchCompat>(R.id.setting_biometric_checkbox)!!
     override var biometricSettingChecked: Boolean by CheckedDelegate(biometricToggle)
@@ -29,7 +29,6 @@ class BiometricSettingsHelperImpl(val rootView: View, val logger: BiometricSetti
     }
 
     private fun showInfo() {
-        logger.logShowFAQ()
         settingsLayout.visibility = View.GONE
         infoLayout.visibility = View.VISIBLE
     }

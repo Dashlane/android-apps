@@ -76,12 +76,11 @@ class LockNavigationHelperImpl @Inject constructor(
         return showAndWaitLockActivityForReason(context, reason, LockHelper.PROMPT_LOCK_FOR_ITEM, message)
     }
 
-    override fun showLockActivityToSetPinCode(context: Context, isReset: Boolean) {
+    override fun showLockActivityToSetPinCode(context: Context) {
         val lockIntent = Intent(context, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra(LockSetting.EXTRA_IS_LOCK_CANCELABLE, true)
             putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_SET, true)
-            putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_RESET, isReset)
         }
         context.startActivity(lockIntent)
     }

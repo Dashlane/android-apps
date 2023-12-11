@@ -1,9 +1,9 @@
 package com.dashlane.autofill.core
 
-import com.dashlane.autofill.api.securitywarnings.AutofillSecurityWarningsLogger
-import com.dashlane.autofill.api.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
+import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
+import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
@@ -19,16 +19,11 @@ import com.dashlane.hermes.generated.events.user.AutofillAccept
 import com.dashlane.hermes.generated.events.user.AutofillDismiss
 import com.dashlane.hermes.generated.events.user.AutofillSuggest
 import com.dashlane.hermes.generated.events.user.Click
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import javax.inject.Inject
 
 class AutofillSecurityWarningsLoggerImpl @Inject constructor(
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val logRepository: LogRepository
-) : AutofillSecurityWarningsLogger, AutofillLegacyLogger(sessionManager, bySessionUsageLogRepository) {
+) : AutofillSecurityWarningsLogger {
 
     override fun onDisplayedIncorrectWarning(
         security: SignatureVerification.Incorrect,

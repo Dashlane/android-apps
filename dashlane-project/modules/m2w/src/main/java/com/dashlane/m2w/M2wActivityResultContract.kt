@@ -11,7 +11,7 @@ class M2wActivityResultContract @Inject constructor(
 ) : ActivityResultContract<String, Boolean>() {
 
     override fun createIntent(context: Context, input: String): Intent =
-        m2xIntentFactory.buildM2xConnect(input)
+        m2xIntentFactory.buildM2xConnect()
 
     override fun parseResult(resultCode: Int, intent: Intent?): Boolean =
         intent != null && M2wIntentCoordinator.isM2wCompleted(intent)

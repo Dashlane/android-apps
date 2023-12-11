@@ -3,9 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Theme.Dashlane.LockedOut.Transparent.Modal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context=".discovery.FollowUpNotificationDiscoveryActivity"
     >
 
     <LinearLayout
@@ -30,7 +30,7 @@
             android:scaleType="fitXY"
             android:visibility="visible"
             app:srcCompat="@drawable/ic_arrow_collapse"
-            app:tint="@color/text_neutral_quiet"
+            app:tint="@color/text_inverse_quiet"
             tools:visibility="visible"
             />
 

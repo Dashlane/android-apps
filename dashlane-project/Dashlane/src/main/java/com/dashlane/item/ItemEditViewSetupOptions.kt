@@ -3,7 +3,6 @@ package com.dashlane.item
 import android.content.Intent
 import android.os.Bundle
 import com.dashlane.authenticator.Otp
-import com.dashlane.useractivity.log.usage.UsageLogCode57
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.xml.domain.SyncObjectType
 
@@ -13,7 +12,6 @@ data class ItemEditViewSetupOptions(
     val websiteUrl: String?,
     val toolbarCollapsed: Boolean,
     val forceEdit: Boolean,
-    val sender: UsageLogCode57.Sender?,
     val successIntent: Intent?,
     val savedScreenConfiguration: Bundle?,
     val savedAdditionalData: Bundle?,

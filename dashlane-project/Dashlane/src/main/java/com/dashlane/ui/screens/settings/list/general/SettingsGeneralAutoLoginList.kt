@@ -13,7 +13,6 @@ import com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingType
 import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
-import com.dashlane.useractivity.log.usage.UsageLogCode95
 
 class SettingsGeneralAutoLoginList(
     private val context: Context,
@@ -39,7 +38,7 @@ class SettingsGeneralAutoLoginList(
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
             if (enable) {
-                navigator.goToInAppLogin(UsageLogCode95.From.SETTINGS.code)
+                navigator.goToInAppLogin()
             } else {
                 lockManager.startAutoLockGracePeriod()
                 if (!inAppLoginManager.startActivityToDisableProvider(context)) {
@@ -64,7 +63,7 @@ class SettingsGeneralAutoLoginList(
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
             if (enable) {
-                navigator.goToInAppLogin(UsageLogCode95.From.SETTINGS.name, OnboardingType.ACCESSIBILITY)
+                navigator.goToInAppLogin(OnboardingType.ACCESSIBILITY)
             } else {
                 lockManager.startAutoLockGracePeriod()
                 inAppLoginManager.inAppLoginByAccessibilityManager.startActivityToChooseProvider(context)
@@ -81,7 +80,7 @@ class SettingsGeneralAutoLoginList(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) =
-            navigator.goToAutofillPauseAndLinkedFromSettings(UsageLogCode95.From.SETTINGS.code)
+            navigator.goToAutofillPauseAndLinkedFromSettings()
     }
 
     private val autoLoginInlineItem = object : SettingItem, SettingCheckable {
@@ -96,6 +95,7 @@ class SettingsGeneralAutoLoginList(
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = userPreferencesManager.hasInlineAutofill
         override fun onCheckChanged(context: Context, enable: Boolean) {
+            if (!autoLoginAppItem.isChecked(context)) return
             userPreferencesManager.hasInlineAutofill = enable
         }
     }

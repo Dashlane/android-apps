@@ -11,27 +11,27 @@
     </plurals>
 
     <plurals name="action_item_description_free_trial_month">
-        <item quantity="one">Claim your offer today and get %1$d month of free %2$s, then pay just %3$s.</item>
-        <item quantity="other">Claim your offer today and get %1$d months of free %2$s, then pay just %3$s.</item>
+        <item quantity="one">Claim your offer today and get %1$d month of free %2$s, then pay just %3$s. Valid for new customers only.</item>
+        <item quantity="other">Claim your offer today and get %1$d months of free %2$s, then pay just %3$s. Valid for new customers only.</item>
     </plurals>
 
 
     <plurals name="action_item_description_monthly_free_trial_to_yearly">
-        <item quantity="one">Claim your offer today and get %1$d month of free %2$s.</item>
-        <item quantity="other">Claim your offer today and get %1$d months of free %2$s.</item>
+        <item quantity="one">Claim your offer today and get %1$d month of free %2$s. Valid for new customers only.</item>
+        <item quantity="other">Claim your offer today and get %1$d months of free %2$s. Valid for new customers only.</item>
     </plurals>
 
     <plurals name="action_item_description_free_trial_year">
-        <item quantity="one">Claim your offer today and get %1$d year of free %2$s, then pay just %3$s.</item>
-        <item quantity="other">Claim your offer today and get %1$d years of free %2$s, then pay just %3$s.</item>
+        <item quantity="one">Claim your offer today and get %1$d year of free %2$s, then pay just %3$s. Valid for new customers only.</item>
+        <item quantity="other">Claim your offer today and get %1$d years of free %2$s, then pay just %3$s. Valid for new customers only.</item>
     </plurals>
 
     <string name="action_item_title_fixed_percent_discount">Special offer: %1$s off %2$s</string>
-    <string name="action_item_description_monthly_recurring_payment_to_monthly_plan">Get Dashlane %1$s for only %2$s for %3$d months.</string>
+    <string name="action_item_description_monthly_recurring_payment_to_monthly_plan">Get Dashlane %1$s for only %2$s for %3$d months. Valid for new customers only.</string>
 
     <plurals name="action_item_description_single_payment_month">
-        <item quantity="one">Upgrade today to get your first month of %2$s for only %3$s.</item>
-        <item quantity="other">Upgrade today to get your first %1$d months of %2$s for only %4$s.</item>
+        <item quantity="one">Upgrade today to get your first month of %2$s for only %3$s. Valid for new customers only.</item>
+        <item quantity="other">Upgrade today to get your first %1$d months of %2$s for only %4$s. Valid for new customers only.</item>
     </plurals>
 
     <string name="action_item_title_fixed_price_discount">Special offer: %1$s for only %2$s</string>
@@ -42,11 +42,11 @@
     </plurals>
 
     <plurals name="action_item_description_single_payment_year">
-        <item quantity="one">Upgrade today to get your first year of %2$s for only %3$s.</item>
-        <item quantity="other">Upgrade today to get your first %1$d year of %2$s for only %3$s.</item>
+        <item quantity="one">Upgrade today to get your first year of %2$s for only %3$s. Valid for new customers only.</item>
+        <item quantity="other">Upgrade today to get your first %1$d years of %2$s for only %3$s. Valid for new customers only.</item>
     </plurals>
 
-    <string name="action_item_description_monthly_recurring_payment_to_yearly_plan">Upgrade today to get %1$s for only %2$s for %3$d months.</string>
+    <string name="action_item_description_monthly_recurring_payment_to_yearly_plan">Upgrade today to get %1$s for only %2$s for %3$d months. Valid for new customers only.</string>
 
     <plurals name="action_item_title_yearly_recurring_payment_to_yearly_plan">
         <item quantity="one">Special offer: Save on first year</item>
@@ -54,7 +54,7 @@
     </plurals>
 
     <plurals name="action_item_description_yearly_recurring_payment_to_yearly_plan">
-        <item quantity="one">Upgrade today to get %1$s for only %2$s for %3$d year.</item>
-        <item quantity="other">Upgrade today to get %1$s for only %2$s for %3$d years.</item>
+        <item quantity="one">Upgrade today to get %1$s for only %2$s for %3$d year. Valid for new customers only.</item>
+        <item quantity="other">Upgrade today to get %1$s for only %2$s for %3$d years. Valid for new customers only.</item>
     </plurals>
 </resources>

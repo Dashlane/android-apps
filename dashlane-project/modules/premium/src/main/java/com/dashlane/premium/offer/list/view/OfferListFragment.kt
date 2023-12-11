@@ -69,8 +69,8 @@ class OfferListFragment : Fragment() {
 
         logger.origin = origin.orEmpty()
         lifecycleScope.launch {
-            logger.currentPageViewFlow.collect { (page, fromAutofill) ->
-                requireActivity().setCurrentPageView(page, fromAutofill)
+            logger.currentPageViewFlow.collect { page ->
+                requireActivity().setCurrentPageView(page)
             }
         }
 
@@ -124,12 +124,7 @@ class OfferListFragment : Fragment() {
     }
 
     companion object {
-        const val EXTRA_ORIGIN = "origin"
-        const val ORIGIN_DEVICE_LIMIT = "device_limit"
-        const val ORIGIN_MONOBUCKET = "mono_test"
         const val AUTO_REDIRECTED_TO_OFFER_DETAILS_KEY = "auto_redirected_to_offer_details_key"
         private const val VIEW_MODEL_TAG = "offers_list"
-
-        fun userLockedOut(origin: String?) = ORIGIN_DEVICE_LIMIT == origin || ORIGIN_MONOBUCKET == origin
     }
 }

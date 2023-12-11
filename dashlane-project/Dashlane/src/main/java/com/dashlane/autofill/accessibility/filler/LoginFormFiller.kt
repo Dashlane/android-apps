@@ -5,7 +5,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.AutofillOrigin
 import com.dashlane.autofill.accessibility.AutoFillAccessibilityViewNode
-import com.dashlane.autofill.api.ui.AutofillFeature
+import com.dashlane.autofill.ui.AutofillFeature
 import com.dashlane.autofill.formdetector.model.AccessibilityLoginForm
 import com.dashlane.autofill.formdetector.model.AutoFillViewNode
 import com.dashlane.hermes.generated.definitions.AutofillMechanism

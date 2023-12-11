@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.dashlane"
     android:installLocation="auto"
     android:targetSandboxVersion="2"
     tools:ignore="UnusedAttribute">
@@ -76,9 +75,11 @@
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
-
     <uses-feature
         android:name="android.hardware.usb.host"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="false" />
 
     <application
@@ -126,10 +127,6 @@
 
         
         <meta-data
-            android:name="io.sentry.dsn"
-/>
-        
-        <meta-data
             android:name="io.sentry.auto-init"
             android:value="false" />
 
@@ -166,18 +163,18 @@
             android:configChanges="keyboard|keyboardHidden"
             android:exported="false"
             android:label="@string/dashlane_main_app_name"
-            android:theme="@style/Theme.Dashlane.Login.LockedOut.TranslucentWindow"
+            android:theme="@style/Theme.Dashlane.Login.TranslucentWindow"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="com.dashlane.login.progress.LoginSyncProgressActivity"
             android:exported="false"
-            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+            android:theme="@style/Theme.Dashlane.Login" />
 
         <activity
             android:name="com.dashlane.login.settings.LoginSettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+            android:theme="@style/Theme.Dashlane.Login" />
 
         <activity
             android:name=".login.monobucket.MonobucketActivity"
@@ -197,7 +194,7 @@
 
         <activity
             android:name=".login.lock.OnboardingApplicationLockActivity"
-            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+            android:theme="@style/Theme.Dashlane.Login" />
         
 
         
@@ -205,7 +202,7 @@
             android:name="com.dashlane.createaccount.CreateAccountActivity"
             android:exported="false"
             android:label="@string/dashlane_main_app_name"
-            android:theme="@style/Theme.Dashlane.Login.LockedOut"
+            android:theme="@style/Theme.Dashlane.Login"
             android:windowSoftInputMode="adjustResize" />
 
 
@@ -297,6 +294,10 @@
             android:theme="@style/Theme.Dashlane.DialogWhenTablet"
             android:windowSoftInputMode="adjustResize" />
 
+        <activity
+            android:name=".collections.sharing.CollectionNewShareActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar" />
+
         
         <activity
             android:name=".attachment.ui.AttachmentListActivity"
@@ -358,10 +359,6 @@
         <receiver
             android:name=".notification.AutofillReceiver"
             android:permission="com.dashlane.notification.autofill.NOT_NOW" />
-
-        <receiver
-            android:name=".autofill.api.totp.services.AutofillApiTotpNotificationReceiver"
-            android:permission="com.dashlane.notification.autofillapi.TOTP_NOTIFICATION" />
 
         
         <receiver
@@ -435,12 +432,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:theme="@style/Theme.Dashlane.Modal" />
 
-        <activity
-            android:name=".plans.ui.view.PurchaseCheckingActivityLockedOut"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:theme="@style/Theme.Dashlane.LockedOut" />
-
-
         
         <activity android:name=".ui.activities.DisclaimerActivity" />
 
@@ -471,7 +462,7 @@
         
         <activity
             android:name=".login.sso.LoginSsoActivity"
-            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+            android:theme="@style/Theme.Dashlane.Login" />
 
         <activity
             android:name=".login.sso.migration.MigrationToSsoMemberIntroActivity"
@@ -479,7 +470,9 @@
 
         <activity
             android:name=".login.sso.migration.MigrationToSsoMemberActivity"
-            android:theme="@style/Theme.Dashlane.Login.LockedOut" />
+            android:theme="@style/Theme.Dashlane.Login" />
+
+        <activity android:name=".createaccount.passwordless.MplessAccountCreationActivity" />
 
         
         <service

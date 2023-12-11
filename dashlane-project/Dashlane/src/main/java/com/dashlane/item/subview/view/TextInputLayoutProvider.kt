@@ -14,6 +14,7 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.res.ResourcesCompat
 import com.dashlane.R
 import com.dashlane.listeners.edittext.NoLockEditTextWatcher
+import com.dashlane.login.lock.LockManager
 import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId
@@ -25,6 +26,7 @@ object TextInputLayoutProvider {
 
     fun create(
         context: Context,
+        lockManager: LockManager,
         header: String,
         value: String?,
         editable: Boolean = false,
@@ -56,7 +58,7 @@ object TextInputLayoutProvider {
             } else {
                 imeOptions = EditorInfo.IME_ACTION_NEXT
                 
-                addTextChangedListener(NoLockEditTextWatcher())
+                addTextChangedListener(NoLockEditTextWatcher(lockManager))
             }
         }
 

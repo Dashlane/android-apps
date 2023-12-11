@@ -12,6 +12,8 @@ interface SharingCenterViewModelContract {
     fun acceptItemGroup(invite: SharingContact.ItemInvite)
     fun declineUserGroup(userGroupId: String)
     fun acceptUserGroup(invite: SharingContact.UserGroupInvite)
+    fun declineCollection(collectionId: String)
+    fun acceptCollection(invite: SharingContact.CollectionInvite)
 
     fun reloadData()
 
@@ -21,11 +23,12 @@ interface SharingCenterViewModelContract {
         object Loading : UIState()
         object Empty : UIState()
         object RequestLoading : UIState()
-        object RequestSuccess : UIState()
+        class RequestSuccess(val acceptedItemName: String? = null) : UIState()
         object RequestFailure : UIState()
         data class Data(
             val itemInvites: List<SharingContact.ItemInvite> = emptyList(),
             val userGroupInvites: List<SharingContact.UserGroupInvite> = emptyList(),
+            val collectionInvites: List<SharingContact.CollectionInvite> = emptyList(),
             val users: List<SharingContact.User> = emptyList(),
             val userGroups: List<SharingContact.UserGroup> = emptyList()
         ) : UIState()

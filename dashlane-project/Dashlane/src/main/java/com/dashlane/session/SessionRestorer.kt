@@ -1,7 +1,7 @@
 package com.dashlane.session
 
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.async.BroadcastManager
+import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.authentication.accountsmanager.AccountsManager
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.authentication.login.AuthenticationDeviceRepository
@@ -46,7 +46,8 @@ class SessionRestorer @Inject constructor(
     private val authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
     private val accountsManager: AccountsManager,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val cryptoObjectHelper: CryptoObjectHelper
+    private val cryptoObjectHelper: CryptoObjectHelper,
+    private val syncBroadcastManager: SyncBroadcastManager
 ) {
     private val _job = Job()
 
@@ -130,25 +131,25 @@ class SessionRestorer @Inject constructor(
                 "Restoring session: Stored MP incorrect can not access local key repository",
                 logToUserSupportFile = true
             )
-            BroadcastManager.removeAllBufferedIntent()
+            syncBroadcastManager.removePasswordBroadcastIntent()
             _job.complete()
             return
         }.getOrThrow()
 
         when (
             sessionManager.loadSession(
-            username,
-            applicationPassword,
-            result.secretKey,
-            result.localKey,
-            loginMode = LoginMode.SessionRestore
-        )
+                username,
+                applicationPassword,
+                result.secretKey,
+                result.localKey,
+                loginMode = LoginMode.SessionRestore
+            )
         ) {
             is SessionResult.Error -> {
                     "Restoring session: Stored MP incorrect or session initialization failed",
                     logToUserSupportFile = true
                 )
-                BroadcastManager.removeAllBufferedIntent()
+                syncBroadcastManager.removePasswordBroadcastIntent()
             }
 
             is SessionResult.Success -> {

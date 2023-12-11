@@ -14,12 +14,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.tooling.DashlanePreview
 
 @Composable
 fun GenericCodeInputContent(
     modifier: Modifier = Modifier,
     text: String,
     login: String,
+    otp: String? = null,
     isLoading: Boolean,
     errorMessage: String?,
     isTokenError: Boolean,
@@ -50,6 +52,7 @@ fun GenericCodeInputContent(
         OtpInput(
             modifier = Modifier.padding(top = 16.dp),
             onOtpComplete = onOtpComplete,
+            otp = otp,
             isError = isTokenError,
             error = if (isTokenError) errorMessage else null
         )
@@ -77,7 +80,14 @@ fun GenericCodeInputContent(
 @Preview
 @Composable
 fun GenericCodeInputContentPreview() {
-    DashlaneTheme(darkTheme = true) {
-        OtpInput(onOtpComplete = { }, isError = true, error = "Error")
+    DashlanePreview {
+        GenericCodeInputContent(
+            text = "Title",
+            login = "randomemail@provider.com",
+            isLoading = true,
+            onOtpComplete = { },
+            isTokenError = true,
+            errorMessage = "Error",
+        )
     }
 }

@@ -1,7 +1,7 @@
 package com.dashlane.autofill.api
 
-import com.dashlane.autofill.api.changepassword.domain.AutofillUpdateAccountService
-import com.dashlane.autofill.api.changepassword.domain.CredentialUpdateInfo
+import com.dashlane.autofill.changepassword.domain.AutofillUpdateAccountService
+import com.dashlane.autofill.changepassword.domain.CredentialUpdateInfo
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
 import com.dashlane.core.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger

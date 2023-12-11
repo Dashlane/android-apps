@@ -1,5 +1,6 @@
 package com.dashlane.masterpassword
 
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.account.UserSecuritySettings
 import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
@@ -39,6 +40,8 @@ import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -46,8 +49,6 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 interface MasterPasswordChanger : ActivateTotpServerKeyChanger {
     val canChangeMasterPassword: Boolean
@@ -126,7 +127,10 @@ class MasterPasswordChangerImpl @Inject constructor(
     override val canChangeMasterPassword: Boolean
         get() {
             val session = sessionManager.session ?: return false
-            return userDatabaseRepository.isRacletteDatabaseAccessible(session)
+            
+            val accountType = sessionManager.session?.username?.let { username -> userAccountStorage[username]?.accountType }
+            return accountType != UserAccountInfo.AccountType.InvisibleMasterPassword &&
+                userDatabaseRepository.isRacletteDatabaseAccessible(session)
         }
 
     override var job: Job? = null
@@ -295,10 +299,13 @@ class MasterPasswordChangerImpl @Inject constructor(
                     progressStateFlow.value = when (it) {
                         SyncCryptoChanger.Progress.Downloading ->
                             MasterPasswordChanger.Progress.Downloading
+
                         is SyncCryptoChanger.Progress.Ciphering ->
                             it.toMasterPasswordChangerProgress()
+
                         SyncCryptoChanger.Progress.Uploading ->
                             MasterPasswordChanger.Progress.Uploading
+
                         is SyncCryptoChanger.Progress.Completed ->
                             MasterPasswordChanger.Progress.Confirmation
                     }

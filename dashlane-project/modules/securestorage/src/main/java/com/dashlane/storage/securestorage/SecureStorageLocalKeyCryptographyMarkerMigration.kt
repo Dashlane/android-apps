@@ -17,8 +17,7 @@ import javax.inject.Inject
 class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
     private val secureDataStorageFactory: SecureDataStorage.Factory,
     private val cryptography: Cryptography,
-    private val saltGenerator: SaltGenerator,
-    private val logger: CryptographyMigrationLogger
+    private val saltGenerator: SaltGenerator
 ) {
     fun migrateLocalKeyIfNeeded(
         session: Session,
@@ -33,9 +32,6 @@ class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
         
         if (currentMarker == cryptographyMarker) return
 
-        logger.logChangeDetected(currentMarker, cryptographyMarker)
-        logger.logStart(currentMarker, cryptographyMarker)
-
         val cipheredLocalKeyUpdatedMarker = session.appKey.use { key ->
             createEncryptionEngine(key, cryptographyMarker).use { encryptionEngine ->
                 CryptographyChanger(createDecryptionEngine(key), encryptionEngine).use { cryptographyChanger ->
@@ -44,7 +40,6 @@ class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
             }
         }
         secureDataStorage.write(SecureDataKey.LOCAL_KEY, cipheredLocalKeyUpdatedMarker)
-        logger.logSuccess(currentMarker, cryptographyMarker)
     }
 
     private fun createEncryptionEngine(
