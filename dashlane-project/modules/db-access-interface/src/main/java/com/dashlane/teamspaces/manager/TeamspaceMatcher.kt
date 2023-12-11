@@ -53,33 +53,36 @@ object TeamspaceMatcher {
     @JvmField
     val DATA_TYPE_TO_MATCH = listOf(
         SyncObjectType.AUTHENTIFIANT,
-        SyncObjectType.EMAIL
+        SyncObjectType.EMAIL,
+        SyncObjectType.PASSKEY
     )
 }
 
 fun SummaryObject.matchForceDomains(domains: List<String>): Boolean {
-    when (this) {
-        is SummaryObject.Authentifiant -> {
-            domains.forEach { domain ->
-                if (this.email?.contains(domain, ignoreCase = true) == true) return true
-                if (this.login?.contains(domain, ignoreCase = true) == true) return true
-                if (this.userSelectedUrl?.contains(domain, ignoreCase = true) == true) return true
-                if (this.url?.contains(domain, ignoreCase = true) == true) return true
-                if (this.secondaryLogin?.contains(domain, ignoreCase = true) == true) return true
-                if (this.linkedServices?.associatedDomains?.any {
-                        it.domain.contains(domain, ignoreCase = true)
-                    } == true
-                ) {
-                        return true
-                    }
-            }
-        }
-        is SummaryObject.Email -> {
-            domains.forEach { domain ->
-                if (this.email?.contains(domain, ignoreCase = true) == true) return true
-            }
-        }
-        else -> return false
+    return when (this) {
+        is SummaryObject.Authentifiant -> domains.any { domain -> isAuthentifiantMatchingDomain(this, domain) }
+        is SummaryObject.Email -> domains.any { domain -> isEmailMatchingDomain(this, domain) }
+        is SummaryObject.Passkey -> domains.any { domain -> isPasskeyMatchingDomain(this, domain) }
+        else -> false
     }
-    return false
+}
+
+private fun isAuthentifiantMatchingDomain(authentifiant: SummaryObject.Authentifiant, domain: String): Boolean {
+    return authentifiant.email?.contains(domain, ignoreCase = true) == true ||
+        authentifiant.login?.contains(domain, ignoreCase = true) == true ||
+        authentifiant.userSelectedUrl?.contains(domain, ignoreCase = true) == true ||
+        authentifiant.url?.contains(domain, ignoreCase = true) == true ||
+        authentifiant.secondaryLogin?.contains(domain, ignoreCase = true) == true ||
+        authentifiant.linkedServices?.associatedDomains?.any {
+            it.domain.contains(domain, ignoreCase = true)
+        } == true
+}
+
+private fun isEmailMatchingDomain(email: SummaryObject.Email, domain: String): Boolean {
+    return email.email?.contains(domain, ignoreCase = true) == true
+}
+
+private fun isPasskeyMatchingDomain(passkey: SummaryObject.Passkey, domain: String): Boolean {
+    return passkey.rpId?.contains(domain, ignoreCase = true) == true ||
+        passkey.userDisplayName?.contains(domain, ignoreCase = true) == true
 }

@@ -2,67 +2,54 @@ package com.dashlane.premium.current
 
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.events.user.CallToAction
 import com.dashlane.premium.current.model.CurrentPlan
-import com.dashlane.util.setCurrentPageView
-import com.skocken.presentation.definition.Base
+import javax.inject.Inject
 import com.dashlane.hermes.generated.definitions.CallToAction as CallToActionValue
 
-class CurrentPlanLogger(
+class CurrentPlanLogger @Inject constructor(
     private val logRepository: LogRepository
 ) {
-    private lateinit var presenter: Base.IPresenter
-    private lateinit var recommendedActions: List<CallToActionValue>
-    private var hasChosenAction = false
 
-    internal fun initPresenter(presenter: Base.IPresenter) {
-        this.presenter = presenter
-    }
-
-    internal fun showCurrentPlan(primaryAction: CurrentPlan.Action, secondaryAction: CurrentPlan.Action?) {
-        hasChosenAction = false
-        presenter.setCurrentPageView(page = AnyPage.CURRENT_PLAN, fromAutofill = false)
-        recommendedActions = listOfNotNull(
-            primaryAction.type.toCallToActionValue().first,
-            secondaryAction?.type?.toCallToActionValue()?.first
-        )
+    internal fun showCurrentPlan() {
+        logRepository.queuePageView(component = BrowseComponent.MAIN_APP, page = AnyPage.CURRENT_PLAN)
     }
 
     internal fun showDwmInfo() {
-        presenter.setCurrentPageView(page = AnyPage.CURRENT_PLAN_DWM_LEARN_MORE, fromAutofill = false)
+        logRepository.queuePageView(component = BrowseComponent.MAIN_APP, page = AnyPage.CURRENT_PLAN_DWM_LEARN_MORE)
     }
 
     internal fun closeDwmInfo() {
-        presenter.setCurrentPageView(page = AnyPage.CURRENT_PLAN, fromAutofill = false)
+        showCurrentPlan()
     }
 
-    internal fun onActionClicked(actionType: CurrentPlan.Action.Type) {
-        val (chosenAction, hasChosenNoAction) = actionType.toCallToActionValue()
-        this.hasChosenAction = !hasChosenNoAction
+    internal fun onActionClicked(
+        actionType: CurrentPlan.Action.Type,
+        recommendedActions: List<CurrentPlan.Action.Type>
+    ) {
         logRepository.queueEvent(
             CallToAction(
-                callToActionList = recommendedActions,
-                hasChosenNoAction = hasChosenNoAction,
-                chosenAction = chosenAction
+                callToActionList = recommendedActions.mapNotNull { it.toCallToActionValue() },
+                hasChosenNoAction = false,
+                chosenAction = actionType.toCallToActionValue()
             )
         )
     }
 
-    internal fun onCurrentPlanFinishing() {
-        if (!hasChosenAction) {
-            logRepository.queueEvent(
-                CallToAction(
-                    callToActionList = recommendedActions,
-                    hasChosenNoAction = true,
-                )
+    internal fun onCancel(recommendedActions: List<CurrentPlan.Action.Type>) {
+        logRepository.queueEvent(
+            CallToAction(
+                callToActionList = recommendedActions.mapNotNull { it.toCallToActionValue() },
+                hasChosenNoAction = true,
             )
-        }
+        )
     }
 
     private fun CurrentPlan.Action.Type.toCallToActionValue() = when (this) {
-        CurrentPlan.Action.Type.ALL_PLANS -> CallToActionValue.ALL_OFFERS to false
-        CurrentPlan.Action.Type.PREMIUM -> CallToActionValue.PREMIUM_OFFER to false
-        CurrentPlan.Action.Type.FAMILY -> CallToActionValue.FAMILY_OFFER to false
-        CurrentPlan.Action.Type.CLOSE -> null to true
+        CurrentPlan.Action.Type.ALL_PLANS -> CallToActionValue.ALL_OFFERS
+        CurrentPlan.Action.Type.PREMIUM -> CallToActionValue.PREMIUM_OFFER
+        CurrentPlan.Action.Type.FAMILY -> CallToActionValue.FAMILY_OFFER
+        CurrentPlan.Action.Type.CLOSE -> null
     }
 }

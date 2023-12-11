@@ -13,12 +13,13 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwnerKt;
 
 import com.dashlane.R;
+import com.dashlane.announcements.AnnouncementCenter;
 import com.dashlane.attachment.AttachmentListContract;
 import com.dashlane.attachment.AttachmentListDataProvider;
 import com.dashlane.attachment.VaultItemLogAttachmentHelper;
 import com.dashlane.core.DataSync;
-import com.dashlane.dagger.singleton.SingletonProvider;
 import com.dashlane.lock.LockHelper;
+import com.dashlane.permission.PermissionsManager;
 import com.dashlane.securefile.DeleteFileManager;
 import com.dashlane.securefile.DownloadFileContract;
 import com.dashlane.securefile.UploadFileContract;
@@ -27,7 +28,7 @@ import com.dashlane.session.SessionManager;
 import com.dashlane.storage.userdata.accessor.MainDataAccessor;
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter;
 import com.dashlane.ui.activities.DashlaneActivity;
-import com.dashlane.util.usagelogs.ViewLogger;
+import com.dashlane.util.userfeatures.UserFeaturesChecker;
 import com.dashlane.vault.VaultItemLogger;
 import com.dashlane.vault.model.VaultItem;
 import com.dashlane.xml.domain.SyncObjectType;
@@ -73,7 +74,14 @@ public class AttachmentListActivity extends DashlaneActivity {
     DeleteFileManager deleteFileManager;
 
     @Inject
-    ViewLogger mViewLogger;
+    PermissionsManager mPermissionsManager;
+
+    @Inject
+    UserFeaturesChecker mUserFeaturesChecker;
+
+    @Inject
+    AnnouncementCenter mAnnouncementCenter;
+
     AttachmentListContract.DataProvider mAttachmentListProvider;
 
     private AttachmentListPresenter mAttachmentListPresenter;
@@ -153,7 +161,7 @@ public class AttachmentListActivity extends DashlaneActivity {
         ActivityResultLauncher<Unit> openDocumentResultLauncher =
                 registerForActivityResult(new OpenDocumentResultContract(), this::onOpenDocumentResult);
         mUploadAttachmentsPresenter =
-                new UploadAttachmentsPresenter(SingletonProvider.getUserFeatureChecker(), lockHelper,
+                new UploadAttachmentsPresenter(mUserFeaturesChecker, lockHelper,
                         LifecycleOwnerKt.getLifecycleScope(this),
                         mSessionManager,
                         vaultItemLogAttachmentHelper,
@@ -172,7 +180,7 @@ public class AttachmentListActivity extends DashlaneActivity {
                 new AttachmentListPresenter(LifecycleOwnerKt.getLifecycleScope(this), actionBarColor,
                         mUploadAttachmentsPresenter,
                         downloadPresenter, deleteFileManager, lockHelper,
-                        SingletonProvider.getPermissionsManager(),
+                        mPermissionsManager,
                         vaultItemLogAttachmentHelper);
         mAttachmentListPresenter.setAttachmentListUpdated(isAttachmentListUpdated);
         mAttachmentListPresenter.setProvider(mAttachmentListProvider);
@@ -180,14 +188,12 @@ public class AttachmentListActivity extends DashlaneActivity {
         mAttachmentListPresenter.onCreate();
 
         
-        SingletonProvider.getAnnouncementCenter().disable();
+        mAnnouncementCenter.disable();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mViewLogger.log("AttachmentListActivity");
-
         if (!getApplicationLocked()) {
             mAttachmentListPresenter.onResume();
         }
@@ -209,7 +215,7 @@ public class AttachmentListActivity extends DashlaneActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (isFinishing()) {
-            SingletonProvider.getAnnouncementCenter().restorePreviousState();
+            mAnnouncementCenter.restorePreviousState();
         }
     }
 

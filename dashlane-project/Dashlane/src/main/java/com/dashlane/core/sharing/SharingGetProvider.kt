@@ -14,10 +14,11 @@ class SharingGetProvider @Inject constructor(
     ): SharingSyncCommunicator.GetSharingResult {
         if (idsToRequest.isEmpty) {
             return SharingSyncCommunicator.GetSharingResult(
-            emptyList(),
-            emptyList(),
-            emptyList()
-        )
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList()
+            )
         }
         val result: List<SharingSyncCommunicator.GetSharingResult> =
             idsToRequest.chunked().map {
@@ -25,13 +26,23 @@ class SharingGetProvider @Inject constructor(
                     session,
                     itemUids = it.items,
                     itemGroupUids = it.itemGroups,
-                    userGroupUids = it.userGroups
+                    userGroupUids = it.userGroups,
+                    collectionUids = it.collections
                 )
             }
+        if (result.isEmpty()) {
+            return SharingSyncCommunicator.GetSharingResult(
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList()
+            )
+        }
         return result.reduce { acc, e ->
             acc.copy(
                 itemGroups = acc.itemGroups + e.itemGroups,
                 userGroups = acc.userGroups + e.userGroups,
+                collections = acc.collections + e.collections,
                 itemContents = acc.itemContents + e.itemContents
             )
         }

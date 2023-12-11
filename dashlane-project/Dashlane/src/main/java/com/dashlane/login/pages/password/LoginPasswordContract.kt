@@ -73,8 +73,6 @@ interface LoginPasswordContract {
         fun getAccountRecoveryKeyIntent(): Intent?
 
         fun onPromptBiometricForRecovery()
-
-        fun onGoToChangeMP()
     }
 
     class SuccessfulLogin(val intent: Intent?)

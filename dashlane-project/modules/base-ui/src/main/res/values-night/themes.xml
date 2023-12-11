@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Dashlane.LockedOut" parent="Theme.Dashlane.NoActionBar.PrimaryBackground" />
-
     <style name="Base.Theme.Dashlane.DayNight" parent="Theme.Material3.DayNight">
         
         <item name="colorPrimary">@color/brand_impala_dark_teal_00</item>
@@ -10,10 +8,8 @@
         <item name="colorSecondary">@color/brand_impala_teal_01</item>
 
         <item name="colorOnPrimary">@color/brand_white</item>
-        <item name="colorAccentOnPrimary">@color/text_inverse_catchy</item>
         <item name="colorOnSecondary">@color/brand_white</item>
         <item name="colorOnBackground">@color/brand_white</item>
-        <item name="colorOnBackgroundMedium">@color/text_inverse_quiet</item>
     </style>
 
     <style name="Theme.Dashlane.DeviceDefault.Dialog.Alert.DayNight" parent="@android:style/Theme.DeviceDefault.Dialog.Alert" />

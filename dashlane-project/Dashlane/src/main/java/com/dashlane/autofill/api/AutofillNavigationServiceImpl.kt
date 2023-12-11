@@ -7,9 +7,9 @@ import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.IntentSender
-import com.dashlane.autofill.api.pausedautofillsettings.PausedAutofillActivity
-import com.dashlane.autofill.api.util.AutofillNavigationService
-import com.dashlane.autofill.api.util.AutofillNavigationService.Companion.REQUEST_KEYBOARD_AUTOFILL_ON_BOARDING
+import com.dashlane.autofill.pausedautofillsettings.PausedAutofillActivity
+import com.dashlane.autofill.util.AutofillNavigationService
+import com.dashlane.autofill.util.AutofillNavigationService.Companion.REQUEST_KEYBOARD_AUTOFILL_ON_BOARDING
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
@@ -22,18 +22,6 @@ import javax.inject.Inject
 class AutofillNavigationServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : AutofillNavigationService {
-    override fun navigateToPlansPage(activity: Activity, origin: String) {
-        activity.startActivity(
-            Intent(
-                ACTION_VIEW,
-                NavigationUriBuilder()
-                    .host(NavigationHelper.Destination.MainPath.GET_PREMIUM)
-                    .origin(origin)
-                    .appendPath(NavigationHelper.Destination.SecondaryPath.GetPremium.ESSENTIALS_OFFER)
-                    .build()
-            )
-        )
-    }
 
     override fun navigateToAutofillSettings(activity: Activity, startAsNewTask: Boolean) {
         activity.startActivity(
@@ -42,7 +30,6 @@ class AutofillNavigationServiceImpl @Inject constructor(
                 NavigationUriBuilder()
                     .host(NavigationHelper.Destination.MainPath.SETTINGS)
                     .appendPath(NavigationHelper.Destination.SecondaryPath.SettingsPath.GENERAL)
-                    .origin(AutofillNavigationService.ORIGIN_OS_SETTINGS)
                     .build()
             ).apply {
                 if (startAsNewTask) {
@@ -58,7 +45,6 @@ class AutofillNavigationServiceImpl @Inject constructor(
                 ACTION_VIEW,
                 NavigationUriBuilder()
                     .host(NavigationHelper.Destination.MainPath.PASSWORDS)
-                    .origin(AutofillNavigationService.ORIGIN_OS_SETTINGS)
                     .build()
             ).apply {
                 if (startAsNewTask) {
@@ -70,10 +56,9 @@ class AutofillNavigationServiceImpl @Inject constructor(
 
     override fun navigateToPausedAutofillSection(
         activity: Activity,
-        autofillFormSource: AutoFillFormSource,
-        origin: String
+        autofillFormSource: AutoFillFormSource
     ) {
-        activity.startActivity(PausedAutofillActivity.newIntent(context, autofillFormSource, origin))
+        activity.startActivity(PausedAutofillActivity.newIntent(context, autofillFormSource))
     }
 
     override fun getLongPressActionOnInline(): PendingIntent {

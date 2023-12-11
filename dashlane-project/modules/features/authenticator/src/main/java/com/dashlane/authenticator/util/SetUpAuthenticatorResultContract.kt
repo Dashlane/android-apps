@@ -152,7 +152,6 @@ class SetUpAuthenticatorResultContract : ActivityResultContract<Unit?, Otp?>() {
                 input ?: return@registerForActivityResult
                 if (input.itemId == null) {
                     navigator.goToCreateAuthentifiant(
-                        sender = null,
                         url = input.domain ?: "",
                         otp = input.otp
                     )

@@ -5,11 +5,12 @@ import com.dashlane.R
 import com.dashlane.search.MatchedSearchResult
 import com.dashlane.search.SearchableSettingItem
 import com.dashlane.ui.activities.fragments.list.ItemWrapperOneColViewHolder
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.activities.fragments.list.wrapper.toItemWrapper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.adapters.text.factory.SearchListTextResolver
 import com.dashlane.ui.screens.fragments.search.SearchRequest
 import com.dashlane.ui.screens.settings.SearchableSettingInRecyclerView
 import com.dashlane.vault.summary.SummaryObject
@@ -26,7 +27,9 @@ object SearchListViewHelper {
         context: Context,
         items: List<MatchedSearchResult>,
         request: SearchRequest,
-        query: String?
+        query: String?,
+        searchListTextResolver: SearchListTextResolver,
+        itemWrapperProvider: ItemWrapperProvider
     ): List<DashlaneRecyclerAdapter.ViewTypeProvider> {
         val list: MutableList<DashlaneRecyclerAdapter.ViewTypeProvider> = ArrayList()
         val resultCount = items.size
@@ -42,7 +45,9 @@ object SearchListViewHelper {
                 context,
                 matchResult,
                 baseListContext.copy(i, resultCount),
-                query
+                query,
+                searchListTextResolver = searchListTextResolver,
+                itemWrapperProvider = itemWrapperProvider
             )?.let { itemToAdd ->
                 list.add(itemToAdd)
             }
@@ -66,12 +71,14 @@ object SearchListViewHelper {
         context: Context,
         matchResult: MatchedSearchResult,
         container: ItemListContext,
-        query: String?
+        query: String?,
+        searchListTextResolver: SearchListTextResolver,
+        itemWrapperProvider: ItemWrapperProvider
     ): DashlaneRecyclerAdapter.ViewTypeProvider? {
         val item = matchResult.item
         if (item is SummaryObject) {
-            val baseItemWrapper = item.toItemWrapper(container) ?: return null
-            val itemWrapper = SearchItemWrapper(matchResult, query, baseItemWrapper)
+            val baseItemWrapper = itemWrapperProvider(item, container) ?: return null
+            val itemWrapper = SearchItemWrapper(matchResult, query, searchListTextResolver, baseItemWrapper)
 
             itemWrapper.setViewType(viewType)
             itemWrapper.allowTeamspaceIcon = true

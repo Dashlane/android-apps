@@ -16,7 +16,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class TokenChecker(private val getTokenService: GetTokenService) {
+class TokenChecker(
+    private val getTokenService: GetTokenService,
+    private val tokenNotificationHandler: TokenNotificationHandler
+) {
 
     fun checkAndDisplayTokenIfNeeded(activity: DashlaneActivity, username: String, uki: String) {
         activity.lifecycleScope.launch(Dispatchers.Main) {
@@ -35,9 +38,9 @@ class TokenChecker(private val getTokenService: GetTokenService) {
 
     private suspend fun retrieveToken(username: String, uki: String): String? = withContext(Dispatchers.Default) {
         
-        val lastToken = TokenNotificationHandler.getLastTokenForCurrentUser()
+        val lastToken = tokenNotificationHandler.lastTokenForCurrentUser
         if (lastToken.isNotSemanticallyNull()) {
-            TokenNotificationHandler.removeSavedToken()
+            tokenNotificationHandler.removeSavedToken()
             lastToken
         } else {
             val currentToken = Constants.GCM.Token[username]

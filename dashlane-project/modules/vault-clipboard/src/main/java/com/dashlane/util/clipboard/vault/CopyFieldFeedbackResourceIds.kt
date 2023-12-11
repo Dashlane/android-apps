@@ -5,7 +5,7 @@ import com.dashlane.util.clipboard.R
 @SuppressWarnings("kotlin:S1479")
 fun CopyField.getFeedback() = when (this) {
     CopyField.Password -> R.string.feedback_copy_password
-    CopyField.Login -> R.string.feedback_copy_login
+    CopyField.Login, CopyField.PasskeyDisplayName -> R.string.feedback_copy_login
     CopyField.Email -> R.string.feedback_copy_email
     CopyField.SecondaryLogin -> R.string.feedback_copy_secondary_login
     CopyField.PaymentsNumber -> R.string.feedback_copy_payments_number
@@ -23,15 +23,20 @@ fun CopyField.getFeedback() = when (this) {
     CopyField.Address -> R.string.feedback_copy_address
     CopyField.City -> R.string.feedback_copy_city
     CopyField.ZipCode -> R.string.feedback_copy_zip_code
+    CopyField.FullName -> R.string.feedback_copy_name_holder
+    CopyField.IdsLinkedIdentity -> R.string.feedback_copy_name_holder
     CopyField.IdsNumber -> R.string.feedback_copy_ids_number
     CopyField.IdsIssueDate -> R.string.feedback_copy_ids_issue_date
     CopyField.IdsExpirationDate -> R.string.feedback_copy_ids_expiration_date
     CopyField.PassportNumber -> R.string.feedback_copy_passport_number
+    CopyField.PassportLinkedIdentity -> R.string.feedback_copy_name_holder
     CopyField.PassportIssueDate -> R.string.feedback_copy_passport_issue_date
     CopyField.PassportExpirationDate -> R.string.feedback_copy_passport_expiration_date
+    CopyField.DriverLicenseLinkedIdentity -> R.string.feedback_copy_name_holder
     CopyField.DriverLicenseNumber -> R.string.feedback_copy_driverlicense_number
     CopyField.DriverLicenseIssueDate -> R.string.feedback_copy_driverlicense_issue_date
     CopyField.DriverLicenseExpirationDate -> R.string.feedback_copy_driverlicense_expiration_date
+    CopyField.SocialSecurityLinkedIdentity -> R.string.feedback_copy_name_holder
     CopyField.SocialSecurityNumber -> R.string.feedback_copy_social_security_number
     CopyField.TaxNumber -> R.string.feedback_copy_fiscal_number
     CopyField.JustEmail -> R.string.feedback_copy_just_email

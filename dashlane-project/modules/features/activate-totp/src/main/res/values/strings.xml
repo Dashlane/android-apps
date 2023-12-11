@@ -100,7 +100,7 @@
     
     <string name="disable_totp_enter_token_recovery_dialog_backup_hint">Enter a recovery code</string>
     
-    <string name="disable_totp_enter_token_recovery_dialog_backup_error">Incorrect recovery code</string>
+    <string name="disable_totp_enter_token_recovery_dialog_backup_error">This recovery code isn’t right. Please check it and try again.</string>
     
     <string name="disable_totp_enter_token_recovery_dialog_phone_description">We\'ll send a text message with two recovery codes to the phone number associated with this account.</string>
     
@@ -109,10 +109,6 @@
     <string name="disable_totp_enter_token_recovery_dialog_phone_button_negative">Cancel</string>
     
     <string name="disable_totp_enter_token_recovery_dialog_phone_backup_description">Enter one of the recovery codes you received by text message.</string>
-    
-    <string name="disable_totp_enter_token_recovery_dialog_phone_backup_button_positive">Turn off 2FA</string>
-    
-    <string name="disable_totp_enter_token_recovery_dialog_phone_backup_button_negative">Cancel</string>
     <string name="disable_totp_enter_token_cta">Next</string>
 
     
@@ -125,9 +121,9 @@
     <string name="disable_totp_deactivation_message_complete">2FA is turned off</string>
 
     
-    <string name="disable_totp_enforced_intro_title">Temporarily turn off 2FA?</string>
+    <string name="disable_totp_enforced_intro_title">Temporarily turn off 2FA</string>
     
-    <string name="disable_totp_enforced_intro_description">Your admin requires 2FA. If you need to update your 2FA preferences, you’ll need to turn off then re-setup 2FA.\n\nWhile 2FA is off, you won’t be able to access your vault.</string>
+    <string name="disable_totp_enforced_intro_description">Your admin requires 2FA. While it’s turned off, you won’t be able to access your vault.\n\nIf you need to update your 2FA preferences, turn off 2FA. You’ll start the setup process again right away.</string>
     
     <string name="disable_totp_enforced_intro_cta_positive">Continue</string>
     

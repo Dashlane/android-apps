@@ -8,7 +8,6 @@ import com.dashlane.network.webservices.VerifyReceiptService
 import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -70,36 +69,20 @@ class BillingVerification @Inject constructor(
             logger.logVerifyingReceiptStart(planId)
             verifyReceipt(purchase, currency, price, session.userId, session.uki)
         }.getOrElse {
-            UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.errorAfterPurchase)
             errorListener.invoke()
             null
         }
         refreshPremiumAfterPurchase.execute(errorListener)
         if (verifyReceipt?.success != true) {
-            UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.receiptFailedValidation)
             errorListener.invoke()
             return
         }
         logger.logVerifyingReceiptSuccess(planId)
         if (verifyReceipt.isRenewable) {
-            UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.appTryingToAcknowledgePurchase, planId)
-            when (val acknowledgeResult = acknowledge(purchase)) {
-                is ServiceResult.Success ->
-                    UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.acknowledgementSuccess)
-                is ServiceResult.Failure ->
-                    UsageLogCode35GoPremium.send(
-                        UsageLogConstant.PremiumAction.acknowledgementFailure,
-                        acknowledgeResult.name
-                    )
-            }
+            acknowledge(purchase)
         } else {
-            UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.appTryingToConsumePurchase, planId)
             consume(purchase)
         }
-        UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.confirmPurchase)
-        UsageLogCode35GoPremium.send(
-            UsageLogConstant.PremiumAction.purchasedSuccessfulPremiumStatusNotCheckedYet
-        )
     }
 
     private suspend fun consume(purchase: Purchase) {
@@ -116,7 +99,6 @@ class BillingVerification @Inject constructor(
         userName: String,
         uki: String
     ): VerifyReceiptService.VerifyReceiptResponse {
-        UsageLogCode35GoPremium.send(UsageLogConstant.PremiumAction.appTryingToValidateReceipt)
         val purchaseToken = purchase.purchaseToken
         return verifyReceiptService.verifyReceipt(
             login = userName,

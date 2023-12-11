@@ -18,7 +18,6 @@ import javax.inject.Inject
 class NotificationCenterDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
     private val repository: NotificationCenterRepository,
-    private val logger: NotificationCenterLogger,
     private val notificationBadgeActor: NotificationBadgeActor,
     private val breachLoader: BreachLoader,
     private val appEvents: AppEvents
@@ -30,15 +29,10 @@ class NotificationCenterDataProvider @Inject constructor(
     override val session: Session?
         get() = sessionManager.session
 
-    override suspend fun loadAll(): List<NotificationItem> =
-        repository.loadAll().onEach { actionItem ->
-            logger.logActionItemShow(actionItem.type.trackingKey)
-        }
+    override suspend fun loadAll(): List<NotificationItem> = repository.loadAll()
 
     override suspend fun load(section: ActionItemSection): List<NotificationItem> =
-        repository.load(section).onEach { actionItem ->
-            logger.logActionItemShow(actionItem.type.trackingKey)
-        }
+        repository.load(section)
 
     override fun markAsRead(list: List<NotificationItem>) {
         list.forEach { item ->

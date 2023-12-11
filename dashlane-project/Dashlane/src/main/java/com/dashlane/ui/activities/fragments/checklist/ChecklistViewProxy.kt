@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.WindowManager
 import androidx.core.content.getSystemService
 import androidx.lifecycle.Lifecycle
@@ -13,17 +12,21 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.dashlane.R
+import com.dashlane.databinding.FragmentChecklistBinding
+import com.dashlane.navigation.Navigator
+import com.dashlane.ui.M2xIntentFactory
 import com.dashlane.ui.activities.fragments.checklist.ChecklistViewSetup.setupView
-import com.dashlane.ui.widgets.view.ChecklistGroup
 import kotlinx.coroutines.launch
 
 class ChecklistViewProxy(
     private val viewModel: ChecklistViewModelContract,
-    private val rootView: View,
-    private val lifecycle: Lifecycle
+    private val binding: FragmentChecklistBinding,
+    private val lifecycle: Lifecycle,
+    private val navigator: Navigator,
+    private val m2xIntentFactory: M2xIntentFactory
 ) {
     private val context
-        get() = rootView.context
+        get() = binding.root.context
 
     init {
         lifecycle.coroutineScope.launch {
@@ -36,8 +39,18 @@ class ChecklistViewProxy(
     }
 
     private fun setChecklist(checklistData: ChecklistData?) {
-        val checklistGroup = rootView.findViewById<ChecklistGroup>(R.id.checklist_group)
-        setupView(checklistGroup!!, checklistData, ::onDismiss)
+        setupView(
+            getStartedBinding = binding.checklistGroup,
+            item = checklistData,
+            onDismiss = ::onDismiss,
+            onImportPasswords = { navigator.goToCredentialAddStep1(expandImportOptions = true) },
+            onActivateAutofill = { navigator.goToInAppLoginIntro() },
+            onShowM2d = {
+                val m2xIntent = m2xIntentFactory.buildM2xConnect()
+                context.startActivity(m2xIntent)
+            },
+            onShowDarkWebMonitoring = { navigator.goToDarkWebMonitoring() }
+        )
     }
 
     private fun onDismiss() {

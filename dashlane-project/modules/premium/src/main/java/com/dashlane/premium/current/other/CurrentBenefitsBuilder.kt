@@ -2,7 +2,7 @@ package com.dashlane.premium.current.other
 
 import androidx.annotation.VisibleForTesting
 import com.dashlane.premium.R
-import com.dashlane.premium.current.CurrentPlanContract
+import com.dashlane.premium.current.CurrentPlanViewModel
 import com.dashlane.premium.current.model.CurrentPlan
 import com.dashlane.ui.model.TextResource
 import com.dashlane.ui.model.TextResource.Arg
@@ -29,7 +29,7 @@ internal class CurrentBenefitsBuilder(
         getPremiumPlus()?.withAction(null)
     )
 
-    private fun TextResource.withAction(action: (CurrentPlanContract.Presenter.() -> Unit)?) =
+    private fun TextResource.withAction(action: (CurrentPlanViewModel.() -> Unit)?) =
         CurrentPlan.Benefit(textResource = this, action = action)
 
     private fun getStoringPasswordLimit() = TextResource.StringText(R.string.current_benefit_passwords_unlimited)

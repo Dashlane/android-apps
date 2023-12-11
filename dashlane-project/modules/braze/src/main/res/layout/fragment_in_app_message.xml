@@ -9,45 +9,68 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:minWidth="280dp"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/spacing_big">
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/dialog_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="fill"
-            android:importantForAccessibility="no" />
+            android:importantForAccessibility="no"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/dialog_title"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/spacing_big"
-            android:layout_marginTop="@dimen/spacing_normal"
-            android:textAppearance="?textAppearanceHeadline6"
-            android:textColor="@color/text_neutral_catchy"
-            tools:text="This is a title" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginHorizontal="@dimen/spacing_normal"
+            android:minWidth="280dp"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/spacing_big">
 
-        <TextView
-            android:id="@+id/dialog_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/spacing_big"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:lineSpacingExtra="@dimen/spacing_extra_small"
-            android:textAppearance="?textAppearanceSubtitle1"
-            tools:text="This is a test message. Keep up the Good work" />
 
-        <com.dashlane.ui.activities.intro.IntroButtonBarLayout
-            android:id="@+id/buttons_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/spacing_big"
-            android:layout_marginTop="@dimen/spacing_normal"
-            android:gravity="end">
+            <TextView
+                android:id="@+id/dialog_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_small"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:textAppearance="?textAppearanceHeadline6"
+                android:textColor="@color/text_neutral_catchy"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="This is a title" />
+
+            <TextView
+                android:id="@+id/dialog_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_small"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:lineSpacingExtra="@dimen/spacing_extra_small"
+                android:textAppearance="?textAppearanceSubtitle1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dialog_title"
+                tools:text="This is a test message. Keep up the Good work" />
+
+            <androidx.constraintlayout.helper.widget.Flow
+                android:id="@+id/flow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_normal"
+                app:constraint_referenced_ids="dialog_negative_button,dialog_positive_button"
+                app:flow_horizontalBias="1"
+                app:flow_horizontalGap="@dimen/spacing_small"
+                app:flow_horizontalStyle="packed"
+                app:flow_wrapMode="chain"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/dialog_text" />
 
             <com.dashlane.design.component.compat.view.ButtonMediumView
                 android:id="@+id/dialog_negative_button"
@@ -58,18 +81,16 @@
                 app:intensity="quiet"
                 app:mood="brand"
                 tools:enabled="true"
-                tools:text="Close"
+                tools:text="This is a very very long text button"
                 tools:visibility="visible" />
 
             <com.dashlane.design.component.compat.view.ButtonMediumView
                 android:id="@+id/dialog_positive_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_normal"
-                android:layout_marginLeft="@dimen/spacing_normal"
                 app:intensity="catchy"
                 app:mood="brand"
                 tools:text="Go Premium" />
-        </com.dashlane.ui.activities.intro.IntroButtonBarLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 </ScrollView>

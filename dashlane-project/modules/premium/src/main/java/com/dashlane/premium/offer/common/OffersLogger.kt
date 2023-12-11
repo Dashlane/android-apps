@@ -9,7 +9,7 @@ interface OffersLogger {
 
     var origin: String?
 
-    val currentPageViewFlow: Flow<Pair<AnyPage, Boolean>>
+    val currentPageViewFlow: Flow<AnyPage>
 
     fun showOfferList(productPeriodicity: ProductPeriodicity?, displayedOffers: List<OfferType>, hasIntroOffers: Boolean)
 

@@ -46,7 +46,7 @@
     <string name="and_accessibility_open_drawer_description">Open navigation drawer</string>
     <string name="and_accessibility_delete_website_url">Remove this website url</string>
     
-    <string name="and_accessibility_delete_linked_app">Remove this linked application</string>
+    <string name="and_accessibility_delete_linked_app">Unlink application</string>
     
     <string name="and_accessibility_open_linked_app">Open application</string>
     
@@ -55,4 +55,10 @@
     <string name="and_accessibility_secret_transfer_qrcode">Scan QR Code</string>
     
     <string name="and_accessibility_secret_transfer_success">Success</string>
+    
+    <string name="and_accessibility_text_edit_reveal">Reveal</string>
+    
+    <string name="and_accessibility_text_edit_hide">Hide</string>
+    
+    <string name="and_accessibility_action_text_clear">Clear</string>
 </resources>

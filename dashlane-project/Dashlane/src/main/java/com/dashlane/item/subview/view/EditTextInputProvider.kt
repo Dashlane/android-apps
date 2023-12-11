@@ -8,11 +8,19 @@ import android.widget.EditText
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.listeners.edittext.NoLockEditTextWatcher
+import com.dashlane.login.lock.LockManager
 
 @SuppressLint("InflateParams")
 object EditTextInputProvider {
 
-    fun create(context: Context, hint: String, value: String, textSize: Float, editable: Boolean): EditText {
+    fun create(
+        context: Context,
+        lockManager: LockManager,
+        hint: String,
+        value: String,
+        textSize: Float,
+        editable: Boolean
+    ): EditText {
         
         
         return (LayoutInflater.from(context).inflate(R.layout.edittext_input_provider_item, null) as EditText).apply {
@@ -22,7 +30,7 @@ object EditTextInputProvider {
             minimumHeight = context.resources.getDimensionPixelSize(R.dimen.minimum_clickable_area_size)
             if (editable) {
                 
-                addTextChangedListener(NoLockEditTextWatcher())
+                addTextChangedListener(NoLockEditTextWatcher(lockManager))
             } else {
                 
                 keyListener = null

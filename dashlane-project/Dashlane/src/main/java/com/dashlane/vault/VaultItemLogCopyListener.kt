@@ -64,6 +64,10 @@ fun CopyField.toFieldItemType() = when (this) {
     CopyField.IdsNumber -> Field.NUMBER to ItemType.ID_CARD
     CopyField.IdsIssueDate -> Field.DELIVERY_DATE to ItemType.ID_CARD
     CopyField.IdsExpirationDate -> Field.EXPIRE_DATE to ItemType.ID_CARD
+    CopyField.PassportLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.PASSPORT
+    CopyField.IdsLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.ID_CARD
+    CopyField.DriverLicenseLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.DRIVER_LICENCE
+    CopyField.SocialSecurityLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.SOCIAL_SECURITY
     CopyField.PassportNumber -> Field.NUMBER to ItemType.PASSPORT
     CopyField.PassportIssueDate -> Field.DELIVERY_DATE to ItemType.PASSPORT
     CopyField.PassportExpirationDate -> Field.EXPIRE_DATE to ItemType.PASSPORT
@@ -78,10 +82,12 @@ fun CopyField.toFieldItemType() = when (this) {
     CopyField.PersonalWebsite -> Field.WEBSITE to ItemType.WEBSITE
     CopyField.PayPalPassword -> Field.PASSWORD to ItemType.PAYPAL
     CopyField.PayPalLogin -> Field.LOGIN to ItemType.PAYPAL
+    CopyField.FullName -> Field.FULLNAME to ItemType.IDENTITY
     CopyField.FirstName -> Field.FIRST_NAME to ItemType.IDENTITY
     CopyField.LastName -> Field.LAST_NAME to ItemType.IDENTITY
     CopyField.MiddleName -> Field.MIDDLE_NAME to ItemType.IDENTITY
     CopyField.IdentityLogin -> Field.LOGIN to ItemType.IDENTITY
     CopyField.CompanyName -> Field.NAME to ItemType.COMPANY
     CopyField.CompanyTitle -> Field.JOB_TITLE to ItemType.COMPANY
+    CopyField.PasskeyDisplayName -> Field.NAME to ItemType.PASSKEY 
 }

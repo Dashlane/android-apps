@@ -1,6 +1,6 @@
 package com.dashlane.autofill.api
 
-import com.dashlane.autofill.api.common.domain.AutofillGeneratePasswordService
+import com.dashlane.autofill.generatepassword.AutofillGeneratePasswordService
 import com.dashlane.password.generator.PasswordGeneratorCriteria
 import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
 import com.dashlane.passwordgenerator.criteria

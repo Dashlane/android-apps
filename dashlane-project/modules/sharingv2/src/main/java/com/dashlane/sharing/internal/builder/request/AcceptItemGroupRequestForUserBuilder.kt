@@ -5,6 +5,7 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptItemGroupServic
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemForEmailing
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
+import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
@@ -34,7 +35,7 @@ class AcceptItemGroupRequestForUserBuilder @Inject constructor(
         val login = session?.userId
             ?: throw RequestBuilderException.AcceptItemGroupRequestException("session is null")
         return withContext(defaultCoroutineDispatcher) {
-            val groupKey = sharingCryptography.getItemGroupKey(itemGroup, login)
+            val groupKey = sharingCryptography.getItemGroupKeyFromUser(itemGroup, login)
                 ?: throw RequestBuilderException.AcceptItemGroupRequestException("Impossible to decrypt the group key")
             val acceptSignature = sharingCryptography.generateAcceptationSignature(
                 itemGroup.groupId,
@@ -43,7 +44,7 @@ class AcceptItemGroupRequestForUserBuilder @Inject constructor(
                 ?: throw RequestBuilderException.AcceptItemGroupRequestException("Impossible to generate acceptSignature")
             AcceptItemGroupService.Request(
                 revision = itemGroup.revision,
-                groupId = AcceptItemGroupService.Request.GroupId(itemGroup.groupId),
+                groupId = UuidFormat(itemGroup.groupId),
                 itemsForEmailing = listOf(itemForEmailing),
                 acceptSignature = acceptSignature,
                 autoAccept = false,
@@ -61,9 +62,10 @@ class AcceptItemGroupRequestForUserBuilder @Inject constructor(
             val login = session?.userId
                 ?: throw RequestBuilderException.AcceptItemGroupRequestException("session is null")
             val privateKey: SharingKeys.Private? =
-                sharingCryptography.getPrivateKey(userGroup, login)
-            val groupKey = sharingCryptography.getItemGroupKey(itemGroup, userGroup, privateKey)
-                ?: throw RequestBuilderException.AcceptItemGroupRequestException("Impossible to decrypt the group key")
+                sharingCryptography.getUserGroupPrivateKey(userGroup, login)
+            val groupKey =
+                sharingCryptography.getItemGroupKeyFromUserGroup(itemGroup, userGroup, login)
+                    ?: throw RequestBuilderException.AcceptItemGroupRequestException("Impossible to decrypt the group key")
             val acceptSignature = sharingCryptography.generateAcceptationSignature(
                 itemGroup.groupId,
                 groupKey.toByteArray(),
@@ -73,11 +75,11 @@ class AcceptItemGroupRequestForUserBuilder @Inject constructor(
 
             AcceptItemGroupService.Request(
                 revision = itemGroup.revision,
-                groupId = AcceptItemGroupService.Request.GroupId(itemGroup.groupId),
+                groupId = UuidFormat(itemGroup.groupId),
                 itemsForEmailing = null,
                 acceptSignature = acceptSignature,
                 autoAccept = false,
-                userGroupId = AcceptItemGroupService.Request.UserGroupId(userGroup.groupId),
+                userGroupId = UuidFormat(userGroup.groupId),
                 auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup)
             )
         }

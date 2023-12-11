@@ -4,12 +4,12 @@ import com.dashlane.followupnotification.api.FollowUpNotificationLockManager
 import com.dashlane.followupnotification.services.FollowUpNotificationDiscoveryService
 import com.dashlane.followupnotification.services.FollowUpNotificationLogger
 import com.dashlane.util.clipboard.vault.CopyField
-import com.dashlane.util.clipboard.vault.VaultItemClipboard
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.tryOrNull
 import javax.inject.Inject
 
 class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
-    private val vaultItemClipboard: VaultItemClipboard,
+    private val vaultItemCopyService: VaultItemCopyService,
     private val followUpNotificationLogger: FollowUpNotificationLogger,
     private val discoveryService: FollowUpNotificationDiscoveryService,
     private val lockManager: FollowUpNotificationLockManager
@@ -40,7 +40,7 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
         followUpNotification: FollowUpNotification,
         copyField: CopyField
     ): Boolean {
-        val result = vaultItemClipboard.handleCopy(
+        val result = vaultItemCopyService.handleCopy(
             notificationId = followUpNotification.id,
             content = followUpNotificationField.content.displayValue,
             copyField = copyField
@@ -49,7 +49,7 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
     }
 
     private fun copyFromVault(followUpNotification: FollowUpNotification, copyField: CopyField): Boolean {
-        val result = vaultItemClipboard.handleCopy(
+        val result = vaultItemCopyService.handleCopy(
             followUpNotification.vaultItemId,
             copyField,
             followUpNotification.type.syncObjectType

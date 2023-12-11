@@ -4,12 +4,10 @@ package com.dashlane.vault.util
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.getDefaultCountry
 import com.dashlane.vault.model.getLabel
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.utils.Country
 
 fun SummaryObject.Address.getAddressCompleteWithoutName(c: Context): String {
@@ -34,21 +32,18 @@ fun SummaryObject.Address.getAddressCompleteWithoutName(c: Context): String {
     if (city.isNotSemanticallyNull()) {
         builder.append(city)
     }
-    builder.append(", ").append(getCountry().getLabel(c))
+    builder.append(", ").append(getCountry(c).getLabel(c))
     return builder.toString().trim().removeSuffix(",")
 }
 
-fun SyncObject.Address.getCountry(): Country =
-    country ?: SingletonProvider.getContext().getDefaultCountry()
+fun SummaryObject.Address.getCountry(context: Context): Country =
+    country ?: context.getDefaultCountry()
 
-fun SummaryObject.Address.getCountry(): Country =
-    country ?: SingletonProvider.getContext().getDefaultCountry()
-
-fun SummaryObject.Address.getFullAddress(): String {
+fun SummaryObject.Address.getFullAddress(context: Context): String {
     val builder = StringBuilder()
     addressName?.let {
         builder.append(addressName).append(" - ")
     }
-    builder.append(getAddressCompleteWithoutName(SingletonProvider.getContext()))
+    builder.append(getAddressCompleteWithoutName(context))
     return builder.toString()
 }

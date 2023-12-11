@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import com.dashlane.authenticator.AuthenticatorAppConnection
 import com.dashlane.createaccount.CreateAccountActivity
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.login.LoginIntents
 import com.dashlane.login.TrackingIdProvider
 import com.dashlane.navigation.NavigationConstants
@@ -15,11 +14,11 @@ import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.welcome.WelcomeActivity
-import java.util.UUID
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class SplashScreenIntentFactory(
     private val activity: Activity,
@@ -88,18 +87,20 @@ class SplashScreenIntentFactory(
     private fun isTokenIntent(intent: Intent): Boolean {
         val data = intent.data
         return data != null &&
-                (data.scheme == NavigationHelper.Destination.SCHEME || data.host == "universal.dashlane.com") &&
-                data.lastPathSegment == NavigationHelper.Destination.MainPath.LOGIN
+            (data.scheme == NavigationHelper.Destination.SCHEME || data.host == "universal.dashlane.com") &&
+            data.lastPathSegment == NavigationHelper.Destination.MainPath.LOGIN
     }
 
     companion object {
         @JvmStatic
-        fun create(activity: Activity): SplashScreenIntentFactory {
-            val preferencesManager = SingletonProvider.getGlobalPreferencesManager()
-            val userPreferencesManager = SingletonProvider.getUserPreferencesManager()
-            val sessionManager = SingletonProvider.getSessionManager()
-            val sessionCredentialsSaver = SingletonProvider.getComponent().sessionCredentialsSaver
-            val authenticatorAppConnection = SingletonProvider.getComponent().authenticatorAppConnection
+        fun create(
+            activity: Activity,
+            preferencesManager: GlobalPreferencesManager,
+            userPreferencesManager: UserPreferencesManager,
+            sessionManager: SessionManager,
+            sessionCredentialsSaver: SessionCredentialsSaver,
+            authenticatorAppConnection: AuthenticatorAppConnection
+        ): SplashScreenIntentFactory {
             return SplashScreenIntentFactory(
                 activity,
                 preferencesManager,

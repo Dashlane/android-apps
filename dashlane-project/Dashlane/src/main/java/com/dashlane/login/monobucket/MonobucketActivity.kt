@@ -21,7 +21,6 @@ class MonobucketActivity : DashlaneActivity() {
         MonobucketViewProxy(this, viewModel)
 
         if (savedInstanceState == null) {
-            viewModel.onShow()
             setCurrentPageView(page = AnyPage.PAYWALL_DEVICE_SYNC_LIMIT)
         }
 

@@ -13,7 +13,7 @@ class SharedContactUserGroup(
     private val userGroup: SharingModels.ItemUserGroup,
     val onPendingMenuClick: (View, SharingModels.ItemUserGroup) -> Unit,
     val onAcceptedMenuClick: (View, SharingModels.ItemUserGroup) -> Unit
-) : SharingContactItem(context, userGroup.userGroup.name, {
+) : SharingContactItem(context, userGroup.name, {
     val action = findViewByIdEfficient<View?>(R.id.action)
     if (userGroup.isAdmin && action != null) {
         setVisibility(R.id.action, View.VISIBLE)
@@ -36,10 +36,14 @@ class SharedContactUserGroup(
             }
     }
 
-    override fun getLine2() = context.getString(userGroup.sharingStatusResource)
+    override fun getLine2() = if (userGroup.sharingStatusResource > 0) {
+        context.getString(userGroup.sharingStatusResource)
+    } else {
+        ""
+    }
 
     override fun isContentTheSame(item: SharingContactItem) =
         super.isContentTheSame(item) &&
-                item is SharedContactUserGroup &&
-                userGroup.sharingStatusResource == item.userGroup.sharingStatusResource
+            item is SharedContactUserGroup &&
+            userGroup.sharingStatusResource == item.userGroup.sharingStatusResource
 }

@@ -9,8 +9,7 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 
 class LoginSettingsViewProxy(
     rootView: View,
-    logger: LoginSettingsContract.Logger,
-    private val biometricSettingsHelper: BiometricSettingsHelper = BiometricSettingsHelperImpl(rootView, logger)
+    private val biometricSettingsHelper: BiometricSettingsHelper = BiometricSettingsHelperImpl(rootView)
 ) : BaseViewProxy<LoginSettingsContract.Presenter>(rootView),
 LoginSettingsContract.ViewProxy,
     BiometricSettingsHelper by biometricSettingsHelper {

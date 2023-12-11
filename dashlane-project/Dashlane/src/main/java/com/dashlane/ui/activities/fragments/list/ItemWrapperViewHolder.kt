@@ -14,14 +14,13 @@ import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
-import com.dashlane.teamspaces.manager.TeamspaceDrawableProvider
+import com.dashlane.teamspaces.adapter.TeamspaceDrawableProvider
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrDrawable
-import com.dashlane.util.graphics.RemoteImageRoundRectDrawable
+import com.dashlane.util.graphics.CredentialRemoteDrawable
 import com.dashlane.util.toHighlightedSpannable
 import com.dashlane.vault.model.isSpaceItem
 import com.dashlane.vault.summary.SummaryObject
@@ -61,7 +60,7 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
                 setImageResource(itemAction.icon)
                 contentDescription = context.getString(itemAction.contentDescription)
                 setOnClickListener { v ->
-                    itemAction.onClickItemAction(v, item.itemObject)
+                    itemAction.onClickItemAction(v, item.summaryObject)
                 }
                 visibility = itemAction.visibility
                 background = context.getThemeAttrDrawable(android.R.attr.selectableItemBackground)
@@ -89,7 +88,7 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
         findViewByIdEfficient<ImageView>(R.id.item_icon)?.let {
             val actualDrawable = it.drawable
             val newDrawable = item.getImageDrawable(context)
-            if (newDrawable !is RemoteImageRoundRectDrawable && actualDrawable is RemoteImageRoundRectDrawable) {
+            if (newDrawable !is CredentialRemoteDrawable && actualDrawable is CredentialRemoteDrawable) {
                 cancelRequest(context, actualDrawable.target)
             }
             it.setImageDrawable(newDrawable)
@@ -101,11 +100,11 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
     }
 
     fun updateSharingItem(item: VaultItemWrapper<out SummaryObject>) {
-        findViewByIdEfficient<ImageView>(R.id.shared_image)?.isVisible = item.itemObject.isShared
+        findViewByIdEfficient<ImageView>(R.id.shared_image)?.isVisible = item.summaryObject.isShared
     }
 
     fun updateLockIcon(item: VaultItemWrapper<out SummaryObject>) {
-        findViewByIdEfficient<ImageView>(R.id.lock_image)?.isVisible = item.itemObject.isProtected
+        findViewByIdEfficient<ImageView>(R.id.lock_image)?.isVisible = item.summaryObject.isProtected
     }
 
     fun updateTeamspaceIcon(item: VaultItemWrapper<out SummaryObject>) {
@@ -128,23 +127,17 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
         if (!item.allowTeamspaceIcon) {
             return null
         }
-        val vaultItem = item.itemObject
+        val vaultItem = item.summaryObject
         if (!vaultItem.isSpaceItem()) {
             return null
         }
         val teamspaceId = getTeamSpaceId(vaultItem)
-        SingletonProvider.getSessionManager().session?.let { session ->
-            SingletonProvider.getComponent().teamspaceRepository.getTeamspaceManager(session)?.let { teamManager ->
-                if (teamManager.isCurrent(teamspaceId)) {
-                    return null
-                }
-                val teamspace = teamManager[teamspaceId] ?: return null
-                return TeamspaceDrawableProvider.getIcon(
-                    context,
-                    teamspace,
-                    R.dimen.teamspace_icon_size_small
-                )
+        item.teamspaceManager?.let { teamManager ->
+            if (teamManager.isCurrent(teamspaceId)) {
+                return null
             }
+            val teamspace = teamManager[teamspaceId] ?: return null
+            return TeamspaceDrawableProvider.getIcon(context, teamspace, R.dimen.teamspace_icon_size_small)
         }
         return null
     }

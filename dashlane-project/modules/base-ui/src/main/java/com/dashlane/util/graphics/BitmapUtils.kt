@@ -60,14 +60,14 @@ fun getDominantColorFromBorder(b: Bitmap): Int {
 
 @Suppress("DEPRECATION")
 @ColorInt
-fun getDominantColor(drawable: Drawable): Int {
+fun getDominantColor(drawable: Drawable?): Int {
     if (drawable is BackgroundColorDrawable) {
         return drawable.backgroundColor
     }
 
     val b = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_4444)
-    drawable.setBounds(0, 0, b.width, b.height)
-    drawable.draw(Canvas(b))
+    drawable?.setBounds(0, 0, b.width, b.height)
+    drawable?.draw(Canvas(b))
 
     val width = b.width
     val height = b.height

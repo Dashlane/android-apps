@@ -21,14 +21,14 @@ import com.dashlane.item.nfc.NfcCreditCardReader
 import com.dashlane.item.subview.ItemCollectionListSubView
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
-import com.dashlane.item.subview.edit.ItemEditSpaceSubView
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.EditableSubViewFactory
-import com.dashlane.item.subview.provider.ItemScreenConfigurationAuthentifiantProvider
 import com.dashlane.item.subview.provider.ItemScreenConfigurationSecureNoteProvider
 import com.dashlane.item.subview.provider.ReadOnlySubViewFactory
 import com.dashlane.item.subview.provider.SubViewFactory
-import com.dashlane.item.subview.provider.getPreviousPassword
+import com.dashlane.item.subview.provider.credential.ItemScreenConfigurationAuthentifiantProvider
+import com.dashlane.item.subview.provider.credential.ItemScreenConfigurationPasskeyProvider
+import com.dashlane.item.subview.provider.credential.getPreviousPassword
 import com.dashlane.item.subview.provider.id.ItemScreenConfigurationDriverLicenseProvider
 import com.dashlane.item.subview.provider.id.ItemScreenConfigurationFiscalStatementProvider
 import com.dashlane.item.subview.provider.id.ItemScreenConfigurationIdCardProvider
@@ -45,9 +45,9 @@ import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationPh
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationWebsiteProvider
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.storage.userdata.EmailSuggestionProvider
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
@@ -56,13 +56,15 @@ import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.useractivity.log.usage.UsageLogRepository
+import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.date.RelativeDateFormatterImpl
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.util.tryOrNull
 import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
@@ -120,15 +122,17 @@ class ItemEditViewDataProvider @Inject constructor(
     private val appLinkDownloader: AuthentifiantAppLinkDownloader,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     private val lockManager: LockManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val navigator: Navigator,
     private val vaultItemLogger: VaultItemLogger,
     private val activityLogger: VaultActivityLogger,
     private val sharingPolicy: SharingPolicyDataProvider,
+    private val sharingDataProvider: SharingDataProvider,
     private val linkedServicesHelper: LinkedServicesHelper,
     private val dataSync: DataSync,
     private val authenticatorLogger: AuthenticatorLogger,
     private val hermesLogRepository: LogRepository,
+    private val vaultItemCopy: VaultItemCopyService,
+    private val teamspaceManagerRepository: TeamspaceManagerRepository,
     clock: Clock
 ) : BaseDataProvider<ItemEditViewContract.Presenter>(), ItemEditViewContract.DataProvider {
 
@@ -225,13 +229,17 @@ class ItemEditViewDataProvider @Inject constructor(
 
         when (options.dataType) {
             SyncObjectType.AUTHENTIFIANT -> {
+                val sharedCollections =
+                    if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)) {
+                        sharingDataProvider.getCollections(item.uid, needsAdminRights = true)
+                    } else {
+                        emptyList()
+                    }
                 provider = ItemScreenConfigurationAuthentifiantProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
                     sharingPolicy = sharingPolicy,
                     emailSuggestionProvider = emailSuggestionProvider,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
                     navigator = navigator,
                     vaultItemLogger = vaultItemLogger,
                     dateTimeFieldFactory = dateTimeFieldFactory,
@@ -239,167 +247,138 @@ class ItemEditViewDataProvider @Inject constructor(
                     linkedServicesHelper = linkedServicesHelper,
                     userFeaturesChecker = userFeaturesChecker,
                     authenticatorLogger = authenticatorLogger,
+                    vaultItemCopy = vaultItemCopy,
+                    sharedCollections = sharedCollections
                 )
             }
 
             SyncObjectType.IDENTITY ->
-                provider =
-                ItemScreenConfigurationIdentityProvider(
+                provider = ItemScreenConfigurationIdentityProvider(
                     teamspaceAccessor = teamspaceAccessor,
-                    dataCounter = mainDataAccessor.getDataCounter(),
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
                     dateTimeFieldFactory = dateTimeFieldFactory
                 )
 
             SyncObjectType.EMAIL ->
-                provider =
-                ItemScreenConfigurationEmailProvider(
+                provider = ItemScreenConfigurationEmailProvider(
                     teamspaceAccessor = teamspaceAccessor,
-                    dataCounter = mainDataAccessor.getDataCounter(),
                     emailSuggestionProvider = emailSuggestionProvider,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.PERSONAL_WEBSITE ->
-                provider =
-                ItemScreenConfigurationWebsiteProvider(
+                provider = ItemScreenConfigurationWebsiteProvider(
                     teamspaceAccessor = teamspaceAccessor,
-                    dataCounter = mainDataAccessor.getDataCounter(),
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.COMPANY ->
-                provider =
-                ItemScreenConfigurationCompanyProvider(
+                provider = ItemScreenConfigurationCompanyProvider(
                     teamspaceAccessor = teamspaceAccessor,
-                    dataCounter = mainDataAccessor.getDataCounter(),
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
                     dateTimeFieldFactory = dateTimeFieldFactory
                 )
 
             SyncObjectType.FISCAL_STATEMENT ->
-                provider =
-                ItemScreenConfigurationFiscalStatementProvider(
+                provider = ItemScreenConfigurationFiscalStatementProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    dataCounter = mainDataAccessor.getDataCounter(),
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.SECURE_NOTE ->
-                provider =
-                ItemScreenConfigurationSecureNoteProvider(
+                provider = ItemScreenConfigurationSecureNoteProvider(
                     teamspaceAccessor = teamspaceAccessor,
-                    dataCounter = mainDataAccessor.getDataCounter(),
                     mainDataAccessor = mainDataAccessor,
                     sharingPolicy = sharingPolicy,
                     userFeaturesChecker = userFeaturesChecker,
+                    dateTimeFieldFactory = dateTimeFieldFactory,
                     sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    teamspaceManagerRepository = teamspaceManagerRepository,
                 )
 
             SyncObjectType.ADDRESS ->
-                provider =
-                ItemScreenConfigurationAddressProvider(
+                provider = ItemScreenConfigurationAddressProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.PHONE ->
-                provider =
-                ItemScreenConfigurationPhoneProvider(
+                provider = ItemScreenConfigurationPhoneProvider(
                     teamspaceAccessor = teamspaceAccessor,
-                    mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.PAYMENT_PAYPAL ->
-                provider =
-                ItemScreenConfigurationPaypalProvider(
+                provider = ItemScreenConfigurationPaypalProvider(
                     teamspaceAccessor = teamspaceAccessor,
-                    dataCounter = mainDataAccessor.getDataCounter(),
                     emailSuggestionProvider = emailSuggestionProvider,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
                     vaultItemLogger = vaultItemLogger,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.PAYMENT_CREDIT_CARD ->
-                provider =
-                ItemScreenConfigurationCreditCardProvider(
+                provider = ItemScreenConfigurationCreditCardProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
                     vaultItemLogger = vaultItemLogger,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.BANK_STATEMENT ->
-                provider =
-                ItemScreenConfigurationBankAccountProvider(
+                provider = ItemScreenConfigurationBankAccountProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
                     vaultItemLogger = vaultItemLogger,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.ID_CARD ->
-                provider =
-                ItemScreenConfigurationIdCardProvider(
+                provider = ItemScreenConfigurationIdCardProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.PASSPORT ->
-                provider =
-                ItemScreenConfigurationPassportProvider(
+                provider = ItemScreenConfigurationPassportProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.DRIVER_LICENCE ->
-                provider =
-                ItemScreenConfigurationDriverLicenseProvider(
+                provider = ItemScreenConfigurationDriverLicenseProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             SyncObjectType.SOCIAL_SECURITY_STATEMENT ->
-                provider =
-                ItemScreenConfigurationSocialSecurityProvider(
+                provider = ItemScreenConfigurationSocialSecurityProvider(
                     teamspaceAccessor = teamspaceAccessor,
                     mainDataAccessor = mainDataAccessor,
-                    sessionManager = sessionManager,
-                    bySessionUsageLogRepository = bySessionUsageLogRepository,
                     vaultItemLogger = vaultItemLogger,
-                    dateTimeFieldFactory = dateTimeFieldFactory
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
+                )
+
+            SyncObjectType.PASSKEY ->
+                provider = ItemScreenConfigurationPasskeyProvider(
+                    teamspaceAccessor = teamspaceAccessor,
+                    vaultItemLogger = vaultItemLogger,
+                    dateTimeFieldFactory = dateTimeFieldFactory,
+                    vaultItemCopy = vaultItemCopy
                 )
 
             else -> return false
@@ -428,9 +407,9 @@ class ItemEditViewDataProvider @Inject constructor(
 
         val collections = genericDataQuery.queryAll(
             genericFilter {
-            specificDataType(SyncObjectType.COLLECTION)
-            specificSpace(teamspaceAccessor.getOrDefault(item.syncObject.spaceId))
-        }
+                specificDataType(SyncObjectType.COLLECTION)
+                specificSpace(teamspaceAccessor.getOrDefault(item.syncObject.spaceId))
+            }
         ).filterIsInstance<SummaryObject.Collection>()
             .filter { collection ->
                 collection.vaultItems?.filter { it.type == item.toCollectionVaultItem().type }
@@ -472,9 +451,6 @@ class ItemEditViewDataProvider @Inject constructor(
     override fun logViewDisplay() {
         val state = state
         logDisplayPendingSetup = state == null
-        state?.run {
-            itemScreenConfigurationProvider.logger.logDisplay(dataType)
-        }
     }
 
     override fun setTemporaryLinkedServices(
@@ -615,8 +591,7 @@ class ItemEditViewDataProvider @Inject constructor(
                 item = itemToSave,
                 canDelete = sharingPolicy.isDeleteAllowed(false, itemToSave)
             )
-            val categorizationMethod =
-                (subViews.firstOrNull { it is ItemEditSpaceSubView } as? ItemEditSpaceSubView)?.categorizationMethod
+
             if (isNew) {
                 when (itemToSave.syncObject) {
                     is SyncObject.Authentifiant -> {
@@ -642,7 +617,6 @@ class ItemEditViewDataProvider @Inject constructor(
                 logSavedItem(
                     action = Action.ADD,
                     itemToSave = itemToSave,
-                    categorizationMethod = categorizationMethod,
                     updatedLinkedWebsites = updatedLinkedWebsites,
                     removedLinkedApps = removedLinkedApps,
                     collectionCount = collectionCount
@@ -651,7 +625,6 @@ class ItemEditViewDataProvider @Inject constructor(
                 logSavedItem(
                     action = Action.EDIT,
                     itemToSave = itemToSave,
-                    categorizationMethod = categorizationMethod,
                     updatedLinkedWebsites = updatedLinkedWebsites,
                     removedLinkedApps = removedLinkedApps,
                     collectionCount = null 
@@ -672,8 +645,11 @@ class ItemEditViewDataProvider @Inject constructor(
         val collectionListSubView =
             state.screenConfiguration.itemSubViews.filterIsInstance<ItemCollectionListSubView>().firstOrNull()
         if (collectionListSubView != null) { 
-            val collectionsFromUi = collectionListSubView.value.value
-            val collectionsToSave = buildCollectionVaultItemListToSave(itemToSave, collectionsFromUi)
+            val collectionsFromUi = collectionListSubView.value.value.mapNotNull { (name, shared) ->
+                if (shared) return@mapNotNull null else name
+            }
+            val collectionsToSave =
+                buildCollectionVaultItemListToSave(itemToSave, collectionsFromUi)
 
             runCatching {
                 dataSaver.save(collectionsToSave)
@@ -691,8 +667,8 @@ class ItemEditViewDataProvider @Inject constructor(
     ): List<VaultItem<SyncObject.Collection>> {
         val alreadyExistingCollections = collectionDataQuery.queryAll(
             CollectionFilter().apply {
-            withVaultItem = CollectionVaultItems(item.toCollectionDataType(), item.uid)
-        }
+                withVaultItem = CollectionVaultItems(item.toCollectionDataType(), item.uid)
+            }
         )
 
         val collectionNamesToAdd = targetCollectionState.filterNot { name ->
@@ -743,8 +719,8 @@ class ItemEditViewDataProvider @Inject constructor(
         .map { syncCollection ->
             syncCollection.copy(
                 syncObject = syncCollection.syncObject.copy {
-                vaultItems = vaultItems?.filterNot { it.id == item.uid }
-            }
+                    vaultItems = vaultItems?.filterNot { it.id == item.uid }
+                }
             )
         }
 
@@ -806,24 +782,10 @@ class ItemEditViewDataProvider @Inject constructor(
     private fun logSavedItem(
         action: Action,
         itemToSave: VaultItem<*>,
-        categorizationMethod: ItemEditSpaceSubView.CategorizationMethod?,
         updatedLinkedWebsites: Pair<List<String>, List<String>>?,
         removedLinkedApps: List<String>?,
         collectionCount: Int? = null
     ) {
-        if (action == Action.ADD) {
-            state!!.itemScreenConfigurationProvider.logger.logItemAdded(
-                itemToSave,
-                state!!.dataType,
-                categorizationMethod
-            )
-        } else if (action == Action.EDIT) {
-            state!!.itemScreenConfigurationProvider.logger.logItemModified(
-                itemToSave,
-                state!!.dataType,
-                categorizationMethod
-            )
-        }
         logItemUpdate(
             itemToSave,
             action,
@@ -862,9 +824,9 @@ class ItemEditViewDataProvider @Inject constructor(
         if (item.hasBeenSaved && (!state.editMode || state.dataType == SyncObjectType.SECURE_NOTE)) {
             saveItem(
                 item.copyWithAttrs {
-                locallyViewedDate = Instant.now()
-                locallyUsedCount = item.locallyUsedCount + 1
-            }
+                    locallyViewedDate = Instant.now()
+                    locallyUsedCount = item.locallyUsedCount + 1
+                }
             )
         }
     }
@@ -896,9 +858,9 @@ class ItemEditViewDataProvider @Inject constructor(
         tryOrNull {
             dataQuery.query(
                 vaultFilter {
-                specificUid(uid)
-                specificDataType(type)
-            }
+                    specificUid(uid)
+                    specificDataType(type)
+                }
             )
         }
     }

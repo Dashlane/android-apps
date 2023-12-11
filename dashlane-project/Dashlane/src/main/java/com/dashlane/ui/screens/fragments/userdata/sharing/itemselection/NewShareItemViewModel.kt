@@ -1,12 +1,9 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.itemselection
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.loaders.datalists.NewShareItemDataProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.useractivity.log.forCode
-import com.dashlane.useractivity.log.usage.UsageLogCode80
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -16,14 +13,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NewShareItemViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val dataProvider: NewShareItemDataProvider,
     private val navigator: Navigator
 ) : ViewModel(), NewShareItemViewModelContract {
-
-    private val args = SharingItemSelectionTabFragmentArgs.fromSavedStateHandle(savedStateHandle)
-    private val from = args.argsUsageLogFrom
-    override val ulFrom: UsageLogCode80.From? = UsageLogCode80.From.values().forCode(from)
 
     override val uiState: MutableStateFlow<NewShareItemViewModelContract.UIState> =
         MutableStateFlow(NewShareItemViewModelContract.UIState.Loading)

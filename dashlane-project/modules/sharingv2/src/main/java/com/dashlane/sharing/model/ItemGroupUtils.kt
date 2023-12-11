@@ -1,6 +1,8 @@
 package com.dashlane.sharing.model
 
 import androidx.annotation.VisibleForTesting
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
+import com.dashlane.server.api.endpoints.sharinguserdevice.CollectionDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.Status
@@ -23,8 +25,14 @@ fun ItemGroup.getUser(userId: String): UserDownload? = users?.find { it.userId =
 fun ItemGroup.getUserGroupMember(userGroupId: String): UserGroupMember? =
     groups?.find { it.groupId == userGroupId }
 
+fun ItemGroup.getCollectionDownload(collectionId: String): CollectionDownload? =
+    collections?.find { it.uuid == collectionId }
+
 fun ItemGroup.getUserGroupMembers(userGroups: List<UserGroup>): List<UserGroupMember> =
     getUserGroupMembers(userGroups, false)
+
+fun ItemGroup.getCollectionDownloads(collections: List<Collection>): List<CollectionDownload> =
+    getCollectionDownloads(collections, false)
 
 fun ItemGroup.getUserGroupMembers(
     userGroups: List<UserGroup>,
@@ -42,10 +50,25 @@ fun ItemGroup.getUserGroupMembers(
     } ?: emptyList()
 }
 
+fun ItemGroup.getCollectionDownloads(
+    myCollections: List<Collection>,
+    onlyAcceptedOrPending: Boolean
+): List<CollectionDownload> {
+    val groupIds = myCollections.map { it.uuid }
+    return collections?.filter {
+        it.uuid in groupIds
+    }?.let { result ->
+        if (onlyAcceptedOrPending) {
+            result.filter { it.status.isAcceptedOrPending }
+        } else {
+            result
+        }
+    } ?: emptyList()
+}
+
 fun ItemGroup.isAlone(login: String): Boolean {
-    if (hasUserGroupsAcceptedOrPending()) {
-        return false
-    }
+    if (hasUserGroupsAcceptedOrPending()) return false
+    if (hasCollectionsAcceptedOrPending()) return false
     if (!isUserAcceptedOrPending(login)) return false
     return users?.count { it.isAcceptedOrPending } == 1
 }
@@ -53,8 +76,14 @@ fun ItemGroup.isAlone(login: String): Boolean {
 fun ItemGroup.hasUserGroupsAcceptedOrPending(): Boolean =
     groups?.find { isUserGroupAcceptedOrPending(it.groupId) } != null
 
+fun ItemGroup.hasCollectionsAcceptedOrPending(): Boolean =
+    collections?.find { isCollectionAcceptedOrPending(it.uuid) } != null
+
 fun ItemGroup.hasUserGroupsAcceptedOrPending(userGroups: List<UserGroup>): Boolean =
     userGroups.find { isUserGroupAcceptedOrPending(it.groupId) } != null
+
+fun ItemGroup.hasCollectionsAcceptedOrPending(collections: List<Collection>): Boolean =
+    collections.find { isCollectionAcceptedOrPending(it.uuid) } != null
 
 fun ItemGroup.hasUserGroupsAccepted(userGroups: List<UserGroup>): Boolean =
     userGroups.find { isUserGroupAccepted(it.groupId) } != null
@@ -64,6 +93,9 @@ private fun ItemGroup.isUserGroupAccepted(userGroupId: String): Boolean =
 
 fun ItemGroup.isUserGroupAcceptedOrPending(userGroupId: String): Boolean =
     getUserGroupMember(userGroupId)?.isAcceptedOrPending == true
+
+fun ItemGroup.isCollectionAcceptedOrPending(collectionId: String): Boolean =
+    getCollectionDownload(collectionId)?.status?.isAcceptedOrPending == true
 
 fun ItemGroup.isUserAccepted(username: String): Boolean =
     getUser(username)?.isAcceptedOrPending == true
@@ -107,9 +139,26 @@ fun ItemGroup.hasAdminUsers(): Boolean = users?.hasAdminUsers() == true
 @VisibleForTesting
 fun ItemGroup.hasAdminUserGroups(): Boolean = groups?.hasAdminUserGroup() == true
 
-fun ItemGroup.getUserStatus(userId: String): String? = getUser(userId)?.status?.key
-
 fun ItemGroup.getUserPermission(userId: String): Permission? = getUser(userId)?.permission
+
+fun ItemGroup.isUserAdmin(userId: String) =
+    getUser(userId)?.let { it.isAccepted && it.isAdmin } ?: false
+
+fun ItemGroup.isAdmin(
+    userId: String,
+    myUserGroups: List<UserGroup>,
+    myCollections: List<Collection>
+) = isUserAdmin(userId) || isGroupAdmin(myUserGroups) || isCollectionAdmin(myCollections)
+
+fun ItemGroup.isGroupAdmin(myUserGroups: List<UserGroup>) = groups?.any { groupMember ->
+    groupMember.isAccepted && groupMember.isAdmin && myUserGroups.any {
+        groupMember.groupId == it.groupId
+    }
+} == true
+
+fun ItemGroup.isCollectionAdmin(myCollections: List<Collection>) = collections?.any { collection ->
+    collection.isAccepted && collection.isAdmin && myCollections.any { it.uuid == collection.uuid }
+} == true
 
 private fun List<UserDownload>.hasAdminUsers(): Boolean =
     find { it.isAccepted && it.isAdmin } != null

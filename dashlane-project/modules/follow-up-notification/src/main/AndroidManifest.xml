@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dashlane.followupnotification">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
         <activity
@@ -10,7 +9,7 @@
         <activity
             android:name=".discovery.FollowUpNotificationDiscoveryActivity"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.Dashlane.LockedOut.Transparent.Modal" />
+            android:theme="@style/Theme.Dashlane.Transparent.Modal" />
 
         <receiver
             android:name=".services.FollowUpNotificationDismissReceiver"

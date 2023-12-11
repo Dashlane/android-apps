@@ -7,23 +7,30 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.dashlane.followupnotification.FollowUpNotificationComponent
 import com.dashlane.followupnotification.R
 import com.dashlane.followupnotification.services.FollowUpNotificationDiscoveryService
 import com.dashlane.followupnotification.services.FollowUpNotificationLogger
 import com.skocken.presentation.presenter.BasePresenter
 import com.skocken.presentation.provider.BaseDataProvider
 import com.skocken.presentation.viewproxy.BaseViewProxy
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class FollowUpNotificationDiscoveryActivity : AppCompatActivity() {
     private lateinit var presenter: Presenter
 
+    @Inject
+    lateinit var followUpNotificationLogger: FollowUpNotificationLogger
+
+    @Inject
+    lateinit var followUpNotificationDiscoveryService: FollowUpNotificationDiscoveryService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val followUpComponent = FollowUpNotificationComponent(this)
         presenter = Presenter(
-            followUpComponent.followUpNotificationLogger,
-            followUpComponent.followUpNotificationDiscoveryService
+            followUpNotificationLogger,
+            followUpNotificationDiscoveryService
         )
         presenter.setProvider(DataProvider())
         presenter.setView(ViewProxy(this))

@@ -7,6 +7,7 @@ import com.dashlane.authentication.AuthenticationInvalidTokenException
 import com.dashlane.authentication.AuthenticationLockedOutException
 import com.dashlane.authentication.AuthenticationOfflineException
 import com.dashlane.authentication.AuthenticationSecondFactor
+import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationSecondFactoryRepository
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,8 +38,8 @@ class LoginTotpViewModel @Inject constructor(
     }
 
     fun onTokenCompleted(token: String) {
-        flow<LoginTotpState> {
-            val result = secondFactoryRepository.validate(AuthenticationSecondFactor.Totp(login, emptySet()), token)
+        flow {
+            val result = secondFactoryRepository.validate(AuthenticationSecondFactor.Totp(login, setOf(SecurityFeature.TOTP)), token)
 
             val authTicket = result.authTicket
             if (authTicket == null) {

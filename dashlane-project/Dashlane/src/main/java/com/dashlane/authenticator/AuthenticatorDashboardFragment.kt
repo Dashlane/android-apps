@@ -14,7 +14,6 @@ import com.dashlane.authenticator.dashboard.AuthenticatorDashboardViewModel
 import com.dashlane.authenticator.dashboard.AuthenticatorDashboardViewProxy
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.navigation.NavControllerUtils.TOP_LEVEL_DESTINATIONS
-import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.MenuContainer
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.util.clipboard.ClipboardCopy
@@ -36,9 +35,6 @@ class AuthenticatorDashboardFragment : AbstractContentFragment() {
             viewModel.onBackToViewMode()
         }
     }
-
-    @Inject
-    lateinit var navigator: Navigator
 
     @Inject
     lateinit var clipboardCopy: ClipboardCopy

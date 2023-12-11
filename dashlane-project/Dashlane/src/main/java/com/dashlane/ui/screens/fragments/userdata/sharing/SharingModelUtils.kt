@@ -3,7 +3,9 @@ package com.dashlane.ui.screens.fragments.userdata.sharing
 import com.dashlane.R
 import com.dashlane.core.domain.sharing.SharingPermission
 import com.dashlane.server.api.endpoints.sharinguserdevice.GetUsersPublicKeyService
+import com.dashlane.server.api.endpoints.sharinguserdevice.UserCollectionDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserDownload
+import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupCollectionDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupMember
 import com.dashlane.sharing.internal.model.UserToUpdate
 import com.dashlane.sharing.model.isAccepted
@@ -11,6 +13,34 @@ import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isPending
 
 fun UserDownload.getSharingStatusResource(): Int {
+    return if (isPending) {
+        R.string.sharing_status_pending
+    } else if (isAccepted) {
+        if (isAdmin) {
+            SharingPermission.ADMIN.stringResource
+        } else {
+            SharingPermission.LIMITED.stringResource
+        }
+    } else {
+        0
+    }
+}
+
+fun UserCollectionDownload.getSharingStatusResource(): Int {
+    return if (isPending) {
+        R.string.sharing_status_pending
+    } else if (isAccepted) {
+        if (isAdmin) {
+            SharingPermission.ADMIN.stringResource
+        } else {
+            SharingPermission.LIMITED.stringResource
+        }
+    } else {
+        0
+    }
+}
+
+fun UserGroupCollectionDownload.getSharingStatusResource(): Int {
     return if (isPending) {
         R.string.sharing_status_pending
     } else if (isAccepted) {

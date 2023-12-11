@@ -7,6 +7,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
 import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.adapter.util.populateItemsAsync
@@ -19,6 +20,7 @@ import com.dashlane.ui.screens.fragments.userdata.sharing.showErrorDialog
 import com.dashlane.ui.screens.fragments.userdata.sharing.showLoadingDialog
 import com.dashlane.ui.setup
 import com.dashlane.ui.widgets.view.empty.SharingCenterEmptyScreen
+import com.dashlane.util.SnackbarUtils
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import kotlinx.coroutines.launch
 
@@ -26,6 +28,7 @@ class SharingCenterViewProxy(
     private val fragment: Fragment,
     view: View,
     private val viewModel: SharingCenterViewModelContract,
+    private val itemWrapperProvider: ItemWrapperProvider
 ) : SharingBaseViewProxy(fragment, view) {
     init {
         fabButton.apply {
@@ -72,7 +75,15 @@ class SharingCenterViewProxy(
                         SharingCenterViewModelContract.UIState.RequestLoading -> fragmentManager.showLoadingDialog(
                             context
                         )
-                        SharingCenterViewModelContract.UIState.RequestSuccess -> fragmentManager.onSuccess()
+                        is SharingCenterViewModelContract.UIState.RequestSuccess -> {
+                            fragmentManager.onSuccess()
+                            state.acceptedItemName?.let {
+                                SnackbarUtils.showSnackbar(
+                                    view,
+                                    context.getString(R.string.sharing_invite_item_accepted, it)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -86,12 +97,14 @@ class SharingCenterViewProxy(
         val userGroups = state.userGroups.toSharingUserGroupItems()
         val itemInvites = state.itemInvites.toSharingInvitationItems()
         val groupInvites = state.userGroupInvites.toSharingInvitationUserGroups()
+        val collectionInvites = state.collectionInvites.toSharingInvitationCollection()
 
         vaultItemsList.apply {
-            if (itemInvites.isNotEmpty() || groupInvites.isNotEmpty()) {
+            if (itemInvites.isNotEmpty() || groupInvites.isNotEmpty() || collectionInvites.isNotEmpty()) {
                 add(getHeaderInvites(context))
-                addAll(itemInvites)
                 addAll(groupInvites)
+                addAll(collectionInvites)
+                addAll(itemInvites)
             }
             if (userGroups.isNotEmpty()) {
                 add(getHeaderGroup(context))
@@ -133,9 +146,20 @@ class SharingCenterViewProxy(
             )
         }.sortedWith(SharingInvitationUserGroup.comparator())
 
+    private fun List<SharingContact.CollectionInvite>.toSharingInvitationCollection() =
+        map { invite ->
+            SharingInvitationCollection(
+                context,
+                invite,
+                onClickAccept = { viewModel.acceptCollection(invite) },
+                onClickDecline = { viewModel.declineCollection(invite.collection.uuid) },
+            )
+        }.sortedWith(SharingInvitationCollection.comparator())
+
     private fun List<SharingContact.ItemInvite>.toSharingInvitationItems() = map { invite ->
         SharingInvitationItem(
             context,
+            itemWrapperProvider,
             invite,
             onClickAccept = {
                 viewModel.acceptItemGroup(invite)

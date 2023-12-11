@@ -12,19 +12,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.url.toUrlDomainOrNull
-import com.dashlane.useractivity.log.usage.UsageLogCode75
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.util.addOnFieldVisibilityToggleListener
-import com.dashlane.util.clipboard.ClipboardUtils
+import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.colorpassword.CharacterColor
 import com.dashlane.util.setCurrentPageView
-import com.dashlane.util.usagelogs.ViewLogger
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
@@ -40,7 +37,10 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
     lateinit var vaultItemLogger: VaultItemLogger
 
     @Inject
-    lateinit var viewLogger: ViewLogger
+    lateinit var clipboardCopy: ClipboardCopy
+
+    @Inject
+    lateinit var mainDataAccessor: MainDataAccessor
 
     private val revealedIds = mutableSetOf<String>()
 
@@ -75,13 +75,8 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
         refreshContent()
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewLogger.log(UsageLogConstant.ViewType.previouslyGeneratedPasswords)
-    }
-
     private fun refreshContent() {
-        val generatedPasswords = SingletonProvider.getMainDataAccessor()
+        val generatedPasswords = mainDataAccessor
             .getGeneratedPasswordQuery()
             .queryAllNotRevoked()
             .sortedByDescending { it.syncObject.generatedDate }
@@ -129,11 +124,6 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
         init {
             passwordLayout.addOnFieldVisibilityToggleListener { visible ->
                 if (visible) {
-                    log(
-                        UsageLogConstant.PreviouslyGeneratedAction.show,
-                        generatedDate?.toString(),
-                        authDomain
-                    )
                     generatedId?.let {
                         vaultItemLogger.logRevealField(
                             Field.PASSWORD,
@@ -198,12 +188,7 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
                 }
             }
             copyPassword.setOnClickListener {
-                ClipboardUtils.copyToClipboard(password.text?.toString().orEmpty(), true)
-                log(
-                    UsageLogConstant.PreviouslyGeneratedAction.copy,
-                    generatedDate?.toString(),
-                    generatedPassword.domain
-                )
+                clipboardCopy.copyToClipboard(data = password.text?.toString().orEmpty(), sensitiveData = true)
                 vaultItemLogger.logCopyField(
                     field = Field.PASSWORD,
                     itemId = generatedPasswordVaultItem.uid,
@@ -212,19 +197,6 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
                     domain = generatedPassword.domain
                 )
             }
-        }
-
-        private fun log(action: String, generatedDate: String?, domain: String?) {
-            SingletonProvider.getSessionManager().session
-                ?.let { SingletonProvider.getComponent().bySessionUsageLogRepository[it] }
-                ?.enqueue(
-                    UsageLogCode75(
-                        type = UsageLogConstant.ViewType.previouslyGeneratedPasswords,
-                        action = action,
-                        subaction = generatedDate,
-                        website = domain
-                    )
-                )
         }
     }
 

@@ -1,6 +1,6 @@
 package com.dashlane.autofill.api.rememberaccount.linkedservices
 
-import com.dashlane.autofill.api.rememberaccount.services.FormSourceAuthentifiantLinker
+import com.dashlane.autofill.rememberaccount.services.FormSourceAuthentifiantLinker
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
 import com.dashlane.util.matchDomain
 import com.dashlane.vault.model.urlDomain

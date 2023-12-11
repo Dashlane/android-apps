@@ -23,6 +23,7 @@ class UserAccountStorageImpl @Inject constructor(
         val preferences = userPreferencesManager.preferencesFor(username)
 
         preferences.putBoolean(ConstantsPrefs.OTP2SECURITY, userAccountInfo.otp2)
+        preferences.putString(ConstantsPrefs.ACCOUNT_TYPE, userAccountInfo.accountType.toString())
         val oldAccessKey = preferences.accessKey
         val newAccessKey = userAccountInfo.accessKey
         if (oldAccessKey.isNullOrEmpty()) {
@@ -57,13 +58,20 @@ class UserAccountStorageImpl @Inject constructor(
             val securitySettingsFlags = preferences.getLong(ConstantsPrefs.SECURITY_SETTINGS).toInt()
             val securitySettings = if (securitySettingsFlags == 0) null else UserSecuritySettings(securitySettingsFlags)
             val accessKey = preferences.accessKey ?: deviceInfoRepository.deviceId ?: return null
+            val accountType = preferences.accountType?.let { UserAccountInfo.AccountType.fromString(it) }
 
                 "account info for '$username'," +
                     " userIsOTP2: $userIsOTP2, " +
                     "null accessKey in preferences? ${preferences.accessKey == null}",
                 logToUserSupportFile = true
             )
-            UserAccountInfo(username.email, userIsOTP2, securitySettings, accessKey)
+            UserAccountInfo(
+                username = username.email,
+                otp2 = userIsOTP2,
+                securitySettings = securitySettings,
+                accessKey = accessKey,
+                accountType = accountType ?: UserAccountInfo.AccountType.MasterPassword
+            )
         } else {
             null
         }
@@ -72,5 +80,10 @@ class UserAccountStorageImpl @Inject constructor(
     override fun saveSecuritySettings(username: Username, securitySettings: UserSecuritySettings) {
         val preferences = userPreferencesManager.preferencesFor(username)
         preferences.putLong(ConstantsPrefs.SECURITY_SETTINGS, securitySettings.asFlags().toLong())
+    }
+
+    override fun saveAccountType(username: String, accountType: UserAccountInfo.AccountType) {
+        val preferences = userPreferencesManager.preferencesFor(username)
+        preferences.putString(ConstantsPrefs.ACCOUNT_TYPE, accountType.toString())
     }
 }

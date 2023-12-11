@@ -3,21 +3,13 @@
 
     <style name="Theme.Dashlane.Login" parent="Theme.Dashlane.Modal" />
 
-    <style name="Theme.Dashlane.Login.LockedOut" parent="Theme.Dashlane.LockedOut" />
-
     <style name="Theme.Dashlane.Login.TranslucentWindow">
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <style name="Theme.Dashlane.Login.Dialog" parent="Theme.Dashlane.Login.TranslucentWindow">
         <item name="android:windowIsFloating">true</item>
+        <item name="colorBiometricText">@color/text_inverse_catchy</item>
     </style>
 
-    <style name="Theme.Dashlane.Login.LockedOut.TranslucentWindow">
-        <item name="android:windowIsTranslucent">true</item>
-    </style>
-
-    <style name="Theme.Dashlane.Login.LockedOut.Dialog" parent="Theme.Dashlane.Login.LockedOut.TranslucentWindow">
-        <item name="android:windowIsFloating">true</item>
-    </style>
 </resources>

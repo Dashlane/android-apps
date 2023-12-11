@@ -20,7 +20,6 @@ import com.dashlane.premium.offer.common.model.ProductDetailsWrapper
 import com.dashlane.premium.offer.common.model.ProductPeriodicity
 import com.dashlane.premium.offer.details.view.OfferDetailsFragmentArgs
 import com.dashlane.premium.offer.list.model.OfferOverview
-import com.dashlane.premium.offer.list.view.OfferListFragment.Companion.userLockedOut
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -53,7 +52,7 @@ internal class OfferDetailsViewModel @Inject constructor(
     private val intendedPeriodicity: ProductPeriodicity = args.intendedPeriodicity
     private val origin: String? = args.origin
 
-    override val currentPageViewFlow: Flow<Pair<AnyPage, Boolean>>
+    override val currentPageViewFlow: Flow<AnyPage>
         get() = logger.currentPageViewFlow
 
     init {
@@ -120,15 +119,14 @@ internal class OfferDetailsViewModel @Inject constructor(
         when (serviceResult) {
             is ServiceResult.Success.Purchases -> {
                 val purchase = serviceResult.purchases.single()
-                val userLockedOut = userLockedOut(origin)
-                onPurchaseDone(product, purchase, userLockedOut)
-                purchase to userLockedOut
+                onPurchaseDone(product, purchase)
+                purchase
             }
 
             else -> null
         }
 
-    override fun onPurchaseDone(product: OfferDetails.Product, purchase: Purchase, userLockedOut: Boolean) {
+    override fun onPurchaseDone(product: OfferDetails.Product, purchase: Purchase) {
         logger.logPurchaseSuccess(
             productPeriodicity = intendedPeriodicity,
             offerType = offerType,

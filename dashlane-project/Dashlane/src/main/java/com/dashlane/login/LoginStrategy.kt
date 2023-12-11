@@ -8,29 +8,26 @@ import com.dashlane.login.LoginStrategy.Strategy.MONOBUCKET
 import com.dashlane.login.LoginStrategy.Strategy.NO_STRATEGY
 import com.dashlane.login.monobucket.MonobucketHelper
 import com.dashlane.login.pages.enforce2fa.HasEnforced2FaLimitUseCaseImpl
-import com.dashlane.login.pages.enforce2fa.HasEnforced2faLimitUseCase
 import com.dashlane.network.tools.authorization
-import com.dashlane.server.api.DashlaneApi
-import com.dashlane.server.api.endpoints.authentication.Auth2faSettingsService
 import com.dashlane.server.api.endpoints.devices.ListDevicesService
 import com.dashlane.session.Session
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability
 import com.dashlane.util.userfeatures.getDevicesLimitValue
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class LoginStrategy(
+@Singleton
+class LoginStrategy @Inject constructor(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val listDevicesService: ListDevicesService,
     private val premiumStatusManager: PremiumStatusManager,
-    private val hasEnforced2faLimitUseCase: HasEnforced2faLimitUseCase
+    private val hasEnforced2faLimitUseCase: HasEnforced2FaLimitUseCaseImpl
 ) {
     lateinit var monobucketHelper: MonobucketHelper
     lateinit var devices: MutableList<Device>
@@ -44,24 +41,6 @@ class LoginStrategy(
 
         ENFORCE_2FA,
     }
-
-    @Inject
-    constructor(
-        userFeaturesChecker: UserFeaturesChecker,
-        dashlaneApi: DashlaneApi,
-        premiumStatusManager: PremiumStatusManager,
-        teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
-        auth2faSettingsService: Auth2faSettingsService
-    ) : this(
-        userFeaturesChecker = userFeaturesChecker,
-        listDevicesService = dashlaneApi.endpoints.devices.listDevicesService,
-        premiumStatusManager = premiumStatusManager,
-        hasEnforced2faLimitUseCase = HasEnforced2FaLimitUseCaseImpl(
-            teamspaceAccessorProvider = teamspaceAccessorProvider,
-            auth2faSettingsService = auth2faSettingsService,
-            userFeaturesChecker = userFeaturesChecker
-        )
-    )
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     suspend fun getStrategy(session: Session, securityFeatureSet: Set<SecurityFeature>? = null): Strategy =

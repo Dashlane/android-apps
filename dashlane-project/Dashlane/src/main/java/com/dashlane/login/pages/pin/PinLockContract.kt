@@ -24,6 +24,8 @@ interface PinLockContract {
         fun setQuestion(question: String)
 
         fun initLogoutButton(text: String?, listener: View.OnClickListener)
+
+        fun hideLogoutButton()
     }
 
     interface Presenter : LoginLockBaseContract.Presenter {
@@ -56,5 +58,7 @@ interface PinLockContract {
         fun removeLastPinNumber()
 
         fun savePinValue()
+
+        fun canUseMasterPassword(): Boolean
     }
 }

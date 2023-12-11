@@ -1,7 +1,7 @@
 package com.dashlane.session.observer
 
-import com.dashlane.autofill.api.linkedservices.AppMetaDataToLinkedAppsMigration
-import com.dashlane.autofill.api.linkedservices.RememberToLinkedAppsMigration
+import com.dashlane.autofill.linkedservices.AppMetaDataToLinkedAppsMigration
+import com.dashlane.autofill.linkedservices.RememberToLinkedAppsMigration
 import com.dashlane.login.LoginInfo
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver

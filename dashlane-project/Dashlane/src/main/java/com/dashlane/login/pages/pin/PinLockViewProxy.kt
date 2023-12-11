@@ -10,7 +10,6 @@ import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.ui.widgets.PinCodeKeyboardView
 import com.dashlane.ui.widgets.PinCodeView
-import com.dashlane.util.getThemeAttrColor
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
 class PinLockViewProxy(view: View) :
@@ -31,7 +30,8 @@ class PinLockViewProxy(view: View) :
 
     private val mErrorColor = context.getColor(R.color.text_warning_standard)
     private val mDefaultColor = context.getColor(R.color.border_neutral_standard_idle)
-    private val mUnderLineFocusedColor = context.getThemeAttrColor(R.attr.colorControlActivated)
+    private val mUnderLineFilledColor = context.getColor(R.color.border_brand_standard_idle)
+    private val mUnderLineFocusedColor = context.getColor(R.color.border_brand_standard_active)
     private val mUnderLineDefaultColor = mDefaultColor
 
     override fun setupKeyboard(pinLockKeyboardListener: PinCodeKeyboardView.PinCodeKeyboardListener) {
@@ -43,7 +43,7 @@ class PinLockViewProxy(view: View) :
     }
 
     override fun setPinsVisible(quantity: Int) {
-        pinEnterArea.setPinsVisible(quantity, mUnderLineFocusedColor, mUnderLineDefaultColor)
+        pinEnterArea.setPinsVisible(quantity, mUnderLineFilledColor, mUnderLineFocusedColor, mUnderLineDefaultColor)
     }
 
     override fun enableAllKeyboardButtons(enabled: Boolean) {
@@ -110,8 +110,13 @@ class PinLockViewProxy(view: View) :
     }
 
     override fun initLogoutButton(text: String?, listener: View.OnClickListener) {
+        logoutButton.visibility = View.VISIBLE
         logoutButton.text = text
         logoutButton.setOnClickListener(listener)
+    }
+
+    override fun hideLogoutButton() {
+        logoutButton.visibility = View.GONE
     }
 
     private fun hideAllElementsExceptDots() {

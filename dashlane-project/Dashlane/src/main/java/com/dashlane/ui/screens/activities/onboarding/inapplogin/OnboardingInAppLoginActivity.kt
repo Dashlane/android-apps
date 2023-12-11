@@ -20,8 +20,6 @@ import com.dashlane.ui.screens.fragments.onboarding.inapplogin.OnboardingAccessi
 import com.dashlane.ui.screens.fragments.onboarding.inapplogin.OnboardingInAppLoginDone
 import com.dashlane.ui.screens.fragments.onboarding.inapplogin.OnboardingStep
 import com.dashlane.ui.screens.fragments.onboarding.inapplogin.adapter.OnboardingInAppLoginFragmentStatePagerAdapter
-import com.dashlane.useractivity.log.inject.UserActivityComponent
-import com.dashlane.useractivity.log.usage.UsageLogCode95
 import com.dashlane.util.getSerializableExtraCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -45,13 +43,6 @@ class OnboardingInAppLoginActivity : DashlaneActivity() {
     private var callOrigin: String? = null
 
     private var onboardingType: OnboardingType = OnboardingType.AUTO_FILL_API
-
-    private val logHelper: OnboardingInAppLoginUlHelper by lazy {
-        OnboardingInAppLoginUlHelper(
-            teamspaceRepository[session],
-            UserActivityComponent(this).currentSessionUsageLogRepository
-        )
-    }
 
     private var isSettingAutofillLaunched = false
 
@@ -85,7 +76,7 @@ class OnboardingInAppLoginActivity : DashlaneActivity() {
             onboardingType = it.getSerializableExtraCompat(EXTRA_ONBOARDING_TYPE) ?: OnboardingType.AUTO_FILL_API
         }
 
-        if (UsageLogCode95.From.REMINDER_NOTIFICATION.code == callOrigin) {
+        if (REMINDER_NOTIFICATION == callOrigin) {
             NotificationManagerCompat.from(this).cancel(AutoFillNotificationCreator.NOTIFICATION_ID)
         }
 
@@ -93,7 +84,6 @@ class OnboardingInAppLoginActivity : DashlaneActivity() {
             finish()
             return
         }
-        logHelper.sendUsageLog34()
 
         if (savedInstanceState != null) {
             userWentToAccessibilitySettings = savedInstanceState.getBoolean(
@@ -159,13 +149,9 @@ class OnboardingInAppLoginActivity : DashlaneActivity() {
         when {
             isEnableForCurrentOnBoarding -> {
                 userWentToAccessibilitySettings = false
-                logHelper.sendUsageLog95(
-                    UsageLogCode95.Action.SUCCESS,
-                    callOrigin,
-                    onboardingType.usageLog95Type
-                )
                 goToStep(OnboardingStep.CONFIRMATION, false)
             }
+
             userWentToAccessibilitySettings -> {
                 userWentToAccessibilitySettings = false
                 openDrawOnTopAuthorisationIfRequire()
@@ -179,10 +165,12 @@ class OnboardingInAppLoginActivity : DashlaneActivity() {
             
             (!isSettingAutofillLaunched) ->
                 launchAutoFillSetting(inAppLoginManager, true)
+
             isSettingAutofillLaunched && isEnableForCurrentOnBoarding -> {
                 viewPager?.visibility = View.VISIBLE
                 goToStep(OnboardingStep.CONFIRMATION, false)
             }
+
             else -> finish()
         }
     }
@@ -223,6 +211,7 @@ class OnboardingInAppLoginActivity : DashlaneActivity() {
     companion object {
         const val ORIGIN = "origin"
         const val EXTRA_ONBOARDING_TYPE = "extra_onboarding_type"
+        const val REMINDER_NOTIFICATION = "reminder_notification"
 
         private const val SAVED_STATE_CURRENT_POSITION = "saved_state_current_position"
         private const val SAVED_USER_WENT_TO_ACCESSIBILITY_SETTINGS =

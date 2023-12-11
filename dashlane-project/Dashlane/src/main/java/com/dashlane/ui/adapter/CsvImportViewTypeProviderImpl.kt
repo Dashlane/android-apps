@@ -4,14 +4,20 @@ import android.content.Context
 import android.view.View
 import android.widget.CheckBox
 import com.dashlane.R
-import com.dashlane.csvimport.CsvImportViewTypeProvider
+import com.dashlane.csvimport.csvimport.CsvImportViewTypeProvider
+import com.dashlane.item.subview.quickaction.QuickActionProvider
+import com.dashlane.navigation.Navigator
+import com.dashlane.session.SessionManager
+import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.ui.activities.fragments.list.ItemWrapperViewHolder
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.wrapper.DefaultVaultItemWrapper
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemDoubleWrapper
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.adapter.ItemListContext.Container
+import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.util.ViewTypeUtils
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
@@ -24,13 +30,29 @@ class CsvImportViewTypeProviderImpl(
 ) : VaultItemDoubleWrapper<SummaryObject.Authentifiant>(itemWrapper),
     CsvImportViewTypeProvider {
 
-    class Factory @Inject constructor() : CsvImportViewTypeProvider.Factory {
+    class Factory @Inject constructor(
+        private val vaultItemCopyService: VaultItemCopyService,
+        private val quickActionProvider: QuickActionProvider,
+        private val navigator: Navigator,
+        private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
+        private val sessionManager: SessionManager,
+        private val teamspaceRepository: TeamspaceManagerRepository
+    ) : CsvImportViewTypeProvider.Factory {
 
         override fun create(
             authentifiant: VaultItem<SyncObject.Authentifiant>,
             selected: Boolean
         ) = CsvImportViewTypeProviderImpl(
-            DefaultVaultItemWrapper(authentifiant.toSummary(), Container.CSV_IMPORT.asListContext()),
+            DefaultVaultItemWrapper(
+                vaultItemCopyService,
+                quickActionProvider,
+                authentifiant.toSummary(),
+                Container.CSV_IMPORT.asListContext(),
+                navigator,
+                dataIdentifierListTextResolver,
+                sessionManager,
+                teamspaceRepository,
+            ),
             selected
         )
     }

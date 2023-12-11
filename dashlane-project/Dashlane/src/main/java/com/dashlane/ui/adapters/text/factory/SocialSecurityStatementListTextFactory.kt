@@ -7,12 +7,12 @@ import com.dashlane.search.fields.SocialSecurityStatementField
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityUtil
+import com.dashlane.vault.util.IdentityNameHolderService
 
 class SocialSecurityStatementListTextFactory(
     private val context: Context,
     private val item: SummaryObject.SocialSecurityStatement,
-    private val identityUtil: IdentityUtil
+    private val identityNameHolderService: IdentityNameHolderService
 ) : DataIdentifierListTextFactory {
 
     override fun getLine1(): StatusText {
@@ -21,11 +21,11 @@ class SocialSecurityStatementListTextFactory(
 
     override fun getLine2(default: StatusText): StatusText {
         val hasNoIdentity = item.linkedIdentity.isSemanticallyNull() &&
-                (item.socialSecurityFullname.isSemanticallyNull() || item.dateOfBirth == null)
+            (item.socialSecurityFullname.isSemanticallyNull() || item.dateOfBirth == null)
         if (hasNoIdentity || item.isSocialSecurityNumberEmpty) {
             return default
         }
-        return StatusText(identityUtil.getOwner(item))
+        return StatusText(identityNameHolderService.getOwner(item))
     }
 
     override fun getLine2FromField(field: SearchField<*>): StatusText? {

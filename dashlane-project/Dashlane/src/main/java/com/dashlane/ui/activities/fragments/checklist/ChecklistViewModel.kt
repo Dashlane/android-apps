@@ -2,9 +2,10 @@ package com.dashlane.ui.activities.fragments.checklist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.navigation.Navigator
+import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.ui.activities.fragments.checklist.ChecklistData.ItemState
-import com.dashlane.ui.menu.MenuDef
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
@@ -16,7 +17,7 @@ class ChecklistViewModel @Inject constructor(
     private val provider: ChecklistDataProvider,
     private val checklistHelper: ChecklistHelper,
     private val navigator: Navigator,
-    private val menuPresenter: MenuDef.IPresenter
+    private val userPreferencesManager: UserPreferencesManager
 ) : ViewModel(), ChecklistViewModelContract {
 
     override val checkListDataFlow =
@@ -37,8 +38,8 @@ class ChecklistViewModel @Inject constructor(
         val m2d = getM2dChecklistItem()
         val isDismissable =
             addCredential?.state !== ItemState.TO_COMPLETE && checkDarkWebAlerts?.state !== ItemState.TO_COMPLETE &&
-                    activatedAutofill.state !== ItemState.TO_COMPLETE && m2d.state !== ItemState.TO_COMPLETE ||
-                    checklistHelper.isAccountOlderThan7Days()
+                activatedAutofill.state !== ItemState.TO_COMPLETE && m2d?.state !== ItemState.TO_COMPLETE ||
+                checklistHelper.isAccountOlderThan7Days()
         return ChecklistData(
             addCredential,
             checkDarkWebAlerts,
@@ -83,7 +84,11 @@ class ChecklistViewModel @Inject constructor(
         return item
     }
 
-    private fun getM2dChecklistItem(): ChecklistItem {
+    private fun getM2dChecklistItem(): ChecklistItem? {
+        if (UserAccountInfo.AccountType.fromString(userPreferencesManager.accountType) == UserAccountInfo.AccountType.InvisibleMasterPassword) {
+            return null
+        }
+
         val state = getCheckListStepState(
             provider.hasCompletedAndAcknowledgedM2D(),
             provider.hasFinishedM2D()
@@ -103,9 +108,7 @@ class ChecklistViewModel @Inject constructor(
     override fun onDismissChecklistClicked() {
         
         provider.setChecklistDismissed()
-        navigator.goToHome()
-        
-        menuPresenter.refreshMenuList()
+        navigator.goToHome() 
     }
 
     private fun onAddCredentialCompletionAcknowledged() {

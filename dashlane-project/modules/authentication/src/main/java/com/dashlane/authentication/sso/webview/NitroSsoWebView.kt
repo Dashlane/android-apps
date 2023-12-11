@@ -73,7 +73,7 @@ class NitroSsoWebView(
                             )
                         }
                         
-                        return WebResourceResponse("text/html", "utf-8", "".byteInputStream())
+                        WebResourceResponse("text/html", "utf-8", "".byteInputStream())
                     } else {
                         super.shouldInterceptRequest(view, request)
                     }
@@ -82,6 +82,9 @@ class NitroSsoWebView(
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                     if (!url.isUrlAllowed(trustedDomain)) {
                         onError(GetSsoInfoResult.Error.UnauthorizedNavigation)
+                        return
+                    } else if (url == NITRO_CALLBACK_URL) {
+                        
                         return
                     }
                 }
@@ -111,6 +114,7 @@ class NitroSsoWebView(
     companion object {
 
         private const val JS_INTERFACE = "Android"
+        private const val NITRO_CALLBACK_URL = "https://sso.nitro.dashlane.com/saml/callback"
 
         @Language("JS")
         private fun readSamlResponse(redirectionUrl: String): String = """

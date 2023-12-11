@@ -7,20 +7,13 @@ import com.dashlane.R
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.BaseLogger
-import com.dashlane.item.logger.Logger
 import com.dashlane.item.subview.action.ItemEditMenuAction
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.item.subview.edit.ItemEditValueSubView
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.readonly.EmptyLinkedServicesSubView
 import com.dashlane.item.subview.readonly.ItemLinkedServicesSubView
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.DataCounter
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.ui.VaultItemImageHelper
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.graphics.RoundRectDrawable
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -29,15 +22,7 @@ import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices
 import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps
 import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices.AssociatedDomains
 
-abstract class ItemScreenConfigurationProvider(
-    teamspaceAccessor: TeamspaceAccessor,
-    dataCounter: DataCounter,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
-) {
-
-    open val logger: Logger = BaseLogger(teamspaceAccessor, dataCounter, sessionManager, bySessionUsageLogRepository)
-
+abstract class ItemScreenConfigurationProvider {
     abstract fun createScreenConfiguration(
         context: Context,
         item: VaultItem<*>,
@@ -79,7 +64,7 @@ abstract class ItemScreenConfigurationProvider(
     }
 
     open fun gatherCollectionsFromUi(collectionSubView: ItemCollectionListSubView?) =
-        collectionSubView?.value?.value ?: emptyList()
+        collectionSubView?.value?.value?.filter { !it.second }?.map { it.first } ?: emptyList()
 
     private fun updateItemFromSubView(updatedItem: VaultItem<*>, subView: ItemSubView<*>): VaultItem<*>? {
         return when (subView) {
@@ -113,12 +98,10 @@ abstract class ItemScreenConfigurationProvider(
         }
         return when {
             linkedServices == null && (
-                item.syncObject.linkedServices == null || item.syncObject.linkedServices == LinkedServices(
-                null,
-                null
-            )
-            ) -> item
-
+                item.syncObject.linkedServices == null ||
+                    item.syncObject.linkedServices == LinkedServices(null, null) ||
+                    item.syncObject.linkedServices == LinkedServices(null, emptyList())
+                ) -> item
             item.syncObject.linkedServices == linkedServices -> item
             else -> item.copySyncObject { this.linkedServices = linkedServices }
         }

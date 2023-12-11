@@ -4,17 +4,18 @@ import android.content.Context
 import android.view.View
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.list.ItemWrapperViewHolder
-import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.activities.fragments.list.wrapper.toItemWrapper
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.vault.summary.SummaryObject
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-class VaultItemViewTypeProvider(val summaryObject: SummaryObject, val itemListContext: ItemListContext) :
-    DashlaneRecyclerAdapter.MultiColumnViewTypeProvider {
-
-    val itemWrapper: VaultItemWrapper<out SummaryObject>? = summaryObject.toItemWrapper(itemListContext)
+class VaultItemViewTypeProvider(
+    val summaryObject: SummaryObject,
+    val itemListContext: ItemListContext,
+    itemWrapperProvider: ItemWrapperProvider
+) : DashlaneRecyclerAdapter.MultiColumnViewTypeProvider {
+    val itemWrapper = itemWrapperProvider(summaryObject, itemListContext)
 
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = DEFAULT_ITEM_WRAPPER_VIEW_TYPE
 

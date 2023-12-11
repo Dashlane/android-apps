@@ -16,12 +16,14 @@ class SharingSyncCommunicatorImpl @Inject constructor(
         session: Authorization.User,
         itemUids: List<String>,
         itemGroupUids: List<String>,
-        userGroupUids: List<String>
+        userGroupUids: List<String>,
+        collectionUids: List<String>
     ): SharingSyncCommunicator.GetSharingResult {
         val request = SharingGetService.Request(
             itemIds = itemUids.map { SharingGetService.Request.ItemId(it) },
             itemGroupIds = itemGroupUids.map { SharingGetService.Request.ItemGroupId(it) },
             userGroupIds = userGroupUids.map { SharingGetService.Request.UserGroupId(it) },
+            collectionIds = collectionUids.map { SharingGetService.Request.CollectionId(it) }
         )
         return run {
             val response = sharingGetService.execute(session, request)
@@ -30,6 +32,7 @@ class SharingSyncCommunicatorImpl @Inject constructor(
                 itemGroups = sharing.itemGroups ?: emptyList(),
                 userGroups = sharing.userGroups ?: emptyList(),
                 itemContents = sharing.items ?: emptyList(),
+                collections = sharing.collections ?: emptyList()
             )
         }
     }

@@ -38,7 +38,7 @@
         android:gravity="center"
         android:text="@string/sso_complete_login_message"
         android:textAppearance="?textAppearanceHeadline1"
-        android:textColor="@color/text_inverse_catchy"
+        android:textColor="@color/text_neutral_catchy"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -7,13 +7,13 @@ import com.dashlane.R
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.help.newIntent
 import com.dashlane.masterpassword.ChangeMasterPasswordLogoutHelper
+import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.safelyStartBrowserActivity
-import com.dashlane.util.usagelogs.ViewLogger
 import com.skocken.presentation.presenter.BasePresenter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,10 +25,10 @@ class MigrationToSsoMemberIntroActivity : DashlaneActivity() {
     lateinit var changeMasterPasswordLogoutHelper: ChangeMasterPasswordLogoutHelper
 
     @Inject
-    lateinit var viewLogger: ViewLogger
+    lateinit var sessionRestorer: SessionRestorer
 
     @Inject
-    lateinit var sessionRestorer: SessionRestorer
+    lateinit var sessionManager: SessionManager
 
     override var requireUserUnlock = false
 
@@ -47,10 +47,9 @@ class MigrationToSsoMemberIntroActivity : DashlaneActivity() {
         setContentView(R.layout.activity_intro)
         val viewProxy = IntroScreenViewProxy(this)
         presenter = Presenter(
-            changeMasterPasswordLogoutHelper,
-            migrationToSsoMemberIntent,
-            viewLogger,
-            sessionRestorer,
+            logoutHelper = changeMasterPasswordLogoutHelper,
+            migrationToSsoMemberIntent = migrationToSsoMemberIntent,
+            sessionRestorer = sessionRestorer
         ).apply { setView(viewProxy) }
     }
 
@@ -61,7 +60,6 @@ class MigrationToSsoMemberIntroActivity : DashlaneActivity() {
     private class Presenter(
         private val logoutHelper: ChangeMasterPasswordLogoutHelper,
         private val migrationToSsoMemberIntent: Intent,
-        private val viewLogger: ViewLogger,
         sessionRestorer: SessionRestorer
     ) : BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
         IntroScreenContract.Presenter {
@@ -94,7 +92,11 @@ class MigrationToSsoMemberIntroActivity : DashlaneActivity() {
 
         override fun onClickLink(position: Int, label: Int) {
             activity?.run {
-                safelyStartBrowserActivity(HelpCenterLink.ARTICLE_SSO_LOGIN.newIntent(this, viewLogger))
+                safelyStartBrowserActivity(
+                    HelpCenterLink.ARTICLE_SSO_LOGIN.newIntent(
+                        context = this
+                    )
+                )
             }
         }
 

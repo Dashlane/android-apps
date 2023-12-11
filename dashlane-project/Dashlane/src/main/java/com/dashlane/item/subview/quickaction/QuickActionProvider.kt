@@ -1,318 +1,398 @@
 package com.dashlane.item.subview.quickaction
 
 import com.dashlane.item.subview.Action
+import com.dashlane.navigation.Navigator
+import com.dashlane.session.SessionManager
+import com.dashlane.session.repository.TeamspaceManagerRepository
+import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
-import com.dashlane.util.clipboard.vault.VaultItemFieldContentService
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.utils.Country
+import javax.inject.Inject
 
-@Suppress("LongMethod")
-fun SummaryObject.getQuickActions(
-    vaultContentService: VaultItemFieldContentService,
-    itemListContext: ItemListContext
-): List<Action> {
-    return when (this.syncObjectType) {
-        SyncObjectType.ADDRESS -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.Address,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.City,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.ZipCode,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.AUTHENTIFIANT -> {
-            return listOfNotNull(
+@Suppress("LargeClass")
+class QuickActionProvider @Inject constructor(
+    private val vaultItemCopyService: VaultItemCopyService,
+    private val sharingPolicyDataProvider: SharingPolicyDataProvider,
+    private val sessionManager: SessionManager,
+    private val teamspaceManagerRepository: TeamspaceManagerRepository,
+    private val navigator: Navigator
+) {
+    private val teamspaceManager: TeamspaceManager?
+        get() = sessionManager.session?.let { teamspaceManagerRepository.getTeamspaceManager(it) }
+
+    @Suppress("LongMethod")
+    fun getQuickActions(summaryObject: SummaryObject, itemListContext: ItemListContext): List<Action> {
+        return when (summaryObject.syncObjectType) {
+            SyncObjectType.ADDRESS -> listOfNotNull(
                 QuickActionCopy.createActionIfFieldExist(
-                    this,
-                    CopyField.Email,
-                    vaultContentService,
-                    itemListContext
+                    summaryObject,
+                    CopyField.Address,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
                 ),
                 QuickActionCopy.createActionIfFieldExist(
-                    this,
-                    CopyField.Login,
-                    vaultContentService,
-                    itemListContext
+                    summaryObject,
+                    CopyField.City,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
                 ),
                 QuickActionCopy.createActionIfFieldExist(
-                    this,
-                    CopyField.SecondaryLogin,
-                    vaultContentService,
-                    itemListContext
+                    summaryObject,
+                    CopyField.ZipCode,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
                 ),
-                QuickActionCopy.createActionIfFieldExist(
-                    this,
-                    CopyField.Password,
-                    vaultContentService,
-                    itemListContext
-                ),
-                QuickActionCopy.createActionIfFieldExist(
-                    this,
-                    CopyField.OtpCode,
-                    vaultContentService,
-                    itemListContext
-                ),
-                QuickActionOpenWebsite(
-                    (this as SummaryObject.Authentifiant).urlForGoToWebsite ?: "",
-                    linkedServices
-                ),
-                QuickActionShare.createActionIfShareAvailable(this),
-                QuickActionDelete.createActionIfCanDelete(this)
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
+            SyncObjectType.AUTHENTIFIANT -> {
+                return listOfNotNull(
+                    QuickActionCopy.createActionIfFieldExist(
+                        summaryObject,
+                        CopyField.Email,
+                        itemListContext,
+                        vaultItemCopyService,
+                        sharingPolicyDataProvider
+                    ),
+                    QuickActionCopy.createActionIfFieldExist(
+                        summaryObject,
+                        CopyField.Login,
+                        itemListContext,
+                        vaultItemCopyService,
+                        sharingPolicyDataProvider
+                    ),
+                    QuickActionCopy.createActionIfFieldExist(
+                        summaryObject,
+                        CopyField.SecondaryLogin,
+                        itemListContext,
+                        vaultItemCopyService,
+                        sharingPolicyDataProvider
+                    ),
+                    QuickActionCopy.createActionIfFieldExist(
+                        summaryObject,
+                        CopyField.Password,
+                        itemListContext,
+                        vaultItemCopyService,
+                        sharingPolicyDataProvider
+                    ),
+                    QuickActionCopy.createActionIfFieldExist(
+                        summaryObject,
+                        CopyField.OtpCode,
+                        itemListContext,
+                        vaultItemCopyService,
+                        sharingPolicyDataProvider
+                    ),
+                    QuickActionOpenWebsite(
+                        (summaryObject as SummaryObject.Authentifiant).urlForGoToWebsite ?: "",
+                        summaryObject.linkedServices
+                    ),
+                    QuickActionShare.createActionIfShareAvailable(
+                        summaryObject,
+                        sharingPolicyDataProvider,
+                        teamspaceManager
+                    ),
+                    QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+                )
+            }
+            SyncObjectType.BANK_STATEMENT -> getBankStatementQuickAction(
+                summaryObject as SummaryObject.BankStatement,
+                itemListContext,
+                vaultItemCopyService,
+                sharingPolicyDataProvider
+            )
+            SyncObjectType.DRIVER_LICENCE -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.DriverLicenseNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.FISCAL_STATEMENT -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.TaxNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.TaxOnlineNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.ID_CARD -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.IdsNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.PASSPORT -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PassportNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.PAYMENT_CREDIT_CARD -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PaymentsNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PaymentsSecurityCode,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.PAYMENT_PAYPAL -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PayPalLogin,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PayPalPassword,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.SECURE_NOTE -> listOfNotNull(
+                QuickActionShare.createActionIfShareAvailable(
+                    summaryObject,
+                    sharingPolicyDataProvider,
+                    teamspaceManager
+                ),
+                QuickActionOpenAttachment.createAttachmentsAction(summaryObject),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.IDENTITY -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.FirstName,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.LastName,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.MiddleName,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.IdentityLogin,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.COMPANY -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.CompanyName,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.CompanyTitle,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.EMAIL -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.JustEmail,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.PERSONAL_WEBSITE -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PersonalWebsite,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.PHONE -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PhoneNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+            SyncObjectType.SOCIAL_SECURITY_STATEMENT -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.SocialSecurityNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+
+            SyncObjectType.PASSKEY -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.PasskeyDisplayName,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
+            )
+
+            else -> emptyList()
         }
-        SyncObjectType.BANK_STATEMENT -> getBankStatementQuickAction(
-            this as SummaryObject.BankStatement,
-            vaultContentService,
-            itemListContext
-        )
-        SyncObjectType.DRIVER_LICENCE -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.DriverLicenseNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopyIdentity.createActionIfIdentityExist(this),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.FISCAL_STATEMENT -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.TaxNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.TaxOnlineNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.ID_CARD -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.IdsNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopyIdentity.createActionIfIdentityExist(this),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.PASSPORT -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.PassportNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopyIdentity.createActionIfIdentityExist(this),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.PAYMENT_CREDIT_CARD -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.PaymentsNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.PaymentsSecurityCode,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.PAYMENT_PAYPAL -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.PayPalLogin,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.PayPalPassword,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.SECURE_NOTE -> listOfNotNull(
-            QuickActionShare.createActionIfShareAvailable(this),
-            QuickActionOpenAttachment.createAttachmentsAction(this),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.IDENTITY -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.FirstName,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.LastName,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.MiddleName,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.IdentityLogin,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.COMPANY -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.CompanyName,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.CompanyTitle,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.EMAIL -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.JustEmail,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.PERSONAL_WEBSITE -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.PersonalWebsite,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.PHONE -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.PhoneNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        SyncObjectType.SOCIAL_SECURITY_STATEMENT -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                this,
-                CopyField.SocialSecurityNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopyIdentity.createActionIfIdentityExist(this),
-            QuickActionDelete.createActionIfCanDelete(this)
-        )
-        else -> emptyList()
     }
-}
 
-@Suppress("LongMethod")
-internal fun getBankStatementQuickAction(
-    summaryObject: SummaryObject.BankStatement,
-    vaultContentService: VaultItemFieldContentService,
-    itemListContext: ItemListContext
-): List<Action> {
-    return listOfNotNull(
-        QuickActionCopy.createActionIfFieldExist(
-            summaryObject,
-            CopyField.BankAccountBank,
-            vaultContentService,
-            itemListContext
-        )
-    ) + when (summaryObject.bankAccountCountry) {
-        Country.Mexico -> listOfNotNull(
+    @Suppress("LongMethod")
+    private fun getBankStatementQuickAction(
+        summaryObject: SummaryObject.BankStatement,
+        itemListContext: ItemListContext,
+        vaultItemCopyService: VaultItemCopyService,
+        sharingPolicyDataProvider: SharingPolicyDataProvider
+    ): List<Action> {
+        return listOfNotNull(
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
-                CopyField.BankAccountBicSwift,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
+                CopyField.BankAccountBank,
+                itemListContext,
+                vaultItemCopyService,
+                sharingPolicyDataProvider
+            )
+        ) + when (summaryObject.bankAccountCountry) {
+            Country.Mexico -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountBicSwift,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountClabe,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                )
+            )
+            Country.UnitedKingdom -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountSortCode,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountAccountNumber,
+
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                )
+            )
+            Country.UnitedStates -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountRoutingNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountAccountNumber,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                )
+            )
+            else -> listOfNotNull(
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountBicSwift,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                ),
+                QuickActionCopy.createActionIfFieldExist(
+                    summaryObject,
+                    CopyField.BankAccountIban,
+                    itemListContext,
+                    vaultItemCopyService,
+                    sharingPolicyDataProvider
+                )
+            )
+        } + listOfNotNull(
+            QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
-                CopyField.BankAccountClabe,
-                vaultContentService,
-                itemListContext
+                sharingPolicyDataProvider,
+                navigator
             )
         )
-        Country.UnitedKingdom -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                summaryObject,
-                CopyField.BankAccountSortCode,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                summaryObject,
-                CopyField.BankAccountAccountNumber,
-                vaultContentService,
-                itemListContext
-            )
-        )
-        Country.UnitedStates -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                summaryObject,
-                CopyField.BankAccountRoutingNumber,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                summaryObject,
-                CopyField.BankAccountAccountNumber,
-                vaultContentService,
-                itemListContext
-            )
-        )
-        else -> listOfNotNull(
-            QuickActionCopy.createActionIfFieldExist(
-                summaryObject,
-                CopyField.BankAccountBicSwift,
-                vaultContentService,
-                itemListContext
-            ),
-            QuickActionCopy.createActionIfFieldExist(
-                summaryObject,
-                CopyField.BankAccountIban,
-                vaultContentService,
-                itemListContext
-            )
-        )
-    } + listOfNotNull(QuickActionDelete.createActionIfCanDelete(summaryObject))
+    }
 }

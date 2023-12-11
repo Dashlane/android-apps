@@ -21,5 +21,7 @@ interface BiometricContract {
         fun createMasterPasswordResetIntroActivityIntent(): Intent?
 
         fun unlockWeakBiometric(): Boolean
+
+        fun isAccountTypeMasterPassword(): Boolean
     }
 }

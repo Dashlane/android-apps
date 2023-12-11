@@ -13,7 +13,8 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,8 +30,8 @@ class SharingUserForItemsViewModel @Inject constructor(
     override val itemId =
         SharingUserForItemsFragmentArgs.fromSavedStateHandle(savedStateHandle).argsItemUid
 
-    override val uiState: MutableStateFlow<SharingUsersForItemViewModelContract.UIState> =
-        MutableStateFlow(SharingUsersForItemViewModelContract.UIState.Loading)
+    override val uiState: MutableSharedFlow<SharingUsersForItemViewModelContract.UIState> =
+        MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     private val dataList = mutableListOf<SharingModels>()
 

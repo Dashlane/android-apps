@@ -20,4 +20,7 @@ interface UserAccountStorage {
         saveSecuritySettings(Username.ofEmail(username), securitySettings)
 
     fun saveSecuritySettings(username: Username, securitySettings: UserSecuritySettings)
+
+    
+    fun saveAccountType(username: String, accountType: UserAccountInfo.AccountType)
 }

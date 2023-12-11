@@ -1,6 +1,6 @@
 package com.dashlane.autofill.core
 
-import com.dashlane.autofill.api.rememberaccount.view.AutofillLinkServiceLogger
+import com.dashlane.autofill.rememberaccount.view.AutofillLinkServiceLogger
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource

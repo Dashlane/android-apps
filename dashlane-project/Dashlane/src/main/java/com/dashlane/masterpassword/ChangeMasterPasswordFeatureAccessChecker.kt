@@ -10,12 +10,13 @@ class ChangeMasterPasswordFeatureAccessChecker @Inject constructor(
     private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>
 ) {
     @JvmOverloads
-    fun canAccessFeature(fromMigrationToMasterPasswordUser: Boolean = false) = when {
-        
-        !masterPasswordChanger.canChangeMasterPassword -> false
-        
-        fromMigrationToMasterPasswordUser -> true
-        
-        else -> teamspaceAccessorProvider.get()?.isSsoUser == false
+    fun canAccessFeature(fromMigrationToMasterPasswordUser: Boolean = false): Boolean {
+        return when {
+            !masterPasswordChanger.canChangeMasterPassword -> false
+            
+            fromMigrationToMasterPasswordUser -> true
+            
+            else -> teamspaceAccessorProvider.get()?.isSsoUser == false
+        }
     }
 }

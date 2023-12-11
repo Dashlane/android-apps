@@ -19,7 +19,8 @@ import com.dashlane.item.subview.action.NewShareMenuAction
 import com.dashlane.item.subview.action.ShareDetailsAction
 import com.dashlane.item.subview.action.ShowAttachmentsMenuAction
 import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
-import com.dashlane.item.subview.provider.ItemScreenConfigurationAuthentifiantProvider
+import com.dashlane.item.subview.provider.credential.ItemScreenConfigurationAuthentifiantProvider
+import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.util.DeviceUtils
 import com.dashlane.util.showToaster
@@ -39,6 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.text.Collator
 
 class ItemEditViewPresenter :
     BasePresenter<ItemEditViewContract.DataProvider, ItemEditViewContract.View>(),
@@ -47,6 +49,7 @@ class ItemEditViewPresenter :
     override val isSecureNote: Boolean
         get() = tryOrNull { provider.vaultItem.syncObject is SyncObject.SecureNote } ?: false
     lateinit var sharingPolicyDataProvider: SharingPolicyDataProvider
+    var teamspaceManager: TeamspaceManager? = null
 
     private lateinit var currentOptions: ItemEditViewSetupOptions
 
@@ -91,7 +94,7 @@ class ItemEditViewPresenter :
             val canShare = !isNewItem(vaultItem) && !provider.isEditMode &&
                     sharingPolicyDataProvider.canShareItem(vaultItem.toSummary()) && !summaryObject.hasAttachments()
             if (canShare) {
-                allMenus.add(NewShareMenuAction(vaultItem))
+                allMenus.add(NewShareMenuAction(vaultItem, teamspaceManager))
             }
             if (provider.isEditMode) {
                 allMenus.add(
@@ -161,12 +164,14 @@ class ItemEditViewPresenter :
         }
     }
 
-    private fun addCollections(collections: List<String>) {
+    private fun addCollections(collections: List<Pair<String, Boolean>>) {
         val subviews = provider.getScreenConfiguration().itemSubViews
         subviews.forEach { subview ->
             when (subview) {
                 is ItemCollectionListSubView -> {
-                    subview.value.value = (subview.value.value.toMutableList() + collections).sorted()
+                    subview.value.value = (subview.value.value + collections).sortedWith(
+                        compareBy(Collator.getInstance()) { (name, _) -> name }
+                    )
                 }
             }
         }
@@ -272,7 +277,7 @@ class ItemEditViewPresenter :
             setupJob?.join()
             val selectedCollections =
                 data?.getStringArrayExtra(CollectionSelectorActivity.RESULT_TEMPORARY_COLLECTIONS)?.toList()
-            selectedCollections?.let { addCollections(it) }
+            selectedCollections?.let { addCollections(it.map { name -> name to false }) }
 
             if (!provider.isEditMode) {
                 provider.save(context!!, provider.getScreenConfiguration().itemSubViews)

@@ -12,6 +12,8 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import com.dashlane.R
+import com.dashlane.util.animation.fadeIn
+import com.dashlane.util.animation.fadeOut
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.graphics.ViewAnimatorPager
 import com.dashlane.util.onLifecycleEvent
@@ -41,7 +43,8 @@ class CreateAccountViewProxy(rootView: View) :
                     .alpha(1.0f)
                     .translationY(0.0f)
             } else {
-                val bottomMargin = (nextButton.layoutParams as ConstraintLayout.LayoutParams).bottomMargin
+                val bottomMargin =
+                    (nextButton.layoutParams as ConstraintLayout.LayoutParams).bottomMargin
                 nextButton.animate()
                     .setInterpolator(FastOutLinearInInterpolator())
                     .alpha(0.0f)
@@ -49,10 +52,16 @@ class CreateAccountViewProxy(rootView: View) :
             }
         }
     }
+    override var mplessButtonVisible: Boolean
+        get() = mplessButton.visibility == View.VISIBLE
+        set(value) {
+            if (value) mplessButton.fadeIn() else mplessButton.fadeOut()
+        }
 
     private val logo: View = findViewByIdEfficient(R.id.logo)!!
     private val progressBar: ProgressBar = findViewByIdEfficient(R.id.view_login_progress)!!
     private val nextButton: Button = findViewByIdEfficient(R.id.view_next)!!
+    private val mplessButton: Button = findViewByIdEfficient(R.id.view_passwordless_button)!!
     private val minContentHeight = resources.getDimensionPixelSize(R.dimen.login_content_min_height)
 
     private var showLogo by Delegates.observable(true) { _, oldValue, newValue ->
@@ -75,7 +84,12 @@ class CreateAccountViewProxy(rootView: View) :
                 ConstraintSet().run {
                     clone(root)
                     clear(R.id.view_login_content, ConstraintSet.TOP)
-                    connect(R.id.view_login_content, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+                    connect(
+                        R.id.view_login_content,
+                        ConstraintSet.TOP,
+                        ConstraintSet.PARENT_ID,
+                        ConstraintSet.TOP
+                    )
                     applyTo(root)
                 }
             }
@@ -84,6 +98,7 @@ class CreateAccountViewProxy(rootView: View) :
 
     init {
         nextButton.setOnClickListener { presenter.onNextClicked() }
+        mplessButton.setOnClickListener { presenter.onMplessSetupClicked() }
 
         root.addOnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ ->
             val height = bottom - top

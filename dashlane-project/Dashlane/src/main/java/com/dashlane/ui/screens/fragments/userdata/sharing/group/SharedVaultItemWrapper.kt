@@ -6,8 +6,8 @@ import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.list.ItemWrapperViewHolder
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.activities.fragments.list.wrapper.toItemWrapper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
 import com.dashlane.ui.adapter.HeaderItem
@@ -20,15 +20,19 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
-class SharedVaultItemWrapper constructor(
+class SharedVaultItemWrapper(
     context: Context,
     val sharedItem: SharingModels,
+    val itemWrapperProvider: ItemWrapperProvider,
     val onPendingMenuClick: (View, SharingModels) -> Unit,
     val onAcceptedMenuClick: (View, SharingModels) -> Unit
 ) : MultiColumnViewTypeProvider, DiffUtilComparator<SharedVaultItemWrapper> {
 
     val itemWrapper: VaultItemWrapper<out SummaryObject>
-        get() = sharedItem.item.toItemWrapper(ItemListContext.Container.SHARING.asListContext())!!
+        get() = itemWrapperProvider(
+            sharedItem.item,
+            ItemListContext.Container.SHARING.asListContext(),
+        )!!
     private val isAdmin: Boolean
         get() = sharedItem.isAdmin
     private val isPending: Boolean
@@ -45,9 +49,9 @@ class SharedVaultItemWrapper constructor(
 
     override fun isContentTheSame(item: SharedVaultItemWrapper): Boolean =
         item.title == title &&
-                item.description == description &&
-                item.sharedItem.sharingStatusResource == sharedItem.sharingStatusResource &&
-                item.sharedItem.isAdmin == sharedItem.isAdmin
+            item.description == description &&
+            item.sharedItem.sharingStatusResource == sharedItem.sharingStatusResource &&
+            item.sharedItem.isAdmin == sharedItem.isAdmin
 
     class ItemViewHolder(itemView: View) : EfficientViewHolder<SharedVaultItemWrapper>(itemView) {
         private val itemWrapperViewHolder: ItemWrapperViewHolder

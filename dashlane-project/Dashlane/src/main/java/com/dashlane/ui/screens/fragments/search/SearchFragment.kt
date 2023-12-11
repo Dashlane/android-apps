@@ -19,13 +19,15 @@ import com.dashlane.events.register
 import com.dashlane.events.unregister
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.search.MatchedSearchResult
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
-import com.dashlane.ui.activities.fragments.list.action.ActionItemLogger
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
+import com.dashlane.ui.adapters.text.factory.SearchListTextResolver
 import com.dashlane.ui.fab.FabDef
 import com.dashlane.ui.fab.FabPresenter
 import com.dashlane.ui.screens.fragments.search.ui.SearchListViewHelper
@@ -42,15 +44,13 @@ import com.dashlane.vault.util.valueOfFromDataIdentifier
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class SearchFragment :
-    AbstractContentFragment(),
-    EfficientAdapter.OnItemClickListener<ViewTypeProvider> {
+class SearchFragment : AbstractContentFragment(), EfficientAdapter.OnItemClickListener<ViewTypeProvider> {
 
     @Inject
     lateinit var searchService: SearchService
@@ -61,11 +61,20 @@ class SearchFragment :
     @Inject
     lateinit var appEvents: AppEvents
 
+    @Inject
+    lateinit var searchListTextResolver: SearchListTextResolver
+
+    @Inject
+    lateinit var quickActionProvider: QuickActionProvider
+
+    @Inject
+    lateinit var itemWrapperProvider: ItemWrapperProvider
+
     private val searchViewModel: SearchViewModel by viewModels()
     private val searchLogger: SearchLogger
-            by lazy {
-                SearchLogger(logRepository)
-            }
+        by lazy {
+            SearchLogger(logRepository)
+        }
 
     private val adapter = DashlaneRecyclerAdapter<ViewTypeProvider>()
     private var searchResultView: RecyclerView? = null
@@ -97,7 +106,7 @@ class SearchFragment :
         ) { item: Any? -> item as? VaultItemWrapper<*> }
         setHasOptionsMenu(true)
 
-        fabPresenter = FabPresenter().also {
+        fabPresenter = FabPresenter(navigator).also {
             val fabViewProxy = searchService.provideFabViewProxy(layout)
             it.setView(fabViewProxy)
             fabViewProxy.setFilter(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
@@ -120,8 +129,6 @@ class SearchFragment :
         searchViewModel.latestSearchResult.observe(this) { searchResult ->
             onLoaded(searchResult)
         }
-
-        searchViewModel.reloadData()
         searchViewModel.latestSearchResult.value?.let {
             searchViewModel.searchFromQuery(it.searchRequest)
         }
@@ -131,7 +138,7 @@ class SearchFragment :
         super.onPrepareOptionsMenu(menu)
         tryOrNull {
             val item = menu.findItem(R.id.action_search)
-            mSearchView = (item.actionView as SearchView).apply {
+            searchView = (item.actionView as SearchView).apply {
                 imeOptions =
                     EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 setOnCloseListener(this@SearchFragment)
@@ -157,12 +164,12 @@ class SearchFragment :
         )
     }
 
-    override fun onQueryTextChange(newText: String?): Boolean {
+    override fun onQueryTextChange(newText: String): Boolean {
         if (!isAdded || !isVisible || isRemoving) {
             return false
         }
         loadingView?.visibility = View.VISIBLE
-        val request = if (newText.isNullOrEmpty()) {
+        val request = if (newText.isEmpty()) {
             searchService.getDefaultSearchRequest()
         } else {
             SearchRequest.FromQuery(newText)
@@ -187,29 +194,25 @@ class SearchFragment :
         position: Int
     ) {
         if (item is VaultItemWrapper<*>) {
-            onVaultItemClick(item.itemObject, position)
+            onVaultItemClick(item.summaryObject)
         } else if (item is SearchableSettingInRecyclerView) {
             onSettingItemClick(item)
         }
     }
 
     override fun onClose(): Boolean {
-        hideKeyboard(mSearchView)
+        hideKeyboard(searchView)
         searchService.popBackStack()
         return false
     }
 
-    private fun onVaultItemClick(vaultItem: SummaryObject?, position: Int) {
+    private fun onVaultItemClick(vaultItem: SummaryObject?) {
         if (vaultItem == null) {
             return
         }
         closeSearchView()
         val type = vaultItem.valueOfFromDataIdentifier()
-        val itemLogger = ActionItemLogger.create()
-        if (searchViewModel.latestSearchResult.value?.searchRequest is SearchRequest.DefaultRequest) {
-            itemLogger.sendOpenFromSearchMostSearchedLog((position - 1).toString()) 
-        } else {
-            val activity = activity
+        if (searchViewModel.latestSearchResult.value?.searchRequest !is SearchRequest.DefaultRequest) {
             if (activity != null && type != null) {
                 searchLogger.logClick(
                     typedCharCount = searchViewModel.latestQuery.charCount(),
@@ -220,7 +223,6 @@ class SearchFragment :
                 itemId = vaultItem.id,
                 syncObjectType = vaultItem.syncObjectType
             )
-            itemLogger.sendOpenFromSearchResultLog()
         }
         searchService.navigateToItem(vaultItem)
     }
@@ -234,13 +236,13 @@ class SearchFragment :
     }
 
     private fun closeSearchView() {
-        if (mSearchView != null) {
-            mSearchView.setOnQueryTextListener(null)
-            mSearchView.setOnSearchClickListener(null)
-            mSearchView.setOnCloseListener(null)
-            mSearchView.setQuery(null, false)
-            mSearchView.clearFocus()
-            mSearchView.isIconified = true
+        searchView?.let { searchView ->
+            searchView.setOnQueryTextListener(null)
+            searchView.setOnSearchClickListener(null)
+            searchView.setOnCloseListener(null)
+            searchView.setQuery(null, false)
+            searchView.clearFocus()
+            searchView.isIconified = true
         }
     }
 
@@ -268,7 +270,9 @@ class SearchFragment :
                     requireContext(),
                     list,
                     request,
-                    (request as? SearchRequest.FromQuery)?.query
+                    (request as? SearchRequest.FromQuery)?.query,
+                    searchListTextResolver,
+                    itemWrapperProvider
                 )
             )
             searchResultView?.scrollToPosition(0) 

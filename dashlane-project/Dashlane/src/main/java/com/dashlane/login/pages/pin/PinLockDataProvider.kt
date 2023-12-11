@@ -1,8 +1,9 @@
 package com.dashlane.login.pages.pin
 
+import com.dashlane.account.UserAccountInfo
+import com.dashlane.account.UserAccountStorage
 import com.dashlane.core.KeyChainHelper
 import com.dashlane.hermes.LogRepository
-import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.login.LoginLogger
 import com.dashlane.login.LoginMode
 import com.dashlane.login.LoginSuccessIntentFactory
@@ -13,18 +14,14 @@ import com.dashlane.login.lock.LockValidator
 import com.dashlane.login.pages.LoginLockBaseDataProvider
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class PinLockDataProvider @Inject constructor(
     @ApplicationCoroutineScope
@@ -34,17 +31,13 @@ class PinLockDataProvider @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val keyChainHelper: KeyChainHelper,
+    private val userAccountStorage: UserAccountStorage,
     successIntentFactory: LoginSuccessIntentFactory,
     lockManager: LockManager,
-    inAppLoginManager: InAppLoginManager,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     logRepository: LogRepository
 ) : LoginLockBaseDataProvider<PinLockContract.Presenter>(
     lockManager,
-    successIntentFactory,
-    inAppLoginManager,
-    sessionManager,
-    bySessionUsageLogRepository
+    successIntentFactory
 ),
     PinLockContract.DataProvider {
 
@@ -75,6 +68,7 @@ class PinLockDataProvider @Inject constructor(
                     delay(10)
                     nextStep(userPin.toString(), disableAnimationEffect)
                 }
+
                 else -> presenter.launch {
                     
                     delay(10)
@@ -94,13 +88,12 @@ class PinLockDataProvider @Inject constructor(
                 presenter.onRequestReenterPin()
                 presenter.clearInput()
             }
+
             1 -> {
                 if (isPinMatching(userInput)) {
                     presenter.newPinConfirmed(disableAnimationEffect)
                 } else {
                     currentStep = 0
-
-                    logUsageLog35Pin(UsageLogConstant.ActionType.pinCodeDidNotMatch)
 
                     presenter.animateError()
 
@@ -112,15 +105,13 @@ class PinLockDataProvider @Inject constructor(
 
     private fun checkInput(userInput: String) {
         if (lockManager.unlock(LockPass.ofPin(userInput))) {
-            usageLogUnlock()
             loginLogger.logSuccess(loginMode = LoginMode.Pin)
             presenter.onUnlockSuccess()
         } else {
-            usageLogFailedUnlockAttempt()
             loginLogger.logWrongPin()
             lockManager.addFailUnlockAttempt()
             if (lockManager.hasFailedUnlockTooManyTimes()) {
-                presenter.logoutTooManyAttempts(null)
+                presenter.logoutTooManyAttempts(errorMessage = null, showToast = canUseMasterPassword())
             } else {
                 presenter.onUnlockError()
             }
@@ -139,7 +130,7 @@ class PinLockDataProvider @Inject constructor(
     override fun savePinValue() {
         sessionManager.session?.let { session ->
             keyChainHelper.initializeKeyStoreIfNeeded(session.userId)
-            lockRepository.getLockManager(session).setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
+            if (canUseMasterPassword()) lockRepository.getLockManager(session).setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
         }
 
         userPreferencesManager
@@ -149,30 +140,9 @@ class PinLockDataProvider @Inject constructor(
         applicationCoroutineScope.launch {
             userSecureStorageManager.storePin(sessionManager.session, pin)
         }
-
-        logUsageLog35Settings(UsageLogConstant.ActionType.usePinCodeOn)
-        if (!lockSetting.isPinSetterReset) {
-            logUsageLog35Pin(UsageLogConstant.ActionType.setupSetPinSelected)
-        } else {
-            logUsageLog35Pin(UsageLogConstant.ActionType.changePinCode)
-        }
     }
 
-    private fun logUsageLog35Pin(action: String) {
-        logUsageLog35(UsageLogConstant.ViewType.pin, action)
-    }
-
-    private fun logUsageLog35Settings(action: String) {
-        logUsageLog35(UsageLogConstant.ViewType.settings, action)
-    }
-
-    private fun logUsageLog35(type: String, action: String) {
-        bySessionUsageLogRepository[sessionManager.session]
-            ?.enqueue(
-                UsageLogCode35(
-                    type = type,
-                    action = action
-                )
-            )
+    override fun canUseMasterPassword(): Boolean {
+        return sessionManager.session?.username?.let { userAccountStorage[it]?.accountType is UserAccountInfo.AccountType.MasterPassword } ?: true
     }
 }

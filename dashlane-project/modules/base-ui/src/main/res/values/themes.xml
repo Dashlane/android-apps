@@ -9,14 +9,6 @@
         <item name="android:statusBarColor">#32000000</item>
     </style>
 
-    <style name="Theme.Dashlane.LockedOut" parent="Theme.Dashlane.NoActionBar.PrimaryBackground">
-        
-        <item name="colorPrimary">@color/brand_dash_green_00</item>
-        <item name="colorPrimaryDark">#0B2A31</item>
-        <item name="colorOnPrimary">@color/brand_white</item>
-        <item name="colorAccentOnPrimary">@color/text_inverse_catchy</item>
-    </style>
-
     <style name="Theme.Dashlane.DayNight" parent="Base.Theme.Dashlane">
         
         <item name="colorPrimary">@color/brand_mid_green_05</item>
@@ -27,10 +19,7 @@
         <item name="colorOnSecondary">@color/brand_white</item>
     </style>
 
-    <style name="Base.Theme.Dashlane.DayNight" parent="Theme.MaterialComponents.Light">
-        
-        <item name="colorAccentOnPrimary">@color/text_brand_standard</item>
-    </style>
+    <style name="Base.Theme.Dashlane.DayNight" parent="Theme.MaterialComponents.Light" />
 
     <style name="Base.Theme.Dashlane" parent="Base.Theme.Dashlane.DayNight">
         
@@ -38,11 +27,11 @@
 
         <item name="colorOnError">@color/brand_white</item>
 
-        <item name="colorTextCatchy">@color/text_neutral_catchy</item>
         <item name="colorOnBackground">@color/text_neutral_standard</item>
         <item name="colorOnBackgroundMedium">@color/text_neutral_quiet</item>
         <item name="colorOnSurface">@color/text_neutral_standard</item>
 
+        <item name="colorBiometricText">@color/text_neutral_catchy</item>
 
         <item name="android:textColorHint">?colorOnBackgroundMedium</item>
 
@@ -127,27 +116,6 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">#32000000</item>
-    </style>
-
-    <style name="Theme.Dashlane.NoActionBar.PrimaryBackground">
-        <item name="android:windowBackground">@color/container_agnostic_inverse_standard</item>
-
-        <item name="colorError">@color/brand_white</item>
-
-        <item name="colorTextCatchy">@color/text_inverse_catchy</item>
-        <item name="colorOnBackground">@color/text_inverse_standard</item>
-        <item name="colorOnBackgroundMedium">@color/text_inverse_quiet</item>
-        <item name="colorOnError">@color/brand_validator_red</item>
-
-        
-        <item name="autoCompleteTextViewStyle">
-            @style/Widget.Dashlane.AutoCompleteTextView.OnPrimary
-        </item>
-        <item name="borderlessButtonStyle">@style/Widget.Dashlane.TextButton.Inverse</item>
-        <item name="checkboxStyle">@style/Widget.Dashlane.Checkbox.Inverse</item>
-        <item name="editTextStyle">@style/Widget.Dashlane.EditText.Inverse</item>
-        <item name="switchStyle">@style/Widget.Dashlane.Switch.Inverse</item>
-        <item name="textInputStyle">@style/Widget.Dashlane.TextInputLayout.Inverse</item>
     </style>
 
     <style name="Theme.Dashlane.NoActionBar.DrawsStatusBarBackground">

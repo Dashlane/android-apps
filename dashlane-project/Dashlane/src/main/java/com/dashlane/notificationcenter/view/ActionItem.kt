@@ -78,17 +78,6 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val action: NotificationCenterDef.Presenter.() -> Unit = { startAddOnePassword() }
     }
 
-    data class ChromeImportActionItem(
-        override val actionItemsRepository: NotificationCenterRepository,
-        override val section: ActionItemSection
-    ) : ActionItem {
-        override val type: ActionItemType = ActionItemType.CHROME_IMPORT
-        override val title: Int = R.string.action_item_chrome_import_title
-        override val description: Int = R.string.action_item_chrome_import_description
-        override val icon: Int = R.drawable.ic_action_item_chrome_import
-        override val action: NotificationCenterDef.Presenter.() -> Unit = { startChromeImport() }
-    }
-
     data class BiometricRecoveryActionItem(
         override val actionItemsRepository: NotificationCenterRepository,
         private val hasBiometricLockType: Boolean

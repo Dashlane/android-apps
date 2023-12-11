@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.notificationcenter.NotificationCenterDataProvider
-import com.dashlane.notificationcenter.NotificationCenterLogger
 import com.dashlane.notificationcenter.NotificationCenterPresenter
 import com.dashlane.notificationcenter.NotificationCenterViewProxy
 import com.dashlane.notificationcenter.view.ActionItemSection
@@ -17,15 +16,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class NotificationCenterSectionDetailsFragment : Fragment(), NotificationCenterLogger.OriginProvider {
+class NotificationCenterSectionDetailsFragment : Fragment() {
     @Inject
     lateinit var dataProvider: NotificationCenterDataProvider
 
     @Inject
     lateinit var presenter: NotificationCenterPresenter
-
-    override val origin: String
-        get() = NotificationCenterLogger.ORIGIN
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.activity_notification_center_details, null)
@@ -53,7 +49,7 @@ class NotificationCenterSectionDetailsFragment : Fragment(), NotificationCenterL
     }
 }
 
-private fun ActionItemSection.toPage(): AnyPage? = when (this) {
+private fun ActionItemSection.toPage(): AnyPage = when (this) {
     ActionItemSection.BREACH_ALERT -> AnyPage.NOTIFICATION_SECURITY_LIST
     ActionItemSection.GETTING_STARTED -> AnyPage.NOTIFICATION_GETTING_STARTED_LIST
     ActionItemSection.WHATS_NEW -> AnyPage.NOTIFICATION_NEW_LIST

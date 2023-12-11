@@ -29,7 +29,6 @@ class OnboardingAccessibilityServices : BaseUiFragment() {
     @Inject
     lateinit var lockManager: LockManager
 
-    private val logger = OnboardingInAppLoginLogger()
     private var activityOrigin: String? = null
 
     private var onboardingType: OnboardingType? = null
@@ -90,14 +89,12 @@ class OnboardingAccessibilityServices : BaseUiFragment() {
     }
 
     private fun onPositiveButtonClicked() {
-        logger.logGo(activityOrigin, onboardingType!!.usageLog95Type)
         lockManager.startAutoLockGracePeriod()
         openAccessibilitySettings()
     }
 
     private fun onNegativeButtonClicked() {
         if (activity is OnboardingInAppLoginActivity) {
-            logger.logNoThanks(activityOrigin, onboardingType?.usageLog95Type)
             activity?.finish()
         }
     }

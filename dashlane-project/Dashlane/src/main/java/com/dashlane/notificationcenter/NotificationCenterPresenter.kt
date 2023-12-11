@@ -26,12 +26,12 @@ import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.presenter.BasePresenter
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class NotificationCenterPresenter @Inject constructor(
     fragment: Fragment,
@@ -39,7 +39,6 @@ class NotificationCenterPresenter @Inject constructor(
     private val fragmentLifecycleCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
-    private val logger: NotificationCenterLogger,
     private val breachesDataProvider: BreachDataHelper,
     private val biometricAuthModule: BiometricAuthModule,
     private val lockHelper: LockHelper,
@@ -50,8 +49,6 @@ class NotificationCenterPresenter @Inject constructor(
     NotificationCenterDef.Presenter {
 
     var section: ActionItemSection? = null
-
-    private val origin = NotificationCenterLogger.ORIGIN
 
     init {
         fragment.lifecycle.addObserver(object : LifecycleEventObserver {
@@ -84,7 +81,6 @@ class NotificationCenterPresenter @Inject constructor(
     override fun click(item: DashlaneRecyclerAdapter.ViewTypeProvider) {
         when (item) {
             is NotificationItem -> {
-                logger.logActionItemClick(item.type.trackingKey)
                 item.action(this)
             }
             is HeaderItem ->
@@ -98,7 +94,6 @@ class NotificationCenterPresenter @Inject constructor(
     }
 
     override fun dismiss(item: NotificationItem) {
-        logger.logActionItemDismiss(item.type.trackingKey)
         providerOrNull?.dismiss(item)
         fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) {
             saveAndRemoveBreach(item)
@@ -106,14 +101,12 @@ class NotificationCenterPresenter @Inject constructor(
     }
 
     override fun undoDismiss(item: NotificationItem) {
-        logger.logActionItemUndoDismiss(item.type.trackingKey)
         providerOrNull?.undoDismiss(item)
-        logger.logActionItemShow(item.type.trackingKey)
         fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) { undoSaveAndRemoveBreach(item) }
     }
 
     override fun startPinCodeSetup() {
-        runWhenUnlocked { context?.let { lockHelper.showLockActivityToSetPinCode(it, false) } }
+        runWhenUnlocked { context?.let { lockHelper.showLockActivityToSetPinCode(it) } }
     }
 
     override fun startBiometricSetup() {
@@ -121,12 +114,11 @@ class NotificationCenterPresenter @Inject constructor(
     }
 
     override fun startOnboardingInAppLogin() {
-        navigator.goToInAppLogin(origin)
+        navigator.goToInAppLogin()
     }
 
     override fun startAddOnePassword() {
         navigator.goToCredentialAddStep1(
-            sender = origin,
             expandImportOptions = true,
             successIntent = DashlaneIntent.newInstance(context, HomeActivity::class.java)
         )
@@ -144,10 +136,6 @@ class NotificationCenterPresenter @Inject constructor(
         navigator.goToPasswordSharingFromActionCenter()
     }
 
-    override fun startChromeImport() {
-        navigator.goToChromeImportIntro(origin)
-    }
-
     override fun startBiometricRecoverySetup(hasBiometricLockType: Boolean) {
         runWhenUnlocked {
             context?.run {
@@ -163,15 +151,15 @@ class NotificationCenterPresenter @Inject constructor(
     }
 
     override fun startGoEssentials() {
-        navigator.goToOffers(origin = origin, offerType = OfferType.ADVANCED.toString())
+        navigator.goToOffers(offerType = OfferType.ADVANCED.toString())
     }
 
     override fun startCurrentPlan() {
-        navigator.goToCurrentPlan(origin = origin)
+        navigator.goToCurrentPlan()
     }
 
     override fun startUpgrade(offerType: OfferType?) {
-        navigator.goToOffers(origin = origin, offerType = offerType?.toString())
+        navigator.goToOffers(offerType = offerType?.toString())
     }
 
     override fun startAuthenticator() {
@@ -210,7 +198,7 @@ class NotificationCenterPresenter @Inject constructor(
         displaySectionHeader: Boolean,
         breachAlertCount: Int?
     ):
-            List<DashlaneRecyclerAdapter.MultiColumnViewTypeProvider> {
+        List<DashlaneRecyclerAdapter.MultiColumnViewTypeProvider> {
         return if (displaySectionHeader) {
             list.groupBy { it.section }
                 .toSortedMap()

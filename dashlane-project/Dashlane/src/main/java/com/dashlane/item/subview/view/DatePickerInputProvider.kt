@@ -3,6 +3,7 @@ package com.dashlane.item.subview.view
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.R
+import com.dashlane.login.lock.LockManager
 import com.dashlane.util.getThemeAttrDrawable
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
@@ -16,8 +17,8 @@ object DatePickerInputProvider {
 
     const val DATE_PICKER_DIALOG_TAG = "date_picker_dialog"
 
-    fun create(activity: AppCompatActivity, header: String, value: String?): TextInputLayout {
-        return TextInputLayoutProvider.create(activity, header, value, false)
+    fun create(activity: AppCompatActivity, lockManager: LockManager, header: String, value: String?): TextInputLayout {
+        return TextInputLayoutProvider.create(activity, lockManager, header, value, false)
     }
 
     fun setClickListener(

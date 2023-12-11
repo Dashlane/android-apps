@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="vault_fab_add_item">Add item</string>
-    <string name="vault_fab_add_password">Add login</string>
-    <string name="vault_fab_add_secure_note">Add Secure Note</string>
-    <string name="vault_fab_add_payment">Add payment</string>
-    <string name="vault_fab_add_personal_info">Add personal info</string>
-    <string name="vault_fab_add_id">Add ID</string>
+    <string name="vault_fab_add_item">Add new</string>
+    <string name="vault_fab_add_password">Add new</string>
+    <string name="vault_fab_add_secure_note">Add new</string>
+    <string name="vault_fab_add_payment">Add new</string>
+    <string name="vault_fab_add_personal_info">Add new</string>
+    <string name="vault_fab_add_id">Add new</string>
     <string name="vault_header_suggested">Suggested</string>
     <string name="vault_header_most_recent">Most recent</string>
     <string name="vault_search_hint">Find an item, tool, or setting</string>

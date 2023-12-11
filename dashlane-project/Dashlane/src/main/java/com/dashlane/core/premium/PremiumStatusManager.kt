@@ -15,12 +15,13 @@ import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.teamspaces.manager.TeamspaceUpdater
 import com.dashlane.util.Constants
 import dagger.Lazy
-import java.io.IOException
-import javax.inject.Inject
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import retrofit2.Retrofit
+import java.io.IOException
+import java.time.Clock
+import javax.inject.Inject
 
 private const val UPDATE_DEVICE_NUMBER_ERROR = "Failed to update number of devices"
 
@@ -32,6 +33,8 @@ class PremiumStatusManager @Inject constructor(
     private val teamspaceUpdater: TeamspaceUpdater,
     private val userSecureDataStorageManager: UserSecureStorageManager,
     private val appEvents: AppEvents,
+    private val clock: Clock,
+    private val userPreferencesManager: UserPreferencesManager,
     @LegacyWebservicesApi private val retrofit: Retrofit
 ) {
 
@@ -49,7 +52,15 @@ class PremiumStatusManager @Inject constructor(
                     Constants.IN_APP_BILLING.PLATFORM_PLAY_STORE_SUBSCRIPTION
                 )
             }
-                .mapCatching { response -> PremiumStatus(response, true) }
+                .mapCatching { response ->
+                    PremiumStatus(
+                        response,
+                        true,
+                        clock,
+                        sessionManager.session,
+                        userPreferencesManager
+                    )
+                }
                 .onSuccess { premiumStatus ->
                     savePremiumStatus(premiumStatus)
                 }

@@ -6,6 +6,8 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.sharing.model.ItemContentRaclette
+import com.dashlane.sharing.model.toCollectionRaclettes
+import com.dashlane.sharing.model.toCollections
 import com.dashlane.sharing.model.toItemGroupRaclettes
 import com.dashlane.sharing.model.toItemGroups
 import com.dashlane.sharing.model.toUserGroupRaclettes
@@ -35,6 +37,7 @@ class SharingDaoMemoryDataAccessRacletteImpl(
         val sharingRepository = sharingRepository ?: return
         delegate.itemGroups = sharingRepository.loadItemGroups().toItemGroups().toMutableList()
         delegate.userGroups = sharingRepository.loadUserGroups().toUserGroups().toMutableList()
+        delegate.collections = sharingRepository.loadCollections().toCollections().toMutableList()
         delegate.itemContentsDB = sharingRepository.loadItemContents().toItemContentDBs().toMutableList()
     }
 
@@ -47,6 +50,8 @@ class SharingDaoMemoryDataAccessRacletteImpl(
             this.deleteUserGroups(delegate.userGroupsToDelete.toSet())
             this.updateItemContents(delegate.itemContentsDB.toItemContentRaclettes())
             this.deleteItemContents(delegate.itemContentsDBToDelete.toSet())
+            this.updateCollections(delegate.collections.toCollectionRaclettes())
+            this.deleteCollections(delegate.collectionsToDelete.toSet())
         }
     }
 }

@@ -5,26 +5,38 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.isInvisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
+import com.dashlane.disabletotp.token.SmsRecoveryCodeDialogState
+import com.dashlane.disabletotp.token.TotpRecoveryCodeAlertDialogBuilder
+import com.dashlane.disabletotp.token.TotpRecoveryCodeDialogViewModel
 import com.dashlane.login.CodeInputViewHelper
 import com.dashlane.login.pages.LoginBaseSubViewProxy
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.DeviceUtils
 import com.dashlane.util.addTextChangedListener
+import com.dashlane.util.getBaseActivity
 import com.google.android.material.textfield.TextInputLayout
 import kotlin.properties.Delegates
+import kotlinx.coroutines.launch
 
 class LoginTotpViewProxy(view: View) :
     LoginBaseSubViewProxy<LoginTotpContract.Presenter>(view),
     LoginTotpContract.ViewProxy {
 
+    private val smsRecoveryCodeDialogViewModel: TotpRecoveryCodeDialogViewModel
     private val totpLayout = findViewByIdEfficient<TextInputLayout>(R.id.view_login_totp_layout)!!
     private val totpView = findViewByIdEfficient<EditText>(R.id.view_login_totp)!!
     private val totpNfcView = findViewByIdEfficient<ImageView>(R.id.view_totp_u2f_key)!!
     private val btnPush = findViewByIdEfficient<AppCompatButton>(R.id.btn_push)!!
+    private val btnRecovery = findViewByIdEfficient<AppCompatButton>(R.id.btn_recovery)!!
 
     override val totpText: String
         get() = totpView.text.toString()
@@ -57,10 +69,31 @@ class LoginTotpViewProxy(view: View) :
 
     private var u2fPresenceDialog: AlertDialog? = null
 
+    private var recoveryCodeDialogBuilder: TotpRecoveryCodeAlertDialogBuilder? = null
+
     init {
         
         
         btnPush.maxLines = 2
+
+        val activity = context.getBaseActivity() as ComponentActivity
+
+        smsRecoveryCodeDialogViewModel = ViewModelProvider(activity)[TotpRecoveryCodeDialogViewModel::class.java]
+
+        activity.lifecycleScope.launch {
+            activity.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                smsRecoveryCodeDialogViewModel.sharedFlow.collect { state ->
+                    when (state) {
+                        SmsRecoveryCodeDialogState.Error -> {
+                            presenter.notifyUnknownError()
+                        }
+                        SmsRecoveryCodeDialogState.Success -> {
+                            show2FARecoveryEnterCodeDialog(context.getString(R.string.login_totp_enter_token_recovery_dialog_phone_backup_description))
+                        }
+                    }
+                }
+            }
+        }
 
         totpView.addTextChangedListener {
             afterTextChanged {
@@ -85,6 +118,9 @@ class LoginTotpViewProxy(view: View) :
                 }
                 setCancelable(true)
             }.show()
+        }
+        btnRecovery.setOnClickListener {
+            show2FARecoveryCodeDialog()
         }
     }
 
@@ -130,6 +166,13 @@ class LoginTotpViewProxy(view: View) :
         DeviceUtils.hideKeyboard(root)
     }
 
+    override fun showRecoveryCodeError() {
+        recoveryCodeDialogBuilder?.apply {
+            getDialog()?.show()
+            setIsError(isError = true, errorMessage = context.getString(R.string.login_totp_enter_token_recovery_dialog_backup_error))
+        }
+    }
+
     private fun updatePushButton() {
         btnPush.run {
             when {
@@ -153,6 +196,56 @@ class LoginTotpViewProxy(view: View) :
                     isInvisible = true
                 }
             }
+        }
+    }
+
+    private fun show2FARecoveryCodeDialog() {
+        DialogHelper()
+            .builder(context, R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog)
+            .setTitle(R.string.login_totp_enter_token_recovery_dialog_title)
+            .setMessage(R.string.login_totp_enter_token_recovery_dialog_choice_description)
+            .setPositiveButton(R.string.login_totp_enter_token_recovery_dialog_choice_button_positive) { _, _ ->
+                show2FARecoveryEnterCodeDialog(context.getString(R.string.login_totp_enter_token_recovery_dialog_backup_description))
+            }
+            .setNegativeButton(R.string.login_totp_enter_token_recovery_dialog_choice_button_negative) { _, _ ->
+                show2FARecoveryPhoneCodeDialog()
+            }
+            .setCancelable(true)
+            .show()
+    }
+
+    private fun show2FARecoveryPhoneCodeDialog() {
+        DialogHelper()
+            .builder(context, R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog)
+            .setTitle(R.string.disable_totp_enter_token_recovery_dialog_title)
+            .setMessage(R.string.login_totp_enter_token_recovery_dialog_phone_description)
+            .setPositiveButton(R.string.login_totp_enter_token_recovery_dialog_phone_button_positive) { _, _ ->
+                smsRecoveryCodeDialogViewModel.sendRecoveryBySms(email)
+            }
+            .setNegativeButton(R.string.login_totp_enter_token_recovery_dialog_phone_button_negative) { _, _ -> }
+            .setCancelable(true)
+            .show()
+    }
+
+    private fun show2FARecoveryEnterCodeDialog(message: String) {
+        val activity = context.getBaseActivity() ?: return
+        recoveryCodeDialogBuilder = TotpRecoveryCodeAlertDialogBuilder(activity).apply {
+            create(
+                title = context.getString(R.string.disable_totp_enter_token_recovery_dialog_title),
+                message = message,
+                hint = context.getString(R.string.login_totp_enter_token_recovery_dialog_backup_hint),
+                positiveText = context.getString(R.string.login_totp_enter_token_recovery_dialog_backup_button_positive),
+                positiveAction = { recoveryCode: String ->
+                    recoveryCodeDialogBuilder?.getDialog()?.hide()
+                    presenter.onRecoveryCodeInput(recoveryCode)
+                },
+                negativeText = context.getString(R.string.login_totp_enter_token_recovery_dialog_backup_button_negative),
+                negativeAction = { },
+            )
+        }
+        recoveryCodeDialogBuilder?.getDialog()?.apply {
+            setOnDismissListener { totpLayout.requestFocus() }
+            show()
         }
     }
 

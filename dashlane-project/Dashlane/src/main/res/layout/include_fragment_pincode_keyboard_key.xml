@@ -7,7 +7,7 @@
     android:background="?selectableItemBackground"
     android:fontFamily="@font/roboto_mono_regular"
     android:gravity="center"
-    android:textColor="?attr/colorAccentOnPrimary"
+    android:textColor="@color/text_neutral_catchy"
     android:textSize="30sp"
     tools:text="1"
     />

@@ -7,6 +7,7 @@ import com.dashlane.hermes.generated.definitions.CryptoAlgorithm
 import com.dashlane.hermes.generated.definitions.CryptoMigrationStatus
 import com.dashlane.hermes.generated.definitions.CryptoMigrationType
 import com.dashlane.hermes.generated.events.user.MigrateCrypto
+import com.dashlane.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.network.tools.authorization
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.Session
@@ -15,7 +16,6 @@ import com.dashlane.sync.cryptochanger.SyncCryptoChanger
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerCryptographyException
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerDownloadException
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerUploadException
-import com.dashlane.useractivity.DeveloperInfoLogger
 import com.dashlane.util.stackTraceToSafeString
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -38,7 +38,7 @@ class LegacyCryptoMigrationHelper @Inject constructor(
             val now = Instant.now()
             val shouldAttemptCryptoMigration =
                 cryptoMigrationAttemptDate == null ||
-                        cryptoMigrationAttemptDate.plus(CRYPTO_MIGRATION_PERIOD_DAYS, ChronoUnit.DAYS) < now
+                    cryptoMigrationAttemptDate.plus(CRYPTO_MIGRATION_PERIOD_DAYS, ChronoUnit.DAYS) < now
             if (shouldAttemptCryptoMigration) {
                 userPreferencesManager.cryptoMigrationAttemptDate = now
 
@@ -58,16 +58,16 @@ class LegacyCryptoMigrationHelper @Inject constructor(
             )
             CryptoMigrationStatus.SUCCESS
         } catch (e: SyncCryptoChangerCryptographyException) {
-            logException(session, CryptoMigrationStatus.ERROR_REENCRYPTION.code, e)
+            logException(CryptoMigrationStatus.ERROR_REENCRYPTION.code, e)
             CryptoMigrationStatus.ERROR_REENCRYPTION
         } catch (e: SyncCryptoChangerDownloadException) {
-            logException(session, CryptoMigrationStatus.ERROR_DOWNLOAD.code, e)
+            logException(CryptoMigrationStatus.ERROR_DOWNLOAD.code, e)
             CryptoMigrationStatus.ERROR_DOWNLOAD
         } catch (e: SyncCryptoChangerUploadException) {
-            logException(session, CryptoMigrationStatus.ERROR_UPLOAD.code, e)
+            logException(CryptoMigrationStatus.ERROR_UPLOAD.code, e)
             CryptoMigrationStatus.ERROR_UPLOAD
         } catch (t: Throwable) {
-            logException(session, "error_unexpected", t)
+            logException("error_unexpected", t)
             throw t
         }
 
@@ -82,9 +82,8 @@ class LegacyCryptoMigrationHelper @Inject constructor(
         )
     }
 
-    private fun logException(session: Session, error: String, t: Throwable) {
+    private fun logException(error: String, t: Throwable) {
         developerInfoLogger.log(
-            session = session,
             action = "migrate_legacy_crypto_error",
             message = t.stackTraceToSafeString(),
             exceptionType = error

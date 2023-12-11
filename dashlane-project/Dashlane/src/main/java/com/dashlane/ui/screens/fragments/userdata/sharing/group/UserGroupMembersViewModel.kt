@@ -10,7 +10,8 @@ import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingUserGroupUser
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,10 +27,11 @@ class UserGroupMembersViewModel @Inject constructor(
     private val userId: String?
         get() = sessionManager.session?.userId
 
-    override val userGroupId = savedStateHandle.get<String>(UserGroupMembersFragment.ARGS_GROUP_ID)!!
+    override val userGroupId =
+        savedStateHandle.get<String>(UserGroupMembersFragment.ARGS_GROUP_ID)!!
 
-    override val uiState: MutableStateFlow<UserGroupMembersViewModelContract.UIState> =
-        MutableStateFlow(UserGroupMembersViewModelContract.UIState.Loading)
+    override val uiState: MutableSharedFlow<UserGroupMembersViewModelContract.UIState> =
+        MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     private val dataList = mutableListOf<SharingUserGroupUser>()
 

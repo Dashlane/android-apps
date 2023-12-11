@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.createaccount.pages.CreateAccountBaseContract
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordPresenter
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordViewProxy
@@ -21,6 +22,7 @@ import com.dashlane.createaccount.pages.settings.CreateAccountSettingsPresenter
 import com.dashlane.createaccount.pages.settings.CreateAccountSettingsViewProxy
 import com.dashlane.createaccount.pages.tos.AgreedTosEvent
 import com.dashlane.createaccount.pages.tos.CreateAccountTosBottomSheetDialogFragment
+import com.dashlane.createaccount.passwordless.MplessAccountCreationActivity
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory
@@ -53,6 +55,12 @@ class CreateAccountPresenter(
             view.showProgress = value
         }
 
+    var accountType: UserAccountInfo.AccountType?
+        get() = pagesStateHelper.accountType
+        set(value) {
+            pagesStateHelper.accountType = value
+        }
+
     var password: ObfuscatedByteArray?
         get() = pagesStateHelper.password
         set(value) {
@@ -72,6 +80,16 @@ class CreateAccountPresenter(
     override fun onNextClicked() {
         pagesStateHelper.currentPresenter.onNextClicked()
         attemptedAccountCreation = true
+    }
+
+    override fun onMplessSetupClicked() {
+        activity?.let {
+            it.startActivity(
+                Intent(it, MplessAccountCreationActivity::class.java).apply {
+                    putExtra(MplessAccountCreationActivity.EXTRA_USER_LOGIN, pagesStateHelper.user)
+                }
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,7 +152,7 @@ class CreateAccountPresenter(
         pagesStateHelper.resetMp = resetMp
     }
 
-    fun showEmailPage(preFilledEmail: String?, skipEmailIfPrefilled: Boolean) {
+    private fun showEmailPage(preFilledEmail: String?, skipEmailIfPrefilled: Boolean) {
         val presenter = createEmailPresenter(preFilledEmail)
         pagesStateHelper.addedPage(presenter)
         if (skipEmailIfPrefilled && !attemptedAccountCreation) {
@@ -158,6 +176,7 @@ class CreateAccountPresenter(
         pagesStateHelper.user = username
         pagesStateHelper.inEuropeanUnion = inEuropeanUnion
         pagesStateHelper.country = country
+        pagesStateHelper.accountType = UserAccountInfo.AccountType.MasterPassword
     }
 
     private fun createChoosePasswordPresenter(username: String): CreateAccountChoosePasswordPresenter {
@@ -210,7 +229,7 @@ class CreateAccountPresenter(
 
     private fun createSettingsPresenter(): CreateAccountSettingsPresenter {
         val view = inflate(R.layout.include_create_account_settings)
-        val viewProxy = CreateAccountSettingsViewProxy(view, provider.biometricSettingsLogger)
+        val viewProxy = CreateAccountSettingsViewProxy(view)
         return CreateAccountSettingsPresenter(
             this
         ).apply {
@@ -270,6 +289,7 @@ class CreateAccountPresenter(
             provider.createAccount(
                 pagesStateHelper.user!!,
                 pagesStateHelper.password!!,
+                pagesStateHelper.accountType!!,
                 AccountCreator.TermsState(true, event.optInOffers),
                 pagesStateHelper.biometricAuthentication,
                 pagesStateHelper.resetMp
@@ -314,6 +334,11 @@ class CreateAccountPresenter(
         setCurrentPageView(page)
     }
 
+    fun toggleMplessButtonVisibility(visible: Boolean) {
+        view.mplessButtonVisible
+        pagesStateHelper.toggleMplessButtonVisibility(visible)
+    }
+
     private inner class PagesStateHelper {
 
         val pageStates = mutableListOf<CreateAccountBaseContract.Presenter>()
@@ -321,6 +346,8 @@ class CreateAccountPresenter(
         var user: String? = null
 
         var password: ObfuscatedByteArray? = null
+
+        var accountType: UserAccountInfo.AccountType? = null
 
         var inEuropeanUnion: Boolean = false
 
@@ -394,6 +421,10 @@ class CreateAccountPresenter(
             view.nextEnabled = currentPresenter.nextEnabled
             currentPresenter.visible = true
             currentPresenter.onShow()
+        }
+
+        fun toggleMplessButtonVisibility(visible: Boolean) {
+            view.mplessButtonVisible = visible
         }
     }
 

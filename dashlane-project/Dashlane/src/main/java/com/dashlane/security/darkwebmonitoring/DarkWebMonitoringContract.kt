@@ -21,7 +21,7 @@ interface DarkWebMonitoringContract {
 
         fun showDarkwebInactiveScene()
         fun goToPendingTab()
-        fun updateActionBar()
+        fun updateActionBar(updateTitle: Boolean)
         fun showDeleteCompleted(breachesDeleted: Int)
     }
 

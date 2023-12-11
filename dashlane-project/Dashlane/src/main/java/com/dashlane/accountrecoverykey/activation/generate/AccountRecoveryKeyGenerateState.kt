@@ -1,5 +1,7 @@
 package com.dashlane.accountrecoverykey.activation.generate
 
+import com.dashlane.account.UserAccountInfo
+
 sealed class AccountRecoveryKeyGenerateState {
     abstract val data: AccountRecoveryKeyGenerateData
 
@@ -11,5 +13,6 @@ sealed class AccountRecoveryKeyGenerateState {
 }
 
 data class AccountRecoveryKeyGenerateData(
+    val accountType: UserAccountInfo.AccountType = UserAccountInfo.AccountType.MasterPassword,
     val accountRecoveryKey: String? = null
 )

@@ -1,6 +1,6 @@
 package com.dashlane.ui.activities.firstpassword
 
-import com.dashlane.csvimport.ImportAuthentifiantHelper
+import com.dashlane.csvimport.csvimport.ImportAuthentifiantHelper
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor

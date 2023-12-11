@@ -1,5 +1,6 @@
 package com.dashlane.session
 
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.use
@@ -20,12 +21,12 @@ import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SessionManagerImpl @Inject constructor(
@@ -43,14 +44,16 @@ class SessionManagerImpl @Inject constructor(
     private val sessionRestorer: Lazy<SessionRestorer>,
     private val userPreferencesManagerLazy: Lazy<UserPreferencesManager>,
     private val remoteConfigurations: Lazy<Set<RemoteConfiguration>>,
-    trackingRepository: LogRepository
+    trackingRepository: Lazy<LogRepository>
 ) : SessionManager, SessionInitializer {
 
     
     private val observerList = mutableListOf<SessionObserver>()
     private var alreadyTriedToRestore = false
     private var _session: Session? = null
-    private val loginLogger = LoginLogger(trackingRepository)
+    private val loginLogger: LoginLogger by lazy {
+        LoginLogger(trackingRepository.get())
+    }
 
     
     override val session: Session?
@@ -85,7 +88,8 @@ class SessionManagerImpl @Inject constructor(
         remoteKey: VaultKey.RemoteKey?,
         deviceAnalyticsId: String,
         userAnalyticsId: String,
-        loginMode: LoginMode
+        loginMode: LoginMode,
+        accountType: UserAccountInfo.AccountType
     ): SessionResult {
         _session?.let {
             
@@ -102,7 +106,8 @@ class SessionManagerImpl @Inject constructor(
             loginInfo = LoginInfo(
                 isFirstLogin = true,
                 loginMode = loginMode
-            )
+            ),
+            accountType = accountType
         ).also {
             if (it is SessionResult.Success) {
                 val preferencesManager = userPreferencesManagerLazy.get()
@@ -143,6 +148,12 @@ class SessionManagerImpl @Inject constructor(
                 SessionResult.ErrorCode.ERROR_SESSION_ACCESS_KEY,
                 "No session access key available"
             )
+
+        val accountType: UserAccountInfo.AccountType =
+            userPreferencesManagerLazy.get().preferencesFor(username).accountType
+                ?.let { UserAccountInfo.AccountType.fromString(it) }
+                ?: UserAccountInfo.AccountType.MasterPassword
+
         val remoteKey = secureStorage.secureStorageManager.getRemoteKey(username, localKey)
         if (remoteKey == null && appKey !is AppKey.Password) {
             loginLogger.logErrorUnknown(loginMode = loginMode)
@@ -151,13 +162,18 @@ class SessionManagerImpl @Inject constructor(
         _session = Session(username, sessionAccessKey, secretKey, localKey, appKey, remoteKey)
         return finalizeSessionSetup(
             userSettings = null,
+            accountType = accountType,
             allowOverwriteAccessKey = accessKey != null,
             loginInfo = LoginInfo(isFirstLogin = false, loginMode = loginMode)
         )
     }
 
     override suspend fun destroySession(session: Session, byUser: Boolean, forceLogout: Boolean) {
-        crashReporter.get().addInformation("[SessionManager] Session destroyed. Logout by user:$byUser")
+            "Received Logout for ${session.userId}. Logout by user:$byUser",
+            logToUserSupportFile = true
+        )
+        crashReporter.get()
+            .addInformation("[SessionManager] Session destroyed. Logout by user:$byUser")
         
         notifySessionEnded(session, byUser, forceLogout)
         userDataRepository.get().sessionCleanup(session, forceLogout)
@@ -174,12 +190,13 @@ class SessionManagerImpl @Inject constructor(
     private suspend fun initialize(
         session: Session,
         userSettings: SyncObject.Settings? = null,
+        accountType: UserAccountInfo.AccountType,
         allowOverwriteAccessKey: Boolean,
         loginInfo: LoginInfo
     ): SessionResult {
         return try {
             sessionCoroutineScopeRepository.get().sessionInitializing(session)
-            userDataRepository.get().sessionInitializing(session, userSettings, allowOverwriteAccessKey)
+            userDataRepository.get().sessionInitializing(session, userSettings, accountType, allowOverwriteAccessKey)
             teamspaceManagerRepository.get().sessionInitializing(session)
 
             remoteConfigurations.get().forEach {
@@ -205,12 +222,13 @@ class SessionManagerImpl @Inject constructor(
 
     private suspend fun finalizeSessionSetup(
         userSettings: SyncObject.Settings?,
+        accountType: UserAccountInfo.AccountType,
         allowOverwriteAccessKey: Boolean,
         loginInfo: LoginInfo
     ): SessionResult {
         return when (
             val sessionInitializationResult =
-            initialize(_session!!, userSettings, allowOverwriteAccessKey, loginInfo)
+                initialize(_session!!, userSettings, accountType, allowOverwriteAccessKey, loginInfo)
         ) {
             is SessionResult.Success -> {
                 

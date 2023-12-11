@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.help.HelpCenterCoordinator
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
+import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -30,6 +31,12 @@ class VpnThirdPartyFragment : AbstractContentFragment() {
     @Inject
     lateinit var presenter: VpnThirdPartyPresenter
 
+    @Inject
+    lateinit var clipboardCopy: ClipboardCopy
+
+    @Inject
+    lateinit var mainDataAccessor: MainDataAccessor
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,17 +52,16 @@ class VpnThirdPartyFragment : AbstractContentFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val activity = requireActivity()
-        val dataAccessor = SingletonProvider.getMainDataAccessor()
         val dataProvider = VpnThirdPartyDataProvider(
             activity.packageManager,
-            dataAccessor.getCredentialDataQuery(),
-            dataAccessor.getVaultDataQuery()
+            mainDataAccessor.getCredentialDataQuery(),
+            mainDataAccessor.getVaultDataQuery()
         )
         presenter.setView(
             VpnThirdPartyViewProxy(
                 this,
-                SingletonProvider.getNavigator(),
-                SingletonProvider.getClipboardCopy(),
+                navigator,
+                clipboardCopy,
                 preferences.getLastLoggedInUser(),
                 preferences.getUserListHistory()
             )

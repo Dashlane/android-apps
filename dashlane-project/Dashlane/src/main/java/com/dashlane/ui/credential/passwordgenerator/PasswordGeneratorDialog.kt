@@ -12,10 +12,10 @@ import androidx.fragment.app.setFragmentResult
 import com.dashlane.R
 import com.dashlane.hermes.LogRepository
 import com.dashlane.passwordstrength.PasswordStrength
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 import com.dashlane.ui.fragments.PasswordGenerationCallback
 import com.dashlane.ui.fragments.PasswordGeneratorFragment
-import com.dashlane.useractivity.log.inject.UserActivityComponent.Companion.invoke
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,15 +29,13 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
     @Inject
     lateinit var logRepository: LogRepository
 
+    @Inject
+    lateinit var sessionManager: SessionManager
+
     @Origin
     lateinit var origin: String
-    lateinit var domainAsking: String
+    private lateinit var domainAsking: String
 
-    private val passwordGeneratorLogger: PasswordGeneratorLogger
-        get() {
-            val usageLogRepository = invoke(requireContext()).currentSessionUsageLogRepository
-            return PasswordGeneratorLogger(usageLogRepository, logRepository)
-        }
     private val passwordGeneratorFragment: PasswordGeneratorFragment
         get() = requireActivity().supportFragmentManager
             .findFragmentById(R.id.dialogPasswordGeneratorFragment) as PasswordGeneratorFragment
@@ -51,11 +49,6 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
         generatedPassword: VaultItem<SyncObject.GeneratedPassword>,
         strength: PasswordStrength?
     ) {
-        passwordGeneratorLogger.log(
-            origin,
-            "clickUse",
-            strength?.percentScore?.toString()
-        )
         setFragmentResult(
             PASSWORD_GENERATOR_REQUEST_KEY,
             bundleOf(
@@ -63,10 +56,6 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
                 PASSWORD_GENERATOR_RESULT_PASSWORD to generatedPassword.syncObject.password.toString()
             )
         )
-    }
-
-    override fun passwordGeneratedColor(color: Int) {
-        
     }
 
     override fun restoreDominantColor(color: Int) {
@@ -96,24 +85,16 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        
-        retainInstance = false
         origin = requireArguments().getString(PASSWORD_GENERATOR_ARG_ORIGIN)!!
         domainAsking = requireArguments().getString(PASSWORD_GENERATOR_ARG_DOMAIN)!!
 
         
         setButtonEnable(DialogInterface.BUTTON_POSITIVE, false)
-        passwordGeneratorLogger.log(origin, "clickGenerate", null)
     }
 
     override fun onClickPositiveButton() {
         super.onClickPositiveButton()
         passwordGeneratorFragment.copyAndSaveGeneratedPassword(domainAsking, false)
-    }
-
-    override fun onClickNegativeButton() {
-        super.onClickNegativeButton()
-        passwordGeneratorLogger.log(origin, "clickCancel", null)
     }
 
     override fun onDismiss(dialog: DialogInterface) {

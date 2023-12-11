@@ -1,6 +1,7 @@
 package com.dashlane.navigation
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,7 +19,11 @@ import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorDashboardFragmentDirections
 import com.dashlane.authenticator.AuthenticatorSuggestionsFragmentDirections
 import com.dashlane.authenticator.Otp
-import com.dashlane.autofill.api.util.AutofillNavigationService
+import com.dashlane.collections.details.CollectionDetailsFragmentDirections
+import com.dashlane.collections.list.CollectionsListFragmentDirections
+import com.dashlane.collections.sharing.CollectionNewShareActivity
+import com.dashlane.collections.sharing.CollectionNewShareActivity.Companion.SHARE_COLLECTION
+import com.dashlane.collections.sharing.CollectionNewShareActivityArgs
 import com.dashlane.events.AppEvents
 import com.dashlane.events.clearLastEvent
 import com.dashlane.followupnotification.discovery.FollowUpNotificationDiscoveryActivity
@@ -35,6 +40,7 @@ import com.dashlane.item.delete.DeleteVaultItemFragmentArgs
 import com.dashlane.item.linkedwebsites.LinkedServicesActivity
 import com.dashlane.lock.LockHelper
 import com.dashlane.lock.UnlockEvent
+import com.dashlane.login.LoginActivity
 import com.dashlane.login.lock.unlockItemIfNeeded
 import com.dashlane.navigation.NavControllerUtils.TOP_LEVEL_DESTINATIONS
 import com.dashlane.navigation.NavControllerUtils.setup
@@ -46,6 +52,7 @@ import com.dashlane.premium.offer.list.view.OffersActivityArgs
 import com.dashlane.premium.paywall.common.PaywallActivity
 import com.dashlane.premium.paywall.common.PaywallActivityArgs
 import com.dashlane.premium.paywall.common.PaywallIntroType
+import com.dashlane.security.DashlaneIntent
 import com.dashlane.security.darkwebmonitoring.DarkWebMonitoringFragmentDirections
 import com.dashlane.security.identitydashboard.IdentityDashboardFragmentDirections
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
@@ -63,29 +70,32 @@ import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingCenterFr
 import com.dashlane.ui.screens.fragments.userdata.sharing.itemselection.SharingItemSelectionTabFragmentDirections
 import com.dashlane.ui.screens.settings.SettingsFragmentDirections
 import com.dashlane.ui.screens.sharing.SharingNewSharePeopleFragmentDirections
-import com.dashlane.useractivity.log.usage.UsageLogCode80
 import com.dashlane.util.DeviceUtils
+import com.dashlane.util.clearTask
+import com.dashlane.util.clearTop
+import com.dashlane.util.getBaseActivity
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.launchUrl
 import com.dashlane.util.logPageView
 import com.dashlane.util.safelyStartBrowserActivity
 import com.dashlane.util.startActivityForResult
-import com.dashlane.util.usagelogs.ViewLogger
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability
 import com.dashlane.util.userfeatures.canShowVpn
 import com.dashlane.util.userfeatures.canUpgradeToGetVpn
 import com.dashlane.vpn.thirdparty.VpnThirdPartyFragmentDirections
 import com.dashlane.xml.domain.SyncObjectType.AUTHENTIFIANT
+import java.io.Serializable
+import java.lang.ref.WeakReference
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.Serializable
-import java.lang.ref.WeakReference
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Suppress("LargeClass")
 @Singleton
@@ -97,8 +107,8 @@ class NavigatorImpl @Inject constructor(
     private val checklistHelper: ChecklistHelper,
     private val appEvents: AppEvents,
     @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    private val viewLoggerDestinationChangedListener: ViewLoggerDestinationChangedListener,
-    private val viewLogger: ViewLogger
+    @MainCoroutineDispatcher
+    private val mainDispatcher: CoroutineDispatcher
 ) : Navigator, AbstractActivityLifecycleListener() {
     private val dataQuery: GenericDataQuery
         get() = mainDataAccessor.getGenericDataQuery()
@@ -106,6 +116,7 @@ class NavigatorImpl @Inject constructor(
     override val currentDestination: NavDestination?
         get() = navigationController?.currentDestination
     private var menuIconDestinationChangedListener: MenuIconDestinationChangedListener? = null
+    private var customTitleDestinationChangedListener: CustomTitleDestinationChangedListener? = null
     private var deepLinkFound: Boolean = false
 
     private var currentActivity: WeakReference<Activity>? = null
@@ -113,7 +124,6 @@ class NavigatorImpl @Inject constructor(
             currentActivity?.get()?.apply {
                 
                 val controller = navigationController ?: return@apply
-                controller.removeOnDestinationChangedListener(viewLoggerDestinationChangedListener)
                 menuIconDestinationChangedListener?.let {
                     controller.removeOnDestinationChangedListener(it)
                 }
@@ -123,14 +133,14 @@ class NavigatorImpl @Inject constructor(
                 val topLevelDestinations = menuIconDestinationChangedListener?.topLevelDestinations
                     ?: TOP_LEVEL_DESTINATIONS
                 setup(activity, deepLinkFound, checklistHelper, topLevelDestinations)
-                addOnDestinationChangedListener(viewLoggerDestinationChangedListener)
-
                 menuIconDestinationChangedListener = MenuIconDestinationChangedListener(
                     activity,
-                    this@NavigatorImpl,
                     topLevelDestinations
                 )
                 addOnDestinationChangedListener(menuIconDestinationChangedListener!!)
+                customTitleDestinationChangedListener =
+                    CustomTitleDestinationChangedListener(activity)
+                addOnDestinationChangedListener(customTitleDestinationChangedListener!!)
             }
         }
 
@@ -138,55 +148,54 @@ class NavigatorImpl @Inject constructor(
         get() = currentActivity!!.get()!!
     private val navigationController
         get() = try {
-            activity.findNavController(R.id.nav_host_fragment)
+            currentActivity?.get()?.findNavController(R.id.nav_host_fragment)
         } catch (e: IllegalArgumentException) {
             
             null
         }
     private val navDeepLinkHelper = NavDeepLinkHelper(navigator = this)
 
-    override fun goToHome(origin: String?, filter: String?) {
+    override fun goToHome(filter: String?) {
         val action =
-            DrawerNavigationDirections.goToHome(filter = filter, origin = origin.originOrDefault())
+            DrawerNavigationDirections.goToHome(filter = filter)
         navigate(action)
     }
 
-    override fun goToActionCenter(origin: String?) {
+    override fun goToActionCenter() {
         val action =
-            DrawerNavigationDirections.goToNotificationCenter(origin = origin.originOrDefault())
+            DrawerNavigationDirections.goToNotificationCenter()
         navigate(action)
     }
 
-    override fun goToPasswordGenerator(origin: String?) {
+    override fun goToPasswordGenerator() {
         val action =
-            DrawerNavigationDirections.goToPasswordGenerator(origin = origin.originOrDefault())
+            DrawerNavigationDirections.goToPasswordGenerator()
         navigate(action)
     }
 
-    override fun goToPasswordSharing(origin: String?) {
-        val action = DrawerNavigationDirections.goToSharingCenter(origin = origin.originOrDefault())
+    override fun goToPasswordSharing() {
+        val action = DrawerNavigationDirections.goToSharingCenter()
         navigate(action)
     }
 
-    override fun goToIdentityDashboard(origin: String?) {
+    override fun goToIdentityDashboard() {
         val action =
-            DrawerNavigationDirections.goToIdentityDashboard(origin = origin.originOrDefault())
+            DrawerNavigationDirections.goToIdentityDashboard()
         navigate(action)
     }
 
-    override fun goToDarkWebMonitoring(origin: String?) {
+    override fun goToDarkWebMonitoring() {
         val action =
             when (userFeaturesChecker.has(Capability.DATA_LEAK)) {
-                true -> DrawerNavigationDirections.goToDarkWebMonitoring(origin = origin.originOrDefault())
+                true -> DrawerNavigationDirections.goToDarkWebMonitoring()
                 else -> DrawerNavigationDirections.goToPaywall(
-                    origin = origin,
                     paywallIntroType = PaywallIntroType.DARK_WEB_MONITORING
                 )
             }
         navigate(action)
     }
 
-    override fun goToVpn(origin: String?) {
+    override fun goToVpn() {
         val action = when {
             !userFeaturesChecker.canShowVpn() -> {
                 
@@ -199,7 +208,6 @@ class NavigatorImpl @Inject constructor(
 
             userFeaturesChecker.canUpgradeToGetVpn() -> {
                 DrawerNavigationDirections.goToPaywall(
-                    origin = origin,
                     paywallIntroType = PaywallIntroType.VPN
                 )
             }
@@ -209,6 +217,10 @@ class NavigatorImpl @Inject constructor(
             }
         }
         navigate(action)
+    }
+
+    override fun goToCollectionsList() {
+        navigate(DrawerNavigationDirections.goToCollectionsList())
     }
 
     override fun goToAuthenticator(otpUri: Uri?) {
@@ -279,50 +291,45 @@ class NavigatorImpl @Inject constructor(
         )
     }
 
-    override fun goToSettings(settingsId: String?, origin: String?) {
-        val action = DrawerNavigationDirections.goToSettings(
-            id = settingsId,
-            origin = origin.originOrDefault()
-        )
+    override fun goToSettings(settingsId: String?) {
+        val action = DrawerNavigationDirections.goToSettings(id = settingsId)
         navigate(action)
     }
 
-    override fun goToHelpCenter(origin: String?) {
+    override fun goToHelpCenter() {
         activity.logPageView(AnyPage.HELP)
-        val intent = HelpCenterLink.Base.newIntent(activity, viewLogger, true)
+        val intent = HelpCenterLink.Base.newIntent(
+            context = activity
+        )
         activity.safelyStartBrowserActivity(intent)
     }
 
-    override fun goToPersonalPlanOrHome(origin: String?) {
+    override fun goToPersonalPlanOrHome() {
         if (checklistHelper.shouldDisplayChecklist()) {
-            goToPersonalPlan(origin = origin)
+            goToPersonalPlan()
         } else {
-            goToHome(origin = origin)
+            goToHome()
         }
     }
 
-    private fun goToPersonalPlan(origin: String?) {
-        val action = DrawerNavigationDirections.goToPersonalPlan(origin = origin.originOrDefault())
+    private fun goToPersonalPlan() {
+        val action = DrawerNavigationDirections.goToPersonalPlan()
         navigate(action)
     }
 
-    override fun goToOffers(origin: String?, offerType: String?) {
+    override fun goToOffers(offerType: String?) {
         if (navigationController == null) {
             
-            val extras = OffersActivityArgs(offerType = offerType, origin = origin).toBundle()
+            val extras = OffersActivityArgs(offerType = offerType).toBundle()
             activity.startActivity(
                 Intent(activity, OffersActivity::class.java).apply {
-                putExtras(extras)
-            }
+                    putExtras(extras)
+                }
             )
             return
         }
-        val action = DrawerNavigationDirections.goToOffers(offerType = offerType, origin = origin)
-        
-        navigate(
-            action,
-            closeMainActivity = AutofillNavigationService.ORIGIN_PASSWORD_LIMIT == origin
-        )
+        val action = DrawerNavigationDirections.goToOffers(offerType = offerType)
+        navigate(action)
     }
 
     override fun goToActionCenterSectionDetails(section: String) {
@@ -337,29 +344,26 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    override fun goToBreachAlertDetail(breachWrapper: Parcelable, origin: String?) {
+    override fun goToBreachAlertDetail(breachWrapper: Parcelable) {
         val breach = breachWrapper as BreachWrapper
         if (breachWrapper.publicBreach.isDarkWebBreach() && !userFeaturesChecker.has(Capability.DATA_LEAK)) {
-            goToPaywall(type = PaywallIntroType.DARK_WEB_MONITORING.toString(), origin = origin)
+            goToPaywall(type = PaywallIntroType.DARK_WEB_MONITORING.toString())
             return
         }
         val action = when (navigationController?.currentDestination?.id) {
             R.id.nav_dark_web_monitoring ->
                 DarkWebMonitoringFragmentDirections.darkWebMonitoringToBreachAlertDetail(
                     breach = breach,
-                    origin = origin.originOrDefault()
                 )
 
             R.id.nav_notif_center ->
                 NotificationCenterFragmentDirections.actionCenterToBreachAlertDetail(
                     breach = breach,
-                    origin = origin.originOrDefault()
                 )
 
             R.id.nav_action_center_section_details ->
                 NotificationCenterSectionDetailsFragmentDirections.actionCenterSectionToBreachAlertDetail(
                     breach = breach,
-                    origin = origin.originOrDefault()
                 )
 
             else -> DrawerNavigationDirections.goToBreachAlertDetail(breach = breach)
@@ -367,7 +371,6 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun goToItem(uid: String, type: String) {
         val lockManager =
             lockRepository.getLockManager(sessionManager) ?: return 
@@ -388,7 +391,6 @@ class NavigatorImpl @Inject constructor(
     }
 
     override fun goToCreateAuthentifiant(
-        sender: String?,
         url: String,
         requestCode: Int?,
         successIntent: Intent?,
@@ -397,7 +399,6 @@ class NavigatorImpl @Inject constructor(
         val action = DrawerNavigationDirections.goToItemEdit(
             dataType = AUTHENTIFIANT.xmlObjectName,
             url = url,
-            sender = sender,
             successIntent = successIntent,
             otp = otp as? Otp
         )
@@ -446,27 +447,85 @@ class NavigatorImpl @Inject constructor(
     }
 
     override fun goToCredentialAddStep1(
-        sender: String?,
         expandImportOptions: Boolean,
         successIntent: Intent?
     ) {
         val action = DrawerNavigationDirections.goToCredentialAddStep1(
             expandImportOptions = expandImportOptions,
             paramSuccessIntent = successIntent,
-            paramSender = sender
         )
         navigate(action)
     }
 
-    override fun goToInAppLoginIntro(origin: String) {
-        val action = DrawerNavigationDirections.goToInAppLoginIntro(origin = origin)
+    override fun goToCollectionDetailsFromCollectionsList(
+        collectionId: String,
+        businessSpace: Boolean,
+        sharedCollection: Boolean,
+        shareAllowed: Boolean
+    ) {
+        val action = CollectionsListFragmentDirections.collectionsListToCollectionDetails(
+            collectionId = collectionId,
+            businessSpace = businessSpace,
+            sharedCollection = sharedCollection,
+            shareAllowed = shareAllowed
+        )
         navigate(action)
     }
 
-    override fun goToInAppLogin(origin: String?, onBoardingType: Serializable?) {
+    override fun goToCollectionAddFromCollectionsList() {
+        val action = CollectionsListFragmentDirections.collectionsListToCollectionEdit(null)
+        navigate(action)
+    }
+
+    override fun goToCollectionEditFromCollectionsList(collectionId: String) {
+        val action = CollectionsListFragmentDirections.collectionsListToCollectionEdit(collectionId)
+        navigate(action)
+    }
+
+    override fun goToCollectionShareFromCollectionList(collectionId: String) {
+        val args = CollectionNewShareActivityArgs(collectionId).toBundle()
+        activity.startActivityForResult<CollectionNewShareActivity>(SHARE_COLLECTION) {
+            putExtras(args)
+        }
+    }
+
+    override fun goToCollectionDetails(
+        collectionId: String,
+        businessSpace: Boolean,
+        sharedCollection: Boolean,
+        shareAllowed: Boolean
+    ) {
+        val action = DrawerNavigationDirections.goToCollectionDetails(
+            collectionId = collectionId,
+            businessSpace = businessSpace,
+            sharedCollection = sharedCollection,
+            shareAllowed = shareAllowed
+        )
+        navigate(action)
+    }
+
+    override fun goToCollectionEditFromCollectionDetail(collectionId: String) {
+        val action =
+            CollectionDetailsFragmentDirections.collectionDetailsToCollectionEdit(collectionId)
+        navigate(action)
+    }
+
+    override fun goToCollectionShareFromCollectionDetail(collectionId: String) {
+        val args = CollectionNewShareActivityArgs(collectionId).toBundle()
+        activity.startActivityForResult<CollectionNewShareActivity>(SHARE_COLLECTION) {
+            putExtras(args)
+        }
+    }
+
+    override fun goToInAppLoginIntro() {
+        val action = DrawerNavigationDirections.goToInAppLoginIntro()
+        navigate(action)
+    }
+
+    override fun goToInAppLogin(onBoardingType: Serializable?) {
         val type = onBoardingType as? OnboardingType ?: OnboardingType.AUTO_FILL_API
         val action =
-            DrawerNavigationDirections.goToInAppLogin(origin = origin, extraOnboardingType = type)
+            DrawerNavigationDirections.goToInAppLogin(extraOnboardingType = type)
         navigate(action)
     }
 
@@ -483,26 +542,24 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    override fun goToPasswordAnalysisFromBreach(breachId: String, origin: String?) {
+    override fun goToPasswordAnalysisFromBreach(breachId: String) {
         
         val action = DrawerNavigationDirections.goToPasswordAnalysis(
             breachFocus = breachId,
-            origin = origin.originOrDefault()
         )
         navigate(action)
     }
 
-    override fun goToPasswordAnalysisFromIdentityDashboard(origin: String?, tab: String?) {
+    override fun goToPasswordAnalysisFromIdentityDashboard(tab: String?) {
         val action =
             IdentityDashboardFragmentDirections.identityDashboardToPasswordAnalysis(
                 tab = tab,
-                origin = origin.originOrDefault()
             )
         navigate(action)
     }
 
-    override fun goToNewShare(origin: String) {
-        val action = DrawerNavigationDirections.goToNewShare(argsUsageLogFrom = origin)
+    override fun goToNewShare() {
+        val action = DrawerNavigationDirections.goToNewShare()
         navigate(action)
     }
 
@@ -533,23 +590,21 @@ class NavigatorImpl @Inject constructor(
         val action = SharingItemSelectionTabFragmentDirections.newShareToSharePeopleSelection(
             argsAuthentifiantUIDs = selectedPasswords,
             argsSecureNotesUIDs = selectedNotes,
-            from = UsageLogCode80.From.SHARING_CENTER.code
+            from = null
         )
         navigate(action)
     }
 
-    override fun goToPasswordSharingFromActionCenter(origin: String?, needsRefresh: Boolean) {
+    override fun goToPasswordSharingFromActionCenter(needsRefresh: Boolean) {
         val action: NavDirections = when (navigationController?.currentDestination?.id) {
             R.id.nav_notif_center ->
                 NotificationCenterFragmentDirections.actionCenterToSharingCenter(
-                    needsRefresh = needsRefresh,
-                    origin = origin.originOrDefault()
+                    needsRefresh = needsRefresh
                 )
 
             R.id.nav_action_center_section_details ->
                 NotificationCenterSectionDetailsFragmentDirections.actionCenterSectionToSharingCenter(
-                    needsRefresh = needsRefresh,
-                    origin = origin.originOrDefault()
+                    needsRefresh = needsRefresh
                 )
 
             else -> return
@@ -582,9 +637,9 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    override fun goToAutofillPauseAndLinkedFromSettings(origin: String?) {
+    override fun goToAutofillPauseAndLinkedFromSettings() {
         val action =
-            SettingsFragmentDirections.settingsToAutofillPausedAndLinked(origin = origin.originOrDefault())
+            SettingsFragmentDirections.settingsToAutofillPausedAndLinked()
         navigate(action)
     }
 
@@ -593,34 +648,32 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    override fun goToPaywall(type: String, origin: String?) {
+    override fun goToPaywall(type: String) {
         val introType = PaywallIntroType.values().firstOrNull { it.name == type } ?: return
         if (navigationController == null) {
-            val args = PaywallActivityArgs(origin = origin, paywallIntroType = introType).toBundle()
+            val args = PaywallActivityArgs(paywallIntroType = introType).toBundle()
             activity.startActivity(
                 Intent(activity, PaywallActivity::class.java).apply {
-                putExtras(args)
-            }
+                    putExtras(args)
+                }
             )
             return
         }
         val action =
-            DrawerNavigationDirections.goToPaywall(origin = origin, paywallIntroType = introType)
+            DrawerNavigationDirections.goToPaywall(paywallIntroType = introType)
         navigate(action)
     }
 
     override fun goToGuidedPasswordChange(
         itemId: String,
         domain: String,
-        username: String?,
-        origin: String?
+        username: String?
     ) {
         val action =
             DrawerNavigationDirections.goToGuidedPasswordChange(
                 websiteDomain = domain,
                 itemId = itemId,
-                username = username,
-                origin = origin
+                username = username
             )
         navigate(action)
     }
@@ -630,13 +683,8 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    override fun goToChromeImportIntro(origin: String) {
-        val action = DrawerNavigationDirections.goToChromeImportIntro(origin = origin)
-        navigate(action)
-    }
-
-    override fun goToM2wImportIntro(origin: String) {
-        val action = DrawerNavigationDirections.goToM2wIntro(origin = origin)
+    override fun goToM2wImportIntro() {
+        val action = DrawerNavigationDirections.goToM2wIntro()
         navigate(action)
     }
 
@@ -655,8 +703,7 @@ class NavigatorImpl @Inject constructor(
             OnboardingGuidedPasswordChangeActivityArgs(
                 websiteDomain = domain,
                 itemId = itemId,
-                username = username,
-                origin = null
+                username = username
             ).toBundle()
         activity.startActivityForResult(
             Intent(activity, OnboardingGuidedPasswordChangeActivity::class.java).apply {
@@ -666,8 +713,8 @@ class NavigatorImpl @Inject constructor(
         )
     }
 
-    override fun goToCurrentPlan(origin: String) {
-        val action = DrawerNavigationDirections.goToCurrentPlan(origin = origin)
+    override fun goToCurrentPlan() {
+        val action = DrawerNavigationDirections.goToCurrentPlan()
         navigate(action)
     }
 
@@ -743,14 +790,14 @@ class NavigatorImpl @Inject constructor(
         }
     }
 
-    override fun goToSecretTransfer(settingsId: String?, origin: String?) {
-        val action = DrawerNavigationDirections.goToSecretTransfer(id = settingsId, origin = origin.originOrDefault())
+    override fun goToSecretTransfer(settingsId: String?) {
+        val action = DrawerNavigationDirections.goToSecretTransfer(id = settingsId)
         navigate(action)
     }
 
-    override fun goToAccountRecoveryKey(settingsId: String?, origin: String?) {
+    override fun goToAccountRecoveryKey(settingsId: String?) {
         val action =
-            DrawerNavigationDirections.goToAccountRecoveryKey(id = settingsId, origin = origin.originOrDefault())
+            DrawerNavigationDirections.goToAccountRecoveryKey(id = settingsId)
         navigate(action)
     }
 
@@ -764,8 +811,13 @@ class NavigatorImpl @Inject constructor(
         currentActivity = WeakReference(activity)
     }
 
-    override fun logoutAndCallLoginScreen() {
-        NavigationUtils.logoutAndCallLoginScreen(activity)
+    override fun logoutAndCallLoginScreen(context: Context?, allowSkipEmail: Boolean) {
+        val intent = if (context is Activity) {
+            context.intent
+        } else {
+            null
+        }
+        logoutAndCallLoginScreen(context ?: activity, intent, allowSkipEmail)
     }
 
     override fun goToWebView(url: String) {
@@ -832,12 +884,42 @@ class NavigatorImpl @Inject constructor(
         }
     }
 
+    private fun logoutAndCallLoginScreen(context: Context, originalIntent: Intent?, allowSkipEmail: Boolean) {
+        val appContext = context.applicationContext
+        
+        
+        
+        
+        
+        val contextIsLogin = context is LoginActivity
+        val baseContext = context.getBaseActivity() 
+        if (baseContext is Activity && !contextIsLogin) {
+            baseContext.finish()
+        }
+
+        appEvents.clearLastEvent<UnlockEvent>()
+        applicationCoroutineScope.launch(mainDispatcher) {
+            sessionManager.session?.let { sessionManager.destroySession(it, true) }
+            val loginIntent = DashlaneIntent.newInstance(appContext, LoginActivity::class.java)
+            if (contextIsLogin) loginIntent.clearTop() else loginIntent.clearTask()
+            if (originalIntent != null && originalIntent.hasExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN)) {
+                loginIntent.putExtra(
+                    NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN,
+                    originalIntent.getBooleanExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, false)
+                )
+            }
+
+            if (allowSkipEmail) {
+                loginIntent.putExtra(LoginActivity.ALLOW_SKIP_EMAIL, true)
+            }
+            context.startActivity(loginIntent)
+        }
+    }
+
     override fun setupActionBar(topLevelDestinations: Set<Int>) {
         navigationController!!.setupActionBar(activity, topLevelDestinations)
         menuIconDestinationChangedListener?.topLevelDestinations = topLevelDestinations
     }
-
-    private fun String?.originOrDefault() = this ?: "mainMenu"
 
     companion object {
         private const val UNLOCK_EVENT_CODE = 178

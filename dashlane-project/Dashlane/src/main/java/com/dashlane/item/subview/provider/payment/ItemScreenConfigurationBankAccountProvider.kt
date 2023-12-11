@@ -7,7 +7,6 @@ import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.BankStatementLogger
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
@@ -19,15 +18,13 @@ import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.BankDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.graphics.getDominantColor
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
@@ -48,23 +45,10 @@ import com.dashlane.xml.domain.utils.Country
 class ItemScreenConfigurationBankAccountProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val vaultItemLogger: VaultItemLogger,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
-
-    override val logger = BankStatementLogger(
-        teamspaceAccessor,
-        mainDataAccessor.getDataCounter(),
-        sessionManager,
-        bySessionUsageLogRepository
-    )
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -86,7 +70,7 @@ class ItemScreenConfigurationBankAccountProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         itemToSave as VaultItem<SyncObject.BankStatement>
         return itemToSave.syncObject.bankAccountBIC?.toString()?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.bankAccountIBAN?.toString()?.trim().isNotSemanticallyNull()
+            itemToSave.syncObject.bankAccountIBAN?.toString()?.trim().isNotSemanticallyNull()
     }
 
     private fun createHeader(
@@ -195,11 +179,10 @@ class ItemScreenConfigurationBankAccountProvider(
                 ItemSubViewWithActionWrapper(
                     it,
                     CopyAction(
-                        item.syncObject.toSummary(),
-                        ibanCopyField(item.syncObject.localeFormat ?: Country.UnitedStates),
-                        action = {
-                            logger.logCopyIban()
-                        }
+                        summaryObject = item.syncObject.toSummary(),
+                        copyField = ibanCopyField(item.syncObject.localeFormat ?: Country.UnitedStates),
+                        action = {},
+                        vaultItemCopy = vaultItemCopy
                     )
                 )
             }
@@ -227,13 +210,12 @@ class ItemScreenConfigurationBankAccountProvider(
                 ItemSubViewWithActionWrapper(
                     it,
                     CopyAction(
-                        item.syncObject.toSummary(),
-                        bicCopyField(
-                        item.syncObject.localeFormat ?: Country.UnitedStates
-                    ),
-                        action = {
-                        logger.logCopyBic()
-                    }
+                        summaryObject = item.syncObject.toSummary(),
+                        copyField = bicCopyField(
+                            item.syncObject.localeFormat ?: Country.UnitedStates
+                        ),
+                        action = {},
+                        vaultItemCopy = vaultItemCopy
                     )
                 )
             }
@@ -337,7 +319,11 @@ class ItemScreenConfigurationBankAccountProvider(
         val itemReadValueListSubView = ItemReadValueListSubView(bankHeader, selectedBank, bankList)
         return ItemSubViewWithActionWrapper(
             itemReadValueListSubView,
-            CopyAction(vaultItem.toSummary(), CopyField.BankAccountBank)
+            CopyAction(
+                summaryObject = vaultItem.toSummary(),
+                copyField = CopyField.BankAccountBank,
+                vaultItemCopy = vaultItemCopy
+            )
         )
     }
 
@@ -381,12 +367,10 @@ class ItemScreenConfigurationBankAccountProvider(
     }
 
     private fun logRevealIban(item: VaultItem<SyncObject.BankStatement>) {
-        logger.logRevealIban()
         vaultItemLogger.logRevealField(Field.IBAN, item.uid, ItemType.BANK_STATEMENT, null)
     }
 
     private fun logRevealBic(item: VaultItem<SyncObject.BankStatement>) {
-        logger.logRevealBic()
         vaultItemLogger.logRevealField(Field.BIC, item.uid, ItemType.BANK_STATEMENT, null)
     }
 

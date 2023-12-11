@@ -3,12 +3,9 @@ package com.dashlane.featureflipping
 import com.dashlane.debug.DaDaDa
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.features.FeatureFlipGetAndEvaluateForUserService
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.RemoteConfiguration
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.useractivity.log.usage.UsageLogCode111
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.UserChangedDetector
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.isSemanticallyNull
@@ -26,7 +23,6 @@ class FeatureFlipManager @Inject constructor(
     private val service: FeatureFlipGetAndEvaluateForUserService,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val dadada: DaDaDa,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope
 ) : RemoteConfiguration {
 
@@ -119,7 +115,6 @@ class FeatureFlipManager @Inject constructor(
             
             return
         }
-        logDifferences(currentValue?.toFeatureFlips() ?: emptyList(), json.toFeatureFlips())
         this.currentValue = json
     }
 
@@ -137,23 +132,6 @@ class FeatureFlipManager @Inject constructor(
     private fun load(json: String?) {
         val overriddenJson = dadada.featureFlippingString ?: json?.toFeatureFlips() ?: return
         featureFlips = overriddenJson
-    }
-
-    private fun logDifferences(currentData: List<String>, newData: List<String>) {
-        val newEnables = newData - currentData.toSet()
-        val newDisables = currentData - newData.toSet()
-        newEnables.forEach { trackValueChanged(it, true) }
-        newDisables.forEach { trackValueChanged(it, false) }
-    }
-
-    private fun trackValueChanged(key: String, value: Boolean) {
-        bySessionUsageLogRepository[sessionManager.session]
-            ?.enqueue(
-                UsageLogCode111(
-                    type = "feature_$key",
-                    status = if (value) "true" else "false"
-                )
-            )
     }
 
     companion object {

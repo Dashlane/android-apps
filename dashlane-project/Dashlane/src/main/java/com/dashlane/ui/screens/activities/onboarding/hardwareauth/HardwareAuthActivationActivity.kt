@@ -12,7 +12,6 @@ import androidx.biometric.BiometricPrompt
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.core.KeyChainHelper
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Mode
 import com.dashlane.hermes.generated.definitions.Reason
@@ -23,24 +22,21 @@ import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
 import com.dashlane.notificationcenter.view.ActionItemType
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.SecurityHelper
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.Toaster
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.hardwaresecurity.BiometricActivationStatus
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class HardwareAuthActivationActivity : DashlaneActivity() {
     @Inject
     lateinit var biometricAuthModule: BiometricAuthModule
@@ -64,27 +60,19 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
     lateinit var toaster: Toaster
 
     @Inject
-    lateinit var bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
-
-    @Inject
     lateinit var logRepository: LogRepository
 
     @Inject
     lateinit var userPreferencesManager: UserPreferencesManager
 
-    private val session: Session?
-        get() = sessionManager.session
-
-    private val lockManager: LockManager?
-        get() = session?.let { lockRepository.getLockManager(it) }
+    @Inject
+    lateinit var lockManager: LockManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        SingletonProvider.getComponent().inject(this)
-
         super.onCreate(savedInstanceState)
 
-        lockManager?.startAutoLockGracePeriod()
-        session?.let { mKeyChainHelper.initializeKeyStoreIfNeeded(it.userId) }
+        lockManager.startAutoLockGracePeriod()
+        sessionManager.session?.let { mKeyChainHelper.initializeKeyStoreIfNeeded(it.userId) }
     }
 
     override fun onStart() {
@@ -100,7 +88,7 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
     override fun onResume() {
         super.onResume()
         if (!biometricAuthModule.isHardwareSetUp()) return
-        val username = session?.userId ?: return
+        val username = sessionManager.session?.userId ?: return
         lifecycleScope.launch {
             
             
@@ -115,7 +103,7 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
     }
 
     private fun processAuthenticationResult(result: BiometricAuthModule.Result) {
-        session?.takeIf {
+        sessionManager.session?.takeIf {
             result !is BiometricAuthModule.Result.StrongBiometricSuccess &&
                 result !is BiometricAuthModule.Result.WeakBiometricSuccess &&
                 result !is BiometricAuthModule.Result.AuthenticationFailure
@@ -125,14 +113,11 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
         when (result) {
             is BiometricAuthModule.Result.StrongBiometricSuccess,
             is BiometricAuthModule.Result.WeakBiometricSuccess -> {
-                sendUsageLog(UsageLogConstant.LockType.fingerPrint, "accept_save_mpwd")
+                
+                runCatching { sessionManager.session?.let(sessionCredentialsSaver::saveCredentials) }
 
                 
-                runCatching { session?.let(sessionCredentialsSaver::saveCredentials) }
-
-                
-                sendUsageLog(UsageLogConstant.ViewType.settings, UsageLogConstant.ActionType.useTouchIDOn)
-                lockManager?.setLockType(LockTypeManager.LOCK_TYPE_BIOMETRIC)
+                lockManager.setLockType(LockTypeManager.LOCK_TYPE_BIOMETRIC)
 
                 
                 NotificationCenterRepositoryImpl.setDismissed(
@@ -163,16 +148,6 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
         }
     }
 
-    private fun sendUsageLog(type: String, action: String) {
-        bySessionUsageLogRepository[sessionManager.session]
-            ?.enqueue(
-                UsageLogCode35(
-                    type = type,
-                    action = action
-                )
-            )
-    }
-
     override fun onPause() {
         super.onPause()
         biometricAuthModule.stopHardwareAuthentication()
@@ -190,7 +165,6 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
             .setMessage(message)
             .setCancelable(true)
             .setPositiveButton(R.string.onboarding_dialog_hardware_registeration_module_google_fp_button) { _, _ ->
-                biometricAuthModule.logRegisterBiometrics()
                 val lockManager = lockRepository.getLockManager(sessionManager.session!!)
                 lockManager.startAutoLockGracePeriod()
                 try {

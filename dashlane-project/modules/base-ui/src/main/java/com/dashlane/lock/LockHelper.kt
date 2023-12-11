@@ -17,6 +17,8 @@ interface LockHelper : LockNavigationHelper, LockWatcher {
     val isLocked: Boolean
     val hasEnteredMP: Boolean
 
+    fun lock()
+
     fun isLockedOrLogout(): Boolean
 
     

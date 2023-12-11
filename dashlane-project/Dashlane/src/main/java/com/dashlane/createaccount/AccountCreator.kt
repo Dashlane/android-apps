@@ -1,6 +1,7 @@
 package com.dashlane.createaccount
 
 import android.widget.EditText
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.AuthenticationException
 import com.dashlane.cryptography.ObfuscatedByteArray
 
@@ -17,9 +18,11 @@ interface AccountCreator {
     suspend fun createAccount(
         username: String,
         password: ObfuscatedByteArray,
+        accountType: UserAccountInfo.AccountType,
         termsState: TermsState?,
         biometricEnabled: Boolean,
-        resetMpEnabled: Boolean
+        resetMpEnabled: Boolean,
+        pinCode: String? = null
     )
 
     @Throws(

@@ -1,5 +1,6 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
@@ -8,6 +9,22 @@ import com.dashlane.vault.summary.SummaryObject
 interface SharingDataProvider {
     suspend fun getItemGroups(): List<ItemGroup>
     suspend fun getUserGroups(): List<UserGroup>
+    suspend fun getCollections(): List<Collection>
+    suspend fun getCollections(itemId: String, needsAdminRights: Boolean): List<Collection>
+    suspend fun getAcceptedCollections(needsAdminRights: Boolean = true): List<Collection>
+    suspend fun getAcceptedCollections(
+        userId: String,
+        needsAdminRights: Boolean
+    ): List<Collection>
+
+    suspend fun getAcceptedCollectionsForGroup(
+        userGroupId: String,
+        needsAdminRights: Boolean
+    ): List<Collection>
+
+    suspend fun getAcceptedCollectionsItems(uuid: String): List<SummaryObject>
+    suspend fun getTeamLogins(): List<String>
+    suspend fun isCollectionShareAllowed(collection: Collection): Boolean
     fun getSummaryObject(itemId: String): SummaryObject?
     suspend fun acceptItemGroupInvite(
         itemGroup: ItemGroup,
@@ -20,6 +37,11 @@ interface SharingDataProvider {
         handleConflict: Boolean
     )
 
+    suspend fun acceptCollectionInvite(
+        collection: Collection,
+        handleConflict: Boolean
+    )
+
     suspend fun declineItemGroupInvite(
         itemGroup: ItemGroup,
         summaryObject: SummaryObject,
@@ -29,13 +51,19 @@ interface SharingDataProvider {
 
     suspend fun declineUserGroupInvite(userGroup: UserGroup, handleConflict: Boolean)
 
+    suspend fun declineCollectionInvite(collection: Collection, handleConflict: Boolean)
+
     suspend fun resendInvite(itemGroup: ItemGroup, memberLogin: String)
 
     suspend fun cancelInvitation(
         itemGroup: ItemGroup,
         userIds: List<String>,
         handleConflict: Boolean = true
-    ) = cancelInvitationUsersAndUserGroups(itemGroup, userIds = userIds, handleConflict = handleConflict)
+    ) = cancelInvitationUsersAndUserGroups(
+        itemGroup,
+        userIds = userIds,
+        handleConflict = handleConflict
+    )
 
     suspend fun cancelInvitationUserGroups(
         itemGroup: ItemGroup,

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="logout">Log out</string>
+    <string name="log_out_of_dashlane_">Log out of Dashlane?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    
+    <string name="log_out_dialog_title">Are you sure you want to log out?</string>
+    
+    <string name="log_out_dialog_description">If you don’t have another logged in device or your recovery key, you could lose access to your account.</string>
+    
+    <string name="log_out_dialog_positive_button">Log out</string>
+    
+    <string name="log_out_dialog_negative_button">Cancel</string>
+</resources>

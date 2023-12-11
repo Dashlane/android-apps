@@ -7,7 +7,6 @@ import com.dashlane.R
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.BaseLogger
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.action.DeleteMenuAction
@@ -18,15 +17,13 @@ import com.dashlane.item.subview.action.note.SecureNoteColorMenuAction
 import com.dashlane.item.subview.action.note.SecureNoteLockMenuAction
 import com.dashlane.item.subview.edit.ItemEditValueRawSubView
 import com.dashlane.item.subview.readonly.ItemReadValueRawSubView
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.DataCounter
+import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.manager.isSsoUser
 import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -39,29 +36,17 @@ import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationSecureNoteProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
-    dataCounter: DataCounter,
     private val mainDataAccessor: MainDataAccessor,
     private val sharingPolicy: SharingPolicyDataProvider,
     private val userFeaturesChecker: UserFeaturesChecker,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    dataCounter,
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val sessionManager: SessionManager,
+    private val teamspaceManagerRepository: TeamspaceManagerRepository
+) : ItemScreenConfigurationProvider() {
 
-    override val logger = BaseLogger(
-        teamspaceAccessor,
-        dataCounter,
-        sessionManager,
-        bySessionUsageLogRepository
-    )
     private val secureNoteDisabled
         get() = userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.DISABLE_SECURE_NOTES) ||
-                !teamspaceAccessor.isFeatureEnabled(Teamspace.Feature.SECURE_NOTES_DISABLED)
+            !teamspaceAccessor.isFeatureEnabled(Teamspace.Feature.SECURE_NOTES_DISABLED)
     private var isLockMenuClicked = false
     private var isSecured = false
     private var selectedNoteType: SyncObject.SecureNoteType? = null
@@ -146,7 +131,8 @@ class ItemScreenConfigurationSecureNoteProvider(
 
         
         if (canShare(item)) {
-            menuActions.add(NewShareMenuAction(item))
+            val teamspaceManager = sessionManager.session?.let { teamspaceManagerRepository.getTeamspaceManager(it) }
+            menuActions.add(NewShareMenuAction(item, teamspaceManager))
         }
 
         listener.notifyColorChanged(
@@ -289,9 +275,10 @@ class ItemScreenConfigurationSecureNoteProvider(
     private fun canEdit(item: VaultItem<SyncObject.SecureNote>) =
         !secureNoteDisabled && sharingPolicy.canEditItem(item.toSummary(), !item.hasBeenSaved)
 
-    private fun canShare(item: VaultItem<SyncObject.SecureNote>) = !secureNoteDisabled && item
-        .hasBeenSaved &&
-            sharingPolicy.canShareItem(item.toSummary()) && !item.toSummary<SummaryObject.SecureNote>().hasAttachments()
+    private fun canShare(item: VaultItem<SyncObject.SecureNote>) =
+        !secureNoteDisabled && item.hasBeenSaved &&
+            sharingPolicy.canShareItem(item.toSummary()) &&
+            !item.toSummary<SummaryObject.SecureNote>().hasAttachments()
 }
 
 @Suppress("UNCHECKED_CAST")

@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCESS_KEY
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCOUNT_CREATION_DATE
+import com.dashlane.preference.ConstantsPrefs.Companion.ACCOUNT_TYPE
 import com.dashlane.preference.ConstantsPrefs.Companion.AUTHENTICATOR_GET_STARTED_DISPLAYED
 import com.dashlane.preference.ConstantsPrefs.Companion.BIOMETRIC_SEAL_PADDING_MIGRATION_ATTEMPT
 import com.dashlane.preference.ConstantsPrefs.Companion.CREDENTIALS_TIMESTAMP
@@ -18,7 +19,6 @@ import com.dashlane.preference.ConstantsPrefs.Companion.FOLLOW_UP_NOTIFICATION_S
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_AUTOMATIC_2FA_TOKEN_COPY
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_FINISHED_M2D
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_SEEN_KEYBOARD_ON_BOARDING_SUGGESTION
-import com.dashlane.preference.ConstantsPrefs.Companion.HAS_STARTED_CHROME_IMPORT
 import com.dashlane.preference.ConstantsPrefs.Companion.IN_APP_REVIEW_NEXT_SCHEDULE_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.IN_APP_REVIEW_PREVIOUS_VERSION_CODE
 import com.dashlane.preference.ConstantsPrefs.Companion.KEYBOARD_AUTOFILL_ANNOUNCEMENT_TIMESTAMP
@@ -36,6 +36,7 @@ import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_2FA_DISABLED
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_ON_LOGIN_PAYWALL
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_SHOULD_SYNC
 import com.dashlane.preference.ConstantsPrefs.Companion.UKI_TEMPORARY_MONOBUCKET
+import com.dashlane.preference.ConstantsPrefs.Companion.USER_ACTIVITY_UPDATE_DATE
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_NUMBER_DEVICES
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_SETTINGS_BACKUP_TIME
 import com.dashlane.preference.ConstantsPrefs.Companion.USE_INLINE_AUTOFILL_SETTING
@@ -53,6 +54,7 @@ abstract class UserPreferencesManager(
 ) : DashlanePreferencesManager() {
 
     var accessKey: String? by stringPreference(ACCESS_KEY)
+    var accountType: String? by stringPreference(ACCOUNT_TYPE)
     var publicKey: String? by stringPreference(RSA_PUBLIC_KEY)
     var referralId by stringPreference(REFFERAL_ID)
     var isPinCodeOn by booleanPreference(PINCODE_ON)
@@ -72,7 +74,6 @@ abstract class UserPreferencesManager(
     var isOnLoginPaywall by booleanPreference(SETTINGS_ON_LOGIN_PAYWALL)
 
     var hasFinishedM2D by booleanPreference(HAS_FINISHED_M2D)
-    var hasStartedChromeImport by booleanPreference(HAS_STARTED_CHROME_IMPORT)
 
     var hasInlineAutofill by booleanPreference(USE_INLINE_AUTOFILL_SETTING, true)
     var requestDisplayKeyboardAnnouncement by booleanPreference(
@@ -193,6 +194,12 @@ abstract class UserPreferencesManager(
         get() = Instant.ofEpochSecond(getLong(VAULT_REPORT_LATEST_TRIGGER_TIMESTAMP, 0))
         set(value) {
             putLong(VAULT_REPORT_LATEST_TRIGGER_TIMESTAMP, value.epochSecond)
+        }
+
+    var userActivityLastUpdateTimestamp: Instant
+        get() = Instant.ofEpochSecond(getLong(USER_ACTIVITY_UPDATE_DATE, 0))
+        set(value) {
+            putLong(USER_ACTIVITY_UPDATE_DATE, value.epochSecond)
         }
 
     fun preferencesFor(username: Username): UserPreferencesManager =

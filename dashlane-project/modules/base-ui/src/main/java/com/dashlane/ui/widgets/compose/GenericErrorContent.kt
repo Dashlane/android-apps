@@ -14,8 +14,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dashlane.design.component.ButtonMediumBar
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.R
 
 @Composable
@@ -60,11 +62,11 @@ fun GenericErrorContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        ButtonRow(
-            textPrimary = textPrimary,
-            textSecondary = textSecondary,
-            onClickPrimary = onClickPrimary,
-            onClickSecondary = onClickSecondary
+        ButtonMediumBar(
+            primaryText = textPrimary,
+            secondaryText = textSecondary,
+            onPrimaryButtonClick = onClickPrimary,
+            onSecondaryButtonClick = onClickSecondary
         )
     }
 }
@@ -72,7 +74,7 @@ fun GenericErrorContent(
 @Preview
 @Composable
 fun GenericErrorContentPreview() {
-    DashlaneTheme {
+    DashlanePreview {
         GenericErrorContent(
             title = "Title",
             message = "Message",

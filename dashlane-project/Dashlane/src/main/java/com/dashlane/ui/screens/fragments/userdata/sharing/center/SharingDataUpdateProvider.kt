@@ -1,8 +1,10 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
 import com.dashlane.network.tools.authorization
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.SharingGetService
+import com.dashlane.server.api.endpoints.sharinguserdevice.SharingServerResponse
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
@@ -16,35 +18,38 @@ class SharingDataUpdateProvider @Inject constructor(
         get() = sessionManager.session
 
     suspend fun getUpdatedItemGroup(itemGroup: ItemGroup): ItemGroup? =
-        runCatching { getUpdatedRevision(itemGroupId = itemGroup.groupId) }.getOrNull()
-            ?.let {
-                itemGroup.copy(revision = it)
-            }
+        getUpdatedItemGroups(listOf(itemGroup))?.firstOrNull()
+
+    suspend fun getUpdatedItemGroups(itemGroups: List<ItemGroup>): List<ItemGroup>? =
+        runCatching { getUpdatedRevision(itemGroupIds = itemGroups.map { it.groupId }) }.getOrNull()
+            ?.itemGroups
 
     suspend fun getUpdatedUserGroup(userGroup: UserGroup): UserGroup? =
-        runCatching { getUpdatedRevision(userGroupId = userGroup.groupId) }.getOrNull()
-            ?.let {
-                userGroup.copy(revision = it)
-            }
+        runCatching { getUpdatedRevision(userGroupIds = listOf(userGroup.groupId)) }.getOrNull()
+            ?.userGroups?.firstOrNull()
+
+    suspend fun getUpdatedCollection(collection: Collection): Collection? =
+        runCatching { getUpdatedRevision(collectionIds = listOf(collection.uuid)) }.getOrNull()
+            ?.collections?.firstOrNull()
 
     private suspend fun getUpdatedRevision(
-        itemGroupId: String? = null,
-        userGroupId: String? = null
-    ): Long? {
+        itemGroupIds: List<String>? = null,
+        userGroupIds: List<String>? = null,
+        collectionIds: List<String>? = null,
+    ): SharingServerResponse? {
         val authorization = session?.authorization ?: return null
-        if (itemGroupId != null && userGroupId != null) return null
-
+        if (itemGroupIds != null && userGroupIds != null) return null
+        val itemGroupRequests = itemGroupIds?.map { SharingGetService.Request.ItemGroupId(it) }
+        val userGroupRequests = userGroupIds?.map { SharingGetService.Request.UserGroupId(it) }
+        val collectionRequests = collectionIds?.map { SharingGetService.Request.CollectionId(it) }
         val result = sharingGetService.execute(
             authorization,
             SharingGetService.Request(
-            itemGroupIds = itemGroupId?.let { listOf(SharingGetService.Request.ItemGroupId(it)) }
-                ?: emptyList(),
-            userGroupIds = userGroupId?.let { listOf(SharingGetService.Request.UserGroupId(it)) }
-                ?: emptyList()
+                itemGroupIds = itemGroupRequests ?: emptyList(),
+                userGroupIds = userGroupRequests ?: emptyList(),
+                collectionIds = collectionRequests ?: emptyList()
+            )
         )
-        )
-
-        return result.data.itemGroups?.singleOrNull()?.revision
-            ?: result.data.userGroups?.singleOrNull()?.revision
+        return result.data
     }
 }

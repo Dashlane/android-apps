@@ -6,10 +6,10 @@ import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.search.SearchField
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityUtil
+import com.dashlane.vault.util.IdentityNameHolderService
 import javax.inject.Inject
 
-open class DataIdentifierListTextResolver @Inject constructor(private val identityUtil: IdentityUtil) {
+open class DataIdentifierListTextResolver @Inject constructor(private val identityNameHolderService: IdentityNameHolderService) {
 
     fun getLine1(context: Context, item: SummaryObject): StatusText {
         return getTextFactory(context, item).getLine1()
@@ -25,12 +25,13 @@ open class DataIdentifierListTextResolver @Inject constructor(private val identi
             is SummaryObject.Authentifiant -> AuthentifiantListTextFactory(context, item)
             is SummaryObject.BankStatement -> BankStatementListTextFactory(context, item)
             is SummaryObject.Company -> CompanyListTextFactory(context, item)
-            is SummaryObject.DriverLicence -> DriverLicenceListTextFactory(context, item, identityUtil)
+            is SummaryObject.DriverLicence -> DriverLicenceListTextFactory(context, item, identityNameHolderService)
             is SummaryObject.Email -> EmailListTextFactory(context, item)
             is SummaryObject.FiscalStatement -> FiscalStatementListTextFactory(context, item)
-            is SummaryObject.IdCard -> IdCardListTextFactory(context, item, identityUtil)
+            is SummaryObject.IdCard -> IdCardListTextFactory(context, item, identityNameHolderService)
             is SummaryObject.Identity -> IdentityListTextFactory(context, item)
-            is SummaryObject.Passport -> PassportListTextFactory(context, item, identityUtil)
+            is SummaryObject.Passkey -> PasskeyListTextFactory(item)
+            is SummaryObject.Passport -> PassportListTextFactory(context, item, identityNameHolderService)
             is SummaryObject.PaymentCreditCard -> PaymentCreditCardListTextFactory(context, item)
             is SummaryObject.PaymentPaypal -> PaymentPaypalListTextFactory(context, item)
             is SummaryObject.PersonalWebsite -> PersonalWebsiteListTextFactory(context, item)
@@ -39,7 +40,7 @@ open class DataIdentifierListTextResolver @Inject constructor(private val identi
             is SummaryObject.SocialSecurityStatement -> SocialSecurityStatementListTextFactory(
                 context,
                 item,
-                identityUtil
+                identityNameHolderService
             )
             else -> DefaultResult(context)
         }

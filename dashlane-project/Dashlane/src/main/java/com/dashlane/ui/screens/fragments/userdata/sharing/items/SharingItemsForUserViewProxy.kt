@@ -1,11 +1,13 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.items
 
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.core.domain.sharing.toUserPermission
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.adapter.util.populateItemsAsync
 import com.dashlane.ui.dialogs.fragment.sharing.confirmation.SharingConfirmationDialogCancelInvite
 import com.dashlane.ui.dialogs.fragment.sharing.confirmation.SharingConfirmationDialogRevoke
@@ -26,6 +28,7 @@ class SharingItemsForUserViewProxy(
     fragment: Fragment,
     view: View,
     private val viewModel: SharingItemsForUserViewModelContract,
+    private val itemWrapperProvider: ItemWrapperProvider
 ) : SharingBaseViewProxy(fragment, view) {
 
     init {
@@ -75,6 +78,7 @@ class SharingItemsForUserViewProxy(
                 SharedVaultItemWrapper(
                     context,
                     it,
+                    itemWrapperProvider,
                     onPendingMenuClick = { view, item ->
                         showManageSharingContactPending(view, item)
                     },
@@ -98,6 +102,7 @@ class SharingItemsForUserViewProxy(
         loadingView.visibility = View.GONE
         refreshLayout.isRefreshing = false
         list.visibility = View.VISIBLE
+        permissionInfobox.isVisible = state.items.any { it.isItemInCollection }
     }
 
     private fun showManageSharingContactPending(
@@ -107,6 +112,7 @@ class SharingItemsForUserViewProxy(
         val dialog = PopupMenuManageUserPending(
             context,
             view,
+            isItemInCollection = sharedItem.isItemInCollection,
             onCancelInvite = {
                 SharingConfirmationDialogCancelInvite.newInstanceForUser(
                     context,
@@ -129,6 +135,7 @@ class SharingItemsForUserViewProxy(
             context,
             view,
             isAdmin = sharedItem.isMemberAdmin,
+            isItemInCollection = sharedItem.isItemInCollection,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUser(
                     context,

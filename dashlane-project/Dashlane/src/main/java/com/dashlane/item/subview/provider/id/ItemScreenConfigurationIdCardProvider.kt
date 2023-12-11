@@ -2,7 +2,6 @@ package com.dashlane.item.subview.provider.id
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.inapplogin.UsageLogCode35Action
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -13,15 +12,11 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -32,15 +27,9 @@ import java.time.LocalDate
 class ItemScreenConfigurationIdCardProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -99,23 +88,27 @@ class ItemScreenConfigurationIdCardProvider(
             createNumberField(subViewFactory, context, item, editMode),
             
             createIdDateField(
+                context,
                 item,
                 editMode,
                 listener,
                 item.syncObject.deliveryDate,
                 context.getString(R.string.issue_date),
                 CopyField.IdsIssueDate,
-                VaultItem<*>::copyForUpdatedDeliveryDate
+                VaultItem<*>::copyForUpdatedDeliveryDate,
+                vaultItemCopy
             ),
             
             createIdDateField(
+                context,
                 item,
                 editMode,
                 listener,
                 item.syncObject.expireDate,
                 context.getString(R.string.expiery_date),
                 CopyField.IdsExpirationDate,
-                VaultItem<*>::copyForUpdatedExpirationDate
+                VaultItem<*>::copyForUpdatedExpirationDate,
+                vaultItemCopy
             ),
             
             createTeamspaceField(subViewFactory, item),
@@ -166,14 +159,12 @@ class ItemScreenConfigurationIdCardProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 numberView,
-                CopyAction(item.toSummary(), CopyField.IdsNumber, action = {
-                    logger.log(
-                        UsageLogCode35(
-                            type = UsageLogCode11.Type.ID_CARD.code,
-                            action = UsageLogCode35Action.COPY_NUMBER
-                        )
-                    )
-                })
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.IdsNumber,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -182,7 +173,7 @@ class ItemScreenConfigurationIdCardProvider(
         override fun fullName(item: VaultItem<SyncObject.IdCard>) = item.syncObject.fullname
 
         override fun withFullName(item: VaultItem<SyncObject.IdCard>, fullName: String?):
-                VaultItem<SyncObject.IdCard> = item.copySyncObject { fullname = fullName }
+            VaultItem<SyncObject.IdCard> = item.copySyncObject { fullname = fullName }
 
         override fun gender(item: VaultItem<SyncObject.IdCard>): SyncObject.Gender? = item.syncObject.sex
 
@@ -195,12 +186,12 @@ class ItemScreenConfigurationIdCardProvider(
         override fun birthDate(item: VaultItem<SyncObject.IdCard>) = item.syncObject.dateOfBirth
 
         override fun withBirthDate(item: VaultItem<SyncObject.IdCard>, birthDate: LocalDate?):
-                VaultItem<SyncObject.IdCard> = item.copySyncObject { dateOfBirth = birthDate }
+            VaultItem<SyncObject.IdCard> = item.copySyncObject { dateOfBirth = birthDate }
 
         override fun linkedIdentity(item: VaultItem<SyncObject.IdCard>) = item.syncObject.linkedIdentity
 
         override fun withLinkedIdentity(item: VaultItem<SyncObject.IdCard>, identity: String?):
-                VaultItem<SyncObject.IdCard> =
+            VaultItem<SyncObject.IdCard> =
             item.copySyncObject { linkedIdentity = identity }
     }
 }

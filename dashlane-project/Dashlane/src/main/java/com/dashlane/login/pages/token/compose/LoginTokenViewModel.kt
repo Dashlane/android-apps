@@ -9,6 +9,7 @@ import com.dashlane.authentication.AuthenticationOfflineException
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.AuthenticationSecondFactoryRepository
+import com.dashlane.debug.DaDaDa
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation
 import com.dashlane.server.api.endpoints.authentication.AuthSendEmailTokenService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,7 @@ import kotlinx.coroutines.launch
 class LoginTokenViewModel @Inject constructor(
     private val secondFactoryRepository: AuthenticationSecondFactoryRepository,
     private val sendEmailTokenService: AuthSendEmailTokenService,
+    private val daDaDa: DaDaDa,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -34,6 +36,7 @@ class LoginTokenViewModel @Inject constructor(
     val uiState = stateFlow.asStateFlow()
 
     init {
+        debug(login)
         flow<LoginTokenState> {
             sendEmailTokenService.execute(AuthSendEmailTokenService.Request(login = login))
         }
@@ -70,6 +73,15 @@ class LoginTokenViewModel @Inject constructor(
                 }
             }
             .onEach { stateFlow.emit(it) }
+            .launchIn(viewModelScope)
+    }
+
+    fun debug(username: String) {
+        daDaDa.getSecurityToken(username)
+            .onEach { token ->
+                stateFlow.emit(LoginTokenState.DebugToken(stateFlow.value.data.copy(token = token)))
+                onTokenCompleted(token)
+            }
             .launchIn(viewModelScope)
     }
 }

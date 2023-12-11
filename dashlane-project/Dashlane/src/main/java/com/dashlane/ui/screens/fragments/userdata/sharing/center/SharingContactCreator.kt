@@ -1,11 +1,14 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.sharing.model.getUser
+import com.dashlane.sharing.model.getUserGroup
+import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.isPending
 import com.dashlane.sharing.model.isUserAcceptedOrPending
 import com.dashlane.sharing.model.isUserGroupAcceptedOrPending
@@ -57,49 +60,83 @@ class SharingContactCreator @Inject constructor(
         }
     }
 
-    fun getUsersToDisplay(itemGroups: List<ItemGroup>): List<SharingContact.User> {
+    fun getCollectionInvites(collections: List<Collection>): List<SharingContact.CollectionInvite> {
+        val login = login ?: return emptyList()
+        return collections.filter { collection ->
+            collection.getUser(login)?.isPending == true
+        }.map {
+            SharingContact.CollectionInvite(it, login)
+        }
+    }
+
+    fun getUsersToDisplay(
+        itemGroups: List<ItemGroup>,
+        myCollections: List<Collection>
+    ): List<SharingContact.User> {
         val login = login ?: return emptyList()
         val contacts: Map<String, List<String>> =
             itemGroups
                 .flatMap { itemGroup ->
-                    itemGroup.users?.map { it.userId } ?: emptyList()
+                    val collectionLogins = itemGroup.collections?.mapNotNull {
+                        myCollections.find { c -> it.uuid == c.uuid }?.users?.map { it.login }
+                    } ?: emptyList()
+                    (itemGroup.users?.map { it.userId } ?: emptyList()) + collectionLogins.flatten()
                 }
                 .toSet()
                 .minus(login) 
                 .associateWith { name ->
                     itemGroups.filter {
-                        it.isUserAcceptedOrPending(name) && it.items != null
+                        (
+                            it.collections?.any {
+                                myCollections.find { c -> it.uuid == c.uuid }
+                                    ?.getUser(name)?.isAcceptedOrPending == true
+                            } == true ||
+                                it.isUserAcceptedOrPending(name)
+                            ) && it.items != null
                     }.flatMap { itemGroup -> itemGroup.items!!.map { it.itemId } }
                 }
-
-        return contacts.map { (name, itemIds) ->
-            SharingContact.User(name, itemIds)
-        }.filter { isValidInCurrentSpace(it) }
+        return contacts.map { (name, itemIds) -> SharingContact.User(name, itemIds) }
+            .filter { isValidInCurrentSpace(it) }
     }
 
     fun getUserGroupsToDisplay(
         myUserGroups: List<UserGroup>,
-        myItemGroups: List<ItemGroup>
+        myItemGroups: List<ItemGroup>,
+        myCollections: List<Collection>
     ): List<SharingContact.UserGroup> {
         val userGroupsIds = myUserGroups.map { it.groupId }
         val contacts: Map<String, List<String>> =
             myItemGroups
                 .flatMap { itemGroup ->
-                    itemGroup.groups?.mapNotNull {
-                        if (it.groupId in userGroupsIds) it.groupId else null
+                    val collectionGroups = itemGroup.collections?.mapNotNull {
+                        myCollections.find { c -> it.uuid == c.uuid }?.userGroups?.mapNotNull {
+                            if (it.uuid in userGroupsIds) it.uuid else null
+                        }
                     } ?: emptyList()
+                    (
+                        itemGroup.groups?.mapNotNull {
+                            if (it.groupId in userGroupsIds) it.groupId else null
+                        } ?: emptyList()
+                        ) + collectionGroups.flatten()
                 }
                 .toSet()
                 .associateWith { userGroupId ->
                     myItemGroups.filter {
-                        it.isUserGroupAcceptedOrPending(userGroupId) && it.items != null
+                        it.collections?.any { gCollection ->
+                            myCollections.any { mCollection ->
+                                mCollection.uuid == gCollection.uuid &&
+                                    mCollection.getUserGroup(userGroupId)?.isAcceptedOrPending == true
+                            }
+                        } == true ||
+                            it.isUserGroupAcceptedOrPending(userGroupId) && it.items != null
                     }.flatMap { itemGroup -> itemGroup.items!!.map { it.itemId } }
                 }
 
         return myUserGroups.map {
+            val groupItems = contacts[it.groupId] ?: emptyList()
             SharingContact.UserGroup(
                 userGroup = it,
-                itemCount = contacts[it.groupId]?.size ?: 0
+                itemCount = groupItems.count()
             )
         }.filter { isValidInCurrentSpace(it) }
     }

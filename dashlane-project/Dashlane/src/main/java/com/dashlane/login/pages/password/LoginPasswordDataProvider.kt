@@ -1,6 +1,7 @@
 package com.dashlane.login.pages.password
 
 import android.content.Intent
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryStatus
 import com.dashlane.authentication.AuthenticationDeviceCredentialsInvalidException
 import com.dashlane.authentication.AuthenticationEmptyPasswordException
@@ -10,18 +11,11 @@ import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
 import com.dashlane.biometricrecovery.BiometricRecovery
-import com.dashlane.core.DataSync
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.help.newIntent
-import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.hermes.generated.definitions.VerificationMode
-import com.dashlane.inapplogin.InAppLoginManager
-import com.dashlane.limitations.DeviceLimitActivityListener
-import com.dashlane.limitations.Enforce2faLimiter
 import com.dashlane.login.LoginDataReset
-import com.dashlane.login.LoginMode
-import com.dashlane.login.LoginNewUserInitialization
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.LoginStrategy.Strategy.DEVICE_LIMIT
 import com.dashlane.login.LoginStrategy.Strategy.ENFORCE_2FA
@@ -39,24 +33,18 @@ import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.AppKey
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
-import com.dashlane.session.SessionResult
 import com.dashlane.session.Username
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.util.installlogs.DataLossTrackingLogger
-import com.dashlane.util.usagelogs.ViewLogger
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class LoginPasswordDataProvider @Inject constructor(
     private val successIntentFactory: LoginSuccessIntentFactory,
     private val dataReset: LoginDataReset,
-    private val initialization: LoginNewUserInitialization,
     private val loggerFactory: LoginPasswordLogger.Factory,
     private val userPreferencesManager: UserPreferencesManager,
     private val globalPreferencesManager: GlobalPreferencesManager,
@@ -67,22 +55,14 @@ class LoginPasswordDataProvider @Inject constructor(
     private val cryptoObjectHelper: CryptoObjectHelper,
     private val passwordRepository: AuthenticationPasswordRepository,
     private val changeAccountHelper: ChangeAccountHelper,
-    private val deviceLimitActivityListener: DeviceLimitActivityListener,
-    private val enforce2faLimiter: Enforce2faLimiter,
-    private val dataSync: DataSync,
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
-    private val viewLogger: ViewLogger,
-    lockManager: LockManager,
-    inAppLoginManager: InAppLoginManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
+    private val loginPasswordRepository: LoginPasswordRepository,
+    lockManager: LockManager
 ) : LoginLockBaseDataProvider<LoginPasswordContract.Presenter>(
     lockManager,
-    successIntentFactory,
-    inAppLoginManager,
-    sessionManager,
-    bySessionUsageLogRepository
+    successIntentFactory
 ),
-    LoginPasswordContract.DataProvider {
+LoginPasswordContract.DataProvider {
 
     var registeredUserDevice: RegisteredUserDevice? = null
         set(value) {
@@ -104,24 +84,25 @@ class LoginPasswordDataProvider @Inject constructor(
             sessionRestorer.canRestoreSession(
                 username,
                 registeredUserDevice!!.serverKey,
-                acceptLoggedOut = true
+                acceptLoggedOut = false
             ) &&
             
             cryptoObjectHelper.getEncryptCipher(CryptoObjectHelper.BiometricsSeal(username)) is CryptoObjectHelper.CipherInitResult.Success
 
     override fun onPromptBiometricForRecovery() {
-        biometricRecovery.logger.logPromptBiometricForRecovery(UsageLogConstant.ViewType.login)
         userPreferencesManager.isMpResetRecoveryStarted = true
     }
 
-    override fun onGoToChangeMP() = biometricRecovery.logger.logGoToChangeMP(UsageLogConstant.ViewType.login)
-
     override fun loginHelp(): Intent {
-        return HelpCenterLink.ARTICLE_CANNOT_LOGIN.newIntent(presenter.context!!, viewLogger, false)
+        return HelpCenterLink.ARTICLE_CANNOT_LOGIN.newIntent(
+            context = presenter.context!!
+        )
     }
 
     override fun passwordForgotten(): Intent {
-        return HelpCenterLink.ARTICLE_FORGOT_PASSWORD.newIntent(presenter.context!!, viewLogger, false)
+        return HelpCenterLink.ARTICLE_FORGOT_PASSWORD.newIntent(
+            context = presenter.context!!
+        )
     }
 
     override suspend fun changeAccount(email: String?): Intent {
@@ -143,14 +124,20 @@ class LoginPasswordDataProvider @Inject constructor(
         }
     }
 
-    override fun getChangeMPIntent(): Intent? = if (biometricRecovery.isFeatureAvailable) {
+    override fun getChangeMPIntent(): Intent? = if (biometricRecovery.isFeatureAvailable()) {
         successIntentFactory.createBiometricRecoveryIntent()
     } else {
         null
     }
 
     override fun getAccountRecoveryKeyIntent(): Intent? {
-        return registeredUserDevice?.let { successIntentFactory.createAccountRecoveryKeyIntent(it, authTicket) }
+        return registeredUserDevice?.let {
+            successIntentFactory.createAccountRecoveryKeyIntent(
+                registeredUserDevice = it,
+                accountType = UserAccountInfo.AccountType.MasterPassword,
+                authTicket = authTicket
+            )
+        }
     }
 
     override suspend fun validatePassword(password: CharSequence, leaveAfterSuccess: Boolean):
@@ -198,10 +185,8 @@ class LoginPasswordDataProvider @Inject constructor(
         appKey: AppKey
     ): LoginPasswordContract.SuccessfulLogin {
         if (lockManager.unlock(LockPass.ofPassword(appKey))) {
-            usageLogUnlock()
             return LoginPasswordContract.SuccessfulLogin(null)
         } else {
-            usageLogFailedUnlockAttempt()
             lockManager.addFailUnlockAttempt()
             throw InvalidPasswordException(InvalidReason.FAILED_UNLOCK)
         }
@@ -224,43 +209,15 @@ class LoginPasswordDataProvider @Inject constructor(
         result: AuthenticationPasswordRepository.Result.Local,
         leaveAfterSuccess: Boolean
     ): LoginPasswordContract.SuccessfulLogin {
-        val sessionResult = sessionManager.loadSession(
-            Username.ofEmail(username),
-            result.password,
-            result.secretKey,
-            result.localKey,
-            result.accessKey.takeIf { result.isAccessKeyRefreshed },
-            LoginMode.MasterPassword(verification = registeredUserDevice!!.toVerification())
-        )
-        if (sessionResult is SessionResult.Error) {
-            throw IllegalStateException(
-                "Failed to load session ${sessionResult.errorCode} ${sessionResult.errorReason}",
-                sessionResult.cause
-            )
-        }
+        val session = loginPasswordRepository.createSessionForLocalPassword(registeredUserDevice!!, result)
         val shouldLaunchInitialSync = userPreferencesManager.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
-        
-        
-        
-        
-        
-        
-        deviceLimitActivityListener.isFirstLogin = shouldLaunchInitialSync
-        enforce2faLimiter.isFirstLogin = shouldLaunchInitialSync
         val intent = createMigrationToSsoMemberIntent() ?: when {
             
-            shouldLaunchInitialSync -> createLocalStrategyIntent(sessionManager.session!!)
+            shouldLaunchInitialSync -> createLocalStrategyIntent(session)
             leaveAfterSuccess -> null
             else -> successIntentFactory.createApplicationHomeIntent()
         }
-
-        val successfulLogin = handleSuccessfulLogin(result, intent)
-
-        if (!shouldLaunchInitialSync) {
-            dataSync.sync(Trigger.LOGIN)
-        }
-
-        return successfulLogin
+        return handleSuccessfulLogin(result, intent)
     }
 
     private suspend fun createLocalStrategyIntent(session: Session): Intent {
@@ -276,45 +233,12 @@ class LoginPasswordDataProvider @Inject constructor(
     }
 
     private suspend fun handleRemotePasswordSuccess(result: AuthenticationPasswordRepository.Result.Remote): LoginPasswordContract.SuccessfulLogin {
-        val accessKey = result.accessKey
-        val secretKey = result.secretKey
-        val sessionResult = initialization.initializeSession(
-            username,
-            result.password,
-            accessKey,
-            secretKey,
-            result.localKey,
-            result.settings,
-            result.sharingKeys?.public?.value,
-            result.sharingKeys?.private?.value,
-            result.remoteKey,
-            result.deviceAnalyticsId,
-            result.userAnalyticsId,
-            LoginMode.MasterPassword(verification = registeredUserDevice!!.toVerification())
+        val session = loginPasswordRepository.createSessionForRemotePassword(
+            result = result,
+            accountType = UserAccountInfo.AccountType.MasterPassword
         )
 
         
-        
-        
-        
-        
-        
-        
-        userPreferencesManager.userSettingsBackupTimeMillis = result.settingsDate.toEpochMilli()
-
-        return when (sessionResult) {
-            is SessionResult.Success -> handleSessionSuccess(result, sessionResult.session)
-            is SessionResult.Error -> throw sessionResult.cause ?: IllegalStateException("Session can't be created")
-        }
-    }
-
-    private suspend fun handleSessionSuccess(
-        result: AuthenticationPasswordRepository.Result.Remote,
-        session: Session
-    ): LoginPasswordContract.SuccessfulLogin {
-        
-        deviceLimitActivityListener.isFirstLogin = true
-        enforce2faLimiter.isFirstLogin = true
         val strategy = loginStrategy.getStrategy(session, result.securityFeatures)
         val intent = createMigrationToSsoMemberIntent() ?: strategy.let {
             when (it) {
@@ -383,7 +307,7 @@ class LoginPasswordDataProvider @Inject constructor(
     }
 }
 
-private fun RegisteredUserDevice.toVerification() = when (this) {
+fun RegisteredUserDevice.toVerification() = when (this) {
     is RegisteredUserDevice.Local -> if (isServerKeyRequired) {
         VerificationMode.OTP2
     } else {

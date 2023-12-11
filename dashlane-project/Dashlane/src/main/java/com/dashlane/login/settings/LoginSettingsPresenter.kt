@@ -26,7 +26,6 @@ class LoginSettingsPresenter @Inject constructor(
     private val applicationCoroutineScope: CoroutineScope,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
-    val logger: LoginSettingsContract.Logger,
     private val loginSuccessIntentFactory: LoginSuccessIntentFactory,
     private val sessionManager: SessionManager,
     private val biometricRecovery: BiometricRecovery,
@@ -42,13 +41,10 @@ class LoginSettingsPresenter @Inject constructor(
         super.onViewChanged()
         if (!biometricAuthModule.isHardwareSetUp()) {
             goToLoginSyncProgress()
-        } else {
-            logger.logDisplay()
         }
     }
 
     override fun onNext() {
-        logger.logNext()
         sessionManager.session?.let { session ->
             if (view.biometricSettingChecked) {
                 applicationCoroutineScope.launch(defaultCoroutineDispatcher) {
@@ -85,6 +81,6 @@ class LoginSettingsPresenter @Inject constructor(
     private fun enableResetMp() {
         
         biometricRecovery.isFeatureKnown = true
-        biometricRecovery.setFeatureEnabled(true, "firstLogin")
+        biometricRecovery.setBiometricRecoveryFeatureEnabled(true)
     }
 }

@@ -23,15 +23,19 @@ interface LoginTotpContract {
         fun showU2fKeyNeedsUserPresence()
 
         fun showU2fKeyMatched()
+
+        fun showRecoveryCodeError()
     }
 
     interface Presenter : LoginBaseContract.Presenter {
 
         fun onCodeCompleted()
 
+        fun onRecoveryCodeInput(code: String)
+
         fun notifyUnknownError()
 
-        fun notifyTotpError(lockedOut: Boolean)
+        fun notifyTotpError(lockedOut: Boolean, isRecoveryCode: Boolean)
 
         fun notifyU2fKeyDetected()
 
@@ -51,7 +55,7 @@ interface LoginTotpContract {
     interface DataProvider : LoginBaseContract.DataProvider {
         val secondFactor: AuthenticationSecondFactor.Totp
 
-        suspend fun validateTotp(otp: String, auto: Boolean)
+        suspend fun validateTotp(otp: String, auto: Boolean, isRecoveryCode: Boolean)
 
         suspend fun executeDuoAuthentication()
 

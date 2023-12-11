@@ -3,6 +3,7 @@ package com.dashlane.vault.util
 import com.dashlane.hermes.generated.definitions.Space
 import com.dashlane.teamspaces.PersonalTeamspace
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isValueNull
 import com.dashlane.vault.model.VaultItem
@@ -12,17 +13,14 @@ import com.dashlane.xml.domain.SyncObject
 
 object TeamSpaceUtils {
 
-    @JvmStatic
     fun getTeamSpaceId(item: VaultItem<*>): String {
         return getTeamSpaceIdOrDefault(item.syncObject.spaceId)
     }
 
-    @JvmStatic
     fun getTeamSpaceId(item: SyncObject?): String {
         return getTeamSpaceIdOrDefault(item?.spaceId)
     }
 
-    @JvmStatic
     fun getTeamSpaceId(item: SummaryObject?): String {
         return getTeamSpaceIdOrDefault(item?.spaceId)
     }
@@ -41,4 +39,10 @@ fun VaultItem<*>.getTeamSpaceLog() = if (isSpaceItem() &&
     Space.PROFESSIONAL
 } else {
     Space.PERSONAL
+}
+
+fun Teamspace?.isSpaceJustRevoked(previousStatus: String?, newStatus: String?): Boolean {
+    return this != null &&
+        previousStatus == Teamspace.Status.ACCEPTED &&
+        newStatus == Teamspace.Status.REVOKED
 }

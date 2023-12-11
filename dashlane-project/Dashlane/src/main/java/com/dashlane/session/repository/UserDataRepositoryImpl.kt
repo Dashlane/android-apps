@@ -10,9 +10,9 @@ import com.dashlane.settings.SettingsManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.withContext
 
 @Singleton
 open class UserDataRepositoryImpl @Inject constructor(
@@ -41,32 +41,36 @@ open class UserDataRepositoryImpl @Inject constructor(
     override suspend fun sessionInitializing(
         session: Session,
         userSettings: SyncObject.Settings?,
+        accountType: UserAccountInfo.AccountType,
         allowOverwriteAccessKey: Boolean
     ) {
-        withContext(sessionCoroutineScopeRepository.getCoroutineScope(session).coroutineContext) {
-            globalPreferencesManager.isUserLoggedOut = false
-            globalPreferencesManager.setLastLoggedInUser(session.userId)
+        sessionCoroutineScopeRepository.getCoroutineScope(session)?.let {
+            withContext(it.coroutineContext) {
+                globalPreferencesManager.isUserLoggedOut = false
+                globalPreferencesManager.setLastLoggedInUser(session.userId)
 
-            
-            val userAccountInfo = UserAccountInfo(
-                username = session.userId,
-                accessKey = session.accessKey,
-                otp2 = session.appKey.isServerKeyNotNull
-            )
-            userAccountStorage.get().saveUserAccountInfo(
-                userAccountInfo,
-                session,
-                allowOverwriteAccessKey
-            )
-
-            
-            userSettings?.run {
-                getSettingsManager(session).updateSettings(this, triggerSync = false)
-            }
-
-            runCatching {
                 
-                getSettingsManager(session).loadSettings()
+                val userAccountInfo = UserAccountInfo(
+                    username = session.userId,
+                    accessKey = session.accessKey,
+                    otp2 = session.appKey.isServerKeyNotNull,
+                    accountType = accountType
+                )
+                userAccountStorage.get().saveUserAccountInfo(
+                    userAccountInfo,
+                    session,
+                    allowOverwriteAccessKey
+                )
+
+                
+                userSettings?.run {
+                    getSettingsManager(session).updateSettings(this, triggerSync = false)
+                }
+
+                runCatching {
+                    
+                    getSettingsManager(session).loadSettings()
+                }
             }
         }
     }

@@ -178,7 +178,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
 
         
         selectedItems.clear()
-        view.updateActionBar()
+        view.updateActionBar(updateTitle = false)
     }
 
     override fun requireRefresh() {
@@ -188,7 +188,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
     override fun onClick(item: DashlaneRecyclerAdapter.ViewTypeProvider) {
         when (item) {
             is DarkWebBreachItem -> {
-                navigator.goToBreachAlertDetail(item.breach, "dark_web")
+                navigator.goToBreachAlertDetail(item.breach)
             }
         }
     }
@@ -224,7 +224,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
             menu.clear()
             inflater.inflate(R.menu.delete_menu, menu)
         }
-        view.updateActionBar()
+        view.updateActionBar(updateTitle = true)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -232,7 +232,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
             android.R.id.home -> {
                 if (selectedItems.size > 0) {
                     selectedItems.clear()
-                    view.updateActionBar()
+                    view.updateActionBar(updateTitle = true)
                     activity?.invalidateOptionsMenu()
                     return true
                 }

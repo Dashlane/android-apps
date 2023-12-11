@@ -69,8 +69,8 @@
 
                 <ImageView
                     android:id="@+id/toolbar_icon"
-                    android:layout_width="?actionBarSize"
-                    android:layout_height="?actionBarSize"
+                    android:layout_width="?android:attr/actionBarSize"
+                    android:layout_height="?android:attr/actionBarSize"
                     />
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -108,7 +108,7 @@
         android:layout_width="@dimen/image_width"
         android:layout_height="@dimen/image_width"
         android:layout_gravity="center_horizontal"
-        app:finalHeight="?actionBarSize"
+        app:finalHeight="?android:attr/actionBarSize"
         app:layout_behavior="com.dashlane.item.header.LogoBehavior"
         />
 

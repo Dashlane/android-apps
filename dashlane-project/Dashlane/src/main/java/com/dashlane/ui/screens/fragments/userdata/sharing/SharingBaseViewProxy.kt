@@ -3,12 +3,14 @@ package com.dashlane.ui.screens.fragments.userdata.sharing
 import android.content.Context
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.InfoboxMediumView
 import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
 import com.dashlane.ui.widgets.view.RecyclerViewFloatingActionButton
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +33,7 @@ open class SharingBaseViewProxy(
     val fabButton: RecyclerViewFloatingActionButton =
         view.findViewById(R.id.data_list_floating_button)
     val toolbar: Toolbar? = fragment.activity?.findViewById(R.id.toolbar)
+    val permissionInfobox = view.findViewById<InfoboxMediumView>(R.id.permission_infobox)
 
     init {
         fabButton.visibility = View.GONE
@@ -39,11 +42,13 @@ open class SharingBaseViewProxy(
     fun showLoadingState() {
         loadingView.visibility = View.VISIBLE
         list.visibility = View.INVISIBLE
+        permissionInfobox.isVisible = false
     }
 
     fun showEmptyState() {
         loadingView.visibility = View.GONE
         refreshLayout.isRefreshing = false
         list.visibility = View.VISIBLE
+        permissionInfobox.isVisible = false
     }
 }

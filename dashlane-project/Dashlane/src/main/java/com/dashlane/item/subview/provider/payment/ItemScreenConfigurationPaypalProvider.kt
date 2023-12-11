@@ -7,21 +7,17 @@ import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.logger.PaypalAccountLogger
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.EmailSuggestionProvider
-import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.graphics.getDominantColor
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
@@ -34,25 +30,11 @@ import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationPaypalProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
-    dataCounter: DataCounter,
     private val emailSuggestionProvider: EmailSuggestionProvider,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
     private val vaultItemLogger: VaultItemLogger,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    dataCounter,
-    sessionManager,
-    bySessionUsageLogRepository
-) {
-
-    override val logger = PaypalAccountLogger(
-        teamspaceAccessor,
-        dataCounter,
-        sessionManager,
-        bySessionUsageLogRepository
-    )
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -132,9 +114,12 @@ class ItemScreenConfigurationPaypalProvider(
             itemSubView?.let {
                 ItemSubViewWithActionWrapper(
                     it,
-                    CopyAction(item.toSummary(), CopyField.PayPalPassword, action = {
-                        logger.logCopyPaypalPassword()
-                    })
+                    CopyAction(
+                        summaryObject = item.toSummary(),
+                        copyField = CopyField.PayPalPassword,
+                        action = {},
+                        vaultItemCopy = vaultItemCopy
+                    )
                 )
             }
         }
@@ -194,11 +179,10 @@ class ItemScreenConfigurationPaypalProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         itemToSave as VaultItem<SyncObject.PaymentPaypal>
         return itemToSave.syncObject.login.isNotSemanticallyNull() ||
-                itemToSave.syncObject.password?.toString().isNotSemanticallyNull()
+            itemToSave.syncObject.password?.toString().isNotSemanticallyNull()
     }
 
     private fun logRevealPassword(item: VaultItem<SyncObject.PaymentPaypal>) {
-        logger.logRevealPassword()
         vaultItemLogger.logRevealField(Field.PASSWORD, item.uid, ItemType.PAYPAL, null)
     }
 }

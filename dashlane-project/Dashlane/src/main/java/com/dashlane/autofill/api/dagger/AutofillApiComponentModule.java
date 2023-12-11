@@ -1,10 +1,7 @@
 package com.dashlane.autofill.api.dagger;
 
-import com.dashlane.R;
-import com.dashlane.autofill.api.changepassword.AutoFillChangePasswordConfiguration;
+import com.dashlane.autofill.changepassword.AutoFillChangePasswordConfiguration;
 import com.dashlane.guidedpasswordchange.OnboardingGuidedPasswordChangeActivity;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;

@@ -23,6 +23,7 @@ class ConstantsPrefs {
         internal const val ACCOUNT_CREATION_DATE = "accountCreationDate"
         internal const val ALLOW_SEND_LOGS = "allowSendLogs"
         internal const val REGISTERED_AUTHENTICATOR_PUSH_ID = "registeredAuthenticatorPushId"
+        internal const val USER_ACTIVITY_UPDATE_DATE = "userActivityUpdateDate"
 
         internal const val CREDENTIALS_TIMESTAMP = "credentials_timestamp"
 
@@ -43,6 +44,7 @@ class ConstantsPrefs {
 
         const val USE_GOOGLE_FINGERPRINT = "useGoogleFingerprint"
         const val INVALIDATED_BIOMETRIC = "invalidatedBiometric"
+        const val DISABLED_ACCOUNT_RECOVERY_KEY = "disabledAccountRecoveryKey"
         const val USER_ORIGIN = "userOrigin"
         const val WINDOW_SECURITY_FLAG_DISABLED = "windowSecurityDisabled"
         const val GRACE_PERIOD_END_NOTIFICATION_DONE = "gracePeriodEndNotified"
@@ -50,6 +52,7 @@ class ConstantsPrefs {
         const val SHOW_PREMIUM_REMINDER = "showPremiumReminder"
         const val USER_NUMBER_DEVICES = "numberOfDevices"
         const val OTP2SECURITY = "otp2"
+        const val ACCOUNT_TYPE = "pref_account_type"
         const val SECURITY_SETTINGS = "loginSecuritySettings"
         const val CLEAR_CLIPBOARD_ON_TIMEOUT = "clearclipboard"
         const val TOKEN_RETRIEVED_ON_PUSH = "tokenRetrievedOnPush"
@@ -67,7 +70,6 @@ class ConstantsPrefs {
         const val FULL_REFERRER = "full_referrer"
         const val REFERRED_BY = "referred_by"
         const val REFERRER_ORIGIN_PACKAGE = "referrer_origin_package"
-        const val REFERRER_UNIQUE_REF_ID = "referrer_unique_ref_id"
         const val INSTALLATION_TIMESTAMP = "installation_timestamp"
         const val HAS_DESKTOP_DEVICE = "has_desktop_device"
         const val IN_APP_REVIEW_NEXT_SCHEDULE_TIMESTAMP = "nextRateTime"
@@ -95,7 +97,6 @@ class ConstantsPrefs {
         const val LEGACY_KEY_FEATURE_FLIPPING = "pref_feature_flipping"
 
         const val HAS_FINISHED_M2D = "has_finished_m2d"
-        const val HAS_STARTED_CHROME_IMPORT = "has_started_chrome_import"
 
         const val AUTOFILL_NOTIFICATION_DISMISS_COUNT = "autofill_notification_dismiss"
 

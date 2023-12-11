@@ -125,11 +125,6 @@ public class ActionBarUtil {
         }
     }
 
-    public interface Delegate {
-
-        int getActionBarColor();
-    }
-
     public interface DrawerLayoutProvider {
 
         DrawerLayout getNavigationDrawer();

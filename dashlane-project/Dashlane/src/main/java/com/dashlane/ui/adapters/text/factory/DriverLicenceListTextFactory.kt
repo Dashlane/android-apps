@@ -2,21 +2,21 @@ package com.dashlane.ui.adapters.text.factory
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.search.fields.DriverLicenceField
 import com.dashlane.search.SearchField
+import com.dashlane.search.fields.DriverLicenceField
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityUtil
+import com.dashlane.vault.util.IdentityNameHolderService
 
 class DriverLicenceListTextFactory(
     private val context: Context,
     private val item: SummaryObject.DriverLicence,
-    private val identityUtil: IdentityUtil
+    private val identityNameHolderService: IdentityNameHolderService
 ) : DataIdentifierListTextFactory {
 
     override fun getLine1(): StatusText {
-        val title = identityUtil.getOwner(item)
+        val title = identityNameHolderService.getOwner(item)
         val incomplete = context.getString(ITEM_TYPE_NAME_ID)
         return StatusText(if (title.isNotSemanticallyNull()) title else incomplete)
     }

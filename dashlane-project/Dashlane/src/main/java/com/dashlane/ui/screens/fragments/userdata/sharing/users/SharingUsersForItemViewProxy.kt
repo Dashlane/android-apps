@@ -1,6 +1,7 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.users
 
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
@@ -126,6 +127,7 @@ class SharingUsersForItemViewProxy(
         loadingView.visibility = View.GONE
         refreshLayout.isRefreshing = false
         list.visibility = View.VISIBLE
+        permissionInfobox.isVisible = state.items.any { it.isItemInCollection }
     }
 
     private fun List<DashlaneRecyclerAdapter.MultiColumnViewTypeProvider>.addHeaders(): List<DashlaneRecyclerAdapter.MultiColumnViewTypeProvider> {
@@ -152,15 +154,16 @@ class SharingUsersForItemViewProxy(
         val dialog = PopupMenuManageUserPending(
             context,
             view,
+            isItemInCollection = sharedItem.isItemInCollection,
             onCancelInvite = {
                 SharingConfirmationDialogCancelInvite.newInstanceForUserGroup(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.userGroup.groupId
+                    sharedItem.groupId
                 ).show(fragmentManager, SharingConfirmationDialogCancelInvite.TAG)
             },
             onResendInvite = {
-                viewModel.onResendInvite(sharedItem.itemGroup, sharedItem.userGroup.groupId)
+                viewModel.onResendInvite(sharedItem.itemGroup, sharedItem.groupId)
             }
         )
         dialog.show()
@@ -173,15 +176,16 @@ class SharingUsersForItemViewProxy(
         val dialog = PopupMenuManageUserPending(
             context,
             view,
+            isItemInCollection = sharedItem.isItemInCollection,
             onCancelInvite = {
                 SharingConfirmationDialogCancelInvite.newInstanceForUser(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.user.userId
+                    sharedItem.userId
                 ).show(fragmentManager, SharingConfirmationDialogCancelInvite.TAG)
             },
             onResendInvite = {
-                viewModel.onResendInvite(sharedItem.itemGroup, sharedItem.user.userId)
+                viewModel.onResendInvite(sharedItem.itemGroup, sharedItem.userId)
             }
         )
         dialog.show()
@@ -195,18 +199,19 @@ class SharingUsersForItemViewProxy(
             context,
             view,
             isAdmin = sharedItem.isMemberAdmin,
+            isItemInCollection = sharedItem.isItemInCollection,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUser(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.user.userId
+                    sharedItem.userId
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {
                 viewModel.onChangePermission(
                     sharedItem.itemGroup,
                     it.toUserPermission(),
-                    sharedItem.user.userId
+                    sharedItem.userId
                 )
             }
         )
@@ -221,18 +226,19 @@ class SharingUsersForItemViewProxy(
             context,
             view,
             isAdmin = sharedItem.isMemberAdmin,
+            isItemInCollection = sharedItem.isItemInCollection,
             onAskRevokeUser = {
                 SharingConfirmationDialogRevoke.newInstanceForUserGroup(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.userGroup.groupId
+                    sharedItem.groupId
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {
                 viewModel.onChangePermissionUserGroup(
                     sharedItem.itemGroup,
                     it.toUserPermission(),
-                    sharedItem.userGroup.groupId
+                    sharedItem.groupId
                 )
             }
         )

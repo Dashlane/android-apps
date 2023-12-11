@@ -22,6 +22,18 @@ enum class CredentialField(
     USER_SELECTED_URL(order = 9);
 }
 
+enum class PasskeyField(
+    override val order: Int,
+    override val itemType: ItemType = ItemType.PASSKEY,
+    override val fieldType: FieldType = FieldType.SECONDARY
+) : SearchField<SyncObject.Passkey> {
+    TITLE(order = 0, fieldType = FieldType.PRIMARY),
+    ITEM_TYPE_NAME(order = 1),
+    USERNAME(order = 2),
+    WEBSITE(order = 3),
+    NOTE(order = 4);
+}
+
 
 enum class BankStatementField(
     override val order: Int,

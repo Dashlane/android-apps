@@ -16,7 +16,6 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.lifecycle.coroutineScope
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.design.component.compat.view.ButtonMediumView
 import com.dashlane.hermes.LogRepository
 import com.dashlane.password.generator.PasswordGeneratorCriteria
@@ -27,6 +26,7 @@ import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.passwordstrength.borderColorRes
 import com.dashlane.passwordstrength.getStrengthDescription
 import com.dashlane.passwordstrength.isSafeEnoughForSpecialMode
+import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
@@ -35,8 +35,7 @@ import com.dashlane.storage.userdata.accessor.filter.space.NoSpaceFilter
 import com.dashlane.ui.PasswordGeneratorConfigurationView
 import com.dashlane.ui.PasswordGeneratorConfigurationView.ConfigurationChangeListener
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorLogger
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.util.clipboard.ClipboardUtils.copyToClipboard
+import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setProgressDrawablePrimaryTrack
@@ -72,6 +71,12 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     @Inject
     lateinit var mainDataAccessor: MainDataAccessor
 
+    @Inject
+    lateinit var clipboardCopy: ClipboardCopy
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
     private val eligibleToSpecialPrideMode: Boolean
         get() = userFeaturesChecker.has(FeatureFlip.SPECIAL_PRIDE_MODE)
 
@@ -93,13 +98,10 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     var log75Subtype: String? = null
 
     private val logger: PasswordGeneratorLogger
-        get() = PasswordGeneratorLogger(
-            SingletonProvider.getComponent().bySessionUsageLogRepository[SingletonProvider.getSessionManager().session],
-            logRepository
-        )
+        get() = PasswordGeneratorLogger(logRepository)
 
     private var generatorActor =
-        lifecycle.coroutineScope.actor<PasswordGeneratorCriteria>(
+        lifecycle.coroutineScope.actor(
             context = Dispatchers.Main,
             capacity = Channel.CONFLATED
         ) {
@@ -156,7 +158,6 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         passwordGenerationCallback?.let {
-            logger.log(log75Subtype, UsageLogConstant.PasswordGeneratorAction.seePreviouslyGenerated)
             it.showPreviouslyGenerated()
         }
         return true
@@ -172,57 +173,28 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     }
 
     override fun onDigitSwitched(criteria: PasswordGeneratorCriteria) {
-        val action = if (criteria.digits) {
-            UsageLogConstant.PasswordGeneratorAction.digitsON
-        } else {
-            UsageLogConstant.PasswordGeneratorAction.digitsOFF
-        }
-        logger.log(log75Subtype, action)
-
         saveAsDefaultPreferences(criteria)
         generatorActor.trySend(criteria)
     }
 
     override fun onLetterSwitched(criteria: PasswordGeneratorCriteria) {
-        val action = if (criteria.letters) {
-            UsageLogConstant.PasswordGeneratorAction.lettersON
-        } else {
-            UsageLogConstant.PasswordGeneratorAction.lettersOFF
-        }
-        logger.log(log75Subtype, action, null)
         saveAsDefaultPreferences(criteria)
         generatorActor.trySend(criteria)
     }
 
     override fun onSymbolSwitched(criteria: PasswordGeneratorCriteria) {
-        val action = if (criteria.symbols) {
-            UsageLogConstant.PasswordGeneratorAction.symbolsON
-        } else {
-            UsageLogConstant.PasswordGeneratorAction.symbolsOFF
-        }
-        logger.log(log75Subtype, action)
         saveAsDefaultPreferences(criteria)
         generatorActor.trySend(criteria)
     }
 
     override fun onAmbiguousSwitched(criteria: PasswordGeneratorCriteria) {
-        val action = if (criteria.ambiguousChars) {
-            UsageLogConstant.PasswordGeneratorAction.ambiguousCharON
-        } else {
-            UsageLogConstant.PasswordGeneratorAction.ambiguousCharOFF
-        }
-        logger.log(log75Subtype, action)
         saveAsDefaultPreferences(criteria)
         generatorActor.trySend(criteria)
     }
 
     override fun onLengthUpdated(criteria: PasswordGeneratorCriteria, fromUser: Boolean) {
-        val length = criteria.length
         saveAsDefaultPreferences(criteria)
         updateLengthValue(criteria, fromUser)
-        if (fromUser) {
-            logger.log(log75Subtype, UsageLogConstant.PasswordGeneratorAction.changeLength, length.toString())
-        }
     }
 
     private fun parseArguments() {
@@ -246,13 +218,11 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
 
     private fun initializeClickListeners() {
         generatePasswordButton?.onClick = {
-            logger.log(log75Subtype, UsageLogConstant.PasswordGeneratorAction.refresh)
             generatorConfiguration?.getConfiguration(null)?.let {
                 generatorActor.trySend(it)
             }
         }
         copyPasswordButton?.onClick = {
-            logger.log(log75Subtype, UsageLogConstant.PasswordGeneratorAction.copy)
             copyAndSaveGeneratedPassword(null, true)
         }
     }
@@ -367,7 +337,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             )
         }
         if (canCopyToClipboard) {
-            copyToClipboard(password, true)
+            clipboardCopy.copyToClipboard(data = password, sensitiveData = true)
         }
         val configuration = generatorConfiguration?.getConfiguration(null)
         if (configuration != null) {

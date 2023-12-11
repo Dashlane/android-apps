@@ -13,5 +13,4 @@ interface MonobucketViewModelContract {
     fun onCancelUnregisterDevice()
     fun onLogOut()
     fun hasSync(): Boolean
-    fun onShow()
 }

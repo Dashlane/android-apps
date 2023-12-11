@@ -29,7 +29,7 @@ interface LoginContract {
 
         fun transition(from: LoginBaseContract.Presenter?, to: LoginBaseContract.Presenter)
 
-        fun transitionToCompose()
+        fun transitionToCompose(email: String?)
     }
 
     interface Presenter : Base.IPresenter {
@@ -49,7 +49,7 @@ interface LoginContract {
 
         fun onPrimaryFactorTooManyAttempts()
 
-        fun onUseMasterPasswordClicked()
+        fun onBiometricNegativeClicked()
     }
 
     interface DataProvider : Base.IDataProvider {

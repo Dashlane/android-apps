@@ -6,7 +6,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.isVisible
 import com.dashlane.R
-import com.dashlane.autofill.api.changepause.view.ChangePauseViewTypeProviderFactory
+import com.dashlane.autofill.changepause.view.ChangePauseViewTypeProviderFactory
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class ChangePauseHolder(v: View) : EfficientViewHolder<ChangePauseViewTypeProviderFactory.PauseSetting>(v) {

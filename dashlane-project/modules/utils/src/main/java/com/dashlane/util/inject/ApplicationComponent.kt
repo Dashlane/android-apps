@@ -7,10 +7,4 @@ interface ApplicationComponent {
 
     @get:ApplicationContext
     val applicationContext: Context
-
-    companion object {
-
-        operator fun invoke(context: Context) =
-            (context.applicationContext as ComponentApplication).component
-    }
 }

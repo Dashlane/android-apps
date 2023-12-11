@@ -10,7 +10,6 @@ import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.login.LoginIntents
 import com.dashlane.login.progress.LoginSyncProgressActivity
-import com.dashlane.premium.offer.list.view.OfferListFragment
 import com.dashlane.premium.offer.list.view.OffersActivity
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.util.startActivity
@@ -84,9 +83,7 @@ class MonobucketViewProxy(
 
     private fun upgradeToPremium() {
         viewModel.onUpgradePremium()
-        activity.startActivity<OffersActivity> {
-            putExtra(OfferListFragment.EXTRA_ORIGIN, OfferListFragment.ORIGIN_MONOBUCKET)
-        }
+        activity.startActivity<OffersActivity>()
     }
 
     private fun showConfirmUnregisterDevice() {

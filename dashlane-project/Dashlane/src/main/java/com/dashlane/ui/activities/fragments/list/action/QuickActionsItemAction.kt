@@ -2,20 +2,18 @@ package com.dashlane.ui.activities.fragments.list.action
 
 import android.view.View
 import com.dashlane.R
-import com.dashlane.dagger.singleton.SingletonProvider
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.item.subview.quickaction.getQuickActions
+import com.dashlane.item.subview.quickaction.QuickActionProvider
+import com.dashlane.navigation.Navigator
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.util.clipboard.vault.VaultItemFieldContentService
 import com.dashlane.vault.summary.SummaryObject
 
 class QuickActionsItemAction(
+    private val quickActionProvider: QuickActionProvider,
     private val item: SummaryObject,
-    private val itemListContext: ItemListContext
+    private val itemListContext: ItemListContext,
+    private val navigator: Navigator
 ) : ListItemAction {
-
-    private val vaultItemFieldContentService: VaultItemFieldContentService =
-        SingletonProvider.getVaultItemFieldContentService()
 
     override val icon: Int = R.drawable.ic_item_action_more
 
@@ -25,16 +23,17 @@ class QuickActionsItemAction(
 
     override val visibility: Int
         get() {
-            val hasQuickActions = item.getQuickActions(vaultItemFieldContentService, itemListContext).isNotEmpty()
-            if (hasQuickActions) {
-                return View.VISIBLE
+            val hasQuickActions = quickActionProvider.getQuickActions(item, itemListContext).isNotEmpty()
+            return if (hasQuickActions) {
+                View.VISIBLE
+            } else {
+                View.INVISIBLE
             }
-            return View.INVISIBLE
         }
 
     override fun onClickItemAction(v: View, item: SummaryObject) {
         val originPage = itemListContext.toAnyPage()
-        SingletonProvider.getNavigator().goToQuickActions(item.id, itemListContext, originPage)
+        navigator.goToQuickActions(item.id, itemListContext, originPage)
     }
 
     private fun ItemListContext.toAnyPage(): AnyPage? = when (this.container) {
@@ -50,6 +49,7 @@ class QuickActionsItemAction(
         ItemListContext.Container.CSV_IMPORT,
         ItemListContext.Container.PASSWORD_HEALTH,
         ItemListContext.Container.SHARING,
+        ItemListContext.Container.PASSKEYS_LIST,
         ItemListContext.Container.NONE -> null
     }
 }

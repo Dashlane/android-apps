@@ -24,6 +24,8 @@ class SecureDataKey {
         const val DEVICE_ANALYTICS_ID = "deviceAnalyticsId"
 
         const val USER_ANALYTICS_ID = "userAnalyticsId"
+
+        const val USER_ACTIVITY = "userActivity"
     }
 
     @Suppress("DEPRECATION")
@@ -41,7 +43,8 @@ class SecureDataKey {
         REMOTE_KEY,
         DEVICE_ANALYTICS_ID,
         USER_ANALYTICS_ID,
-        SERVER_KEY
+        SERVER_KEY,
+        USER_ACTIVITY
     )
     annotation class Key
 }

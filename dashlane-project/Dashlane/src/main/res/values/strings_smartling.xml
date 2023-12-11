@@ -3,7 +3,7 @@
     <string name="contacting_dashlane">Connecting to Dashlane</string>
     <string name="email_address_login_screen">Email</string>
     <string name="pin_desc2">Set a PIN to unlock the app. It\'s quick and easy to set up and keeps your data safe.</string>
-    <string name="receive_sec_code">We just sent you a 6-digit verification code by email. Enter the code below to verify your identity.</string>
+    <string name="receive_sec_code">We just sent you a verification code by email. Enter the code below to verify your identity.</string>
     <string name="otp_enabled_token_desc">To verify your identity, enter the 2FA token provided by your authentication app.</string>
     <string name="account_doesn_t_exist_do_you_have_an_account_with_dashlane">We couldn\'t find this account. Please check the email address.</string>
     <string name="network_failed_notification">We were unable to connect with the Dashlane server. Please check your connection and try again.</string>
@@ -37,10 +37,7 @@
     <string name="pin">Unlock Dashlane with a PIN</string>
     <string name="use_pin">Use a PIN</string>
     <string name="please_re_enter_your_pin_code_to_confirm">Please confirm your PIN</string>
-    <string name="logout">Log out</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="log_out_of_dashlane_">Log out of Dashlane?</string>
+
     <string name="make_sure_you_have_internet_for_refferalid">Please check your connection and try again.</string>
     <string name="network_error">Network error</string>
     <string name="dashlane_sync_in_progress">Dashlane sync in progress</string>
@@ -167,6 +164,8 @@
     <string name="datatype_secure_note">Secure Note</string>
     <string name="datatype_secure_note_category">Secure Note category</string>
     <string name="datatype_bank_statement">Bank accounts</string>
+    
+    <string name="datatype_passkey">Passkey</string>
     <string name="gcmtint_token_is">Your verification code is %1$s</string>
     <string name="gcmtint_token_for_user">You received a verification code (%1$s)</string>
     <string name="gcmtint_token_for_unique_user">You received a verification code</string>
@@ -180,7 +179,9 @@
     <string name="menu_v2_settings_button">Settings</string>
     <string name="settings_app_lock">Application lock</string>
     <string name="settings_use_pincode">PIN lock</string>
-    <string name="setting_use_pincode_description">Unlock the app with a 4-digit code. To use a PIN, your device must have a screen lock.</string>
+    <string name="setting_use_pincode_description">Unlock the app with a 4-digit PIN. To use a PIN, your device must have a screen lock.</string>
+    <string name="settings_change_pincode">Change PIN</string>
+    <string name="settings_change_pincode_description">Use your device-specific PIN to unlock the app</string>
     <string name="settings_disable_totp2_for_device">Disable 2FA</string>
     <string name="settings_disable_totp2_for_device_description">Do not ask for 2-factor authentication (2FA) on this device at most logins</string>
     <string name="settings_title_licenses">Licenses</string>
@@ -227,8 +228,6 @@
     <string name="settings_use_2fa_description_auth_app_installed">2-factor authentication (2FA) is an extra layer of security for your account. When logging in or adding a new device, we’ll verify your identity using the Authenticator app.</string>
     <string name="push_token_toast_unlock_to_get_token">Please unlock to view your verification code.</string>
     <string name="menu_help_center">Help</string>
-    <string name="pin_dialog_set_topic">Choose a PIN</string>
-    <string name="pin_dialog_set_question">to unlock Dashlane after inactivity</string>
     <string name="activity_title_licenses">Licenses</string>
     <string name="marketing_premium_renewal_notification_25days_title">It\'s time to renew your subscription</string>
     <string name="marketing_premium_renewal_notification_25days_desc">Continue enjoying Dashlane’s advanced password management and online security features. Renew now!</string>
@@ -351,7 +350,6 @@
     <string name="list_sharing_emergency_item_selection_empty_securenote">You don\'t have any Secure Notes stored in Dashlane yet</string>
     <string name="list_sharing_emergency_item_selection_no_password_matching_filter">You have no logins stored in Dashlane that match that filter</string>
     <string name="list_sharing_emergency_item_selection_no_securenote_matching_filter">You have no notes stored in Dashlane that match that filter</string>
-    <string name="date_format_identity">d MMMM yyyy</string>
     <string name="delete_device_dialog_title">Remove this device?</string>
     <string name="delete_device_dialog_body">This will wipe your Dashlane account and data from the device</string>
     <string name="sharing_emergency_permission_change_cta">Change</string>
@@ -429,6 +427,8 @@
     <string name="user_group_member_permission_admin">Admin</string>
     <string name="user_group_member_permission_member">Member</string>
     <string name="sharing_pending_invite_user_group_description">Invited by %1$s</string>
+    <string name="sharing_pending_invite_collection_description">Shared by %1$s</string>
+    <string name="sharing_invite_item_accepted">%1$s added to your vault</string>
     <string name="sharing_confirmation_popup_description_decline_user_group_invite">You will not have access to the items shared with the group</string>
     <string name="empty_screen_user_group_members_line1">You\'re not a member</string>
     <string name="empty_screen_user_group_members_line2">You share items with this group, but cannot see its members</string>
@@ -556,6 +556,8 @@
     <string name="infobox_restore_dialog_message">Your new password won’t be available anymore</string>
     <string name="infobox_restore_dialog_positive_button">Restore</string>
     <string name="infobox_restore_dialog_negative_button">Cancel</string>
+    
+    <string name="infobox_passkey_not_usable">Using Dashlane to save and sign in with passkeys is only supported on Android 14 and higher.</string>
     <string name="quick_action_copy_email">Copy email</string>
     <string name="quick_action_copy_login">Copy username</string>
     <string name="quick_action_copy_secondary_login">Copy alternate username</string>

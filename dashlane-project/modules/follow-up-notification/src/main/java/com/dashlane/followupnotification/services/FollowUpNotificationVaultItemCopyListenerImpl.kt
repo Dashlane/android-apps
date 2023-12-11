@@ -1,7 +1,7 @@
 package com.dashlane.followupnotification.services
 
 import android.content.Context
-import com.dashlane.followupnotification.FollowUpNotificationComponent
+import com.dashlane.followupnotification.FollowUpNotificationEntryPoint
 import com.dashlane.hermes.generated.definitions.Highlight
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyListener
@@ -21,14 +21,14 @@ class FollowUpNotificationVaultItemCopyListenerImpl @Inject constructor(
         index: Double?,
         totalCount: Int?
     ) {
-        FollowUpNotificationComponent(context)
+        FollowUpNotificationEntryPoint(context)
             .followUpNotificationApiProvider
             .getFollowUpNotificationApi()
             .startFollowUpNotification(summaryObject, copyField)
     }
 
     override fun onCopyFromFollowUpNotification(notificationId: String, copyField: CopyField) {
-        FollowUpNotificationComponent(context)
+        FollowUpNotificationEntryPoint(context)
             .followUpNotificationApiProvider
             .getFollowUpNotificationApi()
             .refreshExistingFollowUpNotification(notificationId)

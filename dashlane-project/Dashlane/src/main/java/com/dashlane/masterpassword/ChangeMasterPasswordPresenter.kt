@@ -12,7 +12,7 @@ import com.dashlane.exception.NotLoggedInException
 import com.dashlane.hermes.generated.definitions.ChangeMasterPasswordError
 import com.dashlane.masterpassword.logger.ChangeMasterPasswordLogger
 import com.dashlane.masterpassword.tips.MasterPasswordTipsActivity
-import com.dashlane.navigation.NavigationUtils
+import com.dashlane.navigation.Navigator
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.passwordstrength.getShortTitle
@@ -37,6 +37,7 @@ class ChangeMasterPasswordPresenter(
     private val origin: ChangeMasterPasswordOrigin,
     private val warningDesktopShown: Boolean,
     private val changeMasterPasswordLogoutHelper: ChangeMasterPasswordLogoutHelper,
+    private val navigator: Navigator,
     coroutineScope: CoroutineScope
 ) : BasePresenter<ChangeMasterPasswordContract.DataProvider, ChangeMasterPasswordContract.View>(),
     ChangeMasterPasswordContract.Presenter {
@@ -180,7 +181,7 @@ class ChangeMasterPasswordPresenter(
 
     private fun showConfirmationStepErrorDialog() {
         val onDismissErrorDialog = DialogInterface.OnDismissListener {
-            NavigationUtils.logoutAndCallLoginScreen(context!!)
+            navigator.logoutAndCallLoginScreen(context!!)
         }
         showDialog(
             context!!.getString(R.string.change_master_password_pop_success_title),
@@ -210,7 +211,6 @@ class ChangeMasterPasswordPresenter(
             }
             Step.CONFIRM_NEW_PASSWORD -> {
                 if (password.encodeUtf8ToObfuscated().use { it == expectedPassword }) {
-                    logger.logClickConfirmPasswordStep()
                     currentStep = Step.CHANGING_MASTER_PASSWORD
                     initCurrentStep()
                     GlobalScope.launch(Dispatchers.Main) {
@@ -232,7 +232,6 @@ class ChangeMasterPasswordPresenter(
     }
 
     override fun onTipsClicked() {
-        logger.logClickShowTips()
         val tipsIntent = Intent(context, MasterPasswordTipsActivity::class.java)
         context?.startActivity(tipsIntent)
     }
@@ -288,7 +287,6 @@ class ChangeMasterPasswordPresenter(
                         setPassword(expectedPassword.decodeUtf8ToString())
                     }
                 }
-                logger.logDisplayEnterPasswordStep()
             }
             Step.CONFIRM_NEW_PASSWORD -> {
                 view.apply {
@@ -298,7 +296,6 @@ class ChangeMasterPasswordPresenter(
                     setNextButtonText(view.context.getString(R.string.change_master_password_confirm_button))
                     clearPassword()
                 }
-                logger.logDisplayConfirmPasswordStep()
             }
             Step.CHANGING_MASTER_PASSWORD -> {
                 view.clearPassword()
@@ -327,7 +324,6 @@ class ChangeMasterPasswordPresenter(
                         }
                     )
                 }
-                logger.logDisplayPasswordChanged()
             }
         }
     }

@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.DialogFragment
 import com.dashlane.crashreport.CrashReporter
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.login.lock.LockManager
+import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.applyScreenshotAllowedFlag
+import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.ActivityListenerWindowCallback
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -16,6 +18,15 @@ open class BaseDialogFragment : DialogFragment() {
 
     @Inject
     lateinit var crashReporter: CrashReporter
+
+    @Inject
+    lateinit var screenshotPolicy: ScreenshotPolicy
+
+    @Inject
+    lateinit var dialogHelper: DialogHelper
+
+    @Inject
+    lateinit var lockManager: LockManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,9 +72,7 @@ open class BaseDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         val window = dialog.window
-        window!!.applyScreenshotAllowedFlag(SingletonProvider.getScreenshotPolicy())
-        val lockManager = SingletonProvider.getComponent().lockRepository
-            .getLockManager(SingletonProvider.getSessionManager().session!!)
+        window!!.applyScreenshotAllowedFlag(screenshotPolicy)
         window.callback = ActivityListenerWindowCallback(lockManager, window.callback)
         return dialog
     }
@@ -72,7 +81,7 @@ open class BaseDialogFragment : DialogFragment() {
         val dialog = dialog
         dialog?.let {
             val window = it.window
-            window?.applyScreenshotAllowedFlag(SingletonProvider.getScreenshotPolicy())
+            window?.applyScreenshotAllowedFlag(screenshotPolicy)
         }
     }
 }

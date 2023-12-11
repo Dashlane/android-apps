@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/revoke"
-        android:title="@string/sharing_manage_item_access_dialog_revoke_access"/>
+        android:title="@string/sharing_manage_item_access_dialog_revoke_access" />
     <item
         android:id="@+id/grant_admin"
-        android:title="@string/sharing_manage_group_member_dialog_grant_admin"/>
+        android:title="@string/sharing_manage_group_member_dialog_grant_admin" />
     <item
         android:id="@+id/revoke_admin"
-        android:title="@string/sharing_manage_group_member_dialog_remove_admin"/>
+        android:title="@string/sharing_manage_group_member_dialog_remove_admin" />
 </menu>

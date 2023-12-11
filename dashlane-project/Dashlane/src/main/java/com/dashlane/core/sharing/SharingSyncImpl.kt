@@ -3,6 +3,7 @@ package com.dashlane.core.sharing
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.cryptography.decodeBase64ToByteArrayOrNull
 import com.dashlane.server.api.Authorization
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemContent
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
@@ -55,10 +56,16 @@ class SharingSyncImpl @Inject constructor(
                 summary.userGroups.associate { it.id to it.revision }
             )
 
+        val (collectionUidToUpdate, collectionUidToDelete) =
+            getUidOutdated(
+                SharingDataType.COLLECTION,
+                summary.collections.associate { it.id to it.revision }
+            )
+
         requestUpdate(
             session,
-            SharingSync.IdCollection(itemUidToUpdate, itemGroupUidToUpdate, userGroupUidToUpdate),
-            SharingSync.IdCollection(itemUidToDelete, itemGroupUidToDelete, userGroupUidToDelete)
+            SharingSync.IdCollection(itemUidToUpdate, itemGroupUidToUpdate, userGroupUidToUpdate, collectionUidToUpdate),
+            SharingSync.IdCollection(itemUidToDelete, itemGroupUidToDelete, userGroupUidToDelete, collectionUidToDelete)
         )
 
         sendItemsLocalUpdates(session, summary)
@@ -78,6 +85,7 @@ class SharingSyncImpl @Inject constructor(
                 itemGroups = result.itemGroups,
                 itemContents = result.itemContents,
                 userGroupDownloads = result.userGroups,
+                collections = result.collections,
                 idsToDelete = idsToDelete
             )
         } else if (!idsToDelete.isEmpty) {
@@ -91,6 +99,7 @@ class SharingSyncImpl @Inject constructor(
         itemGroups: List<ItemGroup> = emptyList(),
         itemContents: List<ItemContent> = emptyList(),
         userGroupDownloads: List<UserGroup> = emptyList(),
+        collections: List<Collection> = emptyList(),
         idsToDelete: SharingSync.IdCollection
     ) {
         sharingItemUpdater.update(
@@ -98,9 +107,11 @@ class SharingSyncImpl @Inject constructor(
                 itemGroupUpdates = itemGroups,
                 itemContentUpdates = itemContents,
                 userGroupUpdates = userGroupDownloads,
+                collectionUpdates = collections,
                 itemsDeletionIds = idsToDelete.items,
                 itemGroupsDeletionIds = idsToDelete.itemGroups,
-                userGroupDeletionIds = idsToDelete.userGroups
+                userGroupDeletionIds = idsToDelete.userGroups,
+                collectionsDeletionIds = idsToDelete.collections
             )
         )
     }

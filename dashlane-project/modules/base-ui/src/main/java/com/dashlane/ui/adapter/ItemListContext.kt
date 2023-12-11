@@ -19,6 +19,7 @@ data class ItemListContext(
         ALL_ITEMS("allItems"),
         PASSWORD_HEALTH("passwordHealth"),
         CREDENTIALS_LIST("credentials"),
+        PASSKEYS_LIST("passkeys"),
         IDS_LIST("ids"),
         PAYMENT_LIST("payments"),
         PERSONAL_INFO_LIST("personalInfos"),

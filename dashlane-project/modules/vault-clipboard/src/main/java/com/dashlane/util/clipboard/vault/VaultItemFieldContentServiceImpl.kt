@@ -1,18 +1,21 @@
 package com.dashlane.util.clipboard.vault
 
+import android.content.Context
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.util.clipboard.vault.CopyFieldContentMapper.ContentOnlyInSyncObjectException
+import com.dashlane.util.toExpirationDateFormat
+import com.dashlane.util.toIdentityFormat
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
-import java.time.LocalDate
-import java.time.YearMonth
+import com.dashlane.xml.domain.SyncObjectType
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class VaultItemFieldContentServiceImpl @Inject constructor(
-    private val mainDataAccessor: MainDataAccessor,
-    private val enumerationsContent: VaultItemVisibleCopyEdgeCases
+    @ApplicationContext private val context: Context,
+    private val mainDataAccessor: MainDataAccessor
 ) : VaultItemFieldContentService {
     private val vaultDataQuery: VaultDataQuery
         get() = mainDataAccessor.getVaultDataQuery()
@@ -39,18 +42,37 @@ class VaultItemFieldContentServiceImpl @Inject constructor(
             getVaultItem(item)?.let {
                 genericMapper.getContent(it.syncObject)
             }
-        }
+        } ?: return null
 
-        return genericContent?.mapGenericToString(copyField)
+        return parseContent(genericContent)
     }
 
-    override fun getContent(vaultItem: VaultItem<*>, copyField: CopyField) =
-        copyField.contentMapper.getContent(vaultItem.syncObject)?.mapGenericToString(copyField)
+    override fun getContent(vaultItem: VaultItem<*>, copyField: CopyField): String? {
+        val genericContent = copyField.contentMapper.getContent(vaultItem.syncObject) ?: return null
+
+        return parseContent(genericContent)
+    }
+
+    private fun parseContent(
+        genericContent: CopyContent,
+    ): String? {
+        return when (genericContent) {
+            is CopyContent.Ready -> genericContent.mapGenericToString()
+            is CopyContent.FromRemoteItem -> {
+                val remoteItem = getVaultItem(
+                    itemId = genericContent.uid,
+                    syncObjectType = genericContent.syncObjectType
+                ) ?: return null
+                getContent(remoteItem, genericContent.copyField)
+            }
+        }
+    }
 
     private fun getVaultItem(item: SummaryObject): VaultItem<*>? {
-        val itemId = item.id
-        val syncObjectType = item.syncObjectType
+        return getVaultItem(item.id, item.syncObjectType)
+    }
 
+    private fun getVaultItem(itemId: String, syncObjectType: SyncObjectType): VaultItem<*>? {
         return vaultDataQuery.query(
             vaultFilter {
                 specificUid(itemId)
@@ -59,16 +81,12 @@ class VaultItemFieldContentServiceImpl @Inject constructor(
         )
     }
 
-    private fun Any.mapGenericToString(copyField: CopyField): String? {
-        return if (enumerationsContent.shouldCopyDifferentContent(copyField)) {
-            when (this) {
-                is String -> enumerationsContent.mapEnumeration(this, copyField)
-                is LocalDate -> enumerationsContent.mapLocalDate(this, copyField)
-                is YearMonth -> enumerationsContent.mapYearMonth(this, copyField)
-                else -> this.toString()
-            }
-        } else {
-            this.toString()
+    private fun CopyContent.Ready.mapGenericToString(): String? {
+        return when (this) {
+            is CopyContent.Ready.StringValue -> content
+            is CopyContent.Ready.ObfuscatedValue -> content?.toString()
+            is CopyContent.Ready.Date -> content?.toIdentityFormat(context)
+            is CopyContent.Ready.YearMonth -> content?.toExpirationDateFormat()
         }
     }
 }

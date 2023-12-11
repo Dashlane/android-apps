@@ -74,8 +74,6 @@ interface NotificationCenterDef {
 
         fun startBiometricSetup()
 
-        fun startChromeImport()
-
         fun startBiometricRecoverySetup(hasBiometricLockType: Boolean)
 
         fun startGoEssentials()

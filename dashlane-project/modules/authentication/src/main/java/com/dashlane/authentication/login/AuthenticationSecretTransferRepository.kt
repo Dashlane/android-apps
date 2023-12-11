@@ -3,6 +3,8 @@ package com.dashlane.authentication.login
 import com.dashlane.authentication.AuthenticationInvalidPasswordException
 import com.dashlane.authentication.AuthenticationOfflineException
 import com.dashlane.authentication.DeviceRegistrationInfo
+import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.createAppDecryptionEngine
 import com.dashlane.authentication.createVaultDecryptionEngine
 import com.dashlane.authentication.decryptRemoteKey
@@ -19,6 +21,8 @@ import com.dashlane.server.api.endpoints.Platform
 import com.dashlane.server.api.endpoints.authentication.AuthRegistrationAuthTicketService
 import com.dashlane.server.api.endpoints.authentication.AuthRegistrationDevice
 import com.dashlane.server.api.endpoints.authentication.PerformExtraDeviceVerificationService
+import com.dashlane.server.api.endpoints.authentication.RemoteKey
+import com.dashlane.server.api.time.toInstant
 import com.dashlane.session.AppKey
 import com.dashlane.session.VaultKey
 import com.dashlane.xml.domain.SyncObject
@@ -33,7 +37,12 @@ class AuthenticationSecretTransferRepository @Inject constructor(
     private val cryptography: Cryptography
 ) {
 
-    suspend fun register(login: String, token: String): AuthRegistrationAuthTicketService.Data {
+    suspend fun register(
+        login: String,
+        token: String,
+        securityFeatures: Set<SecurityFeature>,
+        remoteKeyType: RemoteKey.Type,
+    ): RegisteredUserDevice.Remote {
         if (connectivityCheck.isOffline) {
             throw AuthenticationOfflineException()
         }
@@ -56,7 +65,7 @@ class AuthenticationSecretTransferRepository @Inject constructor(
 
         val completeRegistrationAuthTicketResponse = completeRegistrationAuthTicketService.execute(completeRegistrationAuthTicketRequest)
 
-        return completeRegistrationAuthTicketResponse.data
+        return completeRegistrationAuthTicketResponse.data.toRegisteredUserDevice(login, securityFeatures, remoteKeyType)
     }
 
     fun decryptStartTransferResponse(symmetricKey: ByteArray, encryptedData: String): String {
@@ -87,3 +96,24 @@ class AuthenticationSecretTransferRepository @Inject constructor(
             .use { it.decryptRemoteKey(encryptedRemoteKey) }
     }
 }
+
+private fun AuthRegistrationAuthTicketService.Data.toRegisteredUserDevice(
+    login: String,
+    securityFeatures: Set<SecurityFeature>,
+    remoteKeyType: RemoteKey.Type
+) = RegisteredUserDevice.Remote(
+    login = login,
+    securityFeatures = securityFeatures,
+    serverKey = serverKey,
+    accessKey = deviceAccessKey,
+    secretKey = deviceSecretKey,
+    encryptedSettings = settings.content ?: throw IllegalStateException(),
+    settingsDate = settings.backupDate.toInstant(),
+    sharingKeys = sharingKeys?.toRegisteredDeviceSharingKeys(),
+    userId = publicUserId,
+    hasDesktopDevice = hasDesktopDevices,
+    registeredDeviceCount = numberOfDevices,
+    deviceAnalyticsId = deviceAnalyticsId,
+    userAnalyticsId = userAnalyticsId,
+    encryptedRemoteKey = remoteKeys?.findByTypeOrNull(remoteKeyType)
+)

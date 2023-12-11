@@ -1,5 +1,7 @@
 package com.dashlane.accountrecoverykey.setting
 
+import com.dashlane.account.UserAccountInfo
+
 sealed class AccountRecoveryKeyDetailSettingState {
     abstract val data: AccountRecoveryKeyDetailSettingData
 
@@ -12,5 +14,6 @@ sealed class AccountRecoveryKeyDetailSettingState {
 
 data class AccountRecoveryKeyDetailSettingData(
     val enabled: Boolean = false,
+    val accountType: UserAccountInfo.AccountType = UserAccountInfo.AccountType.MasterPassword,
     val isDialogDisplayed: Boolean = false
 )

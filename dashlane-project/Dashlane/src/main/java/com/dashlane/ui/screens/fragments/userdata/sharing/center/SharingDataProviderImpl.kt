@@ -2,17 +2,23 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
 import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.sharing.SharingItemUpdater
+import com.dashlane.core.sharing.handleCollectionSharingResult
 import com.dashlane.core.sharing.handleServerResponse
 import com.dashlane.core.sharing.toItemForEmailing
 import com.dashlane.core.sharing.toSharedVaultItemLite
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.Response
+import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptCollectionService
 import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptUserGroupService
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
+import com.dashlane.server.api.endpoints.sharinguserdevice.CollectionServiceResponse
+import com.dashlane.server.api.endpoints.sharinguserdevice.GetTeamLoginsService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.ProvisioningMethod
+import com.dashlane.server.api.endpoints.sharinguserdevice.RefuseCollectionService
 import com.dashlane.server.api.endpoints.sharinguserdevice.RefuseItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.RefuseUserGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ResendItemGroupInvitesService
@@ -23,15 +29,25 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupUpdate
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserInviteResend
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserUpdate
+import com.dashlane.server.api.endpoints.sharinguserdevice.exceptions.InvalidCollectionRevisionException
 import com.dashlane.server.api.endpoints.sharinguserdevice.exceptions.InvalidItemGroupRevisionException
 import com.dashlane.server.api.endpoints.sharinguserdevice.exceptions.InvalidUserGroupRevisionException
+import com.dashlane.server.api.pattern.UserIdFormat
+import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.internal.builder.request.AcceptCollectionRequestBuilder
 import com.dashlane.sharing.internal.builder.request.AcceptItemGroupRequestForUserBuilder
 import com.dashlane.sharing.internal.builder.request.AcceptUserGroupRequestBuilder
+import com.dashlane.sharing.model.isAccepted
+import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.util.AuditLogHelper
+import com.dashlane.sharing.util.intersectUserGroupCollectionDownload
 import com.dashlane.storage.DataStorageProvider
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.util.tryOrNull
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,22 +56,27 @@ import javax.inject.Inject
 
 @Suppress("LargeClass")
 class SharingDataProviderImpl @Inject constructor(
+    private val mainDataAccessor: MainDataAccessor,
     private val dataStorageProvider: DataStorageProvider,
     private val sharingXmlConverter: DataIdentifierSharingXmlConverter,
     private val sessionManager: SessionManager,
     private val sharingItemUpdater: SharingItemUpdater,
     private val acceptItemGroupRequestBuilder: AcceptItemGroupRequestForUserBuilder,
     private val acceptUserGroupRequestBuilder: AcceptUserGroupRequestBuilder,
+    private val acceptCollectionRequestBuilder: AcceptCollectionRequestBuilder,
     private val sharingItemGroupDataProvider: SharingDataUpdateProvider,
     @IoCoroutineDispatcher
     private val ioCoroutineDispatcher: CoroutineDispatcher,
     private val refuseItemGroupService: RefuseItemGroupService,
     private val refuseUserGroupService: RefuseUserGroupService,
+    private val refuseCollectionService: RefuseCollectionService,
     private val acceptItemGroupService: AcceptItemGroupService,
     private val acceptUserGroupService: AcceptUserGroupService,
+    private val acceptCollectionService: AcceptCollectionService,
     private val updateItemGroupMembersService: UpdateItemGroupMembersService,
     private val revokeItemGroupMembersService: RevokeItemGroupMembersService,
     private val resendItemGroupInvitesService: ResendItemGroupInvitesService,
+    private val teamLoginsService: GetTeamLoginsService,
     private val auditLogHelper: AuditLogHelper
 ) : SharingDataProvider {
     private val sharingDao: SharingDao
@@ -64,11 +85,110 @@ class SharingDataProviderImpl @Inject constructor(
     private val session: Session?
         get() = sessionManager.session
 
+    private val credentialDataQuery: CredentialDataQuery
+        get() = mainDataAccessor.getCredentialDataQuery()
+
     override suspend fun getItemGroups() =
         withContext(ioCoroutineDispatcher) { sharingDao.loadAllItemGroup() }
 
     override suspend fun getUserGroups() =
         withContext(ioCoroutineDispatcher) { sharingDao.loadAllUserGroup() }
+
+    override suspend fun getCollections() =
+        withContext(ioCoroutineDispatcher) { sharingDao.loadAllCollection() }
+
+    override suspend fun getCollections(itemId: String, needsAdminRights: Boolean) =
+        withContext(ioCoroutineDispatcher) {
+            val foundItemGroup = getItemGroups().firstOrNull {
+                val collections = it.collections
+                !collections.isNullOrEmpty() &&
+                    it.items?.any { sharedItem -> sharedItem.itemId == itemId } == true
+            } ?: return@withContext emptyList()
+            return@withContext getAcceptedCollections(needsAdminRights).filter {
+                foundItemGroup.collections?.any { groupCollection ->
+                    groupCollection.uuid == it.uuid
+                } == true
+            }
+        }
+
+    override suspend fun getAcceptedCollections(needsAdminRights: Boolean) =
+        withContext(ioCoroutineDispatcher) {
+            val userId = session?.userId ?: return@withContext emptyList()
+            return@withContext getAcceptedCollections(userId, needsAdminRights = needsAdminRights)
+        }
+
+    override suspend fun getAcceptedCollections(userId: String, needsAdminRights: Boolean) =
+        withContext(ioCoroutineDispatcher) {
+            val collections = sharingDao.loadAllCollection()
+            
+            
+            val myCollectionUserGroups =
+                sharingDao.loadUserGroupsAccepted(userId)?.let { acceptedUserGroups ->
+                    collections.mapNotNull { it.userGroups }.flatten()
+                        .filter {
+                            if (needsAdminRights) it.isAccepted && it.isAdmin else it.isAccepted
+                        }
+                        .intersectUserGroupCollectionDownload(acceptedUserGroups)
+                } ?: emptyList()
+            collections.filter {
+                it.userGroups?.any { group -> myCollectionUserGroups.contains(group) } == true ||
+                    it.users?.any { user ->
+                        user.login == userId && user.isAccepted && user.isAdmin
+                    } == true
+            }
+        }
+
+    override suspend fun getAcceptedCollectionsForGroup(
+        userGroupId: String,
+        needsAdminRights: Boolean
+    ) = withContext(ioCoroutineDispatcher) {
+        sharingDao.loadAllCollection().filter { collection ->
+            collection.userGroups?.any {
+                if (needsAdminRights) {
+                    it.isAccepted && it.isAdmin && it.uuid == userGroupId
+                } else {
+                    it.isAccepted && it.uuid == userGroupId
+                }
+            } == true
+        }
+    }
+
+    override suspend fun getAcceptedCollectionsItems(uuid: String) =
+        withContext(ioCoroutineDispatcher) {
+            val collections = getAcceptedCollections().filter { it.uuid == uuid }
+            if (collections.isEmpty()) {
+                return@withContext emptyList()
+            }
+            val items = mutableListOf<SummaryObject>()
+            val credentials = credentialDataQuery.queryAll()
+            sharingDao.loadAllItemGroup().forEach { itemGroup ->
+                itemGroup.collections?.forEach { collection ->
+                    if (collection.uuid == uuid) {
+                        itemGroup.items?.map { it.itemId }?.let { itemIds ->
+                            items.addAll(credentials.filter { itemIds.contains(it.id) })
+                        }
+                    }
+                }
+            }
+            return@withContext items
+        }
+
+    override suspend fun getTeamLogins() = session?.authorization?.let { authorization ->
+        tryOrNull { teamLoginsService.execute(authorization).data.teamLogins }
+    } ?: emptyList()
+
+    override suspend fun isCollectionShareAllowed(collection: Collection): Boolean =
+        withContext(ioCoroutineDispatcher) {
+            val userId = session?.userId
+            val userAdmin = collection.users?.any {
+                it.login == userId && it.isAccepted && it.isAdmin
+            } ?: false
+            val myUserGroups = userId?.let { sharingDao.loadUserGroupsAccepted(it) } ?: emptyList()
+            return@withContext userAdmin || collection.userGroups
+                ?.filter { it.isAccepted && it.isAdmin }
+                ?.intersectUserGroupCollectionDownload(myUserGroups)
+                ?.isNotEmpty() == true
+        }
 
     override fun getSummaryObject(itemId: String) =
         sharingXmlConverter.fromXml(identifier = itemId, xml = sharingDao.getExtraData(itemId))
@@ -111,6 +231,22 @@ class SharingDataProviderImpl @Inject constructor(
         )
     }
 
+    override suspend fun acceptCollectionInvite(collection: Collection, handleConflict: Boolean) {
+        runOnConflictCollectionRevision(
+            block = { sendAcceptCollectionRequest(collection) },
+            onConflict = {
+                if (!handleConflict) throw AcceptCollectionException()
+                val collectionUpdated =
+                    sharingItemGroupDataProvider.getUpdatedCollection(collection)
+                if (collectionUpdated == null) {
+                    throw AcceptCollectionException()
+                } else {
+                    acceptCollectionInvite(collectionUpdated, false)
+                }
+            }
+        )
+    }
+
     override suspend fun declineItemGroupInvite(
         itemGroup: ItemGroup,
         summaryObject: SummaryObject,
@@ -146,12 +282,39 @@ class SharingDataProviderImpl @Inject constructor(
         )
     }
 
+    override suspend fun declineCollectionInvite(collection: Collection, handleConflict: Boolean) {
+        runOnConflictCollectionRevision(
+            block = { sendDeclineCollectionRequest(collection) },
+            onConflict = {
+                if (!handleConflict) throw DeclineCollectionException()
+                val collectionUpdated =
+                    sharingItemGroupDataProvider.getUpdatedCollection(collection)
+                if (collectionUpdated == null) {
+                    throw DeclineCollectionException()
+                } else {
+                    declineCollectionInvite(collection, false)
+                }
+            }
+        )
+    }
+
+    private suspend fun sendDeclineCollectionRequest(collection: Collection): Response<CollectionServiceResponse> {
+        val authorization = session?.authorization ?: throw DeclineCollectionException()
+        return refuseCollectionService.execute(
+            authorization,
+            RefuseCollectionService.Request(
+                collectionId = UuidFormat(collection.uuid),
+                revision = collection.revision
+            )
+        )
+    }
+
     private suspend fun sendDeclineUserGroupRequest(userGroup: UserGroup): Response<SharingServerResponse> {
         val authorization = session?.authorization ?: throw DeclineUserGroupException()
         return refuseUserGroupService.execute(
             authorization,
             RefuseUserGroupService.Request(
-                groupId = RefuseUserGroupService.Request.GroupId(userGroup.groupId),
+                groupId = UuidFormat(userGroup.groupId),
                 provisioningMethod = ProvisioningMethod.USER,
                 revision = userGroup.revision
             )
@@ -188,12 +351,20 @@ class SharingDataProviderImpl @Inject constructor(
         return refuseItemGroupService.execute(
             authorization,
             RefuseItemGroupService.Request(
-                groupId = RefuseItemGroupService.Request.GroupId(itemGroup.groupId),
+                groupId = UuidFormat(itemGroup.groupId),
                 itemsForEmailing = listOf(sharedVaultItemLite.toItemForEmailing()),
                 revision = itemGroup.revision,
                 auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup, summaryObject)
             )
         )
+    }
+
+    private suspend fun sendAcceptCollectionRequest(
+        collection: Collection
+    ): Response<CollectionServiceResponse> {
+        val authorization = session?.authorization ?: throw AcceptCollectionException()
+        val request = acceptCollectionRequestBuilder.build(collection)
+        return acceptCollectionService.execute(authorization, request)
     }
 
     override suspend fun resendInvite(itemGroup: ItemGroup, memberLogin: String) {
@@ -214,7 +385,7 @@ class SharingDataProviderImpl @Inject constructor(
         resendItemGroupInvitesService.execute(
             authorization,
             ResendItemGroupInvitesService.Request(
-                groupId = ResendItemGroupInvitesService.Request.GroupId(itemGroup.groupId),
+                groupId = UuidFormat(itemGroup.groupId),
                 revision = itemGroup.revision,
                 users = inviteResends
             )
@@ -233,13 +404,13 @@ class SharingDataProviderImpl @Inject constructor(
                 revokeItemGroupMembersService.execute(
                     authorization,
                     RevokeItemGroupMembersService.Request(
-                        groupId = RevokeItemGroupMembersService.Request.GroupId(itemGroup.groupId),
+                        groupId = UuidFormat(itemGroup.groupId),
                         revision = itemGroup.revision,
                         users = userIds?.map {
-                            RevokeItemGroupMembersService.Request.User(it)
+                            UserIdFormat(it)
                         },
                         groups = userGroupIds?.map {
-                            RevokeItemGroupMembersService.Request.Group(it)
+                            UuidFormat(it)
                         },
                         auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup)
                     )
@@ -274,11 +445,11 @@ class SharingDataProviderImpl @Inject constructor(
                 updateItemGroupMembersService.execute(
                     authorization,
                     UpdateItemGroupMembersService.Request(
-                        groupId = UpdateItemGroupMembersService.Request.GroupId(itemGroup.groupId),
+                        groupId = UuidFormat(itemGroup.groupId),
                         revision = itemGroup.revision,
                         users = listOf(
                             UserUpdate(
-                                userId = UserUpdate.UserId(userId),
+                                userId = UserIdFormat(userId),
                                 permission = newPermission
                             )
                         )
@@ -309,11 +480,11 @@ class SharingDataProviderImpl @Inject constructor(
                 updateItemGroupMembersService.execute(
                     authorization,
                     UpdateItemGroupMembersService.Request(
-                        groupId = UpdateItemGroupMembersService.Request.GroupId(itemGroup.groupId),
+                        groupId = UuidFormat(itemGroup.groupId),
                         revision = itemGroup.revision,
                         groups = listOf(
                             UserGroupUpdate(
-                                groupId = UserGroupUpdate.GroupId(userGroupId),
+                                groupId = UuidFormat(userGroupId),
                                 permission = newPermission
                             )
                         )
@@ -362,10 +533,28 @@ class SharingDataProviderImpl @Inject constructor(
         }
     }
 
+    private suspend fun runOnConflictCollectionRevision(
+        block: suspend () -> Response<CollectionServiceResponse>,
+        onConflict: suspend () -> Unit
+    ) {
+        runCatching {
+            val collections = block().data.collections!!
+            sharingItemUpdater.handleCollectionSharingResult(collections)
+        }.onFailure {
+            if (it is InvalidCollectionRevisionException) {
+                onConflict()
+            } else {
+                throw it
+            }
+        }
+    }
+
     class AcceptItemGroupException : Exception()
     class AcceptUserGroupException : Exception()
+    class AcceptCollectionException : Exception()
     class DeclineItemGroupException : Exception()
     class DeclineUserGroupException : Exception()
+    class DeclineCollectionException : Exception()
     class ResendItemInvitesException : Exception()
     class CancelInvitationException : Exception()
     class UpdateItemGroupException : Exception()

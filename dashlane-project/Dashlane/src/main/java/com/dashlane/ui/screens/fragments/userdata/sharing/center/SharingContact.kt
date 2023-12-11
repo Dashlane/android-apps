@@ -1,9 +1,12 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.vault.summary.SummaryObject
+
 typealias UserGroupModel = UserGroup
+typealias CollectionModel = Collection
 
 sealed class SharingContact {
     data class UserGroup(
@@ -36,6 +39,11 @@ sealed class SharingContact {
 
     data class UserGroupInvite(
         val userGroup: UserGroupModel,
+        val login: String
+    )
+
+    data class CollectionInvite(
+        val collection: CollectionModel,
         val login: String
     )
 }

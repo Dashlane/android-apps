@@ -17,13 +17,11 @@ import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.getCountryIsoCode
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.vault.model.VaultItem
@@ -39,15 +37,9 @@ import com.dashlane.xml.domain.utils.Country
 class ItemScreenConfigurationAddressProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
     private val mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -69,14 +61,14 @@ class ItemScreenConfigurationAddressProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         itemToSave as VaultItem<SyncObject.Address>
         return itemToSave.syncObject.addressFull?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.city?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.zipCode?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.receiver?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.building?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.door?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.digitCode?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.floor?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.streetNumber?.trim().isNotSemanticallyNull()
+            itemToSave.syncObject.city?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.zipCode?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.receiver?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.building?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.door?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.digitCode?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.floor?.trim().isNotSemanticallyNull() ||
+            itemToSave.syncObject.streetNumber?.trim().isNotSemanticallyNull()
     }
 
     private fun createHeader(
@@ -364,7 +356,11 @@ class ItemScreenConfigurationAddressProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 createSubViewString,
-                CopyAction(item.toSummary(), CopyField.ZipCode)
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.ZipCode,
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -386,7 +382,7 @@ class ItemScreenConfigurationAddressProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 createSubViewString,
-                CopyAction(item.toSummary(), CopyField.City)
+                CopyAction(summaryObject = item.toSummary(), copyField = CopyField.City, vaultItemCopy = vaultItemCopy)
             )
         }
     }
@@ -408,7 +404,11 @@ class ItemScreenConfigurationAddressProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 createSubViewString,
-                CopyAction(item.toSummary(), CopyField.Address)
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.Address,
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }

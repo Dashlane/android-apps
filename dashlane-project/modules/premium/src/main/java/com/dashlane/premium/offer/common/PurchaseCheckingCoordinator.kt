@@ -10,7 +10,6 @@ interface PurchaseCheckingCoordinator {
         purchaseOriginalJson: String,
         signature: String,
         currencyCode: String,
-        price: Float,
-        userLockedOut: Boolean
+        price: Float
     )
 }

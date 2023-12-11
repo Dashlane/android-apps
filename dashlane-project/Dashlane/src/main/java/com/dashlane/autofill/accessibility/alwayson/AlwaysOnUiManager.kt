@@ -15,7 +15,7 @@ import com.dashlane.autofill.accessibility.AutoFillAccessibilityViewNode
 import com.dashlane.autofill.accessibility.DashlaneAccessibilityService
 import com.dashlane.autofill.accessibility.filler.LoginFormFiller
 import com.dashlane.autofill.formdetector.model.AccessibilityLoginForm
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.ui.DashlaneBubble
 import com.dashlane.ui.InAppLoginWindow
 import com.dashlane.util.notification.NotificationHelper
@@ -33,9 +33,9 @@ import java.time.Instant
 class AlwaysOnUiManager(
     private val context: Context,
     private val filler: LoginFormFiller,
-    private val notificationHelper: NotificationHelper,
     private val autofillUsageLog: AutofillAnalyzerDef.IAutofillUsageLog,
-    private val databaseAccess: AutofillAnalyzerDef.DatabaseAccess
+    private val databaseAccess: AutofillAnalyzerDef.DatabaseAccess,
+    private val inAppLoginManager: InAppLoginManager
 ) {
 
     var loginFormGetter: LoginFormGetter? = null
@@ -175,7 +175,7 @@ class AlwaysOnUiManager(
     }
 
     private fun requireOverlayPermission(): Boolean {
-        val intent = SingletonProvider.getInAppLoginManager().intentOverlayPermissionIfRequire
+        val intent = inAppLoginManager.intentOverlayPermissionIfRequire
 
         val notificationManager = NotificationManagerCompat.from(context)
 

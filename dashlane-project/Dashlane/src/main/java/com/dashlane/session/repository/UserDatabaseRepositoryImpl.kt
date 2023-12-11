@@ -19,9 +19,11 @@ open class UserDatabaseRepositoryImpl @Inject constructor(
         databaseProvider.getDatabase(session.userId)
 
     override suspend fun sessionInitializing(session: Session, loginInfo: LoginInfo) {
-        withContext(sessionCoroutineScopeRepository.getCoroutineScope(session).coroutineContext) {
-            openRacletteDatabase(session)
-            racletteLogger.openDatabase()
+        sessionCoroutineScopeRepository.getCoroutineScope(session)?.let {
+            withContext(it.coroutineContext) {
+                openRacletteDatabase(session)
+                racletteLogger.openDatabase()
+            }
         }
     }
 

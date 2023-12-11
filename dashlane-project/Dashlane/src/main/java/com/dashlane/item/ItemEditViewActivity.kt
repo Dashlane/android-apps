@@ -13,11 +13,15 @@ import com.dashlane.followupnotification.services.FollowUpNotificationDiscoveryS
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.item.nfc.NfcHelper
 import com.dashlane.item.subview.ViewFactory
+import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.SchemeUtils.getDataType
+import com.dashlane.passwordstrength.PasswordStrengthEvaluator
+import com.dashlane.session.SessionManager
+import com.dashlane.session.repository.TeamspaceManagerRepository
+import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.useractivity.log.forCode
-import com.dashlane.useractivity.log.usage.UsageLogCode57
+import com.dashlane.util.Toaster
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.hasBeenSaved
@@ -48,6 +52,24 @@ class ItemEditViewActivity :
 
     @Inject
     lateinit var authenticatorLogger: AuthenticatorLogger
+
+    @Inject
+    lateinit var toaster: Toaster
+
+    @Inject
+    lateinit var passwordStrengthEvaluator: PasswordStrengthEvaluator
+
+    @Inject
+    lateinit var mainDataAccessor: MainDataAccessor
+
+    @Inject
+    lateinit var lockManager: LockManager
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var teamspaceManagerRepository: TeamspaceManagerRepository
 
     lateinit var presenterOwner: PresenterOwner<ItemEditViewPresenter, ItemEditViewContract.View>
     lateinit var nfcHelper: NfcHelper
@@ -164,7 +186,15 @@ class ItemEditViewActivity :
         presenter: ItemEditViewPresenter,
         savedInstanceState: Bundle?
     ): ItemEditViewContract.View {
-        return ItemEditViewViewProxy(this, ViewFactory(this), this, navigator, authenticatorLogger)
+        return ItemEditViewViewProxy(
+            this,
+            ViewFactory(this, toaster, lockManager),
+            this,
+            navigator,
+            authenticatorLogger,
+            passwordStrengthEvaluator,
+            mainDataAccessor.getVaultDataQuery()
+        )
     }
 
     val presenter: ItemEditViewPresenter
@@ -180,15 +210,10 @@ class ItemEditViewActivity :
         presenter.coroutineScope = this.lifecycleScope
         presenter.userFeaturesChecker = userFeaturesChecker
         presenter.sharingPolicyDataProvider = sharingPolicyDataProvider
+        presenter.teamspaceManager = sessionManager.session?.let { teamspaceManagerRepository.getTeamspaceManager(it) }
         presenter.setProvider(dataProvider)
         val extras = intent.extras!!
         val args = ItemEditViewActivityArgs.fromBundle(extras)
-        val senderStr = args.sender
-        val sender = if (senderStr == null) {
-            null
-        } else {
-            UsageLogCode57.Sender.values().forCode(senderStr)
-        }
         var screenConfig: Bundle? = null
         var additionalData: Bundle? = null
         var toolbarCollapsed = false
@@ -214,7 +239,6 @@ class ItemEditViewActivity :
             args.url,
             toolbarCollapsed,
             forceEdit,
-            sender,
             args.successIntent,
             screenConfig,
             additionalData,

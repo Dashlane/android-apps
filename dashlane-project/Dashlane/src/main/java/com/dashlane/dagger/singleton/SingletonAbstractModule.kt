@@ -2,29 +2,26 @@ package com.dashlane.dagger.singleton
 
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.account.UserAccountStorageImpl
-import com.dashlane.biometricrecovery.BiometricRecoveryLogger
-import com.dashlane.biometricrecovery.BiometricRecoveryLoggerImpl
 import com.dashlane.autofill.announcement.KeyboardAutofillService
 import com.dashlane.autofill.api.AutofillCreateAccountServiceImpl
 import com.dashlane.autofill.api.AutofillGeneratePasswordServiceImpl
 import com.dashlane.autofill.api.AutofillNavigationServiceImpl
 import com.dashlane.autofill.api.AutofillUpdateAccountServiceImpl
 import com.dashlane.autofill.api.KeyboardAutofillServiceImpl
-import com.dashlane.autofill.api.changepassword.AutofillChangePasswordLogger
-import com.dashlane.autofill.api.changepassword.domain.AutofillUpdateAccountService
-import com.dashlane.autofill.api.common.AutofillGeneratePasswordLogger
-import com.dashlane.autofill.api.common.domain.AutofillGeneratePasswordService
-import com.dashlane.autofill.api.createaccount.AutofillCreateAccountLogger
-import com.dashlane.autofill.api.createaccount.domain.AutofillCreateAccountService
-import com.dashlane.autofill.api.rememberaccount.view.AutofillLinkServiceLogger
-import com.dashlane.autofill.api.request.save.AutofillSaveRequestLogger
-import com.dashlane.autofill.api.securitywarnings.AutofillSecurityWarningsLogger
+import com.dashlane.autofill.changepassword.AutofillChangePasswordLogger
+import com.dashlane.autofill.changepassword.domain.AutofillUpdateAccountService
+import com.dashlane.autofill.createaccount.AutofillCreateAccountLogger
+import com.dashlane.autofill.createaccount.domain.AutofillCreateAccountService
+import com.dashlane.autofill.generatepassword.AutofillGeneratePasswordService
+import com.dashlane.autofill.rememberaccount.view.AutofillLinkServiceLogger
+import com.dashlane.autofill.request.save.AutofillSaveRequestLogger
+import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
 import com.dashlane.autofill.api.securitywarnings.UserPreferencesRememberSecurityWarningsJsonRepository
-import com.dashlane.autofill.api.securitywarnings.model.ExternalRepositoryRememberSecurityWarningsService
-import com.dashlane.autofill.api.securitywarnings.model.RememberSecurityWarningsRepository
-import com.dashlane.autofill.api.securitywarnings.model.RememberSecurityWarningsService
-import com.dashlane.autofill.api.util.AutofillNavigationService
-import com.dashlane.autofill.api.viewallaccounts.AutofillViewAllAccountsLogger
+import com.dashlane.autofill.securitywarnings.model.ExternalRepositoryRememberSecurityWarningsService
+import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsRepository
+import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsService
+import com.dashlane.autofill.util.AutofillNavigationService
+import com.dashlane.autofill.viewallaccounts.AutofillViewAllAccountsLogger
 import com.dashlane.autofill.core.AutofillChangePasswordLoggerImpl
 import com.dashlane.autofill.core.AutofillCreateAccountLoggerImpl
 import com.dashlane.autofill.core.AutofillGeneratePasswordLoggerImpl
@@ -32,30 +29,33 @@ import com.dashlane.autofill.core.AutofillLinkServiceLoggerImpl
 import com.dashlane.autofill.core.AutofillSaveRequestLoggerImpl
 import com.dashlane.autofill.core.AutofillSecurityWarningsLoggerImpl
 import com.dashlane.autofill.core.AutofillViewAllAccountsLoggerImpl
+import com.dashlane.autofill.generatepassword.AutofillGeneratePasswordLogger
 import com.dashlane.core.domain.AccountStorageImpl
 import com.dashlane.core.premium.ConflictingBillingPlatformProviderImpl
 import com.dashlane.core.premium.CurrentPlanStatusProviderImpl
 import com.dashlane.core.premium.FormattedPremiumStatusImpl
-import com.dashlane.core.premium.OffersFromAutofillResolverImpl
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverterImpl
-import com.dashlane.csvimport.CsvImportViewTypeProvider
-import com.dashlane.csvimport.ImportAuthentifiantHelper
+import com.dashlane.credentialmanager.CredentialManagerDAO
+import com.dashlane.credentialmanager.CredentialManagerDAOImpl
+import com.dashlane.credentialmanager.CredentialManagerIntent
+import com.dashlane.credentialmanager.CredentialManagerIntentImpl
+import com.dashlane.credentialmanager.CredentialManagerLocker
+import com.dashlane.credentialmanager.CredentialManagerLockerImpl
+import com.dashlane.csvimport.csvimport.CsvImportViewTypeProvider
+import com.dashlane.csvimport.csvimport.ImportAuthentifiantHelper
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.device.DeviceInfoRepositoryImpl
 import com.dashlane.help.HelpCenterCoordinator
 import com.dashlane.help.HelpCenterCoordinatorImpl
 import com.dashlane.masterpassword.MasterPasswordChanger
 import com.dashlane.masterpassword.MasterPasswordChangerImpl
-import com.dashlane.navigation.Navigator
-import com.dashlane.navigation.NavigatorImpl
 import com.dashlane.notification.badge.SharingInvitationRepository
 import com.dashlane.notification.badge.SharingInvitationRepositoryImpl
 import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
 import com.dashlane.plans.ui.view.PurchaseCheckingCoordinatorImpl
 import com.dashlane.premium.current.other.CurrentPlanStatusProvider
 import com.dashlane.premium.offer.common.FormattedPremiumStatusManager
-import com.dashlane.premium.offer.common.OffersFromAutofillResolver
 import com.dashlane.premium.offer.common.PurchaseCheckingCoordinator
 import com.dashlane.premium.offer.common.StoreOffersManager
 import com.dashlane.premium.offer.details.ConflictingBillingPlatformProvider
@@ -67,19 +67,15 @@ import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.session.repository.UserDatabaseRepositoryImpl
 import com.dashlane.sharing.SharingSyncCommunicator
 import com.dashlane.sharing.SharingSyncCommunicatorImpl
-import com.dashlane.storage.securestorage.CryptographyMigrationLogger
-import com.dashlane.storage.securestorage.CryptographyMigrationLoggerImpl
 import com.dashlane.ui.M2xIntentFactory
 import com.dashlane.ui.M2xIntentFactoryImpl
 import com.dashlane.ui.adapter.CsvImportViewTypeProviderImpl
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
 import com.dashlane.ui.util.PasswordGeneratorWrapperImpl
-import com.dashlane.useractivity.DashlaneDeviceExtraData
 import com.dashlane.useractivity.RacletteLogger
 import com.dashlane.useractivity.RacletteLoggerImpl
 import com.dashlane.useractivity.SharingDeveloperLogger
 import com.dashlane.useractivity.SharingDeveloperLoggerImpl
-import com.dashlane.useractivity.log.DeviceExtraData
 import com.dashlane.vpn.thirdparty.VpnThirdPartyAuthentifiantHelper
 import dagger.Binds
 import dagger.Module
@@ -118,9 +114,6 @@ interface SingletonAbstractModule {
     fun bindBackupIntentCoordinator(impl: BackupCoordinatorImpl): BackupCoordinator
 
     @Binds
-    fun bindAccountRecoveryLogger(impl: BiometricRecoveryLoggerImpl): BiometricRecoveryLogger
-
-    @Binds
     fun bindAGeneratePassword(impl: AutofillGeneratePasswordServiceImpl): AutofillGeneratePasswordService
 
     @Binds
@@ -145,13 +138,7 @@ interface SingletonAbstractModule {
     fun bindHelpCenterNavigator(impl: HelpCenterCoordinatorImpl): HelpCenterCoordinator
 
     @Binds
-    fun bindDashlaneDeviceExtraData(deviceExtraData: DashlaneDeviceExtraData): DeviceExtraData
-
-    @Binds
     fun bindAutofillNavigationService(impl: AutofillNavigationServiceImpl): AutofillNavigationService
-
-    @Binds
-    fun bindNavigator(navigator: NavigatorImpl): Navigator
 
     @Binds
     fun bindKeyboardAutofillService(impl: KeyboardAutofillServiceImpl): KeyboardAutofillService
@@ -191,16 +178,10 @@ interface SingletonAbstractModule {
     fun bindUserDatabaseRepository(impl: UserDatabaseRepositoryImpl): UserDatabaseRepository
 
     @Binds
-    fun bindCryptographyMigrationLogger(impl: CryptographyMigrationLoggerImpl): CryptographyMigrationLogger
-
-    @Binds
     fun bindMasterPasswordChanger(impl: MasterPasswordChangerImpl): MasterPasswordChanger
 
     @Binds
     fun bindCurrentPlanStatusProvider(impl: CurrentPlanStatusProviderImpl): CurrentPlanStatusProvider
-
-    @Binds
-    fun bindOffersFromAutofillResolver(impl: OffersFromAutofillResolverImpl): OffersFromAutofillResolver
 
     @Binds
     fun bindConflictingBillingPlatformProvider(impl: ConflictingBillingPlatformProviderImpl): ConflictingBillingPlatformProvider
@@ -213,4 +194,13 @@ interface SingletonAbstractModule {
 
     @Binds
     fun bindAutofillLinkServiceLogger(impl: AutofillLinkServiceLoggerImpl): AutofillLinkServiceLogger
+
+    @Binds
+    fun bindCredentialManagerIntent(impl: CredentialManagerIntentImpl): CredentialManagerIntent
+
+    @Binds
+    fun bindCredentialManagerLocker(impl: CredentialManagerLockerImpl): CredentialManagerLocker
+
+    @Binds
+    fun bindCredentialManagerDatabase(impl: CredentialManagerDAOImpl): CredentialManagerDAO
 }

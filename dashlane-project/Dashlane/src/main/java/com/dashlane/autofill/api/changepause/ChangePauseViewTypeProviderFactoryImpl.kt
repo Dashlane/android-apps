@@ -1,8 +1,8 @@
 package com.dashlane.autofill.api.changepause
 
 import com.dashlane.R
-import com.dashlane.autofill.api.changepause.model.ChangePauseModel
-import com.dashlane.autofill.api.changepause.view.ChangePauseViewTypeProviderFactory
+import com.dashlane.autofill.changepause.model.ChangePauseModel
+import com.dashlane.autofill.changepause.view.ChangePauseViewTypeProviderFactory
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import javax.inject.Inject
 

@@ -7,7 +7,6 @@ import com.dashlane.util.PackageUtilities.getInstallerOrigin
 import com.dashlane.util.userfeatures.UserFeaturesChecker
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
-import io.sentry.android.core.SentryAndroidOptions
 import io.sentry.protocol.User
 
 class SentryCrashReporter(
@@ -20,10 +19,14 @@ class SentryCrashReporter(
         get() = userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.SENTRY_NON_FATAL)
 
     init {
-        SentryAndroid.init(context) { options: SentryAndroidOptions ->
+        SentryAndroid.init(context) { options ->
             options.release = "com.dashlane@${BuildConfig.VERSION_NAME}.${BuildConfig.VERSION_CODE}"
             options.environment = if (BuildConfig.PLAYSTORE_BUILD) "Playstore" else "Dev"
-            options.isEnableSessionTracking = true
+            options.isEnableAutoSessionTracking = true
+            
+            
+            options.dsn =
+                "randomemail@provider.com/3637169"
         }
         Sentry.setExtra("installer", getInstallerOrigin(context))
         val user = User()

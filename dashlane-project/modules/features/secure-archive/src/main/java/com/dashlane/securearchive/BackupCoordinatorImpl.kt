@@ -8,11 +8,8 @@ import androidx.lifecycle.lifecycleScope
 import com.dashlane.hermes.LogRepository
 import com.dashlane.navigation.Navigator
 import com.dashlane.permission.PermissionsManager
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.SnackbarUtils
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -25,10 +22,9 @@ import kotlin.coroutines.suspendCoroutine
 @Singleton
 class BackupCoordinatorImpl @Inject constructor(
     private val secureArchiveManager: SecureArchiveManager,
-    private val sessionManager: SessionManager,
     private val logRepository: LogRepository,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val permissionsManager: PermissionsManager
 ) : BackupCoordinator {
     val activityLifecycleListener = object : AbstractActivityLifecycleListener() {
         override fun onActivityResumed(activity: Activity) {
@@ -61,8 +57,6 @@ class BackupCoordinatorImpl @Inject constructor(
 
     @Suppress("DEPRECATION")
     override fun startExport() {
-        getBackupLogger().logStart(BackupLogger.Which.EXPORT)
-
         withActivity { activity ->
             activity.lifecycleScope.launch {
                 if (!requestStoragePermissionIfNeeded(activity)) return@launch
@@ -77,8 +71,6 @@ class BackupCoordinatorImpl @Inject constructor(
 
     @Suppress("DEPRECATION")
     override fun startImport() {
-        getBackupLogger().logStart(BackupLogger.Which.IMPORT)
-
         withActivity { activity ->
             activity.lockHelper.startAutoLockGracePeriod(Duration.ofMinutes(2))
 
@@ -98,7 +90,6 @@ class BackupCoordinatorImpl @Inject constructor(
         data: Intent?
     ) {
         if (resultCode != Activity.RESULT_OK) {
-            getBackupLogger().logChooseFileCancelled()
             return
         }
 
@@ -106,7 +97,6 @@ class BackupCoordinatorImpl @Inject constructor(
 
         activity.lifecycleScope.launch {
             if (uri != null && secureArchiveManager.hasData(uri)) {
-                getBackupLogger().logChooseFileSelected()
                 activity.startActivityForResult(
                     BackupActivityIntents.newImportIntent(
                         activity,
@@ -115,15 +105,12 @@ class BackupCoordinatorImpl @Inject constructor(
                     REQUEST_CODE_IMPORT
                 )
             } else {
-                getBackupLogger().logFailureDisplay(BackupLogger.Which.IMPORT)
-
                 SnackbarUtils.showSnackbar(
                     activity,
                     activity.getString(R.string.backup_import_failure_message),
                     SNACKBAR_DURATION
                 ) {
                     setAction(R.string.backup_import_failure_action) {
-                        getBackupLogger().logTryAgainClicked(BackupLogger.Which.IMPORT)
                         startImport()
                     }
                 }
@@ -148,14 +135,12 @@ class BackupCoordinatorImpl @Inject constructor(
             displaySuccessSnackbar(activity, isShared)
         } else {
             val statedWith = data?.getParcelableExtra<Intent?>(BackupActivityIntents.EXTRA_STARTED_WITH) ?: return
-            getBackupLogger().logFailureDisplay(BackupLogger.Which.EXPORT)
             SnackbarUtils.showSnackbar(
                 activity,
                 activity.getString(R.string.backup_export_failure_message),
                 SNACKBAR_DURATION
             ) {
                 setAction(R.string.backup_export_failure_action) {
-                    getBackupLogger().logTryAgainClicked(BackupLogger.Which.EXPORT)
                     activity.startActivityForResult(statedWith, requestCode)
                 }
             }
@@ -177,7 +162,6 @@ class BackupCoordinatorImpl @Inject constructor(
             ) {
                 
                 setAction(R.string.backup_export_success_action) {
-                    getBackupLogger().logSeeFileClicked()
                     activity.startActivity(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
                 }
             }
@@ -198,7 +182,7 @@ class BackupCoordinatorImpl @Inject constructor(
         if (isSuccessful) {
             navigator.goToHome()
             val c = data?.getIntExtra(BackupActivityIntents.EXTRA_COUNT, 0) ?: 0
-            getBackupLogger().logImportSuccessDisplay(c)
+            getBackupLogger().logImportSuccessDisplay()
             SnackbarUtils.showSnackbar(
                 activity,
                 activity.resources.getQuantityString(R.plurals.backup_import_success_message, c, c),
@@ -206,14 +190,12 @@ class BackupCoordinatorImpl @Inject constructor(
             )
         } else {
             val statedWith = data?.getParcelableExtra<Intent?>(BackupActivityIntents.EXTRA_STARTED_WITH) ?: return
-            getBackupLogger().logFailureDisplay(BackupLogger.Which.IMPORT)
             SnackbarUtils.showSnackbar(
                 activity,
                 activity.getString(R.string.backup_import_failure_message),
                 SNACKBAR_DURATION
             ) {
                 setAction(R.string.backup_import_failure_action) {
-                    getBackupLogger().logTryAgainClicked(BackupLogger.Which.IMPORT)
                     activity.startActivityForResult(statedWith, requestCode)
                 }
             }
@@ -222,15 +204,12 @@ class BackupCoordinatorImpl @Inject constructor(
 
     private suspend fun requestStoragePermissionIfNeeded(activity: DashlaneActivity): Boolean =
         suspendCoroutine { cont ->
-            val permissionsManager = activity.uiPartComponent.permissionsManager
-
             if (permissionsManager.isAllowedToWriteToPublicFolder()) {
                 cont.resume(true)
                 return@suspendCoroutine
             }
 
             fun onDenied() {
-                getBackupLogger().logPermissionDisapprovalDisplayed()
                 isStoragePermissionDeniedShown = true
                 showStoragePermissionDenied(activity)
                 cont.resume(false)
@@ -257,12 +236,11 @@ class BackupCoordinatorImpl @Inject constructor(
             SnackbarUtils.getStoragePermissionText(activity),
             Snackbar.LENGTH_INDEFINITE
         ) {
-            getBackupLogger().logPermissionDisapprovalClicked()
             isStoragePermissionDeniedShown = false
         }
     }
 
-    private fun getBackupLogger() = BackupLogger(logRepository, bySessionUsageLogRepository[sessionManager.session])
+    private fun getBackupLogger() = BackupLogger(logRepository)
 
     
     private fun withActivity(block: (activity: DashlaneActivity) -> Unit) {

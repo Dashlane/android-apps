@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="menu_v3_header_security_boosters">Security tools</string>
+    <string name="menu_v3_header_security_boosters">Tools</string>
     <string name="menu_v3_header_manage_account">My account</string>
     <string name="menu_v3_upgrade">Upgrade</string>
     <string name="menu_v3_teamspace_select">Select a Space</string>
@@ -11,4 +11,5 @@
     <string name="menu_v3_section_security_dashboard">Password Health</string>
     <string name="menu_v3_lock_app">Lock app</string>
     <string name="menu_v3_remaining_days">%1$d days to try it for free</string>
+    <string name="menu_v3_new_label">New</string>
 </resources>

@@ -12,11 +12,9 @@ import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsViewModel
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsViewProxy
 import com.dashlane.hermes.generated.definitions.AnyPage.TOOLS_AUTHENTICATOR_EXPLORE
 import com.dashlane.hermes.generated.definitions.AnyPage.TOOLS_AUTHENTICATOR_WELCOME
-import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthenticatorSuggestionsFragment : AbstractContentFragment() {
@@ -33,9 +31,6 @@ class AuthenticatorSuggestionsFragment : AbstractContentFragment() {
             navigator.popBackStack()
         }
     }
-
-    @Inject
-    lateinit var navigator: Navigator
 
     override fun onCreateView(
         inflater: LayoutInflater,

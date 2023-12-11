@@ -5,12 +5,18 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
-import com.dashlane.useractivity.log.inject.UserActivityComponent
 import com.dashlane.util.setCurrentPageView
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class M2wIntroActivity : DashlaneActivity() {
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     private lateinit var presenter: M2wIntroPresenter
 
@@ -18,32 +24,13 @@ class M2wIntroActivity : DashlaneActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_intro)
 
-        val origin: String
-        try {
-            origin = M2wIntentCoordinator.getOrigin(intent)
-        } catch (e: IllegalStateException) {
-            finish()
-            return
-        }
-
         setCurrentPageView(AnyPage.IMPORT_COMPUTER)
 
-        val currentSessionUsageLogRepository = UserActivityComponent(this)
-            .currentSessionUsageLogRepository
-
-        presenter = M2wIntroPresenter().also {
-            it.logger = M2wIntroLoggerImpl(currentSessionUsageLogRepository, origin)
-            it.origin = origin
-        }
+        presenter = M2wIntroPresenter()
         presenter.setView(IntroScreenViewProxy(this))
-
-        if (savedInstanceState == null) {
-            presenter.logger?.logLand()
-        }
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                presenter.logger?.logBack()
                 finish()
             }
         })

@@ -5,6 +5,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import androidx.annotation.CheckResult
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.util.stackTraceToSafeString
 import java.security.InvalidKeyException
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -53,18 +54,24 @@ class CryptoObjectHelper @Inject constructor(
     }
 
     @CheckResult
-    fun getEncryptCipher(keyStoreKey: KeyStoreKey): CipherInitResult = getCipher(keyStoreKey, Cipher.ENCRYPT_MODE)
+    fun getEncryptCipher(
+        keyStoreKey: KeyStoreKey,
+        reportCryptoError: (String, String, String?) -> Unit = { _, _, _ -> }
+    ): CipherInitResult = getCipher(keyStoreKey, Cipher.ENCRYPT_MODE, reportCryptoError = reportCryptoError)
 
     @CheckResult
-    fun getDecryptCipher(keyStoreKey: KeyStoreKey, iv: GCMParameterSpec): CipherInitResult =
-        getCipher(keyStoreKey, Cipher.DECRYPT_MODE, iv)
+    fun getDecryptCipher(
+        keyStoreKey: KeyStoreKey,
+        iv: GCMParameterSpec
+    ): CipherInitResult = getCipher(keyStoreKey, Cipher.DECRYPT_MODE, iv) { _, _, _ -> }
 
     @CheckResult
-    fun challengeAuthentication(cipher: Cipher): CryptoChallengeResult {
+    fun challengeAuthentication(cipher: Cipher, reportAuthenticationError: (String) -> Unit): CryptoChallengeResult {
         return try {
             cipher.doFinal()
             CryptoChallengeResult.Success
         } catch (e: Throwable) {
+            reportAuthenticationError(e.stackTraceToSafeString())
             CryptoChallengeResult.Failure(
                 e,
                 "Cryptographic Key is not properly stored, Biometric Authentication can't be securely used"
@@ -95,12 +102,17 @@ class CryptoObjectHelper @Inject constructor(
         }
     }
 
-    private fun getCipher(keyStoreKey: KeyStoreKey, opMode: Int, iv: GCMParameterSpec? = null): CipherInitResult {
+    private fun getCipher(
+        keyStoreKey: KeyStoreKey,
+        opMode: Int,
+        iv: GCMParameterSpec? = null,
+        reportCryptoError: (String, String, String?) -> Unit
+    ): CipherInitResult {
         
         if (keyStoreKey is BiometricsSeal && !userPreferencesManager.biometricSealPaddingMigrationAttempt) {
             migrateEncryptionKey(
-            keyStoreKey
-        )
+                keyStoreKey
+            )
         }
 
         val cipher = try {
@@ -120,8 +132,14 @@ class CryptoObjectHelper @Inject constructor(
         } catch (e: KeyPermanentlyInvalidatedException) {
             CipherInitResult.InvalidatedKeyError(e, "Encryption key has been invalidated")
         } catch (e: InvalidKeyException) {
+            reportCryptoError("invalid_key_exception", "Could not load the stored Secret key", null)
             CipherInitResult.Failure(e, "Error while initializing the Cipher")
         } catch (t: Throwable) {
+            reportCryptoError(
+                "unknown_crypto_error",
+                "Could not load the stored Secret key",
+                t.stackTraceToSafeString()
+            )
             CipherInitResult.Failure(t, "Error while initializing the Cipher")
         }
     }

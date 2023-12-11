@@ -6,17 +6,20 @@ import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
 import com.dashlane.util.tryOrNull
+import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.vault.util.getComparableField
 import java.util.Locale
 
 object FirstLetterHeaderProvider : HeaderProvider {
-    override fun getHeaderFor(context: Context, viewTypeProvider: ViewTypeProvider): String {
-        val text = getTitleForHeader(context, viewTypeProvider)
+    override fun getHeaderFor(
+        context: Context,
+        viewTypeProvider: ViewTypeProvider,
+        identityNameHolderService: IdentityNameHolderService
+    ): String {
+        val text = getTitleForHeader(context, viewTypeProvider, identityNameHolderService)
         val emptyTextCategory = "..."
-
-        val firstLetter =
-            tryOrNull { text?.substring(0, 1)?.uppercase(Locale.US) }?.takeUnless { it.isEmpty() }
-                ?: " "
+        val firstLetter = tryOrNull { text?.substring(0, 1)?.uppercase(Locale.US) }?.takeUnless { it.isEmpty() }
+            ?: " "
 
         return when (firstLetter[0]) {
             ' ' -> emptyTextCategory
@@ -25,9 +28,13 @@ object FirstLetterHeaderProvider : HeaderProvider {
         }
     }
 
-    private fun getTitleForHeader(context: Context, viewTypeProvider: ViewTypeProvider): String? {
+    private fun getTitleForHeader(
+        context: Context,
+        viewTypeProvider: ViewTypeProvider,
+        identityNameHolderService: IdentityNameHolderService
+    ): String? {
         return when (viewTypeProvider) {
-            is VaultItemViewTypeProvider -> return viewTypeProvider.summaryObject.getComparableField()
+            is VaultItemViewTypeProvider -> viewTypeProvider.summaryObject.getComparableField(identityNameHolderService)
             is VaultItemWrapper<*> -> viewTypeProvider.getTitle(context).text
             else -> null
         }

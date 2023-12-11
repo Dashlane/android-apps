@@ -8,7 +8,6 @@ import javax.inject.Inject
 
 class AutofillDemoPresenter @Inject constructor(
     dataProvider: AutofillDemo.DataProvider,
-    val logger: AutofillDemo.Logger,
     private val navigator: Navigator
 ) : BasePresenter<AutofillDemo.DataProvider, AutofillDemo.ViewProxy>(),
     AutofillDemo.Presenter {
@@ -25,7 +24,6 @@ class AutofillDemoPresenter @Inject constructor(
         this.url = url
         this.login = login
         this.password = password
-        logger.display()
         view.setWebsiteIcon(view.context.getImageDrawableByWebsiteUrl(url))
         finishEnabled = savedInstanceState?.getBoolean(EXTRA_FINISH_ENABLED) ?: false
         if (finishEnabled) {
@@ -39,7 +37,6 @@ class AutofillDemoPresenter @Inject constructor(
 
     override fun onEditTextFocusAcquired(id: Int) {
         view.showAutofillSuggestion(login, url, id)
-        logger.autofillShown()
     }
 
     override fun onAutofillTriggered() {
@@ -47,11 +44,9 @@ class AutofillDemoPresenter @Inject constructor(
         view.hideAutofillSuggestion()
         finishEnabled = true
         view.enableFinish()
-        logger.autofillTriggered()
     }
 
     override fun onButtonFinishClicked() {
-        logger.finishClicked()
         navigator.goToInAppLoginIntro()
         activity?.finish()
     }

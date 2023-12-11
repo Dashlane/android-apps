@@ -12,6 +12,7 @@ import com.dashlane.announcements.AnnouncementsActivityLifecycle
 import com.dashlane.applinkfetcher.AuthentifiantAppLinkDownloader
 import com.dashlane.authenticator.IsSettingUp2faChecker
 import com.dashlane.breach.BreachManagerActivityListener
+import com.dashlane.collections.sharing.CollectionSharingResultActivityListener
 import com.dashlane.hermes.LogFlush
 import com.dashlane.hermes.LogFlushLifecycleObserver
 import com.dashlane.limitations.DeviceLimitActivityListener
@@ -30,9 +31,6 @@ import com.dashlane.security.TouchFilterActivityListener
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.update.AppUpdateNeededActivityListener
-import com.dashlane.useractivity.AggregateUserActivityLifecycleListener
-import com.dashlane.useractivity.log.UserActivityFlush
-import com.dashlane.useractivity.log.UserActivityFlushLifecycleObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,7 +38,6 @@ import javax.inject.Singleton
 class GlobalActivityLifecycleListener @Inject constructor(
     private val sessionManager: SessionManager,
     announcementsActivityLifecycle: AnnouncementsActivityLifecycle,
-    aggregateUserActivityLifecycleListener: AggregateUserActivityLifecycleListener,
     lockManagerActivityListener: LockManagerActivityListener,
     applicationForegroundChecker: ApplicationForegroundChecker,
     backupIntentCoordinator: BackupCoordinatorImpl,
@@ -56,7 +53,7 @@ class GlobalActivityLifecycleListener @Inject constructor(
     deviceLimitActivityListener: DeviceLimitActivityListener,
     touchFilterActivityListener: TouchFilterActivityListener,
     hideOverlayWindowActivityListener: HideOverlayWindowActivityListener,
-    userActivityFlush: UserActivityFlush,
+    collectionSharingResultActivityListener: CollectionSharingResultActivityListener,
     logFlush: LogFlush,
     navigator: Navigator,
     enforce2faLimiter: Enforce2faLimiter,
@@ -76,7 +73,6 @@ class GlobalActivityLifecycleListener @Inject constructor(
         
         ProcessLifecycleOwner.get().lifecycle.apply {
             addObserver(ApplicationProcessLifecycleObserver(this@GlobalActivityLifecycleListener))
-            addObserver(UserActivityFlushLifecycleObserver(userActivityFlush))
             addObserver(LogFlushLifecycleObserver(logFlush))
         }
 
@@ -84,7 +80,6 @@ class GlobalActivityLifecycleListener @Inject constructor(
         register(hideOverlayWindowActivityListener)
         register(touchFilterActivityListener)
         register(announcementsActivityLifecycle)
-        register(aggregateUserActivityLifecycleListener)
         register(lockManagerActivityListener)
         register(ActivityLifecycleLoggerListener())
         register(applicationForegroundChecker)
@@ -102,6 +97,7 @@ class GlobalActivityLifecycleListener @Inject constructor(
         register(deviceLimitActivityListener)
         register(enforce2faLimiter)
         register(isSettingUp2faChecker.activityLifecycleListener)
+        register(collectionSharingResultActivityListener)
     }
 
     fun register(application: Application) {

@@ -36,12 +36,14 @@ import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Icon
 import com.dashlane.design.component.Text
+import com.dashlane.design.component.TextField
+import com.dashlane.design.component.tooling.TextFieldActions
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.ui.widgets.view.CategoryChip
-import com.dashlane.ui.widgets.view.CollectionSearchField
 import com.dashlane.util.DeviceUtils
+import com.dashlane.vault.model.toSanitizedCollectionName
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -98,9 +100,14 @@ class CollectionSelectorActivity : AppCompatActivity() {
             ) {
                 val collections by viewModel.collections.collectAsState()
                 val focusRequester = remember { FocusRequester() }
-                CollectionSearchField(
-                    prompt = viewModel.userPrompt,
-                    onPromptChange = viewModel::updateUserPrompt,
+                TextField(
+                    value = viewModel.userPrompt,
+                    onValueChange = viewModel::updateUserPrompt,
+                    label = stringResource(id = R.string.collection_search_field_label),
+                    placeholder = stringResource(id = com.dashlane.ui.R.string.collection_search_field_placeholder),
+                    actions = TextFieldActions.ClearField(contentDescription = stringResource(id = R.string.and_accessibility_action_text_clear)) {
+                        viewModel.updateUserPrompt("")
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
@@ -117,7 +124,7 @@ class CollectionSelectorActivity : AppCompatActivity() {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val label = viewModel.userPrompt
+                                val label = viewModel.userPrompt.toSanitizedCollectionName()
                                 ButtonMedium(
                                     onClick = {
                                         onClickCollection(label)
@@ -143,7 +150,7 @@ class CollectionSelectorActivity : AppCompatActivity() {
     }
 
     private fun onClickCollection(label: String) {
-        val resultList = arrayOf(label)
+        val resultList = arrayOf(label.toSanitizedCollectionName())
         setResult(
             Activity.RESULT_OK,
             Intent().apply {

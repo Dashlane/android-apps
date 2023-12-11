@@ -4,6 +4,8 @@ import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.server.api.endpoints.sharinguserdevice.UpdateUserGroupUsersService
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserUpdate
+import com.dashlane.server.api.pattern.UserIdFormat
+import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
@@ -35,7 +37,7 @@ class UpdateUserGroupUsersRequestBuilder @Inject constructor(
                 ?: throw RequestBuilderException.AcceptItemGroupRequestException("groupKey is null")
 
             UpdateUserGroupUsersService.Request(
-                groupId = UpdateUserGroupUsersService.Request.GroupId(userGroup.groupId),
+                groupId = UuidFormat(userGroup.groupId),
                 revision = userGroup.revision,
                 users = users.map {
                     createUserUpdate(groupKey, it)
@@ -52,7 +54,7 @@ class UpdateUserGroupUsersRequestBuilder @Inject constructor(
         val userId: String = userToUpdate.userId
         val publicKey: String = userToUpdate.publicKey
         return UserUpdate(
-            userId = UserUpdate.UserId(userId),
+            userId = UserIdFormat(userId),
             proposeSignature = sharingCryptography.generateProposeSignature(userId, groupKey),
             groupKey = sharingCryptography.generateGroupKeyEncrypted(groupKey, publicKey)
         )

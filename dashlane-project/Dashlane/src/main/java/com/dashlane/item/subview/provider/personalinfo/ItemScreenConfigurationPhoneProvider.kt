@@ -2,7 +2,6 @@ package com.dashlane.item.subview.provider.personalinfo
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.inapplogin.UsageLogCode35Action
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -15,15 +14,10 @@ import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogCode11
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.getStringId
@@ -33,16 +27,9 @@ import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationPhoneProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
-    mainDataAccessor: MainDataAccessor,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    mainDataAccessor.getDataCounter(),
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -136,14 +123,12 @@ class ItemScreenConfigurationPhoneProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 numberView,
-                CopyAction(item.toSummary(), CopyField.PhoneNumber, action = {
-                    logger.log(
-                        UsageLogCode35(
-                            type = UsageLogCode11.Type.PHONE.code,
-                            action = UsageLogCode35Action.COPY_NUMBER
-                        )
-                    )
-                })
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.PhoneNumber,
+                    action = {},
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }
@@ -157,8 +142,8 @@ class ItemScreenConfigurationPhoneProvider(
         val phoneTypeList = SyncObject.Phone.Type.values().map { context.getString(it.getStringId()) }
         val selectedType = (
             item.syncObject.type
-            ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE
-        ).let { context.getString(it.getStringId()) }
+                ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE
+            ).let { context.getString(it.getStringId()) }
         return when {
             editMode -> ItemEditValueListSubView(
                 phoneTypeHeader,
@@ -209,7 +194,11 @@ private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*>
 private fun VaultItem<*>.copyForUpdatedType(context: Context, value: String): VaultItem<*> {
     this as VaultItem<SyncObject.Phone>
     val phone = this.syncObject.type
-    return if (value == (phone ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE).let { context.getString(it.getStringId()) }) {
+    return if (value == (
+            phone
+                ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE
+            ).let { context.getString(it.getStringId()) }
+    ) {
         this
     } else {
         val lPhoneType = SyncObject.Phone.Type.values().firstOrNull { value == context.getString(it.getStringId()) }

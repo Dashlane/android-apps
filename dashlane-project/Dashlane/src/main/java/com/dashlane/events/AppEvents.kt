@@ -55,7 +55,7 @@ class AppEvents @Inject constructor(
         val type = event::class.java.name
         lastEventByEventClassName[type] = event
         val listeners = listenersMapByEventClassName[type]?.values?.toList() ?: return
-        scope.getCoroutineScope(session).launch(mainDispatcher) {
+        scope.getCoroutineScope(session)?.launch(mainDispatcher) {
             listeners.forEach {
                 it.invoke(event)
             }
@@ -74,7 +74,7 @@ class AppEvents @Inject constructor(
         lastEventByEventClassName[clazz.name]?.let {
             val listenerBySubscriberClassName = listenersMapByEventClassName[clazz.name] ?: return@let
             val listener = listenerBySubscriberClassName[subscriber] ?: return@let
-            scope.getCoroutineScope(session).launch(mainDispatcher) {
+            scope.getCoroutineScope(session)?.launch(mainDispatcher) {
                 listener.invoke(it)
             }
         }

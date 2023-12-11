@@ -16,8 +16,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.setCurrentPageView
-import com.dashlane.vault.model.urlForUsageLog
-import com.dashlane.vault.summary.SummaryObject
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
@@ -32,7 +30,6 @@ class VaultPresenter @Inject constructor(
     private val fragmentLifecycleCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
-    private val logger: Vault.Logger,
     private val lockManager: LockManager,
     private val appEvents: AppEvents,
     private val navigator: Navigator,
@@ -58,7 +55,6 @@ Vault.Presenter,
         }
         if (filter == null) {
             
-            logger.onListDisplayed(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
             setCurrentPageView(AnyPage.ITEM_ALL_LIST)
         } else {
             this.filter.value = filter
@@ -92,7 +88,6 @@ Vault.Presenter,
     }
 
     override fun onSearchViewClicked() {
-        logger.buttonSearchClicked()
         navigator.goToSearch()
     }
 
@@ -119,21 +114,16 @@ Vault.Presenter,
         position: Int,
     ) {
         if (item is VaultItemViewTypeProvider) {
-            val website: String? = (item.summaryObject as? SummaryObject.Authentifiant)?.urlForUsageLog
-            logger.logClickOpenItem(item.itemListContext, website, filter.value)
             navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.xmlObjectName)
         }
     }
 
     override fun onFilterSelected(filter: Filter) {
-        logger.onListDisplayed(filter)
         setCurrentPageView(filter.toPage())
         this.filter.value = filter
     }
 
-    override fun onTabClicked(filter: Filter) {
-        logger.onFilterSelected(filter)
-    }
+    override fun onTabClicked(filter: Filter) = Unit
 
     override fun onTabReselected(filter: Filter) {
         if (this.filter.value == filter) {
@@ -142,12 +132,11 @@ Vault.Presenter,
     }
 
     override fun onMenuAlertClicked() {
-        navigator.goToActionCenter(ORIGIN_VAULT)
+        navigator.goToActionCenter()
     }
 
     private fun onAutofillAnnouncementClicked() {
-        logger.logAnnouncement("clickAutofillActivationBanner", "dashboard")
-        navigator.goToInAppLogin(ORIGIN_VAULT)
+        navigator.goToInAppLogin()
     }
 
     private fun onSyncFinished(syncFinishedEvent: SyncFinishedEvent) {
@@ -175,7 +164,6 @@ Vault.Presenter,
                 R.layout.include_layout_vault_autofill_announcement,
                 onClick = this::onAutofillAnnouncementClicked
             )
-            logger.logAnnouncement("displayAutofillActivationBanner", "dashboard")
         } else {
             view.showAnnouncement(null)
         }
@@ -183,7 +171,6 @@ Vault.Presenter,
 
     companion object {
         const val EXTRA_CURRENT_FILTER = "extra_current_filter"
-        private const val ORIGIN_VAULT = "vault"
     }
 }
 

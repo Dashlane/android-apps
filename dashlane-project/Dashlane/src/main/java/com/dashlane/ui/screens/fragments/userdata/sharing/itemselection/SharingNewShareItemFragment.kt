@@ -7,11 +7,21 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
+import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
+import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SharingNewShareItemFragment : AbstractContentFragment() {
+
+    @Inject
+    lateinit var itemWrapperProvider: ItemWrapperProvider
+
+    @Inject
+    lateinit var identityNameHolderService: IdentityNameHolderService
+
     
     private val viewModel by viewModels<NewShareItemViewModel>({ requireParentFragment() })
 
@@ -26,7 +36,14 @@ class SharingNewShareItemFragment : AbstractContentFragment() {
         val type = rawDataType
             ?.let { SyncObjectType.forXmlNameOrNull(it) }
             ?: throw IllegalArgumentException("Unsupported type $rawDataType")
-        SharingNewShareItemViewProxy(lifecycle, view, viewModel, type)
+        SharingNewShareItemViewProxy(
+            lifecycle,
+            view,
+            viewModel,
+            type,
+            itemWrapperProvider,
+            identityNameHolderService
+        )
 
         return view
     }

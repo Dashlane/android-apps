@@ -23,11 +23,4 @@ interface AutofillDemo {
     }
 
     interface DataProvider : Base.IDataProvider
-
-    interface Logger {
-        fun display()
-        fun autofillShown()
-        fun autofillTriggered()
-        fun finishClicked()
-    }
 }

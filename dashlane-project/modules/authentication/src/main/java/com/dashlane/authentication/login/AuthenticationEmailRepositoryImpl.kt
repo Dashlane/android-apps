@@ -21,6 +21,7 @@ import com.dashlane.authentication.toAuthenticationException
 import com.dashlane.authentication.toRegisteredUserDevice
 import com.dashlane.server.api.ConnectivityCheck
 import com.dashlane.server.api.DashlaneTime
+import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.server.api.endpoints.authentication.Auth2faUnauthenticatedSettingsService
 import com.dashlane.server.api.endpoints.authentication.AuthLoginService
 import com.dashlane.server.api.endpoints.authentication.AuthMethod
@@ -172,8 +173,10 @@ class AuthenticationEmailRepositoryImpl(
                 verification = verification
             ).also {
                 try {
-                    
-                    sendEmailTokenService.execute(AuthSendEmailTokenService.Request(login = login))
+                    if (responseData.accountType == AccountType.MASTERPASSWORD) {
+                        
+                        sendEmailTokenService.execute(AuthSendEmailTokenService.Request(login = login))
+                    }
                 } catch (e: DashlaneApiException) {
                     throw e.toAuthenticationException()
                 }
@@ -193,7 +196,7 @@ class AuthenticationEmailRepositoryImpl(
             else -> throw AuthenticationUnknownException(message = "Unknown verification")
         }
 
-        return RequiresDeviceRegistration.SecondFactor(secondFactor, ssoInfo)
+        return RequiresDeviceRegistration.SecondFactor(secondFactor = secondFactor, accountType = responseData.accountType, ssoInfo = ssoInfo)
     }
 
     private suspend fun getRemoteDeviceStatus(userDevice: UserStorage.UserDevice): AuthenticationEmailRepository.Result {
@@ -220,7 +223,20 @@ class AuthenticationEmailRepositoryImpl(
         val ssoInfo = verification[AuthVerification.Type.SSO]?.ssoInfo?.toAuthenticationSsoInfo()
 
         return when {
-            verification.isEmpty() -> userDevice.toRequiresPassword(ssoInfo)
+            verification.isEmpty() -> {
+                when (responseData.accountType) {
+                    AccountType.MASTERPASSWORD -> userDevice.toRequiresPassword(ssoInfo)
+                    AccountType.INVISIBLEMASTERPASSWORD -> RequiresDeviceRegistration.SecondFactor(
+                        secondFactor = AuthenticationSecondFactorEmailToken(
+                            login = userDevice.login,
+                            verification = verification
+                        ),
+                        accountType = responseData.accountType,
+                        ssoInfo = null
+                    )
+                }
+            }
+            AuthVerification.Type.DASHLANE_AUTHENTICATOR in verification ||
             AuthVerification.Type.TOTP in verification -> RequiresServerKey(
                 AuthenticationSecondFactorTotp(userDevice.login, verification),
                 ssoInfo

@@ -27,7 +27,7 @@ class SessionCoroutineScopeRepository @Inject constructor() :
 
     override fun get(session: Session?): CoroutineScope? = session?.let { getCoroutineScope(it) }
 
-    fun getCoroutineScope(session: Session) = coroutineScopePerSession[session]!!
+    fun getCoroutineScope(session: Session) = coroutineScopePerSession[session]
 
     private class InternalCoroutineScope(job: Job) : CoroutineScope {
         override val coroutineContext = job

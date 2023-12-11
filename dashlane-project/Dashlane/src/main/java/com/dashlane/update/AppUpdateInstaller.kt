@@ -39,25 +39,29 @@ class AppUpdateInstaller @Inject constructor(
         }
         if (availableUpdate?.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
             
-            appUpdateManager.startUpdateFlowForResult(
-                availableUpdate,
-                AppUpdateType.IMMEDIATE,
-                
-                { _, _, _, _, _, _, _ -> },
-                INSTALL_UPDATE_REQUEST_CODE
-            )
+            availableUpdate?.let {
+                appUpdateManager.startUpdateFlowForResult(
+                    it,
+                    AppUpdateType.IMMEDIATE,
+                    
+                    { _, _, _, _, _, _, _ -> },
+                    INSTALL_UPDATE_REQUEST_CODE
+                )
+            }
         }
     }
 
     fun installUpdate(activity: DashlaneActivity) {
         activity.lifecycleScope.launch(mainCoroutineDispatcher) {
             if (!updateNeeded()) return@launch
-            appUpdateManager.startUpdateFlowForResult(
-                availableUpdate,
-                AppUpdateType.IMMEDIATE,
-                activity,
-                INSTALL_UPDATE_REQUEST_CODE
-            )
+            availableUpdate?.let {
+                appUpdateManager.startUpdateFlowForResult(
+                    it,
+                    AppUpdateType.IMMEDIATE,
+                    activity,
+                    INSTALL_UPDATE_REQUEST_CODE
+                )
+            }
         }
     }
 

@@ -127,6 +127,6 @@ class IdentityDashboardPresenter @Inject constructor(
     }
 
     private fun navigateToPasswordHealth(tab: String? = null) {
-        navigator.goToPasswordAnalysisFromIdentityDashboard("identity_dashboard", tab)
+        navigator.goToPasswordAnalysisFromIdentityDashboard(tab)
     }
 }

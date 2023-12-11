@@ -17,7 +17,7 @@
         android:src="@drawable/logo_lock_up"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/text_inverse_catchy" />
+        app:tint="@color/oddity_brand" />
 
     <Button
         android:id="@+id/view_login_finish"
@@ -135,7 +135,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/login_email_page_secret_transfer_label"
-        android:textColor="@color/text_inverse_standard"
+        android:textColor="@color/text_neutral_standard"
         app:layout_constraintBottom_toTopOf="@id/btn_login_secret_transfer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -159,7 +159,6 @@
         android:id="@+id/installation_id_debug"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:textColor="@color/text_inverse_standard"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

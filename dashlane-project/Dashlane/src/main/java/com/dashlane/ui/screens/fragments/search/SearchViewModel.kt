@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.loaders.datalists.FrequentSearchLoader
-import com.dashlane.loaders.datalists.RecentSearchLoader
 import com.dashlane.loaders.datalists.SearchLoader
 import com.dashlane.search.Match
 import com.dashlane.search.MatchPosition
@@ -13,32 +11,19 @@ import com.dashlane.search.MatchedSearchResult
 import com.dashlane.search.fields.LegacySearchField
 import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
-import com.dashlane.ui.screens.fragments.search.util.SearchSorterProvider
-import com.dashlane.vault.util.IdentityUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(val dataAccessor: MainDataAccessor) : ViewModel() {
+class SearchViewModel @Inject constructor(
+    private val searchLoader: SearchLoader,
+    mainDataAccessor: MainDataAccessor
+) : ViewModel() {
 
-    private val frequentSearchLoader = FrequentSearchLoader(viewModelScope)
-    private val recentSearch = RecentSearchLoader(viewModelScope)
-
-    private val searchLoader: SearchLoader
-
-    init {
-        val identityUtil = IdentityUtil(dataAccessor)
-        val textResolver = DataIdentifierListTextResolver(identityUtil)
-        searchLoader = SearchLoader(
-            SearchSorterProvider.getSearchSorter(textResolver, identityUtil),
-            viewModelScope
-        )
-    }
-
+    private val frequentSearch = mainDataAccessor.getFrequentSearch()
     private val _latestSearchResult = MutableLiveData<SearchResult?>(null)
 
     private val searchFlow = MutableSharedFlow<SearchRequest>(
@@ -64,9 +49,9 @@ class SearchViewModel @Inject constructor(val dataAccessor: MainDataAccessor) : 
                     is SearchRequest.DefaultRequest.FromRecent -> {
                         SearchResult(
                             request,
-                            recentSearch.get()?.map {
-                            MatchedSearchResult(it, Match(MatchPosition.ANYWHERE, LegacySearchField.ANY_FIELD))
-                        } ?: listOf()
+                            frequentSearch.getLastSearchedItems(max = 100).map {
+                                MatchedSearchResult(it, Match(MatchPosition.ANYWHERE, LegacySearchField.ANY_FIELD))
+                            }
                         )
                     }
                 }
@@ -74,18 +59,11 @@ class SearchViewModel @Inject constructor(val dataAccessor: MainDataAccessor) : 
         }
     }
 
-    fun reloadData() {
-        searchLoader.refreshData()
-        recentSearch.reloadData()
-        frequentSearchLoader.reloadData()
-    }
-
     fun searchFromQuery(request: SearchRequest) {
         searchFlow.tryEmit(request)
     }
 
     fun repeatLastSearch() {
-        reloadData()
         latestSearchResult.value?.searchRequest?.let {
             searchFlow.tryEmit(it)
         }

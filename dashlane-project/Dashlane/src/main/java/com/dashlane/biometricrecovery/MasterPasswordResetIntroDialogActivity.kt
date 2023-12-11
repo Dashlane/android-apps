@@ -9,7 +9,6 @@ import com.dashlane.R
 import com.dashlane.lock.LockHelper.Companion.PROMPT_LOCK_FOR_SETTINGS
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.showToaster
@@ -62,7 +61,7 @@ class MasterPasswordResetIntroDialogActivity : DashlaneActivity() {
                         reason is UnlockEvent.Reason.WithCode &&
                         reason.requestCode == UNLOCK_EVENT_CODE
                 }?.let {
-                    biometricRecovery.setFeatureEnabled(true, UsageLogConstant.ViewType.accountRecoveryIntroDialog)
+                    biometricRecovery.setBiometricRecoveryFeatureEnabled(true)
 
                     this@MasterPasswordResetIntroDialogActivity.showToaster(
                         R.string.account_recovery_intro_dialog_success_message,
@@ -78,7 +77,6 @@ class MasterPasswordResetIntroDialogActivity : DashlaneActivity() {
         setOnShowListener {
             
             findViewById<View>(R.id.design_bottom_sheet)?.let { BottomSheetBehavior.from(it).peekHeight = it.height }
-            biometricRecovery.logger.logBiometricRecoveryIntroDialogDisplay()
         }
 
         setOnCancelListener {

@@ -53,7 +53,7 @@ class LoginEmailViewProxy(view: View) :
         }
 
         secretTransferButton.setOnClickListener {
-            presenter.showSecretTransferQRPage()
+            presenter.showSecretTransferQRPage(null)
         }
     }
 

@@ -2,6 +2,7 @@ package com.dashlane.login.sso
 
 import android.content.Context
 import android.content.Intent
+import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.account.UserSecuritySettings
 import com.dashlane.authentication.login.AuthenticationSsoRepository
@@ -108,7 +109,8 @@ class LoginSsoDataProvider @Inject constructor(
             sharingPrivateKey = result.sharingKeys?.private?.value,
             userAnalyticsId = result.userAnalyticsId,
             deviceAnalyticsId = result.deviceAnalyticsId,
-            loginMode = LoginMode.Sso
+            loginMode = LoginMode.Sso,
+            accountType = UserAccountInfo.AccountType.MasterPassword
         )
 
         userPreferencesManager.userSettingsBackupTimeMillis = result.settingsDate.toEpochMilli()

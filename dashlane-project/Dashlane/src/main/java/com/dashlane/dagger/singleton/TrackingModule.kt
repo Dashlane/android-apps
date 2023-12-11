@@ -19,6 +19,7 @@ import com.dashlane.hermes.service.AnalyticsErrorReporter
 import com.dashlane.hermes.service.AnalyticsLogService
 import com.dashlane.hermes.storage.LogStorage
 import com.dashlane.hermes.storage.SecureFileLogStorage
+import com.dashlane.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.logger.utils.HermesDebugUtil
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.server.api.Authorization
@@ -26,7 +27,7 @@ import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.analytics.AnalyticsApi
 import com.dashlane.server.api.endpoints.teams.ActivityLog
 import com.dashlane.server.api.exceptions.DashlaneApiException
-import com.dashlane.useractivity.DeveloperInfoLogger
+import com.dashlane.session.SessionManager
 import com.dashlane.useractivity.InMemoryLogStorage
 import com.dashlane.useractivity.TestLogChecker
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
@@ -38,11 +39,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
 import java.io.File
 import java.time.Clock
 import java.util.UUID
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -99,10 +100,10 @@ open class TrackingModule {
     ) = AnalyticsLogService(analyticsApi, testLogChecker)
 
     @Provides
-    open fun provideActivityLogService(dashlaneApi: DashlaneApi) =
+    open fun provideActivityLogService(dashlaneApi: DashlaneApi, sessionManager: SessionManager) =
         object : ActivityLogService(dashlaneApi.endpoints.teams.storeActivityLogs) {
             override val authorization: Authorization.User?
-                get() = SingletonProvider.getSessionManager().session?.let {
+                get() = sessionManager.session?.let {
                     Authorization.User(it.userId, it.accessKey, it.secretKey)
                 }
         }
@@ -127,21 +128,18 @@ open class TrackingModule {
     open fun provideActivityLogErrorReporter(developerInfoLogger: DeveloperInfoLogger) =
         object : ActivityLogErrorReporter {
             override fun report(invalidLogs: List<InvalidActivityLog>) {
-                SingletonProvider.getSessionManager().session?.let { session ->
-                    invalidLogs.forEach { log ->
-                        val error = log.invalidLog.error.key
-                        val activityLog = tryOrNull {
-                            Gson().fromJson(log.logItem.logContent, ActivityLog::class.java)
-                        }
-                        developerInfoLogger.log(
-                            session = session,
-                            action = "StoreActivityLog",
-                            message = "$error - An activity log with a log type of " +
-                                "${activityLog?.logType?.key} and uid: ${log.logItem.logId} has " +
-                                "been detected to have a technical / schema error",
-                            exceptionType = error
-                        )
+                invalidLogs.forEach { log ->
+                    val error = log.invalidLog.error.key
+                    val activityLog = tryOrNull {
+                        Gson().fromJson(log.logItem.logContent, ActivityLog::class.java)
                     }
+                    developerInfoLogger.log(
+                        action = "StoreActivityLog",
+                        message = "$error - An activity log with a log type of " +
+                            "${activityLog?.logType?.key} and uid: ${log.logItem.logId} has " +
+                            "been detected to have a technical / schema error",
+                        exceptionType = error
+                    )
                 }
             }
         }
@@ -150,18 +148,15 @@ open class TrackingModule {
     open fun provideLogErrorReporter(developerInfoLogger: DeveloperInfoLogger) =
         object : AnalyticsErrorReporter {
             override fun report(exception: DashlaneApiException) {
-                SingletonProvider.getSessionManager().session?.let { session ->
-                    developerInfoLogger.log(
-                        session = session,
-                        action = "Hermes",
-                        message = exception.message,
-                        exceptionType = exception.stackTraceToSafeString()
-                    )
-                }
+                developerInfoLogger.log(
+                    action = "Hermes",
+                    message = exception.message,
+                    exceptionType = exception.stackTraceToSafeString()
+                )
             }
         }
 
-    fun appInfo() = AppInfo(
+    private fun appInfo() = AppInfo(
         if (BuildConfig.VERSION_NAME == "dev_build_dev") "0-dev_build" else BuildConfig.VERSION_NAME,
         if (BuildConfig.PLAYSTORE_BUILD) AppInfo.Build.PRODUCTION else AppInfo.Build.DEV,
         AppInfo.App.MAIN

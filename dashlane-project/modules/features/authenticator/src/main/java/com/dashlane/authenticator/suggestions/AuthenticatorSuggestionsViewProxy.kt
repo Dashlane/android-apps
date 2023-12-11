@@ -2,6 +2,7 @@ package com.dashlane.authenticator.suggestions
 
 import android.view.View
 import android.widget.Button
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -36,7 +37,7 @@ class AuthenticatorSuggestionsViewProxy(
     private val emptyScreen =
         view.findViewById<View>(R.id.authenticator_empty_screen).apply {
             findViewById<Button>(R.id.authenticator_empty_screen_add_button)
-                .setOnClickListener { navigator.goToCredentialAddStep1(null) }
+                .setOnClickListener { navigator.goToCredentialAddStep1() }
             findViewById<Button>(R.id.authenticator_empty_screen_setup_button)
                 .setOnClickListener {
                     viewModel.onSetupAuthenticator(
@@ -47,7 +48,7 @@ class AuthenticatorSuggestionsViewProxy(
     private val emptyScreenAllSetup =
         view.findViewById<View>(R.id.authenticator_empty_screen_all_setup).apply {
             findViewById<Button>(R.id.authenticator_empty_screen_all_setup_add_button)
-                .setOnClickListener { navigator.goToCredentialAddStep1(null) }
+                .setOnClickListener { navigator.goToCredentialAddStep1() }
         }
     private val suggestionsScreen = view.findViewById<View>(R.id.authenticator_suggestions).apply {
         findViewById<Button>(R.id.authenticator_suggestions_setup_button).apply {
@@ -167,6 +168,7 @@ class AuthenticatorSuggestionsViewProxy(
     }
 
     private fun setupFaqCards() {
+        ViewCompat.setAccessibilityHeading(faqTitle, true)
         expandableCards.forEachIndexed { index, expandableCard ->
             expandableCard.setOnExpandListener { expanded ->
                 if (!expanded) return@setOnExpandListener

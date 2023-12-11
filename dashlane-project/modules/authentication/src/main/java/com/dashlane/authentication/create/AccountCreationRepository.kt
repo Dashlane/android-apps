@@ -7,6 +7,7 @@ import com.dashlane.authentication.AuthenticationUnknownException
 import com.dashlane.authentication.TermsOfService
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.SharingKeys
+import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.session.AppKey
 import com.dashlane.session.VaultKey
 import com.dashlane.xml.domain.SyncObject
@@ -21,6 +22,7 @@ interface AccountCreationRepository {
     suspend fun createAccount(
         login: String,
         passwordUtf8Bytes: ObfuscatedByteArray,
+        accountType: AccountType,
         termsOfService: TermsOfService,
         withRemoteKey: Boolean = false,
         withLegacyCrypto: Boolean = false

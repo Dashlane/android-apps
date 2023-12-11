@@ -101,8 +101,7 @@ abstract class LoginBaseSubViewProxy<T : LoginBaseContract.Presenter>(rootView: 
             clearError()
         } else {
             errorTextView?.run {
-                
-                setTextColor(context.getColor(R.color.text_danger_quiet_dark_mode))
+                setTextColor(context.getColor(R.color.text_danger_quiet))
                 visibility = View.VISIBLE
                 text = error
             }

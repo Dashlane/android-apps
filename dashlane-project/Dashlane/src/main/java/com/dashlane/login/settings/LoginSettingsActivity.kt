@@ -25,7 +25,7 @@ class LoginSettingsActivity : DashlaneActivity() {
         val rootView = LayoutInflater.from(this).inflate(R.layout.activity_login_settings, null, false)
         setContentView(rootView)
 
-        loginSettingsPresenter.setView(LoginSettingsViewProxy(rootView, loginSettingsPresenter.logger))
+        loginSettingsPresenter.setView(LoginSettingsViewProxy(rootView))
     }
 
     override fun onBackPressed() {

@@ -1,5 +1,6 @@
 package com.dashlane.accountrecoverykey.activation.confirm
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +19,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,24 +38,32 @@ import com.dashlane.design.component.Text
 import com.dashlane.design.component.TextField
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
+import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.widgets.compose.CircularProgressIndicator
 import com.dashlane.ui.widgets.compose.GenericErrorContent
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AccountRecoveryKeyConfirmScreen(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.semantics {
+        testTagsAsResourceId = true
+    },
     viewModel: AccountRecoveryKeyConfirmViewModel,
+    back: () -> Unit,
     finish: () -> Unit,
     cancel: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    BackHandler(enabled = true) {
+        viewModel.onBackPressed()
+    }
+
     LaunchedEffect(uiState) {
         when (uiState) {
-            is AccountRecoveryKeyConfirmState.Done -> {
-                finish()
-                viewModel.hasNavigated()
-            }
+            is AccountRecoveryKeyConfirmState.Done -> finish()
+            is AccountRecoveryKeyConfirmState.Cancel -> cancel()
+            is AccountRecoveryKeyConfirmState.Back -> back()
 
             else -> Unit
         }
@@ -76,14 +89,16 @@ fun AccountRecoveryKeyConfirmScreen(
             )
         }
 
-        is AccountRecoveryKeyConfirmState.Done -> Unit
+        is AccountRecoveryKeyConfirmState.Done,
+        is AccountRecoveryKeyConfirmState.Back -> Unit
+        is AccountRecoveryKeyConfirmState.Cancel -> Unit
         is AccountRecoveryKeyConfirmState.SyncError -> {
             GenericErrorContent(
                 modifier = modifier,
                 textPrimary = stringResource(id = R.string.generic_error_retry_button),
                 textSecondary = stringResource(id = R.string.generic_error_cancel_button),
                 onClickPrimary = viewModel::retryClicked,
-                onClickSecondary = cancel
+                onClickSecondary = viewModel::cancelClicked
             )
         }
     }
@@ -122,9 +137,10 @@ fun AccountRecoveryKeyConfirmContent(
                 .padding(bottom = 32.dp)
         )
         TextField(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 16.dp)
+                .testTag("confirmRecoveryKeyTextField"),
             value = value,
             isError = isError,
             feedbackText = if (isError) stringResource(id = R.string.account_recovery_key_confirm_error) else null,
@@ -188,8 +204,9 @@ fun AccountRecoveryKeySuccessContent(
                 style = DashlaneTheme.typography.titleSectionLarge,
                 color = DashlaneTheme.colors.textNeutralCatchy,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
+                modifier = modifier
                     .padding(bottom = 32.dp)
+                    .testTag("accountRecoveryKeySuccessTitle")
             )
         }
         ButtonMedium(
@@ -207,7 +224,7 @@ fun AccountRecoveryKeySuccessContent(
 @Preview
 @Composable
 fun AccountRecoveryKeyConfirmContentPreview() {
-    DashlaneTheme {
+    DashlanePreview {
         AccountRecoveryKeyConfirmContent(
             isLoading = true,
             isError = true,
@@ -220,5 +237,5 @@ fun AccountRecoveryKeyConfirmContentPreview() {
 @Preview
 @Composable
 fun AccountRecoveryKeySuccessContentPreview() {
-    DashlaneTheme { AccountRecoveryKeySuccessContent(onDoneClicked = {}) }
+    DashlanePreview { AccountRecoveryKeySuccessContent(onDoneClicked = {}) }
 }

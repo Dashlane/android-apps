@@ -2,7 +2,7 @@ package com.dashlane.util;
 
 import android.content.Context;
 
-import com.dashlane.dagger.singleton.SingletonProvider;
+import androidx.annotation.StringRes;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -10,8 +10,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-
-import androidx.annotation.StringRes;
 
 public class TextUtil {
 
@@ -44,22 +42,9 @@ public class TextUtil {
             lang = "en";
         }
         builder.append(Constants.HTTP.RefferalUrlHeader)
-               .append(lang).append("/").append("as/")
-               .append(refid);
+            .append(lang).append("/").append("as/")
+            .append(refid);
         return builder.toString();
-    }
-
-    public static String formatDate(LocalDate localDate, @StringRes int dateFormat) {
-        Context context = SingletonProvider.getContext();
-        Locale locale = context.getResources().getConfiguration().getLocales().get(0);
-
-        try {
-            DateTimeFormatter dateTimeFormatter =
-                    DateTimeFormatter.ofPattern(context.getString(dateFormat), locale);
-            return dateTimeFormatter.format(localDate);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     public static long daysRemaining(Instant endExclusive) {
@@ -71,12 +56,6 @@ public class TextUtil {
         }
     }
 
-    public static String getStringFromUTF8Bytes(byte[] data) {
-        if (data == null) {
-            return null;
-        }
-        return new String(data, StandardCharsets.UTF_8);
-    }
 
     @SuppressWarnings("squid:S2245")
     public static String generateRandomString(int length, String alphabet) {
@@ -89,20 +68,6 @@ public class TextUtil {
             builder.append(alphabet.charAt((int) (Math.random() * alphabet.length())));
         }
         return builder.toString();
-    }
-
-    public static int compare(String str1, String str2) {
-        if (str1 == null) {
-            if (str2 == null) {
-                return 0;
-            } else {
-                return -1;
-            }
-        } else if (str2 == null) {
-            return 1;
-        } else {
-            return str1.compareToIgnoreCase(str2);
-        }
     }
 
     

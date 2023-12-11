@@ -6,14 +6,10 @@ import android.widget.Toast
 import com.dashlane.R
 import com.dashlane.exception.NotLoggedInException
 import com.dashlane.network.inject.LegacyWebservicesApi
-import com.dashlane.session.BySessionRepository
+import com.dashlane.plans.SubscriptionCodeService
 import com.dashlane.session.SessionManager
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.Toaster
 import com.dashlane.util.launchUrl
-import com.google.gson.JsonObject
-import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -24,16 +20,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import retrofit2.Retrofit
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
 
 class SettingPrivacySetting(
     private val context: Context,
     @LegacyWebservicesApi private val retrofit: Retrofit,
     private val sessionManager: SessionManager,
-    private val toaster: Toaster,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
+    private val toaster: Toaster
 ) {
 
     private val subscriptionCodeService =
@@ -49,20 +41,12 @@ class SettingPrivacySetting(
     @OptIn(DelicateCoroutinesApi::class)
     fun open() {
         if (showPrivacyJob != null) return
-
-        bySessionUsageLogRepository[sessionManager.session]
-            ?.enqueue(
-                UsageLogCode35(
-                    type = "settings",
-                    action = "goToPrivacySettings"
-                )
-            )
-
         showPrivacyJob = GlobalScope.launch(Dispatchers.Main) {
             val subscriptionCode = try {
                 withTimeout(1_000L) {
                     
-                    deferredSubscriptionCodeResponse.await().subscriptionCode
+                    deferredSubscriptionCodeResponse.await()
+                        .content?.get("subscriptionCode")?.asString
                 }
             } catch (t: Throwable) {
                 null
@@ -89,28 +73,6 @@ class SettingPrivacySetting(
             }
         } ?: CompletableDeferred<SubscriptionCodeService.SubscriptionCodeResponse>(null).apply {
             completeExceptionally(NotLoggedInException())
-        }
-    }
-
-    interface SubscriptionCodeService {
-        @FormUrlEncoded
-        @POST("/3/premium/getSubscriptionCode")
-        suspend fun getSubscriptionCode(
-            @Field("login") login: String,
-            @Field("uki") uki: String
-        ): SubscriptionCodeResponse
-
-        class SubscriptionCodeResponse {
-            @SerializedName("code")
-            val code: Int = 0
-
-            @SerializedName("message")
-            val message: String? = null
-
-            @SerializedName("content")
-            val content: JsonObject? = null
-
-            val subscriptionCode: String? by lazy { content?.get("subscriptionCode")?.asString }
         }
     }
 }

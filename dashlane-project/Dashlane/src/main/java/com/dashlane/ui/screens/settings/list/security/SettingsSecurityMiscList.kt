@@ -2,6 +2,8 @@ package com.dashlane.ui.screens.settings.list.security
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.account.UserAccountInfo
+import com.dashlane.account.UserAccountStorage
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.masterpassword.ChangeMasterPasswordActivity
@@ -12,7 +14,6 @@ import com.dashlane.navigation.Navigator
 import com.dashlane.network.inject.LegacyWebservicesApi
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
@@ -24,10 +25,6 @@ import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
-import com.dashlane.util.ThreadHelper
 import com.dashlane.util.Toaster
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.inject.OptionalProvider
@@ -44,12 +41,11 @@ class SettingsSecurityMiscList(
     sessionManager: SessionManager,
     dialogHelper: DialogHelper,
     cryptographyRepository: UserCryptographyRepository,
-    threadHelper: ThreadHelper,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     masterPasswordFeatureAccessChecker: ChangeMasterPasswordFeatureAccessChecker,
     toaster: Toaster,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    userFeaturesChecker: UserFeaturesChecker
+    userFeaturesChecker: UserFeaturesChecker,
+    userAccountStorage: UserAccountStorage,
 ) {
 
     private val miscHeader =
@@ -61,7 +57,7 @@ class SettingsSecurityMiscList(
         override val title = context.getString(R.string.settings_security_flag_title)
         override val description = context.getString(R.string.settings_security_flag_description)
         override fun isEnable() = true
-        override fun isVisible() = true
+        override fun isVisible() = isAccountTypeMasterPassword()
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = screenshotPolicy.areScreenshotAllowed()
@@ -69,19 +65,14 @@ class SettingsSecurityMiscList(
         override fun onCheckChanged(context: Context, enable: Boolean) {
             sensibleSettingsClickHelper.perform(context = context, masterPasswordRecommended = enable) {
                 screenshotPolicy.setScreenshotAllowed(enable)
-                bySessionUsageLogRepository[sessionManager.session]
-                    ?.enqueue(
-                        UsageLogCode35(
-                            type = UsageLogConstant.ViewType.settings,
-                            action = if (enable) {
-                                UsageLogConstant.ActionType.windowsSecurityOff
-                            } else {
-                                UsageLogConstant.ActionType.windowsSecurityOn
-                            }
-                        )
-                    )
-                threadHelper.post { context.getBaseActivity()?.recreate() }
+                context.getBaseActivity()?.recreate()
             }
+        }
+
+        private fun isAccountTypeMasterPassword(): Boolean {
+            return sessionManager.session?.username
+                ?.let { username -> userAccountStorage[username]?.accountType }
+                .let { accountType -> accountType is UserAccountInfo.AccountType.MasterPassword }
         }
     }
 
@@ -129,18 +120,21 @@ class SettingsSecurityMiscList(
         private val readablePayload
             get() = when (
                 val marker =
-                sessionManager.session?.let { cryptographyRepository.getCryptographyMarker(it) }
+                    sessionManager.session?.let { cryptographyRepository.getCryptographyMarker(it) }
             ) {
                 CryptographyMarker.Kwc3 -> context.getString(R.string.settings_cryptography_description_compatibility)
                 is CryptographyMarker.Flexible -> {
                     when (marker.keyDerivation) {
                         is CryptographyMarker.Flexible.KeyDerivation.Argon2d ->
                             context.getString(R.string.settings_cryptography_description_argon2)
+
                         is CryptographyMarker.Flexible.KeyDerivation.Pbkdf2 ->
                             context.getString(R.string.settings_cryptography_description_pbkdf2)
+
                         else -> null
                     }
                 }
+
                 else -> null
             }
 
@@ -180,14 +174,6 @@ class SettingsSecurityMiscList(
         override fun isVisible(): Boolean = masterPasswordFeatureAccessChecker.canAccessFeature()
 
         override fun onClick(context: Context) {
-            bySessionUsageLogRepository[sessionManager.session]
-                ?.enqueue(
-                    UsageLogCode35(
-                        type = UsageLogConstant.ViewType.settings,
-                        action = "goToChangeMP"
-                    )
-                )
-
             if (userPreferencesManager.devicesCount > 1) {
                 context.startActivity(
                     ChangeMPWarningDesktopActivity.newIntent(
@@ -221,7 +207,7 @@ class SettingsSecurityMiscList(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) =
-            SettingPrivacySetting(context, retrofit, sessionManager, toaster, bySessionUsageLogRepository)
+            SettingPrivacySetting(context, retrofit, sessionManager, toaster)
                 .open()
     }
 

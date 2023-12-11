@@ -31,7 +31,7 @@ interface LockNavigationHelper {
     fun showLockActivityForAutofillApi(context: Context)
     suspend fun showLockActivityForFollowUpNotification(context: Context): UnlockEvent?
     fun showLockActivityForInAppLogin(context: Context, itemUID: String?)
-    fun showLockActivityToSetPinCode(context: Context, isReset: Boolean)
+    fun showLockActivityToSetPinCode(context: Context)
     fun showLockActivity(context: Context)
 
     fun logoutAndCallLoginScreenForInAppLogin(context: Context)

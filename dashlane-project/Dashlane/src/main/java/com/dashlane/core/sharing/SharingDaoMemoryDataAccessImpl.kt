@@ -1,5 +1,6 @@
 package com.dashlane.core.sharing
 
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.sharing.model.getUser
@@ -10,9 +11,12 @@ class SharingDaoMemoryDataAccessImpl : SharingDaoMemoryDataAccess {
     override lateinit var itemGroups: MutableList<ItemGroup>
     override lateinit var userGroups: MutableList<UserGroup>
     override lateinit var itemContentsDB: MutableList<ItemContentDB>
+    override lateinit var collections: MutableList<Collection>
 
     override val itemGroupsToDelete: MutableList<String> = mutableListOf()
     override val userGroupsToDelete: MutableList<String> = mutableListOf()
+    override val collectionsToDelete: MutableList<String> = mutableListOf()
+
     override val itemContentsDBToDelete: MutableList<String> = mutableListOf()
 
     override suspend fun init() = Unit
@@ -37,9 +41,38 @@ class SharingDaoMemoryDataAccessImpl : SharingDaoMemoryDataAccess {
         userGroupsToDelete.addAll(uidToDelete)
     }
 
+    override fun saveCollections(collections: List<Collection>) {
+        this.collections.addOrReplaceCollection(collections)
+    }
+
+    override fun deleteCollections(uidToDelete: List<String>) {
+        collections.removeAll { it.uuid in uidToDelete }
+        collectionsToDelete.addAll(uidToDelete)
+    }
+
     override fun loadUserGroupsAcceptedOrPending(userId: String): List<UserGroup> {
         return userGroups.filter {
             it.getUser(userId)?.isAcceptedOrPending == true
+        }
+    }
+
+    override fun loadCollectionsAcceptedOrPending(
+        userId: String,
+        myUserGroupsAcceptedOrPending: List<UserGroup>
+    ): List<Collection> {
+        return collections.filter { collection ->
+            if (collection.getUser(userId)?.isAcceptedOrPending == true) return@filter true
+            val userGroups = collection.userGroups ?: return@filter false
+            val ids =
+                userGroups.map { it.uuid } intersect myUserGroupsAcceptedOrPending.map { it.groupId }
+                    .toSet()
+            if (userGroups.find { userGroup ->
+                    userGroup.uuid in ids && userGroup.status.isAcceptedOrPending
+                } != null
+            ) {
+                return@filter true
+            }
+            false
         }
     }
 

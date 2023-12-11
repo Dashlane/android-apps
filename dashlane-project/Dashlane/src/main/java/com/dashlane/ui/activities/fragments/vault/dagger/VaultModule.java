@@ -3,7 +3,6 @@ package com.dashlane.ui.activities.fragments.vault.dagger;
 import com.dashlane.storage.DataStorageProvider;
 import com.dashlane.ui.activities.fragments.vault.Vault;
 import com.dashlane.ui.activities.fragments.vault.VaultDataProvider;
-import com.dashlane.ui.activities.fragments.vault.VaultLogger;
 import com.dashlane.ui.activities.fragments.vault.VaultPresenter;
 import com.dashlane.ui.activities.fragments.vault.VaultViewModel;
 import com.dashlane.ui.activities.fragments.vault.VaultViewModelFactory;
@@ -21,9 +20,6 @@ import dagger.hilt.android.components.FragmentComponent;
 public abstract class VaultModule {
     @Binds
     abstract Vault.DataProvider bindVaultDataProvider(VaultDataProvider dataProvider);
-
-    @Binds
-    abstract Vault.Logger bindVaultLogger(VaultLogger logger);
 
     @Binds
     abstract Vault.Presenter bindVaultPresenter(VaultPresenter presenter);

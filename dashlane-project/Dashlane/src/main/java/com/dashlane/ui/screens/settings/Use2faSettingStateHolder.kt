@@ -1,5 +1,7 @@
 package com.dashlane.ui.screens.settings
 
+import com.dashlane.account.UserAccountInfo
+import com.dashlane.account.UserAccountStorage
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.UserStorage
 import com.dashlane.network.tools.authorization
@@ -16,7 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 class Use2faSettingStateHolder @Inject constructor(
     private val sessionManager: SessionManager,
     private val userStorage: UserStorage,
-    private val auth2faSettingsService: Auth2faSettingsService
+    private val auth2faSettingsService: Auth2faSettingsService,
+    private val userAccountStorage: UserAccountStorage
 ) : Use2faSettingStateRefresher {
     private val _use2faSettingStateFlow: MutableStateFlow<Use2faSettingState> =
         MutableStateFlow(Use2faSettingState.Unavailable)
@@ -25,8 +28,13 @@ class Use2faSettingStateHolder @Inject constructor(
 
     override suspend fun refresh() {
         val session = sessionManager.session
-
         if (session == null) {
+            _use2faSettingStateFlow.value = Use2faSettingState.Unavailable
+            return
+        }
+
+        val accountType = userAccountStorage[session.username]?.accountType
+        if (accountType is UserAccountInfo.AccountType.InvisibleMasterPassword) {
             _use2faSettingStateFlow.value = Use2faSettingState.Unavailable
             return
         }
@@ -55,10 +63,12 @@ private fun Set<SecurityFeature>.toUse2faSettingState() = when {
         enabled = false,
         checked = true
     )
+
     SecurityFeature.EMAIL_TOKEN in this -> Use2faSettingState.Available(
         enabled = false,
         checked = false
     )
+
     else -> Use2faSettingState.Unavailable
 }
 
@@ -67,10 +77,12 @@ private fun AuthSecurityType.toUse2faSettingState() = when (this) {
         enabled = true,
         checked = false
     )
+
     AuthSecurityType.TOTP_LOGIN,
     AuthSecurityType.TOTP_DEVICE_REGISTRATION -> Use2faSettingState.Available(
         enabled = true,
         checked = true
     )
+
     AuthSecurityType.SSO -> Use2faSettingState.Unavailable
 }

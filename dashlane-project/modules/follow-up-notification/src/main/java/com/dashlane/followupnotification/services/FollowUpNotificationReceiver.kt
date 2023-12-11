@@ -6,7 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.dashlane.followupnotification.FollowUpNotificationComponent
+import com.dashlane.followupnotification.api.FollowUpNotificationApiProvider
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 object FollowUpNotificationReceiver {
     const val NOTIFICATION_REQUEST_CODE = 91
@@ -15,13 +17,17 @@ object FollowUpNotificationReceiver {
     const val NOTIFICATION_COPY_FIELD_INDEX_EXTRA = "notification_copy_field_index"
 }
 
+@AndroidEntryPoint
 class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var followUpNotificationApiProvider: FollowUpNotificationApiProvider
 
     override fun onReceive(context: Context, intent: Intent) {
         val followUpNotificationId =
             intent.getStringExtra(FollowUpNotificationReceiver.NOTIFICATION_FOLLOW_UP_NOTIFICATION_ID_EXTRA)
                 ?: return
-        val followUpNotificationApi = context.getFollowUpNotificationApi()
+        val followUpNotificationApi = followUpNotificationApiProvider.getFollowUpNotificationApi()
         followUpNotificationApi.dismissFollowUpNotifications(followUpNotificationId, false)
         return
     }
@@ -48,7 +54,11 @@ class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
     }
 }
 
+@AndroidEntryPoint
 class FollowUpNotificationCopyReceiver : AppCompatActivity() {
+
+    @Inject
+    lateinit var followUpNotificationApiProvider: FollowUpNotificationApiProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +68,7 @@ class FollowUpNotificationCopyReceiver : AppCompatActivity() {
             finish()
             return
         }
-        val followUpNotificationApi = applicationContext.getFollowUpNotificationApi()
+        val followUpNotificationApi = followUpNotificationApiProvider.getFollowUpNotificationApi()
         val copyFieldIndex =
             intent.getIntExtra(FollowUpNotificationReceiver.NOTIFICATION_COPY_FIELD_INDEX_EXTRA, -1)
         followUpNotificationApi.copyToClipboard(followUpNotificationId, copyFieldIndex)
@@ -93,7 +103,3 @@ class FollowUpNotificationCopyReceiver : AppCompatActivity() {
         }
     }
 }
-
-internal fun Context.getFollowUpNotificationApi() = FollowUpNotificationComponent(this)
-    .followUpNotificationApiProvider
-    .getFollowUpNotificationApi()

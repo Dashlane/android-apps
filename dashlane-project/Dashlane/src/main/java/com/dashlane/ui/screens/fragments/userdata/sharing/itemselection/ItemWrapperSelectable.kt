@@ -23,7 +23,7 @@ class ItemWrapperSelectable<D : SummaryObject>(itemWrapper: VaultItemWrapper<D>)
     override fun isItemTheSame(item: VaultItemWrapper<out SummaryObject>): Boolean = false
 
     override fun isContentTheSame(item: VaultItemWrapper<out SummaryObject>): Boolean {
-        return item.itemObject.id == itemObject.id
+        return item.summaryObject.id == summaryObject.id
     }
 
     override fun getListItemActions(): List<ListItemAction> = emptyList()

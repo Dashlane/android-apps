@@ -7,7 +7,6 @@ enum class ActionItemType(val trackingKey: String) {
     ZERO_PASSWORD("zero_password"),
     BREACH_ALERT("breach_alert"),
     SHARING("sharing_invitation"),
-    CHROME_IMPORT("chrome_import"),
     ACCOUNT_RECOVERY("account_recovery"),
     FREE_TRIAL_STARTED("free_trial_started"),
     TRIAL_UPGRADE_RECOMMENDATION("trial_upgrade_recommendation"),

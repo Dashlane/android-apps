@@ -33,6 +33,9 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -44,17 +47,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.tooling.DashlanePreview
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Suppress("kotlin:S3776", "LongMethod", "ComplexMethod") 
 @Composable
 fun OtpInput(
     modifier: Modifier = Modifier,
+    otp: String? = null, 
     isError: Boolean,
     error: String? = null,
     onOtpComplete: (String) -> Unit
 ) {
-    var otpChars by rememberSaveable { mutableStateOf(listOf("", "", "", "", "", "")) }
+    var otpChars by rememberSaveable(otp) { mutableStateOf(otp?.toList()?.map { it.toString() } ?: listOf("", "", "", "", "", "")) }
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
 
@@ -64,15 +69,17 @@ fun OtpInput(
 
     Column {
         LazyRow(
-            modifier = modifier
-                .fillMaxWidth(),
+            modifier = modifier.semantics {
+                testTagsAsResourceId = true
+            }.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             itemsIndexed(otpChars) { index, text ->
-                val textFieldModifier = if (index == 0) Modifier.focusRequester(focusRequester) else Modifier
+                val textFieldModifier = if (index == 0) modifier.focusRequester(focusRequester) else modifier
 
                 BasicTextField(
                     modifier = textFieldModifier
+                        .testTag("OTPInput$index")
                         .fillParentMaxWidth(1f.div(otpChars.size) - 0.03f) 
                         .onKeyEvent { event ->
                             
@@ -153,7 +160,7 @@ fun OtpInput(
 @Preview
 @Composable
 fun OtpInputPreview() {
-    DashlaneTheme(darkTheme = true) {
+    DashlanePreview {
         OtpInput(onOtpComplete = { }, isError = true, error = "Error")
     }
 }

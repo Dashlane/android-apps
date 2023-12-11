@@ -40,7 +40,7 @@
         android:gravity="center"
         android:text="@string/login_dashlane_authenticator_message_in_progress"
         android:textAppearance="?textAppearanceHeadline2"
-        android:textColor="@color/text_inverse_catchy"
+        android:textColor="@color/text_neutral_catchy"
         app:layout_constraintBottom_toTopOf="@+id/resend_request"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -74,15 +74,15 @@
     <string name="login_password_dialog_trouble_recovery_key_button">Use recovery key</string>
 
     
-    <string name="user_support_file_confirmation_description">These logs do not contain any of the encrypted data you store in your Dashlane account. They will be kept 14 days maximum on our servers and will then be deleted.</string>
+    <string name="user_support_file_confirmation_description">These logs are used for diagnostic purposes and do not contain your encrypted data. Dashlane deletes these logs after 14 days.</string>
     
-    <string name="user_support_file_upload_description">Uploading...</string>
+    <string name="user_support_file_upload_description">Uploading diagnostic file...</string>
     
-    <string name="user_support_file_finish_title">Done! Please share to Dashlane customer support team</string>
+    <string name="user_support_file_finish_title">Upload successful. To continue troubleshooting, please share this code with Customer Support:</string>
     
     <string name="user_support_file_copy">Copy</string>
     
-    <string name="user_support_file_fail_title">Failed! Please try again</string>
+    <string name="user_support_file_fail_title">We encountered an unexpected error. Please try again.</string>
     
     <string name="user_support_file_copied">Copied</string>
 
@@ -99,9 +99,7 @@
     
     <string name="login_secret_transfer_confirm_email_button_confirm">Confirm</string>
     
-    <string name="login_secret_transfer_totp_title">Enter the 6-digit token from your authenticator app</string>
-    
-    <string name="login_secret_transfer_totp_push_2fa_code_button">Use 2FA token</string>
+    <string name="login_secret_transfer_totp_push_2fa_code_button">Use 2FA token instead</string>
     
     <string name="login_secret_transfer_loading_login_title">Logging you in...</string>
     
@@ -120,4 +118,32 @@
     
     <string name="login_team_error">An error has occurred. Please reach out to your plan admin for more info.</string>
 
+    
+    <string name="login_totp_use_recovery_code">Can’t access your app?</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_title">Can’t access your app?</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_choice_description">Use a recovery code from when you first set up 2FA. We can also send you codes by text message.</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_choice_button_positive">Log in with recovery code</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_choice_button_negative">Receive a text message</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_description">Enter one of the 10 recovery codes that were generated when you set up 2FA.</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_button_positive">Next</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_button_negative">Cancel</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_hint">Enter a recovery code</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_error">Incorrect recovery code</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_description">We’ll send a text message with two recovery codes to the phone number associated with this account.</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_button_positive">Send</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_button_negative">Cancel</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_backup_description">Enter one of the recovery codes you received by text message.</string>
 </resources>

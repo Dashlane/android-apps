@@ -9,6 +9,9 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupInvite
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserInvite
+import com.dashlane.server.api.pattern.AliasFormat
+import com.dashlane.server.api.pattern.UserIdFormat
+import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
@@ -45,7 +48,7 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
     ): InviteItemGroupMembersService.Request {
         return withContext(defaultCoroutineDispatcher) {
             val groupCryptographyKey =
-                sharingCryptography.getGroupKey(itemGroup, login, myUserGroupsAcceptedOrPending)
+                sharingCryptography.getItemGroupKey(itemGroup, login, myUserGroupsAcceptedOrPending, emptyList())
                     ?: throw RequestBuilderException.InviteItemGroupMembersRequestException("Impossible to decrypt the group key")
 
             val usersToInvite = usersUpload.mapNotNull {
@@ -71,7 +74,7 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
                 throw RequestBuilderException.InviteItemGroupMembersRequestException("No users or groups to invite")
             }
             InviteItemGroupMembersService.Request(
-                groupId = InviteItemGroupMembersService.Request.GroupId(itemGroup.groupId),
+                groupId = UuidFormat(itemGroup.groupId),
                 revision = itemGroup.revision,
                 users = usersToInvite.takeUnless { it.isEmpty() },
                 groups = userGroupsToInvite.takeUnless { it.isEmpty() },
@@ -90,7 +93,7 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
         val groupKeyByteArray = groupCryptographyKey.toByteArray()
 
         val privateKey: SharingKeys.Private? =
-            sharingCryptography.getPrivateKey(it.userGroup, login)
+            sharingCryptography.getUserGroupPrivateKey(it.userGroup, login)
 
         val acceptSignatureGroup: String = sharingCryptography.generateAcceptationSignature(
             itemGroup.groupId,
@@ -104,7 +107,7 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
         ) ?: return null
 
         return UserGroupInvite(
-            groupId = UserGroupInvite.GroupId(userGroupId),
+            groupId = UuidFormat(userGroupId),
             permission = it.permission,
             proposeSignature = sharingCryptography.generateProposeSignature(
                 userGroupId,
@@ -123,8 +126,8 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
         val alias = userToInvite.alias
         return if (userToInvite.publicKey == null) {
             UserInvite(
-                userId = UserInvite.UserId(alias),
-                alias = UserInvite.Alias(alias),
+                userId = UserIdFormat(alias),
+                alias = AliasFormat(alias),
                 permission = userToInvite.permission,
                 proposeSignature = sharingCryptography.generateProposeSignature(alias, groupKey),
                 groupKey = null,
@@ -132,8 +135,8 @@ class InviteItemGroupMembersRequestBuilder @Inject constructor(
             )
         } else {
             UserInvite(
-                userId = UserInvite.UserId(userId),
-                alias = UserInvite.Alias(alias),
+                userId = UserIdFormat(userId),
+                alias = AliasFormat(alias),
                 permission = userToInvite.permission,
                 proposeSignature = sharingCryptography.generateProposeSignature(alias, groupKey),
                 groupKey = sharingCryptography.generateGroupKeyEncrypted(

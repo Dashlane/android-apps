@@ -23,7 +23,7 @@ class SharingNewSharePeopleFragment : AbstractContentFragment() {
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         val view: View = inflater.inflate(R.layout.fragment_sharing_message, container, false)
-        viewProxy = NewSharePeopleViewProxy(this, view, viewModel)
+        viewProxy = NewSharePeopleViewProxy(this, view, viewModel, lockManager)
         return view
     }
 
@@ -39,6 +39,11 @@ class SharingNewSharePeopleFragment : AbstractContentFragment() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewProxy.onDestroy()
     }
 
     companion object {

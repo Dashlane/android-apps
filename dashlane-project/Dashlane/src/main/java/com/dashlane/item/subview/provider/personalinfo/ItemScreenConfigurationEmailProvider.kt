@@ -11,14 +11,11 @@ import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
-import com.dashlane.session.BySessionRepository
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.EmailSuggestionProvider
-import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -28,17 +25,10 @@ import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationEmailProvider(
     private val teamspaceAccessor: TeamspaceAccessor,
-    dataCounter: DataCounter,
     private val emailSuggestionProvider: EmailSuggestionProvider,
-    sessionManager: SessionManager,
-    bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
-) : ItemScreenConfigurationProvider(
-    teamspaceAccessor,
-    dataCounter,
-    sessionManager,
-    bySessionUsageLogRepository
-) {
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
+    private val vaultItemCopy: VaultItemCopyService
+) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
@@ -138,7 +128,11 @@ class ItemScreenConfigurationEmailProvider(
         } else {
             ItemSubViewWithActionWrapper(
                 emailView,
-                CopyAction(item.toSummary(), CopyField.JustEmail)
+                CopyAction(
+                    summaryObject = item.toSummary(),
+                    copyField = CopyField.JustEmail,
+                    vaultItemCopy = vaultItemCopy
+                )
             )
         }
     }

@@ -31,7 +31,6 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.Executors
-import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -46,9 +45,6 @@ class BarCodeCaptureActivity : DashlaneActivity() {
     private var lensFacing = CameraSelector.LENS_FACING_BACK
     private var previewUseCase: Preview? = null
     private var analysisUseCase: ImageAnalysis? = null
-
-    @Inject
-    lateinit var permissionManager: PermissionsManager
 
     private val screenAspectRatio: Int
         get() {
@@ -91,10 +87,10 @@ class BarCodeCaptureActivity : DashlaneActivity() {
             .processCameraProvider
             .observe(this) { provider: ProcessCameraProvider? ->
                 cameraProvider = provider
-                if (permissionManager.isAllowed(Manifest.permission.CAMERA)) {
+                if (permissionsManager.isAllowed(Manifest.permission.CAMERA)) {
                     bindCameraUseCases()
                 } else {
-                    permissionManager.requestPermission(
+                    permissionsManager.requestPermission(
                         this,
                         PermissionsManager.PERMISSION_CAMERA,
                         object : PermissionsManager.OnPermissionResponseHandler {

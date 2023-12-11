@@ -27,6 +27,7 @@ class CreateAccountConfirmPasswordPresenter(
         passwordSuccessHolder.deferred?.let {
             createAccount(it)
         }
+        presenter.toggleMplessButtonVisibility(false)
     }
 
     override fun onNextClicked() {

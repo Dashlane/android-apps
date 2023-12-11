@@ -1,7 +1,7 @@
 package com.dashlane.autofill.core
 
-import com.dashlane.autofill.api.request.save.AutofillSaveRequestLogger
-import com.dashlane.autofill.api.util.DomainWrapper
+import com.dashlane.autofill.request.save.AutofillSaveRequestLogger
+import com.dashlane.autofill.util.DomainWrapper
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.AnyPage

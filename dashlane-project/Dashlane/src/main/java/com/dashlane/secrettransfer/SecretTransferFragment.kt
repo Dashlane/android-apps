@@ -12,40 +12,29 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,20 +47,17 @@ import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
-import com.dashlane.navigation.Navigator
+import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
-import com.dashlane.ui.widgets.compose.ButtonRow
+import com.dashlane.ui.widgets.compose.ContentStepper
+import com.dashlane.ui.widgets.compose.GenericErrorContent
 import com.dashlane.ui.widgets.compose.LoadingScreen
 import com.google.mlkit.vision.barcode.common.Barcode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class SecretTransferFragment : AbstractContentFragment() {
-
-    @Inject
-    lateinit var navigator: Navigator
 
     private val args: SecretTransferFragmentArgs by navArgs()
     private val viewModel by viewModels<SecretTransferViewModel>()
@@ -83,7 +69,8 @@ class SecretTransferFragment : AbstractContentFragment() {
                 DashlaneTheme {
                     SecretTransferScreen(
                         viewModel = viewModel,
-                        navigator = navigator,
+                        onCancel = { navigator.popBackStack() },
+                        onSuccess = { navigator.popBackStack() },
                         deepLinkTransferId = args.id,
                         deepLinkKey = args.key
                     )
@@ -96,7 +83,8 @@ class SecretTransferFragment : AbstractContentFragment() {
 @Composable
 fun SecretTransferScreen(
     viewModel: SecretTransferViewModel,
-    navigator: Navigator,
+    onCancel: () -> Unit,
+    onSuccess: () -> Unit,
     deepLinkTransferId: String?,
     deepLinkKey: String?
 ) {
@@ -110,12 +98,12 @@ fun SecretTransferScreen(
     LaunchedEffect(key1 = uiState) {
         when (uiState) {
             SecretTransferState.Initial -> Unit
-            SecretTransferState.Cancelled -> navigator.popBackStack()
+            SecretTransferState.Cancelled -> onCancel()
             is SecretTransferState.Error -> Unit
             SecretTransferState.ScanningQR -> scanQrCode.launch(null)
             SecretTransferState.Success -> {
                 delay(2_000) 
-                navigator.popBackStack()
+                onSuccess()
             }
 
             SecretTransferState.Loading -> Unit
@@ -138,10 +126,20 @@ fun SecretTransferContent(
     onClickRetry: () -> Unit,
     uiState: SecretTransferState,
 ) {
-    Crossfade(targetState = uiState) { state ->
+    Crossfade(targetState = uiState, label = "secretTransferCrossfade") { state ->
         when (state) {
             SecretTransferState.Cancelled -> Unit
-            is SecretTransferState.Error -> SecretTransferError(modifier = Modifier, onClickCancel = onClickCancel, onClickRetry = onClickRetry)
+            is SecretTransferState.Error -> {
+                GenericErrorContent(
+                    modifier = modifier,
+                    title = stringResource(id = R.string.secret_transfer_screen_error_title),
+                    message = stringResource(id = R.string.secret_transfer_screen_error_message),
+                    textPrimary = stringResource(id = R.string.secret_transfer_screen_error_retry_button),
+                    textSecondary = stringResource(id = R.string.secret_transfer_screen_error_cancel_button),
+                    onClickPrimary = onClickRetry,
+                    onClickSecondary = onClickCancel
+                )
+            }
             SecretTransferState.ScanningQR,
             SecretTransferState.Initial -> SecretTransferIntro(modifier = modifier, onClickScan = onClickScan)
 
@@ -232,130 +230,16 @@ fun SecretTransferSuccess(
     }
 }
 
-@Composable
-fun SecretTransferError(
-    modifier: Modifier = Modifier,
-    onClickRetry: () -> Unit,
-    onClickCancel: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            Image(
-                modifier = modifier.padding(top = 120.dp),
-                painter = painterResource(R.drawable.ic_error_state),
-                colorFilter = ColorFilter.tint(DashlaneTheme.colors.textDangerQuiet.value),
-                contentDescription = ""
-            )
-            Text(
-                text = stringResource(id = R.string.secret_transfer_screen_error_title),
-                style = DashlaneTheme.typography.titleSectionLarge,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-                modifier = Modifier.padding(top = 32.dp)
-            )
-            Text(
-                text = stringResource(id = R.string.secret_transfer_screen_error_message),
-                style = DashlaneTheme.typography.bodyStandardRegular,
-                color = DashlaneTheme.colors.textNeutralStandard,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-        }
-
-        ButtonRow(
-            textPrimary = stringResource(id = R.string.secret_transfer_screen_error_retry_button),
-            textSecondary = stringResource(id = R.string.secret_transfer_screen_error_cancel_button),
-            onClickPrimary = onClickRetry,
-            onClickSecondary = onClickCancel
-        )
-    }
-}
-
-@Composable
-fun ContentStepper(
-    modifier: Modifier = Modifier,
-    content: List<AnnotatedString>
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                DashlaneTheme.colors.containerAgnosticNeutralSupershy,
-                RoundedCornerShape(10.dp)
-            )
-            .padding(24.dp)
-    ) {
-        content.forEachIndexed { index, string ->
-            val step = index + 1
-            val bottomPadding = if (step == content.size) 0.dp else 16.dp
-            Row(modifier = Modifier.padding(bottom = bottomPadding)) {
-                ContentStepCircle(
-                    text = step.toString(),
-                    modifier = Modifier.align(CenterVertically)
-                )
-                Text(
-                    text = string,
-                    style = DashlaneTheme.typography.bodyStandardRegular,
-                    color = DashlaneTheme.colors.textNeutralCatchy,
-                    modifier = Modifier
-                        .align(CenterVertically)
-                        .padding(start = 12.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ContentStepCircle(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(ContentStepCircleSize)
-            .background(DashlaneTheme.colors.containerExpressiveBrandQuietIdle, CircleShape)
-            .padding(4.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            modifier = Modifier
-                .width(ContentStepCircleSize)
-                .heightIn(max = ContentStepCircleSize),
-            text = text,
-            style = DashlaneTheme.typography.bodyStandardRegular,
-            color = DashlaneTheme.colors.textBrandStandard,
-            textAlign = TextAlign.Center,
-            overflow = TextOverflow.Visible
-        )
-    }
-}
-
-private val ContentStepCircleSize = 32.dp
-
 @Preview
 @Composable
 fun SecretTransferIntroPreview() {
-    DashlaneTheme { SecretTransferIntro(onClickScan = { }) }
-}
-
-@Preview
-@Composable
-fun SecretTransferErrorPreview() {
-    DashlaneTheme { SecretTransferError(onClickRetry = {}, onClickCancel = {}) }
+    DashlanePreview { SecretTransferIntro(onClickScan = { }) }
 }
 
 @Preview
 @Composable
 fun SecretTransferSuccessPreview() {
-    DashlaneTheme { SecretTransferSuccess() }
+    DashlanePreview { SecretTransferSuccess() }
 }
 
 private object ScanQrCode : ActivityResultContract<Unit?, String?>() {

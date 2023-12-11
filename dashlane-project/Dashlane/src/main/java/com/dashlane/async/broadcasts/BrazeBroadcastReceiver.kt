@@ -8,13 +8,17 @@ import android.net.Uri
 import androidx.core.app.TaskStackBuilder
 import com.braze.Constants.BRAZE_PUSH_DEEP_LINK_KEY
 import com.braze.Constants.BRAZE_PUSH_INTENT_NOTIFICATION_OPENED
-import com.dashlane.dagger.singleton.SingletonProvider
-import com.dashlane.ui.premium.inappbilling.UsageLogCode35GoPremium.isDeepLinkToPremium
-import com.dashlane.ui.premium.inappbilling.UsageLogCode35GoPremium.send
-import com.dashlane.useractivity.log.usage.UsageLogConstant
+import com.dashlane.braze.BrazeWrapper
 import com.dashlane.util.isSemanticallyNull
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class BrazeBroadcastReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var brazeWrapper: BrazeWrapper
+
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
         val packageName = context.packageName
@@ -24,7 +28,7 @@ class BrazeBroadcastReceiver : BroadcastReceiver() {
         if (action.endsWith(BRAZE_PUSH_INTENT_NOTIFICATION_OPENED)) {
             onNotificationOpened(context, intent)
         }
-        SingletonProvider.getBrazeWrapper().requestImmediateDataFlush()
+        brazeWrapper.requestImmediateDataFlush()
     }
 
     private fun onNotificationOpened(context: Context, intent: Intent) {
@@ -32,7 +36,6 @@ class BrazeBroadcastReceiver : BroadcastReceiver() {
         if (deepLink.isSemanticallyNull()) {
             return
         }
-        trackGoPremiumIfNeed(deepLink)
         val uriIntent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink))
         uriIntent.flags = (
             Intent.FLAG_ACTIVITY_NEW_TASK
@@ -44,12 +47,6 @@ class BrazeBroadcastReceiver : BroadcastReceiver() {
         try {
             stackBuilder.startActivities()
         } catch (e: ActivityNotFoundException) {
-        }
-    }
-
-    private fun trackGoPremiumIfNeed(deepLink: String?) {
-        if (isDeepLinkToPremium(deepLink)) {
-            send(UsageLogConstant.PremiumAction.goPremiumFromAppBoyNotification)
         }
     }
 

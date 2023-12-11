@@ -2,7 +2,11 @@ package com.dashlane.ui.activities.fragments.list.wrapper
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import com.dashlane.dagger.singleton.SingletonProvider
+import com.dashlane.item.subview.quickaction.QuickActionProvider
+import com.dashlane.navigation.Navigator
+import com.dashlane.session.SessionManager
+import com.dashlane.session.repository.TeamspaceManagerRepository
+import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.activities.fragments.list.action.CopyItemFieldListItemAction
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
@@ -12,42 +16,47 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.util.ViewTypeUtils
+import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityUtil
-import com.dashlane.vault.util.attachmentsAllowed
 import com.dashlane.vault.util.hasAttachments
 import com.dashlane.vault.util.valueOfFromDataIdentifier
 import com.dashlane.xml.domain.SyncObjectType
 
-open class DefaultVaultItemWrapper<D : SummaryObject> constructor(
-    override val itemObject: D,
-    override val itemListContext: ItemListContext
+open class DefaultVaultItemWrapper<D : SummaryObject>(
+    override val vaultItemCopyService: VaultItemCopyService,
+    override val quickActionProvider: QuickActionProvider,
+    override val summaryObject: D,
+    override val itemListContext: ItemListContext,
+    override val navigator: Navigator,
+    private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
+    private val sessionManager: SessionManager,
+    private val teamspaceRepository: TeamspaceManagerRepository,
 ) : VaultItemWrapper<D> {
-    private var overrideViewType: DashlaneRecyclerAdapter.ViewType<VaultItemWrapper<out SummaryObject>>? = null
-    private val dataIdentifierListTextResolver =
-        DataIdentifierListTextResolver(IdentityUtil(SingletonProvider.getMainDataAccessor()))
-    private val userFeaturesChecker = SingletonProvider.getUserFeatureChecker()
+    override val teamspaceManager: TeamspaceManager?
+        get() = sessionManager.session?.let { teamspaceRepository.getTeamspaceManager(it) }
+
     override var allowTeamspaceIcon: Boolean = false
+    private var overrideViewType: DashlaneRecyclerAdapter.ViewType<VaultItemWrapper<out SummaryObject>>? = null
 
     override val dataType: SyncObjectType?
-        get() = itemObject.valueOfFromDataIdentifier()
+        get() = summaryObject.valueOfFromDataIdentifier()
 
     override val isAttachmentIconNeeded: Boolean
-        get() = itemObject.attachmentsAllowed(userFeaturesChecker) && itemObject.hasAttachments()
+        get() = summaryObject.hasAttachments()
 
     override fun getTitle(context: Context): StatusText =
-        dataIdentifierListTextResolver.getLine1(context, itemObject)
+        dataIdentifierListTextResolver.getLine1(context, summaryObject)
 
     override fun getDescription(context: Context): StatusText =
-        dataIdentifierListTextResolver.getLine2(context, itemObject)
+        dataIdentifierListTextResolver.getLine2(context, summaryObject)
 
     override fun getImageDrawable(context: Context): Drawable? =
-        VaultItemImageHelper.getIconDrawableFromSummaryObject(context, itemObject)
+        VaultItemImageHelper.getIconDrawableFromSummaryObject(context, summaryObject)
 
     override fun getListItemActions(): List<ListItemAction> {
         return listOfNotNull(
-            CopyItemFieldListItemAction(itemObject, itemListContext),
-            QuickActionsItemAction(itemObject, itemListContext)
+            CopyItemFieldListItemAction(summaryObject, itemListContext, vaultItemCopyService),
+            QuickActionsItemAction(quickActionProvider, summaryObject, itemListContext, navigator)
         )
     }
 
@@ -62,7 +71,7 @@ open class DefaultVaultItemWrapper<D : SummaryObject> constructor(
     }
 
     override fun isItemTheSame(item: VaultItemWrapper<out SummaryObject>): Boolean {
-        return item.itemObject.id == itemObject.id
+        return item.summaryObject.id == summaryObject.id
     }
 
     override fun isContentTheSame(item: VaultItemWrapper<out SummaryObject>): Boolean = false

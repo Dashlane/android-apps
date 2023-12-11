@@ -1,250 +1,315 @@
 package com.dashlane.sharing.util
 
-import androidx.annotation.VisibleForTesting
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.SharingKeys
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
+import com.dashlane.server.api.endpoints.sharinguserdevice.CollectionDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
-import com.dashlane.server.api.endpoints.sharinguserdevice.RsaStatus
 import com.dashlane.server.api.endpoints.sharinguserdevice.Status
-import com.dashlane.server.api.endpoints.sharinguserdevice.UserDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
-import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupMember
+import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupCollectionDownload
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAcceptedOrPending
 
 class GroupVerification(
+    private val currentUserId: String,
     private val sharingCryptography: SharingCryptographyHelper,
-    private val currentUserId: String
+    private val proposeSignatureVerification: ProposeSignatureVerification
 ) {
-    fun isValid(group: UserGroup): Boolean {
-        if (group.revision < 1) {
+
+    fun isValid(userGroup: UserGroup): Boolean {
+        if (userGroup.revision < 1) {
             return false
         }
-        val groupId = group.groupId
-        val userDownloads = group.users
+        val userDownloads = userGroup.users
         val decryptGroupKey: CryptographyKey.Raw32? = try {
-            getDecryptGroupKeyAsIndividual(userDownloads, groupId)
-        } catch (ex: KeyNotFoundException) {
+            userGroup.decryptUserGroupKey()
+        } catch (ex: Exception) {
             return false 
         }
         return if (decryptGroupKey == null) {
             
             true
         } else {
-            verifyProposeSignature(userDownloads, decryptGroupKey.toByteArray())
+            proposeSignatureVerification.verifyProposeSignature(userDownloads, decryptGroupKey)
         }
     }
 
-    
-    
-    fun isValid(group: ItemGroup, myUserGroups: List<UserGroup>): Boolean {
-        if (group.revision < 1) {
-            return false
-        }
-        val groupId = group.groupId
-        val userDownloads = group.users
-        val groupMembers = group.groups
-        val decryptGroupKey: CryptographyKey.Raw32? = try {
-            getDecryptGroupKey(userDownloads, groupMembers, myUserGroups, groupId)
-        } catch (ex: KeyNotFoundException) {
-            return false 
-        }
-        return if (decryptGroupKey == null) {
-            
-            true
-        } else {
-            verifyProposeSignature(userDownloads, decryptGroupKey.toByteArray()) &&
-                verifyProposeSignatureUserGroup(groupMembers, decryptGroupKey.toByteArray())
-        }
-    }
-
-    @Throws(KeyNotFoundException::class)
-    private fun getDecryptGroupKey(
-        userDownloads: List<UserDownload>?,
-        groupMembers: List<UserGroupMember>?,
+    fun isValid(
+        itemGroup: ItemGroup,
         myUserGroups: List<UserGroup>,
-        groupId: String
+        myCollections: List<Collection>
+    ): Boolean {
+        if (itemGroup.revision < 1) {
+            return false
+        }
+        val userDownloads = itemGroup.users
+        val groupMembers = itemGroup.groups
+        val collection = itemGroup.collections
+        val decryptGroupKey: CryptographyKey.Raw32? = try {
+            itemGroup.decryptItemGroupKey(myUserGroups, myCollections)
+        } catch (ex: Exception) {
+            return false 
+        }
+        return if (decryptGroupKey == null) {
+            
+            true
+        } else {
+            proposeSignatureVerification.verifyProposeSignature(userDownloads, decryptGroupKey) &&
+                proposeSignatureVerification.verifyProposeSignatureUserGroup(
+                    groupMembers,
+                    decryptGroupKey
+                ) &&
+                proposeSignatureVerification.verifyProposeSignatureCollection(
+                    collection,
+                    decryptGroupKey
+                )
+        }
+    }
+
+    fun isValid(collection: Collection, myUserGroups: List<UserGroup>): Boolean {
+        if (collection.revision < 1) {
+            return false
+        }
+        val users = collection.users
+        val userGroups = collection.userGroups
+        val decryptCollectionKey: CryptographyKey.Raw32? = try {
+            collection.decryptCollectionKey(myUserGroups)
+        } catch (ex: Exception) {
+            return false 
+        }
+        return if (decryptCollectionKey == null) {
+            
+            true
+        } else {
+            proposeSignatureVerification.verifyProposeSignatureUserCollection(
+                users,
+                decryptCollectionKey
+            ) &&
+                proposeSignatureVerification.verifyProposeSignatureUserGroupCollection(
+                    userGroups,
+                    decryptCollectionKey
+                )
+        }
+    }
+
+    private fun Collection.decryptCollectionKey(
+        myUserGroups: List<UserGroup>
     ): CryptographyKey.Raw32? {
-        val decryptGroupKeyAsIndividual = getDecryptGroupKeyAsIndividual(userDownloads, groupId)
+        val decryptCollectionKeyAsIndividual =
+            decryptCollectionKeyAsIndividual()
+        val decryptCollectionKeyAsUserGroup: CryptographyKey.Raw32? =
+            decryptCollectionKeyAsUserGroup(myUserGroups)
+        return decryptCollectionKeyAsIndividual ?: decryptCollectionKeyAsUserGroup
+    }
+
+    private fun UserGroup.decryptUserGroupKey(): CryptographyKey.Raw32? {
+        val userDownload = getUser(currentUserId) ?: return null
+        val userGroupKey =
+            sharingCryptography.getUserGroupKey(this, currentUserId)
+                ?: throw KeyNotFoundException.KeyNotFoundUserGroupException.KeyNotFoundUserException()
+        return if (!verifyAcceptSignature(
+                status = userDownload.status,
+                acceptSignatureEncrypted = userDownload.acceptSignature,
+                groupId = groupId,
+                groupKey = userGroupKey.toByteArray(),
+                publicKey = null
+            )
+        ) {
+            throw KeyNotVerifiedException.KeyNotVerifiedUserGroupException.KeyNotVerifiedUserException()
+        } else {
+            userGroupKey
+        }
+    }
+
+    private fun ItemGroup.decryptItemGroupKey(
+        myUserGroups: List<UserGroup>,
+        myCollections: List<Collection>
+    ): CryptographyKey.Raw32? {
+        val decryptGroupKeyAsIndividual: CryptographyKey.Raw32? =
+            decryptItemGroupKeyAsIndividual()
         val decryptGroupKeyAsUserGroup: CryptographyKey.Raw32? =
-            groupMembers?.let { getDecryptKeyFromGroup(it, myUserGroups, groupId) }
-        return decryptGroupKeyAsUserGroup ?: decryptGroupKeyAsIndividual
+            decryptItemGroupKeyFromUserGroup(myUserGroups)
+        val decryptGroupKeyAsCollection: CryptographyKey.Raw32? =
+            decryptItemGroupKeyFromCollection(myUserGroups, myCollections)
+        return decryptGroupKeyAsUserGroup
+            ?: decryptGroupKeyAsIndividual
+            ?: decryptGroupKeyAsCollection
     }
 
-    private fun getDecryptGroupKeyAsIndividual(
-        userDownloads: List<UserDownload>?,
-        groupId: String
+    private fun ItemGroup.decryptItemGroupKeyAsIndividual(): CryptographyKey.Raw32? {
+        val userDownload = users?.find { it.userId == currentUserId } ?: return null
+        val itemGroupKey =
+            sharingCryptography.getItemGroupKeyFromUser(this, currentUserId)
+                ?: throw KeyNotFoundException.KeyNotFoundItemGroupException.KeyNotFoundUserException()
+        return if (!verifyAcceptSignature(
+                status = userDownload.status,
+                acceptSignatureEncrypted = userDownload.acceptSignature,
+                groupId = groupId,
+                groupKey = itemGroupKey.toByteArray(),
+                publicKey = null
+            )
+        ) {
+            throw KeyNotVerifiedException.KeyNotVerifiedItemGroupException.KeyNotVerifiedUserException()
+        } else {
+            itemGroupKey
+        }
+    }
+
+    private fun Collection.decryptCollectionKeyAsIndividual(): CryptographyKey.Raw32? {
+        val userCollectionDownload = users?.find { it.login == currentUserId } ?: return null
+        val collectionKey = sharingCryptography.getCollectionKeyFromUser(this, currentUserId)
+            ?: throw KeyNotFoundException.KeyNotFoundCollectionException.KeyNotFoundUserException()
+        return if (!verifyAcceptSignature(
+                status = userCollectionDownload.status,
+                acceptSignatureEncrypted = userCollectionDownload.acceptSignature,
+                groupId = uuid,
+                groupKey = collectionKey.toByteArray(),
+                publicKey = null
+            )
+        ) {
+            throw KeyNotVerifiedException.KeyNotVerifiedCollectionException.KeyNotVerifiedUserException()
+        } else {
+            collectionKey
+        }
+    }
+
+    private fun Collection.decryptCollectionKeyAsUserGroup(
+        myUserGroups: List<UserGroup>
     ): CryptographyKey.Raw32? {
-        return userDownloads?.let { getDecryptKeyFromUsers(it, groupId) }
+        userGroups?.intersectUserGroupCollectionDownload(myUserGroups)
+            ?.forEach { userGroupCollectionDownload ->
+                val myUserGroup =
+                    myUserGroups.find { userGroup -> userGroup.groupId == userGroupCollectionDownload.uuid }
+                        ?: return@forEach
+                val meInUserGroup = myUserGroup.getUser(currentUserId) ?: return@forEach
+                if (
+                    userGroupCollectionDownload.status.isAcceptedOrPending &&
+                    meInUserGroup.isAccepted
+                ) {
+                    val collectionKey = sharingCryptography.getCollectionKeyFromUserGroup(
+                        this,
+                        myUserGroups,
+                        currentUserId
+                    )
+                        ?: throw KeyNotFoundException.KeyNotFoundCollectionException.KeyNotFoundUserGroupException()
+
+                    if (!verifyAcceptSignature(
+                            status = userGroupCollectionDownload.status,
+                            acceptSignatureEncrypted = userGroupCollectionDownload.acceptSignature,
+                            groupId = uuid,
+                            groupKey = collectionKey.toByteArray(),
+                            publicKey = SharingKeys.Public(myUserGroup.publicKey)
+                        )
+                    ) {
+                        throw KeyNotVerifiedException.KeyNotVerifiedCollectionException.KeyNotVerifiedUserGroupException()
+                    } else {
+                        return collectionKey
+                    }
+                }
+            }
+        return null
     }
 
-    @Throws(KeyNotFoundException::class)
-    private fun getDecryptKeyFromGroup(
-        groupMembers: List<UserGroupMember>,
+    private fun ItemGroup.decryptItemGroupKeyFromCollection(
         myUserGroups: List<UserGroup>,
-        groupId: String
+        myCollections: List<Collection>
     ): CryptographyKey.Raw32? {
-        groupMembers.forEach { userGroupMember ->
+        collections?.intersectCollectionDownload(myCollections)
+            ?.forEach { collectionDownload ->
+                val myCollection = myCollections.find { collection ->
+                    collectionDownload.uuid == collection.uuid
+                } ?: return@forEach
+                val meInCollection = myCollection.getUser(currentUserId) ?: return@forEach
+                if (
+                    collectionDownload.status.isAcceptedOrPending &&
+                    meInCollection.isAccepted
+                ) {
+                    val itemGroupKey = sharingCryptography.getItemGroupKeyFromCollection(
+                        this,
+                        myCollection,
+                        myUserGroups,
+                        currentUserId
+                    )
+                        ?: throw KeyNotFoundException.KeyNotFoundItemGroupException.KeyNotFoundCollectionException()
+                    if (!verifyAcceptSignature(
+                            status = collectionDownload.status,
+                            acceptSignatureEncrypted = collectionDownload.acceptSignature,
+                            groupId = groupId,
+                            groupKey = itemGroupKey.toByteArray(),
+                            publicKey = SharingKeys.Public(myCollection.publicKey)
+                        )
+                    ) {
+                        throw KeyNotVerifiedException.KeyNotVerifiedItemGroupException.KeyNotVerifiedCollectionException()
+                    } else {
+                        return itemGroupKey
+                    }
+                }
+            }
+        return null
+    }
+
+    private fun ItemGroup.decryptItemGroupKeyFromUserGroup(
+        myUserGroups: List<UserGroup>
+    ): CryptographyKey.Raw32? {
+        groups?.forEach { userGroupMember ->
             val myUserGroup = myUserGroups.find { userGroup ->
                 userGroup.groupId == userGroupMember.groupId
             } ?: return@forEach
-            val meInUserGroup = myUserGroup.getUser(currentUserId)
+            val meInUserGroup = myUserGroup.getUser(currentUserId) ?: return@forEach
+
             if (
                 userGroupMember.isAcceptedOrPending &&
-                meInUserGroup?.isAccepted == true
+                meInUserGroup.isAccepted
             ) {
-                return getGroupKey(userGroupMember, myUserGroup, groupId)
-                    ?: throw KeyNotFoundException() 
+                val itemGroupKey = sharingCryptography.getItemGroupKeyFromUserGroup(
+                    this,
+                    myUserGroup,
+                    currentUserId
+                )
+                    ?: throw KeyNotFoundException.KeyNotFoundItemGroupException.KeyNotFoundUserGroupException()
+                if (!verifyAcceptSignature(
+                        status = userGroupMember.status,
+                        acceptSignatureEncrypted = userGroupMember.acceptSignature,
+                        groupId = groupId,
+                        groupKey = itemGroupKey.toByteArray(),
+                        publicKey = SharingKeys.Public(myUserGroup.publicKey)
+                    )
+                ) {
+                    throw KeyNotVerifiedException.KeyNotVerifiedItemGroupException.KeyNotVerifiedUserGroupException()
+                } else {
+                    return itemGroupKey
+                }
             }
         }
         return null
     }
 
-    @Throws(KeyNotFoundException::class)
-    private fun getDecryptKeyFromUsers(
-        userDownloads: List<UserDownload>,
-        groupId: String
-    ): CryptographyKey.Raw32? {
-        return userDownloads.find { it.userId == currentUserId }?.let {
-            getGroupKey(it, groupId)
-                ?: throw KeyNotFoundException() 
-        }
-    }
-
-    private fun getGroupKey(userDownload: UserDownload, groupId: String): CryptographyKey.Raw32? {
-        val encryptedGroupKey = userDownload.groupKey ?: return null
-        val groupKey = sharingCryptography.decryptGroupKey(encryptedGroupKey) ?: return null
-        
-        return if (!verifyAcceptSignature(userDownload, groupId, groupKey.toByteArray())) {
-            null 
-        } else {
-            groupKey
-        }
-    }
-
-    private fun getGroupKey(
-        userGroupMember: UserGroupMember,
-        myUserGroup: UserGroup,
-        itemGroupId: String
-    ): CryptographyKey.Raw32? {
-        val groupKey = userGroupMember.groupKey ?: return null
-        val privateKey: SharingKeys.Private? =
-            sharingCryptography.getPrivateKey(myUserGroup, currentUserId)
-        val decryptGroupKeyFromUserGroup =
-            sharingCryptography.decryptGroupKey(groupKey, privateKey) ?: return null
-        
-        val publicKeyString = myUserGroup.publicKey
-        val publicKey = SharingKeys.Public(publicKeyString)
-        return if (!verifyAcceptSignature(
-                userGroupMember,
-                itemGroupId,
-                decryptGroupKeyFromUserGroup.toByteArray(),
-                publicKey
+    private fun verifyAcceptSignature(
+        status: Status?,
+        acceptSignatureEncrypted: String?,
+        groupId: String,
+        groupKey: ByteArray,
+        publicKey: SharingKeys.Public?
+    ): Boolean {
+        return (
+            Status.ACCEPTED != status ||
+                sharingCryptography.verifyAcceptationSignature(
+                    acceptSignatureEncrypted = acceptSignatureEncrypted,
+                    groupId = groupId,
+                    groupKey = groupKey,
+                    publicKey = publicKey
+                )
             )
-        ) {
-            null 
-        } else {
-            decryptGroupKeyFromUserGroup
-        }
     }
 
-    private fun verifyAcceptSignature(
-        member: UserDownload,
-        groupId: String,
-        groupKey: ByteArray
-    ): Boolean {
-        return (
-            Status.ACCEPTED != member.status ||
-                sharingCryptography.verifyAcceptationSignature(
-                    member.acceptSignature,
-                    groupId,
-                    groupKey,
-                    null
-                )
-        )
+    private fun List<CollectionDownload>.intersectCollectionDownload(collection: List<Collection>): List<CollectionDownload> {
+        val ids = this.map { it.uuid } intersect collection.map { it.uuid }.toSet()
+        return this.filter { it.uuid in ids }
     }
-
-    private fun verifyAcceptSignature(
-        member: UserGroupMember,
-        groupId: String,
-        groupKey: ByteArray,
-        publicKey: SharingKeys.Public
-    ): Boolean {
-        return (
-            Status.ACCEPTED != member.status ||
-                sharingCryptography.verifyAcceptationSignature(
-                    member.acceptSignature,
-                    groupId,
-                    groupKey,
-                    publicKey
-                )
-        )
-    }
-
-    @VisibleForTesting
-    fun verifyProposeSignature(members: List<UserDownload>?, groupKey: ByteArray): Boolean {
-        if (members == null) {
-            
-            return true
-        }
-        return members.find { isMemberProposeSignatureIsInvalid(groupKey, it) } == null
-    }
-
-    @VisibleForTesting
-    fun verifyProposeSignatureUserGroup(
-        members: List<UserGroupMember>?,
-        groupKey: ByteArray
-    ): Boolean {
-        if (members == null) {
-            
-            return true
-        }
-        return members.find { isMemberProposeSignatureIsInvalid(groupKey, it) } == null
-    }
-
-    private fun isMemberProposeSignatureIsInvalid(
-        groupKey: ByteArray,
-        member: UserDownload
-    ): Boolean {
-        val memberId = member.userId
-        val alias = member.alias
-        if (!member.isAcceptedOrPending) {
-            return false
-        }
-        
-        
-        
-        val userIdOrAlias = if (shouldVerifySignatureUsingAlias(member)) {
-            alias
-        } else {
-            memberId
-        }
-        return !sharingCryptography.verifyProposeSignature(
-            member.proposeSignature!!,
-            userIdOrAlias,
-            groupKey
-        )
-    }
-
-    private fun isMemberProposeSignatureIsInvalid(
-        groupKey: ByteArray,
-        member: UserGroupMember
-    ): Boolean {
-        if (!member.isAcceptedOrPending) {
-            return false
-        }
-        return !sharingCryptography.verifyProposeSignature(
-            member.proposeSignature!!,
-            member.groupId,
-            groupKey
-        )
-    }
-
-    private fun shouldVerifySignatureUsingAlias(member: UserDownload): Boolean {
-        return member.proposeSignatureUsingAlias == true &&
-                (member.rsaStatus == RsaStatus.NOKEY || member.rsaStatus == RsaStatus.PUBLICKEY)
-    }
-
-    private class KeyNotFoundException : Exception()
+}
+fun List<UserGroupCollectionDownload>.intersectUserGroupCollectionDownload(userGroup: List<UserGroup>): List<UserGroupCollectionDownload> {
+    val ids = this.map { it.uuid } intersect userGroup.map { it.groupId }.toSet()
+    return this.filter { it.uuid in ids }
 }

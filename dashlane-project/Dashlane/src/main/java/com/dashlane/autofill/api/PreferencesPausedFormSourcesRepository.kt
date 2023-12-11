@@ -1,7 +1,7 @@
 package com.dashlane.autofill.api
 
 import androidx.annotation.VisibleForTesting
-import com.dashlane.autofill.api.pause.services.PausedFormSourcesRepository
+import com.dashlane.autofill.pause.services.PausedFormSourcesRepository
 import com.dashlane.preference.ConstantsPrefs.Companion.PAUSED_APP_SOURCES_LIST
 import com.dashlane.preference.ConstantsPrefs.Companion.PAUSED_WEB_SOURCES_LIST
 import com.dashlane.preference.GlobalPreferencesManager

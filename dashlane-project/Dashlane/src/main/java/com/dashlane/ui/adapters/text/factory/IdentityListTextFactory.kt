@@ -6,6 +6,7 @@ import com.dashlane.search.SearchField
 import com.dashlane.search.fields.IdentityField
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.util.isNotSemanticallyNull
+import com.dashlane.util.toIdentityFormat
 import com.dashlane.vault.model.identityPartialOrFullNameNoLogin
 import com.dashlane.vault.summary.SummaryObject
 
@@ -21,7 +22,7 @@ class IdentityListTextFactory(
     }
 
     override fun getLine2(default: StatusText): StatusText {
-        return item.birthDate?.toIdentityFormat()?.let { StatusText(it) } ?: default
+        return item.birthDate?.toIdentityFormat(context)?.let { StatusText(it) } ?: default
     }
 
     override fun getLine2FromField(field: SearchField<*>): StatusText? {

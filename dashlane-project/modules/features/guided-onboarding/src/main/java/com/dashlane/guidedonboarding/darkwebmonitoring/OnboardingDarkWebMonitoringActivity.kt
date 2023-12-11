@@ -12,8 +12,8 @@ import com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitori
 import com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitoringLoadingFragmentDirections.Companion.loadingToSuccessEmailConfirmed
 import com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitoringLoadingFragmentDirections.Companion.loadingToSuccessNoAlerts
 import com.dashlane.preference.GlobalPreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.useractivity.log.inject.UserActivityComponent
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +38,9 @@ class OnboardingDarkWebMonitoringActivity :
     @ApplicationCoroutineScope
     lateinit var applicationCoroutineScope: CoroutineScope
 
+    @Inject
+    lateinit var sessionManager: SessionManager
+
     private val navController: NavController
         get() = findNavController(R.id.nav_host_onboarding_dark_web)
     private val currentAccountEmail by lazy {
@@ -46,13 +49,10 @@ class OnboardingDarkWebMonitoringActivity :
     private var checkingDone = false
     private var emailConfirmed = false
     private val resultIntent = Intent()
-    private var logger: OnboardingDarkWebUsageLogger? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding_dark_web_monitoring)
-        logger =
-            OnboardingDarkWebUsageLogger(UserActivityComponent(this).currentSessionUsageLogRepository)
     }
 
     override fun onResume() {
@@ -82,13 +82,12 @@ class OnboardingDarkWebMonitoringActivity :
     override fun onTryAgain() {
         checkingDone = false
         emailConfirmed = false
-        logger?.logTryAgain()
         navController.navigate(goToLoading())
         checkDarkWebStatus()
     }
 
     override fun onSkip() {
-        logger?.logSkip()
+        updateActivityResult(RESULT_CANCELED)
         finish()
     }
 
@@ -111,7 +110,6 @@ class OnboardingDarkWebMonitoringActivity :
                 updateActivityResult(RESULT_OK, hasAlerts)
                 showSuccess(hasAlerts)
             }
-
             else -> showError()
         }
         checkingDone = true
@@ -120,18 +118,15 @@ class OnboardingDarkWebMonitoringActivity :
     private fun showSuccess(hasAlerts: Boolean) {
         if (!hasAlerts) {
             if (navController.currentDestination?.id == R.id.nav_onboarding_dwm_success_no_alerts) return
-            logger?.logNoAlerts()
             navController.navigate(loadingToSuccessNoAlerts())
         } else {
             if (navController.currentDestination?.id == R.id.nav_onboarding_dwm_success_email_confirmed) return
-            logger?.logEmailVerified()
             navController.navigate(loadingToSuccessEmailConfirmed())
         }
     }
 
     private fun showError() {
         if (navController.currentDestination?.id == R.id.nav_onboarding_dwm_error) return
-        logger?.logEmailUnverified()
         navController.navigate(loadingToError())
     }
 

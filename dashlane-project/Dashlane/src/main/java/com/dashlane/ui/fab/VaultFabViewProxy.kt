@@ -8,7 +8,6 @@ import com.dashlane.teamspaces.manager.TeamspaceAccessor
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.fab.FabViewUtil.LastMenuItemHiddenCallBack
 import com.dashlane.ui.fab.FabViewUtil.hideFabMenuItems
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.dashlane.util.inject.OptionalProvider
 
 class VaultFabViewProxy(
@@ -18,7 +17,11 @@ class VaultFabViewProxy(
 ) :
     FabViewProxy(rootView) {
     private val fabMenuItemNavigator: VaultFabMenuItemNavigator =
-        VaultFabMenuItemNavigator(this, teamspaceManager, navigator)
+        VaultFabMenuItemNavigator(
+            fabViewProxy = this,
+            teamspaceManager = teamspaceManager,
+            navigator = navigator
+        )
 
     private var currentFilter: Filter = Filter.ALL_VISIBLE_VAULT_ITEM_TYPES
 
@@ -129,12 +132,11 @@ class VaultFabViewProxy(
             fabMenuHolder,
             true,
             object : LastMenuItemHiddenCallBack {
-            override fun onLastMenuItemHidden() {
-                configureViewPayment()
+                override fun onLastMenuItemHidden() {
+                    configureViewPayment()
+                }
             }
-        }
         )
-        fabMenuItemNavigator.log(UsageLogConstant.FabSubType.layer1, UsageLogConstant.FabAction.payment, null)
     }
 
     private fun transitionMenuPersonalInfo() {
@@ -147,7 +149,6 @@ class VaultFabViewProxy(
                 }
             }
         )
-        fabMenuItemNavigator.log(UsageLogConstant.FabSubType.layer1, UsageLogConstant.FabAction.personal_info, null)
     }
 
     private fun transitionMenuIDs() {
@@ -155,12 +156,11 @@ class VaultFabViewProxy(
             fabMenuHolder,
             true,
             object : LastMenuItemHiddenCallBack {
-            override fun onLastMenuItemHidden() {
-                configureViewIDs()
+                override fun onLastMenuItemHidden() {
+                    configureViewIDs()
+                }
             }
-        }
         )
-        fabMenuItemNavigator.log(UsageLogConstant.FabSubType.layer1, UsageLogConstant.FabAction.ID, null)
     }
 
     private fun configureViewPayment() {

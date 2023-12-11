@@ -14,7 +14,7 @@ import com.dashlane.authenticator.dashboard.AuthenticatorDashboardUiState.HasLog
 import com.dashlane.authenticator.item.AuthenticatorViewProxy
 import com.dashlane.ui.widgets.view.ExpandableCardView
 import com.dashlane.util.getBaseActivity
-import com.dashlane.util.graphics.RemoteImageRoundRectDrawable
+import com.dashlane.util.graphics.CredentialRemoteDrawable
 import com.dashlane.util.graphics.RoundRectDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
@@ -30,8 +30,8 @@ class AuthenticatorDashboardCredentialItemViewHolder(v: View) :
     private val delete =
         findViewByIdEfficient<ImageView>(R.id.authenticator_credential_item_delete)!!
     private val arrow = findViewByIdEfficient<ImageView>(R.id.collapse_arrow)!!
-    private val drawable = RemoteImageRoundRectDrawable(v.context, Color.WHITE).also {
-        it.setPreferImageBackgroundColor(true)
+    private val drawable = CredentialRemoteDrawable(v.context, Color.WHITE).also {
+        it.preferImageBackgroundColor = true
     }
     lateinit var listener: Listener
 

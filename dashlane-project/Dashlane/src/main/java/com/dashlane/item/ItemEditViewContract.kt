@@ -52,13 +52,13 @@ interface ItemEditViewContract {
 
             fun notifyNotEnoughDataToSave(@StringRes message: Int)
 
-            fun showNfcPromptDialog(dismissAction: () -> Unit)
+            fun showNfcPromptDialog(dismissAction: () -> Unit = {})
 
             fun showNfcErrorDialog()
 
             fun showNfcSuccessDialog(
                 subviewToFocus: ItemSubView<*>? = null,
-                dismissAction: () -> Unit
+                dismissAction: () -> Unit = {}
             )
 
             fun showRestorePromptDialog()

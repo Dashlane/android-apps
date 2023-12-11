@@ -19,12 +19,32 @@ sealed class RequestBuilderException(
         override val cause: Throwable? = null
     ) : RequestBuilderException(message, cause)
 
+    class AcceptUserCollectionRequestException(
+        override val message: String? = null,
+        override val cause: Throwable? = null
+    ) : RequestBuilderException(message, cause)
+
     class CreateItemRequestException(
         override val message: String? = null,
         override val cause: Throwable? = null
     ) : RequestBuilderException(message, cause)
 
     class InviteItemGroupMembersRequestException(
+        override val message: String? = null,
+        override val cause: Throwable? = null
+    ) : RequestBuilderException(message, cause)
+
+    class CreateCollectionRequestException(
+        override val message: String? = null,
+        override val cause: Throwable? = null
+    ) : RequestBuilderException(message, cause)
+
+    class InviteCollectionMembersRequestException(
+        override val message: String? = null,
+        override val cause: Throwable? = null
+    ) : RequestBuilderException(message, cause)
+
+    class AddItemsGroupToCollectionRequestException(
         override val message: String? = null,
         override val cause: Throwable? = null
     ) : RequestBuilderException(message, cause)

@@ -8,12 +8,4 @@
     <dimen name="spacing_big">24dp</dimen>
     <dimen name="spacing_huge">32dp</dimen>
     <dimen name="spacing_ultra_huge">48dp</dimen>
-
-    <dimen name="teamspace_icon_size_normal">24dp</dimen>
-    <dimen name="teamspace_icon_size_small">16dp</dimen>
-    <dimen name="teamspace_icon_size_menu">36dp</dimen>
-    <dimen name="teamspace_icon_size_edit_selector">18dp</dimen>
-
-    <dimen name="menu_icon_size">24dp</dimen>
-    <dimen name="teamspace_menu_icon_size">44dp</dimen>
 </resources>

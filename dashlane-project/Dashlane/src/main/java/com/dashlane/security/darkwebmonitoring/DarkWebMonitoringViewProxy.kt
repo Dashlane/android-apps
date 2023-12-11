@@ -63,7 +63,12 @@ class DarkWebMonitoringViewProxy(view: View, val activity: DashlaneActivity) :
         sceneRoot.findViewById<Button>(R.id.dark_web_cta)?.setOnClickListener {
             presenter.onInactiveDarkwebCtaClick()
         }
+
+        
         ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.title), true)
+        ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.header_1), true)
+        ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.header_2), true)
+        ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.header_3), true)
     }
 
     override fun goToPendingTab() {
@@ -74,20 +79,22 @@ class DarkWebMonitoringViewProxy(view: View, val activity: DashlaneActivity) :
         }
     }
 
-    override fun updateActionBar() {
+    override fun updateActionBar(updateTitle: Boolean) {
         if (presenter.selectedItems.size == 0) {
-            setupActionBar()
+            setupActionBar(updateTitle)
         } else {
             setupSelectedActionBar()
         }
     }
 
-    private fun setupActionBar() {
+    private fun setupActionBar(updateTitle: Boolean) {
         viewPagerAdapter?.resetToggledItem()
         activity.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
-            title = resources.getString(R.string.menu_v3_section_dark_web_monitoring)
+            if (updateTitle) {
+                title = resources.getString(R.string.menu_v3_section_dark_web_monitoring)
+            }
             activity.actionBarUtil.restoreDefaultActionBarColor()
             activity.actionBarUtil.drawerToggle.isDrawerIndicatorEnabled = true
         }

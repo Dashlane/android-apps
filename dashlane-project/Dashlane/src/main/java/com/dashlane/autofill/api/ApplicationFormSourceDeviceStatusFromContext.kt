@@ -2,7 +2,7 @@ package com.dashlane.autofill.api
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import com.dashlane.autofill.api.internal.ApplicationFormSourceDeviceStatus
+import com.dashlane.autofill.internal.ApplicationFormSourceDeviceStatus
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.core.helpers.PackageSignatureStatus

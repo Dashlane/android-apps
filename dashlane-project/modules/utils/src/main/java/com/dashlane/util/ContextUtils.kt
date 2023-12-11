@@ -1,5 +1,6 @@
 package com.dashlane.util
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityOptions
 import android.content.BroadcastReceiver
@@ -104,6 +105,7 @@ private inline fun <T> Context.getThemeAttr(@AttrRes attr: Int, block: TypedArra
     }
 }
 
+@SuppressLint("UnspecifiedRegisterReceiverFlag")
 fun Context.registerExportedReceiverCompat(broadcastReceiver: BroadcastReceiver, intentFilter: IntentFilter) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         registerReceiver(broadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED)
@@ -112,6 +114,7 @@ fun Context.registerExportedReceiverCompat(broadcastReceiver: BroadcastReceiver,
     }
 }
 
+@SuppressLint("UnspecifiedRegisterReceiverFlag")
 fun Context.registerExportedReceiverCompat(
     broadcastReceiver: BroadcastReceiver,
     intentFilter: IntentFilter,

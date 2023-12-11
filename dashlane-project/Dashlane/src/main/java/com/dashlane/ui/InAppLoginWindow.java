@@ -22,8 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dashlane.R;
-import com.dashlane.autofill.AutofillAnalyzerDef;
-import com.dashlane.autofill.AutofillOrigin;
 import com.dashlane.autofill.accessibility.AccessibilityEventHandler;
 import com.dashlane.autofill.accessibility.DashlaneAccessibilityService;
 import com.dashlane.autofill.accessibility.alwayson.AlwaysOnEventHandler;
@@ -31,20 +29,17 @@ import com.dashlane.autofill.accessibility.alwayson.AlwaysOnUiManager;
 import com.dashlane.autofill.formdetector.model.AccessibilityLoginForm;
 import com.dashlane.core.helpers.PackageNameSignatureHelper;
 import com.dashlane.core.helpers.PackageSignatureStatus;
-import com.dashlane.dagger.autofill.AutofillComponent;
-import com.dashlane.dagger.singleton.SingletonComponentProxy;
-import com.dashlane.dagger.singleton.SingletonProvider;
+import com.dashlane.debug.DaDaDa;
 import com.dashlane.debug.DeveloperUtilities;
 import com.dashlane.login.lock.LockManager;
 import com.dashlane.navigation.NavigationConstants;
 import com.dashlane.navigation.NavigationHelper;
 import com.dashlane.security.DashlaneIntent;
-import com.dashlane.session.Session;
+import com.dashlane.session.SessionManager;
 import com.dashlane.ui.adapters.CredentialSuggestionsAdapter;
 import com.dashlane.ui.controllers.interfaces.SuggestionPicker;
 import com.dashlane.util.DeviceUtils;
 import com.dashlane.util.StringUtils;
-import com.dashlane.vault.model.AuthentifiantKt;
 import com.dashlane.vault.summary.SummaryObject;
 import com.dashlane.vault.util.AuthentifiantPackageNameSignatureUtilKt;
 
@@ -59,27 +54,31 @@ import wei.mark.standout.constants.StandOutFlags;
 import wei.mark.standout.ui.Window;
 
 @AndroidEntryPoint
-public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
-        View.OnClickListener, SuggestionPicker {
+public class InAppLoginWindow extends AbstractDashlaneSubwindow implements View.OnClickListener, SuggestionPicker {
     public static final int WINDOW_ID = InAppLoginWindow.class.hashCode();
     public static final int MAX_SUGGESTION_SHOWN = 3;
     static int UNLOCK_COUNT = 0;
     private static int sWindowLayoutResId = R.layout.window_dashlane_bubble_content;
     private static int sItemLayoutResId = R.layout.list_item_in_app_login_suggestion;
     private static int[] sWindowDimensions = new int[]{0, 0};
+    @Inject
+    PackageNameSignatureHelper packageNameSignatureHelper;
+    @Inject
+    DaDaDa dadada;
+    @Inject
+    LockManager lockManager;
+    @Inject
+    SessionManager sessionManager;
     private AlwaysOnEventHandler.ScanResult mLastScanResult;
     private LayoutInflater mLayoutInflater;
     private ArrayAdapter<AuthentifiantWithWarningInfo> mSuggestionAdapter;
 
-    @Inject
-    PackageNameSignatureHelper packageNameSignatureHelper;
-
     public static int[] getWindowDimensions(Context context, int resultCount) {
         LayoutInflater layoutInflater = LayoutInflater.from(context)
-                .cloneInContext(
-                        new ContextThemeWrapper(context, R.style.Theme_Dashlane));
+            .cloneInContext(
+                new ContextThemeWrapper(context, R.style.Theme_Dashlane));
         return getWindowDimensions(context, layoutInflater,
-                new FakeAdapterForMeasure(layoutInflater, sItemLayoutResId, resultCount));
+            new FakeAdapterForMeasure(layoutInflater, sItemLayoutResId, resultCount));
     }
 
     private static int[] getWindowDimensions(Context context, LayoutInflater layoutInflater, BaseAdapter adapter) {
@@ -117,8 +116,8 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
 
     private static int getMeasuredMaxHeight(View view) {
         view.measure(
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
         return view.getMeasuredHeight();
     }
 
@@ -129,20 +128,19 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
     @Override
     public void onCreate() {
         super.onCreate();
-        AutofillComponent.ComponentProvider.get(getApplicationContext()).inject(this);
 
         mLayoutInflater = LayoutInflater.from(this);
         mSuggestionAdapter = new CredentialSuggestionsAdapter(this,
-                sItemLayoutResId,
-                new ArrayList<AuthentifiantWithWarningInfo>(),
-                this);
+            sItemLayoutResId,
+            new ArrayList<AuthentifiantWithWarningInfo>(),
+            this);
         refreshLastLoadedInformations();
     }
 
     @Override
     public int getFlags(int id) {
         return super.getFlags(id) |
-                StandOutFlags.FLAG_WINDOW_FOCUSABLE_DISABLE;
+            StandOutFlags.FLAG_WINDOW_FOCUSABLE_DISABLE;
     }
 
     @Override
@@ -213,24 +211,17 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
     @Override
     public void onPickSuggestion(int position) {
         boolean isDebugLock = false;
-        if (DeveloperUtilities.systemIsInDebug(getApplicationContext())
-                && SingletonProvider.getDaDaDa().isInAppAutologinLockDebug()) {
+        if (DeveloperUtilities.systemIsInDebug(getApplicationContext()) && dadada.isInAppAutologinLockDebug()) {
             isDebugLock = (UNLOCK_COUNT % 2 == 0);
             ++UNLOCK_COUNT;
         }
-        Session session = SingletonProvider.getSessionManager().getSession();
+        var session = sessionManager.getSession();
         if (session == null) {
             return;
         }
-        SingletonComponentProxy singletonComponent = SingletonProvider.getComponent();
-        LockManager lockManager = singletonComponent.getLockRepository()
-                .getLockManager(session);
         boolean isLock = lockManager.isInAppLoginLocked() || isDebugLock;
 
         SummaryObject.Authentifiant authentifiant = mSuggestionAdapter.getItem(position).authentifiant;
-        String domainName = AuthentifiantKt.getUrlForUsageLog(authentifiant);
-
-        AutofillAnalyzerDef.IAutofillUsageLog autofillUsageLog = singletonComponent.getAutofillUsageLog();
 
         AlwaysOnUiManager alwaysOnUiManager = getAlwaysOnUiManager();
         if (isLock) {
@@ -239,7 +230,6 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
                 alwaysOnUiManager.getFocusOnField();
             }
             lockManager.showLockActivityForInAppLogin(this, authentifiant.getId());
-            autofillUsageLog.onClickToAutoFillCredentialButLock(AutofillOrigin.IN_APP_LOGIN, domainName);
         } else {
             if (alwaysOnUiManager != null) {
                 alwaysOnUiManager.onItemPicked(authentifiant.getId());
@@ -256,13 +246,13 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
 
         Intent createNewAccount = DashlaneIntent.newInstance();
         Uri createNewAccountUri = new Uri.Builder()
-                .scheme(NavigationHelper.Destination.SCHEME)
-                .encodedAuthority(NavigationHelper.Destination.MainPath.PASSWORDS)
-                .path(NavigationHelper.Destination.SecondaryPath.Items.NEW)
-                .appendPath(useUrlOverPackageName ? websiteUrl : packageName)
-                .appendQueryParameter(NavigationHelper.Destination.PathQueryParameters.IS_PACKAGE_NAME,
-                        Boolean.toString(!useUrlOverPackageName))
-                .build();
+            .scheme(NavigationHelper.Destination.SCHEME)
+            .encodedAuthority(NavigationHelper.Destination.MainPath.PASSWORDS)
+            .path(NavigationHelper.Destination.SecondaryPath.Items.NEW)
+            .appendPath(useUrlOverPackageName ? websiteUrl : packageName)
+            .appendQueryParameter(NavigationHelper.Destination.PathQueryParameters.IS_PACKAGE_NAME,
+                Boolean.toString(!useUrlOverPackageName))
+            .build();
         createNewAccount.setAction(Intent.ACTION_VIEW);
         createNewAccount.setData(createNewAccountUri);
         createNewAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -282,7 +272,7 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
     @Override
     public boolean onCloseAll() {
         sendData(InAppLoginWindow.WINDOW_ID, DashlaneBubble.class, DashlaneBubble.WINDOW_ID, DashlaneBubble
-                .REQUEST_CODE_IN_APP_LOGIN_CLOSED, null);
+            .REQUEST_CODE_IN_APP_LOGIN_CLOSED, null);
         return super.onCloseAll();
     }
 
@@ -298,10 +288,10 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
     @NonNull
     private StandOutLayoutParams getStandOutLayoutParams(int id, int[] windowDimensions) {
         return new StandOutLayoutParams(id,
-                windowDimensions[0],
-                windowDimensions[1],
-                StandOutLayoutParams.LEFT,
-                StandOutLayoutParams.TOP
+            windowDimensions[0],
+            windowDimensions[1],
+            StandOutLayoutParams.LEFT,
+            StandOutLayoutParams.TOP
         );
     }
 
@@ -330,9 +320,9 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements
 
     private boolean mayBeUnsafeApplicationFor(String packageName, SummaryObject.Authentifiant authentifiant) {
         return packageName != null
-                && AuthentifiantPackageNameSignatureUtilKt
-                .getSignatureVerificationWith(authentifiant, packageNameSignatureHelper, packageName) !=
-                PackageSignatureStatus.VERIFIED;
+            && AuthentifiantPackageNameSignatureUtilKt
+            .getSignatureVerificationWith(authentifiant, packageNameSignatureHelper, packageName) !=
+            PackageSignatureStatus.VERIFIED;
     }
 
     @Nullable

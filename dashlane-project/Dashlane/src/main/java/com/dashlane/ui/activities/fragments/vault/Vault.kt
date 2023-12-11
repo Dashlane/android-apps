@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.ui.adapter.ItemListContext
 import com.skocken.presentation.definition.Base
 import kotlinx.coroutines.flow.StateFlow
 
@@ -34,14 +33,5 @@ interface Vault {
     interface DataProvider : Base.IDataProvider {
         fun subscribeTeamspaceManager()
         fun unsubscribeTeamspaceManager()
-    }
-
-    interface Logger {
-        fun onListDisplayed(filter: Filter)
-        fun logClickOpenItem(itemListContext: ItemListContext, website: String?, filter: Filter)
-        fun onFilterSelected(filter: Filter)
-        fun buttonSearchClicked()
-        fun logAnnouncement(action: String, type: String)
-        fun logHiddenImpala()
     }
 }

@@ -1,20 +1,15 @@
 package com.dashlane.login.lock
 
 import com.dashlane.lock.LockSelfChecker
-import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.useractivity.log.usage.UsageLogCode35
-import com.dashlane.useractivity.log.usage.UsageLogConstant
-import com.dashlane.useractivity.log.usage.UsageLogRepository
 import javax.inject.Inject
 
 class LockSelfCheckerImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockTypeManager: LockTypeManager,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val bySessionUsageLogRepository: BySessionRepository<UsageLogRepository>
 ) : LockSelfChecker {
 
     var isCredentialsEmpty = false
@@ -34,7 +29,7 @@ class LockSelfCheckerImpl @Inject constructor(
             sessionCredentialsSaver.saveCredentials(session)
 
             
-            verification(session, lockType)
+            verification(session)
         }
         
         resetIsCredentialsEmpty()
@@ -49,17 +44,11 @@ class LockSelfCheckerImpl @Inject constructor(
         return !isCredentialsEmpty
     }
 
-    private fun verification(session: Session, @LockTypeManager.LockType lockType: Int) {
-        val type = when (lockType) {
-            LockTypeManager.LOCK_TYPE_BIOMETRIC -> UsageLogConstant.LockType.fingerPrint
-            LockTypeManager.LOCK_TYPE_PIN_CODE -> UsageLogConstant.LockType.pin
-            else -> UsageLogConstant.LockType.master
-        }
-
+    private fun verification(session: Session) {
         if (sessionCredentialsSaver.areCredentialsSaved(session.username)) {
-            logSuccess(session, type)
+            logSuccess()
         } else {
-            logFailure(session, type)
+            logFailure()
             lockTypeManager.setLockType(LockTypeManager.LOCK_TYPE_MASTER_PASSWORD)
         }
     }
@@ -68,21 +57,9 @@ class LockSelfCheckerImpl @Inject constructor(
         isCredentialsEmpty = false
     }
 
-    private fun logSuccess(session: Session, lockType: String) {
-        log(session, lockType, "reSaveSuccess")
+    private fun logSuccess() {
     }
 
-    private fun logFailure(session: Session, lockType: String) {
-        log(session, lockType, "reSaveFailed")
-    }
-
-    private fun log(session: Session, lockType: String, action: String) {
-        bySessionUsageLogRepository[session]
-            ?.enqueue(
-                UsageLogCode35(
-                    type = lockType,
-                    action = action
-                )
-            )
+    private fun logFailure() {
     }
 }

@@ -1,7 +1,7 @@
 package com.dashlane.premium.current.model
 
 import androidx.annotation.StringRes
-import com.dashlane.premium.current.CurrentPlanContract
+import com.dashlane.premium.current.CurrentPlanViewModel
 import com.dashlane.ui.model.TextResource
 
 internal data class CurrentPlan(
@@ -18,7 +18,7 @@ internal data class CurrentPlan(
 
     data class Benefit(
         val textResource: TextResource,
-        val action: (CurrentPlanContract.Presenter.() -> Unit)?
+        val action: (CurrentPlanViewModel.() -> Unit)?
     )
 
     data class Action(

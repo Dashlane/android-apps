@@ -6,8 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.annotation.IntDef
+import javax.inject.Inject
 
-class InAppLoginManager(
+class InAppLoginManager @Inject constructor(
     val inAppLoginByAccessibilityManager: InAppLoginByAccessibilityManager,
     val inAppLoginByAutoFillApiManager: InAppLoginByAutoFillApiManager?
 ) {

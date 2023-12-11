@@ -48,6 +48,7 @@ sealed class HelpCenterLink {
         val ARTICLE_AUTHENTICATOR = Article("115003383365")
         val ARTICLE_AUTHENTICATOR_APP = Article("4583048536082")
         val ARTICLE_USE_RECOVERY_CODE = Article("202699101")
+        val ARTICLE_MASTER_PASSWORDLESS_ACCOUNT_INFO = Article("10975547141266")
 
         @get:VisibleForTesting
         val helpCenterLanguage: String

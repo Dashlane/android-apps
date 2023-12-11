@@ -8,10 +8,6 @@ import com.dashlane.events.unregister
 import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.storage.userdata.accessor.CredentialDataQuery
-import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.teamspaces.manager.TeamspaceManager
 import com.dashlane.teamspaces.manager.TeamspaceManagerWeakListener
 import com.dashlane.teamspaces.model.Teamspace
@@ -26,7 +22,6 @@ import javax.inject.Inject
 
 class IdentityDashboardDataProvider @Inject constructor(
     private val creditMonitoringManager: CreditMonitoringManager,
-    private val mainDataAccessor: MainDataAccessor,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
     private val sessionManager: SessionManager,
@@ -40,13 +35,6 @@ IdentityDashboardContract.DataProvider,
     private val appEventListener = AppEventsListener(appEvents, this)
     private var latestSecurityScoreEvaluatorResult: Deferred<AuthentifiantSecurityEvaluator.Result?>? = null
     private val teamspaceManagerListener = TeamspaceManagerWeakListener(this)
-
-    private val credentialDataQuery: CredentialDataQuery
-        get() = mainDataAccessor.getCredentialDataQuery()
-    private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
-    private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
 
     override fun hasProtectionPackage(): Boolean {
         return userFeaturesChecker.has(UserFeaturesChecker.Capability.CREDIT_MONITORING)
@@ -73,12 +61,7 @@ IdentityDashboardContract.DataProvider,
         val current = sessionManager.session?.let {
             teamspaceRepository.getTeamspaceManager(it)?.current
         } ?: return null
-        return authentifiantSecurityEvaluator.computeResult(
-            credentialDataQuery,
-            genericDataQuery,
-            vaultDataQuery,
-            current
-        )
+        return authentifiantSecurityEvaluator.computeResult(current)
     }
 
     override fun listenForChanges() {

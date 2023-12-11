@@ -11,8 +11,9 @@ import android.widget.Spinner
 import android.widget.SpinnerAdapter
 import android.widget.TextView
 import com.dashlane.R
+import com.dashlane.login.lock.LockManager
+import com.dashlane.teamspaces.adapter.SpinnerUtil
 import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
-import com.dashlane.ui.util.SpinnerUtil
 import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrDrawable
@@ -20,6 +21,7 @@ import com.dashlane.util.getThemeAttrDrawable
 object SpinnerNoDefaultInputProvider {
     fun create(
         context: Context,
+        lockManager: LockManager,
         title: String,
         defaultText: String,
         values: List<String>,
@@ -43,6 +45,7 @@ object SpinnerNoDefaultInputProvider {
 
         return create(
             context = context,
+            lockManager = lockManager,
             title = title,
             defaultText = defaultText,
             values = values,
@@ -69,6 +72,7 @@ object SpinnerNoDefaultInputProvider {
 
     private fun create(
         context: Context,
+        lockManager: LockManager,
         title: String,
         defaultText: String,
         values: List<String>,
@@ -77,7 +81,7 @@ object SpinnerNoDefaultInputProvider {
         selectionAction: (String) -> Unit
     ): FrameLayout {
         val layout = FrameLayout(context)
-        val textInputLayout = TextInputLayoutProvider.create(context, title, defaultText, false)
+        val textInputLayout = TextInputLayoutProvider.create(context, lockManager, title, defaultText, false)
 
         var userSelect = false
 
@@ -116,22 +120,22 @@ object SpinnerNoDefaultInputProvider {
         layout.apply {
             addView(
                 spinner.apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(0, context.dpToPx(16f).toInt(), 0, 0)
+                    layoutParams = FrameLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        setMargins(0, context.dpToPx(16f).toInt(), 0, 0)
+                    }
+                    SpinnerUtil.disableSpinner(this)
                 }
-                SpinnerUtil.disableSpinner(this)
-            }
             )
             addView(
                 textInputLayout.apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-            }
+                    layoutParams = FrameLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
             )
         }
 

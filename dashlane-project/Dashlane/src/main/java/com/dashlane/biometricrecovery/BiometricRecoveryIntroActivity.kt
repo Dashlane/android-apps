@@ -9,7 +9,6 @@ import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.ui.screens.activities.onboarding.hardwareauth.HardwareAuthActivationActivity
-import com.dashlane.useractivity.log.usage.UsageLogConstant
 import com.skocken.presentation.presenter.BasePresenter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -32,15 +31,11 @@ class BiometricRecoveryIntroActivity : DashlaneActivity() {
             ::onHardwareAuthActivationActivityResult
         )
         Presenter(hardwareAuthActivationActivityResultLauncher).setView(IntroScreenViewProxy(this))
-
-        if (savedInstanceState == null) {
-            biometricRecovery.logger.logBiometricIntroDisplay()
-        }
     }
 
     private fun onHardwareAuthActivationActivityResult(success: Boolean) {
         if (success) {
-            biometricRecovery.setFeatureEnabled(true, UsageLogConstant.ViewType.biometricIntro)
+            biometricRecovery.setBiometricRecoveryFeatureEnabled(true)
             finish()
         }
     }

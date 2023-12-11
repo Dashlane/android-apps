@@ -33,7 +33,6 @@ object SharedItemMerger {
     private val SHARED_FIELDS_SECURE_NOTE = arrayListOf(
         SecureNoteXml.TITLE,
         SecureNoteXml.CONTENT,
-        SecureNoteXml.SECURED,
         SyncObjectXml.ATTACHMENTS
     )
 

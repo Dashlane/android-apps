@@ -11,14 +11,14 @@ import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
 
 class ConnectionScopeImpl(
     private val billingClient: BillingClient,
@@ -56,25 +56,30 @@ class ConnectionScopeImpl(
     override suspend fun consume(purchaseToken: String): ServiceResult {
         val consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build()
 
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             billingClient.consumeAsync(consumeParams) { billingResult, purchaseToken ->
-                if (billingResult.responseCode.isSuccess()) {
-                    continuation.resume(ServiceResult.Success.Consume(purchaseToken))
-                } else {
-                    continuation.resume(billingResult.responseCode.toFailureServiceResult())
+                if (continuation.isActive) {
+                    if (billingResult.responseCode.isSuccess()) {
+                        continuation.resume(ServiceResult.Success.Consume(purchaseToken))
+                    } else {
+                        continuation.resume(billingResult.responseCode.toFailureServiceResult())
+                    }
                 }
             }
         }
     }
 
     override suspend fun acknowledge(purchaseToken: String): ServiceResult {
-        val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchaseToken).build()
-        return suspendCoroutine { continuation ->
+        val acknowledgePurchaseParams =
+            AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchaseToken).build()
+        return suspendCancellableCoroutine { continuation ->
             billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult ->
-                if (billingResult.responseCode.isSuccess()) {
-                    continuation.resume(ServiceResult.Success.Consume(purchaseToken))
-                } else {
-                    continuation.resume(billingResult.responseCode.toFailureServiceResult())
+                if (continuation.isActive) {
+                    if (billingResult.responseCode.isSuccess()) {
+                        continuation.resume(ServiceResult.Success.Consume(purchaseToken))
+                    } else {
+                        continuation.resume(billingResult.responseCode.toFailureServiceResult())
+                    }
                 }
             }
         }
@@ -93,18 +98,22 @@ class ConnectionScopeImpl(
                 inAppPurchases.responseCode.isSuccess() && subscriptionPurchases?.responseCode?.isSuccess() == true -> {
                     ServiceResult.Success.Purchases(inAppPurchases.purchases + subscriptionPurchases.purchases)
                 }
-                inAppPurchases.responseCode.isSuccess() -> ServiceResult.Success.Purchases(inAppPurchases.purchases)
+                inAppPurchases.responseCode.isSuccess() -> ServiceResult.Success.Purchases(
+                    inAppPurchases.purchases
+                )
                 else -> inAppPurchases.responseCode.toFailureServiceResult()
             }
         }
     }
 
     private suspend fun queryPurchaseForType(productType: String): PurchaseResult {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(
                 QueryPurchasesParams.newBuilder().setProductType(productType).build()
             ) { purchasesResult: BillingResult, purchasesList: List<Purchase> ->
-                continuation.resume(PurchaseResult(purchasesResult.responseCode, purchasesList))
+                if (continuation.isActive) {
+                    continuation.resume(PurchaseResult(purchasesResult.responseCode, purchasesList))
+                }
             }
         }
     }
@@ -128,7 +137,8 @@ class ConnectionScopeImpl(
             if (result.find { it.responseCode.isSuccess() } != null) {
                 ServiceResult.Success.Products(productDetailsList)
             } else {
-                result.firstOrNull()?.responseCode?.toFailureServiceResult() ?: ServiceResult.Failure.Error
+                result.firstOrNull()?.responseCode?.toFailureServiceResult()
+                    ?: ServiceResult.Failure.Error
             }
         }
     }
@@ -137,7 +147,7 @@ class ConnectionScopeImpl(
         @ProductType itemType: String,
         productId: List<String>
     ): ProductDetailsResult {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             val productsDetailsParams = productId.map { productId ->
                 QueryProductDetailsParams.Product.newBuilder()
                     .setProductId(productId)
@@ -148,7 +158,14 @@ class ConnectionScopeImpl(
                 .setProductList(productsDetailsParams)
                 .build()
             billingClient.queryProductDetailsAsync(params) { billingResult: BillingResult, productDetailsList: List<ProductDetails> ->
-                continuation.resume(ProductDetailsResult(billingResult.responseCode, productDetailsList))
+                if (continuation.isActive) {
+                    continuation.resume(
+                        ProductDetailsResult(
+                            billingResult.responseCode,
+                            productDetailsList
+                        )
+                    )
+                }
             }
         }
     }

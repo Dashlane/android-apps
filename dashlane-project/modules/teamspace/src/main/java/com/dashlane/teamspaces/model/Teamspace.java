@@ -75,6 +75,7 @@ public class Teamspace {
         mAnonTeamId = anonSpaceId;
     }
 
+    @Nullable
     public String getTeamName() {
         return mTeamName;
     }

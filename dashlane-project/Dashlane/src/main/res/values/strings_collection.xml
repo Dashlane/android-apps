@@ -1,11 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="collections_header_item_edit">Categories</string>
+    <string name="collections_header_item_edit">Collections</string>
     
-    <string name="collection_selector_activity_title">Add a category</string>
+    <string name="collections_header_business_item_edit">Business Collections</string>
+    
+    <string name="collections_header_personal_item_edit">Personal Collections</string>
+    
+    <string name="collection_selector_activity_title">Add a collection</string>
     
     <string name="collection_selector_activity_create_button">Create</string>
     
-    <string name="collection_list_view_provider_add_button">Add a category</string>
+    <string name="collection_list_view_provider_add_button">Add a collection</string>
+    
+    <string name="menu_collections">Collections</string>
+    
+    <string name="collections_list_title">Collections</string>
+    
+    <plurals name="collections_list_collection_item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    
+    <string name="collections_list_empty_state_description">Create your first collection to start organizing the items in your vault.</string>
+    
+    <string name="collections_list_empty_state_button">Create collection</string>
+    
+    <string name="and_accessibility_collection_list_item_personal_teamspace">Personal Space</string>
+    
+    <string name="and_accessibility_collection_list_item_business_teamspace">Business Space</string>
+    
+    <string name="and_accessibility_collection_list_item_shared">Collection shared</string>
+    
+    <string name="collection_details_empty_state_description">This collection doesn’t have any items yet.</string>
+    
+    <string name="collection_add_title">Create new collection</string>
+    
+    <string name="collection_edit_title">Edit collection</string>
+    
+    <string name="collection_add_collection_name_field_label">Collection name</string>
+    
+    <string name="collection_add_collection_space_field_label">Space</string>
+    
+    <string name="collection_add_error_collection_already_exist">A collection with this name already exists in this Space. Please enter a different name.</string>
+    
+    <string name="collections_list_item_menu_share">Share</string>
+    
+    <string name="collections_list_item_menu_shared_access">Shared Access</string>
+    
+    <string name="collections_list_item_menu_edit">Edit</string>
+    
+    <string name="collections_list_item_menu_delete">Delete</string>
+    
+    <string name="collections_list_delete_popup_title">Delete collection?</string>
+    
+    <string name="collections_list_delete_popup_text">This will permanently delete the collection from your Vault. We won’t delete any of the items inside this collection.</string>
+    
+    <string name="collections_list_delete_popup_button_confirm">Delete collection</string>
+    
+    <string name="collections_list_delete_popup_button_cancel">Cancel</string>
+    
+    <string name="collection_list_search_menu_button">Search</string>
+    
+    <string name="collection_list_search_hint">Search by collection name</string>
+    
+    <string name="collection_detail_menu_share">Share</string>
+    
+    <string name="collection_detail_menu_shared_access">Shared access</string>
+    
+    <string name="collection_detail_menu_edit">Edit</string>
+    
+    <string name="collection_detail_menu_delete">Delete</string>
+    
+    <string name="collection_details_item_menu_remove">Remove from this Collection</string>
+    
+    <plurals name="collections_new_share_group_members">
+        <item quantity="one">%1$d user</item>
+        <item quantity="other">%1$d users</item>
+    </plurals>
+    
+    <string name="collection_new_share_infobox_title">Permissions</string>
+    
+    <string name="collection_new_share_infobox_description">Selected groups and individuals can share, edit, and manage access to the Collection. The items shared within the Collection will be granted Full Rights.</string>
+    <string name="collection_new_share_groups_section_title">Groups</string>
+    <string name="collection_new_share_individuals_section_title">Individuals</string>
+    <string name="collection_new_share_title">Share Collection</string>
+    <string name="collection_new_share_primary_button">Share</string>
+    
+    <string name="collection_new_share_error_snackbar">%1$s cannot be shared, please check your connection and try again</string>
+    
+    <string name="collection_new_share_success_snackbar">%1$s successfully shared</string>
+    
+    <string name="collection_new_share_snackbar_default_collection_name">Collection</string>
+    
+    <string name="collection_new_share_search_hint">Search by email or group name...</string>
+    
+    <string name="collection_new_share_search_accessibility">Search</string>
+    
+    <string name="collection_new_share_empty">This collection can only be shared with users in your organization. Please check the email address and try again.</string>
+    
+    <string name="collection_item_share_permission_explanation_title">Permission limitations</string>
+    
+    <string name="collection_item_share_permission_explanation_text">Some users and groups have access to this item via a Collection. Item access can be managed by revoking their access or removing the item from the Collection.</string>
 </resources>

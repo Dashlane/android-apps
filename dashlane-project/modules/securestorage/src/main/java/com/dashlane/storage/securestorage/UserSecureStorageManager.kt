@@ -146,4 +146,26 @@ class UserSecureStorageManager(
             session.localKey
         )?.decodeUtf8ToString()
     }
+
+    fun storeUserActivity(session: Session, id: String?) {
+        if (id == null) {
+            val secureDataStorage = secureStorageManager.getSecureDataStorage(session.username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
+            secureStorageManager.removeKeyData(secureDataStorage, SecureDataKey.USER_ACTIVITY)
+        } else {
+            secureStorageManager.storeKeyData(
+                id.encodeUtf8ToByteArray(),
+                SecureDataKey.USER_ACTIVITY,
+                session.username,
+                session.localKey
+            )
+        }
+    }
+
+    fun readUserActivity(session: Session): String? {
+        return secureStorageManager.getKeyData(
+            SecureDataKey.USER_ACTIVITY,
+            session.username,
+            session.localKey
+        )?.decodeUtf8ToString()
+    }
 }

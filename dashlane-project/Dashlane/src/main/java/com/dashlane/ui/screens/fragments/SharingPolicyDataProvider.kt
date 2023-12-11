@@ -7,10 +7,13 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.canLostAccess
+import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.toPermission
 import com.dashlane.storage.DataStorageProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
+import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
@@ -21,7 +24,8 @@ import javax.inject.Inject
 class SharingPolicyDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
     private val dataStorageProvider: DataStorageProvider,
-    private val sharingDataProvider: SharingDataProvider
+    private val sharingDataProvider: SharingDataProvider,
+    private val userFeaturesChecker: UserFeaturesChecker
 ) {
     private val sharingDao: SharingDao
         get() = dataStorageProvider.sharingDao
@@ -53,9 +57,28 @@ class SharingPolicyDataProvider @Inject constructor(
     }
 
     fun getSharingCountUserAndUserGroup(itemGroup: ItemGroup): Pair<Int, Int> {
-        val c1 = itemGroup.users?.count { it.isAcceptedOrPending } ?: 0
-        val c2 = itemGroup.groups?.count { it.isAcceptedOrPending } ?: 0
-        return c1 to c2
+        val collections = if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)) {
+            sharingDao.loadAllCollection().filter { collection ->
+                itemGroup.collections?.any { collection.uuid == it.uuid && it.isAccepted } == true
+            }
+        } else {
+            emptyList()
+        }
+        val collectionUsers = collections.mapNotNull {
+            it.users?.filter { user -> user.isAcceptedOrPending }
+        }.flatten().distinctBy { it.login }
+        val c1 = itemGroup.users?.distinctBy { it.userId }?.count {
+            it.isAcceptedOrPending && !collectionUsers.any { cUser ->
+                cUser.login == it.userId || cUser.login == it.alias
+            }
+        } ?: 0
+        val collectionGroups = collections.mapNotNull {
+            it.userGroups?.filter { group -> group.isAcceptedOrPending }
+        }.flatten().distinctBy { it.uuid }
+        val c2 = itemGroup.groups?.distinctBy { it.groupId }?.count {
+            it.isAcceptedOrPending && !collectionGroups.any { cGroup -> cGroup.uuid == it.groupId }
+        } ?: 0
+        return c1 + collectionUsers.size to c2 + collectionGroups.size
     }
 
     fun isDeleteAllowed(uid: String, isNewItem: Boolean, isShared: Boolean): Boolean {
