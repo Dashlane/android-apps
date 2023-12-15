@@ -127,7 +127,7 @@ data class GroupOfPassword(
         }
 
         private fun createGroupsSimilar(
-            orginalPasswordMap: Array<BitSet>,
+            originalPasswordMap: Array<BitSet>,
             sortedBitSets: List<BitSet>,
             toKeep: BitSet,
             passwords: List<String>
@@ -139,7 +139,7 @@ data class GroupOfPassword(
                     val bitSet = sortedBitSets[i]
                     val setOfPasswords = mutableSetOf<String>()
 
-                    val indexOfOriginalPassword = orginalPasswordMap.indexOf(bitSet)
+                    val indexOfOriginalPassword = originalPasswordMap.indexOf(bitSet)
                     val originalPassword = passwords[indexOfOriginalPassword]
 
                     for (j in 0 until totalCount) {
