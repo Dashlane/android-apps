@@ -1,4 +1,5 @@
 stages:
-  - security
+  - test
 include:
-  - local: 'gitlab-ci/Secret-Detection.gitlab-ci.yml'
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
