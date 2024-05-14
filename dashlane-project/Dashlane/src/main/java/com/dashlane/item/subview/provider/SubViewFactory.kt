@@ -6,8 +6,8 @@ import com.dashlane.R
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.readonly.ItemClickActionSubView
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.vault.model.VaultItem
 
@@ -56,12 +56,12 @@ interface SubViewFactory {
     ): ItemSubView<Boolean>?
 
     fun createSpaceSelector(
-        current: String?,
-        teamspaceAccessor: TeamspaceAccessor,
+        currentSpaceId: String?,
+        teamSpaceAccessor: TeamSpaceAccessor,
         toListenViews: List<ItemSubView<String>>?,
-        valueUpdate: (VaultItem<*>, Teamspace) -> VaultItem<*>,
+        valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>,
         linkedWebsites: List<String> = listOf()
-    ): ItemSubView<Teamspace>?
+    ): ItemSubView<TeamSpace>?
 
     fun createSubviewDelete(
         context: Context,

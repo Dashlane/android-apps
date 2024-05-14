@@ -3,16 +3,15 @@ package com.dashlane.applinkfetcher
 import android.app.Activity
 import android.os.Bundle
 import com.dashlane.autofill.LinkedServicesHelper
-import com.dashlane.core.DataSync
 import com.dashlane.core.helpers.AppSignature
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.storage.userdata.accessor.filter.credentialFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.sync.DataSync
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.url.UrlDomain
@@ -21,8 +20,8 @@ import com.dashlane.url.assetlinks.UrlDomainAssetLinkService
 import com.dashlane.url.assetlinks.getAssetLinksOrNull
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -33,14 +32,14 @@ import com.dashlane.xml.domain.SyncObjectType
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.withContext
 import okio.ByteString
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class AuthentifiantAppLinkDownloader @Inject constructor(
@@ -50,17 +49,12 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     private val assetLinkService: UrlDomainAssetLinkService,
     private val userPreferencesManager: UserPreferencesManager,
-    private val mainDataAccessor: MainDataAccessor,
+    private val dataSaver: DataSaver,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
     private val dataSync: DataSync,
     private val linkedServicesHelper: LinkedServicesHelper
 ) : AbstractActivityLifecycleListener() {
-
-    private val dataSaver: DataSaver
-        get() = mainDataAccessor.getDataSaver()
-    private val credentialDataQuery: CredentialDataQuery
-        get() = mainDataAccessor.getCredentialDataQuery()
-    private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
 
     private val clock = Clock.systemUTC()
 

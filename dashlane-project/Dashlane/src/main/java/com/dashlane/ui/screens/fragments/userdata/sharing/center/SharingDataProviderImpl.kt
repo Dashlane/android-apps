@@ -43,21 +43,19 @@ import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.util.AuditLogHelper
 import com.dashlane.sharing.util.intersectUserGroupCollectionDownload
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @Suppress("LargeClass")
 class SharingDataProviderImpl @Inject constructor(
-    private val mainDataAccessor: MainDataAccessor,
-    private val dataStorageProvider: DataStorageProvider,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val sharingDao: SharingDao,
     private val sharingXmlConverter: DataIdentifierSharingXmlConverter,
     private val sessionManager: SessionManager,
     private val sharingItemUpdater: SharingItemUpdater,
@@ -79,20 +77,18 @@ class SharingDataProviderImpl @Inject constructor(
     private val teamLoginsService: GetTeamLoginsService,
     private val auditLogHelper: AuditLogHelper
 ) : SharingDataProvider {
-    private val sharingDao: SharingDao
-        get() = dataStorageProvider.sharingDao
-
     private val session: Session?
         get() = sessionManager.session
-
-    private val credentialDataQuery: CredentialDataQuery
-        get() = mainDataAccessor.getCredentialDataQuery()
 
     override suspend fun getItemGroups() =
         withContext(ioCoroutineDispatcher) { sharingDao.loadAllItemGroup() }
 
     override suspend fun getUserGroups() =
         withContext(ioCoroutineDispatcher) { sharingDao.loadAllUserGroup() }
+
+    override suspend fun getUserGroupsAccepted(login: String) = withContext(ioCoroutineDispatcher) {
+        sharingDao.loadUserGroupsAccepted(login) ?: emptyList()
+    }
 
     override suspend fun getCollections() =
         withContext(ioCoroutineDispatcher) { sharingDao.loadAllCollection() }
@@ -120,8 +116,6 @@ class SharingDataProviderImpl @Inject constructor(
     override suspend fun getAcceptedCollections(userId: String, needsAdminRights: Boolean) =
         withContext(ioCoroutineDispatcher) {
             val collections = sharingDao.loadAllCollection()
-            
-            
             val myCollectionUserGroups =
                 sharingDao.loadUserGroupsAccepted(userId)?.let { acceptedUserGroups ->
                     collections.mapNotNull { it.userGroups }.flatten()
@@ -133,29 +127,28 @@ class SharingDataProviderImpl @Inject constructor(
             collections.filter {
                 it.userGroups?.any { group -> myCollectionUserGroups.contains(group) } == true ||
                     it.users?.any { user ->
-                        user.login == userId && user.isAccepted && user.isAdmin
+                        if (needsAdminRights) {
+                            user.login == userId && user.isAccepted && user.isAdmin
+                        } else {
+                            user.login == userId && user.isAccepted
+                        }
                     } == true
             }
         }
 
-    override suspend fun getAcceptedCollectionsForGroup(
-        userGroupId: String,
-        needsAdminRights: Boolean
-    ) = withContext(ioCoroutineDispatcher) {
-        sharingDao.loadAllCollection().filter { collection ->
-            collection.userGroups?.any {
-                if (needsAdminRights) {
-                    it.isAccepted && it.isAdmin && it.uuid == userGroupId
-                } else {
+    override suspend fun getAcceptedCollectionsForGroup(userGroupId: String) =
+        withContext(ioCoroutineDispatcher) {
+            sharingDao.loadAllCollection().filter { collection ->
+                collection.userGroups?.any {
                     it.isAccepted && it.uuid == userGroupId
-                }
-            } == true
+                } == true
+            }
         }
-    }
 
     override suspend fun getAcceptedCollectionsItems(uuid: String) =
         withContext(ioCoroutineDispatcher) {
-            val collections = getAcceptedCollections().filter { it.uuid == uuid }
+            val collections =
+                getAcceptedCollections(needsAdminRights = false).filter { it.uuid == uuid }
             if (collections.isEmpty()) {
                 return@withContext emptyList()
             }

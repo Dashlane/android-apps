@@ -14,7 +14,8 @@ import com.dashlane.item.subview.edit.ItemEditValueTextSubView
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.readonly.ItemReadValueDateSubView
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.util.clipboard.vault.CopyField
@@ -33,8 +34,9 @@ import java.time.LocalDate
 
 fun <T : SyncObject> createIdentitySubviews(
     context: Context,
+    genericDataQuery: GenericDataQuery,
+    vaultDataQuery: VaultDataQuery,
     subViewFactory: SubViewFactory,
-    mainDataAccessor: MainDataAccessor,
     editMode: Boolean,
     listener: ItemEditViewContract.View.UiUpdateListener,
     item: VaultItem<T>,
@@ -45,7 +47,7 @@ fun <T : SyncObject> createIdentitySubviews(
     val isNew = !item.hasBeenSaved
 
     val selectedLinkedIdentity = if (isNew) {
-        mainDataAccessor.getGenericDataQuery().queryFirst(
+        genericDataQuery.queryFirst(
             genericFilter {
                 specificDataType(SyncObjectType.IDENTITY)
             }
@@ -68,14 +70,14 @@ fun <T : SyncObject> createIdentitySubviews(
 
     
     createFieldLinkedIdentity(
-        context,
-        mainDataAccessor,
-        selectedLinkedIdentity,
-        editMode,
-        fullNameView,
-        listener,
-        genderView,
-        birthDateView
+        context = context,
+        vaultDataQuery = vaultDataQuery,
+        selectedLinkedIdentity = selectedLinkedIdentity,
+        editMode = editMode,
+        fullNameView = fullNameView,
+        listener = listener,
+        genderView = genderView,
+        birthDateView = birthDateView
     )?.also {
         list.add(it)
     }
@@ -195,7 +197,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
 @Suppress("UNCHECKED_CAST")
 private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
     context: Context,
-    mainDataAccessor: MainDataAccessor,
+    vaultDataQuery: VaultDataQuery,
     selectedLinkedIdentity: String?,
     editMode: Boolean,
     fullNameView: ItemSubView<String>?,
@@ -206,7 +208,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
     val otherLabel = context.getString(R.string.other)
     val linkedIdentityHeader = context.getString(R.string.identity)
     val fullNameToIdentity: Map<String, VaultItem<SyncObject.Identity>> =
-        mainDataAccessor.getVaultDataQuery().queryAll(
+        vaultDataQuery.queryAll(
             vaultFilter {
                 specificDataType(SyncObjectType.IDENTITY)
             }

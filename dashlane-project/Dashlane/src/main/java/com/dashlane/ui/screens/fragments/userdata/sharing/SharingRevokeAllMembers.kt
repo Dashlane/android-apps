@@ -15,9 +15,13 @@ class SharingRevokeAllMembers @Inject constructor(
     ) {
         val userId = session.userId
         val userIds = itemGroup.users?.filter { it.isAcceptedOrPending && it.userId != userId }
-            ?.map { it.userId }
+            ?.map { it.userId }?.ifEmpty { null }
         val userGroupIds = itemGroup.groups?.filter { it.isAcceptedOrPending }
-            ?.map { it.groupId }
+            ?.map { it.groupId }?.ifEmpty { null }
+        if (userIds == null && userGroupIds == null) {
+            
+            return
+        }
         sharingDataProvider.cancelInvitationUsersAndUserGroups(itemGroup, userIds, userGroupIds, true)
     }
 }

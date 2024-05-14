@@ -4,16 +4,15 @@ import android.view.View
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
 import com.dashlane.navigation.Navigator
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.ui.Feature
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.util.getBaseActivity
-import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.xml.domain.SyncObjectType
 
 class VaultFabMenuItemNavigator(
     private val fabViewProxy: VaultFabViewProxy,
-    private val teamspaceManager: OptionalProvider<TeamspaceAccessor>,
-    private val navigator: Navigator
+    private val teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
+    private val navigator: Navigator,
 ) : View.OnClickListener {
     fun init() {
         val rootView = fabViewProxy.getRootView<View>()
@@ -62,15 +61,12 @@ class VaultFabMenuItemNavigator(
     }
 
     fun addSecureNote() {
-        teamspaceManager.get()?.startFeatureOrNotify(
+        teamspaceRestrictionNotificator.runOrNotifyTeamRestriction(
             fabViewProxy.context.getBaseActivity() as FragmentActivity,
-            Teamspace.Feature.SECURE_NOTES_DISABLED,
-            object : TeamspaceAccessor.FeatureCall {
-                override fun startFeature() {
-                    addNewItem(SyncObjectType.SECURE_NOTE)
-                }
-            }
-        )
+            Feature.SECURE_NOTES_DISABLED
+        ) {
+            addNewItem(SyncObjectType.SECURE_NOTE)
+        }
     }
 
     private fun addNewIdentity() {

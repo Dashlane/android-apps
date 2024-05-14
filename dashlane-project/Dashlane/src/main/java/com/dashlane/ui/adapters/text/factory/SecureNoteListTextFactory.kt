@@ -24,8 +24,7 @@ class SecureNoteListTextFactory(
             if (item.secured == true) {
                 context.getString(R.string.secure_note_is_locked)
             } else {
-                item
-                .content ?: ""
+                item.getContentForList()
             }
         )
     }
@@ -34,11 +33,17 @@ class SecureNoteListTextFactory(
         if (field !is SecureNoteField || item.secured == true) return null
         val text = when (field) {
             SecureNoteField.ITEM_TYPE_NAME -> context.getString(ITEM_TYPE_NAME_ID)
-            SecureNoteField.CONTENT -> item.content
+            SecureNoteField.CONTENT -> item.getContentForList()
             else -> null
         }
         return text?.toStatusText()
     }
+
+    private fun SummaryObject.SecureNote.getContentForList() =
+        when (secured) {
+            true -> context.getString(R.string.secure_note_is_locked)
+            else -> content?.lineSequence()?.firstOrNull()?.take(n = 80) ?: ""
+        }
 
     companion object {
         const val ITEM_TYPE_NAME_ID = R.string.securenote

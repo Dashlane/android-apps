@@ -11,7 +11,6 @@ import com.dashlane.server.api.endpoints.sync.SyncDownloadService
 import com.dashlane.sharing.SharingSyncCommunicator
 import com.dashlane.sharing.internal.model.ItemToUpdate
 import com.dashlane.sharing.util.SharingCryptographyHelper
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.dao.SharingDataType
 import com.dashlane.sync.DataIdentifierExtraDataWrapper
 import com.dashlane.sync.sharing.SharingSync
@@ -22,13 +21,10 @@ class SharingSyncImpl @Inject constructor(
     private val xmlConverter: DataIdentifierSharingXmlConverter,
     private val sharingCommunicator: SharingSyncCommunicator,
     private val sharingCryptographyHelper: SharingCryptographyHelper,
-    private val dataStorageProvider: DataStorageProvider,
+    private val sharingDao: SharingDao,
     private val sharingItemUpdater: SharingItemUpdater,
     private val sharingGetProvider: SharingGetProvider
 ) : SharingSync {
-
-    private val sharingSyncDao: SharingDao
-        get() = dataStorageProvider.sharingDao
 
     override suspend fun syncSharing(
         session: Authorization.User,
@@ -120,16 +116,16 @@ class SharingSyncImpl @Inject constructor(
         session: Authorization.User,
         summary: SyncDownloadService.Data.SharingSummary
     ) {
-        val itemToUpdateList = sharingSyncDao.getDirtyForSharing().mapNotNull { dataIdentifier ->
+        val itemToUpdateList = sharingDao.getDirtyForSharing().mapNotNull { dataIdentifier ->
             getItemToUpdateFrom(dataIdentifier, summary)
         }
         if (itemToUpdateList.isNotEmpty()) {
             val itemContentSent = sharingCommunicator.updateItems(session, itemToUpdateList)
             for (itemContent in itemContentSent) {
                 val itemId = itemContent.itemId
-                sharingSyncDao.updateItemTimestamp(itemId, itemContent.timestamp.toLong())
+                sharingDao.updateItemTimestamp(itemId, itemContent.timestamp.toLong())
             }
-            sharingSyncDao.markAsShared(itemContentSent.map { it.itemId })
+            sharingDao.markAsShared(itemContentSent.map { it.itemId })
         }
     }
 
@@ -139,7 +135,7 @@ class SharingSyncImpl @Inject constructor(
     ): ItemToUpdate? {
         val uid = dataIdentifier.vaultItem.uid
         val syncTimestamp = summary.items.firstOrNull { it.id == uid }?.timestamp
-        val (itemKeyBase64, remoteTimestamp) = sharingSyncDao.getItemKeyTimestamp(uid) ?: run {
+        val (itemKeyBase64, remoteTimestamp) = sharingDao.getItemKeyTimestamp(uid) ?: run {
             return null
         }
         
@@ -160,7 +156,7 @@ class SharingSyncImpl @Inject constructor(
         dataType: SharingDataType,
         remoteRevisionById: Map<String, Long>
     ): Pair<List<String>, List<String>> {
-        val localRevisionById = runCatching { sharingSyncDao.getItemsSummary(dataType) }
+        val localRevisionById = runCatching { sharingDao.getItemsSummary(dataType) }
             .getOrElse { return emptyList<String>() to emptyList() }
             .toMap()
 

@@ -18,7 +18,8 @@ import com.dashlane.securefile.extensions.getFileSize
 import com.dashlane.securefile.extensions.getFileType
 import com.dashlane.securefile.extensions.toSecureFileInfo
 import com.dashlane.session.SessionManager
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.userfeatures.getSecureFilesMaxFileSize
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.xml.domain.SyncObject
@@ -85,9 +86,7 @@ class UploadAttachmentsPresenter(
         
         val maxSize = Formatter.formatShortFileSize(
             context,
-            userFeaturesChecker
-                .getFeatureInfo(UserFeaturesChecker.Capability.SECURE_FILES_UPLOAD)
-                .optLong("maxFileSize")
+            userFeaturesChecker.getSecureFilesMaxFileSize()
         )
         view.showError(context.getString(R.string.file_too_big_error, maxSize))
     }

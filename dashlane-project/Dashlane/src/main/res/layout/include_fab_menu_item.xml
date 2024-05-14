@@ -15,8 +15,7 @@
     android:orientation="horizontal"
     >
 
-    <TextView
-        android:id="@+id/title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/fab_menu_item_text_background"
@@ -24,9 +23,30 @@
         android:paddingTop="4dp"
         android:paddingEnd="8dp"
         android:paddingBottom="4dp"
-        android:textAppearance="?textAppearanceBody2"
-        tools:text="Credit/debit card"
-        />
+        >
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?textAppearanceBody2"
+            tools:text="Credit/debit card"
+            />
+
+        <com.dashlane.design.component.compat.view.BadgeView
+            android:id="@+id/badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_premium_outlined"
+            android:text="@string/menu_v3_upgrade"
+            android:visibility="gone"
+            app:badgeIcon="leading"
+            android:layout_marginStart="8dp"
+            app:intensity="quiet"
+            app:mood="warning"
+            tools:visibility="visible"
+            />
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/icon"
@@ -40,6 +60,4 @@
         android:scaleType="fitCenter"
         app:fabSize="mini"
         />
-
-
 </LinearLayout>

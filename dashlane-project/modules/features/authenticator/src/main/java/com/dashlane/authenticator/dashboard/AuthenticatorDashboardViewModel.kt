@@ -23,13 +23,14 @@ import com.dashlane.authenticator.updateOtp
 import com.dashlane.authenticator.util.SetUpAuthenticatorResultContract
 import com.dashlane.lock.LockHelper
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.model.isSpaceItem
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.titleForListNormalized
 import com.dashlane.vault.model.urlDomain
@@ -37,6 +38,7 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
@@ -49,19 +51,17 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class AuthenticatorDashboardViewModel @Inject constructor(
-    mainDataAccessor: MainDataAccessor,
     urlDomainRegistryFactory: UrlDomainRegistryFactory,
     lockHelper: LockHelper,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
     private val dataSaver: DataSaver,
     private val logger: AuthenticatorLogger,
     private val userPreferencesManager: UserPreferencesManager,
 ) : ViewModel(), AuthenticatorDashboardViewModelContract {
-    private val credentialDataQuery = mainDataAccessor.getCredentialDataQuery()
-    private val vaultDataQuery = mainDataAccessor.getVaultDataQuery()
     private val userCommand = Channel<UserCommand>(1)
     private val editMode: Boolean
         get() = editState.value == EditLogins

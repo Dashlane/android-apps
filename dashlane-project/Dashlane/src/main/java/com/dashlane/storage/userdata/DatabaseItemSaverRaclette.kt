@@ -5,8 +5,8 @@ import com.dashlane.database.Id
 import com.dashlane.database.VaultObjectRepository
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserDatabaseRepository
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.sync.VaultItemBackupWrapper
 import com.dashlane.useractivity.RacletteLogger
@@ -15,9 +15,11 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.isSupportedSyncObjectType
 import dagger.Lazy
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class DatabaseItemSaverRaclette @Inject constructor(
-    private val dataStorageProvider: Lazy<DataStorageProvider>,
+    private val vaultDataQuery: Lazy<VaultDataQuery>,
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,
     private val racletteLogger: RacletteLogger
@@ -88,7 +90,7 @@ class DatabaseItemSaverRaclette @Inject constructor(
             specificUid(itemUid)
             allStatusFilter()
         }
-        return dataStorageProvider.get().vaultDataQuery.query(filter)
+        return vaultDataQuery.get().query(filter)
     }
 
     suspend fun inTransaction(block: VaultObjectRepository.Transaction.() -> Unit) =

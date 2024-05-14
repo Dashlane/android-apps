@@ -27,11 +27,11 @@ suspend fun SharingItemUpdater.handleServerResponse(
 }
 
 suspend fun SharingItemUpdater.handleCollectionSharingResult(
-    collections: List<Collection>,
+    collections: List<Collection>? = null,
     updatedItemGroups: List<ItemGroup>? = null
 ) = update(
     SharingItemUpdaterRequest(
         itemGroupUpdates = updatedItemGroups ?: emptyList(),
-        collectionUpdates = collections
+        collectionUpdates = collections ?: emptyList()
     )
 )

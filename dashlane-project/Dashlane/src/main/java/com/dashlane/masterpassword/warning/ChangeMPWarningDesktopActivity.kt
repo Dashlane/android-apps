@@ -13,14 +13,15 @@ import com.dashlane.lock.UnlockEvent
 import com.dashlane.masterpassword.ChangeMasterPasswordActivity
 import com.dashlane.masterpassword.ChangeMasterPasswordLogoutHelper
 import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.findContentParent
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -86,7 +87,7 @@ class ChangeMPWarningDesktopActivity : DashlaneActivity() {
                 positiveButtonRes = R.string.master_password_user_migration_warning_cta_positive,
                 negativeButtonRes = R.string.master_password_user_migration_warning_cta_negative
             )
-            userFeatureChecker.has(UserFeaturesChecker.Capability.SYNC) -> setTexts(
+            userFeatureChecker.has(Capability.SYNC) -> setTexts(
                 titleRes = R.string.change_mp_warning_desktop_title,
                 subTitleRes = R.string.change_mp_warning_desktop_description
             )
@@ -100,11 +101,14 @@ class ChangeMPWarningDesktopActivity : DashlaneActivity() {
     private fun ActivityWarningBinding.setTexts(
         @StringRes titleRes: Int,
         @StringRes subTitleRes: Int,
+        @StringRes infoBoxRes: Int = R.string.login_account_recovery_key_change_mp_warning,
         @StringRes positiveButtonRes: Int = R.string.change_mp_warning_desktop_positive_button,
         @StringRes negativeButtonRes: Int = R.string.change_mp_warning_desktop_negative_button
     ) {
         textTitle.setText(titleRes)
         textSubtitle.setText(subTitleRes)
+        warningInfobox.text = getString(infoBoxRes)
+        warningInfobox.visibility = View.VISIBLE
         positiveButton.setText(positiveButtonRes)
         negativeButton.setText(negativeButtonRes)
     }

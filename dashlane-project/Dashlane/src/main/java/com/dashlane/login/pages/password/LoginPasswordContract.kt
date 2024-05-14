@@ -1,7 +1,7 @@
 package com.dashlane.login.pages.password
 
 import android.content.Intent
-import com.dashlane.accountrecoverykey.AccountRecoveryStatus
+import com.dashlane.accountrecoverykey.AccountRecoveryState
 import com.dashlane.login.pages.LoginLockBaseContract
 
 interface LoginPasswordContract {
@@ -52,7 +52,7 @@ interface LoginPasswordContract {
 
         suspend fun validatePassword(password: CharSequence, leaveAfterSuccess: Boolean): SuccessfulLogin
 
-        suspend fun getAccountRecoveryKeyStatus(): AccountRecoveryStatus
+        suspend fun getAccountRecoveryKeyStatus(): AccountRecoveryState
 
         fun loginHelp(): Intent
 

@@ -11,8 +11,6 @@ import com.dashlane.login.LoginLogger
 import com.dashlane.login.LoginMode
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureStorageManager
@@ -21,12 +19,12 @@ import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class SessionManagerImpl @Inject constructor(
@@ -40,7 +38,6 @@ class SessionManagerImpl @Inject constructor(
     private val sessionCoroutineScopeRepository: Lazy<SessionCoroutineScopeRepository>,
     private val userDataRepository: Lazy<UserDataRepository>,
     private val userDatabaseRepository: Lazy<UserDatabaseRepository>,
-    private val teamspaceManagerRepository: Lazy<TeamspaceManagerRepository>,
     private val sessionRestorer: Lazy<SessionRestorer>,
     private val userPreferencesManagerLazy: Lazy<UserPreferencesManager>,
     private val remoteConfigurations: Lazy<Set<RemoteConfiguration>>,
@@ -197,7 +194,6 @@ class SessionManagerImpl @Inject constructor(
         return try {
             sessionCoroutineScopeRepository.get().sessionInitializing(session)
             userDataRepository.get().sessionInitializing(session, userSettings, accountType, allowOverwriteAccessKey)
-            teamspaceManagerRepository.get().sessionInitializing(session)
 
             remoteConfigurations.get().forEach {
                 it.initAndRefresh()

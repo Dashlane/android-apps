@@ -1,48 +1,71 @@
 package com.dashlane.ui.menu.domain
 
+import com.dashlane.accountstatus.AccountStatus
+import com.dashlane.accountstatus.premiumstatus.isTrial
+import com.dashlane.accountstatus.premiumstatus.remainingDays
 import com.dashlane.notification.badge.NotificationBadgeActor
-import com.dashlane.premium.offer.common.FormattedPremiumStatusManager
+import com.dashlane.premium.offer.common.UserBenefitStatusProvider
 import com.dashlane.premium.offer.common.model.UserBenefitStatus
+import com.dashlane.server.api.endpoints.premium.PremiumStatus
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.AccountStatusRepository
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.teamspaces.manager.TeamspaceManager
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.checklist.ChecklistHelper
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
-import com.dashlane.util.userfeatures.canShowVpn
-import com.dashlane.util.userfeatures.canUpgradeToGetVpn
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.userfeatures.canShowVpn
+import com.dashlane.userfeatures.canUpgradeToGetVpn
+import com.dashlane.util.inject.OptionalProvider
+import java.time.Clock
 import javax.inject.Inject
 
 class MenuConfigurationProvider @Inject constructor(
     private val checklistHelper: ChecklistHelper,
     private val notificationBadgeActor: NotificationBadgeActor,
-    private val accountStatusRepository: AccountStatusRepository,
+    private val accountStatusProvider: OptionalProvider<AccountStatus>,
     private val sessionManager: SessionManager,
     private val userFeaturesChecker: UserFeaturesChecker,
-    private val teamspaceRepository: TeamspaceManagerRepository,
-    private val premiumStatusManager: FormattedPremiumStatusManager
+    private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
+    private val userBenefitStatusProvider: UserBenefitStatusProvider,
+    private val clock: Clock
 ) {
-    private val userPremiumStatusType: UserBenefitStatus.Type
-        get() = premiumStatusManager.getFormattedStatus().type
+    private val accountStatus: AccountStatus?
+        get() = accountStatusProvider.get()
+    private val premiumStatus: PremiumStatus?
+        get() = accountStatusProvider.get()?.premiumStatus
 
+    private val userPremiumStatusType: UserBenefitStatus.Type
+        get() = userBenefitStatusProvider.getFormattedStatus(accountStatus).type
+
+    private val teamSpaceAccessor: TeamSpaceAccessor?
+        get() = teamSpaceAccessorProvider.get()
     private val userAlias: String
         get() = sessionManager.session?.userId ?: ""
 
-    private val teamspaceManager: TeamspaceManager?
-        get() = sessionManager.session?.let { session -> teamspaceRepository[session] }
-
-    private val currentSpace: Teamspace?
-        get() = teamspaceManager?.current
+    private val currentSpaceFilter: TeamSpace
+        get() = currentTeamSpaceUiFilter.currentFilter.teamSpace
 
     private val canChangeSpace: Boolean
-        get() = teamspaceManager?.canChangeTeamspace() == true
+        get() = teamSpaceAccessor?.canChangeTeamspace == true
 
-    private val selectableTeamspaces: List<Teamspace>?
-        get() = teamspaceManager?.let { teamspaceManager ->
-            teamspaceManager.all.filterNot { it == teamspaceManager.current }
+    private val enforcedTeamspace: TeamSpace?
+        get() {
+            val teamSpaceAccessor = teamSpaceAccessor ?: return null
+            return if (teamSpaceAccessor.hasEnforcedTeamSpace) {
+                teamSpaceAccessor.currentBusinessTeam
+            } else {
+                null
+            }
+        }
+
+    private val selectableTeamspaces: List<TeamSpace>?
+        get() {
+            val teamSpaceAccessor = teamSpaceAccessor ?: return null
+            return teamSpaceAccessor.availableSpaces.minus(currentSpaceFilter)
         }
 
     private val isPersonalPlanVisible: Boolean
@@ -52,24 +75,23 @@ class MenuConfigurationProvider @Inject constructor(
         get() = notificationBadgeActor.hasUnReadActionItems
 
     private val isTrial: Boolean
-        get() = sessionManager.session?.let(accountStatusRepository::getPremiumStatus)?.isTrial == true
+        get() = premiumStatus?.isTrial == true
 
     private val remainingDays: Long
-        get() = sessionManager.session?.let(accountStatusRepository::getPremiumStatus)
-            .let { it?.remainingDays } ?: 0L
+        get() = premiumStatus?.remainingDays(clock) ?: 0L
 
     private val hasDataLeak: Boolean
-        get() = userFeaturesChecker.has(Capability.DATA_LEAK)
+        get() = userFeaturesChecker.has(Capability.DATALEAK)
 
     private val isVPNVisible: Boolean
         get() = userFeaturesChecker.canShowVpn()
 
     private val canUpgradeToGetVPN: Boolean
-        get() = !userFeaturesChecker.has(Capability.VPN_ACCESS) &&
+        get() = !userFeaturesChecker.has(Capability.SECUREWIFI) &&
             userFeaturesChecker.canUpgradeToGetVpn()
 
     private val isCollectionSharingVisible: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
 
     private fun canUpgradePremium() = when (val statusType = userPremiumStatusType) {
         is UserBenefitStatus.Type.Family -> statusType.isAdmin
@@ -90,10 +112,11 @@ class MenuConfigurationProvider @Inject constructor(
             isCollectionSharingVisible = isCollectionSharingVisible,
             canUpgradeToGetVPN = canUpgradeToGetVPN,
             canChangeSpace = canChangeSpace,
-            currentSpace = currentSpace,
+            currentSpace = currentSpaceFilter,
             selectableTeamspaces = selectableTeamspaces,
             userPremiumStatusType = userPremiumStatusType,
-            canUpgradePremium = canUpgradePremium()
+            canUpgradePremium = canUpgradePremium(),
+            enforcedTeamspace = enforcedTeamspace
         )
 }
 
@@ -109,8 +132,9 @@ data class MenuConfiguration(
     val isCollectionSharingVisible: Boolean,
     val canUpgradeToGetVPN: Boolean,
     val canChangeSpace: Boolean,
-    val currentSpace: Teamspace?,
-    val selectableTeamspaces: List<Teamspace>?,
+    val currentSpace: TeamSpace?,
+    val selectableTeamspaces: List<TeamSpace>?,
     val userPremiumStatusType: UserBenefitStatus.Type,
     val canUpgradePremium: Boolean,
+    val enforcedTeamspace: TeamSpace? = null
 )

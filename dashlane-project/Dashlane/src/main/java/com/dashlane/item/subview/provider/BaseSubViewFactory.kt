@@ -6,19 +6,21 @@ import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.AttachmentDetailsAction
 import com.dashlane.item.subview.action.ShareDetailsAction
-import com.dashlane.teamspaces.CombinedTeamspace
-import com.dashlane.teamspaces.PersonalTeamspace
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.attachmentsAllowed
 import com.dashlane.vault.util.attachmentsCount
 
-abstract class BaseSubViewFactory(private val userFeaturesChecker: UserFeaturesChecker) : SubViewFactory {
+abstract class BaseSubViewFactory(
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val currentTeamSpaceFilter: CurrentTeamSpaceUiFilter
+) : SubViewFactory {
 
     override fun createSubviewSharingDetails(
         context: Context,
@@ -53,7 +55,7 @@ abstract class BaseSubViewFactory(private val userFeaturesChecker: UserFeaturesC
         }
 
         return ItemSubViewWithActionWrapper(
-            ReadOnlySubViewFactory(userFeaturesChecker).createSubViewString(
+            ReadOnlySubViewFactory(userFeaturesChecker, currentTeamSpaceFilter).createSubViewString(
                 context.getString(R.string.sharing_services_view_section_title),
                 sharingDetailsText,
                 false
@@ -81,7 +83,7 @@ abstract class BaseSubViewFactory(private val userFeaturesChecker: UserFeaturesC
             attachmentsCount
         )
         return ItemSubViewWithActionWrapper(
-            ReadOnlySubViewFactory(userFeaturesChecker).createSubViewString(
+            ReadOnlySubViewFactory(userFeaturesChecker, currentTeamSpaceFilter).createSubViewString(
                 context.getString(R.string.attachments_view_section_title),
                 attachmentsDetailsText,
                 false
@@ -90,18 +92,19 @@ abstract class BaseSubViewFactory(private val userFeaturesChecker: UserFeaturesC
         )
     }
 
-    fun getTeamspaces(teamspaceAccessor: TeamspaceAccessor): List<Teamspace> {
-        return teamspaceAccessor.all.minus(CombinedTeamspace)
+    fun getTeamspaces(teamSpaceAccessor: TeamSpaceAccessor): List<TeamSpace> {
+        return teamSpaceAccessor.availableSpaces.minus(TeamSpace.Combined)
     }
 
-    fun getTeamspace(teamspaceAccessor: TeamspaceAccessor, teamspaceName: String?): Teamspace {
-        return teamspaceName?.let {
+    fun getTeamspace(teamSpaceAccessor: TeamSpaceAccessor, spaceId: String?): TeamSpace {
+        return spaceId?.let {
             
-            teamspaceAccessor.all.firstOrNull { it.teamId == teamspaceName }
-                ?: PersonalTeamspace 
-        } ?: teamspaceAccessor.current 
-            ?.takeUnless { it.type == Teamspace.Type.COMBINED } 
-        ?: PersonalTeamspace 
+            teamSpaceAccessor.availableSpaces.firstOrNull { it.teamId == spaceId }
+                ?: TeamSpace.Personal 
+        } 
+            ?: currentTeamSpaceFilter.currentFilter.teamSpace.takeUnless { it == TeamSpace.Combined }
+            
+            ?: TeamSpace.Personal 
     }
 
     private fun isNotShared(sharingCount: Pair<Int, Int>) = sharingCount.first == 0 && sharingCount.second == 0

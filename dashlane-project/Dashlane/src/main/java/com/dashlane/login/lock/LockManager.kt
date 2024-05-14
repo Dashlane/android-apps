@@ -14,9 +14,7 @@ import com.dashlane.login.lock.LockTimeManager.Companion.DEFAULT_AUTO_LOCK_GRACE
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.util.Constants
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.summary.SummaryObject
 import java.time.Duration
@@ -32,7 +30,7 @@ class LockManager @Inject constructor(
     private val lockTypeManager: LockTypeManager,
     private val lockTimeManager: LockTimeManager,
     private val lockWatcher: LockWatcherImpl,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val userPreferencesManager: UserPreferencesManager,
     private val sessionManager: SessionManager,
     private val lockValidator: LockValidator,
@@ -194,8 +192,7 @@ class LockManager @Inject constructor(
     fun getFailUnlockAttemptCount(): Int =
         max(0, userPreferencesManager.pinCodeTryCount)
 
-    fun hasFailedUnlockTooManyTimes(): Boolean =
-        getFailUnlockAttemptCount() >= Constants.WORKMODE.MAXIMUM_UNLOCK_TRIES
+    fun hasFailedUnlockTooManyTimes(): Boolean = getFailUnlockAttemptCount() >= 3
 
     fun checkForInactivityLock() {
         val lockTimeout = lockTimeout ?: return 
@@ -224,10 +221,8 @@ class LockManager @Inject constructor(
     }
 
     private fun initLockOnExitWithTeamspace() {
-        val teamspaceAccessor = teamspaceAccessorProvider.get()
-        val settingsForced =
-            teamspaceAccessor != null && !teamspaceAccessor.isFeatureEnabled(Teamspace.Feature.AUTOLOCK)
-        if (settingsForced) {
+        val teamspaceAccessor = teamSpaceAccessorProvider.get() ?: return
+        if (teamspaceAccessor.isLockOnExitEnabled) {
             
             setLockOnExit(true)
         }

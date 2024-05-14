@@ -26,11 +26,12 @@ import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.Re
 import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresSso
 import com.dashlane.authentication.login.SsoInfo
 import com.dashlane.crashreport.CrashReporter
-import com.dashlane.logger.usersupportlogger.UserSupportFileUploadState
-import com.dashlane.logger.usersupportlogger.UserSupportFileUploader
+import com.dashlane.common.logger.usersupportlogger.UserSupportFileUploadState
+import com.dashlane.common.logger.usersupportlogger.UserSupportFileUploader
 import com.dashlane.login.LoginSuccessIntentFactory
 import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginBaseDataProvider
+import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation
 import com.dashlane.login.sso.toMigrationToSsoMemberInfo
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.server.api.endpoints.AccountType
@@ -174,7 +175,7 @@ class LoginEmailDataProvider @Inject constructor(
                 userAccountStorage.saveAccountType(login, accountType)
                 userAccountStorage.saveSecuritySettings(login, securitySettings)
                 if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) {
-                    presenter.showSecretTransferQRPage(login)
+                    presenter.showSecretTransferQRPage(login, LoginSecretTransferNavigation.chooseTypeDestination)
                 } else if (secondFactor.isAuthenticatorEnabled) {
                     presenter.showAuthenticatorPage(secondFactor)
                 } else {

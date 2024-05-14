@@ -22,7 +22,6 @@ open class UserDatabaseRepositoryImpl @Inject constructor(
         sessionCoroutineScopeRepository.getCoroutineScope(session)?.let {
             withContext(it.coroutineContext) {
                 openRacletteDatabase(session)
-                racletteLogger.openDatabase()
             }
         }
     }

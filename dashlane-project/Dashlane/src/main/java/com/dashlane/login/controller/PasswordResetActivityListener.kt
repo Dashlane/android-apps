@@ -3,13 +3,13 @@ package com.dashlane.login.controller
 import android.app.Activity
 import android.content.IntentFilter
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.dashlane.async.BroadcastConstants
 import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.navigation.Navigator
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionTrasher
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.util.Constants
 import javax.inject.Inject
 
 class PasswordResetActivityListener @Inject constructor(
@@ -28,7 +28,7 @@ class PasswordResetActivityListener @Inject constructor(
             passResetReceiver =
                 PasswordResetReceiver(activity, sessionTrasher, syncBroadcastManager, sessionManager, navigator).apply {
                     LocalBroadcastManager.getInstance(activity)
-                        .registerReceiver(this, IntentFilter(Constants.BROADCASTS.PASSWORD_SUCCESS_BROADCAST))
+                        .registerReceiver(this, IntentFilter(BroadcastConstants.PASSWORD_SUCCESS_BROADCAST))
 
                     
                     syncBroadcastManager.popPasswordBroadcast()?.let {

@@ -10,10 +10,9 @@ import com.dashlane.sharing.model.canLostAccess
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.toPermission
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
@@ -23,13 +22,10 @@ import javax.inject.Inject
 
 class SharingPolicyDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
-    private val dataStorageProvider: DataStorageProvider,
+    private val sharingDao: SharingDao,
     private val sharingDataProvider: SharingDataProvider,
     private val userFeaturesChecker: UserFeaturesChecker
 ) {
-    private val sharingDao: SharingDao
-        get() = dataStorageProvider.sharingDao
-
     private fun getSharingPolicy(summaryObject: SummaryObject): Permission? {
         return if (summaryObject.isShared) {
             summaryObject.sharingPermission?.toPermission()
@@ -57,7 +53,7 @@ class SharingPolicyDataProvider @Inject constructor(
     }
 
     fun getSharingCountUserAndUserGroup(itemGroup: ItemGroup): Pair<Int, Int> {
-        val collections = if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)) {
+        val collections = if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
             sharingDao.loadAllCollection().filter { collection ->
                 itemGroup.collections?.any { collection.uuid == it.uuid && it.isAccepted } == true
             }

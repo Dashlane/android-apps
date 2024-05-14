@@ -59,17 +59,19 @@ class CreateAccountEmailPresenter(
 
                 if (pendingAccount.emailLikelyInvalid) {
                     confirmUnlikelyEmail(
-                        pendingAccount.email,
-                        pendingAccount.inEuropeanUnion,
-                        pendingAccount.country,
-                        pendingAccount.loginSsoIntent
+                        email = pendingAccount.email,
+                        inEuropeanUnion = pendingAccount.inEuropeanUnion,
+                        country = pendingAccount.country,
+                        loginSsoIntent = pendingAccount.loginSsoIntent,
+                        isB2B = pendingAccount.isB2B
                     )
                 } else {
                     notifySuccess(
-                        pendingAccount.email,
-                        pendingAccount.inEuropeanUnion,
-                        pendingAccount.country,
-                        pendingAccount.loginSsoIntent
+                        username = pendingAccount.email,
+                        inEuropeanUnion = pendingAccount.inEuropeanUnion,
+                        country = pendingAccount.country,
+                        loginSsoIntent = pendingAccount.loginSsoIntent,
+                        isB2B = pendingAccount.isB2B
                     )
                 }
             }
@@ -105,13 +107,15 @@ class CreateAccountEmailPresenter(
         email: String,
         inEuropeanUnion: Boolean,
         country: String?,
-        loginSsoIntent: Intent?
+        loginSsoIntent: Intent?,
+        isB2B: Boolean
     ) {
         view.showConfirmEmailPopup(
-            email,
-            inEuropeanUnion,
-            country,
-            loginSsoIntent
+            email = email,
+            inEuropeanUnion = inEuropeanUnion,
+            country = country,
+            loginSsoIntent = loginSsoIntent,
+            isB2B = isB2B
         )
     }
 
@@ -119,7 +123,8 @@ class CreateAccountEmailPresenter(
         username: String,
         inEuropeanUnion: Boolean,
         country: String?,
-        loginSsoIntent: Intent?
+        loginSsoIntent: Intent?,
+        isB2B: Boolean
     ) {
         if (loginSsoIntent != null) {
             activity?.startActivityForResult(
@@ -127,7 +132,7 @@ class CreateAccountEmailPresenter(
                 REQUEST_CODE_SSO_LOGIN
             )
         } else {
-            presenter.showChoosePasswordPage(username, inEuropeanUnion, country)
+            presenter.showChoosePasswordPage(username, inEuropeanUnion, country, isB2B)
         }
     }
 
@@ -141,16 +146,16 @@ class CreateAccountEmailPresenter(
     override fun onShow() {
         super.onShow()
         view.exposeTrackingInstallationId(provider.getTrackingInstallationId())
-        presenter.toggleMplessButtonVisibility(false)
     }
 
     override fun onConfirmEmail(
         email: String,
         inEuropeanUnion: Boolean,
         country: String?,
-        loginSsoIntent: Intent?
+        loginSsoIntent: Intent?,
+        isB2B: Boolean
     ) {
-        notifySuccess(email, inEuropeanUnion, country, loginSsoIntent)
+        notifySuccess(email, inEuropeanUnion, country, loginSsoIntent, isB2B)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

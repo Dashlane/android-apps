@@ -4,16 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.session.SessionManager
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class IdentityDashboardFragment : AbstractContentFragment() {
@@ -24,8 +30,32 @@ class IdentityDashboardFragment : AbstractContentFragment() {
     lateinit var presenter: IdentityDashboardPresenter
 
     @Inject
+    lateinit var accountStatusRepository: AccountStatusRepository
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
+
+    @Inject
     @ApplicationCoroutineScope
     lateinit var applicationCoroutineScope: CoroutineScope
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                accountStatusRepository.accountStatusState.collect { accountStatuses ->
+                    accountStatuses[sessionManager.session]?.let {
+                        presenter.requireRefresh(forceRefresh = true)
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,6 +80,11 @@ class IdentityDashboardFragment : AbstractContentFragment() {
     override fun onStart() {
         super.onStart()
         presenter.onViewVisible()
+        lifecycleScope.launch {
+            currentTeamSpaceUiFilter.teamSpaceFilterState.collect {
+                presenter.requireRefresh(forceRefresh = true)
+            }
+        }
     }
 
     override fun onStop() {

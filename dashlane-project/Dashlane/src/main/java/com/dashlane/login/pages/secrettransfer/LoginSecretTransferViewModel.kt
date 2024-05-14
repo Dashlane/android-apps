@@ -21,6 +21,8 @@ import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
 import com.dashlane.notificationcenter.view.ActionItemType
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.secrettransfer.domain.SecretTransferPayload
+import com.dashlane.secrettransfer.domain.toUserAccountInfoType
 import com.dashlane.session.AppKey
 import com.dashlane.session.LocalKey
 import com.dashlane.session.SessionCredentialsSaver
@@ -36,6 +38,7 @@ import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -133,6 +136,8 @@ class LoginSecretTransferViewModel @Inject constructor(
                 SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD -> UserAccountInfo.AccountType.InvisibleMasterPassword
             }
 
+            
+            delay(500)
             emit(LoginSecretTransferState.Success(stateFlow.value.data, accountType))
         }
             .catch {
@@ -149,7 +154,7 @@ class LoginSecretTransferViewModel @Inject constructor(
         registeredUserDevice: RegisteredUserDevice.Remote
     ) {
         val username = Username.ofEmail(secretTransferPayload.login)
-        val password = AppKey.Password(secretTransferPayload.vaultKey.value)
+        val password = AppKey.Password(secretTransferPayload.vaultKey.value, registeredUserDevice.serverKey)
         val localKey = authenticationLocalKeyRepository.createForRemote(
             username = username,
             appKey = password,
@@ -163,7 +168,7 @@ class LoginSecretTransferViewModel @Inject constructor(
             settings = settings,
             appKey = password,
             remoteKey = null,
-            loginMode = LoginMode.MasterPassword(),
+            loginMode = LoginMode.DeviceTransfer,
             accountType = secretTransferPayload.vaultKey.type.toUserAccountInfoType()
         )
 
@@ -195,7 +200,7 @@ class LoginSecretTransferViewModel @Inject constructor(
             settings = settings,
             appKey = ssoKey,
             remoteKey = remoteKey,
-            loginMode = LoginMode.Sso,
+            loginMode = LoginMode.DeviceTransfer,
             accountType = UserAccountInfo.AccountType.MasterPassword
         )
 

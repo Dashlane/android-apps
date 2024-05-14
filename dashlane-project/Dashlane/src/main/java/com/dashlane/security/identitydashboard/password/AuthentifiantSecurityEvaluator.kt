@@ -7,12 +7,12 @@ import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.security.identitydashboard.SecurityScore
 import com.dashlane.similarpassword.GroupOfPassword
 import com.dashlane.similarpassword.SimilarPassword
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.manager.DataIdentifierSpaceCategorization
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.url.UrlDomain
 import com.dashlane.url.registry.UrlDomainCategory
 import com.dashlane.url.registry.UrlDomainRegistryFactory
@@ -28,10 +28,10 @@ import com.dashlane.vault.model.leakedPasswordsSet
 import com.dashlane.vault.model.toVaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 @Singleton
 class AuthentifiantSecurityEvaluator @Inject constructor(
@@ -41,15 +41,14 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
     @Cache
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
     private val jsonSerialization: JsonSerialization,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val urlDomainRegistryFactory: UrlDomainRegistryFactory,
-    private val mainDataAccessor: MainDataAccessor
+    private val vaultDataQuery: VaultDataQuery,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
 ) {
-    private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
 
     suspend fun computeResult(
-        teamspace: Teamspace,
+        teamSpace: TeamSpace,
         ignoreUserLock: Boolean = false
     ): Result = withContext(ioDispatcher) {
         computeResult(
@@ -61,7 +60,7 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
                 vaultDataQuery,
                 ignoreUserLock
             ).distinctBy { it.breachId },
-            teamspace
+            teamSpace
         )
     }
 
@@ -70,13 +69,13 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
     suspend fun computeResult(
         itemsAllSpaces: List<AnalyzedAuthentifiant>,
         securityBreaches: List<SyncObject.SecurityBreach>,
-        teamspace: Teamspace
+        teamspace: TeamSpace
     ): Result {
         val timeMeasurement = TimeMeasurement("SecurityEvaluator")
         val passwordsAllSpaces = getPasswordsForAllSpaces(itemsAllSpaces)
         val spaceCategorization =
-            teamspaceAccessorProvider.get()
-                ?.let { DataIdentifierSpaceCategorization(it, teamspace) }
+            teamSpaceAccessorProvider.get()
+                ?.let { DataIdentifierSpaceCategorization(it, currentTeamSpaceUiFilter, teamspace) }
         val items =
             itemsAllSpaces.filter { spaceCategorization?.canBeDisplay(it.item.toVaultItem()) == true }
         val allDomainsUrls = items.mapNotNull { it.navigationUrl }

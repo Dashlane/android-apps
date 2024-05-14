@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.AuthenticationException
 import com.dashlane.authentication.AuthenticationExpiredVersionException
+import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.pages.CreateAccountBaseContract
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordContract
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordDataProvider
@@ -39,7 +40,6 @@ class CreateAccountDataProvider @Inject constructor(
 ) : BaseDataProvider<LoginContract.Presenter>(), CreateAccountContract.DataProvider {
 
     override fun isExplicitOptinRequired(inEuropeanUnion: Boolean): Boolean {
-        if (accountCreator.isGdprDebugModeEnabled) return accountCreator.isGdprForced
         return inEuropeanUnion
     }
 
@@ -49,7 +49,8 @@ class CreateAccountDataProvider @Inject constructor(
         accountType: UserAccountInfo.AccountType,
         termsState: AccountCreator.TermsState,
         biometricEnabled: Boolean,
-        resetMpEnabled: Boolean
+        resetMpEnabled: Boolean,
+        country: String
     ) = withContext(defaultCoroutineDispatcher) {
         try {
             coroutineScope {
@@ -64,7 +65,8 @@ class CreateAccountDataProvider @Inject constructor(
                     accountType = accountType,
                     termsState = termsState,
                     biometricEnabled = biometricEnabled,
-                    resetMpEnabled = resetMpEnabled
+                    resetMpEnabled = resetMpEnabled,
+                    country = country,
                 )
 
                 val advertisingInfo =
@@ -91,9 +93,10 @@ class CreateAccountDataProvider @Inject constructor(
         return createEmailDataProvider.get()
     }
 
-    override fun createChoosePasswordDataProvider(username: String): CreateAccountChoosePasswordContract.DataProvider {
+    override fun createChoosePasswordDataProvider(username: String, isB2B: Boolean): CreateAccountChoosePasswordContract.DataProvider {
         return createChoosePasswordDataProvider.get().apply {
             this.username = username
+            this.isB2B = isB2B
         }
     }
 
@@ -102,7 +105,7 @@ class CreateAccountDataProvider @Inject constructor(
         password: ObfuscatedByteArray,
         inEuropeanUnion: Boolean,
         origin: String?,
-        country: String?
+        country: String
     ): CreateAccountConfirmPasswordContract.DataProvider {
         return createConfirmPasswordDataProvider.get()
             .also {

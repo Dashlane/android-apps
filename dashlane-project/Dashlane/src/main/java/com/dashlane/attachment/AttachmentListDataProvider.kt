@@ -3,7 +3,7 @@ package com.dashlane.attachment
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import com.dashlane.attachment.ui.AttachmentItem
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.securefile.extensions.toSecureFile
 import com.dashlane.securefile.storage.SecureFileStorage

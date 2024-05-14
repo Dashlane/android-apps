@@ -8,23 +8,17 @@ import com.dashlane.server.api.endpoints.authentication.AuthSecurityType.TOTP_DE
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType.TOTP_LOGIN
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.Session
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.is2FAEnforced
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import javax.inject.Inject
 
 class HasEnforced2FaLimitUseCaseImpl @Inject constructor(
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
-    private val auth2faSettingsService: Auth2faSettingsService,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val teamSpaceAccessor: OptionalProvider<TeamSpaceAccessor>,
+    private val auth2faSettingsService: Auth2faSettingsService
 ) : HasEnforced2faLimitUseCase {
-    private val hasFeature: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.ENFORCED_2FA_POLICY)
 
     override suspend fun invoke(session: Session, hasTotpSetupFallback: Boolean?): Boolean {
-        return if (hasFeature && teamspaceAccessorProvider.get().is2FAEnforced()) {
+        return if (teamSpaceAccessor.get()?.is2FAEnforced == true) {
             try {
                 shouldEnforce2FA(session)
             } catch (e: DashlaneApiException) {

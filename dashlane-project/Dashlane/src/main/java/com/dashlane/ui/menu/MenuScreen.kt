@@ -31,9 +31,12 @@ import com.dashlane.databinding.ActivityHomeActivityLayoutBinding
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.teamspaces.model.SpaceColor
+import com.dashlane.teamspaces.model.SpaceName
 import com.dashlane.ui.menu.domain.MenuItemModel
 import com.dashlane.ui.menu.domain.TeamspaceIcon
 import com.dashlane.ui.menu.view.footer.MenuLockFooterItem
+import com.dashlane.ui.menu.view.header.MenuHeaderEnforcedTeamProfileItem
 import com.dashlane.ui.menu.view.header.MenuHeaderTeamspaceItem
 import com.dashlane.ui.menu.view.header.MenuHeaderUserProfileItem
 import com.dashlane.ui.menu.view.item.MenuItem
@@ -110,10 +113,16 @@ private fun MenuContent(
                     )
                 }
 
-                is MenuItemModel.Header.Teamspace -> {
+                is MenuItemModel.Header.TeamspaceProfile -> {
                     MenuHeaderTeamspaceItem(
                         teamspace = item,
                         onTeamspaceWrapperClick = onHeaderTeamspaceSelectorClick
+                    )
+                }
+
+                is MenuItemModel.Header.EnforcedTeamspaceProfile -> {
+                    MenuHeaderEnforcedTeamProfileItem(
+                        enforcedTeamspaceProfile = item
                     )
                 }
 
@@ -133,7 +142,7 @@ private fun MenuContent(
                     MenuLockFooterItem { onLockout() }
                 }
 
-                is MenuItemModel.Teamspace -> {
+                is MenuItemModel.TeamspaceItem -> {
                     MenuTeamspaceItem(item = item)
                 }
             }
@@ -206,24 +215,24 @@ private fun B2bMenuContentPreview() {
             innerPadding = PaddingValues(),
             uiState = MenuState.Loaded(
                 items = listOf(
-                    MenuItemModel.Header.Teamspace(
+                    MenuItemModel.Header.TeamspaceProfile(
                         icon = TeamspaceIcon.Combined,
-                        name = "All spaces",
+                        name = SpaceName.TeamName("All spaces"),
                         mode = true
                     ),
-                    MenuItemModel.Teamspace(
-                        name = "Personal",
+                    MenuItemModel.TeamspaceItem(
+                        spaceName = SpaceName.TeamName("Personal"),
                         icon = TeamspaceIcon.Space(
-                            displayLetter = "P",
-                            colorInt = 0xFFD000AF.toInt()
+                            displayLetter = 'P',
+                            spaceColor = SpaceColor.FixColor(0xFFD000AF.toInt())
                         ),
                         onClick = {}
                     ),
-                    MenuItemModel.Teamspace(
-                        name = "Upshit",
+                    MenuItemModel.TeamspaceItem(
+                        spaceName = SpaceName.TeamName("Upshit"),
                         icon = TeamspaceIcon.Space(
-                            displayLetter = "U",
-                            colorInt = 0xFF3366FF.toInt()
+                            displayLetter = 'U',
+                            spaceColor = SpaceColor.FixColor(0xFF3366FF.toInt())
                         ),
                         onClick = {}
                     )

@@ -4,9 +4,8 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.teamspaces.manager.TeamspaceManager
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.activities.fragments.list.action.CopyItemFieldListItemAction
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
@@ -29,11 +28,9 @@ open class DefaultVaultItemWrapper<D : SummaryObject>(
     override val itemListContext: ItemListContext,
     override val navigator: Navigator,
     private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
-    private val sessionManager: SessionManager,
-    private val teamspaceRepository: TeamspaceManagerRepository,
+    override val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
+    override val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
 ) : VaultItemWrapper<D> {
-    override val teamspaceManager: TeamspaceManager?
-        get() = sessionManager.session?.let { teamspaceRepository.getTeamspaceManager(it) }
 
     override var allowTeamspaceIcon: Boolean = false
     private var overrideViewType: DashlaneRecyclerAdapter.ViewType<VaultItemWrapper<out SummaryObject>>? = null

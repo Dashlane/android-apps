@@ -4,14 +4,20 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,23 +35,27 @@ import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
+import com.dashlane.design.component.ButtonMediumBar
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.login.pages.secrettransfer.SecretTransferPayload
+import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.ui.widgets.compose.GenericErrorContent
 import com.dashlane.ui.widgets.view.CircularProgressIndicator
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongMethod")
 @Composable
 fun QrCodeScreen(
     modifier: Modifier = Modifier,
     viewModel: QrCodeViewModel,
     email: String? = null,
     onQrScanned: (SecretTransferPayload) -> Unit,
-    onGoToARK: (RegisteredUserDevice) -> Unit,
+    onGoToARK: (RegisteredUserDevice.Local) -> Unit,
+    onGoToUniversalD2D: (String) -> Unit,
     onCancelled: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -57,14 +67,18 @@ fun QrCodeScreen(
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is QrCodeState.GoToConfirmEmail -> {
-                viewModel.hasNavigated()
+                viewModel.viewNavigated()
                 onQrScanned(state.secretTransferPayload)
             }
 
             is QrCodeState.Cancelled -> onCancelled()
             is QrCodeState.GoToARK -> {
-                viewModel.hasNavigated()
+                viewModel.viewNavigated()
                 onGoToARK(state.registeredUserDevice)
+            }
+            is QrCodeState.GoToUniversalD2D -> {
+                viewModel.viewNavigated()
+                onGoToUniversalD2D(state.email)
             }
             else -> Unit
         }
@@ -81,21 +95,32 @@ fun QrCodeScreen(
                 onClickSecondary = { viewModel.cancelOnError(state.error) }
             )
         }
-
-        is QrCodeState.LoadingQR -> QrCodeContent(modifier = modifier, isLoading = true, arkEnabled = state.data.arkEnabled, onARKClicked = { })
-
-        is QrCodeState.GoToConfirmEmail,
-        is QrCodeState.QrCodeUriGenerated -> QrCodeContent(
+        else -> QrCodeContent(
             modifier = modifier,
             qrCodeUri = state.data.qrCodeUri,
-            isLoading = false,
-            arkEnabled = state.data.arkEnabled,
-            onARKClicked = viewModel::arkClicked
+            isLoading = state is QrCodeState.LoadingQR,
+            isHelpEnabled = state.data.email != null,
+            onOtherMethodClicked = viewModel::helpClicked
+        )
+    }
+
+    if (uiState.data.bottomSheetVisible) {
+        val sheetState = rememberModalBottomSheetState(
+            confirmValueChange = { sheetValue ->
+                if (sheetValue == SheetValue.Hidden) viewModel.bottomSheetDismissed()
+                true
+            }
         )
 
-        is QrCodeState.Initial,
-        is QrCodeState.GoToARK,
-        is QrCodeState.Cancelled -> Unit
+        ModalBottomSheet(
+            onDismissRequest = viewModel::bottomSheetDismissed,
+            sheetState = sheetState
+        ) {
+            QRCodeBottomSheetContent(
+                onPrimaryButtonClick = viewModel::universalD2DClicked,
+                onSecondaryButtonClick = viewModel::arkClicked
+            )
+        }
     }
 }
 
@@ -104,14 +129,14 @@ fun QrCodeContent(
     modifier: Modifier = Modifier,
     qrCodeUri: String? = null,
     isLoading: Boolean,
-    arkEnabled: Boolean,
-    onARKClicked: () -> Unit
+    isHelpEnabled: Boolean,
+    onOtherMethodClicked: () -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp)
+            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
         DashlaneLogo()
         Text(
@@ -128,24 +153,11 @@ fun QrCodeContent(
             modifier = Modifier
                 .padding(top = 8.dp)
         )
+        Spacer(modifier = Modifier.weight(1f))
         qrCodeUri?.let { uri ->
             QRCode(
                 uri = uri,
-                modifier = Modifier
-                    .align(CenterHorizontally)
-                    .padding(top = 60.dp, bottom = 60.dp)
-            )
-        }
-        if (arkEnabled) {
-            ButtonMedium(
-                modifier = Modifier
-                    .align(CenterHorizontally)
-                    .padding(bottom = 40.dp),
-                onClick = onARKClicked,
-                intensity = Intensity.Supershy,
-                layout = ButtonLayout.TextOnly(
-                    text = stringResource(id = R.string.login_password_dialog_trouble_recovery_key_button)
-                )
+                modifier = Modifier.align(CenterHorizontally)
             )
         }
         if (isLoading) {
@@ -156,6 +168,43 @@ fun QrCodeContent(
                     .padding(top = 100.dp)
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
+        if (isHelpEnabled) {
+            ButtonMedium(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 32.dp),
+                onClick = onOtherMethodClicked,
+                intensity = Intensity.Quiet,
+                layout = ButtonLayout.TextOnly(
+                    text = stringResource(id = R.string.login_secret_transfer_qr_code_help_button)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun QRCodeBottomSheetContent(
+    onPrimaryButtonClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(24.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.login_secret_transfer_qr_code_help_sheet_title),
+            style = DashlaneTheme.typography.titleSectionMedium,
+            color = DashlaneTheme.colors.textNeutralCatchy,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        ButtonMediumBar(
+            primaryText = stringResource(id = R.string.login_secret_transfer_qr_code_help_sheet_primary_button),
+            secondaryText = stringResource(id = R.string.login_secret_transfer_qr_code_help_sheet_secondary_button),
+            onPrimaryButtonClick = onPrimaryButtonClick,
+            onSecondaryButtonClick = onSecondaryButtonClick
+        )
     }
 }
 
@@ -202,25 +251,36 @@ fun QRCode(
 
 @Preview
 @Composable
-fun LoginStepQRCodeWithLoadingPreview() {
+fun QRCodeContentWithLoadingPreview() {
     DashlanePreview {
         QrCodeContent(
             isLoading = true,
-            arkEnabled = false,
-            onARKClicked = { }
+            isHelpEnabled = true,
+            onOtherMethodClicked = { },
         )
     }
 }
 
 @Preview
 @Composable
-fun LoginStepQRCodeWithQRPreview() {
+fun QRCodeContentWithQRPreview() {
     DashlanePreview {
         QrCodeContent(
             qrCodeUri = "dashlane.com",
             isLoading = false,
-            arkEnabled = true,
-            onARKClicked = { }
+            isHelpEnabled = false,
+            onOtherMethodClicked = { },
+        )
+    }
+}
+
+@Preview
+@Composable
+fun QRCodeBottomSheetContentPreview() {
+    DashlanePreview {
+        QRCodeBottomSheetContent(
+            onPrimaryButtonClick = {},
+            onSecondaryButtonClick = {}
         )
     }
 }
@@ -237,7 +297,7 @@ private fun generateBitmapFromUri(
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     for (x in 0 until width) {
         for (y in 0 until height) {
-            bitmap.setPixel(x, y, if (bitMatrix.get(x, y)) color else Color.Transparent.toArgb())
+            bitmap.setPixel(x, y, if (bitMatrix[x, y]) color else Color.Transparent.toArgb())
         }
     }
     return bitmap.asImageBitmap()

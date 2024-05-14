@@ -18,6 +18,7 @@ import com.dashlane.R
 import com.dashlane.debug.DaDaDa
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.hermes.LogRepository
+import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.login.dagger.TrackingId
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockSetting
@@ -31,6 +32,7 @@ import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory
 import com.dashlane.navigation.Navigator
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.secrettransfer.domain.SecretTransferAnalytics
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
@@ -40,8 +42,8 @@ import com.dashlane.ui.endoflife.EndOfLife
 import com.dashlane.ui.screens.settings.WarningRememberMasterPasswordDialog
 import com.dashlane.util.Toaster
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 
 @AndroidEntryPoint
 class LoginActivity : DashlaneActivity() {
@@ -164,7 +166,7 @@ class LoginHostFragment : Fragment() {
     lateinit var globalPreferencesManager: GlobalPreferencesManager
 
     @Inject
-    lateinit var dadada: DaDaDa
+    lateinit var daDaDa: DaDaDa
 
     lateinit var loginPresenter: LoginPresenter
 
@@ -199,8 +201,10 @@ class LoginHostFragment : Fragment() {
             toaster = toaster,
             navigator = navigator,
             warningRememberMasterPasswordDialog = warningRememberMasterPasswordDialog,
-            globalPreferencesManager = globalPreferencesManager
+            globalPreferencesManager = globalPreferencesManager,
+            daDaDa = daDaDa
         )
+        loginPresenter.setProvider(dataProvider)
 
         activity?.onBackPressedDispatcher?.let {
             it.addCallback(
@@ -224,9 +228,8 @@ class LoginHostFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val viewProxy = LoginViewProxy(view, dadada)
+        val viewProxy = LoginViewProxy(view)
         loginPresenter.apply {
-            setProvider(dataProvider)
             setView(viewProxy)
             onCreate(savedInstanceState)
         }
@@ -257,6 +260,9 @@ class LoginHostFragment : Fragment() {
 @AndroidEntryPoint
 class LoginComposeFragment : Fragment() {
 
+    @Inject
+    lateinit var secretTransferAnalytics: SecretTransferAnalytics
+
     val args: LoginComposeFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -265,15 +271,19 @@ class LoginComposeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val email: String? = args.email
+        val startDestination: String = args.startDestination ?: LoginSecretTransferNavigation.qrCodeDestination
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 DashlaneTheme {
                     LoginSecretTransferNavigation(
+                        secretTransferAnalytics = secretTransferAnalytics,
+                        startDestination = startDestination,
                         email = email,
                         onSuccess = {
                             activity?.run {
+                                secretTransferAnalytics.pageView(AnyPage.SETTINGS_ADD_NEW_DEVICE_SUCCESS)
                                 startActivity(LoginIntents.createProgressActivityIntent(this))
                                 finish()
                             }

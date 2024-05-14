@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.dashlane.R
-import com.dashlane.help.HelpCenterCoordinator
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.setCurrentPageView
@@ -26,16 +26,16 @@ class VpnThirdPartyFragment : AbstractContentFragment() {
     lateinit var preferences: GlobalPreferencesManager
 
     @Inject
-    lateinit var helpCenterCoordinator: HelpCenterCoordinator
-
-    @Inject
     lateinit var presenter: VpnThirdPartyPresenter
 
     @Inject
     lateinit var clipboardCopy: ClipboardCopy
 
     @Inject
-    lateinit var mainDataAccessor: MainDataAccessor
+    lateinit var credentialDataQuery: CredentialDataQuery
+
+    @Inject
+    lateinit var vaultDataQuery: VaultDataQuery
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,9 +53,9 @@ class VpnThirdPartyFragment : AbstractContentFragment() {
 
         val activity = requireActivity()
         val dataProvider = VpnThirdPartyDataProvider(
-            activity.packageManager,
-            mainDataAccessor.getCredentialDataQuery(),
-            mainDataAccessor.getVaultDataQuery()
+            packageManager = activity.packageManager,
+            credentialDataQuery = credentialDataQuery,
+            vaultDataQuery = vaultDataQuery
         )
         presenter.setView(
             VpnThirdPartyViewProxy(

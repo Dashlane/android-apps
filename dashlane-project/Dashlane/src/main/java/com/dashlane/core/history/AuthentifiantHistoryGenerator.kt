@@ -10,11 +10,8 @@ import javax.inject.Inject
 
 class AuthentifiantHistoryGenerator @Inject constructor(
     private val sessionManager: SessionManager,
-    private val provider: DataChangeHistoryQueryProvider
-) : AbstractHistoryGenerator<SyncObject.Authentifiant>() {
-
     override val query: DataChangeHistoryQuery
-        get() = provider.get()
+) : AbstractHistoryGenerator<SyncObject.Authentifiant>() {
 
     override fun newChangeSet(
         oldItem: VaultItem<SyncObject.Authentifiant>?,

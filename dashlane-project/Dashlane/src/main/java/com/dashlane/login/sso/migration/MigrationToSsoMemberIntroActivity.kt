@@ -1,5 +1,6 @@
 package com.dashlane.login.sso.migration
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -53,6 +54,8 @@ class MigrationToSsoMemberIntroActivity : DashlaneActivity() {
         ).apply { setView(viewProxy) }
     }
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         presenter.onBackPressed()
     }

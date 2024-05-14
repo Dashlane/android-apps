@@ -19,7 +19,7 @@ import com.dashlane.hermes.service.AnalyticsErrorReporter
 import com.dashlane.hermes.service.AnalyticsLogService
 import com.dashlane.hermes.storage.LogStorage
 import com.dashlane.hermes.storage.SecureFileLogStorage
-import com.dashlane.logger.developerinfo.DeveloperInfoLogger
+import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.logger.utils.HermesDebugUtil
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.server.api.Authorization

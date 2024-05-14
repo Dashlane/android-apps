@@ -189,6 +189,7 @@ class DataSyncDaoRaclette @Inject constructor(
             it.mapNotNull { item ->
                 val id = Id.of(item.id)
                 val vaultItem = vaultObjectRepository[id] ?: return@mapNotNull null
+                if (vaultItem.isShared()) return@mapNotNull null
                 val backup = backupRepository?.load(id)
                 VaultItemBackupWrapper(
                     vaultItem = vaultItem,

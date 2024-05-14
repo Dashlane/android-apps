@@ -3,7 +3,7 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.users
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.Trigger

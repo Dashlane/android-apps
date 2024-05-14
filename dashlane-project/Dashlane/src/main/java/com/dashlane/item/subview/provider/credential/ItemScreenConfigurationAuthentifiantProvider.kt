@@ -3,7 +3,6 @@ package com.dashlane.item.subview.provider.credential
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.text.format.DateUtils
 import android.view.Gravity
 import androidx.compose.runtime.mutableStateOf
 import com.dashlane.R
@@ -19,6 +18,7 @@ import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
+import com.dashlane.item.collection.getAllCollections
 import com.dashlane.item.header.ItemHeader
 import com.dashlane.item.subview.ItemCollectionListSubView
 import com.dashlane.item.subview.ItemScreenConfigurationProvider
@@ -46,61 +46,59 @@ import com.dashlane.item.subview.readonly.ItemInfoboxSubView
 import com.dashlane.item.subview.readonly.ItemLinkedServicesSubView
 import com.dashlane.item.subview.readonly.ItemPasswordSafetySubView
 import com.dashlane.navigation.Navigator
-import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.similarpassword.SimilarPassword
 import com.dashlane.storage.userdata.EmailSuggestionProvider
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
+import com.dashlane.storage.userdata.accessor.CollectionDataQuery
+import com.dashlane.storage.userdata.accessor.DataChangeHistoryQuery
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.DataChangeHistoryFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.teamspaces.PersonalTeamspace
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.isSpaceItem
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorDialog
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
+import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.url.UrlDomain
 import com.dashlane.url.name
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
+import com.dashlane.util.date.RelativeDateFormatter
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.util.isValidEmail
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.history.password
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.hasBeenSaved
 import com.dashlane.vault.model.isLoginEmail
-import com.dashlane.vault.model.isSpaceItem
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.navigationUrl
 import com.dashlane.vault.model.titleForListNormalized
-import com.dashlane.vault.model.toCollectionDataType
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.model.urlForUsageLog
-import com.dashlane.vault.summary.CollectionVaultItems
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.vault.util.SecurityBreachUtil.isCompromised
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import java.text.Collator
-import java.time.Duration
 import java.time.Instant
+import java.util.Locale
+import kotlinx.coroutines.runBlocking
 
 class ItemScreenConfigurationAuthentifiantProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
-    private val mainDataAccessor: MainDataAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val sharingPolicy: SharingPolicyDataProvider,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     private val navigator: Navigator,
@@ -111,7 +109,11 @@ class ItemScreenConfigurationAuthentifiantProvider(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val authenticatorLogger: AuthenticatorLogger,
     private val vaultItemCopy: VaultItemCopyService,
-    private val sharedCollections: List<Collection>
+    private val sharingDataProvider: SharingDataProvider,
+    private val relativeDateFormatter: RelativeDateFormatter,
+    private val passwordChangedInfoBoxDataProvider: PasswordChangedInfoBoxDataProvider,
+    private val vaultDataQuery: VaultDataQuery,
+    private val collectionDataQuery: CollectionDataQuery
 ) : ItemScreenConfigurationProvider() {
     
     val editedFields: MutableSet<Field> = mutableSetOf()
@@ -312,7 +314,7 @@ class ItemScreenConfigurationAuthentifiantProvider(
                 item = item,
                 context = context,
                 listener = listener,
-                teamspaceView = teamspaceView as? ItemSubView<Teamspace>
+                teamspaceView = teamspaceView as? ItemSubView<TeamSpace>
             ),
             
             createDeleteButton(canDelete, context, subViewFactory, listener)
@@ -324,24 +326,21 @@ class ItemScreenConfigurationAuthentifiantProvider(
         item: VaultItem<SyncObject.Authentifiant>,
         context: Context,
         listener: ItemEditViewContract.View.UiUpdateListener,
-        teamspaceView: ItemSubView<Teamspace>?
+        teamspaceView: ItemSubView<TeamSpace>?
     ): ItemSubView<*> {
-        val collections = mainDataAccessor.getCollectionDataQuery().queryAll(
-            CollectionFilter().apply {
-                withVaultItem = CollectionVaultItems(item.toCollectionDataType(), item.uid)
-                specificSpace(teamspaceAccessor.getOrDefault(item.syncObject.spaceId))
-            }
-        ).mapNotNull {
-            val name = it.name ?: return@mapNotNull null
-            name to false
-        } + sharedCollections.map { it.name to true }
-        val sortedCollections =
-            collections.sortedWith(compareBy(Collator.getInstance()) { (name, _) -> name })
+        val collections = runBlocking {
+            teamSpaceAccessor.getAllCollections(
+                item = item,
+                collectionDataQuery = collectionDataQuery,
+                sharingDataProvider = sharingDataProvider,
+                userFeaturesChecker = userFeaturesChecker
+            )
+        }
         val header = getCollectionListSubViewHeader(context, teamspaceView)
         return ItemCollectionListSubView(
-            value = mutableStateOf(sortedCollections),
+            value = mutableStateOf(collections),
+            canUpdateSharedCollection = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION),
             editMode = editMode,
-            itemId = item.uid,
             header = mutableStateOf(header),
             listener = listener,
             teamspaceView = teamspaceView
@@ -350,13 +349,13 @@ class ItemScreenConfigurationAuthentifiantProvider(
 
     private fun getCollectionListSubViewHeader(
         context: Context,
-        teamspaceView: ItemSubView<Teamspace>?
+        teamspaceView: ItemSubView<TeamSpace>?
     ): String {
-        if (!userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3) || teamspaceView?.value == null) {
+        if (!userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION) || teamspaceView?.value == null) {
             return context.getString(R.string.collections_header_item_edit)
         }
         val teamId = teamspaceView.value.teamId
-        return if (teamspaceAccessor.onlyBusinessSpaces.firstOrNull { it.teamId == teamId } != null) {
+        return if (teamSpaceAccessor.currentBusinessTeam?.teamId == teamId) {
             context.getString(R.string.collections_header_business_item_edit)
         } else {
             context.getString(R.string.collections_header_personal_item_edit)
@@ -409,10 +408,10 @@ class ItemScreenConfigurationAuthentifiantProvider(
         item: VaultItem<SyncObject.Authentifiant>,
         views: List<ItemSubView<String>>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 views,
                 ::copyForUpdatedTeamspace,
                 getLinkedWebsites(item, editMode)
@@ -533,6 +532,7 @@ class ItemScreenConfigurationAuthentifiantProvider(
         } else {
             val loginListener = object : LoginOpener.Listener {
                 override fun onShowOption() {
+                    
                 }
 
                 override fun onLogin(packageName: String) {
@@ -890,16 +890,17 @@ class ItemScreenConfigurationAuthentifiantProvider(
             }
 
             else -> {
-                val changeDate = item.getPreviousPassword(item.syncObject.password?.toString(), mainDataAccessor)?.first
-                if (changeDate?.plus(Duration.ofDays(2))?.isAfter(Instant.now()) == true) {
-                    val formattedDate = DateUtils.formatDateTime(
-                        context,
-                        changeDate.toEpochMilli(),
-                        DateUtils.FORMAT_SHOW_YEAR
-                    )
+                if (passwordChangedInfoBoxDataProvider.isPasswordChangedInfoBoxNeeded(item)) {
+                    val changeDate = passwordChangedInfoBoxDataProvider.getLastPasswordChanged(item) ?: return null
+                    val formattedDate = relativeDateFormatter.format(changeDate).lowercase(Locale.getDefault())
                     ItemInfoboxSubView(
-                        value = context.getString(R.string.infobox_restore_password_title, formattedDate),
+                        value = context.getString(R.string.infobox_restore_password_title_v2, formattedDate),
+                        description = context.getString(R.string.infobox_restore_password_description),
                         mood = Mood.Neutral,
+                        primaryButton = InfoboxButton(
+                            text = context.getString(R.string.infobox_restore_password_button_worked),
+                            onClick = { listener.notifyCloseRestorePasswordInfoBox() }
+                        ),
                         secondaryButton = InfoboxButton(
                             text = context.getString(R.string.infobox_restore_password_button),
                             onClick = { listener.showRestorePromptDialog() }
@@ -914,7 +915,7 @@ class ItemScreenConfigurationAuthentifiantProvider(
 
     private fun isCompromised(password: String): Boolean {
         val filter = vaultFilter { specificDataType(SyncObjectType.SECURITY_BREACH) }
-        return mainDataAccessor.getVaultDataQuery().queryAll(filter).isCompromised(SimilarPassword(), password)
+        return vaultDataQuery.queryAll(filter).isCompromised(SimilarPassword(), password)
     }
 
     companion object {
@@ -927,14 +928,13 @@ class ItemScreenConfigurationAuthentifiantProvider(
 
 internal fun VaultItem<SyncObject.Authentifiant>.getPreviousPassword(
     currentPassword: String?,
-    mainDataAccessor: MainDataAccessor
+    dataChangeHistoryQuery: DataChangeHistoryQuery
 ): Pair<Instant, String>? {
     
     
     
     val filter = DataChangeHistoryFilter(SyncObjectType.AUTHENTIFIANT, uid)
-    val dataChangeHistory =
-        mainDataAccessor.getDataChangeHistoryQuery().query(filter) ?: return null
+    val dataChangeHistory = dataChangeHistoryQuery.query(filter) ?: return null
     val changeSets = dataChangeHistory.syncObject.changeSets?.sortedByDescending { it.modificationDate } ?: return null
     val previousPasswordIndex = changeSets.indexOfFirst { it.password != currentPassword }
     if (previousPasswordIndex <= 0) return null
@@ -961,11 +961,11 @@ private fun ItemScreenConfigurationAuthentifiantProvider.copyForUpdatedNote(
 @Suppress("UNCHECKED_CAST")
 private fun copyForUpdatedTeamspace(
     item: VaultItem<*>,
-    value: Teamspace
+    value: TeamSpace
 ): VaultItem<SyncObject.Authentifiant> {
     item as VaultItem<SyncObject.Authentifiant>
     val authentifiant = item.syncObject
-    val spaceId = authentifiant.spaceId ?: PersonalTeamspace.teamId
+    val spaceId = authentifiant.spaceId ?: TeamSpace.Personal.teamId
     return if (value.teamId == spaceId) {
         item
     } else {

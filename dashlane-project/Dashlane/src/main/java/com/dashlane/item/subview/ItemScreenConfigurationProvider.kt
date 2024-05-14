@@ -64,7 +64,7 @@ abstract class ItemScreenConfigurationProvider {
     }
 
     open fun gatherCollectionsFromUi(collectionSubView: ItemCollectionListSubView?) =
-        collectionSubView?.value?.value?.filter { !it.second }?.map { it.first } ?: emptyList()
+        collectionSubView?.value?.value ?: emptyList()
 
     private fun updateItemFromSubView(updatedItem: VaultItem<*>, subView: ItemSubView<*>): VaultItem<*>? {
         return when (subView) {

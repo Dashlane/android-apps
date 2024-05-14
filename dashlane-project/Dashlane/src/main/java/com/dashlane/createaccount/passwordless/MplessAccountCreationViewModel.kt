@@ -6,7 +6,6 @@ import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.password.generator.PasswordGenerator
 import com.dashlane.password.generator.PasswordGeneratorCriteria
 import com.dashlane.password.generator.generate
-import com.dashlane.security.SecurityHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +14,6 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MplessAccountCreationViewModel @Inject constructor(
-    private val securityHelper: SecurityHelper,
     passwordGenerator: PasswordGenerator
 ) : ViewModel() {
 
@@ -56,8 +54,6 @@ class MplessAccountCreationViewModel @Inject constructor(
             _userDataStateFlow.emit(_userDataStateFlow.value.copy(useBiometrics = useBiometrics))
         }
     }
-
-    fun isUserAllowedToUsePin(): Boolean = securityHelper.allowedToUsePin()
 
     fun updateTos(isTosChecked: Boolean) {
         viewModelScope.launch {

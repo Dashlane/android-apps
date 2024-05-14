@@ -7,25 +7,40 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
 import com.dashlane.databinding.FragmentVaultListBinding
+import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.fragments.vault.Filter
+import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.activities.fragments.vault.VaultViewModel
+import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.util.populateItemsAsync
 import com.dashlane.ui.widgets.view.empty.EmptyScreenViewProvider
 import com.dashlane.util.getThemeAttrColor
+import com.dashlane.vault.VaultItemLogClickListener
+import com.dashlane.vault.VaultItemLogger
+import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import kotlinx.coroutines.launch
 
 class VaultListViewProxy(
     vaultViewModel: VaultViewModel,
+    vaultItemLogger: VaultItemLogger,
     private val vaultListViewModel: VaultListViewModel,
-    val lifecycleOwner: LifecycleOwner,
-    val binding: FragmentVaultListBinding
-) {
+    private val lifecycleOwner: LifecycleOwner,
+    private val binding: FragmentVaultListBinding,
+    private val navigator: Navigator
+) : EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider>,
+    EfficientAdapter.OnItemLongClickListener<DashlaneRecyclerAdapter.ViewTypeProvider> {
     private val context
         get() = binding.root.context
 
+    private val vaultItemLogClickListener = VaultItemLogClickListener(
+        vaultItemLogger,
+        this
+    ) { (it as? VaultItemViewTypeProvider)?.itemWrapper }
+
     init {
         setupRefreshLayout()
-        binding.dashboardView.adapter?.onItemClickListener = vaultListViewModel.vaultItemLogClickListener
+        binding.dashboardView.adapter?.onItemClickListener = vaultItemLogClickListener
+        binding.dashboardView.adapter?.onItemLongClickListener = this
 
         vaultViewModel.observer(lifecycleOwner) {
             vaultListViewModel.refreshItemList(it)
@@ -45,6 +60,28 @@ class VaultListViewProxy(
                     }
                 }
             }
+        }
+    }
+
+    override fun onItemClick(
+        adapter: EfficientAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>,
+        view: View,
+        item: DashlaneRecyclerAdapter.ViewTypeProvider?,
+        position: Int
+    ) {
+        if (item is VaultItemViewTypeProvider) {
+            navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.xmlObjectName)
+        }
+    }
+
+    override fun onLongItemClick(
+        adapter: EfficientAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>,
+        view: View,
+        item: DashlaneRecyclerAdapter.ViewTypeProvider?,
+        position: Int
+    ) {
+        if (item is VaultItemViewTypeProvider) {
+            navigator.goToQuickActions(item.summaryObject.id, item.itemListContext)
         }
     }
 

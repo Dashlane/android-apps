@@ -6,6 +6,8 @@ import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dashlane.R
+import com.dashlane.async.BroadcastConstants
+import com.dashlane.login.controller.LoginTokensModule
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.network.BaseNetworkResponse
 import com.dashlane.network.webservices.authentication.GetTokenService
@@ -16,7 +18,6 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.SplashScreenActivity
-import com.dashlane.util.Constants
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.notification.DashlaneNotificationBuilder
 import com.dashlane.util.notification.NotificationHelper
@@ -36,7 +37,8 @@ class TokenNotificationHandler(
     private val preferencesManager: UserPreferencesManager,
     private val legacyTokenService: GetTokenService,
     private val globalPreferencesManager: GlobalPreferencesManager,
-    private val clock: Clock
+    private val clock: Clock,
+    private val loginTokensModule: LoginTokensModule
 ) : AbstractNotificationHandler(context, message) {
 
     private val isAlive: Boolean
@@ -140,7 +142,7 @@ class TokenNotificationHandler(
 
     private fun notifyUserWithPopup(context: Context) {
         LocalBroadcastManager.getInstance(context)
-            .sendBroadcast(DashlaneIntent.newInstance(Constants.BROADCASTS.NEW_TOKEN_BROADCAST))
+            .sendBroadcast(DashlaneIntent.newInstance(BroadcastConstants.NEW_TOKEN_BROADCAST))
     }
 
     private fun getNotificationMessage(context: Context): String {
@@ -156,7 +158,7 @@ class TokenNotificationHandler(
     }
 
     private fun hasAlreadyHandled(): Boolean {
-        val pushToken = Constants.GCM.Token[recipientEmail]
+        val pushToken = loginTokensModule.tokenHashmap[recipientEmail]
         return pushToken != null && ttl == pushToken.ttl
     }
 
@@ -165,8 +167,10 @@ class TokenNotificationHandler(
     }
 
     private fun notifyUser(context: Context) {
-        Constants.GCM.Token[recipientEmail] = this
-        Constants.GCM.TokenShouldNotify[recipientEmail] = true
+        recipientEmail?.let {
+            loginTokensModule.tokenHashmap[it] = this
+            loginTokensModule.tokenShouldNotifyHashmap[it] = true
+        }
         if (needWebserviceCall()) {
             tokenFromServerIfUserLoggedIn
         }

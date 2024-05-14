@@ -6,12 +6,9 @@ import com.dashlane.events.clearLastEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
 import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.teamspaces.manager.TeamspaceManager
-import com.dashlane.teamspaces.manager.TeamspaceManagerWeakListener
-import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.skocken.presentation.provider.BaseDataProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -24,31 +21,31 @@ class IdentityDashboardDataProvider @Inject constructor(
     private val creditMonitoringManager: CreditMonitoringManager,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
-    private val sessionManager: SessionManager,
-    private val teamspaceRepository: TeamspaceManagerRepository,
-    private val appEvents: AppEvents
+    private val appEvents: AppEvents,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
 ) : BaseDataProvider<IdentityDashboardContract.Presenter>(),
-IdentityDashboardContract.DataProvider,
-    TeamspaceManager.Listener {
+    IdentityDashboardContract.DataProvider {
 
     lateinit var coroutineScope: CoroutineScope
     private val appEventListener = AppEventsListener(appEvents, this)
     private var latestSecurityScoreEvaluatorResult: Deferred<AuthentifiantSecurityEvaluator.Result?>? = null
-    private val teamspaceManagerListener = TeamspaceManagerWeakListener(this)
 
     override fun hasProtectionPackage(): Boolean {
-        return userFeaturesChecker.has(UserFeaturesChecker.Capability.CREDIT_MONITORING)
+        return userFeaturesChecker.has(Capability.CREDITMONITORING)
     }
 
     override fun shouldIdentityRestorationBeVisible(): Boolean {
-        return userFeaturesChecker.has(UserFeaturesChecker.Capability.IDENTITY_RESTORATION)
+        return userFeaturesChecker.has(Capability.IDENTITYRESTORATION)
     }
 
     override suspend fun getCreditMonitoringLink(): String? {
         return creditMonitoringManager.getLink()
     }
 
-    override fun getAuthentifiantsSecurityInfoAsync(): Deferred<AuthentifiantSecurityEvaluator.Result?> {
+    override fun getAuthentifiantsSecurityInfoAsync(forceRefresh: Boolean): Deferred<AuthentifiantSecurityEvaluator.Result?> {
+        if (forceRefresh) {
+            latestSecurityScoreEvaluatorResult = null
+        }
         return latestSecurityScoreEvaluatorResult
             ?: coroutineScope.async(Dispatchers.Default) {
                 getAuthentifiantSecurityInfoAsync()
@@ -57,40 +54,20 @@ IdentityDashboardContract.DataProvider,
             }
     }
 
-    private suspend fun getAuthentifiantSecurityInfoAsync(): AuthentifiantSecurityEvaluator.Result? {
-        val current = sessionManager.session?.let {
-            teamspaceRepository.getTeamspaceManager(it)?.current
-        } ?: return null
-        return authentifiantSecurityEvaluator.computeResult(current)
+    private suspend fun getAuthentifiantSecurityInfoAsync(): AuthentifiantSecurityEvaluator.Result {
+        return authentifiantSecurityEvaluator.computeResult(currentTeamSpaceUiFilter.currentFilter.teamSpace)
     }
 
     override fun listenForChanges() {
-        sessionManager.session?.let {
-            teamspaceManagerListener.listen(teamspaceRepository.getTeamspaceManager(it))
-        }
         appEventListener.listen()
     }
 
     override fun unlistenForChanges() {
-        teamspaceManagerListener.listen(null) 
         appEventListener.unlisten()
     }
 
-    override fun onStatusChanged(teamspace: Teamspace?, previousStatus: String?, newStatus: String?) {
-        
-    }
-
-    override fun onChange(teamspace: Teamspace?) {
-        latestSecurityScoreEvaluatorResult = null
-        refreshUI()
-    }
-
-    override fun onTeamspacesUpdate() {
-        
-    }
-
     private fun refreshUI() {
-        presenter.requireRefresh()
+        presenter.requireRefresh(forceRefresh = false)
     }
 
     class AppEventsListener(

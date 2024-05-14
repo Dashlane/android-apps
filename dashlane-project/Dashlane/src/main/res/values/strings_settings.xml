@@ -12,17 +12,34 @@
 
     
     <string name="setting_in_app_login_category">Autofill</string>
-
     <string name="setting_in_app_login_enabled_title">Autofill</string>
     <string name="setting_in_app_login_enabled_description">Fill forms using your data stored in Dashlane</string>
-
     <string name="setting_in_app_login_browser_enabled_title">Additional Autofill permissions</string>
     <string name="setting_in_app_login_browser_enabled_description">Enhance Autofill and allow Dashlane to detect form fields and autofill details on all web pages</string>
-
+    
+    <string name="settings_general_backup_export_business_data_restriction_title">Export only your personnal data</string>
+    
+    <string name="settings_general_backup_export_business_data_restriction_description">Your company policy prevents you from exporting items stored in your Business Space.</string>
+    
+    <string name="settings_general_backup_export_business_data_restriction_infobox">Before continuing, move any personal items stored in your Business Space to your Personal Space.</string>
+    
+    <string name="settings_general_backup_export_restriction_title">Your company policy restricts data export</string>
+    
+    <string name="settings_general_backup_export_restriction_description">Exporting items stored in Dashlane is restricted, contact your Admin for more information.</string>
 
     
     <string name="setting_change_master_password_title">Change Master Password</string>
     <string name="setting_change_master_password_description">Change the Master Password you use to access Dashlane</string>
     <string name="setting_manage_devices_title">Manage activity</string>
     <string name="setting_manage_devices_description">Manage devices connected to your Dashlane account</string>
+    
+    <string name="settings_cryptography">Key derivation function</string>
+    <string name="settings_cryptography_description">Use %1$s for the key derivation</string>
+    <string name="settings_cryptography_dialog_title">You cannot edit this setting</string>
+    <string name="settings_cryptography_dialog_description_b2c">Please visit the Security settings on the web application to edit your key derivation function.</string>
+    <string name="settings_cryptography_dialog_description_b2b">Your account admin requires the use of this key derivation function as a result of company policy.</string>
+    
+    <string name="settings_cryptography_description_compatibility">AES-256 with PBKDF2 10,204</string>
+    <string name="settings_cryptography_description_argon2">AES-256 with Argon2d</string>
+    <string name="settings_cryptography_description_pbkdf2">AES-256 with PBKDF2 200,000</string>
 </resources>

@@ -57,7 +57,7 @@ fun TermsAndConditionsScreen(
 @Suppress("LongMethod")
 @Composable
 fun TermAndConditionsContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     tosCheck: Boolean,
     privacyPolityCheck: Boolean,
     onCreateAccountClick: () -> Unit,
@@ -69,92 +69,83 @@ fun TermAndConditionsContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        Column(
+        Text(
+            modifier = Modifier.padding(top = 24.dp),
+            text = stringResource(id = R.string.passwordless_terms_and_conditions_title),
+            style = DashlaneTheme.typography.titleSectionLarge
+        )
+        Text(
+            modifier = Modifier.padding(top = 16.dp),
+            text = stringResource(id = R.string.passwordless_terms_and_conditions_description),
+            style = DashlaneTheme.typography.bodyStandardRegular
+        )
+
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(top = 32.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                modifier = Modifier.padding(top = 24.dp),
-                text = stringResource(id = R.string.passwordless_terms_and_conditions_title),
-                style = DashlaneTheme.typography.titleSectionLarge
+            DashlaneCheckbox(
+                checked = privacyPolityCheck,
+                onCheckedChange = onPrivacyPolicyChange
             )
             Text(
-                modifier = Modifier.padding(top = 16.dp),
-                text = stringResource(id = R.string.passwordless_terms_and_conditions_description),
+                text = stringResource(id = R.string.passwordless_terms_and_conditions_privacy_policy),
                 style = DashlaneTheme.typography.bodyStandardRegular
             )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(top = 32.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DashlaneCheckbox(
-                    checked = privacyPolityCheck,
-                    onCheckedChange = onPrivacyPolicyChange
-                )
-                Text(
-                    text = stringResource(id = R.string.passwordless_terms_and_conditions_privacy_policy),
-                    style = DashlaneTheme.typography.bodyStandardRegular
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(top = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DashlaneCheckbox(
-                    checked = tosCheck,
-                    onCheckedChange = onTosCheckChange,
-                )
-                Text(
-                    text = stringResource(id = R.string.passwordless_terms_and_conditions_terms_of_services),
-                    style = DashlaneTheme.typography.bodyStandardRegular
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            LinkButton(
-                modifier = Modifier.padding(start = 48.dp),
-                onClick = { onOpenHelpCenterPage(Legal.URL_TERMS_OF_SERVICE.toUri()) },
-                text = stringResource(R.string.passwordless_terms_and_conditions_terms_of_services_button),
-                destinationType = LinkButtonDestinationType.EXTERNAL
-            )
-            LinkButton(
-                modifier = Modifier.padding(start = 48.dp),
-                onClick = { onOpenHelpCenterPage(Legal.URL_PRIVACY_POLICY.toUri()) },
-                text = stringResource(R.string.passwordless_terms_and_conditions_privacy_policy_button),
-                destinationType = LinkButtonDestinationType.EXTERNAL
-            )
         }
+
         Row(
-            modifier = modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                .align(Alignment.End)
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(top = 24.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            ButtonMedium(
-                enabled = tosCheck,
-                onClick = onCreateAccountClick,
-                mood = Mood.Brand,
-                intensity = Intensity.Catchy,
-                layout = ButtonLayout.TextOnly(
-                    text = stringResource(id = R.string.passwordless_account_creation_create_account_button)
-                )
+            DashlaneCheckbox(
+                checked = tosCheck,
+                onCheckedChange = onTosCheckChange,
+            )
+            Text(
+                text = stringResource(id = R.string.passwordless_terms_and_conditions_terms_of_services),
+                style = DashlaneTheme.typography.bodyStandardRegular
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        LinkButton(
+            modifier = Modifier.padding(start = 48.dp),
+            onClick = { onOpenHelpCenterPage(Legal.URL_TERMS_OF_SERVICE.toUri()) },
+            text = stringResource(R.string.passwordless_terms_and_conditions_terms_of_services_button),
+            destinationType = LinkButtonDestinationType.EXTERNAL
+        )
+        LinkButton(
+            modifier = Modifier.padding(start = 48.dp),
+            onClick = { onOpenHelpCenterPage(Legal.URL_PRIVACY_POLICY.toUri()) },
+            text = stringResource(R.string.passwordless_terms_and_conditions_privacy_policy_button),
+            destinationType = LinkButtonDestinationType.EXTERNAL
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        ButtonMedium(
+            modifier = modifier
+                .align(Alignment.End),
+            enabled = tosCheck,
+            onClick = onCreateAccountClick,
+            mood = Mood.Brand,
+            intensity = Intensity.Catchy,
+            layout = ButtonLayout.TextOnly(
+                text = stringResource(id = R.string.passwordless_account_creation_create_account_button)
+            )
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun RecapScreenPreview() {
+fun TermsAndConditionsScreenPreview() {
     DashlanePreview {
         TermAndConditionsContent(
             modifier = Modifier,

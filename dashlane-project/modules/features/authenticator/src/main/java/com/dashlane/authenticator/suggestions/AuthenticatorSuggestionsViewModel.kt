@@ -19,19 +19,21 @@ import com.dashlane.authenticator.updateOtp
 import com.dashlane.ext.application.KnownLinkedDomains.getMatchingLinkedDomainSet
 import com.dashlane.lock.LockHelper
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.url.domain.otp.HardcodedOtpDomainsRepository
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.getAllLinkedPackageName
-import com.dashlane.vault.model.isSpaceItem
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.titleForListNormalized
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
@@ -43,20 +45,18 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class AuthenticatorSuggestionsViewModel @Inject constructor(
-    mainDataAccessor: MainDataAccessor,
     urlDomainRegistryFactory: UrlDomainRegistryFactory,
     lockHelper: LockHelper,
+    private val vaultDataQuery: VaultDataQuery,
+    private val credentialDataQuery: CredentialDataQuery,
     private val dataSaver: DataSaver,
     private val logger: AuthenticatorLogger,
     private val userPreferencesManager: UserPreferencesManager,
 ) : ViewModel(), AuthenticatorSuggestionsViewModelContract {
     private val repository = HardcodedOtpDomainsRepository()
-    private val vaultDataQuery = mainDataAccessor.getVaultDataQuery()
-    private val credentialDataQuery = mainDataAccessor.getCredentialDataQuery()
     private val userCommand = Channel<UserCommand>(1)
     private lateinit var loadedCredentials: List<CredentialItem>
     private var otpCredentialsCount = -1

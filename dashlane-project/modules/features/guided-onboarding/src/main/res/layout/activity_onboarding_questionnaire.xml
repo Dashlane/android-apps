@@ -27,9 +27,9 @@
             android:id="@+id/button_back"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:contentDescription="@string/and_accessibility_back_button"
             android:src="?homeAsUpIndicator"
             app:buttonLayout="iconOnly"
+            app:iconDescription="@string/and_accessibility_back_button"
             app:intensity="supershy"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -97,6 +97,38 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/animationView"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/preQ1A1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:answertitle="@string/guided_onboarding_pre_question_naive_user_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/barrier"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/preQ1A2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:answertitle="@string/guided_onboarding_pre_question_new_user_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/preQ1A1"
+            />
+
+        <com.dashlane.guidedonboarding.widgets.AnswerView
+            android:id="@+id/preQ1A3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            app:answertitle="@string/guided_onboarding_pre_question_existing_user_title"
+            app:layout_constraintEnd_toEndOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintStart_toStartOf="@id/onboarding_questionnaire_title"
+            app:layout_constraintTop_toBottomOf="@id/preQ1A2"
             />
 
         <com.dashlane.guidedonboarding.widgets.AnswerView
@@ -188,7 +220,7 @@
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/spacing_ultra_huge"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="q2A1,q2A2,q2A3,q1A1,q1A2,q1A3,q3A1"
+            app:constraint_referenced_ids="q2A1,q2A2,q2A3,q1A1,q1A2,q1A3,q3A1,preQ1A1,preQ1A2,preQ1A3"
             />
 
         <androidx.constraintlayout.helper.widget.Flow

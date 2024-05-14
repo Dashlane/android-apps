@@ -9,6 +9,7 @@ import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.Totp
 import com.dashlane.authenticator.UriParser
 import com.dashlane.item.subview.ItemCollectionListSubView
+import com.dashlane.item.subview.ItemCollectionListSubView.Collection
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.ItemEditMenuAction
 import com.dashlane.item.subview.action.note.SecureNoteCategoryMenuAction
@@ -23,20 +24,27 @@ import com.dashlane.item.subview.edit.ItemEditValueListSubView
 import com.dashlane.item.subview.edit.ItemEditValueNumberSubView
 import com.dashlane.item.subview.edit.ItemEditValueRawSubView
 import com.dashlane.item.subview.edit.ItemEditValueTextSubView
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.util.getParcelableArrayCompat
 import com.dashlane.util.isValueNull
 import com.dashlane.util.tryOrNull
 import com.dashlane.xml.SyncObjectEnum
 import com.dashlane.xml.domain.SyncObject
 import java.time.LocalDate
 
-fun ScreenConfiguration.restoreState(bundle: Bundle, teamspaceAccessor: TeamspaceAccessor) {
+fun ScreenConfiguration.restoreState(bundle: Bundle, teamSpaceAccessor: TeamSpaceAccessor) {
+    bundle.getStringArray("itemSubviews")?.let { values ->
+        val collections =
+            bundle.getParcelableArrayCompat("itemCollections", Collection::class.java)
+                ?: emptyList()
+        restoreSubViews(values, teamSpaceAccessor, collections)
+    }
+}
+
+fun ScreenConfiguration.restoreMenuActions(bundle: Bundle) {
     bundle.getStringArray("itemMenuActions")?.let {
         restoreMenuActions(it)
-    }
-    bundle.getStringArray("itemSubviews")?.let {
-        restoreSubViews(it, teamspaceAccessor, bundle.getStringArray("itemCollections"))
     }
 }
 
@@ -46,13 +54,13 @@ fun ScreenConfiguration.toBundle(): Bundle {
         bundle.putStringArray(
             "itemMenuActions",
             list.map {
-            when (it) {
-                is SecureNoteCategoryMenuAction -> it.selectedCategory ?: "null"
-                is SecureNoteColorMenuAction -> it.selectedType.name
-                is CreditCardColorMenuAction -> it.selectedColor.value
-                else -> "null"
-            }
-        }.toTypedArray()
+                when (it) {
+                    is SecureNoteCategoryMenuAction -> it.selectedCategory ?: "null"
+                    is SecureNoteColorMenuAction -> it.selectedType.name
+                    is CreditCardColorMenuAction -> it.selectedColor.value
+                    else -> "null"
+                }
+            }.toTypedArray()
         )
     }
 
@@ -63,7 +71,7 @@ fun ScreenConfiguration.toBundle(): Bundle {
             it.value
         }
         when (value) {
-            is Teamspace -> value.teamId
+            is TeamSpace -> value.teamId
             is LocalDate -> value.toString()
             is Otp -> value.url ?: value.secret
             else -> value?.toString() ?: "null"
@@ -72,18 +80,16 @@ fun ScreenConfiguration.toBundle(): Bundle {
 
     bundle.putStringArray("itemSubviews", subviewValues)
     itemSubViews.filterIsInstance<ItemCollectionListSubView>().firstOrNull()?.let { collectionSubview ->
-        val nonSharedCollections = collectionSubview.value.value
-            .filter { (_, shared) -> !shared }
-            .map { (name, _) -> name }
-        bundle.putStringArray("itemCollections", nonSharedCollections.toTypedArray())
+        val allCollections = collectionSubview.value.value
+        bundle.putParcelableArray("itemCollections", allCollections.toTypedArray())
     }
     return bundle
 }
 
 private fun ScreenConfiguration.restoreSubViews(
     valuesToRestore: Array<String>,
-    teamspaceAccessor: TeamspaceAccessor,
-    collectionsToRestore: Array<String>?
+    teamSpaceAccessor: TeamSpaceAccessor,
+    collectionsToRestore: List<Collection>
 ) {
     if (valuesToRestore.size != itemSubViews.size) {
         
@@ -106,7 +112,7 @@ private fun ScreenConfiguration.restoreSubViews(
             is ItemEditValueTextSubView -> subview.notifyValueChanged(value)
             is ItemEditValueNumberSubView -> subview.notifyValueChanged(value)
             is ItemEditSpaceSubView -> {
-                teamspaceAccessor.all.firstOrNull { it.teamId == value }?.let {
+                teamSpaceAccessor.availableSpaces.firstOrNull { it.teamId == value }?.let {
                     subview.notifyValueChanged(it)
                 }
             }
@@ -120,13 +126,8 @@ private fun ScreenConfiguration.restoreSubViews(
                     subview.notifyValueChanged(Totp(secret = value))
                 }
             }
-            is ItemCollectionListSubView -> {
-                collectionsToRestore?.let { names ->
-                    subview.notifyValueChanged(
-                        mutableStateOf(names.map { it to false })
-                    )
-                }
-            }
+            is ItemCollectionListSubView ->
+                subview.notifyValueChanged(mutableStateOf(collectionsToRestore))
             else -> {
             }
         }
@@ -143,11 +144,11 @@ private fun ScreenConfiguration.restoreMenuActions(menuActionsValuesToRestore: A
                 is SecureNoteCategoryMenuAction -> menuAction.selectedCategory = value
                 is SecureNoteColorMenuAction ->
                     menuAction.selectedType =
-                    SyncObjectEnum.getEnumForValue(value) ?: SyncObject.SecureNoteType.NO_TYPE
+                        SyncObjectEnum.getEnumForValue(value) ?: SyncObject.SecureNoteType.NO_TYPE
 
                 is CreditCardColorMenuAction ->
                     menuAction.selectedColor =
-                    SyncObjectEnum.getEnumForValue(value) ?: SyncObject.PaymentCreditCard.Color.NO_TYPE
+                        SyncObjectEnum.getEnumForValue(value) ?: SyncObject.PaymentCreditCard.Color.NO_TYPE
 
             }
         }

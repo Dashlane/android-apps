@@ -9,9 +9,14 @@ import android.widget.Toast
 import com.dashlane.R
 import com.dashlane.attachment.ui.AttachmentListActivity
 import com.dashlane.authenticator.Otp
+import com.dashlane.events.AppEvents
+import com.dashlane.events.DataIdentifierReplacedEvent
+import com.dashlane.events.register
+import com.dashlane.events.unregister
 import com.dashlane.item.collection.CollectionSelectorActivity
 import com.dashlane.item.linkedwebsites.LinkedServicesActivity
 import com.dashlane.item.subview.ItemCollectionListSubView
+import com.dashlane.item.subview.ItemCollectionListSubView.Collection
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.item.subview.action.NewShareAction
@@ -20,12 +25,13 @@ import com.dashlane.item.subview.action.ShareDetailsAction
 import com.dashlane.item.subview.action.ShowAttachmentsMenuAction
 import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
 import com.dashlane.item.subview.provider.credential.ItemScreenConfigurationAuthentifiantProvider
-import com.dashlane.teamspaces.manager.TeamspaceManager
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.DeviceUtils
+import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.showToaster
 import com.dashlane.util.tryOrNull
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.hasBeenSaved
@@ -39,43 +45,77 @@ import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.Collator
 
+@Suppress("LargeClass")
 class ItemEditViewPresenter :
     BasePresenter<ItemEditViewContract.DataProvider, ItemEditViewContract.View>(),
     ItemEditViewContract.Presenter {
 
     override val isSecureNote: Boolean
         get() = tryOrNull { provider.vaultItem.syncObject is SyncObject.SecureNote } ?: false
+
     lateinit var sharingPolicyDataProvider: SharingPolicyDataProvider
-    var teamspaceManager: TeamspaceManager? = null
-
-    private lateinit var currentOptions: ItemEditViewSetupOptions
-
     lateinit var userFeaturesChecker: UserFeaturesChecker
     lateinit var coroutineScope: CoroutineScope
+    lateinit var appEvents: AppEvents
 
     private var setupJob: Job? = null
 
+    private lateinit var currentOptions: ItemEditViewSetupOptions
+
     override fun setup(context: Context, options: ItemEditViewSetupOptions) {
         currentOptions = options
+        if (setupJob != null) {
+            appEvents.unregister<DataIdentifierReplacedEvent>(this)
+        }
         setupJob = coroutineScope.launch(Dispatchers.Main) {
+            val itemEditActivity = activity ?: return@launch
+            if (itemEditActivity.isFinishing || itemEditActivity.isDestroyed) return@launch
             if (provider.setup(context, options, view.listener)) {
                 refreshUi(options.toolbarCollapsed)
                 provider.onSetupEnd(context, options, view.listener)
             } else {
                 
-                activity!!.finish()
-                activity!!.showToaster(
-                    R.string.error_type_or_uid_invalid_on_item_opening,
-                    Toast.LENGTH_SHORT
-                )
+                itemEditActivity.apply {
+                    finish()
+                    showToaster(
+                        R.string.error_type_or_uid_invalid_on_item_opening,
+                        Toast.LENGTH_SHORT
+                    )
+                }
+            }
+        }
+        registerForEvents(options, context)
+    }
+
+    private fun registerForEvents(
+        options: ItemEditViewSetupOptions,
+        context: Context
+    ) {
+        appEvents.register<DataIdentifierReplacedEvent>(this) { event ->
+            if (event.oldItemId == options.uid) {
+                coroutineScope.launch {
+                    
+                    
+                    setupJob?.join()
+                    
+                    
+                    
+                    val animTime =
+                        context.resources.getInteger(android.R.integer.config_shortAnimTime)
+                            .toLong()
+                    delay(animTime)
+                    
+                    currentOptions = options.copy(uid = event.newItemId)
+                    setup(context, currentOptions)
+                }
             }
         }
     }
 
-    override fun createMenu(menu: Menu): Boolean {
+    override fun createMenu(menu: Menu, restrictionNotificator: TeamSpaceRestrictionNotificator): Boolean {
         val allMenus = mutableListOf<MenuAction>()
         
         provider.getScreenConfiguration().itemHeader?.menuActions?.let {
@@ -92,33 +132,33 @@ class ItemEditViewPresenter :
         if (vaultItem.syncObject !is SyncObject.SecureNote) {
             
             val canShare = !isNewItem(vaultItem) && !provider.isEditMode &&
-                    sharingPolicyDataProvider.canShareItem(vaultItem.toSummary()) && !summaryObject.hasAttachments()
+                sharingPolicyDataProvider.canShareItem(vaultItem.toSummary()) && !summaryObject.hasAttachments()
             if (canShare) {
-                allMenus.add(NewShareMenuAction(vaultItem, teamspaceManager))
+                allMenus.add(NewShareMenuAction(vaultItem, restrictionNotificator))
             }
             if (provider.isEditMode) {
                 allMenus.add(
                     MenuAction(
-                    R.string.dashlane_save,
-                    R.drawable.save,
-                    MenuItem.SHOW_AS_ACTION_ALWAYS
-                ) {
-                    coroutineScope.launch(Dispatchers.Main) {
-                        if (provider.save(context!!, provider.getScreenConfiguration().itemSubViews)) {
-                            handleSuccess(vaultItem)
+                        R.string.dashlane_save,
+                        R.drawable.save,
+                        MenuItem.SHOW_AS_ACTION_ALWAYS
+                    ) {
+                        coroutineScope.launch(Dispatchers.Main) {
+                            if (provider.save(context!!, provider.getScreenConfiguration().itemSubViews)) {
+                                handleSuccess(vaultItem)
+                            }
                         }
                     }
-                }
                 )
             } else if (sharingPolicyDataProvider.canEditItem(vaultItem.toSummary(), isNewItem(vaultItem))) {
                 allMenus.add(
                     MenuAction(
-                    R.string.edit,
-                    R.drawable.edit,
-                    MenuItem.SHOW_AS_ACTION_ALWAYS
-                ) {
-                    setupEditMode()
-                }
+                        R.string.edit,
+                        R.drawable.edit,
+                        MenuItem.SHOW_AS_ACTION_ALWAYS
+                    ) {
+                        setupEditMode()
+                    }
                 )
             }
         }
@@ -137,10 +177,18 @@ class ItemEditViewPresenter :
         view.showConfirmDeleteDialog(provider.vaultItem.uid, provider.vaultItem.isShared())
     }
 
-    override fun restorePassword() {
+    override fun restorePasswordClicked() {
         coroutineScope.launch(Dispatchers.Main) {
             
             if (provider.restorePassword()) setup(context!!, currentOptions)
+        }
+    }
+
+    override fun closeRestorePasswordClicked() {
+        coroutineScope.launch(Dispatchers.Main) {
+            
+            provider.closeRestorePassword()
+            setup(context!!, currentOptions)
         }
     }
 
@@ -164,14 +212,12 @@ class ItemEditViewPresenter :
         }
     }
 
-    private fun addCollections(collections: List<Pair<String, Boolean>>) {
+    private fun addCollection(collection: Collection) {
         val subviews = provider.getScreenConfiguration().itemSubViews
         subviews.forEach { subview ->
             when (subview) {
                 is ItemCollectionListSubView -> {
-                    subview.value.value = (subview.value.value + collections).sortedWith(
-                        compareBy(Collator.getInstance()) { (name, _) -> name }
-                    )
+                    subview.value.value = (subview.value.value + collection).sortedBy { it.name }
                 }
             }
         }
@@ -275,10 +321,12 @@ class ItemEditViewPresenter :
     private fun handleCollectionSelectorResult(data: Intent?) {
         coroutineScope.launch(Dispatchers.Main) {
             setupJob?.join()
-            val selectedCollections =
-                data?.getStringArrayExtra(CollectionSelectorActivity.RESULT_TEMPORARY_COLLECTIONS)?.toList()
-            selectedCollections?.let { addCollections(it.map { name -> name to false }) }
-
+            val selectedCollection =
+                data?.getParcelableExtraCompat(
+                    CollectionSelectorActivity.RESULT_TEMPORARY_COLLECTION,
+                    Collection::class.java
+                )
+            selectedCollection?.let { addCollection(it) }
             if (!provider.isEditMode) {
                 provider.save(context!!, provider.getScreenConfiguration().itemSubViews)
             }
@@ -327,8 +375,8 @@ class ItemEditViewPresenter :
         if (provider.isSetup) {
             val item = provider.vaultItem
             val shouldSave = item.syncObject is SyncObject.SecureNote &&
-                    item.syncState != SyncState.DELETED &&
-                    (provider.hasUnsavedChanges() || isNewItem(item))
+                item.syncState != SyncState.DELETED &&
+                (provider.hasUnsavedChanges() || isNewItem(item))
             if (!shouldSave) return
             
             coroutineScope.launch(Dispatchers.Default) {

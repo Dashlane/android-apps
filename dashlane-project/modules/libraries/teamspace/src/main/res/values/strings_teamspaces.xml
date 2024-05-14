@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="teamspace_personal_title">Personal</string>
+    <string name="teamspace_combined_title">All Spaces</string>
+</resources>

@@ -25,8 +25,9 @@ import com.dashlane.sharing.internal.model.ItemToShare
 import com.dashlane.sharing.internal.model.UserToInvite
 import com.dashlane.sharing.service.FindUsersDataProvider
 import com.dashlane.sharing.util.AuditLogHelper
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.sync.DataIdentifierExtraDataWrapper
+import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
+import com.dashlane.ui.screens.sharing.SharingContact.SharingContactUser
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
@@ -34,11 +35,12 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
+import java.text.Collator
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class NewSharePeopleDataProvider @Inject constructor(
     @IoCoroutineDispatcher
@@ -46,17 +48,16 @@ class NewSharePeopleDataProvider @Inject constructor(
     @DefaultCoroutineDispatcher
     private val defaultDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
-    private val dataStorageProvider: DataStorageProvider,
+    private val sharingDao: SharingDao,
     private val sharingRequestRepository: SharingRequestRepository,
     private val xmlConverter: DataIdentifierSharingXmlConverter,
+    private val sharingDataProvider: SharingDataProvider,
     private val sharingItemUpdater: SharingItemUpdater,
     private val createItemGroupService: CreateItemGroupService,
     private val inviteItemGroupMembersService: InviteItemGroupMembersService,
     private val findUsersDataProvider: FindUsersDataProvider,
     private val auditLogHelper: AuditLogHelper
 ) {
-    private val sharingDao: SharingDao get() = dataStorageProvider.sharingDao
-
     private val session: Session?
         get() = sessionManager.session
 
@@ -87,7 +88,7 @@ class NewSharePeopleDataProvider @Inject constructor(
         withContext(defaultDispatcher) {
             if (accountIds.isEmpty() && secureNoteIds.isEmpty() && contacts.isEmpty()) return@withContext
             val users =
-                contacts.filterIsInstance<SharingContact.SharingContactUser>().map {
+                contacts.filterIsInstance<SharingContactUser>().map {
                     Username.ofEmail(it.name).email
                 }.toSet().toList()
 
@@ -253,16 +254,17 @@ class NewSharePeopleDataProvider @Inject constructor(
         itemGroup.items?.find { it.itemId == itemUid } != null
     }
 
-    private suspend fun loadUsers(
-        username: Username
-    ): List<SharingContact> = withContext(ioDispatcher) {
-        val itemGroups = sharingDao.loadAllItemGroup()
-        itemGroups.mapNotNull { itemGroup ->
-            itemGroup.users?.map { SharingContact.SharingContactUser(it.alias) }
-        }.flatten()
-            .toSet()
-            .filter { !it.name.equals(username.email, ignoreCase = true) }
-    }
+    private suspend fun loadUsers(username: Username): List<SharingContact> =
+        withContext(ioDispatcher) {
+            val itemGroupsUsers = sharingDao.loadAllItemGroup().flatMap { itemGroup ->
+                itemGroup.users?.map { it.alias } ?: emptyList()
+            }
+            val teamUsers = sharingDataProvider.getTeamLogins()
+            val allUsers = itemGroupsUsers + teamUsers
+            allUsers.toSet().filter {
+                !it.equals(username.email, ignoreCase = true)
+            }.sortedWith(Collator.getInstance()).map { SharingContactUser(it) }
+        }
 
     private suspend fun loadUserGroups(): List<SharingContact> =
         withContext(ioDispatcher) {

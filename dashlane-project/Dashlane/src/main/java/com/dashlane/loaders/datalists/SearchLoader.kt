@@ -4,7 +4,6 @@ import com.dashlane.loaders.datalists.search.SearchUtils
 import com.dashlane.search.MatchedSearchResult
 import com.dashlane.search.SearchSorter
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
@@ -24,15 +23,12 @@ import kotlinx.coroutines.withContext
 
 class SearchLoader @Inject constructor(
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
-    private val mainDataAccessor: MainDataAccessor,
+    private val genericDataQuery: GenericDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
     private var settingsList: RootSettingsList,
     searchSorterProvider: SearchSorterProvider,
-    identityNameHolderService: IdentityNameHolderService,
+    identityNameHolderService: IdentityNameHolderService
 ) {
-    private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
-    private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
 
     private var lastResult: CacheResult? = null
     private val searchSorter: SearchSorter

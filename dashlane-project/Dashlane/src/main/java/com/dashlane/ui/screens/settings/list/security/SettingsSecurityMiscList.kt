@@ -4,6 +4,7 @@ import android.content.Context
 import com.dashlane.R
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
+import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.masterpassword.ChangeMasterPasswordActivity
@@ -11,13 +12,11 @@ import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
 import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.masterpassword.warning.ChangeMPWarningDesktopActivity
 import com.dashlane.navigation.Navigator
-import com.dashlane.network.inject.LegacyWebservicesApi
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserCryptographyRepository
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.screens.settings.SettingPrivacySetting
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
@@ -25,19 +24,23 @@ import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.util.DialogHelper
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.Toaster
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import retrofit2.Retrofit
+import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class SettingsSecurityMiscList(
     private val context: Context,
+    private val coroutineScope: CoroutineScope,
     navigator: Navigator,
     screenshotPolicy: ScreenshotPolicy,
     userPreferencesManager: UserPreferencesManager,
-    teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
-    @LegacyWebservicesApi retrofit: Retrofit,
+    teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     sessionManager: SessionManager,
     dialogHelper: DialogHelper,
     cryptographyRepository: UserCryptographyRepository,
@@ -46,6 +49,8 @@ class SettingsSecurityMiscList(
     toaster: Toaster,
     userFeaturesChecker: UserFeaturesChecker,
     userAccountStorage: UserAccountStorage,
+    subscriptionCodeRepository: SubscriptionCodeRepository,
+    @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher
 ) {
 
     private val miscHeader =
@@ -99,8 +104,7 @@ class SettingsSecurityMiscList(
         override val title = context.getString(R.string.setting_automatically_copy_2fa)
         override val description = context.getString(R.string.setting_automatically_copy_2fa_description)
         override fun isEnable() = true
-        override fun isVisible() =
-            userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.AUTOMATICALLY_COPY_2FA)
+        override fun isVisible() = userFeaturesChecker.has(FeatureFlip.AUTOMATICALLY_COPY_2FA)
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = userPreferencesManager.hasAutomatic2faTokenCopy
@@ -146,10 +150,7 @@ class SettingsSecurityMiscList(
         override fun onClick(context: Context) {
             
             val messageId =
-                if (teamspaceAccessorProvider.get()
-                        ?.getFeatureValue(Teamspace.Feature.CRYPTO_FORCED_PAYLOAD)
-                        .isNullOrEmpty()
-                ) {
+                if (teamSpaceAccessorProvider.get()?.cryptoForcedPayload.isNullOrEmpty()) {
                     R.string.settings_cryptography_dialog_description_b2c
                 } else {
                     R.string.settings_cryptography_dialog_description_b2b
@@ -206,9 +207,16 @@ class SettingsSecurityMiscList(
         override val description = context.getString(R.string.setting_privacy_message)
         override fun isEnable() = true
         override fun isVisible() = true
-        override fun onClick(context: Context) =
-            SettingPrivacySetting(context, retrofit, sessionManager, toaster)
-                .open()
+        override fun onClick(context: Context) {
+            coroutineScope.launch {
+                SettingPrivacySetting(
+                    context = context,
+                    subscriptionCodeRepository = subscriptionCodeRepository,
+                    ioDispatcher = ioDispatcher,
+                    toaster = toaster
+                ).open()
+            }
+        }
     }
 
     private val manageDevicesItem = object : SettingItem {

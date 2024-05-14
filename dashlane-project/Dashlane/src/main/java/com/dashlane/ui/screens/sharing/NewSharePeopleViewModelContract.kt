@@ -19,8 +19,9 @@ interface NewSharePeopleViewModelContract {
         ERROR,
         ERROR_ALREADY_ACCESS,
         ERROR_FIND_USERS,
+        ERROR_NOT_INTERNAL,
         SUCCESS,
-        SUCCESS_FOR_RESULT,
+        SUCCESS_FOR_RESULT
     }
 }
 

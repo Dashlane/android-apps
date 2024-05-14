@@ -1,6 +1,5 @@
 package com.dashlane.createaccount.pages.confirmpassword
 
-import com.dashlane.createaccount.AccountCreator
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
@@ -11,20 +10,15 @@ import javax.inject.Inject
 
 class CreateAccountConfirmPasswordDataProvider @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
-    private val accountCreator: AccountCreator,
 ) : BaseDataProvider<CreateAccountConfirmPasswordContract.Presenter>(),
     CreateAccountConfirmPasswordContract.DataProvider {
 
     override val requiresTosApproval by lazy {
-        return@lazy if (accountCreator.isGdprDebugModeEnabled) {
-            accountCreator.isGdprForced
-        } else {
-            inEuropeanUnion
-        }
+        return@lazy inEuropeanUnion
     }
 
     override val biometricAvailable: Boolean
-        get() = biometricAuthModule.isHardwareSetUp()
+        get() = biometricAuthModule.isHardwareSetUp() && !biometricAuthModule.isOnlyWeakSupported()
 
     override val clearPassword: String
         get() = masterPassword.decodeUtf8ToString()

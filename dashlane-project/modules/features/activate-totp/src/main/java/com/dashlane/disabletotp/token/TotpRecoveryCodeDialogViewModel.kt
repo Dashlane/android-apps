@@ -2,7 +2,8 @@ package com.dashlane.disabletotp.token
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.network.webservices.authentication.OtpPhoneLostService
+import com.dashlane.server.api.Response
+import com.dashlane.server.api.endpoints.authentication.RequestOtpRecoveryCodesByPhoneService
 import com.dashlane.session.SessionManager
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,7 @@ import kotlinx.coroutines.flow.onEach
 @HiltViewModel
 class TotpRecoveryCodeDialogViewModel @Inject constructor(
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val otpPhoneLostService: OtpPhoneLostService,
+    private val requestOtpRecoveryCodesByPhoneService: RequestOtpRecoveryCodesByPhoneService,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -30,14 +31,9 @@ class TotpRecoveryCodeDialogViewModel @Inject constructor(
     fun sendRecoveryBySms(email: String? = null) {
         flow {
             val userId = email ?: requireNotNull(sessionManager.session).userId
-            emit(otpPhoneLostService.execute(userId))
+            emit(requestOtpRecoveryCodesByPhoneService.execute(RequestOtpRecoveryCodesByPhoneService.Request(userId)))
         }
-            .map { response ->
-                when (response.code) {
-                    200 -> SmsRecoveryCodeDialogState.Success
-                    else -> SmsRecoveryCodeDialogState.Error
-                }
-            }
+            .map<Response<Unit>, SmsRecoveryCodeDialogState> { SmsRecoveryCodeDialogState.Success }
             .catch { emit(SmsRecoveryCodeDialogState.Error) }
             .onEach { state -> mutableSharedFlow.emit(state) }
             .flowOn(ioDispatcher)
@@ -46,6 +42,6 @@ class TotpRecoveryCodeDialogViewModel @Inject constructor(
 }
 
 sealed class SmsRecoveryCodeDialogState {
-    object Success : SmsRecoveryCodeDialogState()
-    object Error : SmsRecoveryCodeDialogState()
+    data object Success : SmsRecoveryCodeDialogState()
+    data object Error : SmsRecoveryCodeDialogState()
 }

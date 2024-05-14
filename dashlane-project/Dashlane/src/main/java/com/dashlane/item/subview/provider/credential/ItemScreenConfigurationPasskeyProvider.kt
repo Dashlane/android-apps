@@ -18,9 +18,8 @@ import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.readonly.ItemInfoboxSubView
 import com.dashlane.item.subview.readonly.ItemReadValueTextSubView
-import com.dashlane.teamspaces.PersonalTeamspace
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.url.name
 import com.dashlane.url.toUrlOrNull
@@ -36,7 +35,7 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationPasskeyProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
@@ -243,10 +242,10 @@ class ItemScreenConfigurationPasskeyProvider(
         item: VaultItem<SyncObject.Passkey>,
         views: List<ItemSubView<String>>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 views,
                 ::copyForUpdatedTeamspace
             )
@@ -259,11 +258,11 @@ class ItemScreenConfigurationPasskeyProvider(
 @Suppress("UNCHECKED_CAST")
 private fun copyForUpdatedTeamspace(
     item: VaultItem<*>,
-    value: Teamspace
+    value: TeamSpace
 ): VaultItem<SyncObject.Passkey> {
     item as VaultItem<SyncObject.Passkey>
     val authentifiant = item.syncObject
-    val spaceId = authentifiant.spaceId ?: PersonalTeamspace.teamId
+    val spaceId = authentifiant.spaceId ?: TeamSpace.Personal.teamId
     return if (value.teamId == spaceId) {
         item
     } else {

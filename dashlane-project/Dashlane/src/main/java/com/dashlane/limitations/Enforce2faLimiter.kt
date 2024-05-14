@@ -8,14 +8,13 @@ import com.dashlane.login.pages.enforce2fa.HasEnforced2faLimitUseCase
 import com.dashlane.login.pages.password.LoginPasswordDataProvider
 import com.dashlane.server.api.endpoints.authentication.Auth2faSettingsService
 import com.dashlane.session.SessionManager
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,18 +39,16 @@ class Enforce2faLimiter(
         @MainCoroutineDispatcher
         mainCoroutineDispatcher: CoroutineDispatcher,
         sessionManager: SessionManager,
-        teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+        teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
         auth2faSettingsService: Auth2faSettingsService,
-        userFeaturesChecker: UserFeaturesChecker,
         use2faSettingState: Use2faSettingStateHolder
     ) : this(
         applicationCoroutineScope = applicationCoroutineScope,
         mainCoroutineDispatcher = mainCoroutineDispatcher,
         sessionManager = sessionManager,
         enforced2faLimitUseCase = HasEnforced2FaLimitUseCaseImpl(
-            teamspaceAccessorProvider = teamspaceAccessorProvider,
-            auth2faSettingsService = auth2faSettingsService,
-            userFeaturesChecker = userFeaturesChecker
+            teamSpaceAccessor = teamSpaceAccessorProvider,
+            auth2faSettingsService = auth2faSettingsService
         ),
         use2faSettingState = use2faSettingState
     )

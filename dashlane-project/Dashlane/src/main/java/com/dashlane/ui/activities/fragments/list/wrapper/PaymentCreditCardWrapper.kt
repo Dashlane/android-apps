@@ -7,8 +7,8 @@ import androidx.core.content.ContextCompat
 import com.dashlane.R
 import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
@@ -23,8 +23,8 @@ class PaymentCreditCardWrapper(
     itemListContext: ItemListContext,
     dataIdentifierListTextResolver: DataIdentifierListTextResolver,
     navigator: Navigator,
-    sessionManager: SessionManager,
-    teamspaceRepository: TeamspaceManagerRepository
+    teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
+    currentSpaceFilterRepository: CurrentTeamSpaceUiFilter
 ) : DefaultVaultItemWrapper<SummaryObject.PaymentCreditCard>(
     vaultItemCopyService,
     quickActionProvider,
@@ -32,8 +32,8 @@ class PaymentCreditCardWrapper(
     itemListContext,
     navigator,
     dataIdentifierListTextResolver,
-    sessionManager,
-    teamspaceRepository
+    teamSpaceAccessorProvider,
+    currentSpaceFilterRepository
 ) {
 
     override fun getImageDrawable(context: Context): Drawable {

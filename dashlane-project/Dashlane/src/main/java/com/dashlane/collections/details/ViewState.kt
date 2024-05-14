@@ -16,8 +16,10 @@ sealed class ViewState {
 data class ViewData(
     val collectionName: String?,
     val shared: Boolean,
+    val canRemoveFromSharedCollection: Boolean,
     val items: List<SummaryForUi>,
-    val spaceData: SpaceData?
+    val spaceData: SpaceData?,
+    val collectionLimit: CollectionLimiter.UserLimit = CollectionLimiter.UserLimit.NO_LIMIT
 )
 
 data class SummaryForUi(
@@ -26,5 +28,6 @@ data class SummaryForUi(
     val thumbnail: UrlDomain?,
     val firstLine: String,
     val secondLine: String,
+    val sharingPermission: String?,
     val spaceData: SpaceData?
 )

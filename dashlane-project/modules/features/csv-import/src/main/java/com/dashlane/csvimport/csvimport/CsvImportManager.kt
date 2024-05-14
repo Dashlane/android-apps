@@ -6,7 +6,7 @@ import androidx.annotation.VisibleForTesting
 import com.dashlane.autofill.LinkedServicesHelper
 import com.dashlane.csvimport.utils.csvLineSequence
 import com.dashlane.ext.application.KnownApplicationProvider
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.util.PackageUtilities
 import com.dashlane.vault.model.VaultItem
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 class CsvImportManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val mainDataAccessor: MainDataAccessor,
+    private val vaultDataQuery: VaultDataQuery,
     private val linkedServicesHelper: LinkedServicesHelper,
     private val knownApplicationProvider: KnownApplicationProvider,
 ) {
@@ -59,7 +59,7 @@ class CsvImportManager @Inject constructor(
         val filter = vaultFilter {
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
-        val allAuthentifiants = mainDataAccessor.getVaultDataQuery()
+        val allAuthentifiants = vaultDataQuery
             .queryAll(filter)
             .filterIsInstance<VaultItem<SyncObject.Authentifiant>>()
             .map { it.syncObject }

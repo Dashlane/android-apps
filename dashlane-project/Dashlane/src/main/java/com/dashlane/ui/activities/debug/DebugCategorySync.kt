@@ -8,7 +8,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.preference.PreferenceGroup
 import com.dashlane.permission.PermissionsManager
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
 import com.dashlane.util.FileUtils
@@ -16,16 +16,17 @@ import com.dashlane.util.showToaster
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.qualifiers.ActivityContext
+import javax.inject.Inject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 internal class DebugCategorySync @Inject constructor(
     @ActivityContext override val context: Context,
     val permissionsManager: PermissionsManager,
-    val mainDataAccessor: MainDataAccessor
+    private val vaultDataQuery: VaultDataQuery,
+    private val fileUtils: FileUtils
 ) : AbstractDebugCategory() {
 
     override val name: String
@@ -44,15 +45,13 @@ internal class DebugCategorySync @Inject constructor(
             return
         }
 
-        val list = mainDataAccessor
-            .getVaultDataQuery()
+        val list = vaultDataQuery
             .queryAll(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.DATA_CHANGE_HISTORY)))
             .mapNotNull { it.syncObject as? SyncObject.DataChangeHistory }
         val html = list.joinToString("\n") { changeHistory -> changeHistory.html() }
 
         GlobalScope.launch(Dispatchers.Main) {
-            val uri = FileUtils.writeFileToPublicFolder(
-                context,
+            val uri = fileUtils.writeFileToPublicFolder(
                 "data_history.html",
                 "text/html"
             ) { stream ->

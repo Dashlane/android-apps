@@ -22,6 +22,11 @@
         android:name="com.dashlane.login.LoginComposeFragment"
         android:label="@string/login">
         <argument
+            android:name="startDestination"
+            app:nullable="true"
+            android:defaultValue="@null"
+            app:argType="string" />
+        <argument
             android:name="email"
             app:nullable="true"
             android:defaultValue="@null"

@@ -10,23 +10,26 @@ import androidx.activity.viewModels
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
 import com.dashlane.abtesting.OfflineExperimentReporter
 import com.dashlane.abtesting.RemoteAbTestManager
+import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.modules.KeyboardAutofillAnnouncementModule
 import com.dashlane.braze.BrazeWrapper
-import com.dashlane.core.DataSync
 import com.dashlane.databinding.ActivityHomeActivityLayoutBinding
 import com.dashlane.debug.DaDaDa
 import com.dashlane.device.DeviceUpdateManager
 import com.dashlane.events.AppEvents
-import com.dashlane.events.PremiumStatusChangedEvent
 import com.dashlane.featureflipping.FeatureFlipManager
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.SecurityHelper
 import com.dashlane.session.SessionManager
+import com.dashlane.sync.DataSync
 import com.dashlane.ui.activities.fragments.vault.HiddenImpala
 import com.dashlane.ui.dialogs.fragment.TeamRevokedDialogDisplayer
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
@@ -41,10 +44,15 @@ import com.dashlane.util.AppShortcutsUtil
 import com.dashlane.util.DeviceUtils.hideKeyboard
 import com.dashlane.util.getParcelableExtraCompat
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
+    @Inject
+    lateinit var announcementCenter: AnnouncementCenter
+
     @Inject
     lateinit var remoteAbTestManager: RemoteAbTestManager
 
@@ -88,7 +96,10 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
     lateinit var userPreferenceManager: UserPreferencesManager
 
     @Inject
-    lateinit var teamSpaceRevokedDialogListener: TeamRevokedDialogDisplayer
+    lateinit var teamSpaceRevokedDialogDisplayer: TeamRevokedDialogDisplayer
+
+    @Inject
+    lateinit var accountStatusRepository: AccountStatusRepository
 
     private lateinit var navigationDrawer: DrawerLayout
     private val menuViewModel: MenuViewModel by viewModels()
@@ -129,6 +140,17 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
                 onBackPressedDispatcher.addCallback(this@HomeActivity, drawerCallback)
             }
         })
+
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                accountStatusRepository.accountStatusState.collect { accountStatusState ->
+                    accountStatusState[sessionManager.session]?.let {
+                        onPremiumStatusChanged()
+                        teamSpaceRevokedDialogDisplayer.onStatusChanged(WeakReference(this@HomeActivity))
+                    }
+                }
+            }
+        }
 
         
         HiddenImpala.configureForHomeActivity(this)
@@ -187,13 +209,10 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
         return navigationDrawer
     }
 
-    private fun onPremiumStatusChanged(event: PremiumStatusChangedEvent) {
-        appEvents.clearLastEvent(PremiumStatusChangedEvent::class.java)
-        if (event.premiumPlanChanged()) {
-            storeOffersCache.flushCache()
-            loadAccessibleOffers()
-            menuViewModel.refresh()
-        }
+    private fun onPremiumStatusChanged() {
+        storeOffersCache.flushCache()
+        loadAccessibleOffers()
+        menuViewModel.refresh()
     }
 
     override fun onStart() {
@@ -216,6 +235,7 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
         securityHelper.showPopupPinCodeDisableIfWasEnable(this)
         deviceUpdateManager.updateIfNeeded()
         KeyboardAutofillAnnouncementModule.setRequireDisplayIfNeeded(userPreferenceManager, intent)
+        announcementCenter.start(this)
     }
 
     override fun onResume() {
@@ -231,15 +251,6 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
         if (isNavigationDrawerVisible()) {
             hideKeyboard(navigationDrawer)
         }
-        appEvents.register(
-            this,
-            PremiumStatusChangedEvent::class.java,
-            true
-        ) { premiumStatusChangedEvent: PremiumStatusChangedEvent ->
-            onPremiumStatusChanged(premiumStatusChangedEvent)
-        }
-        teamSpaceRevokedDialogListener.showIfNecessary(this, supportFragmentManager)
-        teamSpaceRevokedDialogListener.listenUpcoming(this)
         menuViewModel.refresh()
         loadAccessibleOffers()
         mDataSync.maySync()
@@ -247,18 +258,14 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
 
     override fun onPause() {
         super.onPause()
-        if (isResume) {
-            
-            appEvents.unregister(this, PremiumStatusChangedEvent::class.java)
-        }
         isResume = false
-        teamSpaceRevokedDialogListener.stopUpcomingListener()
     }
 
     override fun onStop() {
         super.onStop()
         
         appShortcutsUtil.refreshShortcuts(this)
+        announcementCenter.stop(this)
     }
 
     private fun initializeNavigationDrawer() {

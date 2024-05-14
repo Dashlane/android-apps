@@ -8,12 +8,13 @@ import com.dashlane.R
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
-import com.dashlane.accountrecoverykey.AccountRecoveryStatus
+import com.dashlane.accountrecoverykey.AccountRecoveryState
 import com.dashlane.activatetotp.ActivateTotpLogger
 import com.dashlane.activatetotp.DownloadAuthenticatorAppIntroActivity
 import com.dashlane.authenticator.isAuthenticatorAppInstalled
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.BiometricRecoveryIntroActivity
+import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.disabletotp.DisableTotpActivity
 import com.dashlane.disabletotp.DisableTotpEnforcedIntroActivity
 import com.dashlane.login.lock.LockManager
@@ -23,10 +24,10 @@ import com.dashlane.navigation.Navigator
 import com.dashlane.security.SecurityHelper
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.TeamspaceRestrictionNotificator
-import com.dashlane.teamspaces.manager.is2FAEnforced
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.session.serverKeyUtf8Bytes
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.ui.Feature
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.screens.settings.SingleChoiceDialog
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
@@ -49,7 +50,7 @@ class SettingsSecurityApplicationLockList(
     private val lockManager: LockManager,
     securityHelper: SecurityHelper,
     biometricAuthModule: BiometricAuthModule,
-    teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+    val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     sessionManager: SessionManager,
     userAccountStorage: UserAccountStorage,
     private val dialogHelper: DialogHelper,
@@ -60,11 +61,14 @@ class SettingsSecurityApplicationLockList(
     private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
     private val navigator: Navigator,
-    private val teamspaceNotificator: TeamspaceRestrictionNotificator
+    private val teamspaceNotificator: TeamSpaceRestrictionNotificator
 ) {
 
     private val appLockHeader =
         SettingHeader(context.getString(R.string.settings_app_lock))
+
+    private val teamSpaceAccessor: TeamSpaceAccessor?
+        get() = teamSpaceAccessorProvider.get()
 
     private val lockPinCodeItem = object : SettingItem, SettingCheckable, SettingChange.Listenable {
 
@@ -80,7 +84,7 @@ class SettingsSecurityApplicationLockList(
             getLockType(lockManager) == LockTypeManager.LOCK_TYPE_PIN_CODE
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
-            if (!securityHelper.allowedToUsePin()) {
+            if (!securityHelper.isDeviceSecured()) {
                 securityHelper.showPopupPinCodeDisable(context)
                 return
             }
@@ -140,9 +144,33 @@ class SettingsSecurityApplicationLockList(
 
             override fun onCheckChanged(context: Context, enable: Boolean) {
                 if (enable) {
+                    val isUsingPin = lockPinCodeItem.isChecked(context)
+                    val positiveButtonText = if (isUsingPin) {
+                        R.string.biometric_settings_weak_warning_dialog_positive_button_keep
+                    } else {
+                        R.string.biometric_settings_weak_warning_dialog_positive_button_setup
+                    }
                     sensibleSettingsClickHelper.perform(context = context) {
-                        
-                        biometricAuthModule.startOnboarding(context)
+                        if (biometricAuthModule.isOnlyWeakSupported()) {
+                            
+                            dialogHelper.builder(context)
+                                .setTitle(R.string.biometric_settings_weak_warning_dialog_title)
+                                .setMessage(R.string.biometric_settings_weak_warning_dialog_message)
+                                .setPositiveButton(positiveButtonText) { _, _ ->
+                                    
+                                    if (!isUsingPin) lockPinCodeItem.onClick(context)
+                                }
+                                .setNegativeButton(
+                                    R.string.biometric_settings_weak_warning_dialog_negative_button,
+                                ) { _, _ ->
+                                    
+                                    biometricAuthModule.startOnboarding(context)
+                                }
+                                .show()
+                        } else {
+                            
+                            biometricAuthModule.startOnboarding(context)
+                        }
                     }
                 } else {
                     runIfBiometricRecoveryDeactivationAcknowledged(context) {
@@ -176,10 +204,21 @@ class SettingsSecurityApplicationLockList(
         }
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
+            val session = sessionManager.session ?: return
             sensibleSettingsClickHelper.perform(
                 context = context,
                 masterPasswordRecommended = enable
-            ) {}
+            ) {
+                if (enable) {
+                    sessionCredentialsSaver.saveServerKey(
+                        serverKey = session.appKey.serverKeyUtf8Bytes?.use(ObfuscatedByteArray::toByteArray),
+                        localKey = session.localKey,
+                        username = session.username
+                    )
+                } else {
+                    sessionCredentialsSaver.removeServerKey(session.username)
+                }
+            }
         }
 
         private fun isOtp2() = sessionManager.session
@@ -204,7 +243,7 @@ class SettingsSecurityApplicationLockList(
         override fun isChecked(context: Context) = lockManager.isItemUnlockableByPinOrFingerprint()
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
-            if (!securityHelper.allowedToUsePin()) {
+            if (!securityHelper.isDeviceSecured()) {
                 securityHelper.showPopupPinCodeDisable(context)
                 return
             }
@@ -240,8 +279,7 @@ class SettingsSecurityApplicationLockList(
         override val header = appLockHeader
         override val title = context.getString(R.string.settings_lock_on_exit)
         override val description = context.getString(R.string.setting_lock_on_exit_description)
-        override fun isEnable() =
-            teamspaceAccessorProvider.get()?.isFeatureEnabled(Teamspace.Feature.AUTOLOCK) ?: false
+        override fun isEnable() = teamSpaceAccessor?.isLockOnExitEnabled == false
 
         override fun isVisible() = true
 
@@ -252,7 +290,7 @@ class SettingsSecurityApplicationLockList(
             if (!isEnable()) {
                 teamspaceNotificator.notifyFeatureRestricted(
                     context.getBaseActivity() as FragmentActivity,
-                    Teamspace.Feature.AUTOLOCK
+                    Feature.AUTOLOCK
                 )
                 return
             }
@@ -362,17 +400,37 @@ class SettingsSecurityApplicationLockList(
                 }
 
                 sensibleSettingsClickHelper.perform(context = context) {
-                    val hasBiometric =
-                        getLockType(lockManager) == LockTypeManager.LOCK_TYPE_BIOMETRIC
-
-                    if (!hasBiometric) {
-                        context.startActivity(
-                            BiometricRecoveryIntroActivity.newIntent(context)
-                                .clearTop()
-                        )
+                    if (biometricAuthModule.isOnlyWeakSupported()) {
+                        
+                        dialogHelper.builder(context)
+                            .setTitle(R.string.account_recovery_weak_warning_dialog_title)
+                            .setMessage(R.string.account_recovery_weak_warning_dialog_message)
+                            .setPositiveButton(
+                                R.string.account_recovery_weak_warning_dialog_positive_button
+                            ) { _, _ ->
+                                setupBiometricRecovery(context)
+                            }
+                            .setNegativeButton(
+                                R.string.account_recovery_weak_warning_dialog_negative_button,
+                                null
+                            )
+                            .show()
                     } else {
-                        biometricRecovery.setBiometricRecoveryFeatureEnabled(true)
+                        setupBiometricRecovery(context)
                     }
+                }
+            }
+
+            private fun setupBiometricRecovery(context: Context) {
+                val hasBiometric =
+                    getLockType(lockManager) == LockTypeManager.LOCK_TYPE_BIOMETRIC
+                if (!hasBiometric) {
+                    context.startActivity(
+                        BiometricRecoveryIntroActivity.newIntent(context)
+                            .clearTop()
+                    )
+                } else {
+                    biometricRecovery.setBiometricRecoveryFeatureEnabled(true)
                 }
             }
         }
@@ -385,20 +443,20 @@ class SettingsSecurityApplicationLockList(
             override val title = context.getString(R.string.account_recovery_key_setting_title)
             override val description
                 get() =
-                    if (checkStatus()?.enabled == true) {
+                    if (checkStatus().enabled) {
                         context.getString(R.string.account_recovery_key_setting_description_on)
                     } else {
                         context.getString(R.string.account_recovery_key_setting_description_off)
                     }
 
             override fun isEnable() = true
-            override fun isVisible() = checkStatus()?.visible ?: false
+            override fun isVisible() = checkStatus().visible
 
             override fun onClick(context: Context) {
                 navigator.goToAccountRecoveryKey(id)
             }
 
-            private fun checkStatus(): AccountRecoveryStatus? = accountRecoveryKeyRepository.getAccountRecoveryStatusBlocking()
+            private fun checkStatus(): AccountRecoveryState = accountRecoveryKeyRepository.getAccountRecoveryStatusBlocking()
         }
 
     private fun getLockType(lockManager: LockManager): Int {
@@ -480,7 +538,7 @@ class SettingsSecurityApplicationLockList(
                     )
                 )
             } else {
-                if (teamspaceAccessorProvider.get().is2FAEnforced()) {
+                if (teamSpaceAccessor?.is2FAEnforced == true) {
                     context.startActivity(Intent(context, DisableTotpEnforcedIntroActivity::class.java).clearTop())
                 } else {
                     dialogHelper

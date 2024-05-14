@@ -13,7 +13,7 @@ import com.dashlane.authentication.UnauthenticatedUser
 import com.dashlane.authentication.login.AuthenticationEmailRepository
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.EMAIL_KEY
-import com.dashlane.login.pages.secrettransfer.SecretTransferPayload
+import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel

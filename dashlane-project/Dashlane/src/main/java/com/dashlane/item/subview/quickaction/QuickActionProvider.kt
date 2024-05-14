@@ -2,11 +2,10 @@ package com.dashlane.item.subview.quickaction
 
 import com.dashlane.item.subview.Action
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.teamspaces.manager.TeamspaceManager
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.model.urlForGoToWebsite
@@ -19,12 +18,10 @@ import javax.inject.Inject
 class QuickActionProvider @Inject constructor(
     private val vaultItemCopyService: VaultItemCopyService,
     private val sharingPolicyDataProvider: SharingPolicyDataProvider,
-    private val sessionManager: SessionManager,
-    private val teamspaceManagerRepository: TeamspaceManagerRepository,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator
 ) {
-    private val teamspaceManager: TeamspaceManager?
-        get() = sessionManager.session?.let { teamspaceManagerRepository.getTeamspaceManager(it) }
 
     @Suppress("LongMethod")
     fun getQuickActions(summaryObject: SummaryObject, itemListContext: ItemListContext): List<Action> {
@@ -51,6 +48,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.AUTHENTIFIANT -> {
@@ -94,10 +92,11 @@ class QuickActionProvider @Inject constructor(
                         (summaryObject as SummaryObject.Authentifiant).urlForGoToWebsite ?: "",
                         summaryObject.linkedServices
                     ),
+                    QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                     QuickActionShare.createActionIfShareAvailable(
                         summaryObject,
                         sharingPolicyDataProvider,
-                        teamspaceManager
+                        teamspaceRestrictionNotificator
                     ),
                     QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
                 )
@@ -117,6 +116,7 @@ class QuickActionProvider @Inject constructor(
                     sharingPolicyDataProvider
                 ),
                 QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.FISCAL_STATEMENT -> listOfNotNull(
@@ -134,6 +134,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.ID_CARD -> listOfNotNull(
@@ -145,6 +146,7 @@ class QuickActionProvider @Inject constructor(
                     sharingPolicyDataProvider
                 ),
                 QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.PASSPORT -> listOfNotNull(
@@ -156,6 +158,7 @@ class QuickActionProvider @Inject constructor(
                     sharingPolicyDataProvider
                 ),
                 QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.PAYMENT_CREDIT_CARD -> listOfNotNull(
@@ -173,6 +176,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.PAYMENT_PAYPAL -> listOfNotNull(
@@ -190,15 +194,16 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.SECURE_NOTE -> listOfNotNull(
                 QuickActionShare.createActionIfShareAvailable(
                     summaryObject,
                     sharingPolicyDataProvider,
-                    teamspaceManager
+                    teamspaceRestrictionNotificator
                 ),
-                QuickActionOpenAttachment.createAttachmentsAction(summaryObject),
+                QuickActionOpenAttachment.createAttachmentsAction(summaryObject, userFeaturesChecker),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.IDENTITY -> listOfNotNull(
@@ -230,6 +235,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.COMPANY -> listOfNotNull(
@@ -247,6 +253,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.EMAIL -> listOfNotNull(
@@ -257,6 +264,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.PERSONAL_WEBSITE -> listOfNotNull(
@@ -267,6 +275,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.PHONE -> listOfNotNull(
@@ -277,6 +286,7 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
             SyncObjectType.SOCIAL_SECURITY_STATEMENT -> listOfNotNull(
@@ -288,6 +298,7 @@ class QuickActionProvider @Inject constructor(
                     sharingPolicyDataProvider
                 ),
                 QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
 
@@ -299,6 +310,11 @@ class QuickActionProvider @Inject constructor(
                     vaultItemCopyService,
                     sharingPolicyDataProvider
                 ),
+                QuickActionOpenWebsite(
+                    (summaryObject as SummaryObject.Passkey).urlForGoToWebsite ?: "",
+                    null
+                ),
+                QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
                 QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
             )
 
@@ -388,6 +404,7 @@ class QuickActionProvider @Inject constructor(
                 )
             )
         } + listOfNotNull(
+            QuickActionEdit.createActionIfCanEdit(summaryObject, sharingPolicyDataProvider, navigator),
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicyDataProvider,

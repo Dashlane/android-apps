@@ -4,8 +4,8 @@ import android.content.Context
 import com.adjust.sdk.Adjust
 import com.adjust.sdk.AdjustConfig
 import com.adjust.sdk.AdjustEvent
+import com.dashlane.BuildConfig
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.util.Constants
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +18,7 @@ class AdjustWrapper @Inject constructor(
     fun initIfNeeded(context: Context) {
         if (isInit) return 
 
-        val appToken = Constants.MARKETING.ADJUST_API_KEY
+        val appToken = BuildConfig.ADJUST_API_KEY
         val environment = AdjustConfig.ENVIRONMENT_PRODUCTION
         val config = AdjustConfig(context, appToken, environment)
         config.setPreinstallTrackingEnabled(true)
@@ -72,7 +72,7 @@ class AdjustWrapper @Inject constructor(
         }
 
         fun sendInstallEvent() {
-            val event = AdjustEvent(Constants.MARKETING.ADJUST_EVENT_INSTALL)
+            val event = AdjustEvent("5afa9x")
             try {
                 event.addPartnerParameter(installEventPartnerParameterKey, id)
             } catch (e: Exception) {

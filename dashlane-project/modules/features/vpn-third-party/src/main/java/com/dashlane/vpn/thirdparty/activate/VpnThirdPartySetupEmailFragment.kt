@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.dashlane.help.HelpCenterCoordinator
-import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.server.api.endpoints.vpn.VpnGetCredentialsService
 import com.dashlane.session.SessionManager
@@ -21,9 +19,6 @@ import javax.inject.Inject
 class VpnThirdPartySetupEmailFragment : Fragment() {
 
     @Inject
-    lateinit var helpCenterCoordinator: HelpCenterCoordinator
-
-    @Inject
     lateinit var getVpnCredentialsService: VpnGetCredentialsService
 
     @Inject
@@ -33,7 +28,7 @@ class VpnThirdPartySetupEmailFragment : Fragment() {
     lateinit var authentifiantHelper: VpnThirdPartyAuthentifiantHelper
 
     @Inject
-    lateinit var logRepository: LogRepository
+    lateinit var logger: VpnThirdPartyLogger
 
     interface Listener {
         fun onPresenterReady(presenter: VpnThirdPartyActivateAccountPresenter)
@@ -50,9 +45,7 @@ class VpnThirdPartySetupEmailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setCurrentPageView(AnyPage.TOOLS_VPN_PRIVACY_CONSENT)
-        val logger = VpnThirdPartyLogger(logRepository)
-        val presenter =
-            VpnThirdPartyActivateAccountPresenter(helpCenterCoordinator, logger)
+        val presenter = VpnThirdPartyActivateAccountPresenter(logger)
         val defaultEmail = activity?.intent?.getStringExtra("email")
         val suggestions = activity?.intent?.getStringArrayExtra("suggestions")
         presenter.setView(

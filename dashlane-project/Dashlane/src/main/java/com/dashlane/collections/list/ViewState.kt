@@ -20,5 +20,7 @@ data class CollectionViewData(
     val itemCount: Int,
     val spaceData: SpaceData?,
     val shared: Boolean,
-    val shareAllowed: Boolean
+    val shareEnabled: Boolean,
+    val shareAllowed: Boolean,
+    val shareLimitedByTeam: Boolean
 )

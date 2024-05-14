@@ -15,7 +15,7 @@ import com.dashlane.autofill.core.AutofillUsageLog
 import com.dashlane.autofill.formdetector.BrowserDetectionHelper
 import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.inapplogin.InAppLoginManager
-import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
+import com.dashlane.teamspaces.db.SmartSpaceCategorizationManager
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.resolveActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,7 +34,7 @@ class DashlaneAccessibilityService : AccessibilityService() {
     private var homePackage: String? = null
 
     @Inject
-    lateinit var teamspaceForceCategorizationManager: TeamspaceForceCategorizationManager
+    lateinit var smartSpaceCategorizationManager: SmartSpaceCategorizationManager
 
     @Inject
     lateinit var linkedServicesHelper: LinkedServicesHelper

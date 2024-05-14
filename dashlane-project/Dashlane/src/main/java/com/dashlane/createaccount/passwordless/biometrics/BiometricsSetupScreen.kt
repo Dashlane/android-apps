@@ -2,8 +2,8 @@ package com.dashlane.createaccount.passwordless.biometrics
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -28,22 +28,24 @@ import com.dashlane.ui.widgets.compose.LoadingScreen
 
 @Composable
 fun BiometricsSetupScreen(
+    modifier: Modifier = Modifier,
     viewModel: BiometricsSetupViewModel,
     onSkip: () -> Unit,
+    onBiometricsDisabled: () -> Unit,
     onBiometricsEnabled: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState) {
         when (uiState) {
-            BiometricSetupState.HardwareDisabled -> onSkip()
+            BiometricSetupState.HardwareDisabled -> onBiometricsDisabled()
             else -> Unit
         }
     }
 
     when (uiState) {
-        BiometricSetupState.HardwareEnabled -> BiometricsSetupContent(onSkip = onSkip, onNext = onBiometricsEnabled)
-        BiometricSetupState.Loading -> LoadingScreen(title = "")
+        BiometricSetupState.HardwareEnabled -> BiometricsSetupContent(modifier = modifier, onSkip = onSkip, onNext = onBiometricsEnabled)
+        BiometricSetupState.Loading -> LoadingScreen(modifier = modifier, title = "")
         else -> Unit
     }
 }
@@ -58,35 +60,29 @@ fun BiometricsSetupContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .weight(1f)
-                .padding(top = 24.dp, end = 24.dp, bottom = 24.dp, start = 24.dp)
-        ) {
-            Image(
-                modifier = Modifier
-                    .size(96.dp),
-                painter = painterResource(id = R.drawable.ic_biometrics),
-                colorFilter = ColorFilter.tint(DashlaneTheme.colors.containerExpressiveBrandCatchyIdle),
-                contentDescription = null
-            )
-            Text(
-                modifier = Modifier.padding(top = 32.dp),
-                text = stringResource(R.string.passwordless_biometrics_setup_title),
-                style = DashlaneTheme.typography.titleSectionLarge
-            )
-            Text(
-                modifier = Modifier.padding(top = 16.dp),
-                text = stringResource(R.string.passwordless_biometrics_setup_description),
-                style = DashlaneTheme.typography.bodyStandardRegular
-            )
-        }
+        Image(
+            modifier = Modifier
+                .padding(top = 48.dp)
+                .size(96.dp),
+            painter = painterResource(id = R.drawable.ic_biometrics),
+            colorFilter = ColorFilter.tint(DashlaneTheme.colors.containerExpressiveBrandCatchyIdle),
+            contentDescription = stringResource(id = R.string.and_accessibility_content_desc_fingerprint_logo)
+        )
+        Text(
+            modifier = Modifier.padding(top = 32.dp),
+            text = stringResource(R.string.passwordless_biometrics_setup_title),
+            style = DashlaneTheme.typography.titleSectionLarge
+        )
+        Text(
+            modifier = Modifier.padding(top = 16.dp),
+            text = stringResource(R.string.passwordless_biometrics_setup_description),
+            style = DashlaneTheme.typography.bodyStandardRegular
+        )
+        Spacer(modifier = Modifier.weight(1f))
         ButtonMediumBar(
             modifier = modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                 .align(Alignment.End),
             primaryText = stringResource(id = R.string.passwordless_biometrics_positive_button),
             secondaryText = stringResource(id = R.string.passwordless_biometrics_neutral_button),

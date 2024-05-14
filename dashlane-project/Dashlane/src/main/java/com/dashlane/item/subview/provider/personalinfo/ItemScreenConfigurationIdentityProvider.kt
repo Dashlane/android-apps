@@ -12,8 +12,8 @@ import com.dashlane.item.subview.edit.ItemEditValueDateSubView
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.readonly.ItemReadValueDateSubView
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.toIdentityFormat
 import com.dashlane.vault.model.VaultItem
@@ -23,7 +23,7 @@ import com.dashlane.xml.domain.SyncObject
 import java.time.LocalDate
 
 class ItemScreenConfigurationIdentityProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider() {
 
@@ -101,10 +101,10 @@ class ItemScreenConfigurationIdentityProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.Identity>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -237,7 +237,7 @@ class ItemScreenConfigurationIdentityProvider(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.Identity>
     val identity = this.syncObject
     return if (value.teamId == identity.spaceId) {

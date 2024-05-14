@@ -2,6 +2,7 @@
 
 package com.dashlane.vault.util
 
+import com.dashlane.teamspaces.TeamSpaceUtils
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem

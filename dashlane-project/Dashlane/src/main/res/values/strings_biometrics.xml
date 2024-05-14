@@ -12,5 +12,14 @@
 
     
     <string name="biometric_prompt_pin_fallback">Use PIN</string>
-
+    
+    <string name="biometric_settings_weak_warning_dialog_title">Your device biometrics is not the most secure</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_message">The biometric unlock method offered by your device could be compromised more easily than other methods. We recommend using a PIN instead.</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_positive_button_setup">Set up PIN</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_positive_button_keep">Keep PIN</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_negative_button">Continue</string>
 </resources>

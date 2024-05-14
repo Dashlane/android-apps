@@ -2,8 +2,10 @@ package com.dashlane.createaccount
 
 import android.widget.EditText
 import com.dashlane.account.UserAccountInfo
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.authentication.TermsOfService
 import com.dashlane.authentication.create.AccountCreationRepository
+import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.core.KeyChainHelper
@@ -59,14 +61,9 @@ class AccountCreatorImpl @Inject constructor(
     private val biometricRecovery: BiometricRecovery,
     private val daDaDa: DaDaDa,
     private val keyChainHelper: KeyChainHelper,
-    private val userSecureStorageManager: UserSecureStorageManager
+    private val userSecureStorageManager: UserSecureStorageManager,
+    private val accountStatusRepository: AccountStatusRepository
 ) : AccountCreator {
-
-    override val isGdprDebugModeEnabled: Boolean
-        get() = daDaDa.isGdprDebugModeEnabled
-
-    override val isGdprForced: Boolean
-        get() = daDaDa.isGdprForced
 
     override suspend fun createAccount(
         username: String,
@@ -75,7 +72,8 @@ class AccountCreatorImpl @Inject constructor(
         termsState: AccountCreator.TermsState?,
         biometricEnabled: Boolean,
         resetMpEnabled: Boolean,
-        pinCode: String?
+        pinCode: String?,
+        country: String?
     ) {
         val createAccountAccountType = when (accountType) {
             UserAccountInfo.AccountType.InvisibleMasterPassword -> AccountType.INVISIBLEMASTERPASSWORD
@@ -91,7 +89,8 @@ class AccountCreatorImpl @Inject constructor(
                 offers = termsState?.offers
             ),
             withRemoteKey = daDaDa.isCreateAccountWithRemoteKeyEnabled,
-            withLegacyCrypto = daDaDa.isCreateAccountWithLegacyCryptoEnabled
+            withLegacyCrypto = daDaDa.isCreateAccountWithLegacyCryptoEnabled,
+            country = country
         )
 
         createAccount(
@@ -243,12 +242,17 @@ class AccountCreatorImpl @Inject constructor(
     ) {
         val username = session.userId
         runCatching {
+            
+            accountStatusRepository.refreshFor(session)
             accountCreationSetup.setupCreatedAccount(username = username, userOrigin = origin)
         }
 
         localNotificationCreator.registerAccountCreation()
 
         lockManager.unlock(LockPass.ofPassword(appKey))
+        if (pinCode != null) {
+            enablePinUnlock(session, pinCode)
+        }
         if (biometricEnabled) {
             applicationCoroutineScope.launch(defaultCoroutineDispatcher) {
                 enableBiometric(session)
@@ -256,9 +260,6 @@ class AccountCreatorImpl @Inject constructor(
                     enableResetMp()
                 }
             }
-        }
-        if (pinCode != null) {
-            enablePinUnlock(session, pinCode)
         }
     }
 

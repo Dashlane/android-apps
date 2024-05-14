@@ -3,11 +3,11 @@ package com.dashlane.collections.sharing
 import android.app.Activity
 import android.content.Intent
 import com.dashlane.R
-import com.dashlane.collections.sharing.CollectionNewShareActivity.Companion.RESULT_EXTRA_COLLECTION_ID
-import com.dashlane.collections.sharing.CollectionNewShareActivity.Companion.RESULT_EXTRA_COLLECTION_NAME
-import com.dashlane.collections.sharing.CollectionNewShareActivity.Companion.RESULT_EXTRA_IS_BUSINESS
-import com.dashlane.collections.sharing.CollectionNewShareActivity.Companion.RESULT_EXTRA_IS_ERROR
-import com.dashlane.collections.sharing.CollectionNewShareActivity.Companion.SHARE_COLLECTION
+import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_COLLECTION_ID
+import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_COLLECTION_NAME
+import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_IS_BUSINESS
+import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_IS_ERROR
+import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.SHARE_COLLECTION
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
@@ -61,6 +61,7 @@ class CollectionSharingResultActivityListener @Inject constructor(
                 collectionId = collectionId,
                 businessSpace = isBusiness,
                 sharedCollection = true,
+                shareEnabled = true,
                 shareAllowed = true
             )
         }

@@ -14,7 +14,6 @@ import com.dashlane.server.api.endpoints.devices.DeactivateDevicesService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.SessionManager
 import com.dashlane.sync.repositories.SyncProgress
-import com.dashlane.util.Constants
 import com.dashlane.util.clearTask
 import com.dashlane.util.coroutines.DeferredViewModel
 import com.dashlane.util.stackTraceToSafeString
@@ -129,11 +128,7 @@ class LoginSyncProgressPresenter(
             viewProxy.finish()
             return
         }
-
         val mainIntent = LoginIntents.createHomeActivityIntent(activity)
-
-        Constants.TIME.LOGIN_TIME_SECONDS = System.currentTimeMillis() / 1000
-
         viewProxy.finish(mainIntent)
     }
 

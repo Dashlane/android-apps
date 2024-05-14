@@ -9,7 +9,7 @@ import com.dashlane.R
 import com.dashlane.events.AppEvents
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.ui.ExpandedBottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -18,7 +18,7 @@ import javax.inject.Inject
 class QuickActionsBottomSheetFragment : ExpandedBottomSheetDialogFragment() {
 
     @Inject
-    lateinit var mainDataAccessor: MainDataAccessor
+    lateinit var genericDataQuery: GenericDataQuery
 
     @Inject
     lateinit var dataProvider: QuickActionsDataProvider
@@ -61,7 +61,7 @@ class QuickActionsBottomSheetFragment : ExpandedBottomSheetDialogFragment() {
                 itemListContext = itemListContext,
                 lockRepository = lockRepository,
                 sessionManager = sessionManager,
-                dataQuery = mainDataAccessor.getGenericDataQuery(),
+                dataQuery = genericDataQuery,
                 appEvents = appEvents,
                 originPage = originPage
             )

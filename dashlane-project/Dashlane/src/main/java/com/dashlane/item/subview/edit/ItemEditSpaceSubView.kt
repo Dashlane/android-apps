@@ -4,17 +4,17 @@ import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ValueChangeManager
 import com.dashlane.item.subview.ValueChangeManagerImpl
 import com.dashlane.teamspaces.manager.firstOrNullMatchingDefinedDomain
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.vault.model.VaultItem
 
 class ItemEditSpaceSubView(
-    override var value: Teamspace,
-    val values: List<Teamspace>,
+    override var value: TeamSpace,
+    val values: List<TeamSpace>,
     private var allowSuggestionAutoChange: Boolean,
     private val views: List<ItemSubView<String>>?,
     private val linkedWebsites: List<String>,
-    valueUpdate: (VaultItem<*>, Teamspace) -> VaultItem<*>
-) : ItemEditValueSubView<Teamspace>(valueUpdate) {
+    valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>
+) : ItemEditValueSubView<TeamSpace>(valueUpdate) {
 
     val enableValueChangeManager = ValueChangeManagerImpl<Boolean>()
     var changeEnable: Boolean = isChangeEnable(getSuggestedTeamspace())
@@ -30,7 +30,7 @@ class ItemEditSpaceSubView(
         get() {
             val suggestedTeamspace = getSuggestedTeamspace()
             if (suggestedTeamspace != null && suggestedTeamspace == value) {
-                return if (suggestedTeamspace.isDomainRestrictionsEnable) {
+                return if ((suggestedTeamspace as? TeamSpace.Business)?.isForcedDomainsEnabled == true) {
                     CategorizationMethod.FORCED_CATEGORIZATION
                 } else {
                     CategorizationMethod.SMART_CATEGORIZATION
@@ -68,7 +68,7 @@ class ItemEditSpaceSubView(
         }
     }
 
-    private fun updateChangeEnable(teamspace: Teamspace?) {
+    private fun updateChangeEnable(teamspace: TeamSpace?) {
         val changeWasEnable = changeEnable
         val changeIsNowEnable = isChangeEnable(teamspace)
         if (changeWasEnable != changeIsNowEnable) {
@@ -77,23 +77,28 @@ class ItemEditSpaceSubView(
         }
     }
 
-    private fun isChangeEnable(teamspace: Teamspace?) =
-        (teamspace == null || !teamspace.isDomainRestrictionsEnable)
+    private fun isChangeEnable(teamspace: TeamSpace?): Boolean {
+        val isForcedDomainsEnabled = when (teamspace) {
+            is TeamSpace.Business -> teamspace.isForcedDomainsEnabled
+            else -> false
+        }
+        return teamspace == null || !isForcedDomainsEnabled
+    }
 
-    private fun getSuggestedTeamspace(): Teamspace? {
+    private fun getSuggestedTeamspace(): TeamSpace? {
         val allViewValues = (views?.map { it.value } ?: emptyList()) + linkedWebsites
 
         
         return (
             values.firstOrNullMatchingDefinedDomain(allViewValues.toTypedArray())
-        
-            ?: initialValue.takeIf { allowSuggestionAutoChange }
-        )
+            
+                ?: initialValue.takeIf { allowSuggestionAutoChange }
+            )
     }
 
-    private fun shouldAssignToSuggestedTeamspace(suggestedTeamspace: Teamspace?) =
+    private fun shouldAssignToSuggestedTeamspace(suggestedTeamspace: TeamSpace?) =
         suggestedTeamspace != null && suggestedTeamspace != value &&
-                (allowSuggestionAutoChange || suggestedTeamspace.isDomainRestrictionsEnable)
+            (allowSuggestionAutoChange || (suggestedTeamspace as? TeamSpace.Business)?.isForcedDomainsEnabled == true)
 
     init {
         enableValueChangeManager.addValueChangedListener(object : ValueChangeManager.Listener<Boolean> {
@@ -106,7 +111,7 @@ class ItemEditSpaceSubView(
         }
     }
 
-    override fun onItemValueHasChanged(previousValue: Teamspace, newValue: Teamspace) {
+    override fun onItemValueHasChanged(previousValue: TeamSpace, newValue: TeamSpace) {
         super.onItemValueHasChanged(previousValue, newValue)
         if (!valueChangedAutomatically) {
             

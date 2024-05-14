@@ -44,25 +44,31 @@ class SettingInRecyclerView(val display: SettingItem) :
             setText(R.id.setting_title, display?.title)
             setText(R.id.setting_description, display?.description)
 
-            findViewByIdEfficient<TextView>(R.id.setting_title)?.setTextColor(
-                context.getColor(
-                    if (editable) {
-                        R.color.text_neutral_catchy
-                    } else {
-                        R.color.text_oddity_disabled
-                    }
+            findViewByIdEfficient<TextView>(R.id.setting_title)?.apply {
+                isEnabled = editable
+                setTextColor(
+                    context.getColor(
+                        if (editable) {
+                            R.color.text_neutral_catchy
+                        } else {
+                            R.color.text_oddity_disabled
+                        }
+                    )
                 )
-            )
+            }
 
-            findViewByIdEfficient<TextView>(R.id.setting_description)?.setTextColor(
-                context.getColor(
-                    if (editable) {
-                        R.color.text_neutral_standard
-                    } else {
-                        R.color.text_oddity_disabled
-                    }
+            findViewByIdEfficient<TextView>(R.id.setting_description)?.apply {
+                isEnabled = editable
+                setTextColor(
+                    context.getColor(
+                        if (editable) {
+                            R.color.text_neutral_standard
+                        } else {
+                            R.color.text_oddity_disabled
+                        }
+                    )
                 )
-            )
+            }
 
             if (display is SettingLoadable && !display.isLoaded(context)) {
                 setVisibility(R.id.setting_checkbox, View.INVISIBLE)

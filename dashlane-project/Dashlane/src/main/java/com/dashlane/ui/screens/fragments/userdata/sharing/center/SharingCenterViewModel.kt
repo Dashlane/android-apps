@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.core.DataSync
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.Trigger
@@ -14,14 +14,13 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isAccepted
-import com.dashlane.teamspaces.manager.TeamspaceAccessor.FeatureCall
-import com.dashlane.teamspaces.manager.TeamspaceManager
-import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
+import com.dashlane.sync.DataSync
+import com.dashlane.teamspaces.ui.Feature
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -35,17 +34,15 @@ class SharingCenterViewModel @Inject constructor(
     private val dataProvider: SharingDataProvider,
     private val creator: SharingContactCreator,
     private val sessionManager: SessionManager,
-    private val teamspaceRepository: TeamspaceManagerRepository,
+    private val accountStatusRepository: AccountStatusRepository,
     private val navigator: Navigator,
     private val appEvents: AppEvents,
     private val dataSync: DataSync,
-    private val userFeaturesChecker: UserFeaturesChecker
-) : ViewModel(), SharingCenterViewModelContract, TeamspaceManager.Listener {
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val restrictionNotificator: TeamSpaceRestrictionNotificator
+) : ViewModel(), SharingCenterViewModelContract {
     private val session: Session?
         get() = sessionManager.session
-
-    private val teamspaceManager: TeamspaceManager?
-        get() = teamspaceRepository[session]
 
     private val dataFlow = MutableStateFlow(Data())
 
@@ -54,14 +51,18 @@ class SharingCenterViewModel @Inject constructor(
     override val uiState: MutableSharedFlow<SharingCenterViewModelContract.UIState> =
         MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-    private val canDisplayCollectionInvitations: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_2)
-
-    private val canDisplaySharedCollections: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)
+    private val hasSharedCollection: Boolean
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
 
     init {
-        teamspaceManager?.subscribeListener(this)
+        
+        viewModelScope.launch {
+            accountStatusRepository.accountStatusState.collect { accountStatuses ->
+                accountStatuses[session]?.let {
+                    display(dataFlow.value.itemGroups, dataFlow.value.userGroups, dataFlow.value.collections)
+                }
+            }
+        }
         appEvents.register(this, SyncFinishedEvent::class.java, false) {
             reloadData()
         }
@@ -75,7 +76,6 @@ class SharingCenterViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        teamspaceManager?.unSubscribeListeners(this)
         appEvents.unregister(this, SyncFinishedEvent::class.java)
     }
 
@@ -152,7 +152,7 @@ class SharingCenterViewModel @Inject constructor(
         val myUserGroups = userGroups.filter { it.getUser(login)?.isAccepted == true }
         val myUserGroupsIds = myUserGroups.map { it.groupId }
         val myCollections =
-            if (canDisplaySharedCollections) {
+            if (hasSharedCollection) {
                 collections.filter { collection ->
                     collection.getUser(login)?.isAccepted == true || collection.userGroups?.find {
                         it.uuid in myUserGroupsIds
@@ -178,7 +178,14 @@ class SharingCenterViewModel @Inject constructor(
         val userGroupsToDisplay =
             creator.getUserGroupsToDisplay(myUserGroups, myItemGroups, myCollections)
         val usersToDisplay = creator.getUsersToDisplay(myItemGroups, myCollections)
-        if (isDataNotEmpty(usersToDisplay, userGroupsToDisplay, itemInvites, userGroupInvites)) {
+        val isDataNotEmpty = isDataNotEmpty(
+            usersToDisplay,
+            userGroupsToDisplay,
+            itemInvites,
+            userGroupInvites,
+            collectionInvites
+        )
+        if (isDataNotEmpty) {
             val data = SharingCenterViewModelContract.UIState.Data(
                 itemInvites = itemInvites,
                 userGroupInvites = userGroupInvites,
@@ -197,9 +204,10 @@ class SharingCenterViewModel @Inject constructor(
         usersToDisplay: List<SharingContact.User>,
         userGroupsToDisplay: List<SharingContact.UserGroup>,
         itemInvites: List<SharingContact.ItemInvite>,
-        userGroupInvites: List<SharingContact.UserGroupInvite>
-    ) =
-        usersToDisplay.isNotEmpty() || userGroupsToDisplay.isNotEmpty() || itemInvites.isNotEmpty() || userGroupInvites.isNotEmpty()
+        userGroupInvites: List<SharingContact.UserGroupInvite>,
+        collectionInvites: List<SharingContact.CollectionInvite>
+    ) = usersToDisplay.isNotEmpty() || userGroupsToDisplay.isNotEmpty() ||
+        itemInvites.isNotEmpty() || userGroupInvites.isNotEmpty() || collectionInvites.isNotEmpty()
 
     override fun reloadData() {
         viewModelScope.run {
@@ -207,7 +215,7 @@ class SharingCenterViewModel @Inject constructor(
                 val data = Data(
                     dataProvider.getItemGroups(),
                     dataProvider.getUserGroups(),
-                    if (canDisplayCollectionInvitations) {
+                    if (hasSharedCollection) {
                         dataProvider.getCollections()
                     } else {
                         emptyList()
@@ -232,13 +240,9 @@ class SharingCenterViewModel @Inject constructor(
         activity: FragmentActivity,
         action: () -> Unit
     ) {
-        teamspaceManager?.startFeatureOrNotify(
-            activity,
-            Teamspace.Feature.SHARING_DISABLED,
-            object : FeatureCall {
-                override fun startFeature() = action()
-            }
-        )
+        restrictionNotificator.runOrNotifyTeamRestriction(activity, Feature.SHARING_DISABLED) {
+            action()
+        }
     }
 
     override fun onUserClicked(user: SharingContact.User) =
@@ -249,17 +253,6 @@ class SharingCenterViewModel @Inject constructor(
             userGroup.groupId,
             userGroup.name
         )
-
-    override fun onStatusChanged(
-        teamspace: Teamspace?,
-        previousStatus: String?,
-        newStatus: String?
-    ) = Unit
-
-    override fun onChange(teamspace: Teamspace?) =
-        display(dataFlow.value.itemGroups, dataFlow.value.userGroups, dataFlow.value.collections)
-
-    override fun onTeamspacesUpdate() = Unit
 
     override fun acceptItemGroup(invite: SharingContact.ItemInvite) {
         uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestLoading)

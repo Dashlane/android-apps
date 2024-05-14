@@ -3,11 +3,11 @@ package com.dashlane
 import android.content.Context
 import com.braze.push.BrazeFirebaseMessagingService
 import com.dashlane.breach.BreachManager
-import com.dashlane.core.DataSync
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DarkWebSetupCompleteEvent
+import com.dashlane.login.controller.LoginTokensModule
 import com.dashlane.network.webservices.authentication.GetTokenService
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
@@ -21,59 +21,52 @@ import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.session.SessionManager
+import com.dashlane.sync.DataSync
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EarlyEntryPoint
+import dagger.hilt.android.EarlyEntryPoints
+import dagger.hilt.components.SingletonComponent
 import java.time.Clock
-import javax.inject.Inject
 
-@AndroidEntryPoint
 class DashlaneFcmService : FirebaseMessagingService() {
 
-    @Inject
-    lateinit var fcmHelper: FcmHelper
+    @EarlyEntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface FcmServiceEntryPoint {
+        val fcmHelper: FcmHelper
+        val appEvents: AppEvents
+        val crashReporter: CrashReporter
+        val dataSync: DataSync
+        val sessionManager: SessionManager
+        val breachManager: BreachManager
+        val breachLoader: BreachLoader
+        val tokenJsonProvider: TokenJsonProvider
+        val preferencesManager: UserPreferencesManager
+        val legacyTokenService: GetTokenService
+        val globalPreferencesManager: GlobalPreferencesManager
+        val clock: Clock
+        val loginTokensModule: LoginTokensModule
+    }
 
-    @Inject
-    lateinit var appEvents: AppEvents
-
-    @Inject
-    lateinit var crashReporter: CrashReporter
-
-    @Inject
-    lateinit var dataSync: DataSync
-
-    @Inject
-    lateinit var sessionManager: SessionManager
-
-    @Inject
-    lateinit var breachManager: BreachManager
-
-    @Inject
-    lateinit var breachLoader: BreachLoader
-
-    @Inject
-    lateinit var tokenJsonProvider: TokenJsonProvider
-
-    @Inject
-    lateinit var preferencesManager: UserPreferencesManager
-
-    @Inject
-    lateinit var legacyTokenService: GetTokenService
-
-    @Inject
-    lateinit var globalPreferencesManager: GlobalPreferencesManager
-
-    @Inject
-    lateinit var clock: Clock
+    private val entryPoint: FcmServiceEntryPoint
+        get() = EarlyEntryPoints.get(applicationContext, FcmServiceEntryPoint::class.java)
 
     override fun onNewToken(token: String) {
-        fcmHelper.apply {
-            clearRegistration()
-            register(token)
+        
+        runCatching {
+            entryPoint.fcmHelper.apply {
+                clearRegistration()
+                register(token)
+            }
         }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+            message = "Received message: ${message.data}",
+            tag = "CLOUD_MESSAGING"
+        )
         if (DeveloperUtilities.isEmulator) return
         val data = message.data
 
@@ -83,7 +76,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
         }
         val code = data["code"] ?: return
 
-        crashReporter.addInformation("[FCM] onMessageReceived: $code")
+        entryPoint.crashReporter.addInformation("[FCM] onMessageReceived: $code")
 
         val fcmCode = FcmCode.get(code) ?: return
 
@@ -101,15 +94,20 @@ class DashlaneFcmService : FirebaseMessagingService() {
     private fun processMessage(context: Context, fcmMessage: FcmMessage) {
         when (fcmMessage.code) {
             FcmCode.SYNC ->
-                SyncNotificationHandler(context, fcmMessage, dataSync, sessionManager).handlePushNotification()
+                SyncNotificationHandler(
+                    context,
+                    fcmMessage,
+                    entryPoint.dataSync,
+                    entryPoint.sessionManager
+                ).handlePushNotification()
 
             FcmCode.DARK_WEB_SETUP_COMPLETE -> {
-                appEvents.post(DarkWebSetupCompleteEvent())
+                entryPoint.appEvents.post(DarkWebSetupCompleteEvent())
                 DarkWebAlertNotificationHandler(
                     context,
                     fcmMessage,
-                    fcmHelper,
-                    globalPreferencesManager
+                    entryPoint.fcmHelper,
+                    entryPoint.globalPreferencesManager
                 ).handlePushNotification()
             }
 
@@ -117,30 +115,31 @@ class DashlaneFcmService : FirebaseMessagingService() {
                 TokenNotificationHandler(
                     context,
                     fcmMessage,
-                    tokenJsonProvider,
-                    sessionManager,
-                    preferencesManager,
-                    legacyTokenService,
-                    globalPreferencesManager,
-                    clock
+                    entryPoint.tokenJsonProvider,
+                    entryPoint.sessionManager,
+                    entryPoint.preferencesManager,
+                    entryPoint.legacyTokenService,
+                    entryPoint.globalPreferencesManager,
+                    entryPoint.clock,
+                    entryPoint.loginTokensModule
                 ).handlePushNotification()
 
             FcmCode.DARK_WEB_ALERT ->
                 DarkWebAlertNotificationHandler(
                     context,
                     fcmMessage,
-                    fcmHelper,
-                    globalPreferencesManager
+                    entryPoint.fcmHelper,
+                    entryPoint.globalPreferencesManager
                 ).handlePushNotification()
 
             FcmCode.PUBLIC_BREACH_ALERT ->
                 PublicBreachAlertNotificationHandler(
                     context,
                     fcmMessage,
-                    globalPreferencesManager,
-                    breachManager,
-                    breachLoader,
-                    sessionManager
+                    entryPoint.globalPreferencesManager,
+                    entryPoint.breachManager,
+                    entryPoint.breachLoader,
+                    entryPoint.sessionManager
                 ).handlePushNotification()
         }
     }

@@ -10,8 +10,6 @@ interface LoginTokenContract {
         var tokenText: String
 
         var tokenViewWidth: Int
-
-        fun initDebug(username: String)
     }
 
     interface Presenter : LoginBaseContract.Presenter {

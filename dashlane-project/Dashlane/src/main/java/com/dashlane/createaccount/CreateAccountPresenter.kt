@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.account.UserAccountInfo
+import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.pages.CreateAccountBaseContract
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordPresenter
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordViewProxy
@@ -53,12 +54,6 @@ class CreateAccountPresenter(
         get() = view.showProgress
         set(value) {
             view.showProgress = value
-        }
-
-    var accountType: UserAccountInfo.AccountType?
-        get() = pagesStateHelper.accountType
-        set(value) {
-            pagesStateHelper.accountType = value
         }
 
     var password: ObfuscatedByteArray?
@@ -170,17 +165,18 @@ class CreateAccountPresenter(
         }
     }
 
-    fun showChoosePasswordPage(username: String, inEuropeanUnion: Boolean, country: String?) {
-        val presenter = createChoosePasswordPresenter(username)
+    fun showChoosePasswordPage(username: String, inEuropeanUnion: Boolean, country: String?, isB2B: Boolean) {
+        val presenter = createChoosePasswordPresenter(username, isB2B)
         pagesStateHelper.addedPage(presenter)
         pagesStateHelper.user = username
         pagesStateHelper.inEuropeanUnion = inEuropeanUnion
         pagesStateHelper.country = country
         pagesStateHelper.accountType = UserAccountInfo.AccountType.MasterPassword
+        pagesStateHelper.isB2B = isB2B
     }
 
-    private fun createChoosePasswordPresenter(username: String): CreateAccountChoosePasswordPresenter {
-        val dataProvider = provider.createChoosePasswordDataProvider(username)
+    private fun createChoosePasswordPresenter(username: String, isB2B: Boolean): CreateAccountChoosePasswordPresenter {
+        val dataProvider = provider.createChoosePasswordDataProvider(username, isB2B)
         val view = inflate(R.layout.include_create_account_choose_password)
         val viewProxy = CreateAccountChoosePasswordViewProxy(view, coroutineScope)
         return CreateAccountChoosePasswordPresenter(this).apply {
@@ -206,7 +202,7 @@ class CreateAccountPresenter(
                 password,
                 pagesStateHelper.inEuropeanUnion,
                 null,
-                pagesStateHelper.country
+                pagesStateHelper.country!!
             )
         val view = inflate(R.layout.include_create_account_confirm_password)
         val viewProxy = CreateAccountConfirmPasswordViewProxy(view)
@@ -292,7 +288,8 @@ class CreateAccountPresenter(
                 pagesStateHelper.accountType!!,
                 AccountCreator.TermsState(true, event.optInOffers),
                 pagesStateHelper.biometricAuthentication,
-                pagesStateHelper.resetMp
+                pagesStateHelper.resetMp,
+                pagesStateHelper.country!!
             )
         }
         createAccount(deferredCreateAccount)
@@ -335,8 +332,7 @@ class CreateAccountPresenter(
     }
 
     fun toggleMplessButtonVisibility(visible: Boolean) {
-        view.mplessButtonVisible
-        pagesStateHelper.toggleMplessButtonVisibility(visible)
+        view.mplessButtonVisible = visible
     }
 
     private inner class PagesStateHelper {
@@ -348,6 +344,8 @@ class CreateAccountPresenter(
         var password: ObfuscatedByteArray? = null
 
         var accountType: UserAccountInfo.AccountType? = null
+
+        var isB2B: Boolean = false
 
         var inEuropeanUnion: Boolean = false
 
@@ -398,6 +396,7 @@ class CreateAccountPresenter(
             bundle.putBoolean(STATE_TOS, currentPresenter is CreateAccountSettingsContract.Presenter)
             bundle.putBoolean(STATE_BIOMETRIC, biometricAuthentication)
             bundle.putBoolean(STATE_RESETMP, resetMp)
+            bundle.putBoolean(STATE_IS_B2B, isB2B)
             
         }
 
@@ -407,8 +406,9 @@ class CreateAccountPresenter(
             country = bundle.getString(STATE_COUNTRY)
             biometricAuthentication = bundle.getBoolean(STATE_BIOMETRIC)
             resetMp = bundle.getBoolean(STATE_RESETMP)
+            isB2B = bundle.getBoolean(STATE_IS_B2B)
             user = bundle.getString(STATE_EMAIL)?.also { u ->
-                pageStates.add(createChoosePasswordPresenter(u))
+                pageStates.add(createChoosePasswordPresenter(u, isB2B))
                 password?.let { pw ->
                     pageStates.add(createConfirmPasswordPresenter(u, pw))
                     if (bundle.getBoolean(STATE_TOS)) {
@@ -422,10 +422,6 @@ class CreateAccountPresenter(
             currentPresenter.visible = true
             currentPresenter.onShow()
         }
-
-        fun toggleMplessButtonVisibility(visible: Boolean) {
-            view.mplessButtonVisible = visible
-        }
     }
 
     companion object {
@@ -435,5 +431,6 @@ class CreateAccountPresenter(
         private const val STATE_TOS = "tos"
         private const val STATE_BIOMETRIC = "biometric"
         private const val STATE_RESETMP = "resetmp"
+        private const val STATE_IS_B2B = "isB2B"
     }
 }

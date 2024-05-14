@@ -9,7 +9,7 @@ import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.Navigator
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingType
+import com.dashlane.autofill.onboarding.OnboardingType
 import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem

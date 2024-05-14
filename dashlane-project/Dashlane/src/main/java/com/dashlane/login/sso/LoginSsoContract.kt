@@ -2,7 +2,7 @@ package com.dashlane.login.sso
 
 import android.content.Intent
 import android.os.Bundle
-import com.dashlane.createaccount.AccountCreator
+import com.dashlane.authentication.create.AccountCreator
 import com.skocken.presentation.definition.Base
 
 interface LoginSsoContract {

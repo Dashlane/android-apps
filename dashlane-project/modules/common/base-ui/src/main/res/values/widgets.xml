@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    
+    <eat-comment />
+
+    <style name="Widget.Dashlane.TextView" parent="Widget.AppCompat.TextView">
+        <item name="android:textAppearance">?textAppearanceBody2</item>
+    </style>
+
+    <style name="DialogWindowTitle.Dashlane" parent="RtlOverlay.DialogWindowTitle.AppCompat">
+        <item name="android:textAppearance">@style/TextAppearance.Dashlane.DialogWindowTitle</item>
+    </style>
+
+    
+    <eat-comment />
+
+    <style name="BaseOutlinedButton">
+        <item name="colorPrimary">?attr/colorSecondary</item>
+    </style>
+
+    <style name="Widget.Dashlane.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="theme">@style/BaseOutlinedButton</item>
+    </style>
+
+    <style name="Widget.Dashlane.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/button_primary_text_color</item>
+        <item name="iconTint">@color/button_primary_text_color</item>
+        <item name="drawableTint">@color/button_primary_text_color</item>
+        <item name="rippleColor">@color/button_primary_ripple_color</item>
+        <item name="backgroundTint">@color/button_primary_background_tint</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
+    </style>
+
+    
+    <style name="Widget.Dashlane.Button.Infobox.Primary.Warning" parent="Widget.Dashlane.Button">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Warning</item>
+    </style>
+
+    
+    <eat-comment />
+
+    <style name="Widget.Dashlane.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/button_ternary_text_color</item>
+        <item name="iconTint">@color/button_ternary_text_color</item>
+        <item name="drawableTint">@color/button_ternary_text_color</item>
+        <item name="rippleColor">@color/button_ternary_ripple_color</item>
+        <item name="backgroundTint">@color/button_ternary_background_tint</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
+    </style>
+
+    <style name="Widget.Dashlane.TextButton.Dialog.Flush" parent="Widget.MaterialComponents.Button.TextButton.Dialog.Flush">
+        <item name="android:textColor">@color/button_ternary_text_color</item>
+        <item name="iconTint">@color/button_ternary_text_color</item>
+        <item name="drawableTint">@color/button_ternary_text_color</item>
+        <item name="rippleColor">@color/button_ternary_ripple_color</item>
+        <item name="backgroundTint">@color/button_ternary_background_tint</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
+    </style>
+
+    
+    <style name="Widget.Dashlane.Button.Infobox.Secondary.Warning" parent="Widget.Dashlane.TextButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Warning</item>
+    </style>
+
+    <style name="Widget.Dashlane.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">@color/menu_floating_action_button_background_tint_selector</item>
+        <item name="tint">@color/menu_floating_action_button_tint_selector</item>
+        <item name="rippleColor">@color/menu_floating_action_button_ripple_color_selector</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
+    </style>
+
+    <style name="Widget.Dashlane.ExtendedFloatingActionButton" parent="Widget.MaterialComponents.ExtendedFloatingActionButton">
+        <item name="backgroundTint">@color/menu_floating_action_button_background_tint_selector</item>
+        <item name="iconTint">@color/menu_floating_action_button_tint_selector</item>
+        <item name="android:textColor">@color/menu_floating_action_button_tint_selector</item>
+        <item name="rippleColor">@color/menu_floating_action_button_ripple_color_selector</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.Brand</item>
+    </style>
+
+    
+    <eat-comment />
+
+    <style name="Widget.Dashlane.Checkbox" parent="Widget.MaterialComponents.CompoundButton.CheckBox">
+        <item name="android:textAppearance">?textAppearanceBody2</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="buttonTint">@color/checkbox_button_tint</item>
+    </style>
+
+    
+    <style name="Widget.Dashlane.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
+        <item name="android:textAppearance">?textAppearanceBody2</item>
+        <item name="android:textColor">@color/text_neutral_catchy</item>
+        <item name="switchTextAppearance">?textAppearanceBody2</item>
+        <item name="thumbTint">@color/switch_thumb_tint</item>
+        <item name="trackTint">@color/switch_track_tint</item>
+    </style>
+
+    
+    <eat-comment />
+
+    <style name="Widget.Dashlane.TextInputLayout" parent="Widget.Design.TextInputLayout">
+        <item name="endIconTint">@color/text_brand_standard</item>
+        <item name="startIconTint">@color/text_brand_standard</item>
+        <item name="passwordToggleTint">@color/text_brand_standard</item>
+
+        <item name="counterTextAppearance">?textAppearanceBody2</item>
+        <item name="counterOverflowTextAppearance">?textAppearanceBody2</item>
+        <item name="errorTextAppearance">?textAppearanceBody2</item>
+        <item name="helperTextTextAppearance">?textAppearanceBody2</item>
+        <item name="hintTextAppearance">?textAppearanceBody2</item>
+
+        <item name="counterTextColor">@color/text_neutral_quiet</item>
+        <item name="counterOverflowTextColor">@color/text_danger_standard</item>
+        <item name="errorTextColor">@color/text_danger_standard</item>
+        <item name="helperTextTextColor">@color/text_neutral_quiet</item>
+        <item name="hintTextColor">@color/text_input_hint_color</item>
+    </style>
+
+    <style name="Widget.Dashlane.EditText" parent="Widget.AppCompat.EditText">
+        <item name="android:textAppearance">?textAppearanceBody1</item>
+        <item name="android:textColor">@color/edit_text_text_color</item>
+        <item name="android:backgroundTint">@color/edit_text_background_tint</item>
+        <item name="theme">@style/ThemeOverlay.Dashlane.TextInputEditText</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Dashlane.TextInputEditText</item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.TextInputEditText" parent="">
+        <item name="colorControlNormal">@color/border_neutral_standard_idle</item>
+        <item name="colorControlActivated">@color/border_brand_standard_active</item>
+    </style>
+
+    <style name="Widget.Dashlane.AutoCompleteTextView" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:textAppearance">?textAppearanceBody1</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:backgroundTint">?colorControlActivated</item>
+    </style>
+
+    <style name="Widget.Dashlane.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="endIconTint">@color/text_brand_standard</item>
+        <item name="startIconTint">@color/text_brand_standard</item>
+        <item name="passwordToggleTint">@color/text_brand_standard</item>
+
+        <item name="counterTextAppearance">?textAppearanceBody2</item>
+        <item name="counterOverflowTextAppearance">?textAppearanceBody2</item>
+        <item name="errorTextAppearance">?textAppearanceBody2</item>
+        <item name="helperTextTextAppearance">?textAppearanceBody2</item>
+        <item name="hintTextAppearance">?textAppearanceBody2</item>
+
+        <item name="counterTextColor">@color/text_neutral_quiet</item>
+        <item name="counterOverflowTextColor">@color/text_danger_quiet</item>
+        <item name="errorTextColor">@color/text_danger_quiet</item>
+        <item name="helperTextTextColor">@color/text_neutral_quiet</item>
+        <item name="hintTextColor">@color/text_input_hint_color</item>
+        <item name="boxStrokeColor">@color/textinputlayout_stroke_color</item>
+        <item name="materialThemeOverlay">
+            @style/ThemeOverlay.Dashlane.TextInputEditText.OutlinedBox
+        </item>
+    </style>
+
+    <style name="ThemeOverlay.Dashlane.TextInputEditText.OutlinedBox" parent="@style/ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="colorControlActivated">@color/text_brand_quiet</item>
+    </style>
+
+    
+    <eat-comment />
+
+    <style name="Widget.Dashlane.ActionBar" parent="Widget.MaterialComponents.ActionBar.Surface">
+        <item name="titleTextStyle">?textAppearanceHeadline6</item>
+        <item name="subtitleTextStyle">?textAppearanceSubtitle1</item>
+        <item name="background">@color/container_agnostic_neutral_standard</item>
+    </style>
+
+    <style name="Widget.Dashlane.Toolbar" parent="Widget.MaterialComponents.Toolbar.Surface">
+        <item name="android:background">@color/container_agnostic_neutral_standard</item>
+        <item name="titleTextColor">@color/text_neutral_catchy</item>
+        <item name="subtitleTextColor">@color/text_neutral_standard</item>
+        <item name="android:theme">?actionBarTheme</item>
+        <item name="popupTheme">?actionBarPopupTheme</item>
+    </style>
+
+    <style name="Widget.Dashlane.AppBarLayout" parent="Widget.MaterialComponents.AppBarLayout.Surface">
+        <item name="android:background">@color/container_agnostic_neutral_standard</item>
+    </style>
+
+    <style name="Widget.Dashlane.GetStartedStepView" parent="">
+        <item name="stepNumberColor">@color/text_neutral_quiet</item>
+        <item name="stepTitleColor">@color/text_neutral_catchy</item>
+        <item name="stepCompletionColor">@color/text_neutral_quiet</item>
+        <item name="shapeAppearance">?shapeAppearanceMediumComponent</item>
+        <item name="stepBackgroundTint">@color/container_agnostic_neutral_supershy</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <style name="Widget.Dashlane.ExpandableCardView" parent="Widget.MaterialComponents.CardView">
+        <item name="android:foreground">?selectableItemBackground</item>
+        <item name="android:backgroundTint">@color/container_agnostic_neutral_supershy</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    
+    <style name="Widget.Dashlane.TabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabTextAppearance">?textAppearanceButton</item>
+        <item name="tabIndicatorColor">@color/text_brand_quiet</item>
+        <item name="tabSelectedTextColor">@color/text_brand_standard</item>
+        <item name="tabTextColor">@color/text_neutral_quiet</item>
+    </style>
+
+    <style name="Widget.Dashlane.TabLayout.Colored" parent="Widget.MaterialComponents.TabLayout.Colored">
+        <item name="tabBackground">@color/container_agnostic_neutral_standard</item>
+        <item name="tabTextAppearance">?textAppearanceButton</item>
+        <item name="tabIndicatorColor">@color/text_brand_quiet</item>
+        <item name="tabSelectedTextColor">@color/text_brand_standard</item>
+        <item name="tabTextColor">@color/text_neutral_quiet</item>
+    </style>
+
+    
+    <style name="Widget.Dashlane.Infobox" parent="Widget.MaterialComponents.TextView">
+        <item name="android:background">@drawable/background_widget_infobox</item>
+        <item name="tint">@color/text_brand_standard</item>
+        <item name="backgroundTint">@color/container_expressive_brand_quiet_idle</item>
+    </style>
+
+    <style name="Widget.Dashlane.Infobox.Warning" parent="Widget.Dashlane.Infobox">
+        <item name="tint">@color/text_warning_standard</item>
+        <item name="backgroundTint">@color/container_expressive_warning_quiet_idle</item>
+    </style>
+
+    <style name="Widget.Dashlane.Slider" parent="Widget.MaterialComponents.Slider">
+        <item name="haloColor">@color/slider_halo_color</item>
+        <item name="thumbColor">@color/slider_thumb_color</item>
+        <item name="tickColorActive">@color/undefined</item>
+        <item name="tickColorInactive">@color/undefined</item>
+        <item name="trackColorActive">@color/slider_track_color_active</item>
+        <item name="trackColorInactive">@color/slider_track_color_inactive</item>
+        <item name="labelStyle">@style/Widget.Dashlane.Slider.Tooltip</item>
+    </style>
+
+    <style name="Widget.Dashlane.Slider.Tooltip" parent="Widget.MaterialComponents.Tooltip">
+        <item name="android:textAppearance">@style/TextAppearance.Dashlane.Slider.Tooltip</item>
+        <item name="backgroundTint">@color/container_agnostic_inverse_standard</item>
+    </style>
+
+    <style name="Widget.Dashlane.CardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/container_agnostic_neutral_supershy</item>
+        <item name="cardForegroundColor">@color/card_foreground_color</item>
+        <item name="checkedIconTint">@color/text_brand_quiet</item>
+        <item name="rippleColor">@color/card_ripple_color</item>
+    </style>
+
+    <style name="Widget.Dashlane.DashlaneWarningDialog.Button" parent="Widget.Dashlane.Button">
+        <item name="android:backgroundTint">?colorError</item>
+    </style>
+
+    <style name="Widget.Dashlane.RadioButton" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
+        <item name="useMaterialThemeColors">false</item>
+        <item name="buttonTint">@color/radio_button_tint</item>
+        <item name="android:textAppearance">?textAppearanceBody2</item>
+    </style>
+</resources>

@@ -11,8 +11,8 @@ import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
@@ -22,7 +22,7 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationWebsiteProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
 ) : ItemScreenConfigurationProvider() {
@@ -90,10 +90,10 @@ class ItemScreenConfigurationWebsiteProvider(
         item: VaultItem<SyncObject.PersonalWebsite>,
         websiteView: ItemSubView<String>?
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 listOfNotNull(websiteView),
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -144,7 +144,7 @@ class ItemScreenConfigurationWebsiteProvider(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.PersonalWebsite>
     val website = this.syncObject
     return if (value.teamId == website.spaceId) {

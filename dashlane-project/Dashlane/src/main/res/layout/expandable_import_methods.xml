@@ -1,86 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     >
 
-    <TextView
+    <com.dashlane.ui.widgets.view.ImportMethodItem
         android:id="@+id/csv"
-        style="?textAppearanceBody1"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:drawableStart="@drawable/ic_import_methods_csv"
-        android:drawablePadding="@dimen/spacing_normal"
-        android:focusable="true"
-        android:foreground="?selectableItemBackground"
-        android:gravity="center_vertical"
-        android:padding="@dimen/spacing_normal"
-        android:text="@string/import_methods_name_csv"
-        app:layout_constraintBottom_toTopOf="@+id/chrome"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:methodicon="@drawable/ic_import_methods_csv"
+        app:methodname="@string/import_methods_name_csv"
         />
 
-    <TextView
+    <com.dashlane.ui.widgets.view.ImportMethodItem
         android:id="@+id/computer"
-        style="?textAppearanceBody1"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:drawablePadding="@dimen/spacing_normal"
-        android:focusable="true"
-        android:foreground="?selectableItemBackground"
-        android:gravity="center_vertical"
-        android:padding="@dimen/spacing_normal"
-        android:text="@string/import_methods_name_m2d"
-        app:drawableStartCompat="@drawable/ic_import_methods_m2d"
-        app:layout_constraintBottom_toTopOf="@+id/backup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/csv"
+        app:methodicon="@drawable/ic_import_methods_m2d"
+        app:methodname="@string/import_methods_name_m2d"
         />
 
-    <TextView
+    <com.dashlane.ui.widgets.view.ImportMethodItem
         android:id="@+id/backup"
-        style="?textAppearanceBody1"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:drawablePadding="@dimen/spacing_normal"
-        android:focusable="true"
-        android:foreground="?selectableItemBackground"
-        android:gravity="center_vertical"
-        android:padding="@dimen/spacing_normal"
-        android:text="@string/import_methods_name_dashlane_secure_archive"
-        app:drawableStartCompat="@drawable/ic_import_methods_dashlane_secure_archive"
-        app:layout_constraintBottom_toTopOf="@+id/password_manager"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/computer"
+        app:methodicon="@drawable/ic_import_methods_dashlane_secure_archive"
+        app:methodname="@string/import_methods_name_dashlane_secure_archive"
         />
 
-    <TextView
+    <com.dashlane.ui.widgets.view.ImportMethodItem
         android:id="@+id/password_manager"
-        style="?textAppearanceBody1"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:drawablePadding="@dimen/spacing_normal"
-        android:focusable="true"
-        android:foreground="?selectableItemBackground"
-        android:gravity="center_vertical"
-        android:padding="@dimen/spacing_normal"
-        android:text="@string/import_methods_name_competitor"
-        app:drawableStartCompat="@drawable/ic_import_methods_competitor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/backup"
+        app:methodicon="@drawable/ic_import_methods_competitor"
+        app:methodname="@string/import_methods_name_competitor"
         />
 
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

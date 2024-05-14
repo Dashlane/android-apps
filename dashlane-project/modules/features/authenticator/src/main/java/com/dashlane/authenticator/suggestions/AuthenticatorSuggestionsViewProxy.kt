@@ -1,7 +1,9 @@
 package com.dashlane.authenticator.suggestions
 
 import android.view.View
+import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
+import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -172,6 +174,8 @@ class AuthenticatorSuggestionsViewProxy(
         expandableCards.forEachIndexed { index, expandableCard ->
             expandableCard.setOnExpandListener { expanded ->
                 if (!expanded) return@setOnExpandListener
+                val body = expandableCard.findViewById<TextView>(R.id.authenticator_faq_question_body)
+                body.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
                 
                 expandableCards.filter { it.id != expandableCard.id }.forEach {
                     it.setExpanded(expanded = false, withAnimation = true)

@@ -5,7 +5,6 @@ import com.dashlane.database.Id
 import com.dashlane.lock.LockHelper
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserDatabaseRepository
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.filter.FilterToPredicate
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.DataTypeFilter
@@ -21,14 +20,11 @@ class VaultDataQueryImplRaclette @Inject constructor(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,
     private val filterToPredicate: FilterToPredicate,
-    private val dataStorageProvider: Lazy<DataStorageProvider>,
+    private val genericDataQuery: Lazy<GenericDataQuery>,
     private val lockHelper: Lazy<LockHelper>
 ) : VaultDataQuery {
     private val database: Database?
         get() = sessionManager.session?.let { userDataRepository.getRacletteDatabase(it) }
-
-    private val genericDataQuery: GenericDataQuery
-        get() = dataStorageProvider.get().genericDataQuery
 
     override fun query(filter: VaultFilter): VaultItem<SyncObject>? {
         return queryAll(filter).firstOrNull()
@@ -71,7 +67,7 @@ class VaultDataQueryImplRaclette @Inject constructor(
                 lockFilter = filter.lockFilter
                 statusFilter = filter.statusFilter
             }
-            genericDataQuery.queryAll(genericFilter).map { it.id }
+            genericDataQuery.get().queryAll(genericFilter).map { it.id }
         } else {
             filter.uidFilter.onlyOnUids!!.toList()
         }

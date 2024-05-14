@@ -5,11 +5,10 @@ import android.content.Intent
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.account.UserSecuritySettings
+import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.authentication.login.AuthenticationSsoRepository
 import com.dashlane.authentication.login.AuthenticationSsoRepository.ValidateResult
-import com.dashlane.core.DataSync
-import com.dashlane.core.premium.PremiumStatusManager
-import com.dashlane.createaccount.AccountCreator
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.login.LoginMode
 import com.dashlane.login.LoginNewUserInitialization
@@ -23,6 +22,7 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionResult
 import com.dashlane.session.Username
+import com.dashlane.sync.DataSync
 import com.dashlane.util.clearTask
 import com.dashlane.util.generateUniqueIdentifier
 import com.skocken.presentation.provider.BaseDataProvider
@@ -38,9 +38,9 @@ class LoginSsoDataProvider @Inject constructor(
     private val successIntentFactory: LoginSuccessIntentFactory,
     private val sessionManager: SessionManager,
     private val userAccountStorage: UserAccountStorage,
-    private val premiumStatusManager: PremiumStatusManager,
     private val accountCreator: AccountCreator,
     private val dataSync: DataSync,
+    private val accountStatusRepository: AccountStatusRepository,
     intent: Intent
 ) : BaseDataProvider<LoginSsoContract.Presenter>(),
     LoginSsoContract.DataProvider {
@@ -190,6 +190,10 @@ class LoginSsoDataProvider @Inject constructor(
     private suspend fun tryRefreshPremiumStatus(sessionResult: SessionResult) {
         if (sessionResult !is SessionResult.Success) return
 
-        runCatching { premiumStatusManager.refreshPremiumStatus(sessionResult.session) }
+        runCatching {
+            sessionResult.session.let { session ->
+                accountStatusRepository.refreshFor(session)
+            }
+        }
     }
 }

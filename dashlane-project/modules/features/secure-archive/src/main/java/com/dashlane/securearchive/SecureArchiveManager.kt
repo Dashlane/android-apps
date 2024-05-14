@@ -13,11 +13,16 @@ import com.dashlane.cryptography.XmlArchiveWriter
 import com.dashlane.cryptography.decryptSecureArchive
 import com.dashlane.cryptography.encryptSecureArchive
 import com.dashlane.cryptography.forXml
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.storage.userdata.accessor.filter.space.SpecificSpaceFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.util.AppSync
+import com.dashlane.sync.DataSync
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.FileUtils
 import com.dashlane.util.generateUniqueIdentifier
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
@@ -30,25 +35,31 @@ import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.toObject
 import com.dashlane.xml.domain.toTransaction
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import java.io.File
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 
 class SecureArchiveManager @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val mainDataAccessor: MainDataAccessor,
+    private val vaultDataQuery: VaultDataQuery,
+    private val dataSaver: DataSaver,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
-    private val appSync: AppSync
+    private val dataSync: DataSync,
+    private val fileUtils: FileUtils
 ) {
     private val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+
+    private val teamSpaceAccessor
+        get() = teamSpaceAccessorProvider.get()
 
     private val fileName: String
         get() {
@@ -75,9 +86,9 @@ class SecureArchiveManager @Inject constructor(
         yield()
 
         val savedItems = fullBackup.generateNewVaultList()
-            .filter { mainDataAccessor.getDataSaver().save(it) }
+            .filter { dataSaver.save(it) }
 
-        appSync.sync()
+        dataSync.sync()
 
         savedItems
     }
@@ -88,8 +99,11 @@ class SecureArchiveManager @Inject constructor(
         val filter = vaultFilter {
             specificDataType(EXPORTABLE_DATA_TYPES)
             onlyShareable()
+            if (teamSpaceAccessor?.isForcedDomainsEnabled == true) {
+                spaceFilter = SpecificSpaceFilter(listOf(TeamSpace.Personal))
+            }
         }
-        val data = mainDataAccessor.getVaultDataQuery().queryAll(filter)
+        val data = vaultDataQuery.queryAll(filter)
 
         val (fullBackupXmlNode, idsList) = data.toSyncBackupWithIdsList()
 
@@ -108,23 +122,17 @@ class SecureArchiveManager @Inject constructor(
         yield()
 
         try {
-            FileUtils.writeFileToPublicFolder(context, fileName, "application/octet-stream") { outputStream ->
+            fileUtils.writeFileToPublicFolder(fileName, "application/octet-stream") { outputStream ->
                 outputStream.writer().use { writer ->
                     archiveWriter.write(writer, archive)
                 }
             }
         } catch (e: IllegalArgumentException) {
             
-            val dir = File(context.cacheDir, "file_provider")
-            dir.mkdirs()
-
-            val newFile = File(dir, fileName)
-            withContext(Dispatchers.IO) {
-                newFile.createNewFile()
-                newFile.writer().use { writer ->
-                    archiveWriter.write(writer, archive)
-                }
+            val newFile = fileUtils.writeFileToCacheFolder(fileName, "file_provider") { writer ->
+                archiveWriter.write(writer, archive)
             }
+
             throw FallbackToSharingArchive(data, newFile, e)
         }
 
@@ -142,20 +150,20 @@ class SecureArchiveManager @Inject constructor(
         val transactionList = toTransactionList()
         return transactionList.mapNotNull { transactionXml ->
             SyncObjectType.forXmlNameOrNull(transactionXml.type)?.takeUnless {
-                    
-                    
-                    it == SyncObjectType.SETTINGS || it == SyncObjectType.COLLECTION
-                }?.let { type ->
-                    val syncObject = transactionXml.toObject(type)
-                    val newId = generateUniqueIdentifier()
-                    
-                    syncObject.id?.let { oldToNewIds[it] = newId }
-                    syncObject.toVaultItem(
-                        overrideUid = newId,
-                        overrideAnonymousUid = generateUniqueIdentifier(),
-                        syncState = SyncState.MODIFIED
-                    )
-                }
+                
+                
+                it == SyncObjectType.SETTINGS || it == SyncObjectType.COLLECTION
+            }?.let { type ->
+                val syncObject = transactionXml.toObject(type)
+                val newId = generateUniqueIdentifier()
+                
+                syncObject.id?.let { oldToNewIds[it] = newId }
+                syncObject.toVaultItem(
+                    overrideUid = newId,
+                    overrideAnonymousUid = generateUniqueIdentifier(),
+                    syncState = SyncState.MODIFIED
+                )
+            }
         } + collectionsWithItemLinkUpdated(transactionList, oldToNewIds)
     }
 

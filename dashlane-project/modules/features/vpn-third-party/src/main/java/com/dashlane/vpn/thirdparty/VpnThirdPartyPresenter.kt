@@ -17,8 +17,7 @@ class VpnThirdPartyPresenter @Inject constructor(
     @FragmentLifecycleCoroutineScope
     private val fragmentLifecycleCoroutineScope: CoroutineScope,
     private val logger: VpnThirdPartyLogger,
-    private val userPreferencesManager: UserPreferencesManager,
-    private val helpCenterCoordinator: HelpCenterCoordinator
+    private val userPreferencesManager: UserPreferencesManager
 ) :
     BasePresenter<VpnThirdPartyContract.DataProvider, VpnThirdPartyContract.ViewProxy>(),
     VpnThirdPartyContract.Presenter {
@@ -67,7 +66,7 @@ class VpnThirdPartyPresenter @Inject constructor(
     }
 
     override fun onQuestionOneReadMoreClicked() =
-        helpCenterCoordinator.openLink(context!!, HelpCenterLink.ARTICLE_THIRD_PARTY_VPN, true)
+        HelpCenterCoordinator.openLink(context!!, HelpCenterLink.ARTICLE_THIRD_PARTY_VPN)
 
     override fun onCopyLoginClicked() {
         account?.let { logger.logCopyEmail(it.itemId, it.domain) }

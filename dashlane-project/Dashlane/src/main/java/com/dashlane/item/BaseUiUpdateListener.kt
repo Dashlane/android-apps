@@ -120,10 +120,16 @@ abstract class BaseUiUpdateListener(private val activity: AppCompatActivity, pri
 
     override fun openCollectionSelector(
         fromViewOnly: Boolean,
-        temporaryCollections: List<String>,
+        temporaryPrivateCollectionsName: List<String>,
+        temporarySharedCollectionsId: List<String>,
         spaceId: String
     ) {
-        navigator.goToCollectionSelectorFromItemEdit(fromViewOnly, temporaryCollections, spaceId)
+        navigator.goToCollectionSelectorFromItemEdit(
+            fromViewOnly,
+            temporaryPrivateCollectionsName,
+            temporarySharedCollectionsId,
+            spaceId
+        )
     }
 
     abstract fun requestFocus(subview: ItemSubView<*>)

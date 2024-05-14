@@ -23,11 +23,10 @@ import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
@@ -38,12 +37,11 @@ import com.dashlane.vault.model.leakedPasswordsSet
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import java.time.Instant
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Call
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -55,25 +53,19 @@ class BreachManager @Inject constructor(
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
-    private val callFactory: Call.Factory,
     private val userPreferencesManager: UserPreferencesManager,
     private val sessionManager: SessionManager,
-    private val mainDataAccessor: MainDataAccessor,
     private val darkWebMonitoringManager: DarkWebMonitoringManager,
     private val appEvents: AppEvents,
+    private val dataSaver: DataSaver,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
     private val breachAlertCenter: BreachAlertPopupModule,
     private val breachLoader: BreachLoader,
     private val breachDataHelper: BreachDataHelper,
-    private val hermesLogRepository: LogRepository
+    private val hermesLogRepository: LogRepository,
+    private val breachService: BreachService,
 ) {
-    private val dataSaver: DataSaver
-        get() = mainDataAccessor.getDataSaver()
-    private val credentialDataQuery: CredentialDataQuery
-        get() = mainDataAccessor.getCredentialDataQuery()
-    private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
-
-    private val breachService by lazy { BreachService(callFactory) }
 
     private var lastRefresh = 0L
     private var refreshInProgress = false
@@ -117,9 +109,7 @@ class BreachManager @Inject constructor(
         applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             val publicBreachResult = try {
                 breachService.getBreaches(
-                    session.userId,
-                    session.uki,
-                    lastFetchedPublicRevision,
+                    fromRevision = lastFetchedPublicRevision,
                     
                     revisionOnly = lastFetchedPublicRevision == 0
                 )

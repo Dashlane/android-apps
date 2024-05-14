@@ -7,11 +7,11 @@ import com.dashlane.hermes.generated.definitions.CryptoAlgorithm
 import com.dashlane.hermes.generated.definitions.CryptoMigrationStatus
 import com.dashlane.hermes.generated.definitions.CryptoMigrationType
 import com.dashlane.hermes.generated.events.user.MigrateCrypto
-import com.dashlane.logger.developerinfo.DeveloperInfoLogger
+import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.network.tools.authorization
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.Session
-import com.dashlane.session.repository.UserDataRepository
+import com.dashlane.session.UserDataRepository
 import com.dashlane.sync.cryptochanger.SyncCryptoChanger
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerCryptographyException
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerDownloadException

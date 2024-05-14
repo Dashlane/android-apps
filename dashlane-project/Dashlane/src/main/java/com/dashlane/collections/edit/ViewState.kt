@@ -1,7 +1,7 @@
 package com.dashlane.collections.edit
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.model.TeamSpace
 
 sealed class ViewState {
     abstract val viewData: ViewData
@@ -15,8 +15,8 @@ sealed class ViewState {
 data class ViewData(
     val collectionName: TextFieldValue,
     val editMode: Boolean,
-    val space: Teamspace?,
-    val availableSpaces: List<Teamspace>?
+    val space: TeamSpace?,
+    val availableSpaces: List<TeamSpace>?
 )
 
 enum class ErrorType {

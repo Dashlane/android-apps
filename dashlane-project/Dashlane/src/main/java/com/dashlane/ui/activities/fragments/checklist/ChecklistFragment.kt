@@ -4,11 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.viewModels
 import com.dashlane.databinding.FragmentChecklistBinding
+import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.m2w.M2WResult
+import com.dashlane.m2w.M2wActivityResultContract
 import com.dashlane.session.SessionManager
-import com.dashlane.ui.M2xIntentFactory
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
+import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -19,7 +23,7 @@ class ChecklistFragment : AbstractContentFragment() {
     lateinit var sessionManager: SessionManager
 
     @Inject
-    lateinit var m2xIntentFactory: M2xIntentFactory
+    lateinit var m2wActivityResult: M2wActivityResultContract
 
     private val viewModel by viewModels<ChecklistViewModel>()
 
@@ -29,13 +33,20 @@ class ChecklistFragment : AbstractContentFragment() {
         savedInstanceState: Bundle?
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
+        setCurrentPageView(AnyPage.HOME_ONBOARDING_CHECKLIST)
         val binding = FragmentChecklistBinding.inflate(inflater)
+        val m2wResultLauncher: ActivityResultLauncher<Unit> =
+            registerForActivityResult(m2wActivityResult) {
+                if (it == M2WResult.SKIPPED) {
+                    navigator.goToHome()
+                }
+            }
         ChecklistViewProxy(
             viewModel = viewModel,
             binding = binding,
             lifecycle = lifecycle,
             navigator = navigator,
-            m2xIntentFactory = m2xIntentFactory
+            m2wResultLauncher = m2wResultLauncher
         )
         return binding.root
     }

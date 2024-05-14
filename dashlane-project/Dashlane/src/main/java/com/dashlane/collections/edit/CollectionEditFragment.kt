@@ -136,10 +136,11 @@ class CollectionEditFragment : AbstractContentFragment() {
             if (spaces != null && selectedSpace != null) {
                 Spacer(modifier = Modifier.height(24.dp))
                 SpacePicker(
+                    modifier = Modifier.fillMaxWidth(),
                     spaces = spaces,
                     onSpaceSelected = viewModel::onSpaceSelected,
                     selectedSpace = selectedSpace,
-                    enabled = !uiState.viewData.editMode 
+                    readOnly = uiState.viewData.editMode 
                 )
             }
         }

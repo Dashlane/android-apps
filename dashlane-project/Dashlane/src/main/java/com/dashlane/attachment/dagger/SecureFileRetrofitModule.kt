@@ -6,7 +6,6 @@ import com.dashlane.network.inject.LegacyWebservicesApi
 import com.dashlane.securefile.services.GetUploadLinkService
 import com.dashlane.securefile.services.CommitService
 import com.dashlane.securefile.services.GetDownloadLinkService
-import com.dashlane.securefile.services.DeleteService
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
@@ -25,9 +24,5 @@ object SecureFileRetrofitModule {
 
     @Provides
     fun provideGetDownloadLinkService(@LegacyWebservicesApi retrofit: Retrofit): GetDownloadLinkService =
-        retrofit.create()
-
-    @Provides
-    fun provideGetDeleteFileService(@LegacyWebservicesApi retrofit: Retrofit): DeleteService =
         retrofit.create()
 }

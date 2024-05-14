@@ -41,4 +41,14 @@
     <string name="account_recovery_deactivation_message">You will not be able to access your account and data if you forget your Master Password</string>
     <string name="account_recovery_deactivation_positive_cta">Disable</string>
     <string name="account_recovery_deactivation_negative_cta">Keep enabled</string>
+
+    
+    <string name="account_recovery_weak_warning_dialog_title">Your device biometrics is not the most secure</string>
+    
+    <string name="account_recovery_weak_warning_dialog_message">Your device’s biometrics could be compromised more easily than other biometric methods. We don’t recommend using this as a recovery method.</string>
+    
+    <string name="account_recovery_weak_warning_dialog_positive_button">Continue</string>
+    
+    <string name="account_recovery_weak_warning_dialog_negative_button">Cancel</string>
+
 </resources>

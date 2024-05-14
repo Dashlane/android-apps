@@ -5,7 +5,6 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.getUserGroup
 import com.dashlane.sharing.model.isAcceptedOrPending
@@ -13,27 +12,22 @@ import com.dashlane.sharing.model.isPending
 import com.dashlane.sharing.model.isUserAcceptedOrPending
 import com.dashlane.sharing.model.isUserGroupAcceptedOrPending
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.datatype.ShareableDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
-import com.dashlane.teamspaces.CombinedTeamspace
-import com.dashlane.teamspaces.manager.TeamspaceManager
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import javax.inject.Inject
 
 class SharingContactCreator @Inject constructor(
-    private val dataProvider: SharingDataProviderImpl,
+    private val dataProvider: SharingDataProvider,
     private val sessionManager: SessionManager,
-    private val teamspaceRepository: TeamspaceManagerRepository,
-    private val mainDataAccessor: MainDataAccessor,
-) {
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
     private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
+) {
     private val session: Session?
         get() = sessionManager.session
     private val login: String?
         get() = session?.username?.email
-    private val teamspaceManager: TeamspaceManager?
-        get() = teamspaceRepository[session]
 
     fun getItemInvites(itemGroups: List<ItemGroup>): List<SharingContact.ItemInvite> {
         val login = login ?: return emptyList()
@@ -158,13 +152,13 @@ class SharingContactCreator @Inject constructor(
         }
         userGroup.teamId ?: return true
 
-        return teamspaceManager?.current?.teamId == userGroup.teamId
+        return currentTeamSpaceUiFilter.currentFilter.teamSpace.teamId == userGroup.teamId
     }
 
     private fun hasOneInCurrentSpace(uids: List<String>): Boolean = getCountAvailable(uids) > 0
 
     private fun isCombinedSpace(): Boolean =
-        teamspaceManager?.current === CombinedTeamspace
+        currentTeamSpaceUiFilter.currentFilter.teamSpace == TeamSpace.Combined
 
     private fun getCountAvailable(uids: List<String>): Int {
         if (uids.isEmpty()) {

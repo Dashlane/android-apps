@@ -67,6 +67,7 @@ class CreateAccountEmailDataProvider @Inject constructor(
                 it,
                 ssoIsNitroProvider
             )
-        }
+        },
+        isB2B = isB2B
     )
 }

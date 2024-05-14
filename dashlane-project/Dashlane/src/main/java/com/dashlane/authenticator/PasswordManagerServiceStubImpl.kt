@@ -6,11 +6,13 @@ import android.os.Binder
 import androidx.core.net.toUri
 import com.dashlane.BuildConfig
 import com.dashlane.authenticator.ipc.PasswordManagerAuthentifiant
+import com.dashlane.authenticator.ipc.PasswordManagerErrorType
+import com.dashlane.authenticator.ipc.PasswordManagerResult
 import com.dashlane.authenticator.ipc.PasswordManagerService
 import com.dashlane.authenticator.ipc.PasswordManagerState
 import com.dashlane.authenticator.ipc.isPaired
-import com.dashlane.core.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockPass
 import com.dashlane.login.lock.LockTypeManager
@@ -22,10 +24,13 @@ import com.dashlane.server.api.endpoints.authenticator.SetAuthenticatorService
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionObserver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.storage.userdata.accessor.filter.credentialFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.sync.DataSync
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.url.toHttpUrl
@@ -46,11 +51,11 @@ import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.util.concurrent.CopyOnWriteArraySet
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.runBlocking
 
 @Singleton
 class PasswordManagerServiceStubImpl @Inject constructor(
@@ -60,12 +65,15 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockManager: LockManager,
     private val setAuthenticatorService: SetAuthenticatorService,
-    private val mainDataAccessor: MainDataAccessor,
+    private val vaultDataQuery: VaultDataQuery,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val dataSaver: DataSaver,
     private val urlDomainRegistryFactory: UrlDomainRegistryFactory,
     private val lockValidator: LockValidator,
     private val dataSync: DataSync,
     private val isSettingUp2faChecker: IsSettingUp2faChecker,
-    private val sharingPolicyDataProvider: SharingPolicyDataProvider
+    private val sharingPolicyDataProvider: SharingPolicyDataProvider,
+    private val passwordLimiter: PasswordLimiter
 ) : PasswordManagerService.Stub(
     context = context,
     checkCallingSignature = BuildConfig.CHECK_AUTHENTICATOR_SIGNATURE
@@ -165,6 +173,11 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         return sessionManager.session?.userId
     }
 
+    override fun isPasswordLimitReached(): Boolean {
+        if (!getState().isPaired()) return false
+        return passwordLimiter.isPasswordLimitReached()
+    }
+
     override fun getDeviceAccessKey(userId: String): String? {
         if (!getState().isPaired()) return null
         return sessionManager.session?.takeIf { it.userId == userId }?.accessKey
@@ -176,7 +189,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     ): List<PasswordManagerAuthentifiant> {
         if (!getState().isPaired()) return emptyList()
 
-        val items = mainDataAccessor.getCredentialDataQuery().queryAll(
+        val items = credentialDataQuery.queryAll(
             credentialFilter {
                 ignoreUserLock()
                 if (domain != null) forDomain(domain)
@@ -185,7 +198,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
             if (hasOtp) filter { it.hasOtpUrl } else this
         }
 
-        return mainDataAccessor.getVaultDataQuery().queryAll(
+        return vaultDataQuery.queryAll(
             vaultFilter {
                 ignoreUserLock()
                 specificUid(items.map { it.id })
@@ -196,23 +209,24 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     override fun saveAuthentifiant(
         authentifiant: PasswordManagerAuthentifiant
-    ): PasswordManagerAuthentifiant? {
+    ): PasswordManagerResult {
             message = "HasId=${authentifiant.id != null} HasOtpUrl=${authentifiant.otpUrl != null}",
             logToUserSupportFile = true
         )
-        if (!getState().isPaired()) return null
+        if (!getState().isPaired()) return PasswordManagerResult.Error(PasswordManagerErrorType.NOT_PAIRED)
 
+        val creationDate = Instant.now()
         val vaultItem = if (authentifiant.id == null) {
-            authentifiant.toVaultItem()
+            authentifiant.toVaultItem(creationDate)
         } else {
-            mainDataAccessor.getVaultDataQuery()
+            vaultDataQuery
                 .query(
                     VaultFilter().apply {
-                    ignoreUserLock()
-                    specificDataType(SyncObjectType.AUTHENTIFIANT)
-                    specificUid(authentifiant.id!!)
-                    onlyShareable()
-                }
+                        ignoreUserLock()
+                        specificDataType(SyncObjectType.AUTHENTIFIANT)
+                        specificUid(authentifiant.id!!)
+                        onlyShareable()
+                    }
                 )
                 ?.let { it as VaultItem<SyncObject.Authentifiant> }
                 ?.copyWithOtpUrl(authentifiant.otpUrl)
@@ -223,11 +237,16 @@ class PasswordManagerServiceStubImpl @Inject constructor(
                     this.url = authentifiant.urlDomain
                     this.userSelectedUrl = authentifiant.urlDomain
                 }
-                ?: authentifiant.toVaultItem() 
-        } ?: return null
+                ?: authentifiant.toVaultItem(creationDate) 
+        } ?: return PasswordManagerResult.Error(PasswordManagerErrorType.SAVE_FAILED)
+
+        
+        if (vaultItem.syncObject.creationDatetime?.epochSecond == creationDate.epochSecond && passwordLimiter.isPasswordLimitReached()) {
+            return PasswordManagerResult.Error(PasswordManagerErrorType.PASSWORD_LIMIT_REACHED)
+        }
 
         val saved = runBlocking { 
-            mainDataAccessor.getDataSaver().save(vaultItem)
+            dataSaver.save(vaultItem)
         }
 
 
@@ -235,9 +254,9 @@ class PasswordManagerServiceStubImpl @Inject constructor(
             runBlocking {
                 dataSync.awaitSync(Trigger.SAVE)
             }
-            vaultItem.toPasswordManagerAuthentifiant()
+            PasswordManagerResult.Success(vaultItem.toPasswordManagerAuthentifiant())
         } else {
-            null
+            PasswordManagerResult.Error(PasswordManagerErrorType.SAVE_FAILED)
         }
     }
 
@@ -248,19 +267,19 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         )
         if (!getState().isPaired() || authentifiant.id == null) return null
 
-        val vaultItem = mainDataAccessor.getVaultDataQuery()
+        val vaultItem = vaultDataQuery
             .query(
                 VaultFilter().apply {
-                ignoreUserLock()
-                specificUid(authentifiant.id!!)
-            }
+                    ignoreUserLock()
+                    specificUid(authentifiant.id!!)
+                }
             )
             ?.let { it as VaultItem<SyncObject.Authentifiant> }
             ?.copySyncObject { this.isFavorite = authentifiant.isFavorite }
             ?: return null
 
         val saved = runBlocking { 
-            mainDataAccessor.getDataSaver().save(vaultItem)
+            dataSaver.save(vaultItem)
         }
 
 
@@ -298,19 +317,17 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun PasswordManagerAuthentifiant.toVaultItem() =
+    private fun PasswordManagerAuthentifiant.toVaultItem(creationDate: Instant) =
         otpUrl?.toUri()?.parseOtp()
             ?.let { otp ->
-                val timestamp = Instant.now()
-
                 val issuer = urlDomain ?: otp.issuer
                 val login = login ?: otp.user
 
                 createAuthentifiant(
                     dataIdentifier = CommonDataIdentifierAttrsImpl(
                         syncState = SyncState.MODIFIED,
-                        creationDate = timestamp,
-                        userModificationDate = timestamp
+                        creationDate = creationDate,
+                        userModificationDate = creationDate
                     ),
                     title = SyncObject.Authentifiant.formatTitle(issuer),
                     deprecatedUrl = issuer?.let {

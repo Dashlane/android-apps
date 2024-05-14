@@ -2,7 +2,7 @@ package com.dashlane.login.pages.password
 
 import android.content.Intent
 import com.dashlane.account.UserAccountInfo
-import com.dashlane.accountrecoverykey.AccountRecoveryStatus
+import com.dashlane.accountrecoverykey.AccountRecoveryState
 import com.dashlane.authentication.AuthenticationDeviceCredentialsInvalidException
 import com.dashlane.authentication.AuthenticationEmptyPasswordException
 import com.dashlane.authentication.AuthenticationException
@@ -39,8 +39,8 @@ import com.dashlane.session.SessionRestorer
 import com.dashlane.session.Username
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.util.installlogs.DataLossTrackingLogger
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
+import kotlinx.coroutines.runBlocking
 
 class LoginPasswordDataProvider @Inject constructor(
     private val successIntentFactory: LoginSuccessIntentFactory,
@@ -62,7 +62,7 @@ class LoginPasswordDataProvider @Inject constructor(
     lockManager,
     successIntentFactory
 ),
-LoginPasswordContract.DataProvider {
+    LoginPasswordContract.DataProvider {
 
     var registeredUserDevice: RegisteredUserDevice? = null
         set(value) {
@@ -168,13 +168,13 @@ LoginPasswordContract.DataProvider {
         }
     }
 
-    override suspend fun getAccountRecoveryKeyStatus(): AccountRecoveryStatus {
+    override suspend fun getAccountRecoveryKeyStatus(): AccountRecoveryState {
         return registeredUserDevice?.let {
             loginAccountRecoveryKeyRepository.getAccountRecoveryStatus(it)
                 .getOrElse { throwable ->
-                    AccountRecoveryStatus(false)
+                    AccountRecoveryState.Success(false, enabled = false)
                 }
-        } ?: AccountRecoveryStatus(false)
+        } ?: AccountRecoveryState.Success(false, enabled = false)
     }
 
     override fun askMasterPasswordLater() {

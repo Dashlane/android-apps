@@ -3,13 +3,18 @@ package com.dashlane.notificationcenter
 import android.content.Context
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.announcements.modules.trialupgraderecommendation.TrialUpgradeRecommendationModule
+import com.dashlane.accountstatus.AccountStatus
+import com.dashlane.accountstatus.premiumstatus.isTrial
+import com.dashlane.accountstatus.premiumstatus.remainingDays
+import com.dashlane.announcements.modules.trialupgraderecommendation.TrialUpgradeRecommendationModule.Companion.REMAINING_TRIALS_DAYS
 import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.darkweb.DarkWebEmailStatus
 import com.dashlane.darkweb.DarkWebMonitoringManager
 import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.inapplogin.InAppLoginManager
+import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.notification.badge.SharingInvitationRepositoryImpl
@@ -31,15 +36,16 @@ import com.dashlane.premium.offer.common.model.ProductDetailsWrapper
 import com.dashlane.premium.offer.common.model.toPromotionType
 import com.dashlane.security.SecurityHelper
 import com.dashlane.security.identitydashboard.breach.BreachLoader
+import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.AccountStatusRepository
-import com.dashlane.storage.DataStorageProvider
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.tryOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Clock
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -54,25 +60,33 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val lockManager: LockManager,
     private val inAppLoginManager: InAppLoginManager,
-    private val mainDataAccessor: MainDataAccessor,
     private val breachLoader: BreachLoader,
     private val sharingLoader: SharingInvitationRepositoryImpl,
+    private val credentialDataQuery: CredentialDataQuery,
     private val sharingXmlConverter: DataIdentifierSharingXmlConverter,
-    private val dataStorageProvider: DataStorageProvider,
     private val sessionManager: SessionManager,
     private val securityHelper: SecurityHelper,
     private val biometricAuthModule: BiometricAuthModule,
     private val biometricRecovery: BiometricRecovery,
-    private val accountStatusRepository: AccountStatusRepository,
+    private val accountStatusProvider: OptionalProvider<AccountStatus>,
     private val darkWebMonitoringManager: DarkWebMonitoringManager,
     private val storeOffersManager: StoreOffersManager,
     private val storeOffersFormatter: StoreOffersFormatter,
     private val userAccountStorage: UserAccountStorage,
+    private val passwordLimiter: PasswordLimiter,
+    private val clock: Clock,
+    private val sharingDao: SharingDao,
     @DefaultCoroutineDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher
 ) : NotificationCenterRepository {
 
     private val hasBiometric
         get() = biometricAuthModule.isHardwareSupported()
+
+    private val hasStrongBiometricMethod
+        get() = !biometricAuthModule.isOnlyWeakSupported()
+
+    private val premiumStatus: PremiumStatus?
+        get() = accountStatusProvider.get()?.premiumStatus
 
     private val lockType get() = lockManager.getLockType()
 
@@ -140,6 +154,8 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         whatIsNewItemTypes.add(ActionItemType.AUTHENTICATOR_ANNOUNCEMENT)
 
         val yourAccountItemTypes = setOf(
+            ActionItemType.PASSWORD_LIMIT_WARNING,
+            ActionItemType.PASSWORD_LIMIT_REACHED,
             ActionItemType.FREE_TRIAL_STARTED,
             ActionItemType.TRIAL_UPGRADE_RECOMMENDATION
         )
@@ -168,6 +184,8 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             )
             ActionItemType.AUTHENTICATOR_ANNOUNCEMENT -> listOf(createAuthenticatorAnnouncementItem())
             ActionItemType.INTRODUCTORY_OFFERS -> createPromotionItems()
+            ActionItemType.PASSWORD_LIMIT_WARNING -> listOf(createPasswordWarningLimitItem())
+            ActionItemType.PASSWORD_LIMIT_REACHED -> listOf(createPasswordLimitReachedItem())
         }
     }
 
@@ -194,7 +212,9 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         val isDeviceSecured = securityHelper.isDeviceSecured()
         return when {
             
-            meetConditionBiometric(type, hasBiometric, isDeviceSecured, lockType) ->
+            
+            hasStrongBiometricMethod &&
+                meetConditionBiometric(type, hasBiometric, isDeviceSecured, lockType) ->
                 ActionItem.BiometricActionItem(this)
             
             meetConditionPinCode(type, hasBiometric, isDeviceSecured, lockType) ->
@@ -232,6 +252,26 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             }
         }.flatten()
         return pendingOffers
+    }
+
+    private fun createPasswordWarningLimitItem(): ActionItem? {
+        if (passwordLimiter.hasPasswordLimit) {
+            val passwordLimit = passwordLimiter.passwordLimitCount?.toInt() ?: return null
+            val passwordCount = passwordLimiter.getCountAuthentifiant()
+            val minDisplayCount = passwordLimit - PasswordLimiter.PASSWORD_LIMIT_LOOMING
+            if (minDisplayCount < passwordLimit && passwordCount in minDisplayCount until passwordLimit) {
+                return ActionItem.PasswordLimitWarningActionItem(this, passwordCount, passwordLimit)
+            }
+        }
+        return null
+    }
+
+    private fun createPasswordLimitReachedItem(): ActionItem? {
+        if (passwordLimiter.isPasswordLimitReached()) {
+            val passwordLimit = passwordLimiter.passwordLimitCount?.toInt() ?: return null
+            return ActionItem.PasswordLimitReachedActionItem(this, passwordLimit)
+        }
+        return null
     }
 
     private suspend fun getTrialUpgradeRecommendationType(): OfferType =
@@ -276,23 +316,20 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         !biometricRecovery.isFeatureEnabled
 
     private fun meetConditionZeroPassword(): Boolean {
-        val passwordCount = mainDataAccessor.getCredentialDataQuery()
+        val passwordCount = credentialDataQuery
             .queryAllPasswords()
             .filter { it.isNotSemanticallyNull() }
             .size
         return passwordCount == 0
     }
 
-    private fun meetConditionFreeTrialStarted(): Boolean =
-        sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }
-            ?.isTrial
-            ?: false
+    private fun meetConditionFreeTrialStarted(): Boolean = premiumStatus?.isTrial == true
 
     private fun meetConditionTrialUpgradeRecommendation(): Boolean {
-        val daysLeftForDisplay = TrialUpgradeRecommendationModule.REMAINING_TRIALS_DAYS
-        return sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }
-            ?.run { isTrial && remainingDays < daysLeftForDisplay + 1 }
-            ?: false
+        val premiumStatus = premiumStatus ?: return false
+        val isTrialEnding = premiumStatus.remainingDays(clock)?.let { it < REMAINING_TRIALS_DAYS + 1 } ?: false
+
+        return premiumStatus.isTrial && isTrialEnding
     }
 
     private fun meetConditionAuthenticatorAnnouncement() =
@@ -313,7 +350,7 @@ class NotificationCenterRepositoryImpl @Inject constructor(
                 actionItemsRepository = this,
                 sharing = invite,
                 xmlConverter = sharingXmlConverter,
-                dataStorageProvider = dataStorageProvider,
+                sharingDao = sharingDao,
                 sessionManager = sessionManager
             ).apply {
                 this.firstDisplayedDate = getOrInitCreationDate(this)
@@ -323,7 +360,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
                 actionItemsRepository = this,
                 sharing = invite,
                 xmlConverter = sharingXmlConverter,
-                dataStorageProvider = dataStorageProvider,
                 sessionManager = sessionManager
             ).apply {
                 this.firstDisplayedDate = getOrInitCreationDate(this)
@@ -333,7 +369,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
                 actionItemsRepository = this,
                 sharing = invite,
                 xmlConverter = sharingXmlConverter,
-                dataStorageProvider = dataStorageProvider,
                 sessionManager = sessionManager
             ).apply {
                 this.firstDisplayedDate = getOrInitCreationDate(this)

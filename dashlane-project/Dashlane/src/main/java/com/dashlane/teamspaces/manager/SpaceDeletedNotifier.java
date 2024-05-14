@@ -1,18 +1,18 @@
 package com.dashlane.teamspaces.manager;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-
 import com.dashlane.network.BaseNetworkResponse;
 import com.dashlane.network.webservices.SpaceDeletedService;
 import com.dashlane.preference.UserPreferencesManager;
 import com.dashlane.session.Session;
+import com.dashlane.teamspaces.model.TeamSpace;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,7 +47,8 @@ public class SpaceDeletedNotifier {
         }
     }
 
-    public void storeSpaceToDelete(String spaceId) {
+    public void storeSpaceToDelete(TeamSpace.Business.Past spaceToDeleted) {
+        String spaceId = spaceToDeleted.getTeamId();
         Set<String> spaceIds = mPreferencesManager.getStringSet(PREF_SPACE_IDS);
         if (spaceIds == null) {
             spaceIds = new HashSet<>();

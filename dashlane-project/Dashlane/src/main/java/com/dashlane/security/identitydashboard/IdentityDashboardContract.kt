@@ -15,7 +15,7 @@ interface IdentityDashboardContract {
     interface Presenter : Base.IPresenter {
         fun onViewVisible()
         fun onViewHidden()
-        fun requireRefresh()
+        fun requireRefresh(forceRefresh: Boolean)
         fun onClick(item: IdentityDashboardItem)
     }
 
@@ -24,7 +24,7 @@ interface IdentityDashboardContract {
 
         fun shouldIdentityRestorationBeVisible(): Boolean
 
-        fun getAuthentifiantsSecurityInfoAsync(): Deferred<AuthentifiantSecurityEvaluator.Result?>
+        fun getAuthentifiantsSecurityInfoAsync(forceRefresh: Boolean): Deferred<AuthentifiantSecurityEvaluator.Result?>
 
         fun listenForChanges()
         fun unlistenForChanges()

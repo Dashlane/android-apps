@@ -2,8 +2,9 @@ package com.dashlane.ui.activities.firstpassword
 
 import com.dashlane.csvimport.csvimport.ImportAuthentifiantHelper
 import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.isValidEmail
 import com.dashlane.vault.model.VaultItem
@@ -15,9 +16,10 @@ import javax.inject.Inject
 
 class AddFirstPasswordDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
-    private val mainDataAccessor: MainDataAccessor,
+    private val dataSaver: DataSaver,
     private val authentifiantHelper: ImportAuthentifiantHelper,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
 ) :
     BaseDataProvider<AddFirstPassword.Presenter>(),
     AddFirstPassword.DataProvider {
@@ -31,10 +33,10 @@ class AddFirstPasswordDataProvider @Inject constructor(
         password: String
     ): VaultItem<SyncObject.Authentifiant> {
         val isValidEmail = login.isValidEmail()
-        val teamspaceAccessor = teamspaceAccessorProvider.get()
+        val teamSpaceAccessor = teamSpaceAccessorProvider.get()
         
-        val teamId = if (teamspaceAccessor?.canChangeTeamspace() == true) {
-            teamspaceAccessor.current?.teamId
+        val teamId = if (teamSpaceAccessor?.canChangeTeamspace == true) {
+            currentTeamSpaceUiFilter.currentFilter.teamSpace.teamId
         } else {
             null
         }
@@ -49,6 +51,6 @@ class AddFirstPasswordDataProvider @Inject constructor(
     }
 
     override suspend fun saveCredential(vaultItem: VaultItem<SyncObject.Authentifiant>): Boolean {
-        return mainDataAccessor.getDataSaver().save(vaultItem)
+        return dataSaver.save(vaultItem)
     }
 }

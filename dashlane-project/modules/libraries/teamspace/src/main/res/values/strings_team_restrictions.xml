@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="teamspace_restrictions_generic_title">Feature not available</string>
+    <string name="teamspace_restrictions_generic_description">Your company policy prevents use of this feature. For more information, contact your account admin.</string>
+    <string name="teamspace_restrictions_sharing_title">Sharing is disabled</string>
+    <string name="teamspace_restrictions_sharing_description">Your company policy prevents sharing items stored in Dashlane. For more information, contact your account admin.</string>
+    <string name="teamspace_restrictions_feature_lock_setting_title">This setting cannot be changed</string>
+    <string name="teamspace_restrictions_feature_lock_setting_description">Your company policy requires auto-lock on exit to be enabled. For more information, contact your account admin.</string>
+    <string name="teamspace_restrictions_secure_notes_title">Secure Notes are disabled</string>
+    <string name="teamspace_restrictions_secure_notes_description">Your company policy prevents the use of Secure Notes. For more information, please contact your account admin.</string>
+
+    <string name="teamspace_forced_categorisation_restricted_domain_with_spacename">This item belongs to your %1$s space, and cannot be moved.\n\nFor more information, contact your account admin</string>
+</resources>

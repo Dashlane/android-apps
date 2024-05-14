@@ -20,7 +20,7 @@ import com.dashlane.design.component.ButtonMediumBar
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.login.pages.secrettransfer.SecretTransferPayload
+import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.login.pages.secrettransfer.qrcode.DashlaneLogo
 import com.dashlane.ui.widgets.compose.GenericErrorContent
 

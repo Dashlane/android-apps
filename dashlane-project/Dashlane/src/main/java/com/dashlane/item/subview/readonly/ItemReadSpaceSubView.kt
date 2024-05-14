@@ -1,8 +1,8 @@
 package com.dashlane.item.subview.readonly
 
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.model.TeamSpace
 
 class ItemReadSpaceSubView(
-    override var value: Teamspace,
-    val values: List<Teamspace>
-) : ItemReadValueSubView<Teamspace>()
+    override var value: TeamSpace,
+    val values: List<TeamSpace>
+) : ItemReadValueSubView<TeamSpace>()

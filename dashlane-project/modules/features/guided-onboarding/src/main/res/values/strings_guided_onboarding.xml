@@ -2,8 +2,16 @@
 <resources>
     <string name="guided_onboarding_question_number">%1$d of %2$d</string>
 
-    <string name="guided_onboarding_brings_title">How can we make your life easier?</string>
+    
+    <string name="guided_onboarding_pre_question_title">How familiar are you with Dashlane?</string>
+    
+    <string name="guided_onboarding_pre_question_naive_user_title">I have never used Dashlane before</string>
+    
+    <string name="guided_onboarding_pre_question_new_user_title">I’m new to Dashlane, but I have used a password manager before</string>
+    
+    <string name="guided_onboarding_pre_question_existing_user_title">I know my way around Dashlane pretty well</string>
 
+    <string name="guided_onboarding_brings_title">How can we make your life easier?</string>
     <string name="guided_onboarding_brings_autofill_title">Type my logins for me</string>
     <string name="guided_onboarding_brings_autofill_detail">Gladly! Our Autofill feature will help you log in to sites and apps instantly.</string>
     <string name="guided_onboarding_brings_m2w_title">Sync logins across my devices</string>

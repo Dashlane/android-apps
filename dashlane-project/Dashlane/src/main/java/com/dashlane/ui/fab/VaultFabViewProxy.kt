@@ -3,23 +3,24 @@ package com.dashlane.ui.fab
 import android.view.LayoutInflater
 import android.view.View
 import com.dashlane.R
+import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.navigation.Navigator
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.fab.FabViewUtil.LastMenuItemHiddenCallBack
 import com.dashlane.ui.fab.FabViewUtil.hideFabMenuItems
-import com.dashlane.util.inject.OptionalProvider
 
 class VaultFabViewProxy(
     rootView: View,
-    teamspaceManager: OptionalProvider<TeamspaceAccessor>,
-    navigator: Navigator
+    teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
+    navigator: Navigator,
+    private val passwordLimiter: PasswordLimiter
 ) :
     FabViewProxy(rootView) {
     private val fabMenuItemNavigator: VaultFabMenuItemNavigator =
         VaultFabMenuItemNavigator(
             fabViewProxy = this,
-            teamspaceManager = teamspaceManager,
+            teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
             navigator = navigator
         )
 
@@ -62,7 +63,7 @@ class VaultFabViewProxy(
         }
     }
 
-    fun configureView() {
+    private fun configureView() {
         fabMenuHolder.removeAllViews()
         val fabMenu = LayoutInflater.from(context)
             .inflate(R.layout.fab_menu_list_recent_item, fabMenuHolder, false)
@@ -84,7 +85,8 @@ class VaultFabViewProxy(
         buttonL1AddPassword.configureAsFab(
             titleRes = R.string.menu_v2_password_button,
             titleDescription = R.string.and_accessibility_add_password,
-            drawableRes = R.drawable.ic_fab_menu_passwords
+            drawableRes = R.drawable.ic_fab_menu_passwords,
+            hasUpgradeBadge = passwordLimiter.isPasswordLimitReached()
         )
         buttonL1AddSecureNote.configureAsFab(
             titleRes = R.string.menu_v2_secure_notes_button,

@@ -6,37 +6,29 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isPending
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import com.dashlane.vault.summary.SummaryObject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class SharingUsersDataProvider @Inject constructor(
-    private val dataStorageProvider: DataStorageProvider,
-    private val mainDataAccessor: MainDataAccessor,
+    private val sharingDao: SharingDao,
+    private val genericDataQuery: GenericDataQuery,
     private val sharingDataProvider: SharingDataProvider,
     @IoCoroutineDispatcher
     private val ioCoroutineDispatcher: CoroutineDispatcher,
     private val userFeaturesChecker: UserFeaturesChecker
 ) {
-    private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
-
-    private val sharingDao: SharingDao
-        get() = dataStorageProvider.sharingDao
-
     private val showSharedCollections: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
 
     suspend fun getContactsForItem(itemId: String): List<SharingModels> {
         return withContext(ioCoroutineDispatcher) {

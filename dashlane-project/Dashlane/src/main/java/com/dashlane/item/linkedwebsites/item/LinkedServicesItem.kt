@@ -150,13 +150,13 @@ data class LinkedAppsItem(
                     onClick = {
                         item.removeAppListener.invoke(item)
                     }
-                    contentDescription = context.getString(R.string.and_accessibility_delete_linked_app)
+                    iconDescription = context.getString(R.string.and_accessibility_delete_linked_app)
                 } else {
                     iconRes = R.drawable.ic_action_open
                     onClick = {
                         item.openAppListener.invoke(item)
                     }
-                    contentDescription = context.getString(R.string.and_accessibility_open_linked_app)
+                    iconDescription = context.getString(R.string.and_accessibility_open_linked_app)
                     isEnabled = !item.isPageEditMode
                 }
             }

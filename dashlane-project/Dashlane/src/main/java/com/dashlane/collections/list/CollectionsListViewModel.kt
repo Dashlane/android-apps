@@ -2,21 +2,25 @@ package com.dashlane.collections.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.collections.businessSpaceData
+import com.dashlane.collections.details.CollectionLimiter
 import com.dashlane.collections.spaceData
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.session.SessionManager
+import com.dashlane.storage.userdata.accessor.CollectionDataQuery
+import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
-import com.dashlane.teamspaces.PersonalTeamspace
-import com.dashlane.teamspaces.manager.TeamspaceAccessorProvider
-import com.dashlane.teamspaces.manager.TeamspaceManager
-import com.dashlane.teamspaces.manager.TeamspaceManagerWeakListener
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.summary.toSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,47 +29,46 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CollectionsListViewModel @Inject constructor(
-    private val teamspaceAccessorProvider: TeamspaceAccessorProvider,
+    private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
+    private val accountStatusRepository: AccountStatusRepository,
+    private val sessionManager: SessionManager,
     private val sharingDataProvider: SharingDataProvider,
     private val userFeaturesChecker: UserFeaturesChecker,
-    mainDataAccessor: MainDataAccessor
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
+    private val collectionLimiter: CollectionLimiter,
+    private val collectionDataQuery: CollectionDataQuery,
+    private val dataSaver: DataSaver,
+    private val vaultActivityLogger: VaultActivityLogger
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<ViewState>(ViewState.Loading(ViewData(emptyList())))
     val uiState = _uiState.asStateFlow()
 
-    private val collectionDataQuery = mainDataAccessor.getCollectionDataQuery()
-
-    private val dataSaver = mainDataAccessor.getDataSaver()
-
-    private val teamspaceChangeListener = object : TeamspaceManager.Listener {
-        override fun onStatusChanged(
-            teamspace: Teamspace?,
-            previousStatus: String?,
-            newStatus: String?
-        ) {
-            
-        }
-
-        override fun onChange(teamspace: Teamspace?) {
-            refreshCollections()
-        }
-
-        override fun onTeamspacesUpdate() {
-            
-        }
-    }
-
-    private val teamspaceManagerListener = TeamspaceManagerWeakListener(teamspaceChangeListener)
-
     private val shareEnabled: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_1)
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
+
+    private val allowAllRoles: Boolean
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_ROLES)
 
     init {
         refreshCollections()
-        teamspaceManagerListener.listen(teamspaceAccessorProvider.get())
         viewModelScope.launch {
-            mainDataAccessor.getDataSaver().savedItemFlow.collect {
+            dataSaver.savedItemFlow.collect {
                 refreshCollections()
+            }
+        }
+        
+        viewModelScope.launch {
+            currentTeamSpaceUiFilter.teamSpaceFilterState.collect {
+                refreshCollections()
+            }
+        }
+
+        
+        viewModelScope.launch {
+            accountStatusRepository.accountStatusState.collect { accountStatuses ->
+                accountStatuses[sessionManager.session]?.let {
+                    refreshCollections()
+                }
             }
         }
     }
@@ -78,14 +81,15 @@ class CollectionsListViewModel @Inject constructor(
                 }
             )
             val sharedCollections = if (shareEnabled) {
-                sharingDataProvider.getAcceptedCollections()
+                sharingDataProvider.getAcceptedCollections(needsAdminRights = !allowAllRoles)
             } else {
                 emptyList()
             }
+            val collectionLimit = collectionLimiter.checkCollectionLimit(isShared = false)
             val allCollections =
-                collections.mapNotNull { it.toCollectionViewData() } + sharedCollections.mapNotNull {
+                collections.mapNotNull { it.toCollectionViewData(collectionLimit) } + sharedCollections.mapNotNull {
                     val size = sharingDataProvider.getAcceptedCollectionsItems(it.uuid).size
-                    it.toCollectionViewData(size)
+                    it.toCollectionViewData(size, collectionLimit)
                 }
             val viewData = ViewData(allCollections.sortedBy { it.name })
             if (viewData.collections.isNotEmpty()) {
@@ -96,21 +100,23 @@ class CollectionsListViewModel @Inject constructor(
         }
     }
 
-    private fun SummaryObject.Collection.toCollectionViewData() =
+    private fun SummaryObject.Collection.toCollectionViewData(userLimit: CollectionLimiter.UserLimit) =
         name?.let { name ->
-            val spaceData = spaceData(teamspaceAccessorProvider)
+            val spaceData = spaceData(teamSpaceAccessorProvider)
             CollectionViewData(
                 id = id,
                 name = name,
                 itemCount = vaultItems?.size ?: 0,
                 spaceData = spaceData,
                 shared = false,
-                shareAllowed = shareEnabled && spaceData?.businessSpace == true
+                shareEnabled = shareEnabled && spaceData?.businessSpace == true,
+                shareAllowed = true,
+                shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN
             )
         }
 
-    private suspend fun Collection.toCollectionViewData(size: Int): CollectionViewData? {
-        if (teamspaceAccessorProvider.get()?.isCurrent(PersonalTeamspace.teamId!!) == true) {
+    private suspend fun Collection.toCollectionViewData(size: Int, userLimit: CollectionLimiter.UserLimit): CollectionViewData? {
+        if (currentTeamSpaceUiFilter.currentFilter.teamSpace == TeamSpace.Personal) {
             
             return null
         }
@@ -118,9 +124,11 @@ class CollectionsListViewModel @Inject constructor(
             id = uuid,
             name = name,
             itemCount = size,
-            spaceData = businessSpaceData(teamspaceAccessorProvider),
+            spaceData = businessSpaceData(teamSpaceAccessorProvider),
             shared = true,
-            shareAllowed = shareEnabled && sharingDataProvider.isCollectionShareAllowed(this)
+            shareEnabled = shareEnabled,
+            shareAllowed = sharingDataProvider.isCollectionShareAllowed(this),
+            shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN
         )
     }
 
@@ -130,6 +138,7 @@ class CollectionsListViewModel @Inject constructor(
             if (collection != null) {
                 val collectionToDelete = collection.copy(syncState = SyncState.DELETED)
                 dataSaver.save(collectionToDelete)
+                vaultActivityLogger.sendCollectionDeletedActivityLog(collection = collection.toSummary())
             }
         }
     }

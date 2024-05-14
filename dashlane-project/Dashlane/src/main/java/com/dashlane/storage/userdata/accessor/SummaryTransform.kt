@@ -1,7 +1,6 @@
 package com.dashlane.storage.userdata.accessor
 
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.isSsoUser
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
@@ -10,9 +9,9 @@ interface SummaryTransform {
     operator fun invoke(summary: SummaryObject): SummaryObject
 
     class Provider @Inject constructor(
-        private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>
+        private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
     ) {
-        fun get() = if (teamspaceAccessorProvider.get()?.isSsoUser == true) {
+        fun get() = if (teamSpaceAccessorProvider.get()?.isSsoUser == true) {
             
             ClearSecureNoteLocks
         } else {

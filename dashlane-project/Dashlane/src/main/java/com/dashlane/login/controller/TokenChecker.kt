@@ -9,7 +9,6 @@ import com.dashlane.network.webservices.authentication.GetTokenService
 import com.dashlane.notification.model.TokenNotificationHandler
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.util.Constants
 import com.dashlane.util.isNotSemanticallyNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,18 +17,19 @@ import java.io.IOException
 
 class TokenChecker(
     private val getTokenService: GetTokenService,
-    private val tokenNotificationHandler: TokenNotificationHandler
+    private val tokenNotificationHandler: TokenNotificationHandler,
+    private val loginTokensModule: LoginTokensModule
 ) {
 
     fun checkAndDisplayTokenIfNeeded(activity: DashlaneActivity, username: String, uki: String) {
         activity.lifecycleScope.launch(Dispatchers.Main) {
             retrieveToken(username, uki)?.let {
-                val pushToken = Constants.GCM.Token[username]
+                val pushToken = loginTokensModule.tokenHashmap[username]
                 if (pushToken != null) {
                     pushToken.setShown()
                     pushToken.clearNotification(activity)
-                    Constants.GCM.Token.remove(username)
-                    Constants.GCM.TokenShouldNotify[username] = false
+                    loginTokensModule.tokenHashmap.remove(username)
+                    loginTokensModule.tokenShouldNotifyHashmap[username] = false
                 }
                 showTokenDialog(activity, it)
             }
@@ -43,7 +43,7 @@ class TokenChecker(
             tokenNotificationHandler.removeSavedToken()
             lastToken
         } else {
-            val currentToken = Constants.GCM.Token[username]
+            val currentToken = loginTokensModule.tokenHashmap[username]
             
             if (currentToken == null || currentToken.needWebserviceCall()) {
                 try {

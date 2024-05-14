@@ -4,20 +4,20 @@ import android.content.Context
 import com.dashlane.R
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
 import com.dashlane.activatetotp.ActivateTotpLogger
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.login.lock.LockManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
 import com.dashlane.navigation.Navigator
-import com.dashlane.network.inject.LegacyWebservicesApi
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.SecurityHelper
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserCryptographyRepository
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.TeamspaceRestrictionNotificator
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
@@ -25,23 +25,25 @@ import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
 import com.dashlane.ui.util.DialogHelper
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.Toaster
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import retrofit2.Retrofit
+import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 
 @Suppress("UseDataClass")
 class RootSettingsSecurityList(
     private val context: Context,
+    coroutineScope: CoroutineScope,
     lockManager: LockManager,
     securityHelper: SecurityHelper,
     biometricAuthModule: BiometricAuthModule,
     navigator: Navigator,
     screenshotPolicy: ScreenshotPolicy,
     userPreferencesManager: UserPreferencesManager,
-    teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
-    @LegacyWebservicesApi retrofit: Retrofit,
+    teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     sessionManager: SessionManager,
     userAccountStorage: UserAccountStorage,
     sessionCredentialsSaver: SessionCredentialsSaver,
@@ -56,7 +58,10 @@ class RootSettingsSecurityList(
     activateTotpLogger: ActivateTotpLogger,
     userFeaturesChecker: UserFeaturesChecker,
     accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
-    teamspaceRestrictionNotificator: TeamspaceRestrictionNotificator
+    teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
+    @IoCoroutineDispatcher
+    ioDispatcher: CoroutineDispatcher,
+    subscriptionCodeRepository: SubscriptionCodeRepository,
 ) {
 
     private val settingsSecurityApplicationLockList = SettingsSecurityApplicationLockList(
@@ -64,7 +69,7 @@ class RootSettingsSecurityList(
         lockManager = lockManager,
         securityHelper = securityHelper,
         biometricAuthModule = biometricAuthModule,
-        teamspaceAccessorProvider = teamspaceAccessorProvider,
+        teamSpaceAccessorProvider = teamSpaceAccessorProvider,
         sessionManager = sessionManager,
         userAccountStorage = userAccountStorage,
         dialogHelper = dialogHelper,
@@ -80,11 +85,11 @@ class RootSettingsSecurityList(
 
     private val settingsSecurityMiscList = SettingsSecurityMiscList(
         context = context,
+        coroutineScope = coroutineScope,
         navigator = navigator,
         screenshotPolicy = screenshotPolicy,
         userPreferencesManager = userPreferencesManager,
-        teamspaceAccessorProvider = teamspaceAccessorProvider,
-        retrofit = retrofit,
+        teamSpaceAccessorProvider = teamSpaceAccessorProvider,
         sessionManager = sessionManager,
         dialogHelper = dialogHelper,
         cryptographyRepository = cryptographyRepository,
@@ -92,7 +97,9 @@ class RootSettingsSecurityList(
         masterPasswordFeatureAccessChecker = masterPasswordFeatureAccessChecker,
         toaster = toaster,
         userFeaturesChecker = userFeaturesChecker,
-        userAccountStorage = userAccountStorage
+        userAccountStorage = userAccountStorage,
+        subscriptionCodeRepository = subscriptionCodeRepository,
+        ioDispatcher = ioDispatcher,
     )
 
     val root = SettingScreenItem(

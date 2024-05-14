@@ -12,6 +12,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatButton
 import com.dashlane.R
 import com.dashlane.login.pages.LoginBaseSubViewProxy
+import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.addTextChangedListener
 import kotlin.properties.Delegates
@@ -53,7 +54,7 @@ class LoginEmailViewProxy(view: View) :
         }
 
         secretTransferButton.setOnClickListener {
-            presenter.showSecretTransferQRPage(null)
+            presenter.showSecretTransferQRPage(null, LoginSecretTransferNavigation.qrCodeDestination)
         }
     }
 

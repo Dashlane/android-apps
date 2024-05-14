@@ -8,9 +8,7 @@ import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isLimited
 import com.dashlane.sharing.model.isUserSolitaryAdmin
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.space.NoRestrictionSpaceFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
@@ -24,18 +22,10 @@ open class TeamspaceForceDeletionSharingWorker @Inject constructor(
     private val sessionManager: SessionManager,
     private val sharingRevokeAllMembers: SharingRevokeAllMembers,
     private val sharingRevokeMe: SharingRevokeMe,
-    private val mainDataAccessor: MainDataAccessor,
-    private val dataStorageProvider: DataStorageProvider
-) {
-    private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
-
-    private val dataSaver: DataSaver
-        get() = mainDataAccessor.getDataSaver()
-
+    private val vaultDataQuery: VaultDataQuery,
+    private val dataSaver: DataSaver,
     private val sharingDao: SharingDao
-        get() = dataStorageProvider.sharingDao
-
+) {
     private val session: Session?
         get() = sessionManager.session
 

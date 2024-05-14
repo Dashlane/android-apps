@@ -1,41 +1,63 @@
 package com.dashlane.guidedonboarding
 
 import android.animation.Animator
-import android.animation.LayoutTransition.CHANGING
+import android.animation.LayoutTransition
+import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.model.KeyPath
-import com.dashlane.design.component.compat.view.BaseButtonView
+import com.dashlane.guidedonboarding.databinding.ActivityOnboardingQuestionnaireBinding
 import com.dashlane.guidedonboarding.widgets.AnswerView
 import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.ACCOUNT_EMAIL
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.AUTOFILL
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.DIGITAL_TOOL
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.DWM
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.M2W
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.MEMORY
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.OTHER
-import com.dashlane.util.SnackbarUtils
+import com.dashlane.guidedonboarding.widgets.QuestionnaireStep
+import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.util.getThemeAttrColor
-import com.skocken.presentation.viewproxy.BaseViewProxy
+import com.dashlane.util.logPageView
+import kotlinx.coroutines.launch
 
-internal class OnboardingQuestionnaireViewProxy(private val activity: AppCompatActivity, accountEmail: String) :
-    OnboardingQuestionnaireContract.View, BaseViewProxy<OnboardingQuestionnaireContract.Presenter>(activity) {
+internal class OnboardingQuestionnaireViewProxy(
+    private val context: Context,
+    private val lifecycle: Lifecycle,
+    private val binding: ActivityOnboardingQuestionnaireBinding,
+    private val viewModel: OnboardingQuestionnaireViewModel,
+    onBackClick: () -> Unit,
+    onTrustClick: () -> Unit,
+    private val onEnded: (Intent) -> Unit,
+    private val onGoToDWM: () -> Unit,
+    private val onGoToEmailConfirmation: (String?) -> Unit,
+    private val onCancel: () -> Unit,
+    private val onDarkWebRegistrationError: () -> Unit
+) {
+    private var progressAnimation: LottieAnimationView
+    private var preQuestionAnswers: Map<AnswerView, QuestionnaireAnswer>
+    private var q1Answers: Map<AnswerView, QuestionnaireAnswer>
+    private var q2Answers: Map<AnswerView, QuestionnaireAnswer>
+    private lateinit var q3Answers: Map<AnswerView, QuestionnaireAnswer>
+    private lateinit var allAnswers: Set<AnswerView>
 
-    private val questionNumber = findViewByIdEfficient<TextView>(R.id.onboarding_questionnaire_question_number)!!
-    private val title = findViewByIdEfficient<TextView>(R.id.onboarding_questionnaire_title)!!
-    private val animationView = findViewByIdEfficient<LottieAnimationView>(R.id.animationView)!!
-    private val subtitle = findViewByIdEfficient<TextView>(R.id.question_subtitle)!!
-    private val planReadyTitle = findViewByIdEfficient<TextView>(R.id.plan_ready_title)!!
-    private val progressAnimation =
-        findViewByIdEfficient<LottieAnimationView>(R.id.progress_animation)!!.apply {
+    init {
+        binding.buttonContinue.onClick = {
+            viewModel.onClickContinue()
+        }
+        binding.buttonBack.onClick = onBackClick
+
+        binding.buttonTrust.onClick = onTrustClick
+
+        binding.buttonSkip.onClick = {
+            viewModel.onClickSkipButton()
+        }
+
+        progressAnimation = binding.progressAnimation.apply {
             addLottieOnCompositionLoadedListener {
                 addValueCallback(KeyPath("**", "Fill 1"), LottieProperty.COLOR) {
                     context.getThemeAttrColor(R.attr.colorOnBackground)
@@ -43,116 +65,177 @@ internal class OnboardingQuestionnaireViewProxy(private val activity: AppCompatA
             }
         }
 
-    private val continueBtn = findViewByIdEfficient<BaseButtonView>(R.id.button_continue)!!
-    private val backBtn = findViewByIdEfficient<BaseButtonView>(R.id.button_back)!!
-    private val trustBtn = findViewByIdEfficient<BaseButtonView>(R.id.button_trust)!!
-    private val skipBtn = findViewByIdEfficient<BaseButtonView>(R.id.button_skip)!!
-
-    private val q1A1 = findViewByIdEfficient<AnswerView>(R.id.q1A1)!!
-    private val q1A2 = findViewByIdEfficient<AnswerView>(R.id.q1A2)!!
-    private val q1A3 = findViewByIdEfficient<AnswerView>(R.id.q1A3)!!
-
-    private val q2A1 = findViewByIdEfficient<AnswerView>(R.id.q2A1)!!
-    private val q2A2 = findViewByIdEfficient<AnswerView>(R.id.q2A2)!!
-    private val q2A3 = findViewByIdEfficient<AnswerView>(R.id.q2A3)!!
-
-    private val q3A1 = findViewByIdEfficient<AnswerView>(R.id.q3A1)!!
-
-    private val q1Answers: Map<AnswerView, QuestionnaireAnswer> = mapOf(
-        q1A1 to AUTOFILL,
-        q1A2 to M2W,
-        q1A3 to DWM
-    )
-
-    private val q2Answers: Map<AnswerView, QuestionnaireAnswer> = mapOf(
-        q2A1 to MEMORY,
-        q2A2 to DIGITAL_TOOL,
-        q2A3 to OTHER
-    )
-
-    private val q3Answers: Map<AnswerView, QuestionnaireAnswer> = mapOf(
-        createAccountEmailAnswer(accountEmail) to ACCOUNT_EMAIL
-    )
-
-    private val allAnswers = q1Answers.keys.union(q2Answers.keys).union(q3Answers.keys)
-
-    init {
-        continueBtn.onClick = {
-            presenter.onClickContinue()
-        }
-        backBtn.onClick = {
-            activity.onBackPressedDispatcher.onBackPressed()
-        }
-
-        trustBtn.onClick = {
-            presenter.onClickTrustButton()
-        }
-
-        skipBtn.onClick = {
-            presenter.onClickSkipButton()
-        }
-        ViewCompat.setAccessibilityHeading(title, true)
-    }
-
-    override fun showQuestion1(q1SelectedAnswer: QuestionnaireAnswer?) {
-        showQuestion(
-            q1SelectedAnswer,
-            q1Answers,
-            1,
-            R.string.guided_onboarding_brings_title,
-            R.raw.guided_onboarding_lottie_04_onlinelife
+        preQuestionAnswers = mapOf(
+            binding.preQ1A1 to QuestionnaireAnswer.NAIVE_USER,
+            binding.preQ1A2 to QuestionnaireAnswer.NEW_USER,
+            binding.preQ1A3 to QuestionnaireAnswer.EXISTING_USER
         )
-        trustBtn.visibility = View.GONE
-    }
-
-    override fun showQuestion2(q2SelectedAnswer: QuestionnaireAnswer?) {
-        showQuestion(
-            q2SelectedAnswer,
-            q2Answers,
-            2,
-            R.string.guided_onboarding_handle_title,
-            R.raw.guided_onboarding_lottie_06_bouncing_logos
+        q1Answers = mapOf(
+            binding.q1A1 to QuestionnaireAnswer.AUTOFILL,
+            binding.q1A2 to QuestionnaireAnswer.M2W,
+            binding.q1A3 to QuestionnaireAnswer.DWM
         )
-        animationView.visibility = View.VISIBLE
-        subtitle.visibility = View.GONE
-        trustBtn.visibility = if (q2SelectedAnswer != null) View.VISIBLE else View.GONE
-        skipBtn.visibility = View.GONE
+        q2Answers = mapOf(
+            binding.q2A1 to QuestionnaireAnswer.MEMORY,
+            binding.q2A2 to QuestionnaireAnswer.DIGITAL_TOOL,
+            binding.q2A3 to QuestionnaireAnswer.OTHER
+        )
+
+        ViewCompat.setAccessibilityHeading(binding.onboardingQuestionnaireTitle, true)
+
+        lifecycle.coroutineScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    collectUiState()
+                }
+            }
+        }
     }
 
-    override fun showQuestion3(q3SelectedAnswer: QuestionnaireAnswer) {
-        showQuestion(q3SelectedAnswer, q3Answers, 3, R.string.guided_onboarding_dwm_title, null)
-        planReadyTitle.apply {
-            (parent as ViewGroup).layoutTransition.disableTransitionType(CHANGING)
+    private suspend fun collectUiState() {
+        viewModel.uiState.collect { viewState ->
+
+            if (!this::q3Answers.isInitialized || !this::allAnswers.isInitialized) {
+                viewState.viewData.email?.let { email ->
+                    q3Answers =
+                        mapOf(createAccountEmailAnswer(email) to QuestionnaireAnswer.ACCOUNT_EMAIL)
+                    allAnswers = preQuestionAnswers.keys.union(q1Answers.keys).union(q2Answers.keys)
+                        .union(q3Answers.keys)
+                }
+            }
+
+            when (viewState) {
+                is OnboardingQuestionnaireState.Question -> {
+                    showQuestion(viewState.viewData)
+                }
+                is OnboardingQuestionnaireState.Plan -> {
+                    showPlanReady(viewState.animate)
+                }
+                is OnboardingQuestionnaireState.Error -> {
+                    if (viewState.error is OnboardingQuestionnaireError.DarkWebRegistrationError) {
+                        onDarkWebRegistrationError()
+                    }
+                }
+                is OnboardingQuestionnaireState.End -> onEnded(viewState.intent)
+                is OnboardingQuestionnaireState.GoToDWM -> onGoToDWM()
+                is OnboardingQuestionnaireState.GoToEmailConfirmation -> onGoToEmailConfirmation(
+                    viewState.viewData.email
+                )
+                is OnboardingQuestionnaireState.Cancel -> onCancel()
+                is OnboardingQuestionnaireState.HasNavigated -> Unit
+            }
+        }
+    }
+
+    private fun showQuestion(viewData: OnboardingQuestionnaireData) {
+        when (viewData.step) {
+            QuestionnaireStep.PRE_QUESTION -> showPreQuestion(viewData.answers[QuestionnaireStep.PRE_QUESTION])
+            QuestionnaireStep.QUESTION_1 -> showQuestion1(viewData.answers[QuestionnaireStep.QUESTION_1])
+            QuestionnaireStep.QUESTION_2 -> showQuestion2(viewData.answers[QuestionnaireStep.QUESTION_2])
+            QuestionnaireStep.QUESTION_3 -> showQuestion3(viewData.answers[QuestionnaireStep.PRE_QUESTION])
+            else -> {
+                
+            }
+        }
+    }
+
+    private fun showPreQuestion(q1SelectedAnswer: QuestionnaireAnswer?) {
+        context.logPageView(AnyPage.USER_PROFILING_FAMILIARITY_WITH_DASHLANE)
+        showQuestion(
+            selectedAnswer = q1SelectedAnswer,
+            answerMap = preQuestionAnswers,
+            currentQuestionNumber = null,
+            resTitle = R.string.guided_onboarding_pre_question_title,
+            defaultResAnimation = null
+        )
+        binding.buttonContinue.visibility = View.GONE
+        binding.buttonSkip.visibility = View.GONE
+        binding.buttonTrust.visibility = View.GONE
+        binding.questionSubtitle.visibility = View.GONE
+    }
+
+    private fun showQuestion1(q1SelectedAnswer: QuestionnaireAnswer?) {
+        showQuestion(
+            selectedAnswer = q1SelectedAnswer,
+            answerMap = q1Answers,
+            currentQuestionNumber = 1,
+            resTitle = R.string.guided_onboarding_brings_title,
+            defaultResAnimation = R.raw.guided_onboarding_lottie_04_onlinelife
+        )
+        binding.buttonSkip.visibility = View.VISIBLE
+        binding.buttonTrust.visibility = View.GONE
+        binding.questionSubtitle.visibility = View.VISIBLE
+    }
+
+    private fun showQuestion2(q2SelectedAnswer: QuestionnaireAnswer?) {
+        showQuestion(
+            selectedAnswer = q2SelectedAnswer,
+            answerMap = q2Answers,
+            currentQuestionNumber = 2,
+            resTitle = R.string.guided_onboarding_handle_title,
+            defaultResAnimation = R.raw.guided_onboarding_lottie_06_bouncing_logos
+        )
+        binding.animationView.visibility = View.VISIBLE
+        binding.questionSubtitle.visibility = View.GONE
+        binding.buttonTrust.visibility = if (q2SelectedAnswer != null) View.VISIBLE else View.GONE
+        binding.buttonSkip.visibility = if (q2SelectedAnswer != null) View.GONE else View.VISIBLE
+    }
+
+    private fun showQuestion3(q1SelectedAnswer: QuestionnaireAnswer?) {
+        showQuestion(
+            selectedAnswer = QuestionnaireAnswer.ACCOUNT_EMAIL,
+            answerMap = q3Answers,
+            currentQuestionNumber = if (q1SelectedAnswer == QuestionnaireAnswer.EXISTING_USER) {
+                null
+            } else {
+                3
+            },
+            resTitle = R.string.guided_onboarding_dwm_title,
+            defaultResAnimation = null
+        )
+        binding.questionSubtitle.visibility = View.VISIBLE
+        binding.planReadyTitle.apply {
+            (parent as ViewGroup).layoutTransition.disableTransitionType(LayoutTransition.CHANGING)
             visibility = View.GONE
         }
         progressAnimation.visibility = View.GONE
-        trustBtn.visibility = View.GONE
-        animationView.visibility = View.GONE
-        subtitle.visibility = View.VISIBLE
-        skipBtn.visibility = View.VISIBLE
-        questionNumber.visibility = View.VISIBLE
-        backBtn.visibility = View.VISIBLE
-        title.visibility = View.VISIBLE
+        binding.buttonTrust.visibility = View.GONE
+        binding.animationView.visibility = View.GONE
+        binding.onboardingQuestionnaireTitle.visibility = View.VISIBLE
+        binding.buttonSkip.visibility = View.VISIBLE
+        binding.onboardingQuestionnaireQuestionNumber.visibility = View.VISIBLE
+        binding.buttonBack.visibility = View.VISIBLE
+        binding.onboardingQuestionnaireTitle.visibility = View.VISIBLE
     }
 
     private fun showQuestion(
         selectedAnswer: QuestionnaireAnswer?,
         answerMap: Map<AnswerView, QuestionnaireAnswer>,
-        currentQuestionNumber: Int,
+        currentQuestionNumber: Int?,
         @StringRes resTitle: Int,
         @RawRes defaultResAnimation: Int?
     ) {
-        questionNumber.text = context.getString(R.string.guided_onboarding_question_number, currentQuestionNumber, 3)
-        title.setText(resTitle)
-        questionNumber.visibility = View.VISIBLE
-        if (defaultResAnimation == null) {
-            animationView.visibility = View.GONE
+        if (currentQuestionNumber == null) {
+            binding.onboardingQuestionnaireQuestionNumber.visibility = View.GONE
         } else {
-            animationView.visibility = View.VISIBLE
-            animationView.changeAnimation(selectedAnswer?.lottieRes ?: defaultResAnimation)
+            binding.onboardingQuestionnaireQuestionNumber.visibility = View.VISIBLE
+            binding.onboardingQuestionnaireQuestionNumber.text =
+                context.getString(
+                    R.string.guided_onboarding_question_number,
+                    currentQuestionNumber,
+                    3
+                )
+        }
+        binding.onboardingQuestionnaireTitle.setText(resTitle)
+        binding.onboardingQuestionnaireQuestionNumber.visibility = View.VISIBLE
+        if (defaultResAnimation == null) {
+            binding.animationView.visibility = View.GONE
+        } else {
+            binding.animationView.visibility = View.VISIBLE
+            binding.animationView.changeAnimation(selectedAnswer?.lottieRes ?: defaultResAnimation)
         }
 
-        allAnswers.forEach {
+        allAnswers.filterNot { it in answerMap }.forEach {
             it.visibility = View.GONE
         }
 
@@ -169,42 +252,43 @@ internal class OnboardingQuestionnaireViewProxy(private val activity: AppCompatA
         }
 
         if (selectedAnswer != null) {
-            val positiveText = if (selectedAnswer == ACCOUNT_EMAIL) {
+            val positiveText = if (selectedAnswer == QuestionnaireAnswer.ACCOUNT_EMAIL) {
                 R.string.guided_onboarding_dwm_positive_button
             } else {
                 R.string.guided_onboarding_continue
             }
-            continueBtn.text = continueBtn.context.getString(positiveText)
-            continueBtn.visibility = View.VISIBLE
+            binding.buttonContinue.text = context.getString(positiveText)
+            binding.buttonContinue.visibility = View.VISIBLE
         } else {
-            continueBtn.visibility = View.GONE
+            binding.buttonContinue.visibility = View.GONE
         }
     }
 
-    override fun showPlanReady(animate: Boolean) {
+    private fun showPlanReady(animate: Boolean) {
         fun showAnimEnd() {
-            planReadyTitle.setText(R.string.guided_onboarding_plan_ready_title)
-            continueBtn.visibility = View.VISIBLE
-            skipBtn.visibility = View.GONE
+            binding.planReadyTitle.setText(R.string.guided_onboarding_plan_ready_title)
+            binding.buttonContinue.visibility = View.VISIBLE
+            binding.buttonSkip.visibility = View.GONE
+            viewModel.onPlanAnimationDone()
         }
-        questionNumber.visibility = View.GONE
-        animationView.visibility = View.GONE
-        subtitle.visibility = View.GONE
+        binding.onboardingQuestionnaireQuestionNumber.visibility = View.GONE
+        binding.animationView.visibility = View.GONE
+        binding.questionSubtitle.visibility = View.GONE
         allAnswers.forEach {
             it.visibility = View.GONE
         }
-        trustBtn.visibility = View.GONE
-        backBtn.visibility = View.GONE
-        title.visibility = View.GONE
-        continueBtn.apply {
+        binding.buttonTrust.visibility = View.GONE
+        binding.buttonBack.visibility = View.GONE
+        binding.onboardingQuestionnaireTitle.visibility = View.GONE
+        binding.buttonContinue.apply {
             visibility = View.GONE
             text = context.getString(R.string.guided_onboarding_continue)
         }
-        skipBtn.visibility = View.VISIBLE
-        planReadyTitle.apply {
+        binding.buttonSkip.visibility = View.VISIBLE
+        binding.planReadyTitle.apply {
             setText(R.string.guided_onboarding_building_plan_title)
             visibility = View.VISIBLE
-            (parent as ViewGroup).layoutTransition.enableTransitionType(CHANGING)
+            (parent as ViewGroup).layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         }
         progressAnimation.apply {
             visibility = View.VISIBLE
@@ -225,53 +309,37 @@ internal class OnboardingQuestionnaireViewProxy(private val activity: AppCompatA
         }
     }
 
-    override fun showDarkWebRegistrationError() {
-        SnackbarUtils.showSnackbar(activity, context.getString(R.string.darkweb_setup_mail_error))
-    }
-
     private fun onAnswerClicked(view: View) {
         if (view !is AnswerView) return
         val map = getCorrespondingAnswerMap(view)
-        map.keys.forEach {
-            if (it != view) {
-                it.visibility = View.GONE
-            } else {
-                it.visibility = View.VISIBLE
-            }
-        }
-        continueBtn.visibility = View.VISIBLE
-        if (map == q2Answers) {
-            trustBtn.visibility = View.VISIBLE
-        }
-        view.showDetail = true
         val answer = map[view]
-        answer?.let {
-            if (it.lottieRes > 0) animationView.changeAnimation(it.lottieRes)
-        }
-        presenter.onAnswerSelected(getQuestionIndexForAnswerView(view), answer)
-    }
-
-    private fun getQuestionIndexForAnswerView(answer: AnswerView) = when (getCorrespondingAnswerMap(answer)) {
-        q1Answers -> 0
-        q2Answers -> 1
-        q3Answers -> 2
-        else -> -1
+        viewModel.onAnswerSelected(getQuestionStepForAnswerView(view), answer)
     }
 
     private fun getCorrespondingAnswerMap(answer: AnswerView) = when (answer) {
+        in preQuestionAnswers -> preQuestionAnswers
         in q1Answers -> q1Answers
         in q2Answers -> q2Answers
         in q3Answers -> q3Answers
         else -> emptyMap()
     }
 
+    private fun getQuestionStepForAnswerView(answer: AnswerView) =
+        when (getCorrespondingAnswerMap(answer)) {
+            preQuestionAnswers -> QuestionnaireStep.PRE_QUESTION
+            q1Answers -> QuestionnaireStep.QUESTION_1
+            q2Answers -> QuestionnaireStep.QUESTION_2
+            q3Answers -> QuestionnaireStep.QUESTION_3
+            else -> null
+        }
+
+    private fun createAccountEmailAnswer(email: String) = binding.q3A1.apply {
+        findViewById<TextView>(R.id.title).text = email
+    }
+
     private fun LottieAnimationView.changeAnimation(@RawRes resId: Int) {
         pauseAnimation()
         setAnimation(resId)
         playAnimation()
-    }
-
-    private fun createAccountEmailAnswer(email: String) = q3A1.apply {
-        findViewById<TextView>(R.id.title).text = email
     }
 }

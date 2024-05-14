@@ -3,7 +3,7 @@ package com.dashlane.autofill.api
 import com.dashlane.autofill.changepassword.domain.AutofillUpdateAccountService
 import com.dashlane.autofill.changepassword.domain.CredentialUpdateInfo
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject

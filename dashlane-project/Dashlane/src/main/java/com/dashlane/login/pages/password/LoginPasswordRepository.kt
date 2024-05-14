@@ -3,7 +3,7 @@ package com.dashlane.login.pages.password
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.limitations.DeviceLimitActivityListener
 import com.dashlane.limitations.Enforce2faLimiter

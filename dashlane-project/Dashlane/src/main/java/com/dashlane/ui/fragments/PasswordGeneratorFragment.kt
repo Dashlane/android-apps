@@ -27,7 +27,7 @@ import com.dashlane.passwordstrength.borderColorRes
 import com.dashlane.passwordstrength.getStrengthDescription
 import com.dashlane.passwordstrength.isSafeEnoughForSpecialMode
 import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
@@ -35,12 +35,12 @@ import com.dashlane.storage.userdata.accessor.filter.space.NoSpaceFilter
 import com.dashlane.ui.PasswordGeneratorConfigurationView
 import com.dashlane.ui.PasswordGeneratorConfigurationView.ConfigurationChangeListener
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorLogger
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setProgressDrawablePrimaryTrack
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import com.dashlane.utils.PasswordScrambler
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,7 +69,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     lateinit var logRepository: LogRepository
 
     @Inject
-    lateinit var mainDataAccessor: MainDataAccessor
+    lateinit var dataCounter: DataCounter
 
     @Inject
     lateinit var clipboardCopy: ClipboardCopy
@@ -245,7 +245,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             NoSpaceFilter,
             DefaultLockFilter
         )
-        return mainDataAccessor.getDataCounter().count(filter)
+        return dataCounter.count(filter)
     }
 
     private suspend fun generatePassword(configuration: PasswordGeneratorCriteria) {

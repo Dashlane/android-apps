@@ -1,5 +1,6 @@
 package com.dashlane.ui.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -26,6 +27,8 @@ class DashlaneWrapperActivity : DashlaneActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         finish()
     }

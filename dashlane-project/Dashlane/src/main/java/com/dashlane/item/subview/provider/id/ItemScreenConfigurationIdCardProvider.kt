@@ -12,9 +12,10 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
@@ -25,8 +26,9 @@ import com.dashlane.xml.domain.SyncObject
 import java.time.LocalDate
 
 class ItemScreenConfigurationIdCardProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
-    private val mainDataAccessor: MainDataAccessor,
+    private val teamspaceAccessor: TeamSpaceAccessor,
+    private val genericDataQuery: GenericDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
 ) : ItemScreenConfigurationProvider() {
@@ -72,13 +74,14 @@ class ItemScreenConfigurationIdCardProvider(
     ): List<ItemSubView<*>> {
         
         val identitySubviews = createIdentitySubviews(
-            context,
-            subViewFactory,
-            mainDataAccessor,
-            editMode,
-            listener,
-            item,
-            IdCardIdentityAdapter
+            context = context,
+            genericDataQuery = genericDataQuery,
+            vaultDataQuery = vaultDataQuery,
+            subViewFactory = subViewFactory,
+            editMode = editMode,
+            listener = listener,
+            item = item,
+            identityAdapter = IdCardIdentityAdapter
         )
 
         val subviews = listOfNotNull(
@@ -129,7 +132,7 @@ class ItemScreenConfigurationIdCardProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.IdCard>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamspaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamspaceAccessor,
@@ -197,7 +200,7 @@ class ItemScreenConfigurationIdCardProvider(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.IdCard>
     val idCard = this.syncObject
     return if (value.teamId == idCard.spaceId) {

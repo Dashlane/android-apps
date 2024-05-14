@@ -12,8 +12,8 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.storage.userdata.EmailSuggestionProvider
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
@@ -24,7 +24,7 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationEmailProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
@@ -96,10 +96,10 @@ class ItemScreenConfigurationEmailProvider(
         item: VaultItem<SyncObject.Email>,
         emailView: ItemSubView<String>?
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 listOfNotNull(emailView),
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -142,6 +142,9 @@ class ItemScreenConfigurationEmailProvider(
         item: VaultItem<SyncObject.Email>,
         subViewFactory: SubViewFactory
     ): ItemSubView<*>? {
+
+        if (teamSpaceAccessor.hasEnforcedTeamSpace) return null
+
         val allTypeCategories = listOf(SyncObject.Email.Type.PERSO, SyncObject.Email.Type.PRO)
 
         val typeUpdate = copyForUpdatedType(context, allTypeCategories)
@@ -193,7 +196,7 @@ class ItemScreenConfigurationEmailProvider(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.Email>
     val email = this.syncObject
     return if (value.teamId == email.spaceId) {

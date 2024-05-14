@@ -4,31 +4,29 @@ import com.dashlane.core.history.AuthentifiantHistoryGenerator
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierDeletedEvent
 import com.dashlane.events.PasswordChangedEvent
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.DatabaseItemSaver
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.model.copyWithSpaceId
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.objectType
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 @Singleton
 class DataSaverImpl @Inject constructor(
     private val authentifiantHistoryGenerator: AuthentifiantHistoryGenerator,
-    private val dataStorageProvider: DataStorageProvider,
-    private val appEvents: AppEvents
+    private val vaultDataQuery: VaultDataQuery,
+    private val dataChangeHistorySaver: DataChangeHistorySaver,
+    private val databaseItemSaver: DatabaseItemSaver,
+    private val appEvents: AppEvents,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
 ) : DataSaver {
-    private val dataChangeHistorySaver: DataChangeHistorySaver
-        get() = dataStorageProvider.dataChangeHistorySaver
-    private val vaultDataQuery: VaultDataQuery
-        get() = dataStorageProvider.vaultDataQuery
-    private val databaseItemSaver: DatabaseItemSaver
-        get() = dataStorageProvider.itemSaver
-
     
     private val _savedItemFlow = MutableSharedFlow<Unit>()
     override val savedItemFlow = _savedItemFlow.asSharedFlow()
@@ -43,30 +41,39 @@ class DataSaverImpl @Inject constructor(
         }
 
         val dataChangeHistoryItems = dataChangeHistories.itemsToSave.toMutableList()
+        val enforcedSpacedId = teamSpaceAccessorProvider.get()?.enforcedSpace?.teamId
 
         val savedRegularItems = when (regularItems.mode) {
             DataSaver.SaveRequest.Mode.INSERT_ONLY -> {
+                val newRegularItems = regularItems.copyWithNewItemsToSave(
+                    itemsToSave = regularItems.itemsToSave.enforceSpaceIfRequired(enforcedSpacedId)
+                )
                 
-                dataChangeHistoryItems.addAll(regularItems.itemsToSave.generateDataChangeHistories())
+                dataChangeHistoryItems.addAll(newRegularItems.itemsToSave.generateDataChangeHistories())
                 
                 
-                databaseItemSaver.save(regularItems, emptyList())
+                databaseItemSaver.save(newRegularItems, emptyList())
             }
             DataSaver.SaveRequest.Mode.INSERT_OR_UPDATE -> {
                 
-                val oldItems = loadDatabaseItems(regularItems.itemsToSave)
+                val (oldItems, newItems) = loadDatabaseItems(regularItems.itemsToSave)
+
+                val newRegularItems = regularItems.copyWithNewItemsToSave(
+                    itemsToSave = regularItems.itemsToSave.replaceItems(newItems.enforceSpaceIfRequired(enforcedSpacedId))
+                )
+
                 if (Thread.interrupted()) {
                     return emptyList()
                 }
 
                 
-                dataChangeHistoryItems.addAll(regularItems.itemsToSave.generateDataChangeHistories(oldItems))
+                dataChangeHistoryItems.addAll(newRegularItems.itemsToSave.generateDataChangeHistories(oldItems))
 
                 
-                val saveResult = databaseItemSaver.save(regularItems, oldItems)
+                val saveResult = databaseItemSaver.save(newRegularItems, oldItems)
 
                 
-                regularItems.itemsToSave.forEach { item ->
+                newRegularItems.itemsToSave.forEach { item ->
                     oldItems.firstOrNull { it.uid == item.uid }?.let { oldItem ->
                         checkPasswordChanged(oldItem, item)
                     }
@@ -95,9 +102,9 @@ class DataSaverImpl @Inject constructor(
         }
     }
 
-    private fun loadDatabaseItems(itemsToSave: List<VaultItem<*>>): List<VaultItem<*>> {
+    private fun loadDatabaseItems(itemsToSave: List<VaultItem<*>>): Pair<List<VaultItem<*>>, List<VaultItem<*>>> {
         
-        return itemsToSave.groupBy { it.syncObject.objectType }
+        val existingItems = itemsToSave.groupBy { it.syncObject.objectType }
             .map { (dataType, items) ->
                 
                 val filter = vaultFilter {
@@ -107,6 +114,8 @@ class DataSaverImpl @Inject constructor(
                 }
                 vaultDataQuery.queryAll(filter)
             }.flatten()
+        val newItems = itemsToSave.filterExistingItems(existingItems)
+        return existingItems to newItems
     }
 
     override suspend fun forceDelete(item: VaultItem<*>): Boolean {
@@ -114,7 +123,7 @@ class DataSaverImpl @Inject constructor(
     }
 
     private fun <T : SyncObject> DataSaver.SaveRequest<T>.splitWithDataChangeHistory():
-            Pair<DataSaver.SaveRequest<T>, DataSaver.SaveRequest<SyncObject.DataChangeHistory>> {
+        Pair<DataSaver.SaveRequest<T>, DataSaver.SaveRequest<SyncObject.DataChangeHistory>> {
         val dataChangeHistory: List<VaultItem<SyncObject.DataChangeHistory>> = itemsToSave.mapNotNull { item ->
             val syncObject: SyncObject = item.syncObject
             if (syncObject is SyncObject.DataChangeHistory) {
@@ -125,16 +134,15 @@ class DataSaverImpl @Inject constructor(
             }
         }
         val leftItems = itemsToSave.filterNot { item -> dataChangeHistory.any { it == item } }
-        return copy(itemsToSave = leftItems) to
-                DataSaver.SaveRequest(
-                    itemsToSave = dataChangeHistory,
-                    origin = origin,
-                    mode = mode
-                )
+        return copy(itemsToSave = leftItems) to DataSaver.SaveRequest(
+            itemsToSave = dataChangeHistory,
+            origin = origin,
+            mode = mode
+        )
     }
 
     private fun <T : SyncObject> List<VaultItem<T>>.generateDataChangeHistories(oldItems: List<VaultItem<*>>? = null):
-            List<VaultItem<SyncObject.DataChangeHistory>> {
+        List<VaultItem<SyncObject.DataChangeHistory>> {
         return mapNotNull { item ->
             val syncObject: SyncObject = item.syncObject
             @Suppress("UNCHECKED_CAST")
@@ -148,5 +156,50 @@ class DataSaverImpl @Inject constructor(
                 null
             }
         }
+    }
+
+    private fun <T : SyncObject> List<VaultItem<T>>.enforceSpaceIfRequired(spacedId: String?): List<VaultItem<T>> {
+        spacedId ?: return this
+
+        return map { vaultItem ->
+            when (vaultItem.syncObjectType) {
+                
+                
+                SyncObjectType.ADDRESS,
+                SyncObjectType.AUTHENTIFIANT,
+                SyncObjectType.BANK_STATEMENT,
+                SyncObjectType.COLLECTION,
+                SyncObjectType.COMPANY,
+                SyncObjectType.DRIVER_LICENCE,
+                SyncObjectType.EMAIL,
+                SyncObjectType.FISCAL_STATEMENT,
+                SyncObjectType.ID_CARD,
+                SyncObjectType.IDENTITY,
+                SyncObjectType.PASSKEY,
+                SyncObjectType.PASSPORT,
+                SyncObjectType.PAYMENT_CREDIT_CARD,
+                SyncObjectType.PAYMENT_PAYPAL,
+                SyncObjectType.PERSONAL_WEBSITE,
+                SyncObjectType.PHONE,
+                SyncObjectType.SECURE_NOTE,
+                SyncObjectType.SOCIAL_SECURITY_STATEMENT -> vaultItem.copyWithSpaceId(spacedId)
+                else -> vaultItem
+            }
+        }
+    }
+
+    private fun <T : SyncObject> DataSaver.SaveRequest<T>.copyWithNewItemsToSave(itemsToSave: List<VaultItem<*>>): DataSaver.SaveRequest<T> = copy(
+        itemsToSave = itemsToSave.filterIsInstance<VaultItem<T>>()
+
+    )
+
+    private fun <U : SyncObject, V : SyncObject> List<VaultItem<U>>.filterExistingItems(items: List<VaultItem<V>>): List<VaultItem<U>> {
+        val itemIds = items.map { it.uid }
+        return this.filterNot { it.uid in itemIds }
+    }
+
+    private fun <E : SyncObject> List<VaultItem<E>>.replaceItems(items: List<VaultItem<E>>): List<VaultItem<E>> {
+        val itemIds = items.map { it.uid }
+        return filterNot { it.uid in itemIds } + items
     }
 }

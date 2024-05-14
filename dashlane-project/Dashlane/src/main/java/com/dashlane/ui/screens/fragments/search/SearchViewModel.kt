@@ -9,7 +9,7 @@ import com.dashlane.search.Match
 import com.dashlane.search.MatchPosition
 import com.dashlane.search.MatchedSearchResult
 import com.dashlane.search.fields.LegacySearchField
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.FrequentSearch
 import com.dashlane.ui.adapter.ItemListContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -20,10 +20,9 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val searchLoader: SearchLoader,
-    mainDataAccessor: MainDataAccessor
+    private val frequentSearch: FrequentSearch,
 ) : ViewModel() {
 
-    private val frequentSearch = mainDataAccessor.getFrequentSearch()
     private val _latestSearchResult = MutableLiveData<SearchResult?>(null)
 
     private val searchFlow = MutableSharedFlow<SearchRequest>(

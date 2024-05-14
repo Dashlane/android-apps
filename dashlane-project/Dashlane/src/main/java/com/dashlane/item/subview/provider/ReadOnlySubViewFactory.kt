@@ -9,12 +9,16 @@ import com.dashlane.item.subview.readonly.ItemReadValueBooleanSubView
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
 import com.dashlane.item.subview.readonly.ItemReadValueNumberSubView
 import com.dashlane.item.subview.readonly.ItemReadValueTextSubView
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 
-class ReadOnlySubViewFactory(userFeaturesChecker: UserFeaturesChecker) : BaseSubViewFactory(userFeaturesChecker) {
+class ReadOnlySubViewFactory(
+    userFeaturesChecker: UserFeaturesChecker,
+    currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
+) : BaseSubViewFactory(userFeaturesChecker, currentTeamSpaceUiFilter) {
 
     override fun createSubViewString(
         header: String,
@@ -89,13 +93,16 @@ class ReadOnlySubViewFactory(userFeaturesChecker: UserFeaturesChecker) : BaseSub
     }
 
     override fun createSpaceSelector(
-        current: String?,
-        teamspaceAccessor: TeamspaceAccessor,
+        currentSpaceId: String?,
+        teamSpaceAccessor: TeamSpaceAccessor,
         toListenViews: List<ItemSubView<String>>?,
-        valueUpdate: (VaultItem<*>, Teamspace) -> VaultItem<*>,
+        valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>,
         linkedWebsites: List<String>
-    ): ItemSubView<Teamspace> {
-        return ItemReadSpaceSubView(getTeamspace(teamspaceAccessor, current), getTeamspaces(teamspaceAccessor))
+    ): ItemSubView<TeamSpace> {
+        return ItemReadSpaceSubView(
+            getTeamspace(teamSpaceAccessor, currentSpaceId),
+            getTeamspaces(teamSpaceAccessor)
+        )
     }
 
     override fun createSubviewDelete(

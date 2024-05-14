@@ -17,7 +17,6 @@ import com.dashlane.announcements.AnnouncementCenter;
 import com.dashlane.attachment.AttachmentListContract;
 import com.dashlane.attachment.AttachmentListDataProvider;
 import com.dashlane.attachment.VaultItemLogAttachmentHelper;
-import com.dashlane.core.DataSync;
 import com.dashlane.lock.LockHelper;
 import com.dashlane.permission.PermissionsManager;
 import com.dashlane.securefile.DeleteFileManager;
@@ -25,10 +24,12 @@ import com.dashlane.securefile.DownloadFileContract;
 import com.dashlane.securefile.UploadFileContract;
 import com.dashlane.securefile.storage.SecureFileStorage;
 import com.dashlane.session.SessionManager;
-import com.dashlane.storage.userdata.accessor.MainDataAccessor;
+import com.dashlane.storage.userdata.accessor.DataSaver;
+import com.dashlane.storage.userdata.accessor.VaultDataQuery;
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter;
+import com.dashlane.sync.DataSync;
 import com.dashlane.ui.activities.DashlaneActivity;
-import com.dashlane.util.userfeatures.UserFeaturesChecker;
+import com.dashlane.userfeatures.UserFeaturesChecker;
 import com.dashlane.vault.VaultItemLogger;
 import com.dashlane.vault.model.VaultItem;
 import com.dashlane.xml.domain.SyncObjectType;
@@ -42,8 +43,6 @@ import kotlin.Unit;
 @AndroidEntryPoint
 public class AttachmentListActivity extends DashlaneActivity {
 
-    static final String LOG_TAG = "ATTACHMENTS";
-
     public static final String ITEM_ID = "itemId";
     public static final String ITEM_TYPE = "itemType";
     public static final String ITEM_ATTACHMENTS = "itemAttachments";
@@ -51,11 +50,14 @@ public class AttachmentListActivity extends DashlaneActivity {
     public static final int REQUEST_CODE_ATTACHMENT_LIST = 123;
     public static final String EXTRA_ATTACHMENTS_STRING = "attachments";
     public static final String EXTRA_HAVE_ATTACHMENTS_CHANGED = "haveAttachmentsChanged";
-
+    static final String LOG_TAG = "ATTACHMENTS";
     @Inject
     SessionManager mSessionManager;
     @Inject
-    MainDataAccessor mMainDataAccessor;
+    VaultDataQuery vaultDataQuery;
+
+    @Inject
+    DataSaver dataSaver;
 
     @Inject
     DataSync mDataSync;
@@ -133,7 +135,7 @@ public class AttachmentListActivity extends DashlaneActivity {
         String itemId = extras.getString(ITEM_ID);
         VaultItem vaultItem = null;
         if (itemType != null && itemId != null) {
-            vaultItem = mMainDataAccessor.getVaultDataQuery().query(new VaultFilter(itemId, itemType));
+            vaultItem = vaultDataQuery.query(new VaultFilter(itemId, itemType));
         }
         if (vaultItem == null) {
             finish();
@@ -141,7 +143,7 @@ public class AttachmentListActivity extends DashlaneActivity {
         }
 
         final VaultItemLogAttachmentHelper vaultItemLogAttachmentHelper =
-                new VaultItemLogAttachmentHelper(mVaultItemLogger, vaultItem);
+            new VaultItemLogAttachmentHelper(mVaultItemLogger, vaultItem);
         LockHelper lockHelper = getLockHelper();
         String attachments;
         boolean isAttachmentListUpdated = false;
@@ -152,36 +154,36 @@ public class AttachmentListActivity extends DashlaneActivity {
             attachments = getIntent().getStringExtra(ITEM_ATTACHMENTS);
         }
         mAttachmentListProvider =
-                new AttachmentListDataProvider(attachments,
-                        vaultItem,
-                        mMainDataAccessor.getDataSaver(),
-                        mDataSync,
-                        mSecureFileStorage);
+            new AttachmentListDataProvider(attachments,
+                vaultItem,
+                dataSaver,
+                mDataSync,
+                mSecureFileStorage);
 
         ActivityResultLauncher<Unit> openDocumentResultLauncher =
-                registerForActivityResult(new OpenDocumentResultContract(), this::onOpenDocumentResult);
+            registerForActivityResult(new OpenDocumentResultContract(), this::onOpenDocumentResult);
         mUploadAttachmentsPresenter =
-                new UploadAttachmentsPresenter(mUserFeaturesChecker, lockHelper,
-                        LifecycleOwnerKt.getLifecycleScope(this),
-                        mSessionManager,
-                        vaultItemLogAttachmentHelper,
-                        openDocumentResultLauncher);
+            new UploadAttachmentsPresenter(mUserFeaturesChecker, lockHelper,
+                LifecycleOwnerKt.getLifecycleScope(this),
+                mSessionManager,
+                vaultItemLogAttachmentHelper,
+                openDocumentResultLauncher);
         mUploadAttachmentsPresenter.setProvider(mUploadFileDataProvider);
         mUploadAttachmentsPresenter.setView(new UploadAttachmentsViewProxy(this));
 
         DownloadAttachmentsPresenter downloadPresenter = new DownloadAttachmentsPresenter(
-                LifecycleOwnerKt.getLifecycleScope(this),
-                vaultItemLogAttachmentHelper);
+            LifecycleOwnerKt.getLifecycleScope(this),
+            vaultItemLogAttachmentHelper);
         downloadPresenter.setProvider(mDownloadFileDataProvider);
         downloadPresenter.setView(new DownloadAttachmentsViewProxy(this));
 
         int actionBarColor = extras.getInt(ITEM_COLOR);
         mAttachmentListPresenter =
-                new AttachmentListPresenter(LifecycleOwnerKt.getLifecycleScope(this), actionBarColor,
-                        mUploadAttachmentsPresenter,
-                        downloadPresenter, deleteFileManager, lockHelper,
-                        mPermissionsManager,
-                        vaultItemLogAttachmentHelper);
+            new AttachmentListPresenter(LifecycleOwnerKt.getLifecycleScope(this), actionBarColor,
+                mUploadAttachmentsPresenter,
+                downloadPresenter, deleteFileManager, lockHelper,
+                mPermissionsManager,
+                vaultItemLogAttachmentHelper);
         mAttachmentListPresenter.setAttachmentListUpdated(isAttachmentListUpdated);
         mAttachmentListPresenter.setProvider(mAttachmentListProvider);
         mAttachmentListPresenter.setView(new AttachmentListViewProxy(this));

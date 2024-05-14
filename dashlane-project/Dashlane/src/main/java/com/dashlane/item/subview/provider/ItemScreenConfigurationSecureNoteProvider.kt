@@ -17,14 +17,14 @@ import com.dashlane.item.subview.action.note.SecureNoteColorMenuAction
 import com.dashlane.item.subview.action.note.SecureNoteLockMenuAction
 import com.dashlane.item.subview.edit.ItemEditValueRawSubView
 import com.dashlane.item.subview.readonly.ItemReadValueRawSubView
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.isSsoUser
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.userfeatures.canUseSecureNotes
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.getColorId
@@ -35,18 +35,20 @@ import com.dashlane.vault.util.hasAttachments
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationSecureNoteProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
-    private val mainDataAccessor: MainDataAccessor,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
+    private val genericDataQuery: GenericDataQuery,
     private val sharingPolicy: SharingPolicyDataProvider,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val sessionManager: SessionManager,
-    private val teamspaceManagerRepository: TeamspaceManagerRepository
+    private val restrictionNotificator: TeamSpaceRestrictionNotificator
 ) : ItemScreenConfigurationProvider() {
 
     private val secureNoteDisabled
-        get() = userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.DISABLE_SECURE_NOTES) ||
-            !teamspaceAccessor.isFeatureEnabled(Teamspace.Feature.SECURE_NOTES_DISABLED)
+        get() = !userFeaturesChecker.canUseSecureNotes()
+
+    private val teamSpaceAccessor: TeamSpaceAccessor?
+        get() = teamSpaceAccessorProvider.get()
+
     private var isLockMenuClicked = false
     private var isSecured = false
     private var selectedNoteType: SyncObject.SecureNoteType? = null
@@ -95,7 +97,7 @@ class ItemScreenConfigurationSecureNoteProvider(
             val lockMenu = SecureNoteLockMenuAction(isSecured, lockMenuAction, lockMenuUpdate)
 
             
-            if (!teamspaceAccessor.isSsoUser) {
+            if (teamSpaceAccessor?.isSsoUser != true) {
                 menuActions.add(lockMenu)
             }
 
@@ -108,11 +110,11 @@ class ItemScreenConfigurationSecureNoteProvider(
             val categoryMenuUpdate = copyForUpdatedCategory()
             menuActions.add(
                 SecureNoteCategoryMenuAction(
-                    context,
-                    mainDataAccessor.getGenericDataQuery(),
-                    item.syncObject,
-                    categorySelectAction,
-                    categoryMenuUpdate
+                    context = context,
+                    genericDataQuery = genericDataQuery,
+                    item = item.syncObject,
+                    categorySelectAction = categorySelectAction,
+                    updateAction = categoryMenuUpdate
                 )
             )
 
@@ -131,8 +133,7 @@ class ItemScreenConfigurationSecureNoteProvider(
 
         
         if (canShare(item)) {
-            val teamspaceManager = sessionManager.session?.let { teamspaceManagerRepository.getTeamspaceManager(it) }
-            menuActions.add(NewShareMenuAction(item, teamspaceManager))
+            menuActions.add(NewShareMenuAction(item, restrictionNotificator))
         }
 
         listener.notifyColorChanged(
@@ -216,10 +217,12 @@ class ItemScreenConfigurationSecureNoteProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.SecureNote>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        val teamSpaceAccessor = this.teamSpaceAccessor ?: return null
+
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -282,7 +285,7 @@ class ItemScreenConfigurationSecureNoteProvider(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<SyncObject.SecureNote> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<SyncObject.SecureNote> {
     val dataIdentifier = this as VaultItem<SyncObject.SecureNote>
     val secureNote = dataIdentifier.syncObject
     return if (value.teamId == secureNote.spaceId) {

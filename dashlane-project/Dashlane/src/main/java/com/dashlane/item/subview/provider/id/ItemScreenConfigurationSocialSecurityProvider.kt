@@ -14,9 +14,10 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
@@ -30,8 +31,9 @@ import com.dashlane.xml.domain.SyncObject
 import java.time.LocalDate
 
 class ItemScreenConfigurationSocialSecurityProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
-    private val mainDataAccessor: MainDataAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
+    private val genericDataQuery: GenericDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
@@ -78,13 +80,14 @@ class ItemScreenConfigurationSocialSecurityProvider(
     ): List<ItemSubView<*>> {
         
         val identitySubviews = createIdentitySubviews(
-            context,
-            subViewFactory,
-            mainDataAccessor,
-            editMode,
-            listener,
-            item,
-            SocialSecurityStatementIdentityAdapter
+            context = context,
+            genericDataQuery = genericDataQuery,
+            vaultDataQuery = vaultDataQuery,
+            subViewFactory = subViewFactory,
+            editMode = editMode,
+            listener = listener,
+            item = item,
+            identityAdapter = SocialSecurityStatementIdentityAdapter
         )
 
         val subviews = listOfNotNull(
@@ -111,10 +114,10 @@ class ItemScreenConfigurationSocialSecurityProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.SocialSecurityStatement>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 null,
                 valueUpdate = VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -201,7 +204,7 @@ private fun VaultItem<*>.copyForUpdatedNumber(value: String): VaultItem<*> {
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.SocialSecurityStatement>
     val socialSecurityStatement = this.syncObject
     return if (value.teamId == socialSecurityStatement.spaceId) {

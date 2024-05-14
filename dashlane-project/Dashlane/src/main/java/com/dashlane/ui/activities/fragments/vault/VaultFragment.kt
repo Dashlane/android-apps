@@ -7,20 +7,21 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
+import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.notification.badge.NotificationBadgeActor
 import com.dashlane.notification.badge.NotificationBadgeListener
 import com.dashlane.session.SessionManager
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.fab.FabDef
 import com.dashlane.ui.fab.FabPresenter
 import com.dashlane.ui.fab.VaultFabViewProxy
-import com.dashlane.util.inject.OptionalProvider
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
@@ -34,7 +35,10 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
     lateinit var sessionManager: SessionManager
 
     @Inject
-    lateinit var teamSpaceAccessor: OptionalProvider<TeamspaceAccessor>
+    lateinit var passwordLimiter: PasswordLimiter
+
+    @Inject
+    lateinit var teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator
 
     private var fabPresenter: FabDef.IPresenter? = null
 
@@ -50,8 +54,9 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
         fabPresenter = FabPresenter(navigator).apply {
             val fabViewProxy = VaultFabViewProxy(
                 rootView = layout,
-                teamspaceManager = teamSpaceAccessor,
-                navigator = navigator
+                teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
+                navigator = navigator,
+                passwordLimiter = passwordLimiter
             )
             setView(fabViewProxy)
 
@@ -63,7 +68,6 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
         }
 
         notificationBadgeActor.subscribe(lifecycleScope, this)
-
         return layout
     }
 
@@ -111,7 +115,7 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
         super.onPrepareOptionsMenu(menu)
         if (notificationBadgeActor.hasUnread) {
             val alertMenu = menu.findItem(R.id.menu_alert)
-            alertMenu.icon = resources.getDrawable(R.drawable.action_bar_menu_alert_with_dot, context?.theme)
+            alertMenu.icon = ResourcesCompat.getDrawable(resources, R.drawable.action_bar_menu_alert_with_dot, context?.theme)
         }
     }
 

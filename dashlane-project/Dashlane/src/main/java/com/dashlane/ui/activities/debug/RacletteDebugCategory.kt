@@ -36,7 +36,8 @@ internal class RacletteDebugCategory @Inject constructor(
     val cryptography: Cryptography,
     val databaseProvider: DatabaseProvider,
     val sessionManager: SessionManager,
-    val permissionsManager: PermissionsManager
+    val permissionsManager: PermissionsManager,
+    private val fileUtils: FileUtils
 ) : AbstractDebugCategory() {
 
     private val session: Session
@@ -175,8 +176,7 @@ internal class RacletteDebugCategory @Inject constructor(
                 compressed = true
             ).let { JSONObject(it).toString(2) }
 
-            val uri = FileUtils.writeFileToPublicFolder(
-                context,
+            val uri = fileUtils.writeFileToPublicFolder(
                 "${file.nameWithoutExtension}.html",
                 "text/html"
             ) { stream ->

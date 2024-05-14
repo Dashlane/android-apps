@@ -1,6 +1,5 @@
 package com.dashlane.dagger.singleton
 
-import com.dashlane.abtesting.RemoteAbTestManager
 import com.dashlane.activatetotp.ActivateTotpAuthenticatorConnection
 import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
 import com.dashlane.authentication.AuthenticationLocalKeyRepositoryImpl
@@ -9,13 +8,13 @@ import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.authenticator.AuthenticatorAppConnection
 import com.dashlane.authenticator.PasswordManagerServiceStubImpl
 import com.dashlane.authenticator.ipc.PasswordManagerService
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
+import com.dashlane.core.DataSyncImpl
 import com.dashlane.core.sharing.SharingDaoMemoryDataAccessProvider
 import com.dashlane.core.sharing.SharingDaoMemoryDataAccessProviderImpl
 import com.dashlane.core.sharing.SharingSyncImpl
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.crashreport.CrashReporterManager
-import com.dashlane.featureflipping.FeatureFlipManager
 import com.dashlane.inappbilling.BillingManager
 import com.dashlane.inappbilling.BillingManagerImpl
 import com.dashlane.lock.LockHelper
@@ -39,32 +38,21 @@ import com.dashlane.navigation.NavigatorImpl
 import com.dashlane.permission.PermissionsManager
 import com.dashlane.permission.PermissionsManagerImpl
 import com.dashlane.premium.offer.common.InAppBillingDebugPreference
-import com.dashlane.session.RemoteConfiguration
 import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.session.repository.UserCryptographyRepositoryImpl
 import com.dashlane.sharing.SharingKeysHelper
 import com.dashlane.sharing.SharingKeysHelperImpl
-import com.dashlane.storage.DataStorageProvider
-import com.dashlane.storage.DataStorageProviderImpl
 import com.dashlane.sync.sharing.SharingSync
-import com.dashlane.ui.ActivityLifecycleListener
-import com.dashlane.ui.GlobalActivityLifecycleListener
-import com.dashlane.ui.ScreenshotPolicy
-import com.dashlane.ui.ScreenshotPolicyImpl
 import com.dashlane.ui.premium.inappbilling.InAppBillingDebugPreferenceImpl
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.ui.screens.settings.Use2faSettingStateRefresher
-import com.dashlane.ui.screens.settings.WindowConfigurationImpl
-import com.dashlane.util.AppSync
 import com.dashlane.util.Toaster
 import com.dashlane.util.ToasterImpl
-import com.dashlane.util.WindowConfiguration
 import com.dashlane.welcome.HasOtpsForBackupProvider
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -74,12 +62,6 @@ interface BinderModule {
 
     @Binds
     fun bindSharingKeysHelper(impl: SharingKeysHelperImpl): SharingKeysHelper
-
-    @Binds
-    fun bindWindowConfiguration(impl: WindowConfigurationImpl): WindowConfiguration
-
-    @Binds
-    fun bindScreenshotPolicy(impl: ScreenshotPolicyImpl): ScreenshotPolicy
 
     @Binds
     fun bindLockHelper(lockManager: LockManager): LockHelper
@@ -100,18 +82,7 @@ interface BinderModule {
     fun bindLockTimeManager(impl: LockTimeManagerImpl): LockTimeManager
 
     @Binds
-    fun bindActivityLifecycleListener(listener: GlobalActivityLifecycleListener): ActivityLifecycleListener
-
-    @Binds
     fun bindCrashReporter(crashReporter: CrashReporterManager): CrashReporter
-
-    @Binds
-    @IntoSet
-    fun bindRemoteAbTestManager(remoteAbTestManager: RemoteAbTestManager): RemoteConfiguration
-
-    @Binds
-    @IntoSet
-    fun bindFeatureFlipManager(featureFlipManager: FeatureFlipManager): RemoteConfiguration
 
     @Binds
     fun bindUserStorage(impl: UserStorageImpl): UserStorage
@@ -120,7 +91,7 @@ interface BinderModule {
     fun bindDataReset(impl: LoginDataResetImpl): LoginDataReset
 
     @Binds
-    fun bindAppSync(dataSync: DataSync): AppSync
+    fun bindDataSync(dataSync: DataSyncImpl): DataSync
 
     @Binds
     fun bindLocalKeyRepository(
@@ -134,9 +105,6 @@ interface BinderModule {
 
     @Binds
     fun bindUserCryptographyRepository(impl: UserCryptographyRepositoryImpl): UserCryptographyRepository
-
-    @Binds
-    fun bindDataStorageProvider(impl: DataStorageProviderImpl): DataStorageProvider
 
     @Binds
     fun bindSharingDaoMemoryDataAccessProvider(impl: SharingDaoMemoryDataAccessProviderImpl): SharingDaoMemoryDataAccessProvider

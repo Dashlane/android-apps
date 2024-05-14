@@ -98,9 +98,13 @@ abstract class LoginBaseSubViewProxy<T : LoginBaseContract.Presenter>(rootView: 
 
     override fun showError(error: CharSequence?, onClick: () -> Unit) {
         if (error.isNullOrEmpty()) {
+            errorTextView?.run {
+                accessibilityLiveRegion = 0
+            }
             clearError()
         } else {
             errorTextView?.run {
+                accessibilityLiveRegion = 1
                 setTextColor(context.getColor(R.color.text_danger_quiet))
                 visibility = View.VISIBLE
                 text = error

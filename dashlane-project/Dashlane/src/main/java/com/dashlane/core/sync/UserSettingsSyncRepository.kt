@@ -2,7 +2,7 @@ package com.dashlane.core.sync
 
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.UserDataRepository
+import com.dashlane.session.UserDataRepository
 import com.dashlane.sync.domain.OutgoingTransaction
 import com.dashlane.sync.domain.Transaction
 import com.dashlane.sync.treat.SyncSummaryItem

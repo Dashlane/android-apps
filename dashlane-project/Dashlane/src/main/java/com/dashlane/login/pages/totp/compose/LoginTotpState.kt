@@ -18,11 +18,17 @@ sealed class LoginTotpState {
 
 data class LoginTotpData(
     val email: String? = null,
-    val token: String? = null
+    val otp: String? = null,
+    val recoveryToken: String? = null,
+    val showHelpDialog: Boolean = false,
+    val showRecoveryCodeDialog: Boolean = false,
+    val showSendTextMessageDialog: Boolean = false,
+    val showTextMessageDialog: Boolean = false
 )
 
 sealed class LoginTotpError : Exception() {
-    object InvalidToken : LoginTotpError()
-    object Network : LoginTotpError()
-    object Offline : LoginTotpError()
+    data object InvalidToken : LoginTotpError()
+    data object AlreadyUsed : LoginTotpError()
+    data object Network : LoginTotpError()
+    data object Offline : LoginTotpError()
 }
