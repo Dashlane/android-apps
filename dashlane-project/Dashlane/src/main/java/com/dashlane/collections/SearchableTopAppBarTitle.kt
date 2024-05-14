@@ -30,10 +30,11 @@ internal fun SearchableTopAppBarTitle(
             label = searchLabel,
             labelPersists = false,
             actions = ClearField(
-                contentDescription = stringResource(
-                    R.string.and_accessibility_action_text_clear
-                ),
-                onClick = { searchQuery.value = "" }
+                contentDescription = stringResource(id = R.string.and_accessibility_action_text_clear),
+                onClick = {
+                    searchQuery.value = ""
+                    true
+                }
             )
         )
     } else {

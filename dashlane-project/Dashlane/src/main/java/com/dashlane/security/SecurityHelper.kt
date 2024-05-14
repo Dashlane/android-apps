@@ -32,7 +32,7 @@ class SecurityHelper @Inject constructor(
     private val keyguardManager
         get() = keyguardManagerProvider.get()
 
-    private val intentHelper = IntentHelper(packageManagerProvider)
+    val intentHelper = IntentHelper(packageManagerProvider)
 
     fun isDeviceSecured(): Boolean {
         
@@ -41,9 +41,6 @@ class SecurityHelper @Inject constructor(
         }
         return keyguardManager.isDeviceSecure
     }
-
-    fun allowedToUsePin(): Boolean =
-        isDeviceSecured()
 
     fun showPopupPinCodeDisableIfWasEnable(activity: Activity) {
         if (isDeviceSecured()) return
@@ -136,7 +133,7 @@ class SecurityHelper @Inject constructor(
         lockManager.get().setLockType(LockTypeManager.LOCK_TYPE_MASTER_PASSWORD)
     }
 
-    private class IntentHelper(
+    class IntentHelper(
         private val packageManagerProvider: Provider<PackageManager>
     ) {
         private val packageManager

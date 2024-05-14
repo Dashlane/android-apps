@@ -8,10 +8,11 @@ import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
 import com.dashlane.cryptography.decodeBase64ToByteArray
 import com.dashlane.cryptography.jni.JniCryptography
 import com.dashlane.device.DeviceInfoRepository
-import com.dashlane.login.pages.secrettransfer.SecretTransferPayload
-import com.dashlane.login.pages.secrettransfer.SecretTransferPublicKey
-import com.dashlane.login.pages.secrettransfer.SecretTransferUri
-import com.dashlane.server.api.endpoints.accountrecovery.AccountRecoveryGetStatusService
+import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.secrettransfer.domain.SecretTransferAnalytics
+import com.dashlane.secrettransfer.domain.SecretTransferPayload
+import com.dashlane.secrettransfer.domain.SecretTransferPublicKey
+import com.dashlane.secrettransfer.domain.SecretTransferUri
 import com.dashlane.server.api.endpoints.mpless.MplessCryptography
 import com.dashlane.server.api.endpoints.mpless.MplessRequestTransferService
 import com.dashlane.server.api.endpoints.mpless.MplessStartTransferService
@@ -39,8 +40,8 @@ class QrCodeViewModel @Inject constructor(
     private val mplessRequestTransferService: MplessRequestTransferService,
     private val mplessStartTransferService: MplessStartTransferService,
     private val authenticationSecretTransferRepository: AuthenticationSecretTransferRepository,
-    private val accountRecoveryGetStatusService: AccountRecoveryGetStatusService,
     private val deviceInfoRepository: DeviceInfoRepository,
+    private val secretTransferAnalytics: SecretTransferAnalytics,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
@@ -56,12 +57,31 @@ class QrCodeViewModel @Inject constructor(
     }
 
     fun viewStarted(email: String?) {
+        secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER_QR_CODE)
+        if (email != null) {
+            viewModelScope.launch { stateFlow.emit(QrCodeState.Initial(stateFlow.value.data.copy(email = email))) }
+        }
         if (stateFlow.value.data.qrCodeUri == null) generateQrCode()
-        if (email != null) checkARKStatus(email)
     }
 
-    fun hasNavigated() {
+    fun viewNavigated() {
         viewModelScope.launch { stateFlow.emit(QrCodeState.Initial(stateFlow.value.data.copy(qrCodeUri = null))) }
+    }
+
+    fun helpClicked() {
+        secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER_HELP)
+        viewModelScope.launch { stateFlow.emit(QrCodeState.QrCodeUriGenerated(stateFlow.value.data.copy(bottomSheetVisible = true))) }
+    }
+
+    fun bottomSheetDismissed() {
+        viewModelScope.launch {
+            val newData = stateFlow.value.data.copy(bottomSheetVisible = false)
+            val newState = when (val state = stateFlow.value) {
+                is QrCodeState.Error -> QrCodeState.Error(newData, state.error)
+                else -> QrCodeState.QrCodeUriGenerated(newData)
+            }
+            stateFlow.emit(newState)
+        }
     }
 
     fun cancelOnError(error: QrCodeError) {
@@ -82,10 +102,17 @@ class QrCodeViewModel @Inject constructor(
 
     fun arkClicked() {
         viewModelScope.launch {
-            val email = stateFlow.value.data.email ?: return@launch
-            val accessKey = deviceInfoRepository.deviceId ?: return@launch
+            val email = stateFlow.value.data.email ?: throw IllegalStateException("email cannot be null")
+            val accessKey = deviceInfoRepository.deviceId ?: throw IllegalStateException("deviceId cannot be null")
             val registeredUserDevice = RegisteredUserDevice.Local(login = email, securityFeatures = emptySet(), accessKey = accessKey)
-            stateFlow.emit(QrCodeState.GoToARK(stateFlow.value.data, registeredUserDevice))
+            stateFlow.emit(QrCodeState.GoToARK(stateFlow.value.data.copy(bottomSheetVisible = false), registeredUserDevice))
+        }
+    }
+
+    fun universalD2DClicked() {
+        viewModelScope.launch {
+            val email = stateFlow.value.data.email ?: throw IllegalStateException("email cannot be null")
+            stateFlow.emit(QrCodeState.GoToUniversalD2D(stateFlow.value.data.copy(bottomSheetVisible = false), email))
         }
     }
 
@@ -109,21 +136,6 @@ class QrCodeViewModel @Inject constructor(
             }
             .onEach { state -> stateFlow.emit(state) }
             .onStart { emit(QrCodeState.LoadingQR(stateFlow.value.data.copy(qrCodeUri = null))) }
-            .launchIn(viewModelScope)
-    }
-
-    @VisibleForTesting
-    fun checkARKStatus(email: String) {
-        flow<QrCodeState> {
-            val request = AccountRecoveryGetStatusService.Request(email)
-            val getStatusResponse = accountRecoveryGetStatusService.execute(request)
-            emit(QrCodeState.QrCodeUriGenerated(stateFlow.value.data.copy(email = email, arkEnabled = getStatusResponse.data.enabled)))
-        }
-            .flowOn(ioDispatcher)
-            .catch {
-                
-            }
-            .onEach { state -> stateFlow.emit(state) }
             .launchIn(viewModelScope)
     }
 

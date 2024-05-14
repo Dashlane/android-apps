@@ -50,10 +50,10 @@ class ChecklistViewModel @Inject constructor(
         )
     }
 
-    private suspend fun getCheckDarkWebAlertsChecklistItem(): ChecklistItem {
+    private fun getCheckDarkWebAlertsChecklistItem(): ChecklistItem {
         val state = getCheckListStepState(
-            provider.hasCompletedAndAcknowledgedDarkWebAlerts(),
-            provider.hasReadAllDarkWebAlerts()
+            isAcknowledged = provider.hasCompletedAndAcknowledgedDarkWebAlerts(),
+            isCompleted = provider.hasCompletedAndAcknowledgedDarkWebAlerts()
         )
         val item = ChecklistItem(ChecklistData.ItemType.DARK_WEB_MONITORING, state, null)
         item.onChecklistItemAcknowledge = { this.onCheckDarkWebCompletionAcknowledged() }
@@ -109,6 +109,11 @@ class ChecklistViewModel @Inject constructor(
         
         provider.setChecklistDismissed()
         navigator.goToHome() 
+    }
+
+    
+    override fun onDWMViewScanResult() {
+        provider.saveDarkWebMonitoringCompletedAndAcknowledged()
     }
 
     private fun onAddCredentialCompletionAcknowledged() {

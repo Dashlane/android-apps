@@ -8,7 +8,6 @@ import androidx.activity.viewModels
 import com.dashlane.createaccount.CreateAccountSuccessIntentFactory
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.endoflife.EndOfLifeObserver
-import com.dashlane.security.SecurityHelper
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.Toaster
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
@@ -33,9 +32,6 @@ class MplessAccountCreationActivity : DashlaneActivity() {
     lateinit var intentFactory: CreateAccountSuccessIntentFactory
 
     @Inject
-    lateinit var securityHelper: SecurityHelper
-
-    @Inject
     lateinit var biometricsAuthModule: BiometricAuthModule
 
     val viewModel: MplessAccountCreationViewModel by viewModels()
@@ -58,7 +54,6 @@ class MplessAccountCreationActivity : DashlaneActivity() {
                 MplessAccountCreationNavigation(
                     viewModel = viewModel,
                     onCancel = ::onCancel,
-                    onRequireLockScreen = ::promptLockScreenPopup,
                     onAccountCreated = ::onAccountCreated,
                     displayErrorMessage = ::displayErrorMessage,
                     displayExpirationErrorMessage = ::displayExpirationMessage,
@@ -70,10 +65,6 @@ class MplessAccountCreationActivity : DashlaneActivity() {
 
     private fun onOpenHelpCenterPage(uri: Uri) {
         launchUrl(uri)
-    }
-
-    private fun promptLockScreenPopup() {
-        securityHelper.showPopupPinCodeDisable(this)
     }
 
     private fun onCancel() {

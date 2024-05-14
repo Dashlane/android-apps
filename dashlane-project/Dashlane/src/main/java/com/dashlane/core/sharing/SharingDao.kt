@@ -3,6 +3,7 @@ package com.dashlane.core.sharing
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
+import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.dao.SharingDataType
@@ -10,6 +11,8 @@ import com.dashlane.sync.DataIdentifierExtraDataWrapper
 import com.dashlane.util.generateUniqueIdentifier
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.model.copySyncObject
+import com.dashlane.vault.model.toCollectionVaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.Lazy
@@ -18,6 +21,7 @@ interface SharingDao {
 
     val vaultDataQuery: VaultDataQuery
     val dataSaver: Lazy<DataSaver>
+    val collectionDataQuery: Lazy<CollectionDataQuery>
 
     val databaseOpen: Boolean
 
@@ -75,8 +79,8 @@ interface SharingDao {
         dataType: SyncObjectType
     ): DataIdentifierExtraDataWrapper<SyncObject>?
 
-    suspend fun duplicateDataIdentifier(itemId: String): Boolean {
-        val vaultItem = loadVaultItem(itemId) ?: return false
+    suspend fun duplicateDataIdentifier(itemId: String): VaultItem<*>? {
+        val vaultItem = loadVaultItem(itemId) ?: return null
         
         val new = vaultItem.copyWithAttrs {
             id = 0 
@@ -85,7 +89,33 @@ interface SharingDao {
             syncState = SyncState.MODIFIED
             sharingPermission = null
         }
-        return dataSaver.get().save(new)
+        dataSaver.get().save(new)
+        return new
+    }
+
+    suspend fun updatePrivateCollections(
+        newItem: VaultItem<*>,
+        oldItemId: String
+    ) {
+        if (newItem.syncObjectType != SyncObjectType.AUTHENTIFIANT) return
+        val dataQuery = collectionDataQuery.get()
+        val collections = dataQuery.queryAll().filter { collection ->
+            collection.vaultItems?.any { it.id == oldItemId } == true
+        }
+        if (collections.isNotEmpty()) {
+            dataQuery.queryByIds(collections.map { it.id }).forEach { collection ->
+                val updatedCollection = collection
+                    .copySyncObject {
+                        val currentItems = vaultItems?.filterNot { it.id == oldItemId }
+                            ?: emptyList()
+                        vaultItems = currentItems + newItem.toCollectionVaultItem()
+                    }
+                    .copyWithAttrs {
+                        syncState = SyncState.MODIFIED
+                    }
+                dataSaver.get().save(updatedCollection)
+            }
+        }
     }
 
     suspend fun updatePermission(

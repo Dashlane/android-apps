@@ -18,7 +18,7 @@ import androidx.navigation.fragment.findNavController
 import com.dashlane.activatetotp.databinding.EnableTotpStepAddPhoneContentBinding
 import com.dashlane.activatetotp.databinding.EnableTotpStepContainerBinding
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
 import com.dashlane.util.setCurrentPageView
@@ -35,7 +35,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 internal class EnableTotpAddPhoneFragment : Fragment() {
     @Inject
-    internal lateinit var mainDataAccessor: MainDataAccessor
+    internal lateinit var vaultDataQuery: VaultDataQuery
 
     private lateinit var selectedCountry: Country
 
@@ -145,7 +145,7 @@ internal class EnableTotpAddPhoneFragment : Fragment() {
         outState.putString(STATE_SELECTED_COUNTRY, selectedCountry.isoCode)
     }
 
-    private fun getPrefilledPhone(): Pair<Country, String>? = mainDataAccessor.getVaultDataQuery()
+    private fun getPrefilledPhone(): Pair<Country, String>? = vaultDataQuery
         .queryAll(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.PHONE)))
         .map { it.syncObject as SyncObject.Phone }
         .takeIf { it.size == 1 }
@@ -164,11 +164,11 @@ internal class EnableTotpAddPhoneFragment : Fragment() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup) =
             (
                 super.getView(
-                position,
-                convertView,
-                parent
-            ) as TextView
-            ).apply { setTextColor(Color.TRANSPARENT) }
+                    position,
+                    convertView,
+                    parent
+                ) as TextView
+                ).apply { setTextColor(Color.TRANSPARENT) }
 
         override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup) =
             (super.getView(position, convertView, parent) as TextView).apply {

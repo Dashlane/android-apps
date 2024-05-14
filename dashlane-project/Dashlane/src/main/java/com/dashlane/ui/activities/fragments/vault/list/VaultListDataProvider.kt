@@ -1,7 +1,7 @@
 package com.dashlane.ui.activities.fragments.vault.list
 
 import android.content.Context
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.vault.Filter

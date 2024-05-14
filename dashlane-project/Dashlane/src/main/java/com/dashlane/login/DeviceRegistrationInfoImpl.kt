@@ -2,13 +2,15 @@ package com.dashlane.login
 
 import android.content.Context
 import com.dashlane.BuildConfig
+import com.dashlane.R
 import com.dashlane.authentication.DeviceRegistrationInfo
+import com.dashlane.debug.DaDaDa
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.util.Constants
-import com.dashlane.debug.DaDaDa
 import com.dashlane.util.DeviceUtils
+import com.dashlane.util.getOsLang
+import com.dashlane.util.tryOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -36,8 +38,8 @@ class DeviceRegistrationInfoImpl @Inject constructor(
         get() = DeviceUtils.getDeviceCountry(context)
 
     override val language: String
-        get() = Constants.getLang(context)
+        get() = tryOrNull { context.getString(R.string.language_iso_639_1) } ?: "EN"
 
     override val osLanguage: String
-        get() = Constants.getOSLang()
+        get() = getOsLang()
 }

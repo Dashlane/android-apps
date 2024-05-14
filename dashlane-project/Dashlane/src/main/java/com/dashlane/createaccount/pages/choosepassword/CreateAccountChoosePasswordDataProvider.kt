@@ -6,19 +6,20 @@ import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.skocken.presentation.provider.BaseDataProvider
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import javax.inject.Inject
 
 class CreateAccountChoosePasswordDataProvider @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
-    private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
+    private val passwordStrengthEvaluator: PasswordStrengthEvaluator
 ) : BaseDataProvider<CreateAccountChoosePasswordContract.Presenter>(),
     CreateAccountChoosePasswordContract.DataProvider {
 
     lateinit var username: String
+    var isB2B: Boolean = false
 
     override suspend fun validatePassword(password: CharSequence) {
         val passwordStrengthDeferred = getPasswordStrengthAsync(password)
@@ -33,6 +34,8 @@ class CreateAccountChoosePasswordDataProvider @Inject constructor(
             }
         }
     }
+
+    override fun isPasswordlessEnabled(): Boolean = !isB2B
 
     override fun getPasswordStrengthAsync(password: CharSequence): Deferred<PasswordStrength?> =
         applicationCoroutineScope.async {

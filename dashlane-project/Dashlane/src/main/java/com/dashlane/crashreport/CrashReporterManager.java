@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.dashlane.BuildConfig;
 import com.dashlane.crashreport.reporter.SentryCrashReporter;
 import com.dashlane.preference.GlobalPreferencesManager;
-import com.dashlane.util.userfeatures.UserFeaturesChecker;
+import com.dashlane.userfeatures.UserFeaturesChecker;
 
 import org.jetbrains.annotations.NotNull;
 

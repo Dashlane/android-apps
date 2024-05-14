@@ -2,14 +2,4 @@
 <resources>
     <item name="float_label" type="id"/>
     <item name="edit_text" type="id"/>
-    <declare-styleable name="FloatLabel">
-        <attr name="android:hint"/>
-        <attr name="android:layout"/>
-        <attr name="android:text"/>
-        <attr name="android:textColorHint"/>
-        <attr name="floatLabelColor" format="color"/>
-        <attr name="textColorHighlight" format="color"/>
-        <attr name="android:inputType"/>
-        <attr name="overrideInputType" format="boolean"/>
-    </declare-styleable>
 </resources>

@@ -1,14 +1,23 @@
 package com.dashlane.item.subview
 
+import android.os.Parcelable
+import androidx.annotation.Keep
 import androidx.compose.runtime.MutableState
 import com.dashlane.item.ItemEditViewContract
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.item.subview.ItemCollectionListSubView.Collection
+import com.dashlane.teamspaces.model.TeamSpace
+import kotlinx.parcelize.Parcelize
 
+@Keep
 class ItemCollectionListSubView(
-    override var value: MutableState<List<Pair<String, Boolean>>>,
+    override var value: MutableState<List<Collection>>,
+    val canUpdateSharedCollection: Boolean,
     val editMode: Boolean,
-    val itemId: String,
     val header: MutableState<String>,
     val listener: ItemEditViewContract.View.UiUpdateListener? = null,
-    val teamspaceView: ItemSubView<Teamspace>? = null
-) : ItemSubViewImpl<MutableState<List<Pair<String, Boolean>>>>()
+    val teamspaceView: ItemSubView<TeamSpace>? = null
+) : ItemSubViewImpl<MutableState<List<Collection>>>() {
+    @Parcelize
+    data class Collection(val id: String? = null, val name: String, val shared: Boolean) :
+        Parcelable
+}

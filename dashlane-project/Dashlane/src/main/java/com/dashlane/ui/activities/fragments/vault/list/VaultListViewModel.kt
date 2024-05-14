@@ -2,17 +2,16 @@ package com.dashlane.ui.activities.fragments.vault.list
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.View
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.core.DataSync
 import com.dashlane.events.AppEvents
 import com.dashlane.events.registerAsFlow
 import com.dashlane.navigation.Navigator
+import com.dashlane.sync.DataSync
+import com.dashlane.sync.DataSyncState
 import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.activities.fragments.vault.ScrollToTopEvent
-import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.activities.fragments.vault.list.VaultListDataProvider.BoundedListSortMode
 import com.dashlane.ui.activities.fragments.vault.list.VaultListDataProvider.UnboundedListSortMode
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
@@ -25,12 +24,7 @@ import com.dashlane.ui.widgets.view.empty.SecureNotesEmptyScreen
 import com.dashlane.ui.widgets.view.empty.VaultAllItemsEmptyScreen
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.vault.VaultItemLogClickListener
-import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.xml.domain.SyncObjectType
-import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -52,14 +46,11 @@ class VaultListViewModel @Inject constructor(
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     val appEvents: AppEvents,
     val navigator: Navigator,
-    vaultItemLogger: VaultItemLogger,
     private val dataSync: DataSync,
     @field:SuppressLint("StaticFieldLeak") @ApplicationContext private val context: Context,
-    private val userFeaturesChecker: UserFeaturesChecker,
     savedStateHandle: SavedStateHandle
 ) : ViewModel(),
-    VaultList.ViewModel,
-    EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider> {
+    VaultList.ViewModel {
 
     private val filter: Filter =
         savedStateHandle.get<Filter>(VaultListFragment.EXTRA_FILTER) ?: Filter.ALL_VISIBLE_VAULT_ITEM_TYPES
@@ -76,27 +67,11 @@ class VaultListViewModel @Inject constructor(
         deliverLastEvent = false
     ).shareIn(viewModelScope, SharingStarted.WhileSubscribed(replayExpirationMillis = 0))
 
-    val vaultItemLogClickListener = VaultItemLogClickListener(
-        vaultItemLogger,
-        this
-    ) { (it as? VaultItemViewTypeProvider)?.itemWrapper }
-
     private val isSyncRunning: Boolean
-        get() = dataSync.dataSyncState.replayCache.firstOrNull() == DataSync.DataSyncState.Active
+        get() = dataSync.dataSyncState.replayCache.firstOrNull() == DataSyncState.Active
 
     override fun onRefresh() {
         provider.syncData()
-    }
-
-    override fun onItemClick(
-        adapter: EfficientAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>,
-        view: View,
-        item: DashlaneRecyclerAdapter.ViewTypeProvider?,
-        position: Int
-    ) {
-        if (item is VaultItemViewTypeProvider) {
-            navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.xmlObjectName)
-        }
     }
 
     fun refreshItemList(allItems: List<SummaryObject>) {
@@ -108,8 +83,7 @@ class VaultListViewModel @Inject constructor(
 
             val allItemsFiltered = withContext(defaultCoroutineDispatcher) {
                 allItems.filter {
-                    filter.contains(it.syncObjectType) &&
-                            (it.syncObjectType != SyncObjectType.PASSKEY || userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.PASSKEY_IN_UI))
+                    filter.contains(it.syncObjectType)
                 }
             }
 

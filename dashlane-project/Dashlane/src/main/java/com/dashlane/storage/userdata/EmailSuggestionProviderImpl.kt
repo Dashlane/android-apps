@@ -1,16 +1,15 @@
 package com.dashlane.storage.userdata
 
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import java.util.Locale
+import javax.inject.Inject
 
-class EmailSuggestionProviderImpl(private val mainDataAccessor: MainDataAccessor) :
-    EmailSuggestionProvider {
+class EmailSuggestionProviderImpl @Inject constructor(
     private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
+) : EmailSuggestionProvider {
 
     override fun getAllEmails(): List<String> {
         val filter = genericFilter { specificDataType(SyncObjectType.AUTHENTIFIANT, SyncObjectType.EMAIL) }

@@ -4,6 +4,11 @@ import com.dashlane.guidedonboarding.R
 
 enum class QuestionnaireAnswer(val id: Int) {
     
+    NAIVE_USER(-11),
+    NEW_USER(-12),
+    EXISTING_USER(-13),
+
+    
     AUTOFILL(0),
     M2W(1),
     DWM(2),
@@ -44,7 +49,7 @@ enum class QuestionnaireAnswer(val id: Int) {
 
     companion object {
         const val KEY_GUIDED_PASSWORD_ONBOARDING_Q2_ANSWER = "guided_password_onboarding_q2_answer"
-        const val KEY_GUIDED_ONBOARDING_DWM_USER_HAS_ALERTS = "guided_password_onboarding_dwm_user_has_alerts"
+        const val KEY_GUIDED_ONBOARDING_DWM_OPT_IN = "key_guided_onboarding_dwm_opt_in"
 
         @JvmStatic
         fun fromId(id: Int): QuestionnaireAnswer? = values().firstOrNull { it.id == id }

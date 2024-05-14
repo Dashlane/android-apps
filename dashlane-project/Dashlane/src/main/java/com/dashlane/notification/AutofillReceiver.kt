@@ -15,6 +15,9 @@ class AutofillReceiver : BroadcastReceiver() {
     @Inject
     lateinit var preferenceManager: GlobalPreferencesManager
 
+    @Inject
+    lateinit var autoFillNotificationCreator: AutoFillNotificationCreator
+
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.getBooleanExtra(NOTIFICATION_NOT_NOW_EXTRA, false)
         if (!action) return
@@ -22,7 +25,7 @@ class AutofillReceiver : BroadcastReceiver() {
         preferenceManager.incrementAutofillNotificationDismiss()
 
         if (preferenceManager.getAutofillNotificationDismissCount() >= AutoFillNotificationCreator.DISMISSAL_THRESHOLD) {
-            AutoFillNotificationCreator.cancelAutofillNotificationWorkers(context)
+            autoFillNotificationCreator.cancelAutofillNotificationWorkers()
         }
 
         clearNotification(context)

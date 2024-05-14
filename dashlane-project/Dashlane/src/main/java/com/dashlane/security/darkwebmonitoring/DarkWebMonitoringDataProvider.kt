@@ -11,11 +11,6 @@ import com.dashlane.events.unregister
 import com.dashlane.notificationcenter.alerts.BreachDataHelper
 import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.teamspaces.manager.TeamspaceManager
-import com.dashlane.teamspaces.manager.TeamspaceManagerWeakListener
-import com.dashlane.teamspaces.model.Teamspace
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.provider.BaseDataProvider
 import java.lang.ref.WeakReference
@@ -24,16 +19,11 @@ import javax.inject.Inject
 class DarkWebMonitoringDataProvider @Inject constructor(
     private val breachLoader: BreachLoader,
     private val darkWebMonitoringManager: DarkWebMonitoringManager,
-    private val sessionManager: SessionManager,
-    private val teamspaceRepository: TeamspaceManagerRepository,
     private val breachDataHelper: BreachDataHelper,
     private val appEvents: AppEvents
-) : BaseDataProvider<DarkWebMonitoringContract.Presenter>(),
-DarkWebMonitoringContract.DataProvider,
-    TeamspaceManager.Listener {
+) : BaseDataProvider<DarkWebMonitoringContract.Presenter>(), DarkWebMonitoringContract.DataProvider {
 
     private val appEventListener = AppEventsListener(appEvents, this)
-    private val teamspaceManagerListener = TeamspaceManagerWeakListener(this)
 
     override suspend fun getDarkwebBreaches(): List<BreachWrapper> = breachLoader.getBreachesWrapper().filter {
         it.publicBreach.isDarkWebBreach()
@@ -54,27 +44,11 @@ DarkWebMonitoringContract.DataProvider,
         darkWebMonitoringManager.getEmailsWithStatus()
 
     override fun listenForChanges() {
-        sessionManager.session?.let {
-            teamspaceManagerListener.listen(teamspaceRepository.getTeamspaceManager(it))
-        }
         appEventListener.listen()
     }
 
     override fun unlistenForChanges() {
-        teamspaceManagerListener.listen(null) 
         appEventListener.unlisten()
-    }
-
-    override fun onStatusChanged(teamspace: Teamspace?, previousStatus: String?, newStatus: String?) {
-        
-    }
-
-    override fun onChange(teamspace: Teamspace?) {
-        refreshUI()
-    }
-
-    override fun onTeamspacesUpdate() {
-        
     }
 
     private fun refreshUI() {

@@ -5,7 +5,7 @@ import com.dashlane.R
 import com.dashlane.autofill.createaccount.domain.AutofillCreateAccountService
 import com.dashlane.autofill.createaccount.domain.CredentialInfo
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.storage.userdata.EmailSuggestionProvider

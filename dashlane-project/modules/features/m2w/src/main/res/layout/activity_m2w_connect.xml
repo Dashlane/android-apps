@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:maxWidth="@dimen/size_600dp"
+    tools:context=".M2wConnectActivity"
+    >
+
+    <include
+        layout="@layout/include_m2w_connect_url"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/button_flow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_normal"
+        android:layout_marginTop="@dimen/spacing_big"
+        android:layout_marginBottom="@dimen/spacing_normal"
+        app:constraint_referenced_ids="button_skip,view_next"
+        app:flow_horizontalBias="1"
+        app:flow_horizontalGap="@dimen/spacing_small"
+        app:flow_horizontalStyle="packed"
+        app:flow_wrapMode="chain"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="1"
+        />
+
+    <com.dashlane.design.component.compat.view.ButtonMediumView
+        android:id="@+id/button_skip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/m2w_connect_cta_skip"
+        app:intensity="quiet"
+        app:layout_constrainedWidth="true"
+        app:mood="neutral" />
+
+    <com.dashlane.design.component.compat.view.ButtonMediumView
+        android:id="@+id/view_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/m2w_connect_cta_done"
+        app:intensity="catchy"
+        app:layout_constrainedWidth="true"
+        app:mood="brand" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

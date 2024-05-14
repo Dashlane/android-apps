@@ -13,7 +13,7 @@ import com.dashlane.authentication.AuthenticationUnknownException
 import com.dashlane.authentication.sso.GetSsoInfoResult
 import com.dashlane.authentication.sso.GetUserSsoInfoActivity
 import com.dashlane.authentication.sso.utils.UserSsoInfo
-import com.dashlane.createaccount.AccountCreator
+import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getParcelableExtraCompat

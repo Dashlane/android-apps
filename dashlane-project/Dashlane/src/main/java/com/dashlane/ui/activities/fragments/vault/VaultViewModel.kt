@@ -6,7 +6,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.vault.summary.SummaryObject
@@ -16,9 +15,10 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.withContext
 
-class VaultViewModel(val dataStorageProvider: DataStorageProvider) : ViewModel() {
+class VaultViewModel(
     private val genericDataQuery: GenericDataQuery
-        get() = dataStorageProvider.genericDataQuery
+) : ViewModel() {
+
     private val liveData: MutableLiveData<List<SummaryObject>> = MutableLiveData()
 
     @Suppress("EXPERIMENTAL_API_USAGE")
@@ -46,8 +46,8 @@ class VaultViewModel(val dataStorageProvider: DataStorageProvider) : ViewModel()
 }
 
 @Suppress("UNCHECKED_CAST")
-class VaultViewModelFactory(val dataStorageProvider: DataStorageProvider) : ViewModelProvider.Factory {
+class VaultViewModelFactory(val genericDataQuery: GenericDataQuery) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return VaultViewModel(dataStorageProvider) as T
+        return VaultViewModel(genericDataQuery) as T
     }
 }

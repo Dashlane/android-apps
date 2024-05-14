@@ -218,6 +218,7 @@ private fun LoginMode.toMode(): Mode? = when (this) {
     LoginMode.Pin -> Mode.PIN
     is LoginMode.MasterPassword -> Mode.MASTER_PASSWORD
     LoginMode.Sso -> Mode.SSO
+    LoginMode.DeviceTransfer -> Mode.DEVICE_TRANSFER
     LoginMode.SessionRestore,
     LoginMode.MasterPasswordChanger -> null
 }

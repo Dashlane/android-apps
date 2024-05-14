@@ -9,15 +9,15 @@ import com.dashlane.item.subview.ItemScreenConfigurationProvider
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationCompanyProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val dateTimeFieldFactory: DateTimeFieldFactory
 ) : ItemScreenConfigurationProvider() {
 
@@ -90,10 +90,10 @@ class ItemScreenConfigurationCompanyProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.Company>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -130,7 +130,7 @@ class ItemScreenConfigurationCompanyProvider(
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.Company>
     val company = this.syncObject
     return if (value.teamId == company.spaceId) {

@@ -6,7 +6,7 @@ import com.dashlane.design.iconography.IconTokens
 import com.dashlane.navigation.NavigationUtils
 import com.dashlane.navigation.Navigator
 import com.dashlane.premium.offer.common.model.UserBenefitStatus
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.model.TeamSpace
 
 class BuildMenuNavigationUseCase(
     private val navigator: Navigator,
@@ -183,7 +183,7 @@ class BuildMenuNavigationUseCase(
             navigator.goToHelpCenter()
         }
 
-    fun build(onSpaceClick: (teamspace: Teamspace) -> Unit): List<MenuItemModel> {
+    fun build(onSpaceClick: (teamspace: TeamSpace) -> Unit): List<MenuItemModel> {
         return buildList {
             val header = buildHeader(menuConfiguration)
             add(header)
@@ -196,14 +196,14 @@ class BuildMenuNavigationUseCase(
         }
     }
 
-    private fun buildItemsModeTeamspaceSelection(onSpaceClick: (teamspace: Teamspace) -> Unit): List<MenuItemModel> {
+    private fun buildItemsModeTeamspaceSelection(onSpaceClick: (teamspace: TeamSpace) -> Unit): List<MenuItemModel> {
         val teamspaces = menuConfiguration.selectableTeamspaces
         return if (teamspaces.isNullOrEmpty()) {
             emptyList()
         } else {
             teamspaces.map { space ->
-                MenuItemModel.Teamspace(
-                    name = space.teamName ?: "",
+                MenuItemModel.TeamspaceItem(
+                    spaceName = space.name,
                     icon = getTeamSpaceIcon(space),
                     onClick = { onSpaceClick(space) }
                 )
@@ -212,14 +212,17 @@ class BuildMenuNavigationUseCase(
     }
 
     private fun buildHeader(menuConfiguration: MenuConfiguration): MenuItemModel.Header {
-        return if (menuConfiguration.canChangeSpace && menuConfiguration.currentSpace != null) {
-            MenuItemModel.Header.Teamspace(
+        return when {
+            menuConfiguration.canChangeSpace && menuConfiguration.currentSpace != null -> MenuItemModel.Header.TeamspaceProfile(
                 icon = getTeamSpaceIcon(menuConfiguration.currentSpace),
-                name = menuConfiguration.currentSpace.teamName ?: "",
+                name = menuConfiguration.currentSpace.name,
                 mode = menuConfiguration.teamspaceSelectionMode
             )
-        } else {
-            MenuItemModel.Header.UserProfile(
+            menuConfiguration.enforcedTeamspace != null -> MenuItemModel.Header.EnforcedTeamspaceProfile(
+                userName = menuConfiguration.userAlias,
+                spaceName = menuConfiguration.enforcedTeamspace.name
+            )
+            else -> MenuItemModel.Header.UserProfile(
                 userName = menuConfiguration.userAlias,
                 userStatus = getAccountStatusText(menuConfiguration.userPremiumStatusType),
                 canUpgrade = menuConfiguration.canUpgradePremium
@@ -240,9 +243,9 @@ class BuildMenuNavigationUseCase(
         UserBenefitStatus.Type.Free, UserBenefitStatus.Type.Unknown -> R.string.menu_user_profile_status_free
     }
 
-    private fun getTeamSpaceIcon(teamspace: Teamspace) = when (teamspace.type) {
-        Teamspace.Type.COMBINED -> TeamspaceIcon.Combined
-        else -> TeamspaceIcon.Space(teamspace.displayLetter, teamspace.colorInt)
+    private fun getTeamSpaceIcon(teamspace: TeamSpace) = when (teamspace) {
+        TeamSpace.Combined -> TeamspaceIcon.Combined
+        else -> TeamspaceIcon.Space(teamspace.displayLetter, teamspace.color)
     }
 
     private fun buildItemsModeDefault() = buildList {

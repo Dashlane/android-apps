@@ -2,8 +2,8 @@ package com.dashlane.ui.activities.fragments.list.wrapper
 
 import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
@@ -14,8 +14,8 @@ class ItemWrapperProvider @Inject constructor(
     private val vaultItemCopyService: VaultItemCopyService,
     private val navigator: Navigator,
     private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
-    private val sessionManager: SessionManager,
-    private val teamspaceRepository: TeamspaceManagerRepository,
+    private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
+    private val currentTeamSpaceFilterRepository: CurrentTeamSpaceUiFilter,
     private val quickActionProvider: QuickActionProvider
 ) {
     operator fun invoke(item: SummaryObject, container: ItemListContext): VaultItemWrapper<out SummaryObject>? {
@@ -47,8 +47,8 @@ class ItemWrapperProvider @Inject constructor(
                 itemListContext = container,
                 dataIdentifierListTextResolver = dataIdentifierListTextResolver,
                 navigator = navigator,
-                sessionManager = sessionManager,
-                teamspaceRepository = teamspaceRepository
+                teamSpaceAccessorProvider = teamSpaceAccessorProvider,
+                currentTeamSpaceUiFilter = currentTeamSpaceFilterRepository
             )
             is SummaryObject.PaymentCreditCard -> PaymentCreditCardWrapper(
                 vaultItemCopyService = vaultItemCopyService,
@@ -57,8 +57,8 @@ class ItemWrapperProvider @Inject constructor(
                 itemListContext = container,
                 dataIdentifierListTextResolver = dataIdentifierListTextResolver,
                 navigator = navigator,
-                sessionManager = sessionManager,
-                teamspaceRepository = teamspaceRepository
+                teamSpaceAccessorProvider = teamSpaceAccessorProvider,
+                currentSpaceFilterRepository = currentTeamSpaceFilterRepository
             )
             else -> null
         }
@@ -75,8 +75,8 @@ class ItemWrapperProvider @Inject constructor(
             itemListContext = container,
             navigator = navigator,
             dataIdentifierListTextResolver = dataIdentifierListTextResolver,
-            sessionManager = sessionManager,
-            teamspaceRepository = teamspaceRepository
+            teamSpaceAccessorProvider = teamSpaceAccessorProvider,
+            currentTeamSpaceUiFilter = currentTeamSpaceFilterRepository
         )
     }
 }

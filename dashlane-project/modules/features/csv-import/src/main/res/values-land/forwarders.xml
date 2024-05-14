@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="forwarder_onboarding_chrome_import" type="layout">
-        @layout/include_onboarding_chrome_import_land
-    </item>
-</resources>

@@ -10,8 +10,8 @@ import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import com.skocken.presentation.definition.Base
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,7 +39,7 @@ class LoginSettingsPresenter @Inject constructor(
 
     override fun onViewChanged() {
         super.onViewChanged()
-        if (!biometricAuthModule.isHardwareSetUp()) {
+        if (!biometricAuthModule.isHardwareSetUp() || biometricAuthModule.isOnlyWeakSupported()) {
             goToLoginSyncProgress()
         }
     }

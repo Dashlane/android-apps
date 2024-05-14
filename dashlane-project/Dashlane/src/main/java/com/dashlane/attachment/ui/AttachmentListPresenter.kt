@@ -175,8 +175,10 @@ class AttachmentListPresenter(
             lockHelper.startAutoLockGracePeriod()
 
             val openIntent = Intent(Intent.ACTION_VIEW).apply {
-                type = item.type
-                data = UriUtils.getOpenFileUri(activity.applicationContext, file)
+                setDataAndType(
+                    UriUtils.getOpenFileUri(activity.applicationContext, file),
+                    item.type
+                )
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             downloadPresenter.onAttachmentOpened(item)

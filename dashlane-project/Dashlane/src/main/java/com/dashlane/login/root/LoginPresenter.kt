@@ -12,6 +12,7 @@ import com.dashlane.R
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.debug.DaDaDa
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.help.newIntent
 import com.dashlane.hermes.generated.definitions.AnyPage
@@ -53,14 +54,14 @@ import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setCurrentPageView
 import com.skocken.presentation.presenter.BasePresenter
+import java.util.Deque
+import java.util.LinkedList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.util.Deque
-import java.util.LinkedList
 
 @Suppress("LargeClass")
 class LoginPresenter(
@@ -77,7 +78,8 @@ class LoginPresenter(
     private val toaster: Toaster,
     private val navigator: Navigator,
     private val warningRememberMasterPasswordDialog: WarningRememberMasterPasswordDialog,
-    private val globalPreferencesManager: GlobalPreferencesManager
+    private val globalPreferencesManager: GlobalPreferencesManager,
+    private val daDaDa: DaDaDa
 ) : BasePresenter<LoginContract.DataProvider, LoginContract.LoginViewProxy>(),
     LoginContract.Presenter {
 
@@ -192,8 +194,13 @@ class LoginPresenter(
     }
 
     fun showEmailPage() {
-        val presenter = createEmailPresenter()
-        pagesStateHelper.addedPage(presenter, null)
+        
+        if (pagesStateHelper.currentPresenter !is LoginEmailPresenter) {
+            val presenter = createEmailPresenter()
+            pagesStateHelper.addedPage(presenter, null)
+        } else {
+            view.transitionTo(pagesStateHelper.currentPresenter as LoginEmailPresenter)
+        }
     }
 
     private fun createEmailPresenter(): LoginEmailPresenter {
@@ -219,7 +226,7 @@ class LoginPresenter(
 
     private fun createTokenPresenter(emailSecondFactor: AuthenticationSecondFactor.EmailToken): LoginTokenPresenter {
         val dataProvider = provider.createTokenDataProvider(emailSecondFactor)
-        return LoginTokenPresenter(this, createChildCoroutineScope(), loginLogger).apply {
+        return LoginTokenPresenter(this, createChildCoroutineScope(), daDaDa, loginLogger).apply {
             setProvider(dataProvider)
         }
     }
@@ -233,8 +240,8 @@ class LoginPresenter(
         loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.AUTHENTICATOR_APP))
     }
 
-    fun showSecretTransferQRPage(email: String?) {
-        view.transitionToCompose(email)
+    fun showSecretTransferQRPage(email: String?, startDestination: String) {
+        view.transitionToCompose(email, startDestination)
     }
 
     private fun createDashlaneAuthenticatorPresenter(secondFactor: AuthenticationSecondFactor): LoginDashlaneAuthenticatorPresenter {

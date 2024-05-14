@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -40,6 +41,8 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.design.theme.typography.getStrongerStyle
+import com.dashlane.teamspaces.model.SpaceColor
+import com.dashlane.teamspaces.model.SpaceName
 import com.dashlane.ui.menu.domain.MenuItemModel
 import com.dashlane.ui.menu.domain.TeamspaceIcon
 import com.dashlane.ui.menu.view.teamspace.MenuTeamspaceIcon
@@ -73,8 +76,8 @@ fun MenuHeaderUserProfileItem(
 @Composable
 fun MenuHeaderTeamspaceItem(
     modifier: Modifier = Modifier,
-    teamspace: MenuItemModel.Header.Teamspace,
-    onTeamspaceWrapperClick: () -> Unit,
+    teamspace: MenuItemModel.Header.TeamspaceProfile,
+    onTeamspaceWrapperClick: () -> Unit
 ) {
     BaseMenuHeaderItem(
         modifier = modifier,
@@ -84,10 +87,11 @@ fun MenuHeaderTeamspaceItem(
                     .size(avatarSize)
                     .background(
                         color = when (teamspace.icon) {
-                            TeamspaceIcon.Combined ->
-                                DashlaneTheme.colors.containerExpressiveBrandQuietIdle
-                            is TeamspaceIcon.Space ->
-                                Color(teamspace.icon.colorInt).copy(alpha = if (isSystemInDarkTheme()) 0.3f else 0.2f)
+                            TeamspaceIcon.Combined -> DashlaneTheme.colors.containerExpressiveBrandQuietIdle
+                            is TeamspaceIcon.Space -> when (val color = teamspace.icon.spaceColor) {
+                                is SpaceColor.FixColor -> colorResource(color.colorRes)
+                                is SpaceColor.TeamColor -> Color(color.color)
+                            }.copy(alpha = if (isSystemInDarkTheme()) 0.3f else 0.2f)
                         },
                         shape = CircleShape
                     )
@@ -96,10 +100,38 @@ fun MenuHeaderTeamspaceItem(
             )
         },
         onUpgradeClick = null,
-        statusText = teamspace.name,
+        statusText = when (val spaceName = teamspace.name) {
+            is SpaceName.FixName -> stringResource(spaceName.nameRes)
+            is SpaceName.TeamName -> spaceName.value
+        },
         statusHelper = stringResource(if (teamspace.mode) R.string.menu_v3_teamspace_select else R.string.menu_v3_teamspace_change),
         dropdownToken = if (teamspace.mode) IconTokens.caretUpOutlined else IconTokens.caretDownOutlined,
         onStatusWrapperClick = onTeamspaceWrapperClick,
+    )
+}
+
+@Composable
+fun MenuHeaderEnforcedTeamProfileItem(
+    modifier: Modifier = Modifier,
+    enforcedTeamspaceProfile: MenuItemModel.Header.EnforcedTeamspaceProfile
+) {
+    BaseMenuHeaderItem(
+        modifier = modifier,
+        icon = {
+            Image(
+                modifier = Modifier.size(avatarSize),
+                painter = painterResource(id = R.drawable.ic_menu_dashlane),
+                contentDescription = stringResource(id = R.string.and_accessibility_user_profile_icon)
+            )
+        },
+        onUpgradeClick = null,
+        statusText = enforcedTeamspaceProfile.userName,
+        statusHelper = when (val spaceName = enforcedTeamspaceProfile.spaceName) {
+            is SpaceName.FixName -> stringResource(spaceName.nameRes)
+            is SpaceName.TeamName -> spaceName.value
+        },
+        dropdownToken = null,
+        onStatusWrapperClick = { },
     )
 }
 
@@ -110,7 +142,7 @@ private fun BaseMenuHeaderItem(
     icon: @Composable () -> Unit,
     onUpgradeClick: (() -> Unit)?,
     statusText: String,
-    statusHelper: String,
+    statusHelper: String?,
     dropdownToken: IconToken?,
     onStatusWrapperClick: () -> Unit
 ) {
@@ -164,13 +196,15 @@ private fun BaseMenuHeaderItem(
                     )
                 }
             }
-            Text(
-                text = statusHelper,
-                color = DashlaneTheme.colors.textNeutralQuiet,
-                style = DashlaneTheme.typography.bodyHelperRegular,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            statusHelper?.let {
+                Text(
+                    text = it,
+                    color = DashlaneTheme.colors.textNeutralQuiet,
+                    style = DashlaneTheme.typography.bodyHelperRegular,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         Box(
             modifier = Modifier
@@ -204,9 +238,9 @@ private fun MenuHeaderTeamspaceCombinedItemPreview() {
     DashlanePreview {
         var mode: Boolean by rememberSaveable { mutableStateOf(false) }
         MenuHeaderTeamspaceItem(
-            teamspace = MenuItemModel.Header.Teamspace(
+            teamspace = MenuItemModel.Header.TeamspaceProfile(
                 icon = TeamspaceIcon.Combined,
-                name = stringResource(id = R.string.teamspace_combined),
+                name = SpaceName.FixName(R.string.teamspace_combined_title),
                 mode = mode
             ),
             onTeamspaceWrapperClick = { mode = !mode }
@@ -220,15 +254,47 @@ private fun MenuHeaderTeamspacePersonalItemPreview() {
     DashlanePreview {
         var mode: Boolean by rememberSaveable { mutableStateOf(true) }
         MenuHeaderTeamspaceItem(
-            teamspace = MenuItemModel.Header.Teamspace(
+            teamspace = MenuItemModel.Header.TeamspaceProfile(
                 icon = TeamspaceIcon.Space(
-                    displayLetter = "L",
-                    colorInt = android.graphics.Color.MAGENTA
+                    displayLetter = 'P',
+                    spaceColor = SpaceColor.FixColor(R.color.teamspace_personal)
                 ),
-                name = stringResource(id = R.string.teamspace_personal),
+                name = SpaceName.FixName(R.string.teamspace_personal_title),
                 mode = mode
             ),
             onTeamspaceWrapperClick = { mode = !mode }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun MenuHeaderTeamspaceTeamItemPreview() {
+    DashlanePreview {
+        var mode: Boolean by rememberSaveable { mutableStateOf(true) }
+        MenuHeaderTeamspaceItem(
+            teamspace = MenuItemModel.Header.TeamspaceProfile(
+                icon = TeamspaceIcon.Space(
+                    displayLetter = 'B',
+                    spaceColor = SpaceColor.TeamColor(android.graphics.Color.BLUE)
+                ),
+                name = SpaceName.TeamName("Business"),
+                mode = mode
+            ),
+            onTeamspaceWrapperClick = { mode = !mode }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun MenuHeaderEnforcedTeamspaceProfileItemPreview() {
+    DashlanePreview {
+        MenuHeaderEnforcedTeamProfileItem(
+            enforcedTeamspaceProfile = MenuItemModel.Header.EnforcedTeamspaceProfile(
+                userName = "randomemail@provider.com",
+                spaceName = SpaceName.TeamName("The Dashling Dashers")
+            )
         )
     }
 }

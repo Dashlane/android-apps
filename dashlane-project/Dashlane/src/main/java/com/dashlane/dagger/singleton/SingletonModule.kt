@@ -17,7 +17,6 @@ import com.dashlane.braze.BrazeInAppMessageSubscriber
 import com.dashlane.braze.BrazeWrapper
 import com.dashlane.debug.DashlaneBuildConfig
 import com.dashlane.events.AppEvents
-import com.dashlane.featureflipping.FeatureFlipManager
 import com.dashlane.login.lock.LockManager
 import com.dashlane.network.inject.RetrofitModule
 import com.dashlane.preference.GlobalPreferencesManager
@@ -29,56 +28,42 @@ import com.dashlane.server.api.endpoints.payments.StoreOffersService
 import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionManagerImpl
-import com.dashlane.session.repository.AccountStatusRepository
 import com.dashlane.settings.AutofillUserPreferencesAccess
 import com.dashlane.storage.securestorage.SecureStorageManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.storage.userdata.EmailSuggestionProvider
 import com.dashlane.storage.userdata.EmailSuggestionProviderImpl
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.dagger.UserDataAccessorModule
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.TeamspaceAccessorProvider
 import com.dashlane.ui.PostAccountCreationCoordinator
 import com.dashlane.ui.activities.onboarding.HomeActivityIntentCoordinator
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.ui.widgets.Notificator
 import com.dashlane.url.assetlinks.UrlDomainAssetLinkService
 import com.dashlane.url.icon.UrlDomainIconAndroidRepository
 import com.dashlane.url.icon.UrlDomainIconDataStore
 import com.dashlane.url.icon.UrlDomainIconDatabase
 import com.dashlane.url.icon.UrlDomainIconRepository
-import com.dashlane.userfeatures.UserFeaturesCheckerImpl
-import com.dashlane.util.Toaster
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
-import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.Clock
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Call
+import java.time.Clock
+import javax.inject.Singleton
 
 @Module(includes = [BinderModule::class, UserDataAccessorModule::class, RetrofitModule::class, InAppLoginModule::class, TrackingModule::class])
 open class SingletonModule {
-    @Provides 
-    fun provideTeamspaceAccessor(
-        provider: TeamspaceAccessorProvider
-    ): OptionalProvider<TeamspaceAccessor> {
-        return provider
-    }
 
     @Provides
     @Singleton
     fun provideEmailSuggestionProvider(
-        mainDataAccessor: MainDataAccessor
+        genericDataQuery: GenericDataQuery
     ): EmailSuggestionProvider {
-        return EmailSuggestionProviderImpl(mainDataAccessor)
+        return EmailSuggestionProviderImpl(genericDataQuery)
     }
 
     @Provides
@@ -96,16 +81,6 @@ open class SingletonModule {
     @Provides
     fun provideUrlDomainAssetLinkService(callFactory: Call.Factory): UrlDomainAssetLinkService {
         return UrlDomainAssetLinkService(callFactory)
-    }
-
-    @Provides
-    @Singleton
-    open fun provideUserFeatureChecker(
-        sessionManager: SessionManager,
-        accountStatusRepository: AccountStatusRepository,
-        userFeature: FeatureFlipManager
-    ): UserFeaturesChecker {
-        return UserFeaturesCheckerImpl(sessionManager, accountStatusRepository, userFeature)
     }
 
     @Singleton
@@ -149,12 +124,6 @@ open class SingletonModule {
 
     @Provides
     @Singleton
-    fun provideNotificator(toaster: Toaster): Notificator {
-        return Notificator(toaster)
-    }
-
-    @Provides
-    @Singleton
     fun provideAnnouncementCenter(): AnnouncementCenter {
         return DashlaneAnnouncementCenter()
     }
@@ -180,12 +149,6 @@ open class SingletonModule {
     @Singleton
     fun provideCryptoObjectHelper(userPreferencesManager: UserPreferencesManager): CryptoObjectHelper {
         return CryptoObjectHelper(userPreferencesManager)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSessionManager(sessionManager: SessionManagerImpl): SessionManager {
-        return sessionManager
     }
 
     @Provides
@@ -236,7 +199,7 @@ open class SingletonModule {
 
     @Provides
     fun provideDashlaneBuildConfig(): DashlaneBuildConfig {
-        return DashlaneBuildConfig(BuildConfig.CHECK_DADADA_SIGNATURE, BuildConfig.PLAYSTORE_BUILD)
+        return DashlaneBuildConfig(BuildConfig.PLAYSTORE_BUILD, BuildConfig.NIGHTLY_BUILD)
     }
 
     @Provides

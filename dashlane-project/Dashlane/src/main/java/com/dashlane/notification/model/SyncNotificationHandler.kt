@@ -1,7 +1,7 @@
 package com.dashlane.notification.model
 
 import android.content.Context
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.notification.FcmMessage
 import com.dashlane.session.SessionManager

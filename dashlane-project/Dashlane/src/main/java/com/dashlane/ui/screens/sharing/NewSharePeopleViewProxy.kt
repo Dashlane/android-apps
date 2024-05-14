@@ -90,6 +90,10 @@ class NewSharePeopleViewProxy(
                         showErrorDialog(
                             R.string.ui_sharing_error_cannot_share_with_only_you
                         )
+                    NewSharePeopleViewModelContract.UIState.ERROR_NOT_INTERNAL ->
+                        showErrorDialog(
+                            R.string.ui_sharing_error_internal_only
+                        )
                     else -> showLoadingDialog(false)
                 }
             }

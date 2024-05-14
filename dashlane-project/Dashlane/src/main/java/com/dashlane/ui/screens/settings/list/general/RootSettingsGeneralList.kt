@@ -2,8 +2,6 @@ package com.dashlane.ui.screens.settings.list.general
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.account.UserAccountStorage
-import com.dashlane.core.DataSync
 import com.dashlane.followupnotification.domain.FollowUpNotificationSettings
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
@@ -15,14 +13,18 @@ import com.dashlane.navigation.Navigator
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.securearchive.BackupCoordinator
-import com.dashlane.session.SessionManager
+import com.dashlane.sync.DataSync
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
+import com.dashlane.ui.util.DialogHelper
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.DarkThemeHelper
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.util.inject.OptionalProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -36,7 +38,6 @@ class RootSettingsGeneralList(
     navigator: Navigator,
     rootHeader: SettingHeader,
     backupCoordinator: BackupCoordinator,
-    sessionManager: SessionManager,
     darkThemeHelper: DarkThemeHelper,
     logRepository: LogRepository,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
@@ -44,7 +45,8 @@ class RootSettingsGeneralList(
     globalPreferencesManager: GlobalPreferencesManager,
     followUpNotificationSettings: FollowUpNotificationSettings,
     dataSync: DataSync,
-    userAccountStorage: UserAccountStorage
+    dialogHelper: DialogHelper,
+    teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) {
 
     private val settingsGeneralAutoLoginList = SettingsGeneralAutoLoginList(
@@ -65,8 +67,8 @@ class RootSettingsGeneralList(
         context = context,
         backupCoordinator = backupCoordinator,
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
-        sessionManager = sessionManager,
-        userAccountStorage = userAccountStorage
+        dialogHelper = dialogHelper,
+        teamSpaceAccessorProvider = teamSpaceAccessorProvider,
     )
 
     private val displayHeader = SettingHeader(context.getString(R.string.settings_display_category))
@@ -105,8 +107,7 @@ class RootSettingsGeneralList(
         override val title = context.getString(R.string.setting_allow_logs_title)
         override val description = context.getString(R.string.setting_allow_logs_description)
         override fun isEnable() = true
-        override fun isVisible() =
-            userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.SHOW_ALLOW_SEND_LOGS)
+        override fun isVisible() = userFeaturesChecker.has(FeatureFlip.SHOW_ALLOW_SEND_LOGS)
 
         override fun isChecked(context: Context): Boolean = globalPreferencesManager.allowSendLogs
 

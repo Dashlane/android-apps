@@ -1,15 +1,6 @@
 package com.dashlane.util;
 
-import android.content.Context;
-
-import androidx.annotation.StringRes;
-
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import static com.dashlane.util.LocaleUtilKt.getOsLang;
 
 public class TextUtil {
 
@@ -17,56 +8,15 @@ public class TextUtil {
         
     }
 
-    public static boolean isServerResponsePositive(String response) {
-        if (response == null) {
-            return false;
-        }
-        final String chunk = response.toLowerCase(Locale.US);
-        if (chunk.contains("invalid"))
-            return false;
-        if (chunk.contains("yes"))
-            return true;
-        if (chunk.contains("success"))
-            return true;
-        if (chunk.contains("valid"))
-            return true;
-        if (chunk.contains("\"code\":200,\"message\":\"OK\""))
-            return true;
-        return chunk.contains("\"message\":\"ok\"");
-    }
-
     public static String generateRefferalUrl(String refid) {
         StringBuilder builder = new StringBuilder();
-        String lang = Constants.getOSLang();
-        if (!lang.equals("en") || !lang.equals("fr")) {
+        String lang = getOsLang();
+        if (!("en").equals(lang) && !"fr".equals(lang)) {
             lang = "en";
         }
-        builder.append(Constants.HTTP.RefferalUrlHeader)
-            .append(lang).append("/").append("as/")
-            .append(refid);
-        return builder.toString();
-    }
-
-    public static long daysRemaining(Instant endExclusive) {
-        Duration duration = Duration.between(Instant.now(), endExclusive);
-        if (duration.isNegative()) {
-            return 0;
-        } else {
-            return duration.toDays();
-        }
-    }
-
-
-    @SuppressWarnings("squid:S2245")
-    public static String generateRandomString(int length, String alphabet) {
-        if (length < 1) {
-            throw new IllegalArgumentException("Length must be >= 1");
-        }
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; ++i) {
-            
-            builder.append(alphabet.charAt((int) (Math.random() * alphabet.length())));
-        }
+        builder.append("https://www.dashlane.com/")
+               .append(lang).append("/").append("as/")
+               .append(refid);
         return builder.toString();
     }
 
@@ -87,7 +37,7 @@ public class TextUtil {
             thatMarker += thatChunk.length();
 
             
-            int result = 0;
+            int result;
             if (isDigit(thisChunk.charAt(0)) && isDigit(thatChunk.charAt(0))) {
                 
                 int thisChunkLength = thisChunk.length();

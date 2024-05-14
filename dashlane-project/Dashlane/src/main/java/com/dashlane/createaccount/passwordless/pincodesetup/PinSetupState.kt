@@ -1,15 +1,19 @@
 package com.dashlane.createaccount.passwordless.pincodesetup
 
+import android.content.Intent
+
 sealed class PinSetupState {
-    abstract val pinCode: String
+    abstract val data: PinSetupData
 
-    data class Default(override val pinCode: String) : PinSetupState()
-
-    data class Transition(override val pinCode: String) : PinSetupState()
-
-    data class Choose(override val pinCode: String, val hasError: Boolean = false) : PinSetupState()
-
-    data class Confirm(override val pinCode: String, val chosenPin: String) : PinSetupState()
-
-    data class GoToNext(override val pinCode: String) : PinSetupState()
+    data class Initial(override val data: PinSetupData) : PinSetupState()
+    data class PinUpdated(override val data: PinSetupData, val hasError: Boolean = false) : PinSetupState()
+    data class GoToNext(override val data: PinSetupData) : PinSetupState()
+    data class GoToSystemLockSetting(override val data: PinSetupData, val intent: Intent) : PinSetupState()
 }
+
+data class PinSetupData(
+    val pinCode: String,
+    val chosenPin: String = "",
+    val confirming: Boolean = false,
+    val isSystemLockSetup: Boolean = true
+)

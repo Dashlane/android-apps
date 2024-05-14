@@ -28,8 +28,7 @@ class CreateAccountChoosePasswordPresenter(private val basePresenter: CreateAcco
         } else {
             updateTitle()
         }
-        
-        basePresenter.toggleMplessButtonVisibility(false)
+        basePresenter.toggleMplessButtonVisibility(provider.isPasswordlessEnabled() && visible)
     }
 
     override fun onPasswordChanged(password: CharSequence) {

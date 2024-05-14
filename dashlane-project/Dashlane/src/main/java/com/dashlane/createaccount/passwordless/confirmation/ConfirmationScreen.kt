@@ -161,7 +161,7 @@ fun LoaderComposable(
 
 @Preview
 @Composable
-fun PinCodeScreenPreview() {
+fun ConfirmationContentPreview() {
     DashlanePreview {
         ConfirmationContent(
             modifier = Modifier,

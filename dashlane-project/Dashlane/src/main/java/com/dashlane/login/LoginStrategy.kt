@@ -1,7 +1,7 @@
 package com.dashlane.login
 
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.authentication.SecurityFeature
-import com.dashlane.core.premium.PremiumStatusManager
 import com.dashlane.login.LoginStrategy.Strategy.DEVICE_LIMIT
 import com.dashlane.login.LoginStrategy.Strategy.ENFORCE_2FA
 import com.dashlane.login.LoginStrategy.Strategy.MONOBUCKET
@@ -10,24 +10,24 @@ import com.dashlane.login.monobucket.MonobucketHelper
 import com.dashlane.login.pages.enforce2fa.HasEnforced2FaLimitUseCaseImpl
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.devices.ListDevicesService
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
 import com.dashlane.session.Session
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability
-import com.dashlane.util.userfeatures.getDevicesLimitValue
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.userfeatures.getDevicesLimitValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class LoginStrategy @Inject constructor(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val listDevicesService: ListDevicesService,
-    private val premiumStatusManager: PremiumStatusManager,
-    private val hasEnforced2faLimitUseCase: HasEnforced2FaLimitUseCaseImpl
+    private val hasEnforced2faLimitUseCase: HasEnforced2FaLimitUseCaseImpl,
+    private val accountStatusRepository: AccountStatusRepository
 ) {
     lateinit var monobucketHelper: MonobucketHelper
     lateinit var devices: MutableList<Device>
@@ -54,7 +54,7 @@ class LoginStrategy @Inject constructor(
             }
             val listDevicesResponse = listDevicesResponseDeferred.getCompleted() ?: return@withContext NO_STRATEGY
             val listDevicesData = listDevicesResponse.data
-            if (userFeaturesChecker.has(Capability.DEVICES_LIMIT)) {
+            if (userFeaturesChecker.has(Capability.DEVICESLIMIT)) {
                 val limit = userFeaturesChecker.getDevicesLimitValue()
                 if (limit > 1 && getDevicesCount(listDevicesData) > limit) return@withContext DEVICE_LIMIT
             }
@@ -77,7 +77,7 @@ class LoginStrategy @Inject constructor(
     private fun CoroutineScope.refreshPremiumStatusAsync(session: Session) =
         async {
             try {
-                premiumStatusManager.refreshPremiumStatus(session)
+                accountStatusRepository.refreshFor(session)
             } catch (e: Exception) {
                 
             }

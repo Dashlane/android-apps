@@ -1,7 +1,6 @@
 package com.dashlane.loaders.datalists
 
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
@@ -10,22 +9,19 @@ import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
 import com.dashlane.vault.util.hasAttachments
 import com.dashlane.xml.domain.SyncObjectType
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class NewShareItemDataProvider @Inject constructor(
-    private val mainDataAccessor: MainDataAccessor,
+    private val genericDataQuery: GenericDataQuery,
     private val identityNameHolderService: IdentityNameHolderService,
     @IoCoroutineDispatcher
     private val ioDispatcher: CoroutineDispatcher,
 ) {
-    private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
-
     private lateinit var deferred: Deferred<List<SummaryObject>>
 
     suspend fun init() {

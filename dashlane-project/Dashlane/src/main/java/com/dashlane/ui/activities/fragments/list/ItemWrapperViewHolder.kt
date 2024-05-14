@@ -14,7 +14,9 @@ import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.dashlane.R
+import com.dashlane.teamspaces.TeamSpaceUtils.getTeamSpaceId
 import com.dashlane.teamspaces.adapter.TeamspaceDrawableProvider
+import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
@@ -22,9 +24,7 @@ import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrDrawable
 import com.dashlane.util.graphics.CredentialRemoteDrawable
 import com.dashlane.util.toHighlightedSpannable
-import com.dashlane.vault.model.isSpaceItem
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.TeamSpaceUtils.getTeamSpaceId
 import com.dashlane.vault.util.isProtected
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
@@ -132,11 +132,12 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
             return null
         }
         val teamspaceId = getTeamSpaceId(vaultItem)
-        item.teamspaceManager?.let { teamManager ->
-            if (teamManager.isCurrent(teamspaceId)) {
+        item.teamSpaceAccessorProvider.get()?.let { teamSpaceAccessor ->
+            val currentSpaceFilter = item.currentTeamSpaceUiFilter.currentFilter
+            if (currentSpaceFilter.teamSpace.teamId == teamspaceId) {
                 return null
             }
-            val teamspace = teamManager[teamspaceId] ?: return null
+            val teamspace = teamSpaceAccessor.availableSpaces.firstOrNull { it.teamId == teamspaceId } ?: return null
             return TeamspaceDrawableProvider.getIcon(context, teamspace, R.dimen.teamspace_icon_size_small)
         }
         return null

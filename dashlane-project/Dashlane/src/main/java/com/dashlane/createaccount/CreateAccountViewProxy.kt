@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ButtonMediumView
 import com.dashlane.util.animation.fadeIn
 import com.dashlane.util.animation.fadeOut
 import com.dashlane.util.getThemeAttrColor
@@ -61,7 +62,7 @@ class CreateAccountViewProxy(rootView: View) :
     private val logo: View = findViewByIdEfficient(R.id.logo)!!
     private val progressBar: ProgressBar = findViewByIdEfficient(R.id.view_login_progress)!!
     private val nextButton: Button = findViewByIdEfficient(R.id.view_next)!!
-    private val mplessButton: Button = findViewByIdEfficient(R.id.view_passwordless_button)!!
+    private val mplessButton: ButtonMediumView = findViewByIdEfficient(R.id.view_passwordless_button)!!
     private val minContentHeight = resources.getDimensionPixelSize(R.dimen.login_content_min_height)
 
     private var showLogo by Delegates.observable(true) { _, oldValue, newValue ->
@@ -98,7 +99,7 @@ class CreateAccountViewProxy(rootView: View) :
 
     init {
         nextButton.setOnClickListener { presenter.onNextClicked() }
-        mplessButton.setOnClickListener { presenter.onMplessSetupClicked() }
+        mplessButton.onClick = { presenter.onMplessSetupClicked() }
 
         root.addOnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ ->
             val height = bottom - top

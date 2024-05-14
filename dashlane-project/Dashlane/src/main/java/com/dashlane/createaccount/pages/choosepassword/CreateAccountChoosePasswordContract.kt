@@ -40,6 +40,8 @@ interface CreateAccountChoosePasswordContract {
 
         suspend fun validatePassword(password: CharSequence)
 
+        fun isPasswordlessEnabled(): Boolean
+
         fun getPasswordStrengthAsync(password: CharSequence): Deferred<PasswordStrength?>
     }
 }

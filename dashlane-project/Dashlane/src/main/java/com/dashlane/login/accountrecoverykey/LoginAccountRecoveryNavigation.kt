@@ -2,7 +2,6 @@ package com.dashlane.login.accountrecoverykey
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,8 +13,8 @@ import com.dashlane.createaccount.passwordless.biometrics.BiometricsSetupScreen
 import com.dashlane.createaccount.passwordless.pincodesetup.PinSetupScreen
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.LOGIN_KEY
-import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.changeMasterPasswordDestination
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.biometricsSetupDestination
+import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.changeMasterPasswordDestination
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.emailTokenDestination
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.enterARKDestination
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.introDestination
@@ -28,6 +27,7 @@ import com.dashlane.login.accountrecoverykey.recovery.RecoveryScreen
 import com.dashlane.login.pages.token.compose.LoginTokenScreen
 import com.dashlane.login.pages.totp.compose.LoginTotpScreen
 import com.dashlane.masterpassword.compose.ChangeMasterPasswordScreen
+import com.dashlane.util.compose.navigateAndPopupToStart
 
 object LoginAccountRecoveryNavigation {
     const val introDestination = "ark/intro"
@@ -68,9 +68,9 @@ fun LoginAccountRecoveryNavigation(
                 registeredUserDevice = registeredUserDevice,
                 authTicket = authTicket,
                 accountType = accountType,
-                goToARK = { navController.navigateAndPopup("$enterARKDestination/$login") },
-                goToToken = { navController.navigateAndPopup("$emailTokenDestination/$login") },
-                goToTOTP = { navController.navigateAndPopup("$totpDestination/$login") },
+                goToARK = { navController.navigateAndPopupToStart("$enterARKDestination/$login") },
+                goToToken = { navController.navigateAndPopupToStart("$emailTokenDestination/$login") },
+                goToTOTP = { navController.navigateAndPopupToStart("$totpDestination/$login") },
                 onCancel = onCancel
             )
         }
@@ -118,7 +118,7 @@ fun LoginAccountRecoveryNavigation(
                 viewModel = hiltViewModel(),
                 goToNext = {
                     mainViewModel.masterPasswordChanged(it)
-                    navController.navigateAndPopup(recoveryDestination)
+                    navController.navigateAndPopupToStart(recoveryDestination)
                 },
                 goBack = { navController.popBackStack() }
             )
@@ -140,27 +140,19 @@ fun LoginAccountRecoveryNavigation(
             )
         }
         composable(route = biometricsSetupDestination) {
+            val onSkip = {
+                mainViewModel.onSkipBiometric()
+                navController.navigateAndPopupToStart(recoveryDestination)
+            }
             BiometricsSetupScreen(
                 viewModel = hiltViewModel(),
-                onSkip = {
-                    mainViewModel.onSkipBiometric()
-                    navController.navigateAndPopup(recoveryDestination)
-                },
+                onSkip = onSkip,
+                onBiometricsDisabled = onSkip,
                 onBiometricsEnabled = {
                     mainViewModel.onEnableBiometrics()
-                    navController.navigateAndPopup(recoveryDestination)
+                    navController.navigateAndPopupToStart(recoveryDestination)
                 }
             )
-        }
-    }
-}
-
-fun NavController.navigateAndPopup(route: String) {
-    navigate(route) {
-        currentBackStackEntry?.destination?.route?.let { route ->
-            popUpTo(route) {
-                inclusive = true
-            }
         }
     }
 }

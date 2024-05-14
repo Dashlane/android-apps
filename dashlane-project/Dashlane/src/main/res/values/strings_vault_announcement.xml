@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="vault_announcement_autofill_title">Start logging in faster with Autofill</string>
+    
+    <string name="vault_announcement_password_limit_title">You’ve reached your Free plan password limit. Upgrade to premium</string>
+    
+    <string name="vault_announcement_password_limit_remaining_title">%1$d passwords left in your Free plan.\nUpgrade to Premium</string>
 </resources>

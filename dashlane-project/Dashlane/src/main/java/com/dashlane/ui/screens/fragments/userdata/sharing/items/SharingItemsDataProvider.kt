@@ -10,36 +10,28 @@ import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isPending
 import com.dashlane.sharing.model.isUserAccepted
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.datatype.ShareableDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class SharingItemsDataProvider @Inject constructor(
-    private val dataStorageProvider: DataStorageProvider,
+    private val sharingDao: SharingDao,
     private val sharingDataProvider: SharingDataProvider,
     private val sessionManager: SessionManager,
-    private val mainDataAccessor: MainDataAccessor,
+    private val genericDataQuery: GenericDataQuery,
     @IoCoroutineDispatcher
     private val ioCoroutineDispatcher: CoroutineDispatcher,
     private val userFeaturesChecker: UserFeaturesChecker
 ) {
-    private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
-
-    private val sharingDao: SharingDao
-        get() = dataStorageProvider.sharingDao
-
     private val session: Session?
         get() = sessionManager.session
 
@@ -51,7 +43,7 @@ class SharingItemsDataProvider @Inject constructor(
             val itemGroups = sharingDao.loadAllItemGroup()
             val myUserGroupsAccepted = sharingDao.loadUserGroupsAccepted(username) ?: emptyList()
             val myCollectionsAccepted =
-                if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_3)) {
+                if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
                     sharingDataProvider.getAcceptedCollections(username, needsAdminRights = false)
                 } else {
                     emptyList()

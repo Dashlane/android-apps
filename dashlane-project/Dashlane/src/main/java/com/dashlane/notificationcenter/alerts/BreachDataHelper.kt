@@ -3,7 +3,8 @@ package com.dashlane.notificationcenter.alerts
 import com.dashlane.events.AppEvents
 import com.dashlane.events.BreachStatusChangedEvent
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
@@ -13,7 +14,8 @@ import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
 class BreachDataHelper @Inject constructor(
-    private val dataAccessor: MainDataAccessor,
+    private val vaultDataQuery: VaultDataQuery,
+    private val dataSaver: DataSaver,
     private val appEvents: AppEvents
 ) {
 
@@ -24,8 +26,8 @@ class BreachDataHelper @Inject constructor(
             specificUid(securityBreach.uid)
             specificDataType(SyncObjectType.SECURITY_BREACH)
         }
-        val breach = dataAccessor.getVaultDataQuery().query(filter) as? VaultItem<SyncObject.SecurityBreach> ?: return
-        dataAccessor.getDataSaver().save(
+        val breach = vaultDataQuery.query(filter) as? VaultItem<SyncObject.SecurityBreach> ?: return
+        dataSaver.save(
             breach
                 .copySyncObject { status = breachStatus }
                 .copyWithAttrs {
@@ -43,9 +45,8 @@ class BreachDataHelper @Inject constructor(
                     specificUid(it.localBreach.uid)
                     specificDataType(SyncObjectType.SECURITY_BREACH)
                 }
-                val breach =
-                    dataAccessor.getVaultDataQuery().query(filter) as? VaultItem<SyncObject.SecurityBreach> ?: return
-                dataAccessor.getDataSaver().save(
+                val breach = vaultDataQuery.query(filter) as? VaultItem<SyncObject.SecurityBreach> ?: return
+                dataSaver.save(
                     breach.copySyncObject {
                         status = SyncObject.SecurityBreach.Status.VIEWED
                     }

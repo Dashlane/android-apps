@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="collections_limiter_approaching_title">You can only share one Collection with your Starter</string>
+    
+    <string name="collections_limiter_approaching_description">To share unlimited Collections, go to the Admin Console on the Web App and upgrade your account.</string>
+    
+    <string name="collections_limiter_reached_title">You have reached the Collection sharing limit for the Starter plan.</string>
+    
+    <string name="collections_limiter_right_limit_description">To share unlimited Collections, go to the Admin Console on the web app and upgrade your account.</string>
+    
+    <string name="collections_limiter_right_limit_existing_item_description">You can still edit and share this collection. To share unlimited Collections, go to the Admin Console on the web app and upgrade your account.</string>
+    
+    <string name="collections_limiter_business_trial_title">Unlimited Collections sharing is only available for Business plans</string>
+    
+    <string name="collections_limiter_business_trial_description">Collection sharing is only available for your Starter plan admin</string>
+    
+    <string name="collections_limiter_member_title">Collection sharing is only available for your Starter plan admin</string>
+    
+    <string name="collections_limiter_member_description">Contact your admin to upgrade and share unlimited Collections.</string>
+    
+    <string name="collections_limiter_member_cta">Ok, Got it</string>
+</resources>

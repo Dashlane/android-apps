@@ -1,13 +1,12 @@
 package com.dashlane.masterpassword
 
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.isSsoUser
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
 import javax.inject.Inject
 
 class ChangeMasterPasswordFeatureAccessChecker @Inject constructor(
     private val masterPasswordChanger: MasterPasswordChanger,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
 ) {
     @JvmOverloads
     fun canAccessFeature(fromMigrationToMasterPasswordUser: Boolean = false): Boolean {
@@ -16,7 +15,7 @@ class ChangeMasterPasswordFeatureAccessChecker @Inject constructor(
             
             fromMigrationToMasterPasswordUser -> true
             
-            else -> teamspaceAccessorProvider.get()?.isSsoUser == false
+            else -> teamSpaceAccessorProvider.get()?.isSsoUser == false
         }
     }
 }

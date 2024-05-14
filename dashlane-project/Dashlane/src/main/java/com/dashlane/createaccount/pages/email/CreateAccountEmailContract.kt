@@ -16,6 +16,7 @@ interface CreateAccountEmailContract {
             inEuropeanUnion: Boolean,
             country: String?,
             loginSsoIntent: Intent?,
+            isB2B: Boolean,
             callback: () -> Unit = {}
         )
 
@@ -30,7 +31,8 @@ interface CreateAccountEmailContract {
             email: String,
             inEuropeanUnion: Boolean,
             country: String?,
-            loginSsoIntent: Intent?
+            loginSsoIntent: Intent?,
+            isB2B: Boolean
         )
     }
 
@@ -45,7 +47,8 @@ interface CreateAccountEmailContract {
         val emailLikelyInvalid: Boolean,
         val inEuropeanUnion: Boolean,
         val country: String?,
-        val loginSsoIntent: Intent?
+        val loginSsoIntent: Intent?,
+        val isB2B: Boolean
     )
 
     class EmptyEmailException(cause: Throwable? = null) : Exception(cause)

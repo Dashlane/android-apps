@@ -32,8 +32,6 @@ interface PasswordAnalysisContract {
         suspend fun saveModified(authentifiant: VaultItem<SyncObject.Authentifiant>)
 
         fun shouldDisplayProcessDuration(): Boolean
-        fun listenForChanges()
-        fun unlistenForChanges()
     }
 
     enum class Mode { COMPROMISED, REUSED, WEAK, EXCLUDED }

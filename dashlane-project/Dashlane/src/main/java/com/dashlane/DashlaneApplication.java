@@ -7,20 +7,17 @@ import android.os.Build;
 import android.os.Looper;
 import android.webkit.WebView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.hilt.work.HiltWorkerFactory;
-import androidx.work.Configuration;
-
 import com.braze.ui.inappmessage.BrazeInAppMessageManager;
-import com.dashlane.debug.DeveloperUtilities;
 import com.dashlane.hermes.LogRepository;
-import com.dashlane.util.BuildContract;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.hilt.work.HiltWorkerFactory;
+import androidx.work.Configuration;
 import dagger.hilt.android.HiltAndroidApp;
 
 @HiltAndroidApp
@@ -57,16 +54,6 @@ public class DashlaneApplication extends Application implements Configuration.Pr
             dashlaneObserver.onTerminate(this);
         }
         super.onTerminate();
-    }
-
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        
-        
-        if (!DeveloperUtilities.isUnitTestMode()) {
-            BuildContract.initializeSystemSettings();
-        }
     }
 
     private void updateWebViewDataDirectory() {

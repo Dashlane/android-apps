@@ -3,6 +3,7 @@ package com.dashlane.notificationcenter.view
 import android.content.Context
 import android.view.View
 import com.dashlane.R
+import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.databinding.ItemActionitemBinding
 import com.dashlane.notificationcenter.NotificationCenterDef
@@ -10,7 +11,6 @@ import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.getUser
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.drawable.CircleDrawable
@@ -22,8 +22,8 @@ import java.time.Instant
 data class SharingActionItemItemGroup(
     val sharing: ItemGroup,
     val xmlConverter: DataIdentifierSharingXmlConverter,
-    val dataStorageProvider: DataStorageProvider,
     val sessionManager: SessionManager,
+    val sharingDao: SharingDao,
     override val actionItemsRepository: NotificationCenterRepository,
     override val section: ActionItemSection = ActionItemSection.SHARING,
     override val type: ActionItemType = ActionItemType.SHARING,
@@ -89,8 +89,7 @@ data class SharingActionItemItemGroup(
             referrer: String
         ) {
             val itemId = itemGroup.items?.firstOrNull()?.itemId ?: return
-            val extraData =
-                actionItem.dataStorageProvider.sharingDao.loadItemContentExtraData(itemId)
+            val extraData = actionItem.sharingDao.loadItemContentExtraData(itemId)
             val vaultItem = actionItem.xmlConverter.fromXml(itemId, extraData)?.vaultItem
             val item: SummaryObject? = vaultItem?.toSummary()
 

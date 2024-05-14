@@ -14,8 +14,8 @@ import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.model.VaultItem
@@ -26,7 +26,7 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationPhoneProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
 ) : ItemScreenConfigurationProvider() {
@@ -96,9 +96,9 @@ class ItemScreenConfigurationPhoneProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.Phone>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             val spaceUpdate = VaultItem<*>::copyForUpdatedTeamspace
-            subViewFactory.createSpaceSelector(item.syncObject.spaceId, teamspaceAccessor, null, spaceUpdate)
+            subViewFactory.createSpaceSelector(item.syncObject.spaceId, teamSpaceAccessor, null, spaceUpdate)
         } else {
             null
         }
@@ -180,7 +180,7 @@ private fun VaultItem<*>.copyForUpdatedPhoneNumber(value: String): VaultItem<*> 
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.Phone>
     val phone = this.syncObject
     return if (value.teamId == phone.spaceId) {

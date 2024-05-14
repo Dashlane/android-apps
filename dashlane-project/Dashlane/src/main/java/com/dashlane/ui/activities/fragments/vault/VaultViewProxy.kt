@@ -74,12 +74,14 @@ class VaultViewProxy(
         filterTabLayout.selectTab(filterTabLayout.getTabAt(position))
     }
 
-    override fun showAnnouncement(@LayoutRes layout: Int?, onClick: () -> Unit) {
+    override fun showAnnouncement(@LayoutRes layout: Int?, onClick: () -> Unit): View? {
         announcementView.removeAllViews()
         if (layout != null) {
-            LayoutInflater.from(context).inflate(layout, announcementView)
+            val viewCreated = LayoutInflater.from(context).inflate(layout, announcementView)
             announcementView.setOnClickListener { onClick() }
+            return viewCreated
         }
+        return null
     }
 
     override fun showSnackbar(stringRes: Int) {

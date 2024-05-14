@@ -5,6 +5,7 @@ import com.dashlane.account.UserAccountStorage
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.Session
+import com.dashlane.session.UserDataRepository
 import com.dashlane.session.isServerKeyNotNull
 import com.dashlane.settings.SettingsManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager

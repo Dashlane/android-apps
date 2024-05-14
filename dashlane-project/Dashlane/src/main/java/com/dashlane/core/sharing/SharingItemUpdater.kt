@@ -3,6 +3,8 @@ package com.dashlane.core.sharing
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.encodeBase64ToString
+import com.dashlane.events.AppEvents
+import com.dashlane.events.DataIdentifierReplacedEvent
 import com.dashlane.exception.NotLoggedInException
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
@@ -29,35 +31,29 @@ import com.dashlane.sharing.util.GroupKeyLazy
 import com.dashlane.sharing.util.GroupVerification
 import com.dashlane.sharing.util.ProposeSignatureVerification
 import com.dashlane.sharing.util.SharingCryptographyHelper
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.xml.domain.objectType
 import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @Suppress("LargeClass")
 class SharingItemUpdater @Inject constructor(
     private val sharingCryptographyHelper: SharingCryptographyHelper,
-    private val dataStorageProvider: DataStorageProvider,
+    private val sharingDao: SharingDao,
+    private val genericDataQuery: GenericDataQuery,
     private val sessionManager: SessionManager,
     private val xmlConverterLazy: Lazy<DataIdentifierSharingXmlConverter>,
     private val sharingDaoMemoryDataAccessProvider: SharingDaoMemoryDataAccessProvider,
     private val autoAcceptItemGroup: AutoAcceptItemGroup,
     private val sharingInvitePublicKeyUser: SharingInvitePublicKeyUser,
     private val deleteItemGroupService: DeleteItemGroupService,
-    private val proposeSignatureVerification: ProposeSignatureVerification
+    private val proposeSignatureVerification: ProposeSignatureVerification,
+    private val appEvents: AppEvents
 ) {
-
-    private val sharingDao: SharingDao
-        get() = dataStorageProvider.sharingDao
-
-    private val genericDataQuery: GenericDataQuery
-        get() = dataStorageProvider.genericDataQuery
-
     private val mutex = Mutex()
 
     @Throws(NotLoggedInException::class)
@@ -351,10 +347,14 @@ class SharingItemUpdater @Inject constructor(
         items?.forEach { item ->
             val itemId = item.itemId
             
+            val newItem = sharingDao.duplicateDataIdentifier(itemId) ?: return@forEach
+            
             memory.deleteItemContent(itemId)
             
-            sharingDao.duplicateDataIdentifier(itemId)
+            sharingDao.updatePrivateCollections(newItem, itemId)
+            
             sharingDao.deleteDataIdentifier(itemId)
+            appEvents.post(DataIdentifierReplacedEvent(itemId, newItem.uid))
         }
         sendDeleteItemGroup(session)
         memory.delete(this)

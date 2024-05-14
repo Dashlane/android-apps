@@ -1,13 +1,12 @@
 package com.dashlane.core.domain
 
 import android.content.Context
-import com.dashlane.core.DataSync
 import com.dashlane.csvimport.csvimport.ImportAuthentifiantHelper
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.sync.DataSync
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
@@ -27,14 +26,11 @@ import javax.inject.Singleton
 class AccountStorageImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val mainDataAccessor: MainDataAccessor,
+    private val dataSaver: DataSaver,
     private val sessionManager: SessionManager,
     private val dataSync: DataSync,
     private val activityLogger: VaultActivityLogger
 ) : ImportAuthentifiantHelper, VpnThirdPartyAuthentifiantHelper {
-
-    private val dataSaver: DataSaver
-        get() = mainDataAccessor.getDataSaver()
 
     @Suppress("UNCHECKED_CAST")
     override fun newAuthentifiant(
@@ -94,7 +90,7 @@ class AccountStorageImpl @Inject constructor(
             )
         )
         savedAuthentifiants.forEach {
-            activityLogger.sendActivityLog(vaultItem = it, action = Action.ADD)
+            activityLogger.sendAuthentifiantActivityLog(vaultItem = it, action = Action.ADD)
         }
         if (savedAuthentifiants.isNotEmpty()) {
             dataSync.sync(Trigger.SAVE)

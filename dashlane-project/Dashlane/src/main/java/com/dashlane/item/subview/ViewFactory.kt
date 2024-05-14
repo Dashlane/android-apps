@@ -286,6 +286,7 @@ class ViewFactory(
             activity = activity,
             mood = item.mood,
             title = item.value,
+            description = item.description,
             primaryButton = item.primaryButton,
             secondaryButton = item.secondaryButton
         )

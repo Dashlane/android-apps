@@ -1,5 +1,6 @@
 package com.dashlane.notification.badge
 
+import com.dashlane.core.sharing.SharingDao
 import com.dashlane.loaders.datalists.SharingUserDataUtils
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
@@ -7,10 +8,9 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isPending
-import com.dashlane.storage.DataStorageProvider
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 
 class SharingInvitationRepositoryImpl @Inject constructor(
     private val sessionManager: SessionManager,
-    private val dataStorageProvider: DataStorageProvider,
+    private val sharingDao: SharingDao,
     @DefaultCoroutineDispatcher
     private val defaultDispatcher: CoroutineDispatcher,
     private val userFeaturesChecker: UserFeaturesChecker,
@@ -69,18 +69,18 @@ class SharingInvitationRepositoryImpl @Inject constructor(
     }
 
     private suspend fun loadItemGroups() = withContext(defaultDispatcher) {
-        dataStorageProvider.sharingDao.loadAllItemGroup()
+        sharingDao.loadAllItemGroup()
     }
 
     private suspend fun loadUserGroups() = withContext(defaultDispatcher) {
-        dataStorageProvider.sharingDao.loadAllUserGroup()
+        sharingDao.loadAllUserGroup()
     }
 
     private suspend fun loadCollections() = withContext(defaultDispatcher) {
-        if (!userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_2)) {
+        if (!userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
             return@withContext emptyList()
         }
-        dataStorageProvider.sharingDao.loadAllCollection()
+        sharingDao.loadAllCollection()
     }
 
     data class SharingInvitations(

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.dashlane.account.UserAccountInfo
+import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordContract
 import com.dashlane.createaccount.pages.confirmpassword.CreateAccountConfirmPasswordContract
 import com.dashlane.createaccount.pages.email.CreateAccountEmailContract
@@ -63,19 +64,20 @@ interface CreateAccountContract {
             accountType: UserAccountInfo.AccountType,
             termsState: AccountCreator.TermsState,
             biometricEnabled: Boolean,
-            resetMpEnabled: Boolean
+            resetMpEnabled: Boolean,
+            country: String
         )
 
         fun createEmailDataProvider(): CreateAccountEmailContract.DataProvider
 
-        fun createChoosePasswordDataProvider(username: String): CreateAccountChoosePasswordContract.DataProvider
+        fun createChoosePasswordDataProvider(username: String, isB2B: Boolean): CreateAccountChoosePasswordContract.DataProvider
 
         fun createConfirmPasswordDataProvider(
             username: String,
             password: ObfuscatedByteArray,
             inEuropeanUnion: Boolean,
             origin: String?,
-            country: String?
+            country: String
         ): CreateAccountConfirmPasswordContract.DataProvider
 
         fun createSuccessIntent(): Intent

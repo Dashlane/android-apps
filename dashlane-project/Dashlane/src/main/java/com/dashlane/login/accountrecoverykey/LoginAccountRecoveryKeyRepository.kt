@@ -1,7 +1,7 @@
 package com.dashlane.login.accountrecoverykey
 
 import com.dashlane.account.UserAccountInfo
-import com.dashlane.accountrecoverykey.AccountRecoveryStatus
+import com.dashlane.accountrecoverykey.AccountRecoveryState
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyKey
@@ -70,12 +70,12 @@ class LoginAccountRecoveryKeyRepository @Inject constructor(
         stateFlow.emit(LoginAccountRecoveryKeyData())
     }
 
-    suspend fun getAccountRecoveryStatus(registeredUserDevice: RegisteredUserDevice): Result<AccountRecoveryStatus> {
+    suspend fun getAccountRecoveryStatus(registeredUserDevice: RegisteredUserDevice): Result<AccountRecoveryState> {
         return runCatching {
             val request = AccountRecoveryGetStatusService.Request(registeredUserDevice.login)
             val getStatusResponse = accountRecoveryGetStatusService.execute(request)
 
-            return@runCatching AccountRecoveryStatus(
+            return@runCatching AccountRecoveryState.Success(
                 enabled = getStatusResponse.data.enabled,
                 visible = true
             )

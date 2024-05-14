@@ -14,12 +14,14 @@ import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.BadgeView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 fun View?.configureAsFab(
     @StringRes titleRes: Int,
     @StringRes titleDescription: Int,
-    @DrawableRes drawableRes: Int
+    @DrawableRes drawableRes: Int,
+    hasUpgradeBadge: Boolean = false
 ) {
     this?.findViewById<TextView>(R.id.title)?.run {
         setText(titleRes)
@@ -27,6 +29,9 @@ fun View?.configureAsFab(
     }
     this?.findViewById<FloatingActionButton>(R.id.icon)?.run {
         setImageResource(drawableRes)
+    }
+    this?.findViewById<BadgeView>(R.id.badge)?.run {
+        visibility = if (hasUpgradeBadge) View.VISIBLE else View.GONE
     }
 }
 

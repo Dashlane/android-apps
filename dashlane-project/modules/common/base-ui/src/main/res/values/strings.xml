@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings">Settings</string>
+    <string name="allow_dashlane_to_access_your_contacts">Allow Dashlane to access your contacts.</string>
+    <string name="download_file_permission_required">Allow Dashlane storage access to downloaded files.</string>
+    <string name="copy" translatable="false">Copy</string>
+    <string name="warning_no_browser_enabled_on_device">We couldn\'t open this link because you don\'t have a browser enabled on your device.</string>
+    <string name="and_accessibility_action_expand">Expand</string>
+    <string name="and_accessibility_action_collapse">Collapse</string>
+    <string name="and_accessibility_back_button">Back</string>
+    
+    <string name="and_accessibility_remove_category">Remove</string>
+    
+    <string name="and_accessibility_shared_category">Shared</string>
+    
+    <string name="and_accessibility_pin_keyboard_action_text_clear">Clear</string>
+
+    
+    <string name="generic_error_title">Something went wrong</string>
+    
+    <string name="generic_error_message">An unexpected error occurred. Please try again.</string>
+    
+    <string name="generic_error_retry_button">Try again</string>
+    
+    <string name="generic_error_cancel_button">Cancel</string>
+
+    
+    <string name="collection_search_field_label">Collection name</string>
+    
+    <string name="collection_search_field_placeholder">Select or create...</string>
+
+    
+    <string name="password_limit_bottom_sheet_title">You’ve reached your Free plan password limit</string>
+    
+    <string name="password_limit_bottom_sheet_message">Upgrade to add unlimited passwords and sync across unlimited devices.</string>
+    
+    <string name="password_limit_bottom_sheet_upgrade">Upgrade</string>
+    
+    <string name="password_limit_bottom_sheet_cancel">Not now</string>
+
+    
+    <string name="passphrase_component_missing_word_label">Missing word</string>
+    
+    <string name="passphrase_component_missing_word_error">That does not match. Please try again</string>
+</resources>

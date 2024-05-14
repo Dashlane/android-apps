@@ -5,6 +5,7 @@ import android.app.backup.BackupManager
 import android.content.Context
 import com.dashlane.abtesting.OfflineExperimentReporter
 import com.dashlane.account.UserAccountStorage
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.authenticator.AuthenticatorAppConnection
@@ -13,18 +14,17 @@ import com.dashlane.autofill.linkedservices.RememberToLinkedAppsMigration
 import com.dashlane.braze.BrazeWrapper
 import com.dashlane.breach.BreachManager
 import com.dashlane.callbacks.AdjustActivityCallback
-import com.dashlane.core.DataSync
+import com.dashlane.core.DataSyncImpl
 import com.dashlane.core.DataSyncNotification
 import com.dashlane.crashreport.CrashReporter
-import com.dashlane.debug.DaDaDa
 import com.dashlane.debug.DeveloperUtilities.systemIsInDebug
-import com.dashlane.device.DeviceInfoUpdater
 import com.dashlane.device.DeviceUpdateManager
 import com.dashlane.events.AppEvents
 import com.dashlane.hermes.LogRepository
 import com.dashlane.inappbilling.BillingManager
 import com.dashlane.logger.AdjustWrapper
 import com.dashlane.notification.FcmHelper
+import com.dashlane.preference.CleanupPreferencesManager
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.server.api.DashlaneApi
@@ -40,14 +40,12 @@ import com.dashlane.session.observer.LinkedAppsMigrationObserver
 import com.dashlane.session.observer.OfflineExperimentObserver
 import com.dashlane.session.observer.SystemUpdateObserver
 import com.dashlane.session.observer.UserSettingsLogObserver
-import com.dashlane.session.repository.AccountStatusRepository
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
-import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.session.repository.UserAccountInfoRepository
 import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.session.startRestoreSession
-import com.dashlane.ui.GlobalActivityLifecycleListener
+import com.dashlane.ui.ActivityLifecycleListener
 import com.dashlane.ui.endoflife.EndOfLife
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 import com.dashlane.update.AppUpdateInstaller
@@ -73,8 +71,7 @@ class DashlaneApplicationObserver @Inject constructor(
     private val userAccountInfoRepository: UserAccountInfoRepository,
     private val accountStatusRepository: AccountStatusRepository,
     private val lockRepository: LockRepository,
-    private val teamspaceManagerRepository: TeamspaceManagerRepository,
-    private val dataSync: DataSync,
+    private val dataSync: DataSyncImpl,
     private val offlineExperimentReporter: OfflineExperimentReporter,
     private val announcementCenter: AnnouncementCenter,
     private val deviceUpdateManager: DeviceUpdateManager,
@@ -89,9 +86,7 @@ class DashlaneApplicationObserver @Inject constructor(
     private val endOfLife: EndOfLife,
     private val appMetaDataToLinkedAppsMigration: AppMetaDataToLinkedAppsMigration,
     private val rememberToLinkedAppsMigration: RememberToLinkedAppsMigration,
-    private val deviceInfoUpdater: DeviceInfoUpdater,
-    private val daDaDa: DaDaDa,
-    private val globalActivityLifecycleListener: GlobalActivityLifecycleListener,
+    private val globalActivityLifecycleListener: ActivityLifecycleListener,
     private val billingManager: BillingManager,
     private val notificationHelper: NotificationHelper,
     private val brazeWrapper: BrazeWrapper,
@@ -107,13 +102,12 @@ class DashlaneApplicationObserver @Inject constructor(
     private val breachManager: BreachManager,
     private val logRepository: LogRepository,
     private val userSettingsLogRepository: UserSettingsLogRepository,
-    private val syncBroadcastManager: SyncBroadcastManager
+    private val syncBroadcastManager: SyncBroadcastManager,
+    private val cleanupPreferencesManager: CleanupPreferencesManager,
 ) : ApplicationObserver {
     override fun onCreate(application: DashlaneApplication) {
         init()
         FirebaseApp.initializeApp(application)
-        deviceInfoUpdater.refreshIfNeeded()
-        daDaDa.listen(application)
         globalActivityLifecycleListener.register(application)
         announcementCenter.start(application)
         if (!systemIsInDebug(application.applicationContext)) {
@@ -127,6 +121,7 @@ class DashlaneApplicationObserver @Inject constructor(
         userSupportFileLoggerApplicationCreated.onApplicationCreated(application)
         vaultReportLogger.start()
         authenticatorAppConnection.loadOtpsForBackup()
+        cleanupPreferencesManager.cleanup()
     }
 
     override fun onTerminate(application: DashlaneApplication) {
@@ -164,9 +159,8 @@ class DashlaneApplicationObserver @Inject constructor(
     private fun setupSessionObservers() {
         sessionManager.attach(sessionCoroutineScopeRepository)
         sessionManager.attach(lockRepository)
-        sessionManager.attach(teamspaceManagerRepository)
-        sessionManager.attach(AnnouncementCenterObserver(announcementCenter))
         sessionManager.attach(accountStatusRepository)
+        sessionManager.attach(AnnouncementCenterObserver(announcementCenter))
         sessionManager.attach(userAccountInfoRepository)
         sessionManager.attach(cryptographyMigrationObserver)
         sessionManager.attach(broadcastManagerObserver)

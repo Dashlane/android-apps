@@ -10,7 +10,6 @@ import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.getUser
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.drawable.CircleDrawable
@@ -19,7 +18,6 @@ import java.time.Instant
 data class SharingActionItemCollection(
     val sharing: Collection,
     val xmlConverter: DataIdentifierSharingXmlConverter,
-    val dataStorageProvider: DataStorageProvider,
     val sessionManager: SessionManager,
     override val actionItemsRepository: NotificationCenterRepository,
     override val section: ActionItemSection = ActionItemSection.SHARING,

@@ -50,7 +50,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class SearchFragment : AbstractContentFragment(), EfficientAdapter.OnItemClickListener<ViewTypeProvider> {
+class SearchFragment :
+    AbstractContentFragment(),
+    EfficientAdapter.OnItemClickListener<ViewTypeProvider>,
+    EfficientAdapter.OnItemLongClickListener<ViewTypeProvider> {
 
     @Inject
     lateinit var searchService: SearchService
@@ -104,6 +107,7 @@ class SearchFragment : AbstractContentFragment(), EfficientAdapter.OnItemClickLi
             searchService.getVaultItemLogger(),
             this
         ) { item: Any? -> item as? VaultItemWrapper<*> }
+        adapter.onItemLongClickListener = this
         setHasOptionsMenu(true)
 
         fabPresenter = FabPresenter(navigator).also {
@@ -197,6 +201,17 @@ class SearchFragment : AbstractContentFragment(), EfficientAdapter.OnItemClickLi
             onVaultItemClick(item.summaryObject)
         } else if (item is SearchableSettingInRecyclerView) {
             onSettingItemClick(item)
+        }
+    }
+
+    override fun onLongItemClick(
+        adapter: EfficientAdapter<ViewTypeProvider>,
+        view: View,
+        item: ViewTypeProvider?,
+        position: Int
+    ) {
+        if (item is VaultItemWrapper<*>) {
+            searchService.navigateToQuickAction(item.summaryObject, item.itemListContext)
         }
     }
 

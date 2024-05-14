@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 interface ChecklistViewModelContract {
     val checkListDataFlow: Flow<ChecklistData>
     fun onDismissChecklistClicked()
+
+    fun onDWMViewScanResult()
 }

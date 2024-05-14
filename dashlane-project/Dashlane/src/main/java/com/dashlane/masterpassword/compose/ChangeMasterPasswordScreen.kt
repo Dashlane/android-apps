@@ -180,8 +180,7 @@ fun ChangeMasterPasswordContent(
 private fun passwordFieldActions(): TextFieldActions.Password = TextFieldActions.Password(
     hideRevealAction = TextFieldAction.HideReveal(
         contentDescriptionToHide = stringResource(id = R.string.and_accessibility_text_edit_hide),
-        contentDescriptionToReveal = stringResource(id = R.string.and_accessibility_text_edit_reveal),
-        onClick = { }
+        contentDescriptionToReveal = stringResource(id = R.string.and_accessibility_text_edit_reveal)
     ),
     genericAction = null,
     passwordGeneratorAction = null

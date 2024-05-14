@@ -18,8 +18,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.reflect.KClass
 
+@Singleton
 class SyncVaultImplRaclette @Inject constructor(
     private val userSettingsSyncRepository: UserSettingsSyncRepository,
     private val dataIdentifierSyncRepository: DataIdentifierSyncRepositoryRaclette,

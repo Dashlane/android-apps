@@ -1,16 +1,12 @@
 package com.dashlane.ui.activities.fragments.checklist
 
 import com.dashlane.R
-import com.dashlane.darkweb.DarkWebEmailStatus
-import com.dashlane.darkweb.DarkWebMonitoringManager
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.KEY_GUIDED_ONBOARDING_DWM_USER_HAS_ALERTS
+import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.KEY_GUIDED_ONBOARDING_DWM_OPT_IN
 import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.KEY_GUIDED_PASSWORD_ONBOARDING_Q2_ANSWER
 import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.fromId
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.storage.userdata.accessor.DataCounter
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import com.dashlane.storage.userdata.accessor.filter.CredentialFilter
 import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
@@ -19,34 +15,18 @@ import com.dashlane.ui.activities.fragments.checklist.ChecklistData.Companion.KE
 import com.dashlane.ui.activities.fragments.checklist.ChecklistData.Companion.KEY_CHECKLIST_AUTOFILL_ACTIVATION_ACKNOWLEDGED
 import com.dashlane.ui.activities.fragments.checklist.ChecklistData.Companion.KEY_CHECKLIST_DWM_ACKNOWLEDGED
 import com.dashlane.ui.activities.fragments.checklist.ChecklistData.Companion.KEY_CHECKLIST_M2D_ACKNOWLEDGED
-import com.dashlane.xml.domain.SyncObject
 import java.time.Instant
 import javax.inject.Inject
 
 class ChecklistDataProvider @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val inAppLoginManager: InAppLoginManager,
-    private val mainDataAccessor: MainDataAccessor,
-    private val checklistHelper: ChecklistHelper,
-    private val breachLoader: BreachLoader,
-    private val darkWebMonitoringManager: DarkWebMonitoringManager
+    private val dataCounter: DataCounter,
+    private val checklistHelper: ChecklistHelper
 ) : ChecklistDataProviderContract {
 
-    private val dataCounter: DataCounter
-        get() = mainDataAccessor.getDataCounter()
-
     override fun hasDarkWebMonitoring() =
-        userPreferencesManager.getBoolean(KEY_GUIDED_ONBOARDING_DWM_USER_HAS_ALERTS, false)
-
-    override suspend fun hasReadAllDarkWebAlerts(): Boolean {
-        val setupIncomplete = darkWebMonitoringManager.getEmailsWithStatus()?.any {
-            it.status == DarkWebEmailStatus.STATUS_PENDING
-        } ?: true
-        if (setupIncomplete) return false
-        return breachLoader.getBreachesWrapper(ignoreUserLock = true)
-            .filter { it.publicBreach.isDarkWebBreach() }
-            .all { it.localBreach.status != SyncObject.SecurityBreach.Status.PENDING }
-    }
+        userPreferencesManager.getBoolean(KEY_GUIDED_ONBOARDING_DWM_OPT_IN, false)
 
     override fun hasActivatedAutofill() = inAppLoginManager.isEnableForApp()
 

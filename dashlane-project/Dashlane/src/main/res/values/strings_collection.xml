@@ -9,7 +9,7 @@
     
     <string name="collection_selector_activity_title">Add a collection</string>
     
-    <string name="collection_selector_activity_create_button">Create</string>
+    <string name="collection_selector_activity_new_badge">New collection</string>
     
     <string name="collection_list_view_provider_add_button">Add a collection</string>
     
@@ -74,6 +74,14 @@
     
     <string name="collection_details_item_menu_remove">Remove from this Collection</string>
     
+    <string name="collection_detail_dialog_confirm_title">Add to a Shared Collection</string>
+    
+    <string name="collection_detail_dialog_confirm_text">Everyone that has access to %1$s Collection will have Full Rights access to this item.</string>
+    
+    <string name="collection_detail_dialog_confirm_positive_button">Add to Collection</string>
+    
+    <string name="collection_detail_dialog_confirm_negative_button">Cancel</string>
+    
     <plurals name="collections_new_share_group_members">
         <item quantity="one">%1$d user</item>
         <item quantity="other">%1$d users</item>
@@ -102,4 +110,36 @@
     <string name="collection_item_share_permission_explanation_title">Permission limitations</string>
     
     <string name="collection_item_share_permission_explanation_text">Some users and groups have access to this item via a Collection. Item access can be managed by revoking their access or removing the item from the Collection.</string>
+    
+    <string name="collection_shared_access_title">Shared Access</string>
+    
+    <string name="collection_shared_access_item_invitation_pending">Invite pending</string>
+    
+    <string name="collection_shared_access_item_member_myself">You cannot remove yourself</string>
+    
+    <string name="collection_shared_access_revoke_button_accessibility">Revoke</string>
+    
+    <string name="collection_shared_access_revoke_dialog_title">Sure you want to revoke?</string>
+    
+    <string name="collection_shared_access_revoke_dialog_text">%1$s will no longer be able to access this collection.</string>
+    
+    <string name="collection_shared_access_revoke_dialog_positive_button">Revoke access</string>
+    
+    <string name="collection_shared_access_revoke_dialog_negative_button">Cancel</string>
+    
+    <string name="collection_shared_access_revoke_success_text">Shared access updated</string>
+    
+    <string name="collection_shared_access_revoke_error_text">Shared access cannot be updated</string>
+    
+    <string name="collection_role_manager">Manager</string>
+    
+    <string name="collection_role_editor">Editor</string>
+    
+    <string name="collection_new_share_infobox_title_roles">Permissions</string>
+    
+    <string name="collection_new_share_infobox_description_roles">Selected users will default to the Manager role and can share, edit, and manage access to the Collection. To share with an Editor role, please use the Web App.</string>
+    
+    <string name="collection_shared_access_infobox_title_roles">Permissions</string>
+    
+    <string name="collection_shared_access_infobox_description_roles">Editor role cannot manage or revoke access to the Shared Collection.</string>
 </resources>

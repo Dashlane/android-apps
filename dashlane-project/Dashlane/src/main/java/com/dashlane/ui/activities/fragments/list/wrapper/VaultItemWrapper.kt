@@ -4,7 +4,8 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.teamspaces.manager.TeamspaceManager
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
@@ -29,7 +30,8 @@ interface VaultItemWrapper<D : SummaryObject> :
     val vaultItemCopyService: VaultItemCopyService
     val navigator: Navigator
     val quickActionProvider: QuickActionProvider
-    val teamspaceManager: TeamspaceManager?
+    val teamSpaceAccessorProvider: TeamSpaceAccessorProvider
+    val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
 
     fun getListItemActions(): List<ListItemAction>
     fun getTitle(context: Context): StatusText

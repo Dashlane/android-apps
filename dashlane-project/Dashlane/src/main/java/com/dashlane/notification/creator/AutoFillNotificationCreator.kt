@@ -10,7 +10,6 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dashlane.R
-import com.dashlane.debug.DaDaDa
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
@@ -18,7 +17,7 @@ import com.dashlane.notification.AutofillReceiver
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.SplashScreenActivity
-import com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingInAppLoginActivity
+import com.dashlane.autofill.onboarding.OnboardingInAppLoginActivity
 import com.dashlane.util.clearTask
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.notification.NotificationHelper
@@ -36,29 +35,13 @@ class AutoFillNotificationCreator @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
     private val inAppLoginManager: InAppLoginManager,
-    private val daDaDa: DaDaDa,
     private val globalPreferencesManager: GlobalPreferencesManager
 ) {
     private val workManager: WorkManager by lazy { WorkManager.getInstance(context) }
 
-    companion object {
-        const val NOTIFICATION_ID = 0x08
-        const val TAG_NEW_USER = "tag_new_user"
-        const val TAG_EXISTING_USER_ACTIVE = "tag_existing_user_active"
-        const val TAG_EXISTING_USER_INACTIVE = "tag_existing_inactive"
-        const val DISMISSAL_THRESHOLD = 2
-        private val TAG_ARRAY = arrayOf(TAG_NEW_USER, TAG_EXISTING_USER_ACTIVE, TAG_EXISTING_USER_INACTIVE)
-        private const val DURATION_DAY_INITIAL_DELAY = 1
-        private const val DURATION_DAY_NEW_USER = 2
-        private const val DURATION_DAY_EXISTING_INACTIVE_USER = 7
-        private const val DURATION_DAY_EXISTING_ACTIVE_USER = 28
-
-        @JvmStatic
-        fun cancelAutofillNotificationWorkers(context: Context) {
-            val workManager = WorkManager.getInstance(context)
-            TAG_ARRAY.forEach { tag ->
-                workManager.cancelAllWorkByTag(tag)
-            }
+    fun cancelAutofillNotificationWorkers() {
+        TAG_ARRAY.forEach { tag ->
+            workManager.cancelAllWorkByTag(tag)
         }
     }
 
@@ -111,38 +94,18 @@ class AutoFillNotificationCreator @Inject constructor(
     }
 
     private fun getDurationInitialDelay(): Long {
-        return if (daDaDa.isEnabled && daDaDa.isNotificationDelayEnabled) {
-            daDaDa.notificationAutofillInitialDelay.toLong()
-        } else {
-            getWorkManagerDuration(DURATION_DAY_INITIAL_DELAY, 19)
-        }
+        return getWorkManagerDuration(DURATION_DAY_INITIAL_DELAY, 19)
     }
 
     private fun getDurationNewUser(): Long {
-        return if (daDaDa.isEnabled && daDaDa.isNotificationDelayEnabled) {
-            daDaDa.notificationAutofillNewUserDelay.toLong()
-        } else {
-            getWorkManagerDuration(DURATION_DAY_NEW_USER, 19)
-        }
+        return getWorkManagerDuration(DURATION_DAY_NEW_USER, 19)
     }
 
-    private fun getDurationExistingInactiveUser() = if (daDaDa.isEnabled && daDaDa.isNotificationDelayEnabled) {
-        daDaDa.notificationAutofillExistingInactiveUserDelay.toLong()
-    } else {
-        getWorkManagerDuration(DURATION_DAY_EXISTING_INACTIVE_USER, 19)
-    }
+    private fun getDurationExistingInactiveUser() = getWorkManagerDuration(DURATION_DAY_EXISTING_INACTIVE_USER, 19)
 
-    private fun getInitialDelayExistingActiveUser() = if (daDaDa.isEnabled && daDaDa.isNotificationDelayEnabled) {
-        daDaDa.notificationAutofillInitialDelay.toLong()
-    } else {
-        getDurationExistingActiveUser()
-    }
+    private fun getInitialDelayExistingActiveUser() = getDurationExistingActiveUser()
 
-    private fun getDurationExistingActiveUser() = if (daDaDa.isEnabled && daDaDa.isNotificationDelayEnabled) {
-        daDaDa.notificationAutofillExistingActiveUserDelay.toLong()
-    } else {
-        getWorkManagerDuration(DURATION_DAY_EXISTING_ACTIVE_USER, 19)
-    }
+    private fun getDurationExistingActiveUser() = getWorkManagerDuration(DURATION_DAY_EXISTING_ACTIVE_USER, 19)
 
     @HiltWorker
     class AutoFillNotificationWorker @AssistedInject constructor(
@@ -216,5 +179,18 @@ class AutoFillNotificationCreator @Inject constructor(
             }
             return Result.success()
         }
+    }
+
+    companion object {
+        const val NOTIFICATION_ID = 0x08
+        const val TAG_NEW_USER = "tag_new_user"
+        const val TAG_EXISTING_USER_ACTIVE = "tag_existing_user_active"
+        const val TAG_EXISTING_USER_INACTIVE = "tag_existing_inactive"
+        const val DISMISSAL_THRESHOLD = 2
+        private val TAG_ARRAY = arrayOf(TAG_NEW_USER, TAG_EXISTING_USER_ACTIVE, TAG_EXISTING_USER_INACTIVE)
+        private const val DURATION_DAY_INITIAL_DELAY = 1
+        private const val DURATION_DAY_NEW_USER = 2
+        private const val DURATION_DAY_EXISTING_INACTIVE_USER = 7
+        private const val DURATION_DAY_EXISTING_ACTIVE_USER = 28
     }
 }

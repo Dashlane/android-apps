@@ -1,22 +1,29 @@
 package com.dashlane.ui.activities.fragments.vault
 
 import android.os.Bundle
-import android.view.View
+import android.widget.TextView
 import com.dashlane.R
+import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.announcements.AnnouncementCenter
+import com.dashlane.announcements.AnnouncementTags
 import com.dashlane.core.sync.getAgnosticMessageFeedback
 import com.dashlane.events.AppEvents
+import com.dashlane.events.DataIdentifierDeletedEvent
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.inapplogin.InAppLoginManager
+import com.dashlane.limitations.PasswordLimitationLogger
+import com.dashlane.limitations.PasswordLimiter
+import com.dashlane.limitations.PasswordLimiter.Companion.PASSWORD_LIMIT_LOOMING
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.Navigator
-import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.session.SessionManager
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.setCurrentPageView
-import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +32,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class VaultPresenter @Inject constructor(
-    dataProvider: VaultDataProvider,
     @FragmentLifecycleCoroutineScope
     private val fragmentLifecycleCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
@@ -35,14 +41,32 @@ class VaultPresenter @Inject constructor(
     private val navigator: Navigator,
     private val vaultViewModel: VaultViewModel,
     private val inAppLoginManager: InAppLoginManager,
+    private val announcementCenter: AnnouncementCenter,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
+    private val passwordLimiter: PasswordLimiter,
+    private val passwordLimitationLogger: PasswordLimitationLogger,
+    private val sessionManager: SessionManager,
+    private val accountStatusRepository: AccountStatusRepository
 ) : BasePresenter<Vault.DataProvider, Vault.View>(),
-Vault.Presenter,
-    EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider> {
+    Vault.Presenter {
 
     override val filter = MutableStateFlow(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
 
     init {
-        setProvider(dataProvider)
+        
+        fragmentLifecycleCoroutineScope.launch {
+            currentTeamSpaceUiFilter.teamSpaceFilterState.collect { filter ->
+                onTeamspaceChange(filter.teamSpace)
+            }
+        }
+        
+        fragmentLifecycleCoroutineScope.launch {
+            accountStatusRepository.accountStatusState.collect { accountStatuses ->
+                accountStatuses[sessionManager.session]?.let {
+                    refresh()
+                }
+            }
+        }
     }
 
     override fun onCreate(arguments: Bundle?, savedInstanceState: Bundle?) {
@@ -63,15 +87,20 @@ Vault.Presenter,
     }
 
     override fun onStartFragment() {
-        provider.subscribeTeamspaceManager()
         appEvents.register(this, SyncFinishedEvent::class.java, false) {
             onSyncFinished(it)
         }
+        appEvents.register(this, DataIdentifierDeletedEvent::class.java, false) {
+            
+            mayShowAnnouncement()
+        }
+        announcementCenter.fragment(AnnouncementTags.FRAGMENT_VAULT_LIST)
     }
 
     override fun onStopFragment() {
-        provider.unsubscribeTeamspaceManager()
         appEvents.unregister(this, SyncFinishedEvent::class.java)
+        appEvents.unregister(this, DataIdentifierDeletedEvent::class.java)
+        announcementCenter.fragment(null)
     }
 
     override fun onResumeFragment() {
@@ -83,7 +112,7 @@ Vault.Presenter,
         outState.putString(EXTRA_CURRENT_FILTER, filter.value.name)
     }
 
-    override fun onTeamspaceChange(teamspace: Teamspace?) {
+    override fun onTeamspaceChange(teamspace: TeamSpace?) {
         refresh()
     }
 
@@ -107,17 +136,6 @@ Vault.Presenter,
         vaultViewModel.refresh()
     }
 
-    override fun onItemClick(
-        adapter: EfficientAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>,
-        view: View,
-        item: DashlaneRecyclerAdapter.ViewTypeProvider?,
-        position: Int,
-    ) {
-        if (item is VaultItemViewTypeProvider) {
-            navigator.goToItem(item.summaryObject.id, item.summaryObject.syncObjectType.xmlObjectName)
-        }
-    }
-
     override fun onFilterSelected(filter: Filter) {
         setCurrentPageView(filter.toPage())
         this.filter.value = filter
@@ -137,6 +155,11 @@ Vault.Presenter,
 
     private fun onAutofillAnnouncementClicked() {
         navigator.goToInAppLogin()
+    }
+
+    private fun onPasswordLimitAnnouncementClicked() {
+        passwordLimitationLogger.upgradeFromBanner()
+        navigator.goToOffers()
     }
 
     private fun onSyncFinished(syncFinishedEvent: SyncFinishedEvent) {
@@ -159,13 +182,33 @@ Vault.Presenter,
     }
 
     private fun mayShowAnnouncement() {
-        if (inAppLoginManager.isDisabledForApp()) {
-            view.showAnnouncement(
-                R.layout.include_layout_vault_autofill_announcement,
-                onClick = this::onAutofillAnnouncementClicked
-            )
-        } else {
-            view.showAnnouncement(null)
+        when {
+            passwordLimiter.isPasswordLimitReached() -> {
+                view.showAnnouncement(
+                    R.layout.include_vault_password_limit_announcement,
+                    onClick = this::onPasswordLimitAnnouncementClicked
+                )
+            }
+            passwordLimiter.passwordRemainingBeforeLimit() in 0..PASSWORD_LIMIT_LOOMING -> {
+                val viewCreated = view.showAnnouncement(
+                    R.layout.include_vault_password_limit_remaining_announcement,
+                    onClick = this::onPasswordLimitAnnouncementClicked
+                )
+                viewCreated?.findViewById<TextView>(R.id.vault_announcement_text)?.text =
+                    viewCreated?.context?.getString(
+                        R.string.vault_announcement_password_limit_remaining_title,
+                        passwordLimiter.passwordRemainingBeforeLimit()
+                    )
+            }
+            inAppLoginManager.isDisabledForApp() -> {
+                view.showAnnouncement(
+                    R.layout.include_vault_autofill_announcement,
+                    onClick = this::onAutofillAnnouncementClicked
+                )
+            }
+            else -> {
+                view.showAnnouncement(null)
+            }
         }
     }
 

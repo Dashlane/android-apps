@@ -19,6 +19,6 @@ interface ChecklistDataProviderContract {
     fun setChecklistDismissed()
     fun getAccountCreationDate(): Instant
     fun hasActivatedAutofill(): Boolean
+
     fun hasCompletedAndAcknowledgedDarkWebAlerts(): Boolean
-    suspend fun hasReadAllDarkWebAlerts(): Boolean
 }

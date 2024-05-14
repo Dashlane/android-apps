@@ -3,53 +3,43 @@ package com.dashlane.invites
 import android.content.Context
 import android.widget.Toast
 import com.dashlane.R
-import com.dashlane.network.webservices.GetSharingLinkService
-import com.dashlane.session.SessionManager
+import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
+import com.dashlane.server.api.endpoints.invitation.GetSharingLinkService
+import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.util.IntentFactory.sendShareWithFriendsIntent
 import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.Toaster
 import com.dashlane.util.isNotSemanticallyNull
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 object InviteFriendsIntentHelper {
-    fun launchInviteFriendsIntent(
+    suspend fun launchInviteFriendsIntent(
         context: Context,
         toaster: Toaster,
+        subscriptionCodeRepository: SubscriptionCodeRepository,
         sharingLinkService: GetSharingLinkService,
-        sessionManager: SessionManager,
+        ioDispatcher: CoroutineDispatcher,
         networkStateProvider: NetworkStateProvider,
-        referralId: String?
     ) {
-        if (referralId != null) {
-            sendShareWithFriendsIntent(context, referralId)
-            return
-        }
-        
-        val session = sessionManager.session
-        if (session != null && networkStateProvider.isOn()) {
-            sharingLinkService.createCall(session.userId, session.uki).enqueue(object :
-                Callback<GetSharingLinkService.Content> {
-                override fun onResponse(
-                    call: Call<GetSharingLinkService.Content>,
-                    response: Response<GetSharingLinkService.Content>
-                ) {
-                    if (response.isSuccessful) {
-                        val sharingId = response.body()!!.sharingId
-                        if (sharingId.isNotSemanticallyNull()) {
-                            sendShareWithFriendsIntent(context, sharingId)
-                            return
-                        }
-                    }
-                    
-                    toaster.show(R.string.network_failed_notification, Toast.LENGTH_LONG)
-                }
+        if (networkStateProvider.isOn()) {
+            try {
+                withContext(ioDispatcher) {
+                    val subscriptionCode = subscriptionCodeRepository.get()
+                    val response = sharingLinkService.execute(
+                        request = GetSharingLinkService.Request(
+                            userKey = subscriptionCode,
+                        )
+                    )
 
-                override fun onFailure(call: Call<GetSharingLinkService.Content>, t: Throwable) {
-                    toaster.show(R.string.network_failed_notification, Toast.LENGTH_LONG)
+                    val sharingId = response.data.sharingId
+                    if (sharingId.isNotSemanticallyNull()) {
+                        sendShareWithFriendsIntent(context, toaster, sharingId)
+                    }
                 }
-            })
+            } catch (ex: DashlaneApiException) {
+                toaster.show(R.string.network_failed_notification, Toast.LENGTH_LONG)
+            }
         } else {
             toaster.show(R.string.make_sure_you_have_internet_for_refferalid, Toast.LENGTH_LONG)
         }

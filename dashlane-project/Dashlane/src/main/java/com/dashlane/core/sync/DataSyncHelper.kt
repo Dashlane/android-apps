@@ -2,8 +2,8 @@ package com.dashlane.core.sync
 
 import androidx.annotation.StringRes
 import com.dashlane.R
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.async.SyncBroadcastManager
-import com.dashlane.core.premium.PremiumStatusManager
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.ErrorDescription
@@ -19,12 +19,13 @@ import com.dashlane.server.api.exceptions.DashlaneApiHttpException
 import com.dashlane.server.api.exceptions.DashlaneApiIoException
 import com.dashlane.server.api.exceptions.DashlaneApiOfflineException
 import com.dashlane.session.Session
+import com.dashlane.session.UserDataRepository
 import com.dashlane.session.repository.UserCryptographyRepository
-import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.sync.repositories.ServerCredentials
 import com.dashlane.sync.repositories.SyncProgressChannel
 import com.dashlane.sync.repositories.SyncRepository
 import com.dashlane.sync.vault.SyncVault
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.generateUniqueIdentifier
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import retrofit2.HttpException
@@ -39,12 +40,13 @@ import com.dashlane.hermes.generated.definitions.Duration as HermesDuration
 class DataSyncHelper @Inject constructor(
     private val userDataRepository: UserDataRepository,
     private val userCryptographyRepository: UserCryptographyRepository,
-    private val premiumStatusManager: PremiumStatusManager,
     private val logRepository: LogRepository,
     private val syncVault: SyncVaultImplRaclette,
     private val syncRepository: SyncRepository,
     private val legacyCryptoMigrationHelper: LegacyCryptoMigrationHelper,
-    private val syncBroadcastManager: SyncBroadcastManager
+    private val syncBroadcastManager: SyncBroadcastManager,
+    private val accountStatusRepository: AccountStatusRepository,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
 ) {
 
     @OptIn(ObsoleteCoroutinesApi::class)
@@ -89,7 +91,7 @@ class DataSyncHelper @Inject constructor(
         syncRepository: SyncRepository,
         syncVault: SyncVault
     ) {
-        premiumStatusManager.refreshPremiumStatus(session)
+        accountStatusRepository.refreshFor(session)
         val serverCredentials = session.toServerCredentials()
         val success = try {
             syncRepository.sync(
@@ -135,6 +137,7 @@ class DataSyncHelper @Inject constructor(
             }
         }
         syncBroadcastManager.sendSyncFinishedBroadcast(origin)
+        currentTeamSpaceUiFilter.loadFilter()
     }
 
     private fun handleSyncError(

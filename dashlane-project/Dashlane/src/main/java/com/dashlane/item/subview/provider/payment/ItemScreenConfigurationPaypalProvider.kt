@@ -14,8 +14,8 @@ import com.dashlane.item.subview.action.CopyAction
 import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.storage.userdata.EmailSuggestionProvider
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.graphics.getDominantColor
@@ -29,7 +29,7 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationPaypalProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
@@ -163,10 +163,10 @@ class ItemScreenConfigurationPaypalProvider(
         item: VaultItem<SyncObject.PaymentPaypal>,
         loginView: ItemSubView<String>?
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 listOfNotNull(loginView),
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -210,7 +210,7 @@ private fun VaultItem<*>.copyForUpdatedName(value: String): VaultItem<*> {
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.PaymentPaypal>
     val paypal = this.syncObject
     return if (value.teamId == paypal.spaceId) {

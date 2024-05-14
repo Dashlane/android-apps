@@ -5,13 +5,16 @@ import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.dashlane.R
+import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.breach.Breach
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.navigation.Navigator
 import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.getShortTitle
+import com.dashlane.session.SessionManager
 import com.dashlane.similarpassword.GroupOfPassword
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.adapter.HeaderItem
@@ -41,10 +44,12 @@ class PasswordAnalysisPresenter(
     private val toaster: Toaster,
     private val navigator: Navigator,
     private val vaultDataQuery: VaultDataQuery,
-    private val itemWrapperProvider: ItemWrapperProvider
-) :
-    BasePresenter<PasswordAnalysisContract.DataProvider,
-        PasswordAnalysisContract.ViewProxy>(),
+    private val itemWrapperProvider: ItemWrapperProvider,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
+    private val sessionManager: SessionManager,
+    private val accountStatusRepository: AccountStatusRepository
+) : BasePresenter<PasswordAnalysisContract.DataProvider,
+    PasswordAnalysisContract.ViewProxy>(),
     PasswordAnalysisContract.Presenter,
     PasswordAnalysisItemWrapper.ActionListener {
 
@@ -55,12 +60,24 @@ class PasswordAnalysisPresenter(
 
     override fun onViewVisible() {
         requireRefresh(false)
-        provider.listenForChanges()
+        
+        coroutineScope.launch {
+            currentTeamSpaceUiFilter.teamSpaceFilterState.collect {
+                requireRefresh(true)
+            }
+        }
+        
+        coroutineScope.launch {
+            accountStatusRepository.accountStatusState.collect { accountStatuses ->
+                accountStatuses[sessionManager.session]?.let {
+                    requireRefresh(forceUpdate = true)
+                }
+            }
+        }
     }
 
     override fun onViewHidden() {
         view.removeListenerPage()
-        provider.unlistenForChanges()
     }
 
     override fun requireRefresh(forceUpdate: Boolean) {

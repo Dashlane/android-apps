@@ -1,6 +1,5 @@
 package com.dashlane.ui.menu.view.teamspace
 
-import android.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -14,17 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.teamspaces.model.SpaceColor
+import com.dashlane.teamspaces.model.SpaceName
 import com.dashlane.ui.menu.domain.MenuItemModel
 import com.dashlane.ui.menu.domain.TeamspaceIcon
 
 @Composable
-fun MenuTeamspaceItem(item: MenuItemModel.Teamspace) {
+fun MenuTeamspaceItem(item: MenuItemModel.TeamspaceItem) {
     Row(
         modifier = Modifier
             .semantics(mergeDescendants = true) {}
@@ -45,7 +47,10 @@ fun MenuTeamspaceItem(item: MenuItemModel.Teamspace) {
             icon = item.icon
         )
         Text(
-            text = item.name,
+            text = when (item.spaceName) {
+                is SpaceName.FixName -> stringResource(item.spaceName.nameRes)
+                is SpaceName.TeamName -> item.spaceName.value
+            },
             style = DashlaneTheme.typography.titleBlockMedium,
             color = DashlaneTheme.colors.textNeutralCatchy
         )
@@ -57,9 +62,12 @@ fun MenuTeamspaceItem(item: MenuItemModel.Teamspace) {
 fun MenuTeamspaceItemPreview() {
     DashlanePreview {
         MenuTeamspaceItem(
-            item = MenuItemModel.Teamspace(
-                name = "Personnel",
-                icon = TeamspaceIcon.Space(displayLetter = "P", colorInt = Color.MAGENTA)
+            item = MenuItemModel.TeamspaceItem(
+                spaceName = SpaceName.TeamName("Personnel"),
+                icon = TeamspaceIcon.Space(
+                    displayLetter = 'P',
+                    spaceColor = SpaceColor.FixColor(0xFFD000AF.toInt())
+                )
             ) { }
         )
     }

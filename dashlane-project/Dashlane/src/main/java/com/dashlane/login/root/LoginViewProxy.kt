@@ -16,7 +16,6 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.dashlane.R
-import com.dashlane.debug.DaDaDa
 import com.dashlane.login.LoginHostFragmentDirections
 import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.authenticator.LoginDashlaneAuthenticatorContract
@@ -45,7 +44,7 @@ import com.dashlane.login.pages.totp.LoginTotpPresenter
 import com.dashlane.login.pages.totp.LoginTotpViewProxy
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-class LoginViewProxy(rootView: View, private val dadada: DaDaDa) : BaseViewProxy<LoginContract.Presenter>(rootView), LoginContract.LoginViewProxy {
+class LoginViewProxy(rootView: View) : BaseViewProxy<LoginContract.Presenter>(rootView), LoginContract.LoginViewProxy {
     private val root: FrameLayout = findViewByIdEfficient(R.id.view_login_root_container)!!
 
     override fun transitionTo(presenter: LoginBaseContract.Presenter) {
@@ -98,8 +97,8 @@ class LoginViewProxy(rootView: View, private val dadada: DaDaDa) : BaseViewProxy
         TransitionManager.go(scene, transition)
     }
 
-    override fun transitionToCompose(email: String?) {
-        root.findNavController().navigate(LoginHostFragmentDirections.actionFragmentToCompose(email))
+    override fun transitionToCompose(email: String?, startDestination: String) {
+        root.findNavController().navigate(LoginHostFragmentDirections.actionFragmentToCompose(startDestination = startDestination, email = email))
     }
 
     private fun createViewProxyForPresenter(presenter: LoginBaseContract.Presenter) = when (presenter) {
@@ -126,7 +125,7 @@ class LoginViewProxy(rootView: View, private val dadada: DaDaDa) : BaseViewProxy
 
     private fun createLoginTokenViewProxy(): Pair<LoginTokenContract.ViewProxy, Scene> {
         val view = inflate(R.layout.scene_login_token)
-        return LoginTokenViewProxy(view, dadada) to Scene(root, view)
+        return LoginTokenViewProxy(view) to Scene(root, view)
     }
 
     private fun createLoginAuthenticatorPresenter(): Pair<LoginDashlaneAuthenticatorContract.ViewProxy, Scene> {

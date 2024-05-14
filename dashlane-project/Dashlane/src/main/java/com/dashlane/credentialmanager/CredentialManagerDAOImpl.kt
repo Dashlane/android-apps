@@ -2,11 +2,12 @@ package com.dashlane.credentialmanager
 
 import android.content.Context
 import com.dashlane.autofill.LinkedServicesHelper
-import com.dashlane.core.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.session.SessionManager
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.sync.DataSync
 import com.dashlane.util.isValidEmail
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
@@ -22,7 +23,8 @@ import java.time.Instant
 import javax.inject.Inject
 
 class CredentialManagerDAOImpl @Inject constructor(
-    private val mainDataAccessor: MainDataAccessor,
+    private val vaultDataQuery: VaultDataQuery,
+    private val dataSaver: DataSaver,
     private val sessionManager: SessionManager,
     private val linkedServicesHelper: LinkedServicesHelper,
     private val dataSync: DataSync
@@ -54,7 +56,7 @@ class CredentialManagerDAOImpl @Inject constructor(
             userDisplayName = userDisplayName,
             keyAlgorithm = keyAlgorithm
         )
-        if (mainDataAccessor.getDataSaver().save(passkey)) {
+        if (dataSaver.save(passkey)) {
             
             dataSync.sync(Trigger.SAVE)
 
@@ -96,7 +98,7 @@ class CredentialManagerDAOImpl @Inject constructor(
         ).copyWithDefaultValue(context, sessionManager.session)
             .asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
             ?.let {
-                if (mainDataAccessor.getDataSaver().save(it)) {
+                if (dataSaver.save(it)) {
                     
                     dataSync.sync(Trigger.SAVE)
 
@@ -126,7 +128,7 @@ class CredentialManagerDAOImpl @Inject constructor(
         val filter = vaultFilter {
             specificUid(itemId)
         }
-        val updatedAccount = mainDataAccessor.getVaultDataQuery()
+        val updatedAccount = vaultDataQuery
             .query(filter)
             ?.asVaultItemOfClassOrNull(SyncObject.Passkey::class.java)
             ?.copySyncObject {
@@ -136,6 +138,6 @@ class CredentialManagerDAOImpl @Inject constructor(
                 this.locallyViewedDate = lastUsedDate
                 this.locallyUsedCount = locallyUsedCount + 1
             } ?: return false
-        return mainDataAccessor.getDataSaver().save(updatedAccount)
+        return dataSaver.save(updatedAccount)
     }
 }

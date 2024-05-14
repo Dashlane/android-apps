@@ -29,7 +29,7 @@ interface LoginContract {
 
         fun transition(from: LoginBaseContract.Presenter?, to: LoginBaseContract.Presenter)
 
-        fun transitionToCompose(email: String?)
+        fun transitionToCompose(email: String?, startDestination: String)
     }
 
     interface Presenter : Base.IPresenter {

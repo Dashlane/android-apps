@@ -2,9 +2,11 @@ package com.dashlane.login.pages.token
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.viewModelScope
 import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.hermes.generated.definitions.VerificationMode
+import com.dashlane.debug.DaDaDa
 import com.dashlane.login.LoginLogger
 import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginBasePresenter
@@ -17,11 +19,15 @@ import kotlin.properties.Delegates
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class LoginTokenPresenter(
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
+    private val daDaDa: DaDaDa,
     private val loginLogger: LoginLogger
 ) :
     LoginBasePresenter<LoginTokenContract.DataProvider, LoginTokenContract.ViewProxy>(
@@ -62,7 +68,11 @@ class LoginTokenPresenter(
         super.onViewOrProviderChanged()
         val provider = providerOrNull ?: return
         val view = viewOrNull ?: return
-        view.initDebug(provider.username)
+        daDaDa.getSecurityToken(provider.username)
+            .onEach { token ->
+                view.tokenText = token
+            }
+            .launchIn(viewModelScope)
     }
 
     override fun onCodeCompleted() {

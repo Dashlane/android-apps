@@ -1,5 +1,6 @@
 package com.dashlane.guidedonboarding.darkwebmonitoring
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.navigation.NavController
@@ -67,11 +68,14 @@ class OnboardingDarkWebMonitoringActivity :
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         
         if (checkingDone) {
@@ -104,10 +108,9 @@ class OnboardingDarkWebMonitoringActivity :
             matchingEmail == null -> showError()
             matchingEmail.status == STATUS_ACTIVE -> {
                 emailConfirmed = true
-                
                 val alerts = darkWebMonitoringManager.getBreaches(0L)
                 val hasAlerts = alerts?.second?.isNotEmpty() == true
-                updateActivityResult(RESULT_OK, hasAlerts)
+                updateActivityResult(RESULT_OK)
                 showSuccess(hasAlerts)
             }
             else -> showError()
@@ -130,14 +133,11 @@ class OnboardingDarkWebMonitoringActivity :
         navController.navigate(loadingToError())
     }
 
-    private fun updateActivityResult(result: Int, hasAlerts: Boolean = true) {
-        resultIntent.putExtra(EXTRA_HAS_ALERTS, hasAlerts)
+    private fun updateActivityResult(result: Int) {
         setResult(result, resultIntent)
     }
 
     companion object {
-        const val EXTRA_HAS_ALERTS = "email_has_alerts"
-
         
         private val MIN_LOADING_TIME = Duration.ofMillis(800)
     }

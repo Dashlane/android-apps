@@ -1,5 +1,12 @@
 package com.dashlane.login.pages.token.compose
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -7,9 +14,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonLayout
@@ -17,7 +26,9 @@ import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.GenericCodeInputContent
+import com.dashlane.ui.widgets.compose.CircularProgressIndicator
+import com.dashlane.ui.widgets.compose.DashlaneLogo
+import com.dashlane.ui.widgets.compose.OtpInput
 
 @Composable
 fun LoginTokenScreen(
@@ -72,16 +83,54 @@ fun LoginTotpContent(
 ) {
     var isHelpDialogDisplayed by rememberSaveable { mutableStateOf(false) }
 
-    GenericCodeInputContent(
-        modifier = modifier,
-        text = stringResource(id = R.string.receive_sec_code),
-        login = login,
-        otp = otp,
-        isLoading = isLoading,
-        errorMessage = errorMessage,
-        isTokenError = isTokenError,
-        onOtpComplete = onOtpComplete
-    )
+    Column(
+        modifier = modifier
+            .padding(24.dp)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        DashlaneLogo()
+        Text(
+            text = login,
+            style = DashlaneTheme.typography.bodyStandardRegular,
+            color = DashlaneTheme.colors.textNeutralStandard,
+            modifier = Modifier
+                .padding(top = 24.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(id = R.string.receive_sec_code),
+            style = DashlaneTheme.typography.bodyStandardRegular,
+            color = DashlaneTheme.colors.textNeutralCatchy,
+            modifier = Modifier
+                .padding(top = 48.dp)
+        )
+        OtpInput(
+            modifier = Modifier.padding(top = 16.dp),
+            onOtpComplete = onOtpComplete,
+            otp = otp,
+            isError = isTokenError,
+            error = if (isTokenError) errorMessage else null
+        )
+        if (!isTokenError && errorMessage != null) {
+            Text(
+                modifier = Modifier.padding(top = 2.dp),
+                text = errorMessage,
+                color = DashlaneTheme.colors.textDangerQuiet,
+                style = DashlaneTheme.typography.bodyHelperRegular
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+    }
+
+    if (isLoading) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator()
+        }
+    }
 
     if (isHelpDialogDisplayed) {
         EmailCodeHelpAlertDialog(

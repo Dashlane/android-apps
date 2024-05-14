@@ -1,28 +1,23 @@
 package com.dashlane.storage.userdata.accessor
 
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.userdata.accessor.filter.credentialFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class GeneratedPasswordQueryImpl @Inject constructor(
-    private val dataStorageProvider: DataStorageProvider,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>
+    private val genericDataQuery: GenericDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
 ) : GeneratedPasswordQuery {
-
-    private val genericDataQuery: GenericDataQuery
-        get() = dataStorageProvider.genericDataQuery
-    private val vaultDataQuery: VaultDataQuery
-        get() = dataStorageProvider.vaultDataQuery
-    private val credentialDataQuery: CredentialDataQuery
-        get() = dataStorageProvider.credentialDataQuery
-
     override fun queryAllNotRevoked(): List<VaultItem<SyncObject.GeneratedPassword>> {
         val generatedPasswordIds = genericDataQuery.queryAll(
             genericFilter {
@@ -32,10 +27,10 @@ class GeneratedPasswordQueryImpl @Inject constructor(
 
         
         val forbiddenDomains =
-            teamspaceAccessorProvider.get()
-                ?.revokedAndDeclinedSpaces
+            teamSpaceAccessorProvider.get()
+                ?.pastBusinessTeams
                 ?.mapNotNull { space ->
-                    space.domains.takeIf { space.isDomainRestrictionsEnable }
+                    space.domains.takeIf { space.isForcedDomainsEnabled }
                 }
                 ?.flatten()
 

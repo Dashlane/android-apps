@@ -9,18 +9,16 @@ import com.dashlane.vault.summary.SummaryObject
 interface SharingDataProvider {
     suspend fun getItemGroups(): List<ItemGroup>
     suspend fun getUserGroups(): List<UserGroup>
+    suspend fun getUserGroupsAccepted(login: String): List<UserGroup>
     suspend fun getCollections(): List<Collection>
     suspend fun getCollections(itemId: String, needsAdminRights: Boolean): List<Collection>
-    suspend fun getAcceptedCollections(needsAdminRights: Boolean = true): List<Collection>
+    suspend fun getAcceptedCollections(needsAdminRights: Boolean): List<Collection>
     suspend fun getAcceptedCollections(
         userId: String,
         needsAdminRights: Boolean
     ): List<Collection>
 
-    suspend fun getAcceptedCollectionsForGroup(
-        userGroupId: String,
-        needsAdminRights: Boolean
-    ): List<Collection>
+    suspend fun getAcceptedCollectionsForGroup(userGroupId: String): List<Collection>
 
     suspend fun getAcceptedCollectionsItems(uuid: String): List<SummaryObject>
     suspend fun getTeamLogins(): List<String>

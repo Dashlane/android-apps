@@ -16,9 +16,11 @@ import com.dashlane.core.popularWebsitesToIconWrappers
 import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.iconcrawler.mapIconWrappersToUrlDomainIcons
+import com.dashlane.limitations.PasswordLimitationLogger
+import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.loaders.InstalledAppAndPopularWebsiteLoader
 import com.dashlane.securearchive.BackupCoordinator
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.CredentialsDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
@@ -29,6 +31,8 @@ import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.widgets.view.ExpandableCardView
+import com.dashlane.ui.widgets.view.ImportMethodItem
+import com.dashlane.ui.widgets.view.Infobox
 import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
 import com.dashlane.url.icon.UrlDomainIconAndroidRepository
 import com.dashlane.url.registry.UrlDomainRegistryFactory
@@ -58,18 +62,24 @@ class CredentialAddStep1Fragment :
     lateinit var iconAndroidRepository: UrlDomainIconAndroidRepository
 
     @Inject
-    lateinit var mainDataAccessor: MainDataAccessor
+    lateinit var dataCounter: DataCounter
 
     @Inject
     lateinit var knownApplicationProvider: KnownApplicationProvider
 
+    @Inject
+    lateinit var passwordLimiter: PasswordLimiter
+
+    @Inject
+    lateinit var passwordLimitationLogger: PasswordLimitationLogger
+
     private lateinit var websiteUrlInput: TextInputLayout
     private lateinit var recyclerView: MultiColumnRecyclerView
     private lateinit var popularWebsiteProgress: ProgressBar
+    private lateinit var passwordLimitReachedInfobox: Infobox
 
     private val isFirstPassword
-        get() = mainDataAccessor.getDataCounter()
-            .count(
+        get() = dataCounter.count(
                 CounterFilter(
                     CredentialsDataTypeFilter,
                     NoSpaceFilter,
@@ -113,13 +123,13 @@ class CredentialAddStep1Fragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        setCurrentPageView(AnyPage.ITEM_CREDENTIAL_CREATE_SELECT_WEBSITE)
+        setCurrentPageView(AnyPage.HOME_ADD_ITEM)
         val view = inflater.inflate(R.layout.fragment_create_credential_step1, container, false)
         websiteUrlInput = view.findViewById(R.id.website_url_input_layout)
         recyclerView = view.findViewById(R.id.recyclerView)
         popularWebsiteProgress = view.findViewById(R.id.popular_website_gridview_loader)
-        websiteUrlInput.editText?.imeOptions =
-            EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+        passwordLimitReachedInfobox = view.findViewById(R.id.infobox_password_limit_reached)
+        websiteUrlInput.editText?.imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_EXTRACT_UI
         val expandableCardView = view.findViewById<ExpandableCardView>(R.id.expandableImportMethods)
 
         if (savedInstanceState == null) {
@@ -130,8 +140,15 @@ class CredentialAddStep1Fragment :
         
         
         @Suppress("MissingInflatedId")
-        view.findViewById<View>(R.id.csv).setOnClickListener {
-            navigator.goToCsvImportIntro()
+        view.findViewById<ImportMethodItem>(R.id.csv).apply {
+            setOnClickListener {
+                if (passwordLimiter.hasPasswordLimit) {
+                    navigator.goToOffers()
+                } else {
+                    navigator.goToCsvImportIntro()
+                }
+            }
+            setBadgeVisibility(passwordLimiter.hasPasswordLimit)
         }
 
         @Suppress("MissingInflatedId")
@@ -145,8 +162,15 @@ class CredentialAddStep1Fragment :
         }
 
         @Suppress("MissingInflatedId")
-        view.findViewById<View>(R.id.password_manager).setOnClickListener {
-            navigator.goToCompetitorImportIntro()
+        view.findViewById<ImportMethodItem>(R.id.password_manager).apply {
+            setOnClickListener {
+                if (passwordLimiter.hasPasswordLimit) {
+                    navigator.goToOffers()
+                } else {
+                    navigator.goToCompetitorImportIntro()
+                }
+            }
+            setBadgeVisibility(passwordLimiter.hasPasswordLimit)
         }
 
         recyclerView.adapter?.onItemClickListener = this
@@ -177,8 +201,22 @@ class CredentialAddStep1Fragment :
     @Suppress("DEPRECATION")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        showLoader()
-        InstalledAppAndPopularWebsiteLoader(this, this, knownApplicationProvider).start()
+
+        if (passwordLimiter.isPasswordLimitReached()) {
+            
+            
+            popularWebsiteProgress.visibility = View.GONE
+            recyclerView.visibility = View.GONE
+            websiteUrlInput.visibility = View.GONE
+            passwordLimitReachedInfobox.visibility = View.VISIBLE
+            passwordLimitReachedInfobox.primaryButton.setOnClickListener {
+                passwordLimitationLogger.upgradeFromBanner()
+                navigator.goToOffers()
+            }
+        } else {
+            showLoader()
+            InstalledAppAndPopularWebsiteLoader(this, this, knownApplicationProvider).start()
+        }
     }
 
     private fun goToNextStep(getUrlFromInput: Boolean, url: String?) {

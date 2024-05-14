@@ -3,13 +3,15 @@ package com.dashlane.createaccount
 import android.content.Context
 import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorAppConnection
-import com.dashlane.core.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.sync.DataSync
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.url.toHttpUrl
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
@@ -25,15 +27,13 @@ import javax.inject.Inject
 class AccountCreationSetup @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val dataAccessor: MainDataAccessor,
+    private val dataSaver: DataSaver,
     private val userPreferencesManager: UserPreferencesManager,
     private val authenticatorAppConnection: AuthenticatorAppConnection,
     private val urlDomainRegistryFactory: UrlDomainRegistryFactory,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
+    private val teamSpaceAccessor: OptionalProvider<TeamSpaceAccessor>
 ) {
-
-    private val dataSaver
-        get() = dataAccessor.getDataSaver()
 
     suspend fun setupCreatedAccount(
         username: String,
@@ -49,15 +49,18 @@ class AccountCreationSetup @Inject constructor(
         username: String
     ) {
         val timeStamp = Instant.now()
+        val (emailType, teamId) = teamSpaceAccessor.get()?.enforcedSpace?.let { SyncObject.Email.Type.PRO to it.teamId }
+            ?: (SyncObject.Email.Type.PERSO to null)
         val email = createEmail(
             dataIdentifier = CommonDataIdentifierAttrsImpl(
                 formatLang = context.getDefaultCountry(),
                 syncState = SyncState.MODIFIED,
                 locallyViewedDate = Instant.EPOCH,
                 creationDate = timeStamp,
-                userModificationDate = timeStamp
+                userModificationDate = timeStamp,
+                teamSpaceId = teamId
             ),
-            type = SyncObject.Email.Type.PERSO,
+            type = emailType,
             emailName = context.getString(R.string.email),
             emailAddress = username
         )

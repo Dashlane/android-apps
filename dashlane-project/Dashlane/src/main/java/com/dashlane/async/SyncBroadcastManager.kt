@@ -8,7 +8,6 @@ import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.security.DashlaneIntent
-import com.dashlane.util.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,8 +41,8 @@ class SyncBroadcastManager @Inject constructor(
 
     fun sendPasswordErrorBroadcast() {
         try {
-            val passwordIntent = Intent(Constants.BROADCASTS.PASSWORD_SUCCESS_BROADCAST)
-            passwordIntent.putExtra(Constants.BROADCASTS.SUCCESS_EXTRA, false)
+            val passwordIntent = Intent(BroadcastConstants.PASSWORD_SUCCESS_BROADCAST)
+            passwordIntent.putExtra(BroadcastConstants.SUCCESS_EXTRA, false)
             LocalBroadcastManager.getInstance(context).sendBroadcast(passwordIntent)
             lastPasswordBroadcastIntent = passwordIntent
         } catch (e: Exception) {
@@ -54,8 +53,8 @@ class SyncBroadcastManager @Inject constructor(
 
     fun sendSyncShowProgressBroadcast(show: Boolean) {
         try {
-            val syncBroadcast = DashlaneIntent.newInstance(Constants.BROADCASTS.SYNC_PROGRESS_BROADCAST)
-            syncBroadcast.putExtra(Constants.BROADCASTS.SYNC_PROGRESS_BROADCAST_SHOW_PROGRESS, show)
+            val syncBroadcast = DashlaneIntent.newInstance(BroadcastConstants.SYNC_PROGRESS_BROADCAST)
+            syncBroadcast.putExtra(BroadcastConstants.SYNC_PROGRESS_BROADCAST_SHOW_PROGRESS, show)
             LocalBroadcastManager.getInstance(context).sendBroadcast(syncBroadcast)
         } catch (e: Exception) {
             
@@ -83,8 +82,8 @@ class SyncBroadcastManager @Inject constructor(
 
     private fun notifySyncFinished(state: SyncFinishedEvent.State, origin: Trigger) {
         val success = state === SyncFinishedEvent.State.SUCCESS
-        val syncFinishIntent = Intent(Constants.BROADCASTS.SYNCFINISHED_BROADCAST)
-        syncFinishIntent.putExtra(Constants.BROADCASTS.SUCCESS_EXTRA, success)
+        val syncFinishIntent = Intent(BroadcastConstants.SYNC_FINISHED_BROADCAST)
+        syncFinishIntent.putExtra(BroadcastConstants.SUCCESS_EXTRA, success)
         LocalBroadcastManager.getInstance(context)
             .sendBroadcast(syncFinishIntent)
         val trigger: SyncFinishedEvent.Trigger = if (Trigger.MANUAL == origin) {

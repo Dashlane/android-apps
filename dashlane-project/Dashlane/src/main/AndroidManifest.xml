@@ -35,8 +35,10 @@
     
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <uses-permission android:name="com.dashlane.permission.SEND_CONFIGURATION" />
+
     <permission
-        android:name="dashlane.permission.PERMISSION"
+        android:name="com.dashlane.permission.SEND_CONFIGURATION"
         android:protectionLevel="signature" />
 
     <permission
@@ -49,7 +51,7 @@
         android:name="com.dashlane.notification.followupnotification.FOLLOW_UP_NOTIFICATION"
         android:protectionLevel="signature" />
     <permission
-        android:name="com.dashlane.authentication.PACKAGE_REMOVED"
+        android:name="com.dashlane.authenticator.PACKAGE_REMOVED"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.dashlane.notification.autofill.NOT_NOW" />
@@ -216,7 +218,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="com.dashlane.ui.screens.activities.onboarding.inapplogin.OnboardingInAppLoginActivity"
+            android:name="com.dashlane.autofill.onboarding.OnboardingInAppLoginActivity"
             android:theme="@style/Theme.Dashlane.Modal" />
 
         
@@ -295,7 +297,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".collections.sharing.CollectionNewShareActivity"
+            android:name=".collections.sharing.share.CollectionNewShareActivity"
+            android:theme="@style/Theme.Dashlane.NoActionBar" />
+
+        <activity
+            android:name=".collections.sharing.access.CollectionSharedAccessActivity"
             android:theme="@style/Theme.Dashlane.NoActionBar" />
 
         
@@ -336,6 +342,20 @@
             </intent-filter>
         </receiver>
 
+        
+        <receiver
+            android:name=".debug.broadcast.SettingConfigurationBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="com.dashlane.permission.SEND_CONFIGURATION">
+            <intent-filter>
+                <action android:name="${applicationId}.SETTING_RELEASE_CONFIGURATION" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="${applicationId}.SETTING_STORE_CONFIGURATION" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".DashlaneFcmService"
             android:exported="false"
@@ -363,12 +383,13 @@
         
         <receiver
             android:name="com.dashlane.authenticator.AuthenticatorUninstalledReceiver"
-            android:permission="com.dashlane.authenticator.PACKAGE_REMOVED"
             android:exported="true"
-            >
+            android:permission="com.dashlane.authenticator.PACKAGE_REMOVED">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
-                <data android:scheme="package" android:sspPrefix="com.dashlane.authenticator" />
+                <data
+                    android:scheme="package"
+                    android:sspPrefix="com.dashlane.authenticator" />
             </intent-filter>
         </receiver>
 
@@ -472,7 +493,9 @@
             android:name=".login.sso.migration.MigrationToSsoMemberActivity"
             android:theme="@style/Theme.Dashlane.Login" />
 
-        <activity android:name=".createaccount.passwordless.MplessAccountCreationActivity" />
+        <activity
+            android:name=".createaccount.passwordless.MplessAccountCreationActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         
         <service

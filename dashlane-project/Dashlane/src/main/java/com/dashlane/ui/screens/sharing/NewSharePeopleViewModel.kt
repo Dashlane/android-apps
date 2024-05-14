@@ -4,23 +4,29 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.navigation.Navigator
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.sharing.exception.SharingAlreadyAccessException
+import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
+import com.dashlane.ui.screens.sharing.SharingContact.SharingContactUser
 import com.dashlane.useractivity.SharingDeveloperLogger
+import com.dashlane.userfeatures.UserFeaturesChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class NewSharePeopleViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dataProvider: NewSharePeopleDataProvider,
     private val navigator: Navigator,
-    private val sharingDeveloperLogger: SharingDeveloperLogger
+    private val sharingDeveloperLogger: SharingDeveloperLogger,
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val sharingDataProvider: SharingDataProvider
 ) : ViewModel(), NewSharePeopleViewModelContract {
     private val args = SharingNewSharePeopleFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private val authentifiantUIDs = args.argsAuthentifiantUIDs
@@ -53,6 +59,18 @@ class NewSharePeopleViewModel @Inject constructor(
 
         viewModelScope.launch {
             uiState.tryEmit(NewSharePeopleViewModelContract.UIState.LOADING)
+
+            if (userFeaturesChecker.has(Capability.INTERNALSHARINGONLY)) {
+                val internalContacts = sharingDataProvider.getTeamLogins()
+                val allContactsInternal = contacts
+                    .filterIsInstance(SharingContactUser::class.java)
+                    .all { contact -> internalContacts.contains(contact.name) }
+                if (!allContactsInternal) {
+                    uiState.tryEmit(NewSharePeopleViewModelContract.UIState.ERROR_NOT_INTERNAL)
+                    return@launch
+                }
+            }
+
             runCatching {
                 dataProvider.share(
                     authentifiantUIDs,

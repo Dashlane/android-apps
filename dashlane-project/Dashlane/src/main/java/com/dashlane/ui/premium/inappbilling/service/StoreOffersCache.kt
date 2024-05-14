@@ -60,7 +60,6 @@ class StoreOffersCache(
         val request = StoreOffersService.Request(platform = PLAYSTORE_SUBSCRIPTION)
 
         val response = storeOffersService.execute(user, request)
-
         lastOperation = LastOperation(username = user.login, storeOffers = response.data)
         return response.data
     }

@@ -9,7 +9,7 @@ import com.dashlane.R
 object IntentFactory {
 
     @JvmStatic
-    fun sendShareWithFriendsIntent(activity: Context, refid: String?) {
+    fun sendShareWithFriendsIntent(activity: Context, toaster: Toaster, refid: String?) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
         @Suppress("DEPRECATION")
@@ -25,7 +25,7 @@ object IntentFactory {
             )
         )
         if (intent.resolveActivity(activity.packageManager) == null) {
-            ToasterImpl(activity).show(
+            toaster.show(
                 activity.getString(R.string.contact_system_administrator),
                 Toast.LENGTH_LONG
             )

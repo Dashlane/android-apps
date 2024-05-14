@@ -3,7 +3,6 @@ package com.dashlane.ui.dialogs.fragment
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
 import com.dashlane.ui.dialogs.fragment.TeamRevokedDialogDisplayer.Companion.ARG_SPACE_REVOKED_ID
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,9 +19,6 @@ class SpaceRevokedDialog : NotificationDialogFragment() {
 
     @Inject
     lateinit var sessionManager: SessionManager
-
-    @Inject
-    lateinit var teamspaceManagerRepository: TeamspaceManagerRepository
 
     @Inject
     lateinit var userPreferencesManager: UserPreferencesManager

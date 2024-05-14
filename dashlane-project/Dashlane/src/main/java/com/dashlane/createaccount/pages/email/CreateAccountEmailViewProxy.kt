@@ -49,13 +49,14 @@ class CreateAccountEmailViewProxy(
         inEuropeanUnion: Boolean,
         country: String?,
         loginSsoIntent: Intent?,
+        isB2B: Boolean,
         callback: () -> Unit
     ) {
         DialogHelper().builder(context)
             .setTitle(email)
             .setMessage(R.string.create_account_confirm_unlikely_email)
             .setPositiveButton(R.string.confirm) { _, _ ->
-                presenter.onConfirmEmail(email, inEuropeanUnion, country, loginSsoIntent)
+                presenter.onConfirmEmail(email, inEuropeanUnion, country, loginSsoIntent, isB2B)
             }
             .setNegativeButton(R.string.cancel) { _, _ -> }
             .create()
@@ -65,6 +66,7 @@ class CreateAccountEmailViewProxy(
 
     override fun showError(errorResId: Int) {
         val error = context.getString(errorResId)
+        emailLayout.errorAccessibilityLiveRegion = 1
         emailLayout.error = error
     }
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.dashlane.accountrecoverykey.enforce.AccountRecoveryKeyEnforcer
 import com.dashlane.announcements.AnnouncementsActivityLifecycle
 import com.dashlane.applinkfetcher.AuthentifiantAppLinkDownloader
 import com.dashlane.authenticator.IsSettingUp2faChecker
@@ -57,6 +58,7 @@ class GlobalActivityLifecycleListener @Inject constructor(
     logFlush: LogFlush,
     navigator: Navigator,
     enforce2faLimiter: Enforce2faLimiter,
+    accountRecoveryKeyEnforcer: AccountRecoveryKeyEnforcer,
     isSettingUp2faChecker: IsSettingUp2faChecker
 ) : ActivityLifecycleListener {
 
@@ -98,13 +100,14 @@ class GlobalActivityLifecycleListener @Inject constructor(
         register(enforce2faLimiter)
         register(isSettingUp2faChecker.activityLifecycleListener)
         register(collectionSharingResultActivityListener)
+        register(accountRecoveryKeyEnforcer)
     }
 
-    fun register(application: Application) {
+    override fun register(application: Application) {
         application.registerActivityLifecycleCallbacks(this)
     }
 
-    fun unregister(application: Application) {
+    override fun unregister(application: Application) {
         application.unregisterActivityLifecycleCallbacks(this)
     }
 

@@ -111,8 +111,8 @@ class CreateAccountChoosePasswordViewProxy(rootView: View, private val scope: Co
             
             tipsView.removeAllViews() 
             
-            LayoutInflater.from(tipsView.context)
-                .inflate(passwordValidatorViewProxy.getIncludeLayout(), tipsView)
+            LayoutInflater.from(tipsView.context).inflate(passwordValidatorViewProxy.getIncludeLayout(), tipsView)
+            tipsView.labelFor = R.id.view_create_account_password_layout
         }
         passwordValidatorViewProxy.show(tipsView, strengthDeferred)
     }

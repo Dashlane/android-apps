@@ -10,18 +10,19 @@ import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
 import com.dashlane.item.subview.ValueChangeManager
 import com.dashlane.item.subview.edit.ItemEditSpaceSubView
-import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.teamspaces.adapter.TeamspaceSpinnerAdapter
 import com.dashlane.teamspaces.adapter.SpinnerUtil
-import com.dashlane.ui.widgets.Notificator
+import com.dashlane.teamspaces.adapter.TeamspaceSpinnerAdapter
+import com.dashlane.teamspaces.model.SpaceName
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.ui.widgets.NotificatorImpl
 import com.dashlane.util.Toaster
 
 object SpaceSelectorProvider {
 
     fun create(
         activity: FragmentActivity,
-        current: Teamspace,
-        values: List<Teamspace>,
+        current: TeamSpace,
+        values: List<TeamSpace>,
         editable: Boolean = false,
         item: ItemEditSpaceSubView?,
         toaster: Toaster,
@@ -106,12 +107,15 @@ object SpaceSelectorProvider {
         return null
     }
 
-    private fun showDisabledTeamspaceNotification(activity: FragmentActivity, teamspace: Teamspace, toaster: Toaster) {
+    private fun showDisabledTeamspaceNotification(activity: FragmentActivity, teamspace: TeamSpace, toaster: Toaster) {
         val message = activity.getString(
             R.string.teamspace_forced_categorisation_restricted_domain_with_spacename,
-            teamspace.teamName
+            when (val name = teamspace.name) {
+                is SpaceName.FixName -> activity.getString(name.nameRes)
+                is SpaceName.TeamName -> name.value
+            }
         )
-        Notificator(toaster).customErrorDialogMessage(
+        NotificatorImpl(toaster).customErrorDialogMessage(
             activity = activity,
             topic = null,
             message = message,

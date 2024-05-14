@@ -7,10 +7,14 @@ import com.dashlane.R
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountstatus.AccountStatus
+import com.dashlane.accountstatus.premiumstatus.isAdvancedPlan
+import com.dashlane.accountstatus.premiumstatus.isFamilyAdmin
+import com.dashlane.accountstatus.premiumstatus.isFamilyPlan
+import com.dashlane.accountstatus.premiumstatus.isPremiumPlan
+import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
 import com.dashlane.activatetotp.ActivateTotpLogger
 import com.dashlane.biometricrecovery.BiometricRecovery
-import com.dashlane.core.DataSync
-import com.dashlane.core.premium.FamilyMembership
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.debug.DaDaDa
 import com.dashlane.followupnotification.domain.FollowUpNotificationSettings
@@ -22,21 +26,21 @@ import com.dashlane.invites.InviteFriendsIntentHelper
 import com.dashlane.login.lock.LockManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
 import com.dashlane.navigation.Navigator
-import com.dashlane.network.inject.LegacyWebservicesApi
-import com.dashlane.network.webservices.GetSharingLinkService
-import com.dashlane.plans.ui.PlansUtils
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.premium.enddate.EndDateFormatter
+import com.dashlane.premium.enddate.FormattedEndDateProviderImpl
+import com.dashlane.premium.utils.PlansUtils
 import com.dashlane.search.SearchableSettingItem
 import com.dashlane.securearchive.BackupCoordinator
 import com.dashlane.security.SecurityHelper
+import com.dashlane.server.api.endpoints.invitation.GetSharingLinkService
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.AccountStatusRepository
 import com.dashlane.session.repository.UserCryptographyRepository
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.TeamspaceRestrictionNotificator
+import com.dashlane.sync.DataSync
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.activities.debug.DebugActivity
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
@@ -49,6 +53,8 @@ import com.dashlane.ui.screens.settings.list.general.RootSettingsGeneralList
 import com.dashlane.ui.screens.settings.list.help.RootSettingsHelpList
 import com.dashlane.ui.screens.settings.list.security.RootSettingsSecurityList
 import com.dashlane.ui.util.DialogHelper
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.DarkThemeHelper
 import com.dashlane.util.IntentFactory
 import com.dashlane.util.NetworkStateProvider
@@ -58,10 +64,12 @@ import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import retrofit2.Retrofit
+import kotlinx.coroutines.launch
+import java.time.Clock
 import javax.inject.Inject
 
 class RootSettingsList @Inject constructor(
@@ -72,15 +80,18 @@ class RootSettingsList @Inject constructor(
     private val navigator: Navigator,
     private val toaster: Toaster,
     private val sharingLinkService: GetSharingLinkService,
+    private val subscriptionCodeRepository: SubscriptionCodeRepository,
+    private val accountStatusProvider: OptionalProvider<AccountStatus>,
+    @IoCoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
     userFeaturesChecker: UserFeaturesChecker,
     lockManager: LockManager,
     inAppLoginManager: InAppLoginManager,
     biometricAuthModule: BiometricAuthModule,
     sessionManager: SessionManager,
-    teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+    teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     screenshotPolicy: ScreenshotPolicy,
     globalPreferencesManager: GlobalPreferencesManager,
-    @LegacyWebservicesApi retrofit: Retrofit,
     dialogHelper: DialogHelper,
     userAccountStorage: UserAccountStorage,
     sessionCredentialsSaver: SessionCredentialsSaver,
@@ -88,7 +99,6 @@ class RootSettingsList @Inject constructor(
     securityHelper: SecurityHelper,
     masterPasswordFeatureAccessChecker: ChangeMasterPasswordFeatureAccessChecker,
     backupCoordinator: BackupCoordinator,
-    accountStatusRepository: AccountStatusRepository,
     crashReporter: CrashReporter,
     darkThemeHelper: DarkThemeHelper,
     biometricRecovery: BiometricRecovery,
@@ -101,32 +111,39 @@ class RootSettingsList @Inject constructor(
     dataSync: DataSync,
     networkStateProvider: NetworkStateProvider,
     accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
-    teamspaceRestrictionNotificator: TeamspaceRestrictionNotificator,
-    clipboardCopy: ClipboardCopy
+    teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
+    clipboardCopy: ClipboardCopy,
+    clock: Clock
 ) {
 
     private val paramHeader = SettingHeader(context.getString(R.string.settings_category_advanced))
+
+    private val accountStatus: AccountStatus?
+        get() = accountStatusProvider.get()
 
     private val premiumItem = object : SettingItem {
         override val id = "premium"
         override val header = SettingHeader(context.getString(R.string.setting_premium_category))
         override val title: String
-            get() = sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }
+            get() = accountStatus?.premiumStatus
                 ?.let { PlansUtils.getTitle(context, it) }
                 ?: context.getString(
                     R.string.plan_action_bar_title,
                     context.getString(R.string.plan_free_action_bar_title)
                 )
         override val description: String
-            get() = sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }
-                ?.let { endDateFormatter.getLabel(it) } ?: context.getString(R.string.no_date_plan_subtitle)
+            get() = accountStatus?.let {
+                endDateFormatter.getLabel(FormattedEndDateProviderImpl(it, clock))
+            } ?: context.getString(R.string.no_date_plan_subtitle)
 
         val isFamilyInvitee: Boolean
-            get() = sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) }?.let { status ->
-                status.isFamilyUser && status.familyMemberships!!.all { it == FamilyMembership.REGULAR }
-            } ?: false
+            get() = accountStatus?.premiumStatus
+                ?.let { status ->
+                    status.isFamilyPlan && !status.isFamilyAdmin
+                } ?: false
+
         val isInTeam: Boolean
-            get() = teamspaceAccessorProvider.get()?.canChangeTeamspace() ?: false
+            get() = teamSpaceAccessorProvider.get()?.currentBusinessTeam != null
 
         override fun isEnable() = true
         override fun isVisible() = !isInTeam && !isFamilyInvitee
@@ -138,14 +155,14 @@ class RootSettingsList @Inject constructor(
 
     private val settingsSecurityList = RootSettingsSecurityList(
         context = context,
+        coroutineScope = coroutineScope,
         lockManager = lockManager,
         securityHelper = securityHelper,
         biometricAuthModule = biometricAuthModule,
         navigator = navigator,
         screenshotPolicy = screenshotPolicy,
         userPreferencesManager = userPreferencesManager,
-        teamspaceAccessorProvider = teamspaceAccessorProvider,
-        retrofit = retrofit,
+        teamSpaceAccessorProvider = teamSpaceAccessorProvider,
         sessionManager = sessionManager,
         userAccountStorage = userAccountStorage,
         sessionCredentialsSaver = sessionCredentialsSaver,
@@ -160,7 +177,9 @@ class RootSettingsList @Inject constructor(
         activateTotpLogger = activateTotpLogger,
         userFeaturesChecker = userFeaturesChecker,
         accountRecoveryKeyRepository = accountRecoveryKeyRepository,
-        teamspaceRestrictionNotificator = teamspaceRestrictionNotificator
+        teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
+        subscriptionCodeRepository = subscriptionCodeRepository,
+        ioDispatcher = ioDispatcher,
     )
 
     private val settingsGeneralList = RootSettingsGeneralList(
@@ -172,7 +191,6 @@ class RootSettingsList @Inject constructor(
         navigator = navigator,
         rootHeader = paramHeader,
         backupCoordinator = backupCoordinator,
-        sessionManager = sessionManager,
         darkThemeHelper = darkThemeHelper,
         logRepository = logRepository,
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
@@ -180,7 +198,8 @@ class RootSettingsList @Inject constructor(
         globalPreferencesManager = globalPreferencesManager,
         followUpNotificationSettings = followUpNotificationSettings,
         dataSync = dataSync,
-        userAccountStorage = userAccountStorage
+        dialogHelper = dialogHelper,
+        teamSpaceAccessorProvider = teamSpaceAccessorProvider,
     )
 
     private val settingsHelpList = RootSettingsHelpList(
@@ -221,20 +240,21 @@ class RootSettingsList @Inject constructor(
         override fun isEnable() = true
         override fun isVisible() = true
         override fun onClick(context: Context) {
-            InviteFriendsIntentHelper.launchInviteFriendsIntent(
-                context,
-                toaster,
-                sharingLinkService,
-                sessionManager,
-                networkStateProvider,
-                userPreferencesManager.referralId
-            )
+            coroutineScope.launch {
+                InviteFriendsIntentHelper.launchInviteFriendsIntent(
+                    context = context,
+                    toaster = toaster,
+                    sharingLinkService = sharingLinkService,
+                    subscriptionCodeRepository = subscriptionCodeRepository,
+                    ioDispatcher = ioDispatcher,
+                    networkStateProvider = networkStateProvider,
+                )
+            }
         }
 
         private fun isPremiumRewardCandidate(): Boolean {
-            val premiumStatus =
-                sessionManager.session?.let { accountStatusRepository.getPremiumStatus(it) } ?: return true
-            return !premiumStatus.isPremium || premiumStatus.premiumPlan.isEssentials
+            val premiumStatus = accountStatus?.premiumStatus ?: return true
+            return !premiumStatus.isPremiumPlan || premiumStatus.isAdvancedPlan
         }
     }
 
@@ -254,8 +274,7 @@ class RootSettingsList @Inject constructor(
         override val title = context.getString(R.string.setting_dashlane_labs)
         override val description = context.getString(R.string.setting_dashlane_labs_description)
         override fun isEnable() = true
-        override fun isVisible() =
-            userFeaturesChecker.has(UserFeaturesChecker.FeatureFlip.DASHLANE_LABS)
+        override fun isVisible() = userFeaturesChecker.has(FeatureFlip.DASHLANE_LABS)
 
         override fun onClick(context: Context) = navigator.goToDashlaneLabs()
     }

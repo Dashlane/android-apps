@@ -1,8 +1,8 @@
 package com.dashlane.vault
 
-import com.dashlane.autofill.pause.services.PausedFormSourcesProvider
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
+import com.dashlane.autofill.pause.services.PausedFormSourcesProvider
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.ext.application.KnownApplicationProvider
@@ -14,11 +14,12 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
 import com.dashlane.security.identitydashboard.password.GroupOfAuthentifiant
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataCounter
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.counterFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_ID
 import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_PASSWORD
 import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_PAYMENT
@@ -29,14 +30,14 @@ import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.xml.domain.SyncObject
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import kotlin.math.roundToInt
 
 class VaultReportLogger @Inject constructor(
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
@@ -44,16 +45,14 @@ class VaultReportLogger @Inject constructor(
     private val userPreferencesManager: UserPreferencesManager,
     private val logRepository: LogRepository,
     private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
-    private val mainDataAccessor: MainDataAccessor,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+    private val vaultDataQuery: VaultDataQuery,
+    private val dataCounter: DataCounter,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val pausedFormSourcesProvider: PausedFormSourcesProvider,
     private val breachLoader: BreachLoader,
     private val knownApplicationProvider: KnownApplicationProvider,
     private val collectionsReportProvider: CollectionsReportProvider
 ) {
-    private val vaultDataQuery get() = mainDataAccessor.getVaultDataQuery()
-    private val dataCounter get() = mainDataAccessor.getDataCounter()
-
     fun start() {
         appEvents.register(this, SyncFinishedEvent::class.java, false) {
             if (it.state != SyncFinishedEvent.State.SUCCESS) return@register
@@ -84,15 +83,15 @@ class VaultReportLogger @Inject constructor(
     @Suppress("LongMethod")
     private suspend fun buildVaultReport(scope: Scope): VaultReport? =
         withContext(Dispatchers.Default) {
-            val teamspaceType = when (scope) {
-                Scope.GLOBAL -> Teamspace.Type.COMBINED
-                Scope.PERSONAL -> Teamspace.Type.PERSONAL
-                Scope.TEAM -> Teamspace.Type.COMPANY
-            }
-
-            val teamspace = teamspaceAccessorProvider.get()
-                ?.all
-                ?.firstOrNull { it.type == teamspaceType }
+            val teamspace = teamSpaceAccessorProvider.get()
+                ?.availableSpaces
+                ?.firstOrNull {
+                    when (scope) {
+                        Scope.GLOBAL -> it is TeamSpace.Combined
+                        Scope.PERSONAL -> it is TeamSpace.Personal
+                        Scope.TEAM -> it is TeamSpace.Business
+                    }
+                }
                 ?: return@withContext null
 
             val credentials = vaultDataQuery.queryAll(
@@ -132,7 +131,7 @@ class VaultReportLogger @Inject constructor(
             )
 
             val evaluatorResult = authentifiantSecurityEvaluator.computeResult(
-                teamspace = teamspace,
+                teamSpace = teamspace,
                 ignoreUserLock = true
             )
             val securityAlerts = breachLoader.getBreachesWrapper(ignoreUserLock = true)

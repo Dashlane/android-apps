@@ -20,10 +20,10 @@ import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.item.subview.ItemCollectionListSubView
+import com.dashlane.item.subview.ItemCollectionListSubView.Collection
 import com.dashlane.item.subview.ValueChangeManager
 import com.dashlane.item.subview.edit.ItemEditSpaceSubView
-import com.dashlane.teamspaces.PersonalTeamspace
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.widgets.view.CategoryChip
 import com.dashlane.ui.widgets.view.CategoryChipList
 
@@ -31,8 +31,8 @@ object CollectionListViewProvider {
 
     fun create(context: Context, item: ItemCollectionListSubView): View {
         (item.teamspaceView as? ItemEditSpaceSubView)?.addValueChangedListener(object :
-            ValueChangeManager.Listener<Teamspace> {
-            override fun onValueChanged(origin: Any, newValue: Teamspace) {
+            ValueChangeManager.Listener<TeamSpace> {
+            override fun onValueChanged(origin: Any, newValue: TeamSpace) {
                 item.value.value = emptyList()
                 
                 
@@ -72,15 +72,19 @@ object CollectionListViewProvider {
 
                 if (collections.value.isNotEmpty()) {
                     CategoryChipList {
-                        collections.value.forEach { (label, shared) ->
+                        collections.value.forEach { collection ->
+                            val canDelete = !collection.shared || item.canUpdateSharedCollection
+                            val editMode = item.editMode && canDelete
                             CategoryChip(
-                                label = label,
-                                editMode = !shared && item.editMode,
-                                shared = shared,
+                                label = collection.name,
+                                editMode = editMode,
+                                shared = collection.shared,
                                 onClick = {
-                                    if (!shared && item.editMode) {
-                                        item.value.value =
-                                            collections.value.filterNot { it.first == label }
+                                    if (editMode) {
+                                        item.value.value = collections.value.filterNot {
+                                            (collection.id != null && it.id == collection.id) ||
+                                                (collection.id == null && it.name == collection.name)
+                                        }
                                     }
                                 }
                             )
@@ -97,14 +101,17 @@ object CollectionListViewProvider {
     @Composable
     private fun ButtonAddCollection(
         item: ItemCollectionListSubView,
-        collections: List<Pair<String, Boolean>>
+        collections: List<Collection>
     ) {
         ButtonMedium(
             onClick = {
                 item.listener?.openCollectionSelector(
                     fromViewOnly = !item.editMode,
-                    temporaryCollections = collections.filter { !it.second }.map { it.first },
-                    spaceId = item.teamspaceView?.value?.teamId ?: PersonalTeamspace.teamId ?: ""
+                    temporaryPrivateCollectionsName = collections.filter { !it.shared }
+                        .map { it.name },
+                    temporarySharedCollectionsId = collections.filter { it.shared }
+                        .mapNotNull { it.id },
+                    spaceId = item.teamspaceView?.value?.teamId ?: TeamSpace.Personal.teamId ?: ""
                 )
             },
             layout = if (item.editMode) {

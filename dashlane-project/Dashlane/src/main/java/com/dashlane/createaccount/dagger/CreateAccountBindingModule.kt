@@ -3,14 +3,15 @@ package com.dashlane.createaccount.dagger
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import com.dashlane.createaccount.AccountCreatorImpl
-import com.dashlane.createaccount.AccountCreator
+import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.CreateAccountContract
 import com.dashlane.createaccount.CreateAccountDataProvider
 import com.dashlane.createaccount.pages.email.CreateAccountEmailLoggerImpl
 import com.dashlane.createaccount.pages.email.CreateAccountEmailLogger
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.Provides
+import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(ActivityComponent::class)
@@ -23,9 +24,9 @@ interface CreateAccountBindingModule {
 }
 
 @Module
-@InstallIn(ActivityRetainedComponent::class)
-interface AccountCreatorModule {
+@InstallIn(SingletonComponent::class)
+object AccountCreatorModule {
 
-    @Binds
-    fun bindAccountCreator(impl: AccountCreatorImpl): AccountCreator
+    @Provides
+    fun bindAccountCreator(impl: AccountCreatorImpl): AccountCreator = impl
 }

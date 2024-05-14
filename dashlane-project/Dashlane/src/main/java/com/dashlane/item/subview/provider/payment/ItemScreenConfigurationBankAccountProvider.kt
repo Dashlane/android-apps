@@ -18,10 +18,10 @@ import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.BankDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
@@ -43,8 +43,8 @@ import com.dashlane.xml.domain.utils.Country
 
 @Suppress("LargeClass")
 class ItemScreenConfigurationBankAccountProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
-    private val mainDataAccessor: MainDataAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
+    private val genericDataQuery: GenericDataQuery,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
@@ -147,10 +147,10 @@ class ItemScreenConfigurationBankAccountProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.BankStatement>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -227,7 +227,7 @@ class ItemScreenConfigurationBankAccountProvider(
         context: Context,
         item: VaultItem<SyncObject.BankStatement>
     ): ItemSubView<*>? {
-        val identities = mainDataAccessor.getGenericDataQuery()
+        val identities = genericDataQuery
             .queryAll(genericFilter { specificDataType(SyncObjectType.IDENTITY) })
             .mapNotNull { (it as? SummaryObject.Identity)?.identityPartialOrFullNameNoLogin }
         return subViewFactory.createSubViewString(
@@ -286,7 +286,7 @@ class ItemScreenConfigurationBankAccountProvider(
         editMode: Boolean,
         bankDataProvider: BankDataProvider,
         otherLabel: String
-    ): ItemSubView<*> {
+    ): ItemSubView<*>? {
         val bankHeader = context.getString(R.string.bank)
         val country = item.syncObject.localeFormat ?: Country.UnitedStates
         val bankList = bankDataProvider.getCreditCardBankList(country, otherLabel)
@@ -300,7 +300,10 @@ class ItemScreenConfigurationBankAccountProvider(
                 selectedBank,
                 bankList.map { it.first },
                 bankUpdate
-            )
+            ).also {
+                it.invisible = !bankDataProvider.isCountrySupported(country)
+            }
+            !bankDataProvider.isCountrySupported(country) -> null
             else -> createBankSpinnerFieldWithCopyAction(
                 bankHeader,
                 selectedBank,
@@ -411,7 +414,7 @@ private fun VaultItem<*>.copyForUpdatedOwner(value: String): VaultItem<*> {
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.BankStatement>
     val bankStatement = this.syncObject
     return if (value.teamId == bankStatement.spaceId) {

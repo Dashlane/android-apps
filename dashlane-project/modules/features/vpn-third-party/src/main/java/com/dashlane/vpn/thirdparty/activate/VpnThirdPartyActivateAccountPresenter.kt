@@ -19,7 +19,6 @@ import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.delay
 
 class VpnThirdPartyActivateAccountPresenter(
-    private val helpCenterCoordinator: HelpCenterCoordinator,
     private val logger: VpnThirdPartyLogger
 ) :
     BasePresenter<VpnThirdPartyActivateAccountContract.DataProvider, VpnThirdPartyActivateAccountContract.ViewProxy>(),
@@ -38,7 +37,7 @@ class VpnThirdPartyActivateAccountPresenter(
 
     override fun onLearnMoreClicked() {
         context?.let {
-            helpCenterCoordinator.openLink(it, HelpCenterLink.ARTICLE_THIRD_PARTY_VPN_HOW_TO, true)
+            HelpCenterCoordinator.openLink(it, HelpCenterLink.ARTICLE_THIRD_PARTY_VPN_HOW_TO)
         }
     }
 

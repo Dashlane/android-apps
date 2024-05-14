@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.dashlane.item.subview.Action
 import com.dashlane.item.subview.quickaction.QuickActionProvider
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.adapter.ItemListContext
@@ -14,14 +14,14 @@ import com.skocken.presentation.provider.BaseDataProvider
 import javax.inject.Inject
 
 class QuickActionsDataProvider @Inject constructor(
-    private val mainDataAccessor: MainDataAccessor,
+    private val genericDataQuery: GenericDataQuery,
     private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
     private val quickActionProvider: QuickActionProvider
 ) : QuickActionsContract.DataProvider, BaseDataProvider<QuickActionsContract.Presenter>() {
 
     override fun getVaultItem(itemId: String): SummaryObject? {
         val query = vaultFilter { specificUid(itemId) }
-        return mainDataAccessor.getGenericDataQuery().queryFirst(query)
+        return genericDataQuery.queryFirst(query)
     }
 
     override fun getActions(itemId: String, itemListContext: ItemListContext): List<Action> {

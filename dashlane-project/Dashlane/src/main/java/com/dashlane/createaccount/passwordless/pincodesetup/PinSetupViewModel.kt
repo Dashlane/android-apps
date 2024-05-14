@@ -3,40 +3,67 @@ package com.dashlane.createaccount.passwordless.pincodesetup
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.security.SecurityHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
-class PinSetupViewModel @Inject constructor() : ViewModel() {
+class PinSetupViewModel @Inject constructor(
+    private val securityHelper: SecurityHelper
+) : ViewModel() {
 
     companion object {
         const val PIN_LENGTH = 4
-        const val TRANSITION_DELAY_MS = 100L
         const val CLEAR_PIN_VALUE = ""
     }
 
-    private val _uiState = MutableStateFlow<PinSetupState>(
-        PinSetupState.Default(CLEAR_PIN_VALUE)
-    )
-    val uiState: StateFlow<PinSetupState> = _uiState.asStateFlow()
+    private val mutableStateFlow: MutableStateFlow<PinSetupState> = MutableStateFlow(PinSetupState.Initial(PinSetupData(CLEAR_PIN_VALUE)))
+    val uiState: StateFlow<PinSetupState> = mutableStateFlow.asStateFlow()
+
+    fun onViewResumed() {
+        viewModelScope.launch {
+            val isSystemLockSetup = securityHelper.isDeviceSecured()
+            mutableStateFlow.emit(PinSetupState.Initial(uiState.value.data.copy(isSystemLockSetup = isSystemLockSetup)))
+        }
+    }
+
+    fun hasNavigated() {
+        viewModelScope.launch {
+            mutableStateFlow.emit(
+                PinSetupState.Initial(
+                    uiState.value.data.copy(
+                        pinCode = CLEAR_PIN_VALUE,
+                        chosenPin = CLEAR_PIN_VALUE,
+                        confirming = false
+                    )
+                )
+            )
+        }
+    }
+
+    fun onGoToSystemLockSetting() {
+        viewModelScope.launch {
+            securityHelper.intentHelper.findEnableDeviceLockIntent()?.let { intent ->
+                mutableStateFlow.emit(PinSetupState.GoToSystemLockSetting(uiState.value.data, intent))
+            }
+        }
+    }
 
     fun onPinUpdated(newPin: String) {
         viewModelScope.launch {
             val pinCode = sanitizePin(newPin)
+            val data = uiState.value.data
 
-            when (val state = uiState.value) {
-                is PinSetupState.Choose -> handlePinSelection(pinCode)
-                is PinSetupState.Confirm -> handlePinConfirmation(
+            when (uiState.value.data.confirming) {
+                false -> handlePinSelection(pinCode = pinCode)
+                true -> handlePinConfirmation(
                     pinCode = pinCode,
-                    chosenPin = state.chosenPin
+                    chosenPin = data.chosenPin
                 )
-
-                else -> Unit
             }
         }
     }
@@ -44,19 +71,11 @@ class PinSetupViewModel @Inject constructor() : ViewModel() {
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
     suspend fun handlePinSelection(pinCode: String) {
+        val data = uiState.value.data
         if (pinCode.length == PIN_LENGTH) {
-            _uiState.emit(PinSetupState.Transition(pinCode))
-            delay(TRANSITION_DELAY_MS)
-            _uiState.emit(
-                PinSetupState.Confirm(
-                    chosenPin = pinCode,
-                    pinCode = CLEAR_PIN_VALUE
-                )
-            )
+            mutableStateFlow.emit(PinSetupState.PinUpdated(data.copy(pinCode = CLEAR_PIN_VALUE, confirming = true, chosenPin = pinCode)))
         } else {
-            _uiState.emit(
-                PinSetupState.Choose(pinCode)
-            )
+            mutableStateFlow.emit(PinSetupState.PinUpdated(data.copy(pinCode = pinCode)))
         }
     }
 
@@ -66,30 +85,15 @@ class PinSetupViewModel @Inject constructor() : ViewModel() {
         pinCode: String,
         chosenPin: String
     ) {
+        val data = uiState.value.data
         if (pinCode.length == PIN_LENGTH) {
             if (pinCode == chosenPin) {
-                _uiState.emit(
-                    PinSetupState.Transition(pinCode)
-                )
-                delay(TRANSITION_DELAY_MS)
-                _uiState.emit(
-                    PinSetupState.GoToNext(pinCode)
-                )
+                mutableStateFlow.emit(PinSetupState.GoToNext(data.copy(pinCode = pinCode)))
             } else {
-                _uiState.emit(
-                    PinSetupState.Choose(
-                        pinCode = CLEAR_PIN_VALUE,
-                        hasError = true
-                    )
-                )
+                mutableStateFlow.emit(PinSetupState.PinUpdated(data.copy(pinCode = CLEAR_PIN_VALUE), hasError = true))
             }
         } else {
-            _uiState.emit(
-                PinSetupState.Confirm(
-                    pinCode = pinCode,
-                    chosenPin = chosenPin
-                )
-            )
+            mutableStateFlow.emit(PinSetupState.PinUpdated(data.copy(pinCode = pinCode, chosenPin = chosenPin)))
         }
     }
 
@@ -104,24 +108,6 @@ class PinSetupViewModel @Inject constructor() : ViewModel() {
             newPin.take(PIN_LENGTH)
         } else {
             newPin
-        }
-    }
-
-    fun hasNavigated() {
-        viewModelScope.launch {
-            _uiState.emit(
-                PinSetupState.Default(CLEAR_PIN_VALUE)
-            )
-        }
-    }
-
-    fun onViewStarted() {
-        viewModelScope.launch {
-            if (_uiState.value is PinSetupState.Default) {
-                _uiState.emit(
-                    PinSetupState.Choose(CLEAR_PIN_VALUE)
-                )
-            }
         }
     }
 }

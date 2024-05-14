@@ -1,45 +1,43 @@
 package com.dashlane.vault
 
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.filter.collectionFilter
 import com.dashlane.storage.userdata.accessor.queryAll
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
 class CollectionsReportProvider @Inject constructor(
-    mainDataAccessor: MainDataAccessor
+    private val collectionDataQuery: CollectionDataQuery
 ) {
-    private val collectionDataQuery = mainDataAccessor.getCollectionDataQuery()
-
-    fun computeCollectionTotalCount(teamspace: Teamspace): Int = collectionDataQuery.count(
-        collectionFilter {
-        ignoreUserLock()
-        specificSpace(teamspace)
-    }
-    )
-
-    fun computeItemPerCollectionAverageCount(teamspace: Teamspace): Int =
-        computeItemPerCollectionAverageCount(queryAllCollectionsForSpace(teamspace))
-
-    fun computeCollectionPerItemAverageCount(teamspace: Teamspace): Int =
-        computeCollectionPerItemAverageCount(queryAllCollectionsForSpace(teamspace))
-
-    fun computeCollectionsWithLoginCount(teamspace: Teamspace): Int =
-        computeCollectionsWithLoginCount(queryAllCollectionsForSpace(teamspace))
-
-    fun computeLoginsWithSingleCollectionCount(teamspace: Teamspace): Int =
-        computeLoginsWithSingleCollectionCount(queryAllCollectionsForSpace(teamspace))
-
-    fun computeLoginsWithMultipleCollectionsCount(teamspace: Teamspace): Int =
-        computeLoginsWithMultipleCollectionCount(queryAllCollectionsForSpace(teamspace))
-
-    private fun queryAllCollectionsForSpace(teamspace: Teamspace) = collectionDataQuery.queryAll {
+    fun computeCollectionTotalCount(teamSpace: TeamSpace): Int = collectionDataQuery.count(
         collectionFilter {
             ignoreUserLock()
-            specificSpace(teamspace)
+            specificSpace(teamSpace)
+        }
+    )
+
+    fun computeItemPerCollectionAverageCount(teamSpace: TeamSpace): Int =
+        computeItemPerCollectionAverageCount(queryAllCollectionsForSpace(teamSpace))
+
+    fun computeCollectionPerItemAverageCount(teamSpace: TeamSpace): Int =
+        computeCollectionPerItemAverageCount(queryAllCollectionsForSpace(teamSpace))
+
+    fun computeCollectionsWithLoginCount(teamSpace: TeamSpace): Int =
+        computeCollectionsWithLoginCount(queryAllCollectionsForSpace(teamSpace))
+
+    fun computeLoginsWithSingleCollectionCount(teamSpace: TeamSpace): Int =
+        computeLoginsWithSingleCollectionCount(queryAllCollectionsForSpace(teamSpace))
+
+    fun computeLoginsWithMultipleCollectionsCount(teamSpace: TeamSpace): Int =
+        computeLoginsWithMultipleCollectionCount(queryAllCollectionsForSpace(teamSpace))
+
+    private fun queryAllCollectionsForSpace(teamSpace: TeamSpace) = collectionDataQuery.queryAll {
+        collectionFilter {
+            ignoreUserLock()
+            specificSpace(teamSpace)
         }
     }
 }

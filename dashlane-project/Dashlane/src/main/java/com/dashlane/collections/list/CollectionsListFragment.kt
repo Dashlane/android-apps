@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +62,7 @@ import com.dashlane.collections.CollectionLoading
 import com.dashlane.collections.DeleteConfirmationDialog
 import com.dashlane.collections.SearchableTopAppBarTitle
 import com.dashlane.collections.SpaceData
+import com.dashlane.collections.details.DialogBusinessMemberLimit
 import com.dashlane.design.component.ButtonLarge
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.Icon
@@ -71,6 +73,7 @@ import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.color.TextColor
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.teamspaces.model.SpaceColor
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.widgets.compose.OutlinedTeamspaceIcon
 import com.dashlane.util.hideSoftKeyboard
@@ -110,6 +113,7 @@ class CollectionsListFragment : AbstractContentFragment() {
         val showSearch = remember { mutableStateOf(false) }
         val searchQuery = remember { mutableStateOf("") }
         val isSearching = remember { mutableStateOf(false) }
+        var displayBusinessMemberLimitDialog by rememberSaveable { mutableStateOf(false) }
         val menuHost: MenuHost = requireActivity()
         val menuProvider = remember {
             object : MenuProvider {
@@ -166,8 +170,16 @@ class CollectionsListFragment : AbstractContentFragment() {
             Box(modifier = Modifier.padding(it)) {
                 when (uiState) {
                     is ViewState.List -> {
-                        CollectionsList(uiState.viewData, searchQuery.value)
+                        CollectionsList(
+                            uiState.viewData,
+                            searchQuery.value
+                        ) { value -> displayBusinessMemberLimitDialog = value }
                         menuHost.invalidateMenu()
+                        if (displayBusinessMemberLimitDialog) {
+                            DialogBusinessMemberLimit {
+                                displayBusinessMemberLimitDialog = false
+                            }
+                        }
                     }
 
                     is ViewState.Empty -> {
@@ -209,7 +221,11 @@ class CollectionsListFragment : AbstractContentFragment() {
     }
 
     @Composable
-    private fun CollectionsList(viewData: ViewData, searchQuery: String) {
+    private fun CollectionsList(
+        viewData: ViewData,
+        searchQuery: String,
+        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -223,7 +239,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                 viewData.collections.filter { it.name.contains(searchQuery, ignoreCase = true) }
             }
             items(filteredCollections) { collection ->
-                CollectionItem(collection)
+                CollectionItem(collection, onDisplayBusinessMemberLimitDialogChange)
             }
         }
     }
@@ -267,15 +283,18 @@ class CollectionsListFragment : AbstractContentFragment() {
     @Composable
     private fun CollectionItem(
         item: CollectionViewData,
+        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
         viewModel: CollectionsListViewModel = viewModel()
     ) {
         var expanded by remember { mutableStateOf(false) }
         CollectionItem(
             item = item,
             expandMenu = expanded,
+            shareEnabled = item.shareEnabled,
             shareAllowed = item.shareAllowed,
             onExpandMenuChange = { expanded = it },
-            onDeleteClicked = viewModel::deleteClicked
+            onDeleteClicked = viewModel::deleteClicked,
+            onDisplayBusinessMemberLimitDialogChange = onDisplayBusinessMemberLimitDialogChange
         )
     }
 
@@ -284,9 +303,11 @@ class CollectionsListFragment : AbstractContentFragment() {
     private fun CollectionItem(
         item: CollectionViewData,
         expandMenu: Boolean,
+        shareEnabled: Boolean,
         shareAllowed: Boolean,
         onExpandMenuChange: (Boolean) -> Unit,
-        onDeleteClicked: (String) -> Unit
+        onDeleteClicked: (String) -> Unit,
+        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
     ) {
         var displayDeleteDialog by rememberSaveable { mutableStateOf(false) }
         Row(
@@ -296,7 +317,8 @@ class CollectionsListFragment : AbstractContentFragment() {
                         collectionId = item.id,
                         businessSpace = item.spaceData?.businessSpace ?: false,
                         sharedCollection = item.shared,
-                        shareAllowed = item.shareAllowed
+                        shareAllowed = item.shareAllowed,
+                        shareEnabled = item.shareEnabled
                     )
                 }
                 .padding(vertical = 8.dp)
@@ -317,7 +339,10 @@ class CollectionsListFragment : AbstractContentFragment() {
                         Spacer(modifier = Modifier.width(6.dp))
                         OutlinedTeamspaceIcon(
                             letter = item.spaceData.spaceLetter,
-                            color = item.spaceData.spaceColor,
+                            color = when (val color = item.spaceData.spaceColor) {
+                                is SpaceColor.FixColor -> colorResource(color.colorRes).toArgb()
+                                is SpaceColor.TeamColor -> color.color
+                            },
                             iconSize = 12.dp
                         )
                     }
@@ -342,53 +367,15 @@ class CollectionsListFragment : AbstractContentFragment() {
                 )
             }
 
-            Box {
-                IconButton(onClick = { onExpandMenuChange(true) }) {
-                    Icon(token = IconTokens.actionMoreOutlined, contentDescription = null)
-                }
-                MaterialTheme(
-                    
-                    
-                    colors = MaterialTheme.colors.copy(
-                        surface = DashlaneTheme.colors.containerAgnosticNeutralSupershy
-                    )
-                ) {
-                    DropdownMenu(
-                        expanded = expandMenu,
-                        onDismissRequest = {
-                            onExpandMenuChange(false)
-                        },
-                        offset = DpOffset(x = 12.dp, y = 0.dp)
-                    ) {
-                        if (shareAllowed) {
-                            TextMenuItem(stringResource(id = R.string.collections_list_item_menu_share)) {
-                                onExpandMenuChange(false)
-                                navigator.goToCollectionShareFromCollectionList(item.id)
-                            }
-                            if (item.shared) {
-                                TextMenuItem(stringResource(id = R.string.collections_list_item_menu_shared_access)) {
-                                    onExpandMenuChange(false)
-                                    
-                                }
-                            }
-                        }
-                        TextMenuItem(
-                            stringResource(id = R.string.collections_list_item_menu_edit),
-                            enabled = !item.shared
-                        ) {
-                            onExpandMenuChange(false)
-                            navigator.goToCollectionEditFromCollectionsList(item.id)
-                        }
-                        TextMenuItem(
-                            stringResource(id = R.string.collections_list_item_menu_delete),
-                            enabled = !item.shared
-                        ) {
-                            onExpandMenuChange(false)
-                            displayDeleteDialog = true
-                        }
-                    }
-                }
-            }
+            CollectionItemDropdownMenu(
+                onExpandMenuChange,
+                expandMenu,
+                shareEnabled,
+                shareAllowed,
+                item,
+                onDisplayBusinessMemberLimitDialogChange,
+                displayDeleteDialog
+            )
         }
 
         if (displayDeleteDialog) {
@@ -401,6 +388,74 @@ class CollectionsListFragment : AbstractContentFragment() {
                     displayDeleteDialog = false
                 }
             )
+        }
+    }
+
+    @Composable
+    private fun CollectionItemDropdownMenu(
+        onExpandMenuChange: (Boolean) -> Unit,
+        expandMenu: Boolean,
+        shareEnabled: Boolean,
+        shareAllowed: Boolean,
+        item: CollectionViewData,
+        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
+        displayDeleteDialog: Boolean
+    ) {
+        var displayDeleteDialog1 = displayDeleteDialog
+        Box {
+            IconButton(onClick = { onExpandMenuChange(true) }) {
+                Icon(token = IconTokens.actionMoreOutlined, contentDescription = null)
+            }
+            MaterialTheme(
+                
+                
+                colors = MaterialTheme.colors.copy(
+                    surface = DashlaneTheme.colors.containerAgnosticNeutralSupershy
+                )
+            ) {
+                DropdownMenu(
+                    expanded = expandMenu,
+                    onDismissRequest = {
+                        onExpandMenuChange(false)
+                    },
+                    offset = DpOffset(x = 12.dp, y = 0.dp)
+                ) {
+                    if (shareEnabled) {
+                        TextMenuItem(
+                            stringResource(id = R.string.collections_list_item_menu_share),
+                            enabled = shareAllowed
+                        ) {
+                            onExpandMenuChange(false)
+                            if (!shareAllowed) return@TextMenuItem
+                            if (item.shareLimitedByTeam) {
+                                onDisplayBusinessMemberLimitDialogChange(true)
+                            } else {
+                                navigator.goToCollectionShareFromCollectionList(item.id)
+                            }
+                        }
+                        if (item.shared) {
+                            TextMenuItem(stringResource(id = R.string.collections_list_item_menu_shared_access)) {
+                                onExpandMenuChange(false)
+                                navigator.goToCollectionSharedAccessFromCollectionsList(item.id)
+                            }
+                        }
+                    }
+                    TextMenuItem(
+                        stringResource(id = R.string.collections_list_item_menu_edit),
+                        enabled = !item.shared
+                    ) {
+                        onExpandMenuChange(false)
+                        navigator.goToCollectionEditFromCollectionsList(item.id)
+                    }
+                    TextMenuItem(
+                        stringResource(id = R.string.collections_list_item_menu_delete),
+                        enabled = !item.shared
+                    ) {
+                        onExpandMenuChange(false)
+                        displayDeleteDialog1 = true
+                    }
+                }
+            }
         }
     }
 
@@ -424,17 +479,21 @@ class CollectionsListFragment : AbstractContentFragment() {
                     itemCount = 5,
                     SpaceData(
                         spaceLetter = 'E',
-                        spaceColor = Color.Magenta.toArgb(),
+                        spaceColor = SpaceColor.TeamColor(Color.Magenta.toArgb()),
                         spaceContentDescriptionResId = R.string.and_accessibility_collection_list_item_business_teamspace,
                         businessSpace = true
                     ),
                     shared = true,
-                    shareAllowed = true
+                    shareEnabled = true,
+                    shareAllowed = true,
+                    shareLimitedByTeam = true
                 ),
                 expandMenu = false,
                 shareAllowed = true,
+                shareEnabled = true,
                 onExpandMenuChange = {},
-                onDeleteClicked = {}
+                onDeleteClicked = {},
+                onDisplayBusinessMemberLimitDialogChange = {}
             )
         }
     }
@@ -450,17 +509,21 @@ class CollectionsListFragment : AbstractContentFragment() {
                     itemCount = 5,
                     SpaceData(
                         spaceLetter = 'E',
-                        spaceColor = Color.Magenta.toArgb(),
+                        spaceColor = SpaceColor.TeamColor(Color.Magenta.toArgb()),
                         spaceContentDescriptionResId = R.string.and_accessibility_collection_list_item_business_teamspace,
                         businessSpace = true
                     ),
                     shared = true,
-                    shareAllowed = true
+                    shareEnabled = true,
+                    shareAllowed = true,
+                    shareLimitedByTeam = false
                 ),
                 expandMenu = false,
                 shareAllowed = true,
+                shareEnabled = true,
                 onExpandMenuChange = {},
-                onDeleteClicked = {}
+                onDeleteClicked = {},
+                onDisplayBusinessMemberLimitDialogChange = {}
             )
         }
     }
@@ -476,12 +539,16 @@ class CollectionsListFragment : AbstractContentFragment() {
                     itemCount = 1,
                     spaceData = null,
                     shared = true,
-                    shareAllowed = false
+                    shareEnabled = true,
+                    shareAllowed = false,
+                    shareLimitedByTeam = false
                 ),
                 expandMenu = false,
                 shareAllowed = true,
+                shareEnabled = true,
                 onExpandMenuChange = {},
-                onDeleteClicked = {}
+                onDeleteClicked = {},
+                onDisplayBusinessMemberLimitDialogChange = {}
             )
         }
     }

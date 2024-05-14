@@ -19,16 +19,16 @@ import com.dashlane.sharing.model.toItemGroups
 import com.dashlane.sharing.model.toUserGroups
 import com.dashlane.storage.userdata.DataSyncDaoRaclette
 import com.dashlane.storage.userdata.DatabaseItemSaverRaclette
+import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQueryImplRaclette
 import com.dashlane.storage.userdata.dao.SharingDataType
 import com.dashlane.sync.DataIdentifierExtraDataWrapper
 import com.dashlane.sync.VaultItemBackupWrapper
 import com.dashlane.sync.toDataIdentifierExtraDataWrapper
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.manager.getSuggestedTeamspace
 import com.dashlane.useractivity.RacletteLogger
-import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.copyWithLock
 import com.dashlane.vault.model.copyWithSpaceId
 import com.dashlane.xml.domain.SyncObject
@@ -37,18 +37,21 @@ import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
 import com.dashlane.xml.serializer.XmlDeserializer
 import com.dashlane.xml.serializer.XmlSerializer
 import dagger.Lazy
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
+@Singleton
 class SharingDaoImplRaclette @Inject constructor(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,
     private val databaseItemSaver: DatabaseItemSaverRaclette,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
+    private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val xmlConverterLazy: Lazy<DataIdentifierSharingXmlConverter>,
     override val vaultDataQuery: VaultDataQueryImplRaclette,
     override val dataSaver: Lazy<DataSaver>,
+    override val collectionDataQuery: Lazy<CollectionDataQuery>,
     private val dataSyncDaoRaclette: DataSyncDaoRaclette,
     private val racletteLogger: RacletteLogger
 ) : SharingDao {
@@ -212,9 +215,9 @@ class SharingDaoImplRaclette @Inject constructor(
         userPermission: String
     ) {
         objectToSave ?: return
-        val teamspaceAccessor = teamspaceAccessorProvider.get() ?: return
+        val teamSpaceAccessor = teamSpaceAccessorProvider.get() ?: return
         val vaultItem = objectToSave.vaultItem.let {
-            it.copyWithAttrs { teamSpaceId = it.getSuggestedTeamspace(teamspaceAccessor)?.teamId }
+            it.copyWithAttrs { teamSpaceId = it.getSuggestedTeamspace(teamSpaceAccessor)?.teamId }
         }
         val newObjectToSave = VaultItemBackupWrapper(
             vaultItem = vaultItem.copyWithAttrs {

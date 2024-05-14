@@ -12,8 +12,8 @@ import com.dashlane.ui.drawable.CircleDrawable
 
 interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     val title: Int
-    val titleFormatArgs: Array<Any>
-        get() = emptyArray()
+    val titleFormatArgs: List<Any>
+        get() = emptyList()
     val description: Int
     val icon: Int
     override val trackingKey: String
@@ -130,13 +130,44 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val action: NotificationCenterDef.Presenter.() -> Unit = { startAuthenticator() }
     }
 
+    data class PasswordLimitReachedActionItem(
+        override val actionItemsRepository: NotificationCenterRepository,
+        private val passwordLimit: Int
+    ) : ActionItem {
+        override val type: ActionItemType = ActionItemType.PASSWORD_LIMIT_REACHED
+        override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
+        override val title: Int = R.string.action_item_password_limit_reached_title
+        override val description: Int = R.string.action_item_password_limit_description
+        override val icon: Int = R.drawable.ic_action_item_premium_related
+        override val action: NotificationCenterDef.Presenter.() -> Unit =
+            { startGoEssentials() }
+        override val titleFormatArgs: List<Any>
+            get() = listOf(passwordLimit)
+    }
+
+    data class PasswordLimitWarningActionItem(
+        override val actionItemsRepository: NotificationCenterRepository,
+        private val passwordCount: Int,
+        private val passwordLimit: Int
+    ) : ActionItem {
+        override val type: ActionItemType = ActionItemType.PASSWORD_LIMIT_WARNING
+        override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
+        override val title: Int = R.string.action_item_password_limit_warning_title
+        override val description: Int = R.string.action_item_password_limit_description
+        override val icon: Int = R.drawable.ic_action_item_premium_related
+        override val action: NotificationCenterDef.Presenter.() -> Unit =
+            { startGoEssentials() }
+        override val titleFormatArgs: List<Any>
+            get() = listOf(passwordCount, passwordLimit)
+    }
+
     class ViewHolder(view: View) : ReadStateViewHolder<ActionItem>(view) {
 
         @Suppress("SpreadOperator")
         override fun updateView(context: Context, item: ActionItem?) {
             super.updateView(context, item)
             item ?: return
-            setText(R.id.title, context.getString(item.title, *item.titleFormatArgs))
+            setText(R.id.title, context.getString(item.title, *item.titleFormatArgs.toTypedArray()))
             setText(R.id.description, context.getString(item.description))
             setImageDrawable(
                 R.id.icon,

@@ -22,6 +22,7 @@ import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.ui.screens.activities.onboarding.hardwareauth.HardwareAuthActivationActivity
+import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.util.clearTop
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getParcelableExtraCompat
@@ -51,6 +52,9 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
     @Inject
     lateinit var userPreferencesManager: UserPreferencesManager
 
+    @Inject
+    lateinit var sensibleSettingsClickHelper: SensibleSettingsClickHelper
+
     private lateinit var presenter: Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,12 +77,13 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         )
 
         presenter = Presenter(
-            lockTypeManager,
-            biometricAuthModule,
-            securityHelper,
-            biometricRecovery,
-            nextIntent,
-            fromUse2fa
+            lockTypeManager = lockTypeManager,
+            biometricAuthModule = biometricAuthModule,
+            securityHelper = securityHelper,
+            biometricRecovery = biometricRecovery,
+            sensibleSettingsClickHelper = sensibleSettingsClickHelper,
+            nextIntent = nextIntent,
+            fromUse2fa = fromUse2fa
         )
         presenter.setView(ViewProxy(this))
     }
@@ -134,6 +139,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         private val biometricAuthModule: BiometricAuthModule,
         private val securityHelper: SecurityHelper,
         private val biometricRecovery: BiometricRecovery,
+        private val sensibleSettingsClickHelper: SensibleSettingsClickHelper,
         private val nextIntent: Intent,
         private val fromUse2fa: Boolean
     ) : BasePresenter<IntroScreenContract.DataProvider, ViewProxy>(),
@@ -169,10 +175,13 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         }
 
         override fun onClickPositiveButton() {
-            if (uiConfig.hasBiometrics) {
-                showBiometricActivation()
-            } else {
-                showPinCodeSetter()
+            val context = context ?: return
+            sensibleSettingsClickHelper.perform(context) {
+                if (uiConfig.hasBiometrics) {
+                    showBiometricActivation()
+                } else {
+                    showPinCodeSetter()
+                }
             }
         }
 
@@ -218,11 +227,11 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
                 return
             }
 
-            if (uiConfig.canSkip && !securityHelper.allowedToUsePin()) {
+            if (uiConfig.canSkip && !securityHelper.isDeviceSecured()) {
                 
                 done()
                 return
-            } else if (!securityHelper.allowedToUsePin()) {
+            } else if (!securityHelper.isDeviceSecured()) {
                 securityHelper.showPopupPinCodeDisable(activity)
             }
 

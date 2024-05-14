@@ -15,7 +15,7 @@ import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GeneratedPasswordQuery
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.addOnFieldVisibilityToggleListener
@@ -40,7 +40,7 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
     lateinit var clipboardCopy: ClipboardCopy
 
     @Inject
-    lateinit var mainDataAccessor: MainDataAccessor
+    lateinit var generatedPasswordQuery: GeneratedPasswordQuery
 
     private val revealedIds = mutableSetOf<String>()
 
@@ -76,8 +76,7 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
     }
 
     private fun refreshContent() {
-        val generatedPasswords = mainDataAccessor
-            .getGeneratedPasswordQuery()
+        val generatedPasswords = generatedPasswordQuery
             .queryAllNotRevoked()
             .sortedByDescending { it.syncObject.generatedDate }
 

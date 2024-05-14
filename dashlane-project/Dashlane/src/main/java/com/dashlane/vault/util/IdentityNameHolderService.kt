@@ -1,6 +1,6 @@
 package com.dashlane.vault.util
 
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.GenericFilter
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.summary.SummaryObject
@@ -15,12 +15,11 @@ interface IdentityNameHolderService {
     fun getOwner(item: SummaryObject.FiscalStatement): String
 }
 
-class IdentityNameHolderServiceImpl @Inject constructor(private val dataAccessor: MainDataAccessor) :
+class IdentityNameHolderServiceImpl @Inject constructor(private val genericDataQuery: GenericDataQuery) :
     IdentityNameHolderService {
     private fun getIdentityFullName(identityUid: String?, fallbackName: String?): String {
         if (identityUid.isNotSemanticallyNull()) {
-            val identity = dataAccessor
-                .getGenericDataQuery()
+            val identity = genericDataQuery
                 .queryFirst(GenericFilter(identityUid!!, SyncObjectType.IDENTITY)) as? SummaryObject.Identity
             identity
                 ?.fullName

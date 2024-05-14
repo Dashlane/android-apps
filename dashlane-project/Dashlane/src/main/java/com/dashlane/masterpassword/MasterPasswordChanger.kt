@@ -5,7 +5,6 @@ import com.dashlane.account.UserAccountStorage
 import com.dashlane.account.UserSecuritySettings
 import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
-import com.dashlane.core.DataSync
 import com.dashlane.cryptography.CryptographyKeyGenerator
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.cryptography.ObfuscatedByteArray
@@ -23,20 +22,20 @@ import com.dashlane.session.AppKey
 import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
+import com.dashlane.session.UserDataRepository
 import com.dashlane.session.Username
 import com.dashlane.session.VaultKey
-import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.session.repository.getCryptographyMarkerOrDefault
 import com.dashlane.session.serverKeyUtf8Bytes
-import com.dashlane.storage.DataStorageProvider
 import com.dashlane.storage.securestorage.LocalKeyRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureDataStorage
 import com.dashlane.storage.securestorage.SecureStorageManager
+import com.dashlane.sync.DataSync
 import com.dashlane.sync.cryptochanger.SyncCryptoChanger
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.sync.vault.SyncVault
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
@@ -111,17 +110,17 @@ class MasterPasswordChangerImpl @Inject constructor(
     private val userAccountStorage: UserAccountStorage,
     private val secureStorageManager: SecureStorageManager,
     private val cryptographyKeyGenerator: CryptographyKeyGenerator,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>,
-    private val dataStorageProvider: Lazy<DataStorageProvider>,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val dadada: DaDaDa,
+    private val syncVault: Lazy<SyncVault>,
     private val syncCryptoChanger: SyncCryptoChanger
 ) : MasterPasswordChanger {
 
-    private val teamspaceAccessor: TeamspaceAccessor?
-        get() = teamspaceAccessorProvider.get()
+    private val teamSpaceAccessor: TeamSpaceAccessor?
+        get() = teamSpaceAccessorProvider.get()
 
     private val teamspaceForcedPayload
-        get() = teamspaceAccessor?.getFeatureValue(Teamspace.Feature.CRYPTO_FORCED_PAYLOAD)
+        get() = teamSpaceAccessor?.cryptoForcedPayload
             ?.toCryptographyMarkerOrNull()
 
     override val canChangeMasterPassword: Boolean
@@ -293,7 +292,7 @@ class MasterPasswordChangerImpl @Inject constructor(
                     cryptographyMarker = securityUpdate.newCryptoMarker,
                     authTicket = securityUpdate.authTicket,
                     ssoServerKey = securityUpdate.ssoServerKey,
-                    syncVault = dataStorageProvider.get().syncVault,
+                    syncVault = syncVault.get(),
                     uploadReason = uploadReason
                 ) {
                     progressStateFlow.value = when (it) {

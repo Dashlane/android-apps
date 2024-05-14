@@ -6,10 +6,10 @@ import com.dashlane.server.api.endpoints.features.FeatureFlipGetAndEvaluateForUs
 import com.dashlane.session.RemoteConfiguration
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
+import com.dashlane.userfeatures.FeatureFlip
 import com.dashlane.util.UserChangedDetector
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.isSemanticallyNull
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -70,7 +70,7 @@ class FeatureFlipManager @Inject constructor(
         val session = sessionManager.session ?: return
         val login = session.userId
         val request = FeatureFlipGetAndEvaluateForUserService.Request(
-            UserFeaturesChecker.FeatureFlip.values().map { it.value }
+            FeatureFlip.values().map { it.value }
         )
         runCatching {
             val enabledFeatures = service.execute(

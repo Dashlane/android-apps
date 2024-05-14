@@ -26,11 +26,13 @@ import com.dashlane.storage.securestorage.SecureStorageManager
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.util.installlogs.DataLossTrackingLogger
 import dagger.Lazy
+import javax.crypto.AEADBadTagException
+import javax.crypto.IllegalBlockSizeException
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SessionRestorer @Inject constructor(
@@ -190,11 +192,16 @@ class SessionRestorer @Inject constructor(
         
         migrateAccountManager(username)
 
-        val secureDataStorage =
-            secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
-        val bytes =
-            secureDataStorage.read(SecureDataKey.LOCAL_KEY)?.value?.decodeBase64ToByteArrayOrNull() ?: return null
-        val localKeyBytes = cryptoObjectHelper.decrypt(CryptoObjectHelper.LocalKeyLock(username.email), bytes)
+        val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
+        val bytes = secureDataStorage.read(SecureDataKey.LOCAL_KEY)?.value?.decodeBase64ToByteArrayOrNull() ?: return null
+
+        val localKeyBytes = try {
+            cryptoObjectHelper.decrypt(CryptoObjectHelper.LocalKeyLock(username.email), bytes)
+        } catch (exception: AEADBadTagException) {
+            null
+        } catch (exception: IllegalBlockSizeException) {
+            null
+        }
 
         if (localKeyBytes == null) {
             lockManager.markCredentialsEmpty()

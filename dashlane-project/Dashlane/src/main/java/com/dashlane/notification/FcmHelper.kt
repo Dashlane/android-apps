@@ -4,10 +4,9 @@ import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.SessionManager
 import com.dashlane.ui.ApplicationForegroundChecker
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.isSemanticallyNull
+import com.dashlane.util.isValueNull
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -18,7 +17,6 @@ import javax.inject.Singleton
 class FcmHelper @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
-    private val sessionManager: SessionManager,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val userPreferencesManager: UserPreferencesManager,
     private val register: PushNotificationRegister,
@@ -27,8 +25,6 @@ class FcmHelper @Inject constructor(
     companion object {
         
         private const val SERVER_REGISTERED = "dservNot"
-
-        const val INTENT_COME_FROM_NOTIFICATION = "intent_come_from_notification"
     }
 
     private var serverRegistered: Boolean
@@ -50,13 +46,8 @@ class FcmHelper @Inject constructor(
         }
     }
 
-    fun register(token: String?) {
-        
-        if (token.isSemanticallyNull()) return
-
-        
-        val username = sessionManager.session?.userId ?: return
-        val uki = sessionManager.session?.uki ?: return
+    fun register(token: String) {
+        if (token.isValueNull()) return
 
         val isSameToken = globalPreferencesManager.fcmRegistrationId == token
 
@@ -72,10 +63,9 @@ class FcmHelper @Inject constructor(
         serverRegistered = false
 
         
-
         applicationCoroutineScope.launch {
             
-            val success = register.register(username, uki, token!!)
+            val success = register.register(token)
             if (success) {
                 
                 serverRegistered = true

@@ -4,19 +4,26 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.collections.businessSpaceData
+import com.dashlane.collections.sharing.item.CollectionSharingItemDataProvider
 import com.dashlane.collections.spaceData
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
-import com.dashlane.teamspaces.manager.TeamspaceAccessorProvider
+import com.dashlane.storage.userdata.accessor.CollectionDataQuery
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.queryFirst
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.url.toUrlDomainOrNull
+import com.dashlane.userfeatures.FeatureFlip
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.FeatureFlip
+import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
+import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.titleForListNormalized
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.summary.toSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -27,19 +34,30 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CollectionDetailsViewModel @Inject constructor(
-    private val teamspaceAccessorProvider: TeamspaceAccessorProvider,
+    private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    mainDataAccessor: MainDataAccessor,
     savedStateHandle: SavedStateHandle,
+    private val collectionDataQuery: CollectionDataQuery,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val dataSaver: DataSaver,
     private val sharingDataProvider: SharingDataProvider,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val collectionSharingItemDataProvider: CollectionSharingItemDataProvider,
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val collectionLimiter: CollectionLimiter,
+    private val vaultActivityLogger: VaultActivityLogger
 ) : ViewModel() {
-    private val collectionDataQuery = mainDataAccessor.getCollectionDataQuery()
-    private val dataSaver = mainDataAccessor.getDataSaver()
     private val shareEnabled: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_MILESTONE_1)
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
+    private val allowAllRoles: Boolean
+        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_ROLES)
+
+    
+    val isCollectionSharingLimited: Boolean
+        get() = uiState.value.viewData.collectionLimit == CollectionLimiter.UserLimit.REACHED_LIMIT
+
     val navArgs = CollectionDetailsFragmentArgs.fromSavedStateHandle(savedStateHandle)
     var listeningChanges = true
+    var userAccessCouldChange = false
 
     private val _uiState = MutableStateFlow<ViewState>(
         ViewState.Loading(
@@ -47,7 +65,8 @@ class CollectionDetailsViewModel @Inject constructor(
                 collectionName = null,
                 shared = false,
                 items = emptyList(),
-                spaceData = null
+                spaceData = null,
+                canRemoveFromSharedCollection = shareEnabled
             )
         )
     )
@@ -56,11 +75,18 @@ class CollectionDetailsViewModel @Inject constructor(
     init {
         refreshCollectionDetails()
         viewModelScope.launch {
-            mainDataAccessor.getDataSaver().savedItemFlow.collect {
+            dataSaver.savedItemFlow.collect {
                 
                 
                 if (listeningChanges) refreshCollectionDetails()
             }
+        }
+    }
+
+    fun mayRefresh() {
+        if (userAccessCouldChange) {
+            refreshCollectionDetails()
+            userAccessCouldChange = false
         }
     }
 
@@ -77,7 +103,9 @@ class CollectionDetailsViewModel @Inject constructor(
 
     private suspend fun refreshSharedCollection() {
         val collections =
-            sharingDataProvider.getAcceptedCollections().filter { it.uuid == navArgs.collectionId }
+            sharingDataProvider.getAcceptedCollections(needsAdminRights = !allowAllRoles).filter {
+                it.uuid == navArgs.collectionId
+            }
         if (collections.isEmpty()) {
             _uiState.emit(ViewState.Deleted(_uiState.value.viewData))
             return
@@ -85,11 +113,14 @@ class CollectionDetailsViewModel @Inject constructor(
         val collection = collections.first()
         val title = collection.name
         val items = sharingDataProvider.getAcceptedCollectionsItems(navArgs.collectionId)
+        val collectionLimit = collectionLimiter.checkCollectionLimit(navArgs.sharedCollection)
         val viewData = ViewData(
             collectionName = title,
             shared = true,
             items = items.mapNotNull { it.toSummaryForUi() },
-            spaceData = businessSpaceData(teamspaceAccessorProvider)
+            spaceData = businessSpaceData(teamSpaceAccessorProvider),
+            canRemoveFromSharedCollection = shareEnabled,
+            collectionLimit = collectionLimit
         )
 
         if (items.isNotEmpty()) {
@@ -108,11 +139,15 @@ class CollectionDetailsViewModel @Inject constructor(
 
         val title = collection.syncObject.name
         val items = collectionDataQuery.queryVaultItemsWithCollectionId(navArgs.collectionId)
+        val collectionLimit = collectionLimiter.checkCollectionLimit(navArgs.sharedCollection)
+
         val viewData = ViewData(
             collectionName = title,
             shared = false,
             items = items.mapNotNull { it.toSummaryForUi() },
-            spaceData = collection.syncObject.spaceData(teamspaceAccessorProvider)
+            spaceData = collection.syncObject.spaceData(teamSpaceAccessorProvider),
+            canRemoveFromSharedCollection = shareEnabled,
+            collectionLimit = collectionLimit
         )
 
         if (items.isNotEmpty()) {
@@ -131,7 +166,8 @@ class CollectionDetailsViewModel @Inject constructor(
                     thumbnail = urlDomain?.toUrlDomainOrNull(),
                     firstLine = titleForListNormalized ?: "",
                     secondLine = loginForUi ?: "",
-                    spaceData = spaceData(teamspaceAccessorProvider)
+                    sharingPermission = if (allowAllRoles) sharingPermission else null,
+                    spaceData = spaceData(teamSpaceAccessorProvider)
                 )
             }
 
@@ -151,6 +187,9 @@ class CollectionDetailsViewModel @Inject constructor(
             if (collection != null) {
                 val collectionToDelete = collection.copy(syncState = SyncState.DELETED)
                 dataSaver.save(collectionToDelete)
+                vaultActivityLogger.sendCollectionDeletedActivityLog(
+                    collection = collectionToDelete.toSummary()
+                )
             }
         }
     }
@@ -161,16 +200,34 @@ class CollectionDetailsViewModel @Inject constructor(
         }
     }
 
-    fun removeItem(itemId: String) {
+    fun removeItem(itemId: String, shared: Boolean) {
         viewModelScope.launch {
+            if (shared) {
+                val collection =
+                    sharingDataProvider.getCollections(itemId, needsAdminRights = false)
+                        .firstOrNull { it.uuid == navArgs.collectionId } ?: return@launch
+                collectionSharingItemDataProvider.removeItemFromSharedCollections(
+                    itemId,
+                    listOf(collection)
+                )
+                return@launch
+            }
             val collection = collectionDataQuery.queryById(navArgs.collectionId)
             if (collection != null) {
-                val updatedCollection = collection.copy(
-                    syncObject = collection.syncObject.copy {
-                        vaultItems = vaultItems?.filterNot { it.id == itemId }
-                    }
-                )
+                val updatedCollection = collection.copySyncObject {
+                    vaultItems = vaultItems?.filterNot { it.id == itemId }
+                }.copyWithAttrs {
+                    syncState = SyncState.MODIFIED
+                }
                 dataSaver.save(updatedCollection)
+
+                val removedItem = credentialDataQuery.queryFirst { specificUid(itemId) }
+                if (removedItem != null) {
+                    vaultActivityLogger.sendRemoveItemFromCollectionActivityLog(
+                        collection = updatedCollection.toSummary(),
+                        item = removedItem
+                    )
+                }
             }
         }
     }

@@ -13,7 +13,7 @@ import com.dashlane.hermes.generated.events.user.AutofillAccept
 import com.dashlane.hermes.generated.events.user.AutofillDismiss
 import com.dashlane.hermes.generated.events.user.UpdateVaultItem
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.util.getTeamSpaceLog
+import com.dashlane.teamspaces.getTeamSpaceLog
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 

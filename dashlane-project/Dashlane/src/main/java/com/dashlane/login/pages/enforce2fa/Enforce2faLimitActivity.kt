@@ -1,5 +1,6 @@
 package com.dashlane.login.pages.enforce2fa
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import com.dashlane.R
 import com.dashlane.ui.activities.DashlaneActivity
@@ -34,6 +35,8 @@ class Enforce2faLimitActivity : DashlaneActivity() {
         super.onPause()
     }
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         
     }

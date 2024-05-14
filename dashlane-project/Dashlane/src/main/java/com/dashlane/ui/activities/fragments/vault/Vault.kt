@@ -3,7 +3,7 @@ package com.dashlane.ui.activities.fragments.vault
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.model.TeamSpace
 import com.skocken.presentation.definition.Base
 import kotlinx.coroutines.flow.StateFlow
 
@@ -15,7 +15,7 @@ interface Vault {
         fun onStartFragment()
         fun onStopFragment()
         fun onResumeFragment()
-        fun onTeamspaceChange(teamspace: Teamspace?)
+        fun onTeamspaceChange(teamspace: TeamSpace?)
         fun onSearchViewClicked()
         fun onFilterSelected(filter: Filter)
         fun onTabReselected(filter: Filter)
@@ -26,12 +26,11 @@ interface Vault {
     interface View : Base.IView {
         fun setSelectedFilterTab(filter: Filter)
         fun getSelectedPosition(): Int
-        fun showAnnouncement(@LayoutRes layout: Int?, onClick: () -> Unit = {})
+        fun showAnnouncement(@LayoutRes layout: Int?, onClick: () -> Unit = {}): android.view.View?
         fun showSnackbar(@StringRes stringRes: Int)
     }
 
     interface DataProvider : Base.IDataProvider {
-        fun subscribeTeamspaceManager()
-        fun unsubscribeTeamspaceManager()
+        
     }
 }

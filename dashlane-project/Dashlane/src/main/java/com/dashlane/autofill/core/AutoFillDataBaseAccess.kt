@@ -3,20 +3,22 @@ package com.dashlane.autofill.core
 import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.LinkedServicesHelper
-import com.dashlane.core.DataSync
 import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.core.helpers.PackageSignatureStatus
 import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.session.SessionManager
+import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataCounter
+import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.GenericFilter
 import com.dashlane.storage.userdata.accessor.filter.counterFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
+import com.dashlane.sync.DataSync
+import com.dashlane.teamspaces.db.SmartSpaceCategorizationManager
 import com.dashlane.url.root
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
@@ -51,19 +53,18 @@ import kotlinx.coroutines.withContext
 @Suppress("LargeClass")
 class AutoFillDataBaseAccess @Inject constructor(
     private val sessionManager: SessionManager,
-    private val mainDataAccessor: MainDataAccessor,
+    private val dataCounter: DataCounter,
+    private val dataSaver: DataSaver,
+    private val genericDataQuery: GenericDataQuery,
+    private val credentialDataQuery: CredentialDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
     @IoCoroutineDispatcher private val ioCoroutineDispatcher: CoroutineDispatcher,
-    private val teamspaceForceCategorizationManager: TeamspaceForceCategorizationManager,
+    private val smartSpaceCategorizationManager: SmartSpaceCategorizationManager,
     private val linkedServicesHelper: LinkedServicesHelper,
     private val dataSync: DataSync,
     private val knownApplicationProvider: KnownApplicationProvider,
     private val packageNameSignatureHelper: PackageNameSignatureHelper
 ) : AutofillAnalyzerDef.DatabaseAccess {
-
-    private val dataCounter: DataCounter
-        get() = mainDataAccessor.getDataCounter()
-    private val genericDataQuery: GenericDataQuery
-        get() = mainDataAccessor.getGenericDataQuery()
 
     private var lastResult: LastResult? = null
 
@@ -100,13 +101,12 @@ class AutoFillDataBaseAccess @Inject constructor(
     }
 
     private fun loadAuthentifiantsForPackageName(packageName: String): List<SummaryObject.Authentifiant> {
-        val dataQuery = mainDataAccessor.getCredentialDataQuery()
-        val filter = dataQuery.createFilter().also { it.ignoreUserLock() }
+        val filter = credentialDataQuery.createFilter().also { it.ignoreUserLock() }
         filter.packageName = packageName
         filter.allowSimilarDomains = true
 
         
-        return dataQuery.queryAll(filter)
+        return credentialDataQuery.queryAll(filter)
     }
 
     private fun loadAuthentifiantsPackageNameWhiteListDomains(packageName: String): List<SummaryObject.Authentifiant>? {
@@ -116,13 +116,12 @@ class AutoFillDataBaseAccess @Inject constructor(
         if (authentifiants != null) {
             return authentifiants
         }
-        val dataQuery = mainDataAccessor.getCredentialDataQuery()
-        val filter = dataQuery.createFilter().apply {
+        val filter = credentialDataQuery.createFilter().apply {
             ignoreUserLock()
             forDomain(domain)
             allowSimilarDomains = true
         }
-        val credentials = dataQuery.queryAll(filter)
+        val credentials = credentialDataQuery.queryAll(filter)
         setCachedResult(domain, credentials)
         return credentials
     }
@@ -134,13 +133,12 @@ class AutoFillDataBaseAccess @Inject constructor(
         if (authentifiants != null) {
             return authentifiants
         }
-        val dataQuery = mainDataAccessor.getCredentialDataQuery()
-        val filter = dataQuery.createFilter().apply {
+        val filter = credentialDataQuery.createFilter().apply {
             ignoreUserLock()
             forDomain(domain)
             allowSimilarDomains = true
         }
-        val credentials = dataQuery.queryAll(filter)
+        val credentials = credentialDataQuery.queryAll(filter)
         setCachedResult(domain, credentials)
         return credentials
     }
@@ -156,12 +154,11 @@ class AutoFillDataBaseAccess @Inject constructor(
 
     override fun <T : SyncObject> loadSyncObject(itemId: String): VaultItem<T>? {
         if (!isLoggedIn) return null
-        val dataQuery = mainDataAccessor.getVaultDataQuery()
         val filter = vaultFilter {
             ignoreUserLock()
             specificUid(itemId)
         }
-        return dataQuery.query(filter) as? VaultItem<T>
+        return vaultDataQuery.query(filter) as? VaultItem<T>
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -201,7 +198,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             passwordModificationDate = createTimestamp,
             linkedServices = linkedServices
         ).copyWithDefaultValue(context, sessionManager.session) as VaultItem<SyncObject.Authentifiant>
-        if (!mainDataAccessor.getDataSaver().save(newCredential)) {
+        if (!dataSaver.save(newCredential)) {
             
             return null
         }
@@ -218,7 +215,7 @@ class AutoFillDataBaseAccess @Inject constructor(
         if (!isLoggedIn) return null
 
         val authentifiant = prepareAuthentifiantToSave(website, packageName, context, password, login)
-        if (!mainDataAccessor.getDataSaver().save(authentifiant)) {
+        if (!dataSaver.save(authentifiant)) {
             
             return null
         }
@@ -236,10 +233,9 @@ class AutoFillDataBaseAccess @Inject constructor(
             specificUid(uid)
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
-        val account =
-            mainDataAccessor.getVaultDataQuery().query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
+        val account = vaultDataQuery.query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
         val updatedAccount = account.copyWithNewUrl(website).copyWithAttrs { syncState = SyncState.MODIFIED }
-        mainDataAccessor.getDataSaver().save(updatedAccount)
+        dataSaver.save(updatedAccount)
         return updatedAccount
     }
 
@@ -252,9 +248,8 @@ class AutoFillDataBaseAccess @Inject constructor(
         val filter = vaultFilter {
             specificUid(itemId)
         }
-        val updatedAccount =
-            mainDataAccessor.getVaultDataQuery().query(filter)?.copyWithAttrs { locallyViewedDate = instant } ?: return
-        mainDataAccessor.getDataSaver().save(updatedAccount)
+        val updatedAccount = vaultDataQuery.query(filter)?.copyWithAttrs { locallyViewedDate = instant } ?: return
+        dataSaver.save(updatedAccount)
     }
 
     private fun prepareAuthentifiantToSave(
@@ -340,7 +335,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             expireMonth = expireMonth,
             expireYear = expireYear
         )
-        if (mainDataAccessor.getDataSaver().save(creditCard)) {
+        if (dataSaver.save(creditCard)) {
             return creditCard
         }
         return null
@@ -357,10 +352,9 @@ class AutoFillDataBaseAccess @Inject constructor(
             specificUid(uid)
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
-        val account =
-            mainDataAccessor.getVaultDataQuery().query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
+        val account = vaultDataQuery.query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
         val updatedAccount = account.copyWithNewPassword(password).copyWithAttrs { syncState = SyncState.MODIFIED }
-        mainDataAccessor.getDataSaver().save(updatedAccount)
+        dataSaver.save(updatedAccount)
         return updatedAccount
     }
 
@@ -382,9 +376,9 @@ class AutoFillDataBaseAccess @Inject constructor(
                     userModificationDate = Instant.now()
                     syncState = SyncState.MODIFIED
                 }
-                return@withContext mainDataAccessor.getDataSaver().save(toSaveItem).also {
+                return@withContext dataSaver.save(toSaveItem).also {
                     
-                    teamspaceForceCategorizationManager.executeSync()
+                    smartSpaceCategorizationManager.executeSync()
 
                     
                     dataSync.sync(Trigger.SAVE)
@@ -408,7 +402,7 @@ class AutoFillDataBaseAccess @Inject constructor(
                         userModificationDate = Instant.now()
                         syncState = SyncState.MODIFIED
                     }
-                    return@withContext mainDataAccessor.getDataSaver().save(toSaveItem).also {
+                    return@withContext dataSaver.save(toSaveItem).also {
                         
                         dataSync.sync(Trigger.SAVE)
                     }

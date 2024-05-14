@@ -7,18 +7,18 @@ import com.dashlane.hermes.generated.definitions.CallToAction
 import com.dashlane.login.LoginIntents
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.premium.offer.list.view.OffersActivity
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.util.startActivity
-import com.dashlane.util.userfeatures.UserFeaturesChecker
-import com.dashlane.util.userfeatures.UserFeaturesChecker.Capability.DEVICES_LIMIT
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import com.dashlane.hermes.generated.events.user.CallToAction as UserCallToAction
 
 class DeviceLimitPresenter @Inject constructor(
@@ -40,8 +40,8 @@ class DeviceLimitPresenter @Inject constructor(
     }
 
     override fun onStart() {
-        userPreferencesManager.isOnLoginPaywall = userFeaturesChecker.has(DEVICES_LIMIT)
-        if (!userFeaturesChecker.has(DEVICES_LIMIT)) {
+        userPreferencesManager.isOnLoginPaywall = userFeaturesChecker.has(Capability.DEVICESLIMIT)
+        if (!userFeaturesChecker.has(Capability.DEVICESLIMIT)) {
             activity.startActivity(LoginIntents.createProgressActivityIntent(activity))
             activity.finish()
         }

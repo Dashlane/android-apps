@@ -5,19 +5,20 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.CollectionDataQuery
+import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.filter.collectionFilter
-import com.dashlane.teamspaces.CombinedTeamspace
-import com.dashlane.teamspaces.PersonalTeamspace
-import com.dashlane.teamspaces.manager.TeamspaceAccessorProvider
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.COLLECTION_NAME_MAX_LENGTH
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.createCollection
 import com.dashlane.vault.model.toSanitizedCollectionName
+import com.dashlane.vault.summary.toSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -29,9 +30,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CollectionsEditViewModel @Inject constructor(
-    private val teamspaceAccessorProvider: TeamspaceAccessorProvider,
+    private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
+    private val collectionDataQuery: CollectionDataQuery,
+    private val dataSaver: DataSaver,
+    private val vaultActivityLogger: VaultActivityLogger,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    mainDataAccessor: MainDataAccessor,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -50,9 +53,6 @@ class CollectionsEditViewModel @Inject constructor(
     )
     val uiState = _uiState.asStateFlow()
 
-    private val collectionDataQuery = mainDataAccessor.getCollectionDataQuery()
-    private val dataSaver = mainDataAccessor.getDataSaver()
-
     init {
         viewModelScope.launch(defaultDispatcher) {
             loadExistingCollectionData()
@@ -61,15 +61,13 @@ class CollectionsEditViewModel @Inject constructor(
     }
 
     private fun loadExistingCollectionData() {
-        if (navArgs.collectionId == null) {
-            return
-        }
-        val collection = collectionDataQuery.queryById(navArgs.collectionId)
+        val collectionId = navArgs.collectionId ?: return
+        val collection = collectionDataQuery.queryById(collectionId)
         val spaceId = collection?.syncObject?.spaceId
         val space = if (spaceId != null) {
-            teamspaceAccessorProvider.get()?.let { teamspaceAccessor ->
-                if (teamspaceAccessor.canChangeTeamspace()) {
-                    teamspaceAccessor.get(spaceId)
+            teamSpaceAccessorProvider.get()?.let { teamSpaceAccessor ->
+                if (teamSpaceAccessor.canChangeTeamspace) {
+                    teamSpaceAccessor.currentBusinessTeam.takeIf { it?.teamId == spaceId }
                 } else {
                     null
                 }
@@ -93,9 +91,9 @@ class CollectionsEditViewModel @Inject constructor(
     }
 
     private fun refreshAvailableSpaces() {
-        val spaces = teamspaceAccessorProvider.get()?.let { teamspaceAccessor ->
-            if (teamspaceAccessor.canChangeTeamspace()) {
-                teamspaceAccessor.all.minus(CombinedTeamspace)
+        val spaces = teamSpaceAccessorProvider.get()?.let { teamSpaceAccessor ->
+            if (teamSpaceAccessor.canChangeTeamspace) {
+                teamSpaceAccessor.availableSpaces.minus(TeamSpace.Combined)
             } else {
                 null
             }
@@ -105,7 +103,7 @@ class CollectionsEditViewModel @Inject constructor(
                 viewState.viewData.copy(
                     availableSpaces = spaces,
                     space = viewState.viewData.space.takeIf { it in (spaces ?: emptyList()) }
-                        ?: PersonalTeamspace
+                        ?: TeamSpace.Personal
                 )
             )
         }
@@ -122,7 +120,7 @@ class CollectionsEditViewModel @Inject constructor(
         }
     }
 
-    fun onSpaceSelected(teamspace: Teamspace) {
+    fun onSpaceSelected(teamspace: TeamSpace) {
         _uiState.update {
             if (it is ViewState.Form || it is ViewState.Error) {
                 ViewState.Form(it.viewData.copy(space = teamspace))
@@ -145,29 +143,38 @@ class CollectionsEditViewModel @Inject constructor(
         }
 
         viewModelScope.launch(defaultDispatcher) {
+            val collectionId = navArgs.collectionId
             val existingCollection =
                 collectionDataQuery.queryByName(name, collectionFilter { space?.let { specificSpace(space) } })
-            if (existingCollection != null && existingCollection.uid != navArgs.collectionId) {
+            if (existingCollection != null && existingCollection.uid != collectionId) {
                 _uiState.update {
                     ViewState.Error(it.viewData, ErrorType.COLLECTION_ALREADY_EXISTS)
                 }
             } else {
                 
-                val collection = if (navArgs.collectionId == null) {
+                val collection = if (collectionId == null) {
                     createCollection(
                         dataIdentifier = CommonDataIdentifierAttrsImpl(
-                            teamSpaceId = space?.teamId ?: PersonalTeamspace.teamId
+                            teamSpaceId = space?.teamId ?: TeamSpace.Personal.teamId
                         ),
                         name = name,
                         vaultItems = emptyList()
-                    )
+                    ).also { collection ->
+                        vaultActivityLogger.sendCollectionCreatedActivityLog(collection = collection.toSummary())
+                    }
                 } else {
-                    collectionDataQuery.queryById(navArgs.collectionId)?.let {
+                    val collection = collectionDataQuery.queryById(collectionId)
+                    collection?.let {
                         it.copySyncObject {
                             this.name = name
                         }.copyWithAttrs {
                             syncState = SyncState.MODIFIED
                         }
+                    }?.also { editedCollection ->
+                        vaultActivityLogger.sendCollectionRenamedActivityLog(
+                            collection = editedCollection.toSummary(),
+                            previousName = collection.syncObject.name
+                        )
                     }
                 }
 

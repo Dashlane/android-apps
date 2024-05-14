@@ -74,7 +74,7 @@ class UserAccountInfoRepository @Inject constructor(
             if (loginInfo?.loginMode != null) {
                 LoginLogger(logRepository).logSuccess(
                     isFirstLogin = loginInfo.isFirstLogin,
-                    loginMode = loginInfo.loginMode!!
+                    loginMode = loginInfo.loginMode
                 )
             }
 

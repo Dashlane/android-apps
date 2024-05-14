@@ -7,8 +7,8 @@ import com.dashlane.R
 import com.dashlane.csvimport.csvimport.CsvImportViewTypeProvider
 import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
+import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.list.ItemWrapperViewHolder
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.wrapper.DefaultVaultItemWrapper
@@ -35,8 +35,8 @@ class CsvImportViewTypeProviderImpl(
         private val quickActionProvider: QuickActionProvider,
         private val navigator: Navigator,
         private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
-        private val sessionManager: SessionManager,
-        private val teamspaceRepository: TeamspaceManagerRepository
+        private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
+        private val currentTeamSpaceFilterRepository: CurrentTeamSpaceUiFilter
     ) : CsvImportViewTypeProvider.Factory {
 
         override fun create(
@@ -50,8 +50,8 @@ class CsvImportViewTypeProviderImpl(
                 Container.CSV_IMPORT.asListContext(),
                 navigator,
                 dataIdentifierListTextResolver,
-                sessionManager,
-                teamspaceRepository,
+                teamSpaceAccessorProvider,
+                currentTeamSpaceFilterRepository
             ),
             selected
         )

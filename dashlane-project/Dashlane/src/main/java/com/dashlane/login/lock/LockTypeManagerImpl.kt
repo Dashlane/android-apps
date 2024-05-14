@@ -3,7 +3,6 @@ package com.dashlane.login.lock
 import com.dashlane.account.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.biometricrecovery.BiometricRecovery
-import com.dashlane.debug.DaDaDa
 import com.dashlane.lock.LockHelper
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.pages.password.LoginPasswordPresenter
@@ -27,7 +26,6 @@ class LockTypeManagerImpl @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
     private val sessionManager: SessionManager,
     private val biometricRecovery: BiometricRecovery,
-    private val daDaDa: DaDaDa,
     private val userAccountStorage: UserAccountStorage
 ) : LockTypeManager {
 
@@ -73,7 +71,7 @@ class LockTypeManagerImpl @Inject constructor(
         biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
 
         var lock = lockType
-        if (!securityHelper.allowedToUsePin()) {
+        if (!securityHelper.isDeviceSecured()) {
             lock = LockTypeManager.LOCK_TYPE_MASTER_PASSWORD
         }
         val session = sessionManager.session ?: return
@@ -143,7 +141,6 @@ class LockTypeManagerImpl @Inject constructor(
         return when {
             accountType is UserAccountInfo.AccountType.InvisibleMasterPassword -> false
             askedAccountRecovery || getLockType() == LockTypeManager.LOCK_TYPE_MASTER_PASSWORD -> false
-            daDaDa.isUserLockout -> true
             else -> {
                 val loginDate = preferenceManager.credentialsSaveDate
                 loginDate.plus(Duration.ofDays(lockoutDays)) < Instant.now()

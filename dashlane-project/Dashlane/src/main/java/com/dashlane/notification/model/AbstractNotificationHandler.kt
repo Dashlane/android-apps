@@ -5,9 +5,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.SystemClock
 import androidx.core.app.NotificationManagerCompat
+import com.dashlane.BuildConfig.APPLICATION_ID
 import com.dashlane.notification.FcmMessage
 import com.dashlane.security.DashlaneIntent
-import com.dashlane.util.Constants
 import com.dashlane.util.isNotSemanticallyNull
 import org.json.JSONException
 import org.json.JSONObject
@@ -53,7 +53,7 @@ abstract class AbstractNotificationHandler protected constructor(
     protected fun setUpCancelAlarm(context: Context) {
         if (hasTTL()) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val i = DashlaneIntent.newInstance(Constants.GCM.CLEAR_GCM_NOTIFICATION)
+            val i = DashlaneIntent.newInstance("$APPLICATION_ID.gcm.CLEAR_NOTIFICATIONS")
             i.putExtra("notificationId", notificationId)
             val intentExecuted = PendingIntent.getBroadcast(
                 context,

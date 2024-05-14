@@ -24,10 +24,10 @@ import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
 import com.dashlane.item.subview.readonly.ItemReadValueDateSubView
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.BankDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
@@ -61,8 +61,8 @@ import java.time.YearMonth
 import java.time.ZoneOffset
 
 class ItemScreenConfigurationCreditCardProvider(
-    private val teamspaceAccessor: TeamspaceAccessor,
-    private val mainDataAccessor: MainDataAccessor,
+    private val teamSpaceAccessor: TeamSpaceAccessor,
+    private val genericDataQuery: GenericDataQuery,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
     private val vaultItemCopy: VaultItemCopyService
@@ -310,10 +310,10 @@ class ItemScreenConfigurationCreditCardProvider(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.PaymentCreditCard>
     ): ItemSubView<*>? {
-        return if (teamspaceAccessor.canChangeTeamspace()) {
+        return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
-                teamspaceAccessor,
+                teamSpaceAccessor,
                 null,
                 VaultItem<*>::copyForUpdatedTeamspace
             )
@@ -424,13 +424,15 @@ class ItemScreenConfigurationCreditCardProvider(
         } ?: otherLabel
         val bankUpdate = copyForUpdatedBank(bankDataProvider, otherLabel)
         return when {
-            !bankDataProvider.isCountrySupported(country) -> null
             editMode -> ItemEditValueListSubView(
                 bankHeader,
                 selectedBank,
                 bankList.map { it.first },
                 bankUpdate
-            )
+            ).also {
+                it.invisible = !bankDataProvider.isCountrySupported(country)
+            }
+            !bankDataProvider.isCountrySupported(country) -> null
             else -> ItemReadValueListSubView(bankHeader, selectedBank, bankList.map { it.first })
         }
     }
@@ -637,7 +639,7 @@ class ItemScreenConfigurationCreditCardProvider(
         context: Context,
         item: VaultItem<SyncObject.PaymentCreditCard>
     ): ItemSubView<String>? {
-        val identities = mainDataAccessor.getGenericDataQuery()
+        val identities = genericDataQuery
             .queryAll(genericFilter { specificDataType(SyncObjectType.IDENTITY) })
             .mapNotNull { (it as? SummaryObject.Identity)?.identityPartialOrFullNameNoLogin }
         return subViewFactory.createSubViewString(
@@ -654,7 +656,7 @@ class ItemScreenConfigurationCreditCardProvider(
         val addressList = arrayListOf<Pair<String, String?>>()
         addressList.add(Pair(defaultLabel, null))
 
-        val addressDataIdentifierList = mainDataAccessor.getGenericDataQuery().queryAll(
+        val addressDataIdentifierList = genericDataQuery.queryAll(
             genericFilter { specificDataType(SyncObjectType.ADDRESS) }
         )
         addressDataIdentifierList.forEach { summaryObject ->
@@ -726,7 +728,7 @@ private fun VaultItem<*>.copyForUpdatedNote(value: String): VaultItem<*> {
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun VaultItem<*>.copyForUpdatedTeamspace(value: Teamspace): VaultItem<*> {
+private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*> {
     this as VaultItem<SyncObject.PaymentCreditCard>
     val creditCard = this.syncObject
     return if (value.teamId == creditCard.spaceId) {

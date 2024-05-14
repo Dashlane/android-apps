@@ -9,11 +9,10 @@ import com.dashlane.cryptography.CryptographySettings
 import com.dashlane.cryptography.SaltGenerator
 import com.dashlane.cryptography.toCryptographyMarkerOrNull
 import com.dashlane.session.Session
+import com.dashlane.session.UserDataRepository
 import com.dashlane.session.VaultKey
 import com.dashlane.settings.SettingsManager
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.manager.isSsoUser
-import com.dashlane.teamspaces.model.Teamspace
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
@@ -32,23 +31,21 @@ class UserCryptographyRepositoryImpl @Inject constructor(
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
     private val userDataRepositoryLazy: Lazy<UserDataRepository>,
-    private val teamspaceAccessorProvider: OptionalProvider<TeamspaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
 ) : UserCryptographyRepository {
 
     private val userDataRepository
         get() = userDataRepositoryLazy.get()
 
-    private val teamspaceAccessor
-        get() = teamspaceAccessorProvider.get()
+    private val teamSpaceAccessor
+        get() = teamSpaceAccessorProvider.get()
 
     override fun getCryptographyMarker(session: Session): CryptographyMarker? {
         val keyType = session.appKeyType
 
         
-        if (teamspaceAccessor?.isSsoUser != true) {
-            val teamMarker =
-                teamspaceAccessor?.getFeatureValue(Teamspace.Feature.CRYPTO_FORCED_PAYLOAD)
-                    ?.toCryptographyMarkerOrNull()
+        if (teamSpaceAccessor?.isSsoUser != true) {
+            val teamMarker = teamSpaceAccessor?.cryptoForcedPayload?.toCryptographyMarkerOrNull()
             if (teamMarker != null && teamMarker.keyType == keyType) return teamMarker
         }
 
@@ -65,7 +62,7 @@ class UserCryptographyRepositoryImpl @Inject constructor(
         )
 
     override fun getCryptographySettings(session: Session): CryptographySettings =
-        CryptographySettingsImpl(getSettingsManager(session), saltGenerator, teamspaceAccessor)
+        CryptographySettingsImpl(getSettingsManager(session), saltGenerator, teamSpaceAccessor)
 
     private fun getSettingsManager(session: Session) =
         userDataRepository.getSettingsManager(session)
@@ -74,14 +71,13 @@ class UserCryptographyRepositoryImpl @Inject constructor(
 private class CryptographySettingsImpl(
     private val settingsManager: SettingsManager,
     private val saltGenerator: SaltGenerator,
-    private val teamspaceAccessor: TeamspaceAccessor?
+    private val teamSpaceAccessor: TeamSpaceAccessor?
 ) : CryptographySettings {
 
     override fun getOrCreateMarker(keyType: CryptographyKey.Type): CryptographyMarker {
         
         val teamMarker =
-            teamspaceAccessor?.getFeatureValue(Teamspace.Feature.CRYPTO_FORCED_PAYLOAD)
-                ?.toCryptographyMarkerOrNull()
+            teamSpaceAccessor?.cryptoForcedPayload?.toCryptographyMarkerOrNull()
         if (teamMarker != null && (teamMarker.keyType == keyType)) return teamMarker
 
         

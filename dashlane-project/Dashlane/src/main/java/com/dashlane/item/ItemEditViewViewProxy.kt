@@ -190,7 +190,9 @@ class ItemEditViewViewProxy(
 
             override fun notifyDeleteClicked() = presenter.deleteClicked()
 
-            override fun notifyRestorePassword() = presenter.restorePassword()
+            override fun notifyRestorePassword() = presenter.restorePasswordClicked()
+
+            override fun notifyCloseRestorePasswordInfoBox() = presenter.closeRestorePasswordClicked()
 
             override fun notifyOtpRefreshed(otp: Otp) = presenter.otpRefreshed(otp)
         }

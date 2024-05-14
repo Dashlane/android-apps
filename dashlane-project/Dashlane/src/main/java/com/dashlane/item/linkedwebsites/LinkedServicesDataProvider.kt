@@ -1,15 +1,18 @@
 package com.dashlane.item.linkedwebsites
 
 import com.dashlane.autofill.LinkedServicesHelper
-import com.dashlane.core.DataSync
 import com.dashlane.ext.application.KnownLinkedDomains
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.hermes.generated.definitions.Trigger
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.teamspaces.db.TeamspaceForceCategorizationManager
+import com.dashlane.sync.DataSync
+import com.dashlane.teamspaces.db.SmartSpaceCategorizationManager
+import com.dashlane.teamspaces.getTeamSpaceLog
 import com.dashlane.util.matchDomain
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.VaultItemLogger
@@ -20,27 +23,26 @@ import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.getTeamSpaceLog
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import javax.inject.Inject
 
 class LinkedServicesDataProvider @Inject constructor(
-    private val mainDataAccessor: MainDataAccessor,
+    private val vaultDataQuery: VaultDataQuery,
+    private val dataSaver: DataSaver,
+    private val genericDataQuery: GenericDataQuery,
     private val vaultItemLogger: VaultItemLogger,
     private val activityLogger: VaultActivityLogger,
-    private val teamspaceForceCategorizationManager: TeamspaceForceCategorizationManager,
+    private val smartSpaceCategorizationManager: SmartSpaceCategorizationManager,
     private val linkedServicesHelper: LinkedServicesHelper,
     private val dataSync: DataSync
 ) : LinkedServicesContract.DataProvider {
 
-    private val dataSaver = mainDataAccessor.getDataSaver()
-
     @Suppress("UNCHECKED_CAST")
     override suspend fun getItem(itemId: String): VaultItem<SyncObject.Authentifiant>? {
         val query = vaultFilter { specificUid(itemId) }
-        return mainDataAccessor.getVaultDataQuery().query(query) as? VaultItem<SyncObject.Authentifiant>
+        return vaultDataQuery.query(query) as? VaultItem<SyncObject.Authentifiant>
     }
 
     override suspend fun save(
@@ -81,10 +83,10 @@ class LinkedServicesDataProvider @Inject constructor(
             removedWebsites = updatedLinkedWebsites?.second,
             removedApps = removedApps
         )
-        activityLogger.sendActivityLog(vaultItem = vaultItem, action = action)
+        activityLogger.sendAuthentifiantActivityLog(vaultItem = vaultItem, action = action)
 
         
-        teamspaceForceCategorizationManager.executeSync()
+        smartSpaceCategorizationManager.executeSync()
 
         
         dataSync.sync(Trigger.SAVE)
@@ -127,7 +129,7 @@ class LinkedServicesDataProvider @Inject constructor(
         addedWebsites: List<String>,
         syncObject: SyncObject.Authentifiant?
     ): Pair<String, String>? {
-        val allAuthentifiant = mainDataAccessor.getGenericDataQuery()
+        val allAuthentifiant = genericDataQuery
             .queryAll(vaultFilter { specificDataType(SyncObjectType.AUTHENTIFIANT) })
             .filterNot { it.id == syncObject?.id }
             .filterIsInstance<SummaryObject.Authentifiant>()

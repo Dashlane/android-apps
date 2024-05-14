@@ -91,6 +91,14 @@
     
     <string name="login_secret_transfer_qr_code_title">Scan the QR code using the camera on your logged-in mobile device</string>
     
+    <string name="login_secret_transfer_qr_code_help_button">Log in with another method</string>
+    
+    <string name="login_secret_transfer_qr_code_help_sheet_title">How do you want to log in?</string>
+    
+    <string name="login_secret_transfer_qr_code_help_sheet_primary_button">Take security challenge</string>
+    
+    <string name="login_secret_transfer_qr_code_help_sheet_secondary_button">Use recovery key</string>
+    
     <string name="login_secret_transfer_confirm_email_title">Confirm your email address</string>
     
     <string name="login_secret_transfer_confirm_email_body">Before logging in, make sure this is the Dashlane account you want to log in to:</string>
@@ -116,10 +124,81 @@
     <string name="login_secret_transfer_error_button_cancel">Cancel</string>
 
     
+    <string name="login_secret_transfer_choose_type_title">Use a logged in device to access Dashlane</string>
+    
+    <string name="login_secret_transfer_choose_type_computer_button">Computer</string>
+    
+    <string name="login_secret_transfer_choose_type_mobile_button">Mobile</string>
+    
+    <string name="login_secret_transfer_choose_type_recovery_button">Don’t have a logged in device?</string>
+
+    
+    <string name="login_universal_d2d_intro_title">Log in to Dashlane with a security challenge</string>
+    
+    <string name="login_universal_d2d_intro_infoxbox">Always use the Dashlane browser extension or mobile app to add a new device.</string>
+    
+    <string name="login_universal_d2d_intro_step1">Open Dashlane on one of your logged in devices</string>
+    
+    <string name="login_universal_d2d_intro_step2">Go to Dashlane settings and select &lt;strong&gt;Add new device&lt;/strong&gt;</string>
+    
+    <string name="login_universal_d2d_intro_step3">Validate the new device request, then a security challenge will be displayed here</string>
+    
+    <string name="login_universal_d2d_intro_recovery_button">Can’t take the challenge?</string>
+    
+    <string name="login_universal_d2d_loading_challenge">Loading challenge...</string>
+    
+    <string name="login_universal_d2d_loading_account">Loading your account...</string>
+
+    
+    <string name="login_universal_d2d_recovery_help_title">Use your recovery key to log in to Dashlane</string>
+    
+    <string name="login_universal_d2d_recovery_help_description">If you don’t have a logged in device available, you can use your recovery key to log in to Dashlane.\n\nBefore you start the recovery process, make sure you have your single-use recovery key. Depending on your security settings, additional verification may be required to complete the recovery process.</string>
+    
+    <string name="login_universal_d2d_recovery_help_primary_button">Start recovery</string>
+    
+    <string name="login_universal_d2d_recovery_help_secondary_button">Lost your key?</string>
+
+    
+    <string name="login_universal_d2d_lost_key_title">If you don’t have a recovery method available</string>
+    
+    <string name="login_universal_d2d_lost_key_description">You need a logged in device or your recovery key to access your account on this device. If none of these methods are available, you can start the process of resetting your account.</string>
+    
+    <string name="login_universal_d2d_lost_key_primary_button">Reset account</string>
+    
+    <string name="login_universal_d2d_lost_key_secondary_button">Learn more</string>
+
+    
+    <string name="login_universal_d2d_passphrase_identification_title">Identify missing word</string>
+    
+    <string name="login_universal_d2d_passphrase_identification_description">Use this word list to complete the challenge on your logged in device.</string>
+
+    
+    <string name="login_universal_d2d_generic_error_title">Error loading your account</string>
+    
+    <string name="login_universal_d2d_generic_error_description">Please retry login or contact support.</string>
+    
+    <string name="login_universal_d2d_generic_error_primary_button">Go to login</string>
+    
+    <string name="login_universal_d2d_generic_error_secondary_button">Contact support</string>
+
+    
+    <string name="login_universal_d2d_timeout_error_title">New device request has timed out</string>
+    
+    <string name="login_universal_d2d_timeout_error_description">The request to set up a new device has timed out. Go to login and try again.</string>
+    
+    <string name="login_universal_d2d_timeout_error_primary_button">Go to login</string>
+
+    
     <string name="login_team_error">An error has occurred. Please reach out to your plan admin for more info.</string>
 
     
+    <string name="login_totp_text_field_label">2FA Token</string>
+    
+    <string name="login_totp_next_button">Next</string>
+    
     <string name="login_totp_use_recovery_code">Can’t access your app?</string>
+    
+    <string name="login_totp_error_message_already_used">This OTP was already used</string>
     
     <string name="login_totp_enter_token_recovery_dialog_title">Can’t access your app?</string>
     

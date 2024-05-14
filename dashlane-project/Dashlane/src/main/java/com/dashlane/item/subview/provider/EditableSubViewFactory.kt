@@ -13,12 +13,16 @@ import com.dashlane.item.subview.edit.ItemEditValueListSubView
 import com.dashlane.item.subview.edit.ItemEditValueNumberSubView
 import com.dashlane.item.subview.edit.ItemEditValueTextSubView
 import com.dashlane.item.subview.readonly.ItemClickActionSubView
-import com.dashlane.teamspaces.manager.TeamspaceAccessor
-import com.dashlane.teamspaces.model.Teamspace
-import com.dashlane.util.userfeatures.UserFeaturesChecker
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 
-class EditableSubViewFactory(userFeaturesChecker: UserFeaturesChecker) : BaseSubViewFactory(userFeaturesChecker) {
+class EditableSubViewFactory(
+    userFeaturesChecker: UserFeaturesChecker,
+    currentTeamSpaceFilter: CurrentTeamSpaceUiFilter
+) : BaseSubViewFactory(userFeaturesChecker, currentTeamSpaceFilter) {
 
     override fun createSubViewString(
         header: String,
@@ -92,16 +96,16 @@ class EditableSubViewFactory(userFeaturesChecker: UserFeaturesChecker) : BaseSub
     }
 
     override fun createSpaceSelector(
-        current: String?,
-        teamspaceAccessor: TeamspaceAccessor,
+        currentSpaceId: String?,
+        teamSpaceAccessor: TeamSpaceAccessor,
         toListenViews: List<ItemSubView<String>>?,
-        valueUpdate: (VaultItem<*>, Teamspace) -> VaultItem<*>,
+        valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>,
         linkedWebsites: List<String>,
-    ): ItemSubView<Teamspace> {
+    ): ItemSubView<TeamSpace> {
         return ItemEditSpaceSubView(
-            getTeamspace(teamspaceAccessor, current),
-            getTeamspaces(teamspaceAccessor),
-            current == null,
+            getTeamspace(teamSpaceAccessor, currentSpaceId),
+            getTeamspaces(teamSpaceAccessor),
+            currentSpaceId == null,
             toListenViews,
             linkedWebsites,
             valueUpdate

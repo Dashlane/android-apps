@@ -48,7 +48,7 @@ class IdentityDashboardPresenter @Inject constructor(
     @Suppress("kotlin:S6311")
     override fun onViewVisible() {
         provider.listenForChanges()
-        coroutineScope.launch(mainCoroutineDispatcher) { refreshList() }
+        coroutineScope.launch(mainCoroutineDispatcher) { refreshList(forceRefresh = false) }
     }
 
     override fun onViewHidden() {
@@ -56,8 +56,8 @@ class IdentityDashboardPresenter @Inject constructor(
     }
 
     @Suppress("kotlin:S6311")
-    override fun requireRefresh() {
-        coroutineScope.launch(mainCoroutineDispatcher) { refreshList() }
+    override fun requireRefresh(forceRefresh: Boolean) {
+        coroutineScope.launch(mainCoroutineDispatcher) { refreshList(forceRefresh = forceRefresh) }
     }
 
     override fun onClick(item: IdentityDashboardItem) {
@@ -106,15 +106,15 @@ class IdentityDashboardPresenter @Inject constructor(
         context.launchUrl(helpLink)
     }
 
-    private suspend fun refreshList() {
+    private suspend fun refreshList(forceRefresh: Boolean) {
         lockManager.waitUnlock()
 
         val items = mutableListOf<IdentityDashboardItem>()
         
         items.add(
             dashboardPasswordHealthItem.apply {
-            futureSecurityScoreResult = provider.getAuthentifiantsSecurityInfoAsync()
-        }
+                futureSecurityScoreResult = provider.getAuthentifiantsSecurityInfoAsync(forceRefresh)
+            }
         )
 
         

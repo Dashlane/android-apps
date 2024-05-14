@@ -10,6 +10,7 @@ import com.dashlane.authenticator.Otp
 import com.dashlane.item.header.ItemHeader
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.action.MenuAction
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.vault.model.VaultItem
 import com.skocken.presentation.definition.Base
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,8 @@ interface ItemEditViewContract {
 
             fun notifyRestorePassword()
 
+            fun notifyCloseRestorePasswordInfoBox()
+
             fun notifyPotentialBarCodeScan(requestCode: Int, resultCode: Int, data: Intent?)
 
             fun notifyNotEnoughDataToSave(@StringRes message: Int)
@@ -74,7 +77,8 @@ interface ItemEditViewContract {
 
             fun openCollectionSelector(
                 fromViewOnly: Boolean,
-                temporaryCollections: List<String>,
+                temporaryPrivateCollectionsName: List<String>,
+                temporarySharedCollectionsId: List<String>,
                 spaceId: String
             )
 
@@ -87,13 +91,15 @@ interface ItemEditViewContract {
 
         fun setup(context: Context, options: ItemEditViewSetupOptions)
 
-        fun createMenu(menu: Menu): Boolean
+        fun createMenu(menu: Menu, teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator): Boolean
 
         fun selectMenuItem(item: MenuItem): Boolean
 
         fun deleteClicked()
 
-        fun restorePassword()
+        fun restorePasswordClicked()
+
+        fun closeRestorePasswordClicked()
 
         fun otpRefreshed(otp: Otp)
 
@@ -151,6 +157,8 @@ interface ItemEditViewContract {
         )
 
         suspend fun restorePassword(): Boolean
+
+        suspend fun closeRestorePassword()
 
         fun onNewIntent(intent: Intent, coroutineScope: CoroutineScope)
 

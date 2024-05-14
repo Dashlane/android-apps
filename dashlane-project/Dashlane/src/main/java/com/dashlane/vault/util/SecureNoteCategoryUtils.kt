@@ -5,7 +5,7 @@ package com.dashlane.vault.util
 import android.content.Context
 import com.dashlane.R
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
@@ -16,14 +16,14 @@ import com.dashlane.xml.domain.SyncObjectType
 
 object SecureNoteCategoryUtils {
 
-    suspend fun createDefaultCategoriesIfNotExist(context: Context, mainDataAccessor: MainDataAccessor) {
-        val authCategories = mainDataAccessor.getGenericDataQuery().queryAll(
+    suspend fun createDefaultCategoriesIfNotExist(context: Context, genericDataQuery: GenericDataQuery, dataSaver: DataSaver) {
+        val authCategories = genericDataQuery.queryAll(
             genericFilter {
             specificDataType(SyncObjectType.SECURE_NOTE_CATEGORY)
         }
         )
         if (authCategories.isEmpty()) {
-            generateAndSaveDefaultNoteCategories(context, mainDataAccessor.getDataSaver())
+            generateAndSaveDefaultNoteCategories(context, dataSaver)
         }
     }
 

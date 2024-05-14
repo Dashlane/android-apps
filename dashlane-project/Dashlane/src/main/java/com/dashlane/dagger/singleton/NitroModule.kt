@@ -1,12 +1,11 @@
 package com.dashlane.dagger.singleton
 
+import com.dashlane.network.NitroUrlOverride
 import com.dashlane.nitro.api.tools.CloudflareNitroHeaderInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Named
-import javax.inject.Singleton
 import okhttp3.Call
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -14,6 +13,8 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import javax.inject.Named
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -22,11 +23,12 @@ object NitroModule {
     @Singleton
     @Provides
     @Named("NitroCallFactory")
-    fun provideNitroCallFactory(): Call.Factory = OkHttpClient.Builder()
-        .cookieJar(MemoryCookieJar())
-        .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-        .addInterceptor(CloudflareNitroHeaderInterceptor())
-        .build()
+    fun provideNitroCallFactory(nitroUrlOverride: NitroUrlOverride): Call.Factory =
+        OkHttpClient.Builder()
+            .cookieJar(MemoryCookieJar())
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .addInterceptor(CloudflareNitroHeaderInterceptor(nitroUrlOverride))
+            .build()
 }
 
 class MemoryCookieJar : CookieJar {

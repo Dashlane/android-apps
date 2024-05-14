@@ -9,7 +9,6 @@ import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.debug.DeveloperUtilities.systemIsInDebug
 import com.dashlane.logger.AdjustWrapper
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.util.Constants
 import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,10 +53,6 @@ class InstallReceiver : BroadcastReceiver() {
                 syncBroadcastManager.removePasswordBroadcastIntent()
                 if (!systemIsInDebug(context)) {
                     sendAdjustEvent(context, intent)
-                }
-                globalPreferencesManager.putBoolean(Constants.MARKETING.SHOULD_SEND_REPORTS, true)
-                intent.extras?.getString("referrer")?.also {
-                    globalPreferencesManager.putString(Constants.MARKETING.REFFERAL_STRING, it)
                 }
             }
         }

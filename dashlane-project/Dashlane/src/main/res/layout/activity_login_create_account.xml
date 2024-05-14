@@ -36,8 +36,7 @@
                 app:layout_constraintBottom_toTopOf="@id/view_login_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/oddity_brand"
-                />
+                app:tint="@color/oddity_brand" />
 
             <com.dashlane.util.graphics.ViewAnimatorPager
                 android:id="@+id/view_login_content"
@@ -74,14 +73,15 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_goneMarginBottom="@dimen/spacing_normal" />
 
-                <Button
+                <com.dashlane.design.component.compat.view.ButtonMediumView
                     android:id="@+id/view_passwordless_button"
-                    style="?borderlessButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/spacing_normal"
                     android:text="@string/create_account_cta_passwordless"
                     android:visibility="gone"
+                    app:buttonLayout="textOnly"
+                    app:intensity="quiet"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1"

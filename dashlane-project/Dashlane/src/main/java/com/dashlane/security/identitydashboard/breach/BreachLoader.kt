@@ -3,7 +3,6 @@ package com.dashlane.security.identitydashboard.breach
 import androidx.annotation.VisibleForTesting
 import com.dashlane.breach.Breach
 import com.dashlane.similarpassword.SimilarPassword
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.util.JsonSerialization
@@ -15,10 +14,8 @@ import javax.inject.Inject
 
 class BreachLoader @Inject constructor(
     private val jsonConverter: JsonSerialization,
-    private val mainDataAccessor: MainDataAccessor
-) {
     private val vaultDataQuery: VaultDataQuery
-        get() = mainDataAccessor.getVaultDataQuery()
+) {
 
     fun getBreachesWrapper(limit: Int?): List<BreachWrapper> {
         return getBreachesWrapper(loadBreachesFromDB(), limit)

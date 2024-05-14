@@ -2,7 +2,7 @@ package com.dashlane.ui.activities.firstpassword
 
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
-import com.dashlane.core.DataSync
+import com.dashlane.sync.DataSync
 import com.dashlane.guidedonboarding.R
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator

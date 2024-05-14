@@ -1,14 +1,15 @@
 package com.dashlane.item
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
-import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.crashreport.CrashReporterManager
+import com.dashlane.events.AppEvents
 import com.dashlane.followupnotification.services.FollowUpNotificationDiscoveryService
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.item.nfc.NfcHelper
@@ -17,19 +18,22 @@ import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.SchemeUtils.getDataType
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.TeamspaceManagerRepository
-import com.dashlane.storage.userdata.accessor.MainDataAccessor
+import com.dashlane.session.repository.SessionCoroutineScopeRepository
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
+import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.Toaster
+import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.setCurrentPageView
-import com.dashlane.util.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.hasBeenSaved
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.util.PresenterOwner
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 
 @AndroidEntryPoint
 class ItemEditViewActivity :
@@ -60,7 +64,7 @@ class ItemEditViewActivity :
     lateinit var passwordStrengthEvaluator: PasswordStrengthEvaluator
 
     @Inject
-    lateinit var mainDataAccessor: MainDataAccessor
+    lateinit var vaultDataQuery: VaultDataQuery
 
     @Inject
     lateinit var lockManager: LockManager
@@ -69,7 +73,17 @@ class ItemEditViewActivity :
     lateinit var sessionManager: SessionManager
 
     @Inject
-    lateinit var teamspaceManagerRepository: TeamspaceManagerRepository
+    lateinit var appEvents: AppEvents
+
+    @Inject
+    lateinit var teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator
+
+    @Inject
+    lateinit var sessionCoroutineScope: SessionCoroutineScopeRepository
+
+    @ApplicationCoroutineScope
+    @Inject
+    lateinit var applicationCoroutineScope: CoroutineScope
 
     lateinit var presenterOwner: PresenterOwner<ItemEditViewPresenter, ItemEditViewContract.View>
     lateinit var nfcHelper: NfcHelper
@@ -103,6 +117,7 @@ class ItemEditViewActivity :
         presenter.onNewIntent(intent)
     }
 
+    @Suppress("DEPRECATION")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val isOutside = event.action == MotionEvent.ACTION_DOWN &&
             window.isOutOfBounds(this, event) ||
@@ -114,7 +129,7 @@ class ItemEditViewActivity :
         return super.onTouchEvent(event)
     }
 
-    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         presenter.onActivityResult(requestCode, resultCode, data)
@@ -139,6 +154,7 @@ class ItemEditViewActivity :
     }
 
     @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
     override fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
         presenter.onNewActivityLaunching(object : ItemEditViewContract.Presenter.Callback {
             override fun onCompletion() {
@@ -163,13 +179,15 @@ class ItemEditViewActivity :
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        return presenter.createMenu(menu)
+        return presenter.createMenu(menu, teamspaceRestrictionNotificator)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return presenter.selectMenuItem(item)
     }
 
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         presenter.onBackPressed()
     }
@@ -187,13 +205,13 @@ class ItemEditViewActivity :
         savedInstanceState: Bundle?
     ): ItemEditViewContract.View {
         return ItemEditViewViewProxy(
-            this,
-            ViewFactory(this, toaster, lockManager),
-            this,
-            navigator,
-            authenticatorLogger,
-            passwordStrengthEvaluator,
-            mainDataAccessor.getVaultDataQuery()
+            activity = this,
+            viewFactory = ViewFactory(this, toaster, lockManager),
+            lifecycleOwner = this,
+            navigator = navigator,
+            authenticatorLogger = authenticatorLogger,
+            passwordStrengthEvaluator = passwordStrengthEvaluator,
+            vaultDataQuery = vaultDataQuery
         )
     }
 
@@ -207,10 +225,11 @@ class ItemEditViewActivity :
     }
 
     private fun setupPresenter(savedInstanceState: Bundle?) {
-        presenter.coroutineScope = this.lifecycleScope
+        presenter.coroutineScope =
+            sessionCoroutineScope[sessionManager.session] ?: applicationCoroutineScope
         presenter.userFeaturesChecker = userFeaturesChecker
         presenter.sharingPolicyDataProvider = sharingPolicyDataProvider
-        presenter.teamspaceManager = sessionManager.session?.let { teamspaceManagerRepository.getTeamspaceManager(it) }
+        presenter.appEvents = appEvents
         presenter.setProvider(dataProvider)
         val extras = intent.extras!!
         val args = ItemEditViewActivityArgs.fromBundle(extras)
