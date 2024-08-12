@@ -17,6 +17,7 @@ import com.dashlane.R
 import com.dashlane.abtesting.OfflineExperimentReporter
 import com.dashlane.abtesting.RemoteAbTestManager
 import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.accountstatus.premiumstatus.planName
 import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.modules.KeyboardAutofillAnnouncementModule
 import com.dashlane.braze.BrazeWrapper
@@ -26,6 +27,7 @@ import com.dashlane.device.DeviceUpdateManager
 import com.dashlane.events.AppEvents
 import com.dashlane.featureflipping.FeatureFlipManager
 import com.dashlane.navigation.NavigationConstants
+import com.dashlane.navigation.Navigator
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.SecurityHelper
 import com.dashlane.session.SessionManager
@@ -101,6 +103,9 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
     @Inject
     lateinit var accountStatusRepository: AccountStatusRepository
 
+    @Inject
+    lateinit var navigator: Navigator
+
     private lateinit var navigationDrawer: DrawerLayout
     private val menuViewModel: MenuViewModel by viewModels()
     private var drawerToggle: MainDrawerToggle? = null
@@ -145,7 +150,7 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 accountStatusRepository.accountStatusState.collect { accountStatusState ->
                     accountStatusState[sessionManager.session]?.let {
-                        onPremiumStatusChanged()
+                        onPremiumStatusChanged(it.premiumStatus.planName)
                         teamSpaceRevokedDialogDisplayer.onStatusChanged(WeakReference(this@HomeActivity))
                     }
                 }
@@ -209,8 +214,8 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
         return navigationDrawer
     }
 
-    private fun onPremiumStatusChanged() {
-        storeOffersCache.flushCache()
+    private fun onPremiumStatusChanged(newSubscription: String?) {
+        storeOffersCache.flushCacheIfSubscriptionHasChanged(newSubscription)
         loadAccessibleOffers()
         menuViewModel.refresh()
     }

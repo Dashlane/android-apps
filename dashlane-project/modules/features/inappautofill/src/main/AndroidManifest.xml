@@ -18,6 +18,10 @@
         <activity
             android:name="com.dashlane.autofill.ui.SmsOtpAutofillActivity"
             android:theme="@style/Theme.Dashlane.Transparent.NoAnimation" />
+        <activity
+            android:name="com.dashlane.autofill.frozenautofill.FrozenAutofillActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Dashlane.Transparent.Modal.NoAnimation" />
 
         <service
             android:name="com.dashlane.autofillapi.AutoFillAPIService"
@@ -37,6 +41,10 @@
 
         <activity
             android:name="com.dashlane.autofill.pause.view.AutofillPauseActivity"
+            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+
+        <activity
+            android:name="com.dashlane.autofill.phishing.PhishingWarningActivity"
             android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
 
         <activity

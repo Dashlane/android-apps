@@ -1,7 +1,7 @@
 package com.dashlane.autofill
 
 import android.content.Context
-import com.dashlane.autofill.ui.AutofillFeature
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
 import com.dashlane.hermes.generated.definitions.MatchType
@@ -88,21 +88,24 @@ interface AutofillAnalyzerDef {
             @AutofillOrigin origin: Int,
             packageName: String,
             isNativeApp: Boolean,
-            totalCount: Int
+            totalCount: Int,
+            phishingAttemptLevel: PhishingAttemptLevel
         )
 
         fun onShowCreditCardList(
             @AutofillOrigin origin: Int,
             packageName: String,
             isNativeApp: Boolean,
-            totalCount: Int
+            totalCount: Int,
+            phishingAttemptLevel: PhishingAttemptLevel,
         )
 
         fun onShowEmailList(
             @AutofillOrigin origin: Int,
             packageName: String,
             isNativeApp: Boolean,
-            totalCount: Int
+            totalCount: Int,
+            phishingAttemptLevel: PhishingAttemptLevel
         )
 
         fun onAutoFillCredentialDone(
@@ -110,31 +113,33 @@ interface AutofillAnalyzerDef {
             packageName: String,
             websiteUrlDomain: UrlDomain?,
             itemUrlDomain: UrlDomain?,
-            autofillFeature: AutofillFeature,
             matchType: MatchType,
             autofillOrigin: HermesAutofillOrigin,
-            autofillMechanism: AutofillMechanism
+            autofillMechanism: AutofillMechanism,
+            credentialId: String?,
         )
 
         fun onAutoFillCreditCardDone(
             @AutofillOrigin origin: Int,
             packageName: String,
             websiteUrlDomain: UrlDomain?,
-            autofillFeature: AutofillFeature,
             matchType: MatchType,
             autofillOrigin: HermesAutofillOrigin,
-            autofillMechanism: AutofillMechanism
+            autofillMechanism: AutofillMechanism,
+            credentialId: String,
         )
 
         fun onAutoFillEmailDone(
             @AutofillOrigin origin: Int,
             packageName: String,
             websiteUrlDomain: UrlDomain?,
-            autofillFeature: AutofillFeature,
             matchType: MatchType,
             autofillOrigin: HermesAutofillOrigin,
-            autofillMechanism: AutofillMechanism
+            autofillMechanism: AutofillMechanism,
+            credentialId: String,
         )
+
+        fun onAutoFillWarningClick()
     }
 
     interface ILockManager {

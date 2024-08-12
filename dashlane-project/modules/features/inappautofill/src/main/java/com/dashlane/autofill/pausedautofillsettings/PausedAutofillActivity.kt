@@ -13,7 +13,7 @@ import com.dashlane.autofill.pause.model.PauseDurations
 import com.dashlane.autofill.pause.view.AskPauseDialogContract
 import com.dashlane.autofill.pause.view.BottomSheetAskPauseDialogFragment
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.getParcelableCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

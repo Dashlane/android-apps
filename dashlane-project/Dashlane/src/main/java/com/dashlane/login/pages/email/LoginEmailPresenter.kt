@@ -8,6 +8,7 @@ import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.createaccount.CreateAccountActivity
 import com.dashlane.login.InstallationIdDebugUtil
+import com.dashlane.login.REQUEST_CODE_SSO_LOGIN
 import com.dashlane.login.pages.LoginBaseContract
 import com.dashlane.login.pages.LoginBasePresenter
 import com.dashlane.login.root.LoginPresenter
@@ -210,9 +211,5 @@ class LoginEmailPresenter(
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(STATE_EMAIL, email)
-    }
-
-    companion object {
-        private const val REQUEST_CODE_SSO_LOGIN = 24_365
     }
 }

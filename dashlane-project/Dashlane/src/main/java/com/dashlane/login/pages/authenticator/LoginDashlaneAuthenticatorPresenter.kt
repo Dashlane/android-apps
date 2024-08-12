@@ -18,13 +18,14 @@ import kotlinx.coroutines.launch
 class LoginDashlaneAuthenticatorPresenter(
     rootPresenter: LoginPresenter,
     coroutineScope: CoroutineScope,
-    private val authenticationHolder: DeferredViewModel<RegisteredUserDevice>
+    private val authenticationHolder: DeferredViewModel<Pair<RegisteredUserDevice, String?>>
 ) : LoginBasePresenter<LoginDashlaneAuthenticatorContract.DataProvider, LoginDashlaneAuthenticatorContract.ViewProxy>(
     rootPresenter,
     coroutineScope
 ),
-LoginDashlaneAuthenticatorContract.Presenter {
+    LoginDashlaneAuthenticatorContract.Presenter {
     private var useEmailTokenJob: Job? = null
+    private var authenticateJob: Job? = null
 
     override fun onNextClicked() = Unit
 
@@ -37,8 +38,8 @@ LoginDashlaneAuthenticatorContract.Presenter {
 
         if (deferred == null) {
             authenticate()
-        } else {
-            await(deferred)
+        } else if (authenticateJob == null || authenticateJob?.isActive == false) {
+            authenticateJob = await(deferred)
         }
 
         viewOrNull?.showTotpAvailable = provider.secondFactor is AuthenticationSecondFactor.Totp
@@ -87,13 +88,13 @@ LoginDashlaneAuthenticatorContract.Presenter {
             provider.executeAuthenticatorAuthentication()
         }
 
-        await(deferred)
+        authenticateJob = await(deferred)
     }
 
-    private fun await(deferred: Deferred<RegisteredUserDevice>) {
-        launch {
+    private fun await(deferred: Deferred<Pair<RegisteredUserDevice, String?>>): Job {
+        return launch {
             view.showLoading()
-            val credentials = try {
+            val (registeredUserDevice, authTicket) = try {
                 deferred.await()
             } catch (_: CancellationException) {
                 return@launch
@@ -109,7 +110,7 @@ LoginDashlaneAuthenticatorContract.Presenter {
             }
 
             view.showSuccess {
-                rootPresenter.showPrimaryFactorStep(registeredUserDevice = credentials, authTicket = null)
+                rootPresenter.showPrimaryFactorStep(registeredUserDevice = registeredUserDevice, authTicket = authTicket)
                 authenticationHolder.deferred = null
             }
         }

@@ -13,8 +13,8 @@ import com.dashlane.navigation.NavigationConstants
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.summary.SummaryObject
-import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
+import kotlinx.coroutines.withTimeout
 
 class LockNavigationHelperImpl @Inject constructor(
     private val messageHelper: LockMessageHelper,
@@ -76,15 +76,6 @@ class LockNavigationHelperImpl @Inject constructor(
         return showAndWaitLockActivityForReason(context, reason, LockHelper.PROMPT_LOCK_FOR_ITEM, message)
     }
 
-    override fun showLockActivityToSetPinCode(context: Context) {
-        val lockIntent = Intent(context, LoginActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(LockSetting.EXTRA_IS_LOCK_CANCELABLE, true)
-            putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_SET, true)
-        }
-        context.startActivity(lockIntent)
-    }
-
     override fun showLockActivity(context: Context) {
         val lockIntent = Intent(context, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -99,9 +90,9 @@ class LockNavigationHelperImpl @Inject constructor(
         val reason = UnlockEvent.Reason.AccessFromAutofillApi()
         val lockIntent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
-                    Intent.FLAG_ACTIVITY_NO_HISTORY
+                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
+                Intent.FLAG_ACTIVITY_NO_HISTORY
             putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
             putExtra(LockSetting.EXTRA_AS_DIALOG, true)
         }
@@ -114,9 +105,9 @@ class LockNavigationHelperImpl @Inject constructor(
         val reason = UnlockEvent.Reason.AccessFromFollowUpNotification()
         val lockIntent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
-                    Intent.FLAG_ACTIVITY_NO_HISTORY
+                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
+                Intent.FLAG_ACTIVITY_NO_HISTORY
             putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
             putExtra(LockSetting.EXTRA_AS_DIALOG, true)
         }
@@ -128,9 +119,9 @@ class LockNavigationHelperImpl @Inject constructor(
         val reason = UnlockEvent.Reason.AccessFromExternalComponent(itemUID)
         val lockIntent = getIntentLock(context, reason, LockHelper.PROMPT_LOCK_REGULAR, null).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
-                    Intent.FLAG_ACTIVITY_NO_HISTORY
+                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS or
+                Intent.FLAG_ACTIVITY_NO_HISTORY
             putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
         }
         context.startActivity(lockIntent)
@@ -165,11 +156,17 @@ class LockNavigationHelperImpl @Inject constructor(
         if (customMessage != null) {
             putExtra(LockSetting.EXTRA_TOPIC_LOCK, customMessage)
         }
-        if (reason is UnlockEvent.Reason.AccessFromExternalComponent ||
-            reason is UnlockEvent.Reason.OpenItem ||
-            reason is UnlockEvent.Reason.WithCode
-        ) {
-            putExtra(LockSetting.EXTRA_AS_DIALOG, true)
+
+        when (reason) {
+            is UnlockEvent.Reason.AccessFromExternalComponent,
+            is UnlockEvent.Reason.OpenItem -> putExtra(LockSetting.EXTRA_AS_DIALOG, true)
+            is UnlockEvent.Reason.WithCode -> {
+                when (reason.origin) {
+                    null,
+                    UnlockEvent.Reason.WithCode.Origin.EDIT_SETTINGS -> putExtra(LockSetting.EXTRA_AS_DIALOG, true)
+                    UnlockEvent.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD -> putExtra(LockSetting.EXTRA_IS_MASTER_PASSWORD_RESET, true)
+                }
+            }
         }
     }
 }

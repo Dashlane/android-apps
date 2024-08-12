@@ -15,11 +15,10 @@ import com.dashlane.autofill.model.toItemToFill
 import com.dashlane.autofill.navigation.AutofillNavigatorImpl
 import com.dashlane.autofill.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.autofill.ui.AutoFillResponseActivity
-import com.dashlane.autofill.ui.AutofillFeature
 import com.dashlane.bottomnavigation.delegatenavigation.DelegateNavigationBottomSheetFragment
 import com.dashlane.hermes.generated.definitions.MatchType
-import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.limitations.PasswordLimitBottomSheet
+import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.util.Toaster
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
@@ -78,7 +77,6 @@ class AutofillCreateAccountActivity :
     override fun onFinishWithResult(result: VaultItem<SyncObject.Authentifiant>) {
         finishWithResult(
             itemToFill = result.toItemToFill(),
-            autofillFeature = AutofillFeature.CREATE_ACCOUNT,
             matchType = MatchType.CREATED_PASSWORD
         )
     }

@@ -1,6 +1,6 @@
 package com.dashlane.login
 
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.util.installlogs.DataLossTrackingLogger
 
 interface LoginDataReset {

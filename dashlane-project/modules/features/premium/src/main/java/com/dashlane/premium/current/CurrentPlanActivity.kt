@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.dashlane.navigation.Navigator
 import com.dashlane.premium.current.model.CurrentPlan
 import com.dashlane.premium.current.ui.CurrentBenefitItem
 import com.dashlane.premium.current.ui.DarkWebMonitoringBottomSheetDialogFragment
@@ -22,6 +23,9 @@ class CurrentPlanActivity : DashlaneActivity() {
 
     @Inject
     lateinit var currentPlanLogger: CurrentPlanLogger
+
+    @Inject
+    lateinit var navigator: Navigator
 
     private val viewModel: CurrentPlanViewModel by viewModels()
     private val benefitsAdapter = DashlaneRecyclerAdapter<CurrentBenefitItem>()

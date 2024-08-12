@@ -4,6 +4,9 @@ import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.use
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.crypto.keys.serverKeyUtf8Bytes
+import com.dashlane.crypto.keys.userKeyBytes
 import com.dashlane.logger.Log
 import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.preference.UserPreferencesManager
@@ -12,6 +15,7 @@ import com.dashlane.session.repository.LockRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureDataStorage
 import com.dashlane.storage.securestorage.SecureStorageManager
+import com.dashlane.user.Username
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import javax.inject.Inject
 import javax.inject.Provider
@@ -55,7 +59,7 @@ class SessionCredentialsSaver @Inject constructor(
             cryptoObjectHelper.createEncryptionKey(keyStoreKey = keystoreKey, isUserAuthenticationRequired = false)
             val encrypted = cryptoObjectHelper.encrypt(keystoreKey, localKey.cryptographyKeyBytes.use(ObfuscatedByteArray::toByteArray)) ?: return
             val storage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
-            storage.write(SecureDataKey.LOCAL_KEY, encrypted.encodeBase64ToString().asEncryptedBase64())
+            storage.writeLegacy(SecureDataKey.LOCAL_KEY, encrypted.encodeBase64ToString().asEncryptedBase64())
         } catch (e: Exception) {
             Log.w(TAG, "Exception raised when saving the LK", e)
         }
@@ -92,7 +96,7 @@ class SessionCredentialsSaver @Inject constructor(
 
     fun areCredentialsSaved(username: Username): Boolean {
         val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
-        return secureDataStorage.read(SecureDataKey.LOCAL_KEY) != null
+        return secureDataStorage.readLegacy(SecureDataKey.LOCAL_KEY) != null
     }
 
     fun deleteSavedCredentials(username: Username?) {

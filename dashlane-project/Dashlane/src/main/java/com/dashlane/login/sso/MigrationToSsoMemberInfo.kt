@@ -12,7 +12,7 @@ data class MigrationToSsoMemberInfo(
     val totpAuthTicket: String? = null
 ) : Parcelable
 
-fun SsoInfo.toMigrationToSsoMemberInfo(login: String): MigrationToSsoMemberInfo? =
+fun SsoInfo.toMigrationToSsoMemberInfo(): MigrationToSsoMemberInfo? =
     takeIf { migration == SsoInfo.Migration.TO_SSO_MEMBER }
         ?.let {
             MigrationToSsoMemberInfo(

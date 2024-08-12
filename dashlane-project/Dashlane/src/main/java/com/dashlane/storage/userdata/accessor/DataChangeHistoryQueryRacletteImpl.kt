@@ -32,6 +32,6 @@ class DataChangeHistoryQueryRacletteImpl @Inject constructor(
         val item: SummaryObject.DataChangeHistory = summary.data.find {
             it.objectId == filter.objectUid
         } ?: return null
-        return vaultDataQuery.get().query(vaultFilter { specificUid(item.id) }) as? VaultItem<SyncObject.DataChangeHistory>
+        return vaultDataQuery.get().queryLegacy(vaultFilter { specificUid(item.id) }) as? VaultItem<SyncObject.DataChangeHistory>
     }
 }

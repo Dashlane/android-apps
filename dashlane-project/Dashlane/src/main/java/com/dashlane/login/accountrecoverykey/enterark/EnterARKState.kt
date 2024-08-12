@@ -1,6 +1,6 @@
 package com.dashlane.login.accountrecoverykey.enterark
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.cryptography.ObfuscatedByteArray
 
 sealed class EnterARKState {

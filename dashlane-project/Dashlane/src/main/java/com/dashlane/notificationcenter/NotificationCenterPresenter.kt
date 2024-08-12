@@ -1,5 +1,6 @@
 package com.dashlane.notificationcenter
 
+import android.content.Intent
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -8,13 +9,14 @@ import com.dashlane.biometricrecovery.BiometricRecoveryIntroActivity
 import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
 import com.dashlane.events.AppEvents
 import com.dashlane.events.BreachStatusChangedEvent
-import com.dashlane.lock.LockHelper
 import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.notificationcenter.alerts.BreachDataHelper
 import com.dashlane.notificationcenter.view.ActionItemSection
 import com.dashlane.notificationcenter.view.AlertActionItem
 import com.dashlane.notificationcenter.view.HeaderItem
 import com.dashlane.notificationcenter.view.NotificationItem
+import com.dashlane.pin.settings.PinSettingsActivity
 import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
@@ -22,16 +24,16 @@ import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.presenter.BasePresenter
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class NotificationCenterPresenter @Inject constructor(
     fragment: Fragment,
@@ -41,7 +43,6 @@ class NotificationCenterPresenter @Inject constructor(
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val breachesDataProvider: BreachDataHelper,
     private val biometricAuthModule: BiometricAuthModule,
-    private val lockHelper: LockHelper,
     private val sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     private val appEvents: AppEvents,
     private val navigator: Navigator
@@ -106,7 +107,7 @@ class NotificationCenterPresenter @Inject constructor(
     }
 
     override fun startPinCodeSetup() {
-        runWhenUnlocked { context?.let { lockHelper.showLockActivityToSetPinCode(it) } }
+        runWhenUnlocked { context?.startActivity(Intent(context, PinSettingsActivity::class.java)) }
     }
 
     override fun startBiometricSetup() {
@@ -150,10 +151,6 @@ class NotificationCenterPresenter @Inject constructor(
         }
     }
 
-    override fun startGoEssentials() {
-        navigator.goToOffers(offerType = OfferType.ADVANCED.toString())
-    }
-
     override fun startCurrentPlan() {
         navigator.goToCurrentPlan()
     }
@@ -164,6 +161,10 @@ class NotificationCenterPresenter @Inject constructor(
 
     override fun startAuthenticator() {
         navigator.goToAuthenticator()
+    }
+
+    override fun openFrozenStatePaywall() {
+        navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
     }
 
     private fun runWhenUnlocked(onUnlock: () -> Unit) {

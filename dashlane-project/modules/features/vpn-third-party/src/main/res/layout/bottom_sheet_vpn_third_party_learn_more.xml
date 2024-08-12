@@ -27,7 +27,7 @@
         android:scaleType="fitCenter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/handle"
-        app:srcCompat="@drawable/ic_bottom_sheet_vpn_logo"
+        app:srcCompat="@drawable/ic_feature_vpn_outlined"
         app:tint="@color/text_brand_quiet"
         />
 

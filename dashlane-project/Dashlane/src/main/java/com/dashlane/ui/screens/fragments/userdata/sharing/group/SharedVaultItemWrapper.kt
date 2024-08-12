@@ -13,10 +13,10 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvid
 import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.util.DiffUtilComparator
-import com.dashlane.ui.adapters.text.factory.DataIdentifierTypeTextFactory
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.util.ViewTypeUtils
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.textfactory.list.DataIdentifierTypeTextFactory
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 

@@ -1,5 +1,6 @@
 package com.dashlane.vault.util
 
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.title
 import com.dashlane.vault.model.titleForListNormalized

@@ -49,7 +49,7 @@ class SettingsManager(
             ?: settingsCacheLock.withLock {
                 validSettingsCache ?: GlobalScope.async(loadDispatcher) {
                     val settingsXml =
-                        checkNotNull(userSecureStorageManager.readSettings(session)) {
+                        checkNotNull(userSecureStorageManager.readSettings(session.localKey, session.username)) {
                             "Unable to read settings"
                         }
                     deserializeSettings(settingsXml)
@@ -73,7 +73,7 @@ class SettingsManager(
     fun updateSettings(settings: Settings, triggerSync: Boolean = true) {
         val settingsXml = XmlSerialization.serializeTransaction(settings.toTransaction())
         settingsCache = CompletableDeferred(settings) 
-        userSecureStorageManager.storeSettings(session, settingsXml)
+        userSecureStorageManager.storeSettings(session.localKey, session.username, settingsXml)
         shouldSyncSettings = shouldSyncSettings || triggerSync
     }
 }

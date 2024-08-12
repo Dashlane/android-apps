@@ -5,11 +5,11 @@
     app:startDestination="@id/nav_login">
     <fragment
         android:id="@+id/nav_login"
-        android:name="com.dashlane.login.LoginHostFragment"
+        android:name="com.dashlane.login.root.LoginLegacyFragment"
         android:label="@string/login">
         <action
             android:id="@+id/action_fragment_to_compose"
-            app:destination="@id/nav_login_compose"
+            app:destination="@id/nav_login_secret_transfer"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_enter_anim"
@@ -18,19 +18,19 @@
     </fragment>
 
     <fragment
-        android:id="@+id/nav_login_compose"
-        android:name="com.dashlane.login.LoginComposeFragment"
+        android:id="@+id/nav_login_secret_transfer"
+        android:name="com.dashlane.login.pages.secrettransfer.LoginSecretTransferFragment"
         android:label="@string/login">
         <argument
             android:name="startDestination"
-            app:nullable="true"
             android:defaultValue="@null"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <argument
             android:name="email"
-            app:nullable="true"
             android:defaultValue="@null"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true"/>
     </fragment>
 
 </navigation>

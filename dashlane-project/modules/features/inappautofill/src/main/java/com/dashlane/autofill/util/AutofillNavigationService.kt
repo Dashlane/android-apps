@@ -16,6 +16,8 @@ interface AutofillNavigationService {
         autofillFormSource: AutoFillFormSource
     )
 
+    fun navigateToFrozenAccountPaywall(activity: Activity)
+
     fun getLongPressActionOnInline(): PendingIntent
 
     fun getOnBoardingIntentSender(): IntentSender

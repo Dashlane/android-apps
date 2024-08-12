@@ -68,7 +68,7 @@ class VpnThirdPartyActivateAccountViewProxy(
                 setAdapter(adapter)
             }
 
-            val clearButton = getDrawable(context, R.drawable.ic_clear)!!
+            val clearButton = getDrawable(context, R.drawable.ic_action_clear_content_filled)!!
             doAfterTextChanged {
                 mayEnableConfirmButton()
                 if (text.isEmpty()) {

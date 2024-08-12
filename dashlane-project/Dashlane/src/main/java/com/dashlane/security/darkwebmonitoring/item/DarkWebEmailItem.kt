@@ -2,12 +2,11 @@ package com.dashlane.security.darkwebmonitoring.item
 
 import android.content.Context
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.darkweb.DarkWebEmailStatus
+import com.dashlane.design.component.compat.view.ThumbnailView
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.drawable.ContactDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 data class DarkWebEmailItem(val emailStatus: DarkWebEmailStatus) : DashlaneRecyclerAdapter.ViewTypeProvider {
@@ -39,9 +38,9 @@ data class DarkWebEmailItem(val emailStatus: DarkWebEmailStatus) : DashlaneRecyc
             view.isClickable = isClickable
             view.isFocusable = isClickable
 
-            val contactDrawable = ContactDrawable.newInstance(context, email)
-
-            findViewByIdEfficient<ImageView>(R.id.icon)!!.setImageDrawable(contactDrawable)
+            findViewByIdEfficient<ThumbnailView>(R.id.icon)?.apply {
+                thumbnailUrl = email
+            }
             setText(R.id.item_line1, email)
 
             val statusString = when (status) {

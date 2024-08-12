@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_vertical"
     android:minHeight="?listPreferredItemHeightSmall"
     android:orientation="horizontal"
-    android:padding="8dp"
-    >
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="8dp">
 
-    <ImageView
+    <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
         android:id="@+id/websiteIcon"
-        android:layout_width="96dp"
-        android:layout_height="48dp"
-        android:adjustViewBounds="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:importantForAccessibility="no"
-        android:scaleType="centerInside"
+        app:thumbnailSize="medium"
         />
 
     <TextView

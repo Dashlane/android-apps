@@ -25,7 +25,3 @@ data class PrivilegedAllowlist(
         @Json(name = "cert_fingerprint_sha256") val sha256: String
     )
 }
-
-fun formatHexString(input: String): String {
-    return input.chunked(2).joinToString(":") { it.uppercase() }
-}

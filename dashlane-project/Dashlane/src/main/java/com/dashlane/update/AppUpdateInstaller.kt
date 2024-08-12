@@ -7,7 +7,7 @@ import com.dashlane.login.LoginInfo
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.tryOrNull
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory

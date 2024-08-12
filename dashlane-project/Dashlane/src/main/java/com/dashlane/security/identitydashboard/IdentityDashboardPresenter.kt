@@ -2,8 +2,6 @@ package com.dashlane.security.identitydashboard
 
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast
-import com.dashlane.R
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.NavigationHelper
@@ -12,24 +10,19 @@ import com.dashlane.security.identitydashboard.item.IdentityDashboardItem
 import com.dashlane.security.identitydashboard.item.IdentityDashboardPasswordHealthItem
 import com.dashlane.security.identitydashboard.item.IdentityDashboardSeparatorItem
 import com.dashlane.security.identitydashboard.item.identityprotection.IdentityDashboardProtectionPackageActiveItem
-import com.dashlane.util.Toaster
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.launchUrl
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class IdentityDashboardPresenter @Inject constructor(
     private val lockManager: LockManager,
-    private val toaster: Toaster,
     private val navigator: Navigator,
     @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @DefaultCoroutineDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher,
     @MainCoroutineDispatcher private val mainCoroutineDispatcher: CoroutineDispatcher
 ) :
     BasePresenter<IdentityDashboardContract.DataProvider, IdentityDashboardContract.ViewProxy>(),
@@ -79,27 +72,14 @@ class IdentityDashboardPresenter @Inject constructor(
         navigateToPasswordHealth(NavigationHelper.Destination.SecondaryPath.PasswordHealth.WEAK)
     }
 
-    @Suppress("kotlin:S6311")
-    override fun onActiveCreditViewClick() {
-        val context = this.context ?: return
-        coroutineScope.launch(mainCoroutineDispatcher) {
-            val result = withContext(defaultCoroutineDispatcher) { provider.getCreditMonitoringLink() }
-            if (result != null && result != CreditMonitoringManager.ERROR_UNKNOWN) {
-                context.launchUrl(result)
-            } else {
-                toaster.show(resources!!.getString(R.string.general_error), Toast.LENGTH_SHORT)
-            }
-        }
-    }
-
     override fun onActiveProtectionLearnMoreClick() {
         val context = this.context ?: return
-        openCustomTab(HelpCenterLink.ARTICLE_IDENTITY_PROTECTION.uri, context)
+        openCustomTab(HelpCenterLink.ARTICLE_IDENTITY_PROTECTION.androidUri, context)
     }
 
     override fun onActiveRestorationLearnMoreClick() {
         val context = this.context ?: return
-        openCustomTab(HelpCenterLink.ARTICLE_IDENTITY_RESTORATION.uri, context)
+        openCustomTab(HelpCenterLink.ARTICLE_IDENTITY_RESTORATION.androidUri, context)
     }
 
     private fun openCustomTab(helpLink: Uri, context: Context) {

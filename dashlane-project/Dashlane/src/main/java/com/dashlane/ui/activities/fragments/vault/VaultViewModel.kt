@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.home.vaultlist.Filter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor

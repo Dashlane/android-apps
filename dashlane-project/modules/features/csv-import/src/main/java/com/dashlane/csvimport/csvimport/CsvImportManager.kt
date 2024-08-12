@@ -60,7 +60,7 @@ class CsvImportManager @Inject constructor(
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
         val allAuthentifiants = vaultDataQuery
-            .queryAll(filter)
+            .queryAllLegacy(filter)
             .filterIsInstance<VaultItem<SyncObject.Authentifiant>>()
             .map { it.syncObject }
 

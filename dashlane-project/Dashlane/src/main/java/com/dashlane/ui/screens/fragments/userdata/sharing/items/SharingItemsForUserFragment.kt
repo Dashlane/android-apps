@@ -9,7 +9,7 @@ import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
+import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

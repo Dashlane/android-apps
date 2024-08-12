@@ -13,7 +13,7 @@ interface AuthenticatorDashboardViewModelContract : AuthenticatorBaseViewModelCo
     fun onOtpCounterUpdate(itemId: String, otp: Otp)
     fun onEditClicked()
     fun onBackToViewMode()
-    fun onOtpCodeCopy(itemId: String, domain: String?)
+    fun onOtpCodeCopy(itemId: String, domain: String?): Boolean
     fun onSetupAuthenticatorFromUri(
         otpUri: Uri,
         setUpAuthenticatorResultContract: SetUpAuthenticatorResultContract

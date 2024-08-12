@@ -5,10 +5,10 @@ import android.content.Intent
 import android.content.res.Resources
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
-import com.dashlane.accountrecoverykey.AccountRecoveryState
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingState
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
 import com.dashlane.activatetotp.ActivateTotpLogger
 import com.dashlane.activatetotp.DownloadAuthenticatorAppIntroActivity
 import com.dashlane.authenticator.isAuthenticatorAppInstalled
@@ -17,14 +17,15 @@ import com.dashlane.biometricrecovery.BiometricRecoveryIntroActivity
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.disabletotp.DisableTotpActivity
 import com.dashlane.disabletotp.DisableTotpEnforcedIntroActivity
+import com.dashlane.crypto.keys.serverKeyUtf8Bytes
 import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.lock.OnboardingApplicationLockActivity
 import com.dashlane.navigation.Navigator
+import com.dashlane.pin.settings.PinSettingsActivity
 import com.dashlane.security.SecurityHelper
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.session.serverKeyUtf8Bytes
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.Feature
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
@@ -59,9 +60,9 @@ class SettingsSecurityApplicationLockList(
     use2faSettingStateHolder: Use2faSettingStateHolder,
     activateTotpLogger: ActivateTotpLogger,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
     private val navigator: Navigator,
-    private val teamspaceNotificator: TeamSpaceRestrictionNotificator
+    private val teamspaceNotificator: TeamSpaceRestrictionNotificator,
+    private val accountRecoveryKeySettingStateHolder: AccountRecoveryKeySettingStateHolder
 ) {
 
     private val appLockHeader =
@@ -92,7 +93,7 @@ class SettingsSecurityApplicationLockList(
                 
                 runIfBiometricRecoveryDeactivationAcknowledged(context) {
                     sensibleSettingsClickHelper.perform(context = context) {
-                        lockManager.showLockActivityToSetPinCode(context)
+                        context.startActivity(Intent(context, PinSettingsActivity::class.java))
                     }
                 }
             } else {
@@ -119,7 +120,7 @@ class SettingsSecurityApplicationLockList(
         override fun isEnable() = true
         override fun isVisible() = isPinLockEnabled()
         override fun onClick(context: Context) = sensibleSettingsClickHelper.perform(context = context) {
-            lockManager.showLockActivityToSetPinCode(context)
+            context.startActivity(Intent(context, PinSettingsActivity::class.java))
         }
 
         private fun isPinLockEnabled(): Boolean {
@@ -436,27 +437,36 @@ class SettingsSecurityApplicationLockList(
         }
 
     private val accountRecoveryKeyItem =
-        object : SettingItem, SettingChange.Listenable {
+        object : SettingItem, SettingChange.Listenable, SettingLoadable {
+
+            private val state: AccountRecoveryKeySettingState
+                get() = accountRecoveryKeySettingStateHolder.uiState.value
+
             override var listener: SettingChange.Listener? = null
             override val id = "account-recovery"
             override val header = appLockHeader
             override val title = context.getString(R.string.account_recovery_key_setting_title)
             override val description
-                get() =
-                    if (checkStatus().enabled) {
-                        context.getString(R.string.account_recovery_key_setting_description_on)
-                    } else {
-                        context.getString(R.string.account_recovery_key_setting_description_off)
-                    }
+                get() = when (val state = state) {
+                    is AccountRecoveryKeySettingState.Loaded ->
+                        if (state.isEnabled) {
+                            context.getString(R.string.account_recovery_key_setting_description_on)
+                        } else {
+                            context.getString(R.string.account_recovery_key_setting_description_off)
+                        }
+                    else -> ""
+                }
 
             override fun isEnable() = true
-            override fun isVisible() = checkStatus().visible
+            override fun isVisible() = state != AccountRecoveryKeySettingState.Hidden
 
             override fun onClick(context: Context) {
-                navigator.goToAccountRecoveryKey(id)
+                if (state is AccountRecoveryKeySettingState.Loaded) {
+                    navigator.goToAccountRecoveryKey(id)
+                }
             }
 
-            private fun checkStatus(): AccountRecoveryState = accountRecoveryKeyRepository.getAccountRecoveryStatusBlocking()
+            override fun isLoaded(context: Context): Boolean = state != AccountRecoveryKeySettingState.Loading
         }
 
     private fun getLockType(lockManager: LockManager): Int {
@@ -530,13 +540,15 @@ class SettingsSecurityApplicationLockList(
                     context,
                     DownloadAuthenticatorAppIntroActivity::class.java
                 )
-                context.startActivity(
-                    OnboardingApplicationLockActivity.newIntent(
-                        context,
-                        nextIntent = nextIntent,
-                        fromUse2fa = true
+                sensibleSettingsClickHelper.perform(context) {
+                    context.startActivity(
+                        OnboardingApplicationLockActivity.newIntent(
+                            context,
+                            nextIntent = nextIntent,
+                            fromUse2fa = true
+                        )
                     )
-                )
+                }
             } else {
                 if (teamSpaceAccessor?.is2FAEnforced == true) {
                     context.startActivity(Intent(context, DisableTotpEnforcedIntroActivity::class.java).clearTop())

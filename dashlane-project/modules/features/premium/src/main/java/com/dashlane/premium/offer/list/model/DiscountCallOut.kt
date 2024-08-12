@@ -1,6 +1,6 @@
 package com.dashlane.premium.offer.list.model
 
-import android.content.Context
+import android.content.res.Resources
 import com.dashlane.premium.R
 import com.dashlane.premium.offer.common.model.ProductDetailsWrapper
 import com.dashlane.premium.offer.common.model.ProductPeriodicity
@@ -9,7 +9,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 sealed class DiscountCallOut {
-    abstract fun formattedText(context: Context): String
+    abstract fun formattedText(resources: Resources): String
 
     data class FixedPercent(
         private val basePriceMicro: Long,
@@ -19,11 +19,11 @@ sealed class DiscountCallOut {
         private val periodicity: ProductPeriodicity
     ) : DiscountCallOut() {
 
-        override fun formattedText(context: Context): String {
+        override fun formattedText(resources: Resources): String {
             val totalLength = offerCycleLength * offerCycleCount
             val discount: Double = 1 - offerPriceMicro.toDouble() / offerCycleLength / basePriceMicro
             val discountPercent = NumberFormat.getPercentInstance(
-                Locale.Builder().setLanguage(context.getString(R.string.language_iso_639_1)).build()
+                Locale.Builder().setLanguage(resources.getString(R.string.language_iso_639_1)).build()
             ).apply { maximumFractionDigits = 0 }.format(discount)
             val textResource = when (periodicity) {
                 ProductPeriodicity.MONTHLY -> R.plurals.plans_offer_call_out_fixed_percent_discount_monthly
@@ -33,7 +33,7 @@ sealed class DiscountCallOut {
                 pluralsRes = textResource,
                 quantity = totalLength,
                 args = listOf(TextResource.Arg.StringArg(discountPercent), TextResource.Arg.IntArg(totalLength))
-            ).format(context.resources)
+            ).format(resources)
         }
     }
 
@@ -42,7 +42,7 @@ sealed class DiscountCallOut {
         private val offerCycleCount: Int,
         private val periodicity: ProductPeriodicity
     ) : DiscountCallOut() {
-        override fun formattedText(context: Context): String {
+        override fun formattedText(resources: Resources): String {
             val totalLength = offerCycleLength * offerCycleCount
             val textResource = when (periodicity) {
                 ProductPeriodicity.MONTHLY -> R.plurals.plans_offer_call_out_free_trial_monthly
@@ -52,7 +52,7 @@ sealed class DiscountCallOut {
                 pluralsRes = textResource,
                 quantity = totalLength,
                 args = listOf(TextResource.Arg.IntArg(totalLength))
-            ).format(context.resources)
+            ).format(resources)
         }
     }
 
@@ -61,7 +61,7 @@ sealed class DiscountCallOut {
         private val offerCycleCount: Int,
         private val periodicity: ProductPeriodicity
     ) : DiscountCallOut() {
-        override fun formattedText(context: Context): String {
+        override fun formattedText(resources: Resources): String {
             val totalLength = offerCycleLength * offerCycleCount
             val textResource = when (periodicity) {
                 ProductPeriodicity.MONTHLY -> R.plurals.plans_offer_call_out_simple_saving_over_fixed_period_monthly
@@ -71,7 +71,7 @@ sealed class DiscountCallOut {
                 pluralsRes = textResource,
                 quantity = totalLength,
                 args = listOf(TextResource.Arg.IntArg(totalLength))
-            ).format(context.resources)
+            ).format(resources)
         }
     }
 

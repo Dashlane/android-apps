@@ -31,7 +31,7 @@
     <string name="authenticator_success_intro_positive_button">OK, got it</string>
 
     <string name="authenticator_error_intro_title">We couldn’t set up 2FA for %1$s</string>
-    <string name="authenticator_error_intro_body">Please try again. If you continue to have issues, contact Support.</string>
+    <string name="authenticator_error_intro_body">Please try again. If you continue to have issues, visit our help center.</string>
     <string name="authenticator_error_intro_positive_button">Try again</string>
     <string name="authenticator_error_intro_negative_button">Cancel</string>
     
@@ -50,7 +50,7 @@
     <string name="authenticator_faq_question_3_title">I need help</string>
     <string name="authenticator_faq_question_1_body">It generates 6-digit tokens every time you log in to an app or site you’ve set up 2FA for.</string>
     <string name="authenticator_faq_question_2_body">Setting up 2FA for your services adds an extra layer of security by asking to authenticate with a second factor in order to log in.</string>
-    <string name="authenticator_faq_question_3_body">If you need more help, visit our Help Center or contact our Support team.</string>
+    <string name="authenticator_faq_question_3_body">If you need more help, visit our Help Center.</string>
     <string name="authenticator_faq_question_1_button">Learn more about 2FA</string>
     <string name="authenticator_faq_question_2_button">Learn more</string>
     <string name="authenticator_faq_question_3_button">Help center</string>
@@ -73,15 +73,6 @@
     <string name="authenticator_suggestions_setup_button">Add 2FA token</string>
     <string name="authenticator_see_all">See all</string>
     <string name="authenticator_see_less">See less</string>
-
-    <string name="authenticator_get_started_dialog_title">Now available: 2FA for Dashlane</string>
-    <string name="authenticator_get_started_dialog_body">2-factor authentication (2FA) is an extra layer of security for your account. When logging in or adding a new device, we’ll ask you to enter a 6-digit token from your authenticator app.</string>
-    <string name="authenticator_get_started_dialog_button">Get started</string>
-    <string name="authenticator_get_started_animation_continue">Continue</string>
-    <string name="authenticator_get_started_animation_login">Login</string>
-
-    <string name="authenticator_notification_center_title">Now available: 2FA for Dashlane</string>
-    <string name="authenticator_notification_center_body">2-factor authentication (2FA) is an extra layer of security for your account. When logging in or adding a new device, we’ll ask you to enter a 6-digit token from your authenticator app.</string>
 
     <string name="authenticator_multiple_matches_title">%1$d %2$s accounts available</string>
     <string name="authenticator_multiple_matches_subtitle">Select the account you want to set up 2FA for.</string>

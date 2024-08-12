@@ -7,10 +7,9 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.emptywebsitewarning.domain.EmptyWebsiteWarningDialogResponse
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.model.toItemToFill
 import com.dashlane.autofill.ui.AutoFillResponseActivity
-import com.dashlane.autofill.ui.AutofillFeature
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.url.toUrlDomain
 import com.dashlane.util.tryOrNull
@@ -51,13 +50,11 @@ class EmptyWebsiteWarningActivity :
 
     override fun onAutofillResult(result: VaultItem<SyncObject.Authentifiant>) = finishWithResult(
         itemToFill = result.toItemToFill(),
-        autofillFeature = AutofillFeature.EMPTY_WEBSITE,
         matchType = matchType
     )
 
     override fun onNoResult() = finishWithResult(
         itemToFill = null,
-        autofillFeature = AutofillFeature.EMPTY_WEBSITE,
         matchType = matchType
     )
 

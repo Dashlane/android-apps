@@ -23,7 +23,7 @@ import com.dashlane.url.root
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.PackageUtilities
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isValidEmail
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.util.valueWithoutWww
@@ -158,7 +158,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             ignoreUserLock()
             specificUid(itemId)
         }
-        return vaultDataQuery.query(filter) as? VaultItem<T>
+        return vaultDataQuery.queryLegacy(filter) as? VaultItem<T>
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -233,7 +233,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             specificUid(uid)
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
-        val account = vaultDataQuery.query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
+        val account = vaultDataQuery.queryLegacy(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
         val updatedAccount = account.copyWithNewUrl(website).copyWithAttrs { syncState = SyncState.MODIFIED }
         dataSaver.save(updatedAccount)
         return updatedAccount
@@ -248,7 +248,7 @@ class AutoFillDataBaseAccess @Inject constructor(
         val filter = vaultFilter {
             specificUid(itemId)
         }
-        val updatedAccount = vaultDataQuery.query(filter)?.copyWithAttrs { locallyViewedDate = instant } ?: return
+        val updatedAccount = vaultDataQuery.queryLegacy(filter)?.copyWithAttrs { locallyViewedDate = instant } ?: return
         dataSaver.save(updatedAccount)
     }
 
@@ -352,7 +352,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             specificUid(uid)
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
-        val account = vaultDataQuery.query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
+        val account = vaultDataQuery.queryLegacy(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
         val updatedAccount = account.copyWithNewPassword(password).copyWithAttrs { syncState = SyncState.MODIFIED }
         dataSaver.save(updatedAccount)
         return updatedAccount

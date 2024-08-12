@@ -5,8 +5,8 @@ import com.dashlane.autofill.changepause.services.ChangePauseStrings
 import com.dashlane.autofill.pause.model.PausedFormSource
 import com.dashlane.autofill.pause.services.RemovePauseContract
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

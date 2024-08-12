@@ -5,18 +5,21 @@ import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.CryptographyKeyGenerator
 import com.dashlane.cryptography.EncryptedFile
 import com.dashlane.cryptography.encryptToFile
+import com.dashlane.network.tools.authorization
 import com.dashlane.network.webservices.UploadFileService
-import com.dashlane.securefile.services.CommitService
-import com.dashlane.securefile.services.GetUploadLinkService
+import com.dashlane.server.api.endpoints.securefile.CommitSecureFileService
+import com.dashlane.server.api.endpoints.securefile.GetSecureFileUploadLinkService
+import com.dashlane.server.api.endpoints.securefile.exceptions.HardQuotaExceededException
+import com.dashlane.server.api.endpoints.securefile.exceptions.MaxContentLengthExceededException
+import com.dashlane.server.api.endpoints.securefile.exceptions.SoftQuotaExceededException
+import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.provider.BaseDataProvider
-import java.io.InputStream
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,16 +34,19 @@ import okio.BufferedSink
 import okio.Source
 import okio.buffer
 import okio.source
+import java.io.InputStream
+import javax.inject.Inject
 
 class UploadFileDataProvider @Inject constructor(
     @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher private val mainCoroutineDispatcher: CoroutineDispatcher,
-    private val uploadLinkService: GetUploadLinkService,
+    private val getSecureFileUploadLinkService: GetSecureFileUploadLinkService,
     private val uploadFileService: UploadFileService,
-    private val commitService: CommitService,
+    private val commitSecureFileService: CommitSecureFileService,
+    private val sessionManager: SessionManager,
     private val dataSaver: DataSaver,
     private val cryptography: Cryptography,
-    private val keyGenerator: CryptographyKeyGenerator
+    private val keyGenerator: CryptographyKeyGenerator,
 ) : BaseDataProvider<UploadFileContract.Presenter>(), UploadFileContract.DataProvider {
 
     override suspend fun createSecureFile(
@@ -69,29 +75,30 @@ class UploadFileDataProvider @Inject constructor(
     }
 
     override suspend fun uploadSecureFile(
-        username: String,
-        uki: String,
         secureFile: SecureFile,
         secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
     ) {
         
-        getLinkAndUpload(username, uki, secureFile, secureFileInfo)
+        getLinkAndUpload(secureFile, secureFileInfo)
     }
 
     private suspend fun commit(
-        username: String,
-        uki: String,
         secureFile: SecureFile,
         secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
     ) {
         runCatching {
-            commitService.commit(
-                username,
-                uki,
-                secureFile.id!!,
-                secureFileInfo.syncObject.id ?: ""
+            val session = requireNotNull(sessionManager.session)
+            val id = requireNotNull(secureFile.id)
+            val secureFileInfoId = requireNotNull(secureFileInfo.syncObject.id)
+
+            commitSecureFileService.execute(
+                userAuthorization = session.authorization,
+                request = CommitSecureFileService.Request(
+                    key = id,
+                    secureFileInfoId = secureFileInfoId
+                )
             )
-        }.onSuccess { result ->
+        }.onSuccess { response ->
             
             val modifiedDataIdentifier = secureFileInfo.copy(syncState = SyncState.MODIFIED)
             dataSaver.save(modifiedDataIdentifier)
@@ -99,123 +106,104 @@ class UploadFileDataProvider @Inject constructor(
             secureFile.encryptedFile!!.value.delete()
             
             presenter.notifyFileUploaded(secureFile, modifiedDataIdentifier)
-            val quota = result.content?.quota ?: return@onSuccess
-            presenter.notifyStorageSpaceChanged(quota.remainingBytes, quota.maxBytes)
+            val quota = response.data.quota
+            presenter.notifyStorageSpaceChanged(quota.remaining, quota.max)
         }.onFailure {
-            
             secureFile.encryptedFile!!.value.delete()
             presenter.notifyFileUploadFailed(secureFile, secureFileInfo)
         }
     }
 
     private suspend fun getLinkAndUpload(
-        username: String,
-        uki: String,
         secureFile: SecureFile,
         secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
     ) {
         runCatching {
-            uploadLinkService.createCall(
-                username,
-                uki,
-                secureFile.encryptedFile!!.value.length(),
-                secureFileInfo.syncObject.id
+            val session = requireNotNull(sessionManager.session)
+            val secureFileInfoId = requireNotNull(secureFileInfo.syncObject.id)
+            val contentLength = requireNotNull(secureFile.encryptedFile?.value?.length())
+
+            getSecureFileUploadLinkService.execute(
+                userAuthorization = session.authorization,
+                request = GetSecureFileUploadLinkService.Request(
+                    secureFileInfoId = secureFileInfoId,
+                    contentLength = contentLength,
+                )
             )
-        }.onSuccess { getLink ->
-            when (getLink.code) {
-                200 -> {
-                    val updatedSecureFile = secureFile.copy(
-                        id = getLink.content?.fileId
-                    )
-                    val updatedSecureFileInfo = secureFileInfo.syncObject.copy {
-                        downloadKey = updatedSecureFile.id
-                    }
-                    val updatedSecureFileInfoDataIdentifier =
-                        secureFileInfo.copy(syncObject = updatedSecureFileInfo)
+        }.onSuccess { response ->
+            val updatedSecureFile = secureFile.copy(
+                id = response.data.key,
+            )
+            val updatedSecureFileInfo = secureFileInfo.syncObject.copy {
+                downloadKey = updatedSecureFile.id
+            }
+            val updatedSecureFileInfoDataIdentifier =
+                secureFileInfo.copy(syncObject = updatedSecureFileInfo)
 
-                    presenter.notifyFileSpaceReserved(updatedSecureFile, updatedSecureFileInfoDataIdentifier)
-                    val uploadSuccessful = uploadFile(
-                        username,
-                        uki,
-                        getLink,
-                        updatedSecureFile,
-                        updatedSecureFileInfoDataIdentifier
-                    )
-                    if (!uploadSuccessful) {
-                        onLinkAndUploadFailure(secureFile, secureFileInfo)
-                    }
-                }
-
-                403 -> {
-                    handleSpaceFullError(secureFile.encryptedFile, getLink, secureFile, secureFileInfo)
-                    return
-                }
+            presenter.notifyFileSpaceReserved(updatedSecureFile, updatedSecureFileInfoDataIdentifier)
+            val uploadSuccessful = uploadFile(
+                data = response.data,
+                secureFile = updatedSecureFile,
+                secureFileInfo = updatedSecureFileInfoDataIdentifier
+            )
+            if (!uploadSuccessful) {
+                onLinkAndUploadFailure(secureFile = secureFile, secureFileInfo = secureFileInfo)
             }
         }.onFailure {
-            onLinkAndUploadFailure(secureFile, secureFileInfo)
-        }
-    }
-
-    private fun handleSpaceFullError(
-        encryptedFile: EncryptedFile?,
-        getLink: GetUploadLinkService.Response,
-        secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
-    ) {
-        
-        encryptedFile?.value?.delete()
-
-        when (getLink.content?.errorMessage) {
-            
-            "MAX_CONTENT_LENGTH_EXCEEDED" -> presenter.notifyFileSizeLimitExceeded(
-                secureFile,
-                secureFileInfo
-            )
-            
-            "QUOTA_EXCEEDED" -> presenter.notifyMaxStorageSpaceReached(
-                secureFile,
-                secureFileInfo,
-                getLink.code,
-                getLink.message
-            )
-
-            else -> onLinkAndUploadFailure(secureFile, secureFileInfo)
+            onLinkAndUploadFailure(secureFile = secureFile, secureFileInfo = secureFileInfo, throwable = it)
         }
     }
 
     private fun onLinkAndUploadFailure(
         secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
+        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
+        throwable: Throwable? = null,
     ) {
         
         secureFile.encryptedFile?.value?.delete()
-        presenter.notifyFileUploadFailed(secureFile, secureFileInfo)
+
+        when (throwable) {
+            
+            is MaxContentLengthExceededException -> presenter.notifyFileSizeLimitExceeded(
+                secureFile,
+                secureFileInfo
+            )
+            
+            is HardQuotaExceededException,
+            is SoftQuotaExceededException -> presenter.notifyMaxStorageSpaceReached(
+                secureFile,
+                secureFileInfo,
+            )
+            else -> presenter.notifyFileUploadFailed(secureFile, secureFileInfo)
+        }
     }
 
     private suspend fun uploadFile(
-        username: String,
-        uki: String,
-        response: GetUploadLinkService.Response,
+        data: GetSecureFileUploadLinkService.Data,
         secureFile: SecureFile,
         secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
     ): Boolean {
-        val content = response.content!!
-        val fields = content.fields.apply {
-            addProperty("key", content.fileId)
-            addProperty("acl", content.acl)
+        val fields: Map<String, String> = data.fields.toMutableMap().apply {
+            put("key", data.key)
+            put("acl", data.acl)
         }
         val formParts = HashMap<String, RequestBody>()
-        fields.entrySet().forEach {
-            formParts[it.key] = it.value.asString.toRequestBody(null)
+        fields.forEach {
+            formParts[it.key] = it.value.toRequestBody(null)
         }
-        val requestFile = ProgressRequestBody(presenter, secureFile.encryptedFile!!, applicationCoroutineScope, mainCoroutineDispatcher)
+        val requestFile = ProgressRequestBody(
+            presenter,
+            secureFile.encryptedFile!!,
+            applicationCoroutineScope,
+            mainCoroutineDispatcher
+        )
         val filePart = MultipartBody.Part.createFormData("file", null, requestFile)
 
         
-        val upload = uploadFileService.execute(content.url, formParts, filePart)
+        val upload = uploadFileService.execute(data.url, formParts, filePart)
         if (upload.isSuccessful) {
             
-            commit(username, uki, secureFile, secureFileInfo)
+            commit(secureFile = secureFile, secureFileInfo = secureFileInfo)
         }
         return upload.isSuccessful
     }

@@ -21,7 +21,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
-            tools:text="Secure Notes is a paid feature. Upgrade to our Essentials plan to store and share encrypted documents." />
+            tools:text="Secure Notes is a paid feature. Upgrade to our Premium plan to store and share encrypted documents." />
 
         <ImageView
             android:id="@+id/empty_screen_img"

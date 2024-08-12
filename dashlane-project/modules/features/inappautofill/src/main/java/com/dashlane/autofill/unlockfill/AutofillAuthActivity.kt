@@ -3,20 +3,25 @@ package com.dashlane.autofill.unlockfill
 import android.content.Context
 import android.content.IntentSender
 import android.os.Bundle
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.frozenautofill.FrozenAutofillActivity
 import com.dashlane.autofill.model.AuthentifiantItemToFill
 import com.dashlane.autofill.model.CreditCardItemToFill
 import com.dashlane.autofill.model.EmailItemToFill
 import com.dashlane.autofill.model.ItemToFill
 import com.dashlane.autofill.model.OtpItemToFill
 import com.dashlane.autofill.model.ToUnlockItemToFill
+import com.dashlane.autofill.phishing.AutofillPhishingWarningFragment
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import com.dashlane.autofill.securitywarnings.view.SecurityWarningsViewProxy
 import com.dashlane.autofill.ui.AutoFillResponseActivity
-import com.dashlane.autofill.ui.AutofillFeature
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.util.getParcelableExtraCompat
+import com.dashlane.vault.model.urlForUI
 import com.dashlane.xml.domain.SyncObject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 open class AutofillAuthActivity : AutoFillResponseActivity() {
     private val securityWarningsViewProxy: SecurityWarningsViewProxy by lazy(LazyThreadSafetyMode.NONE) {
         SecurityWarningsViewProxy(
@@ -37,6 +42,19 @@ open class AutofillAuthActivity : AutoFillResponseActivity() {
         super.onCreate(savedInstanceState)
         val intent = intent
         itemToFill = intent.getParcelableExtraCompat(EXTRA_ITEM_TO_FILL)
+
+        supportFragmentManager.setFragmentResultListener(
+            AutofillPhishingWarningFragment.PHISHING_WARNING_RESULT,
+            this
+        ) { _, bundle ->
+            val result = bundle.getInt(AutofillPhishingWarningFragment.PHISHING_WARNING_PARAMS_RESULT)
+            if (result == RESULT_OK) {
+                phishingAttemptTrustedByUser = true
+                onUserLoggedIn()
+            } else {
+                finish()
+            }
+        }
     }
 
     override fun onResume() {
@@ -72,6 +90,13 @@ open class AutofillAuthActivity : AutoFillResponseActivity() {
                     
                     if (isGuidedChangePassword) {
                         changePasswordShowDialog(unlockedAuthentifiant)
+                    } else if (shouldDisplayPhishingWarning(syncObject)) {
+                        AutofillPhishingWarningFragment.create(
+                            summary,
+                            item.syncObject?.urlForUI(),
+                            item.itemId,
+                            phishingAttemptLevel
+                        ).show(supportFragmentManager, SECURITY_WARNING_DIALOG_TAG)
                     } else {
                         dealWithSecurityWarning(unlockedAuthentifiant)
                     }
@@ -93,7 +118,6 @@ open class AutofillAuthActivity : AutoFillResponseActivity() {
         }
         finishWithResult(
             itemToFill = itemToFill,
-            autofillFeature = AutofillFeature.SUGGESTION,
             matchType = matchType
         )
     }
@@ -129,8 +153,14 @@ open class AutofillAuthActivity : AutoFillResponseActivity() {
             summary: AutoFillHintSummary,
             forKeyboard: Boolean,
             guidedChangePasswordFlow: Boolean,
-            matchType: MatchType?
+            matchType: MatchType?,
+            phishingAttemptLevel: PhishingAttemptLevel,
+            isAccountFrozen: Boolean
         ): IntentSender {
+            if (isAccountFrozen) {
+                return FrozenAutofillActivity.getPendingIntent(context, summary)
+            }
+
             val intent = if (guidedChangePasswordFlow) {
                 createIntent(context, summary, AutofillAuthChangePasswordActivity::class)
             } else {
@@ -141,6 +171,7 @@ open class AutofillAuthActivity : AutoFillResponseActivity() {
             intent.putExtra(EXTRA_FOR_KEYBOARD_AUTOFILL, forKeyboard)
             intent.putExtra(EXTRA_IS_GUIDED_CHANGE_PASSWORD, guidedChangePasswordFlow)
             intent.putExtra(EXTRA_MATCH_TYPE, matchType?.code)
+            intent.putExtra(EXTRA_PHISHING_ATTEMPT_LEVEL, phishingAttemptLevel)
 
             return createIntentSender(context, intent)
         }

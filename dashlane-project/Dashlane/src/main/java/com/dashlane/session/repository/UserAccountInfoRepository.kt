@@ -50,11 +50,13 @@ class UserAccountInfoRepository @Inject constructor(
                     prefs.publicUserId = accountInfo.publicUserId
                     prefs.accountCreationDate = accountInfo.creationDate.toInstant()
                     userSecureStorageManager.storeDeviceAnalyticsId(
-                        session,
+                        session.localKey,
+                        session.username,
                         accountInfo.deviceAnalyticsId
                     )
                     userSecureStorageManager.storeUserAnalyticsId(
-                        session,
+                        session.localKey,
+                        session.username,
                         accountInfo.userAnalyticsId
                     )
                 }
@@ -88,8 +90,8 @@ class UserAccountInfoRepository @Inject constructor(
         return UserAccountInfo(
             publicUserId = prefs.publicUserId,
             creationDate = prefs.accountCreationDate,
-            deviceAnalyticsId = userSecureStorageManager.readDeviceAnalyticsId(session),
-            userAnalyticsId = userSecureStorageManager.readUserAnalyticsId(session)
+            deviceAnalyticsId = userSecureStorageManager.readDeviceAnalyticsId(session.localKey, session.username),
+            userAnalyticsId = userSecureStorageManager.readUserAnalyticsId(session.localKey, session.username)
         )
     }
 

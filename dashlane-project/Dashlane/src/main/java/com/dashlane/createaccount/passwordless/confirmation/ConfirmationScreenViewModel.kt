@@ -2,7 +2,7 @@ package com.dashlane.createaccount.passwordless.confirmation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.AuthenticationExpiredVersionException
 import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.passwordless.UserData

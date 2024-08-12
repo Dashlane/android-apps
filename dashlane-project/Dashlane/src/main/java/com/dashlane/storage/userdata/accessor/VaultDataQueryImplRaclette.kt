@@ -15,6 +15,7 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.runBlocking
 
 class VaultDataQueryImplRaclette @Inject constructor(
     private val sessionManager: SessionManager,
@@ -26,17 +27,19 @@ class VaultDataQueryImplRaclette @Inject constructor(
     private val database: Database?
         get() = sessionManager.session?.let { userDataRepository.getRacletteDatabase(it) }
 
-    override fun query(filter: VaultFilter): VaultItem<SyncObject>? {
-        return queryAll(filter).firstOrNull()
+    override fun queryLegacy(filter: VaultFilter): VaultItem<SyncObject>? = runBlocking { query(filter) }
+
+    override suspend fun query(filter: VaultFilter): VaultItem<SyncObject>? {
+        return queryAllLegacy(filter).firstOrNull()
     }
 
-    override fun queryAll(filter: VaultFilter): List<VaultItem<SyncObject>> {
+    override fun queryAllLegacy(filter: VaultFilter): List<VaultItem<SyncObject>> = runBlocking { queryAll(filter) }
+
+    override suspend fun queryAll(filter: VaultFilter): List<VaultItem<SyncObject>> {
         if (lockHelper.get().forbidDataAccess(filter)) return listOf()
         val database = database ?: return emptyList()
         val ids = getIdsToQuery(filter)
-        val vaultItems = ids.mapNotNull { id ->
-            database.vaultObjectRepository[Id.of(id)]
-        }.asSequence()
+        val vaultItems = ids.mapNotNull { id -> database.vaultObjectRepository.get(Id.of(id)) }.asSequence()
         return vaultItems
             .filterDataType(filter)
             .filterStatus(filter)
@@ -51,8 +54,8 @@ class VaultDataQueryImplRaclette @Inject constructor(
         filter {
             if (filter.onlyVisibleStatus) {
                 it.syncState == SyncState.IN_SYNC_MODIFIED ||
-                        it.syncState == SyncState.MODIFIED ||
-                        it.syncState == SyncState.SYNCED
+                    it.syncState == SyncState.MODIFIED ||
+                    it.syncState == SyncState.SYNCED
             } else {
                 true
             }

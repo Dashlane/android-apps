@@ -12,8 +12,14 @@ class QuickActionsPresenter : QuickActionsContract.Presenter,
     }
 
     override fun getItemDetails(itemId: String) {
-        val icon = provider.getItemIcon(context!!, itemId)
+        val configuration = provider.getItemThumbnail(context!!, itemId)
         val title = provider.getItemTitle(context!!, itemId)
-        view.setItemDetail(icon, title)
+        view.setItemDetail(
+            title = title,
+            thumbnailType = configuration?.type?.value,
+            thumbnailIconRes = configuration?.iconRes,
+            thumbnailColorRes = configuration?.colorRes,
+            thumbnailUrlDomain = configuration?.urlDomain
+        )
     }
 }

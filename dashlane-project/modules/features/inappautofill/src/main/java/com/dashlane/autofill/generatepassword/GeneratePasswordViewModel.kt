@@ -3,14 +3,14 @@ package com.dashlane.autofill.generatepassword
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.autofill.createaccount.view.CreateAccountDialogFragmentArgs
 import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.password.generator.PasswordGeneratorCriteria
 import com.dashlane.url.root
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.useractivity.hermes.TrackingLogUtils
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.urlForGoToWebsite

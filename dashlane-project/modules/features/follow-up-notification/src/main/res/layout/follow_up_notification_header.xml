@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="6dp"
     android:layout_marginBottom="6dp"
+    android:layout_marginTop="6dp"
     android:orientation="horizontal"
-    tools:ignore="UseCompoundDrawables"
-    >
+    tools:ignore="UseCompoundDrawables">
 
     <ImageView
         android:id="@+id/item_thumbnail"
-        android:layout_width="42dp"
-        android:layout_height="27dp"
-        />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:src="@drawable/ic_item_login_outlined" />
 
     <TextView
         android:id="@+id/tv_item_name"
@@ -25,7 +23,6 @@
         android:layout_weight="1"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.Dashlane.FollowUpNotification.Item.Attribute.Name"
-        tools:text="Facebook"
-        />
+        tools:text="Facebook" />
 
 </LinearLayout>

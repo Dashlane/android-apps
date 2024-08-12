@@ -1,7 +1,7 @@
 package com.dashlane.dagger
 
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

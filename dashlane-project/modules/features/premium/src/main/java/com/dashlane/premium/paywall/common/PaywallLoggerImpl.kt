@@ -2,6 +2,8 @@ package com.dashlane.premium.paywall.common
 
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.CallToAction.ALL_OFFERS
+import com.dashlane.hermes.generated.definitions.CallToAction.CANCEL
+import com.dashlane.hermes.generated.definitions.CallToAction.CLOSE
 import com.dashlane.hermes.generated.definitions.CallToAction.PREMIUM_OFFER
 import com.dashlane.hermes.generated.events.user.CallToAction
 import javax.inject.Inject
@@ -13,28 +15,36 @@ class PaywallLoggerImpl @Inject constructor(
 
     private var chosenActionSent = false
 
-    override fun onLeaving() {
+    override fun onLeaving(callToActionList: List<CallToActionValue>) {
         if (!chosenActionSent) {
-            logUserAction(chosenAction = null)
+            logUserAction(chosenAction = null, callToActionList = callToActionList)
         }
     }
 
-    override fun onClickSeeAllOptions() {
-        logUserAction(chosenAction = ALL_OFFERS)
+    override fun onClickSeeAllOptions(callToActionList: List<CallToActionValue>) {
+        logUserAction(chosenAction = ALL_OFFERS, callToActionList = callToActionList)
     }
 
-    override fun onClickUpgrade() {
-        logUserAction(chosenAction = PREMIUM_OFFER)
+    override fun onClickUpgrade(callToActionList: List<CallToActionValue>) {
+        logUserAction(chosenAction = PREMIUM_OFFER, callToActionList = callToActionList)
     }
 
-    override fun onClickClose() {
-        logUserAction(chosenAction = null)
+    override fun onNavigateUp(callToActionList: List<CallToActionValue>) {
+        logUserAction(chosenAction = null, callToActionList = callToActionList)
     }
 
-    private fun logUserAction(chosenAction: CallToActionValue?) =
+    override fun onClickCancel(callToActionList: List<CallToActionValue>) {
+        logUserAction(chosenAction = CANCEL, callToActionList = callToActionList)
+    }
+
+    override fun onClickClose(callToActionList: List<CallToActionValue>) {
+        logUserAction(chosenAction = CLOSE, callToActionList = callToActionList)
+    }
+
+    private fun logUserAction(chosenAction: CallToActionValue?, callToActionList: List<CallToActionValue>) =
         logRepository.queueEvent(
             CallToAction(
-                callToActionList = listOf(PREMIUM_OFFER, ALL_OFFERS),
+                callToActionList = callToActionList,
                 hasChosenNoAction = chosenAction == null,
                 chosenAction = chosenAction
             )

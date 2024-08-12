@@ -21,13 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,6 +39,7 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
+import com.dashlane.ui.widgets.compose.DashlaneLogo
 import com.dashlane.ui.widgets.compose.GenericErrorContent
 import com.dashlane.ui.widgets.view.CircularProgressIndicator
 import com.google.zxing.BarcodeFormat
@@ -138,7 +137,7 @@ fun QrCodeContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        DashlaneLogo()
+        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
         Text(
             text = (stringResource(id = R.string.login_secret_transfer_step_label, 1, 2)).uppercase(),
             style = DashlaneTheme.typography.bodyHelperRegular,
@@ -206,18 +205,6 @@ fun QRCodeBottomSheetContent(
             onSecondaryButtonClick = onSecondaryButtonClick
         )
     }
-}
-
-@Composable
-fun DashlaneLogo(
-    modifier: Modifier = Modifier
-) {
-    Image(
-        modifier = modifier,
-        painter = painterResource(R.drawable.logo_lock_up),
-        colorFilter = ColorFilter.tint(DashlaneTheme.colors.textNeutralCatchy.value),
-        contentDescription = stringResource(id = R.string.and_accessibility_domain_item_logo, stringResource(id = R.string.dashlane_main_app_name))
-    )
 }
 
 @Composable

@@ -6,16 +6,24 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.compose.ui.platform.ComposeView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.dashlane.design.iconography.IconTokens
+import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.color.Mood
 import com.dashlane.premium.R
+import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.premium.offer.common.model.Offers
 import com.dashlane.premium.offer.list.model.OfferOverview
-import com.dashlane.premium.offer.list.view.OfferCardWidget
+import com.dashlane.premium.offer.list.ui.OfferCard
+import com.dashlane.premium.utils.PriceUtils
+import com.dashlane.premium.utils.toFormattedPrice
 import com.dashlane.util.animation.fadeOut
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.skocken.presentation.viewproxy.BaseViewProxy
+import java.util.Locale
 
 internal class OfferListViewProxy(view: View) :
     BaseViewProxy<OfferListContract.Presenter>(view),
@@ -41,14 +49,25 @@ internal class OfferListViewProxy(view: View) :
         emptyStateView.visibility = View.VISIBLE
     }
 
-    override fun showAvailableOffers(offers: Offers) {
+    override fun showAvailableOffers(
+        offers: Offers,
+        isUserFree: Boolean,
+        isUserFrozen: Boolean,
+        passwordLimit: Long?
+    ) {
         val monthlyOffersCards = buildOfferScreen(
             title = context.getString(R.string.plans_periodicity_toggle_monthly),
-            offers = offers.monthlyOffers
+            offers = offers.monthlyOffers,
+            isUserFree = isUserFree,
+            isUserFrozen = isUserFrozen,
+            passwordLimit = passwordLimit
         ) { presenterOrNull?.onMonthlyPeriodicityClicked() }
         val yearlyOffersCards = buildOfferScreen(
             title = context.getString(R.string.plans_periodicity_toggle_yearly),
-            offers = offers.yearlyOffers
+            offers = offers.yearlyOffers,
+            isUserFree = isUserFree,
+            isUserFrozen = isUserFrozen,
+            passwordLimit = passwordLimit
         ) { presenterOrNull?.onYearlyPeriodicityClicked() }
 
         val offersPerPeriodicity = listOfNotNull(monthlyOffersCards, yearlyOffersCards)
@@ -76,32 +95,83 @@ internal class OfferListViewProxy(view: View) :
     private fun buildOfferScreen(
         title: String,
         offers: List<OfferOverview>,
+        isUserFree: Boolean,
+        isUserFrozen: Boolean,
+        passwordLimit: Long?,
         onDisplay: () -> Unit
     ): PeriodicityPagerAdapter.OffersScreen? = if (offers.isNotEmpty()) {
         PeriodicityPagerAdapter.OffersScreen(
             title = title,
-            offers = offers.map { buildOfferCardView(it) },
+            offers = buildList {
+                
+                if (isUserFree) {
+                    add(
+                        buildFreeOfferCardView(
+                            currencyCode = offers.first().currencyCode,
+                            isUserFrozen = isUserFrozen,
+                            passwordLimit = passwordLimit
+                        )
+                    )
+                }
+                addAll(
+                    offers.map {
+                        buildOfferCardView(it)
+                    }
+                )
+            },
             onDisplay = onDisplay
         )
     } else {
         null
     }
 
-    private fun buildOfferCardView(offer: OfferOverview) =
-        OfferCardWidget(context).apply {
-            title = context.getString(offer.title)
-            description = context.getString(offer.description)
-            if (offer is OfferOverview.IntroductoryOffer) {
-                barredText = offer.pricing?.getBarredText(context)
-                billedPrice = offer.pricing?.getPriceText(context)
-                offerCallOut = offer.discountCallOut.formattedText(context)
-                additionalInfo = offer.pricing?.getAdditionalInfoText(context)
-            } else {
-                billedPrice = offer.pricing?.getPriceText(context)
+    private fun buildFreeOfferCardView(currencyCode: String, isUserFrozen: Boolean, passwordLimit: Long?): ComposeView {
+        return ComposeView(context).apply {
+            setContent {
+                DashlaneTheme {
+                    OfferCard(
+                        iconToken = if (isUserFrozen) {
+                            IconTokens.lockOutlined
+                        } else {
+                            null
+                        },
+                        title = context.getString(R.string.plans_free_title),
+                        billedPrice = (0 / PriceUtils.MICRO.toDouble()).toFormattedPrice(
+                            currencyCode,
+                            Locale(context.getString(R.string.language_iso_639_1))
+                        ),
+                        description = if (isUserFrozen) {
+                            context.getString(R.string.plans_free_description_for_frozen_account, passwordLimit.toString())
+                        } else {
+                            context.getString(R.string.plans_free_description, passwordLimit.toString())
+                        },
+                        descriptionMood = if (isUserFrozen) {
+                            Mood.Warning
+                        } else {
+                            null
+                        },
+                        onClick = { presenterOrNull?.onOfferClicked(OfferType.FREE) }
+                    )
+                }
             }
-            onGoingLabel = offer.onGoingRes?.let { context.getString(it) }
-            setOnClickListener {
-                presenterOrNull?.onOfferClicked(offer.type)
+        }
+    }
+
+    private fun buildOfferCardView(offer: OfferOverview) =
+        ComposeView(context).apply {
+            setContent {
+                DashlaneTheme {
+                    OfferCard(
+                        title = offer.title,
+                        badgeText = (offer as? OfferOverview.IntroductoryOffer)?.discountCallOut,
+                        barredPrice = (offer as? OfferOverview.IntroductoryOffer)?.barredPrice,
+                        billedPrice = offer.billedPrice!!,
+                        currentPlanLabel = offer.currentPlanLabel,
+                        additionalInfo = (offer as? OfferOverview.IntroductoryOffer)?.additionalInfo,
+                        description = offer.description,
+                        onClick = { presenterOrNull?.onOfferClicked(offer.type) }
+                    )
+                }
             }
         }
 
@@ -123,7 +193,7 @@ internal class OfferListViewProxy(view: View) :
 
         override fun getItemCount(): Int = offersPerPeriodicity.size
 
-        data class OffersScreen(val title: String, val offers: List<OfferCardWidget>, val onDisplay: () -> Unit)
+        data class OffersScreen(val title: String, val offers: List<ComposeView>, val onDisplay: () -> Unit)
     }
 
     class PeriodicityViewHolder(val itemView: View) : RecyclerView.ViewHolder(itemView) {

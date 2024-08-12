@@ -53,7 +53,7 @@ object NavigationHelper {
 
         object SecondaryPath {
             object GetPremium {
-                const val ESSENTIALS_OFFER = "essentialsoffer"
+                const val ADVANCED_OFFER = "essentialsoffer"
                 const val PREMIUM_OFFER = "premiumoffer"
                 const val FAMILY_OFFER = "premiumfamilyoffer"
             }

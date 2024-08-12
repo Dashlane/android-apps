@@ -4,7 +4,6 @@ package com.dashlane.accountrecoverykey.activation.generate
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,16 +37,17 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.R
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
+import com.dashlane.design.component.cardBackground
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.CircularProgressIndicator
+import com.dashlane.ui.common.compose.components.CircularProgressIndicator
 import com.dashlane.ui.widgets.compose.GenericErrorContent
 
 @Composable
@@ -160,10 +159,7 @@ fun AccountRecoveryKeyGenerateContent(
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 48.dp)
                 .padding(bottom = 16.dp)
-                .background(
-                    color = DashlaneTheme.colors.containerAgnosticNeutralSupershy,
-                    shape = RoundedCornerShape(10.dp)
-                )
+                .cardBackground()
                 .padding(top = 16.dp, bottom = 16.dp, start = 4.dp, end = 4.dp)
                 .combinedClickable(
                     onClick = onCopy,

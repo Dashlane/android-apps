@@ -34,12 +34,12 @@ class DataIdentifierSyncRepositoryRaclette @Inject constructor(
         return databaseItemSaver.getItemToSave(dataWrapper, DataSaver.SaveRequest.Origin.PERSONAL_SYNC)
     }
 
-    fun getOutgoingTransactions(): List<OutgoingTransaction> {
+    suspend fun getOutgoingTransactions(): List<OutgoingTransaction> {
         val pendingItems = dao.getItemsPendingSyncForType()
         return pendingItems.map { createOutgoingTransaction(it) }
     }
 
-    fun fetchAsOutgoingUpdate(
+    suspend fun fetchAsOutgoingUpdate(
         uuids: List<String>
     ): List<OutgoingTransaction.Update> {
         return dao.getItemsWithExtraData(uuids).map {
@@ -100,7 +100,7 @@ class DataIdentifierSyncRepositoryRaclette @Inject constructor(
         dao.markItemsInSync(types)
     }
 
-    fun fetchDuplicate(
+    suspend fun fetchDuplicate(
         types: List<SyncObjectType>
     ): List<List<OutgoingTransaction.Update>> =
         dao.getDuplicationCandidates(types).map { items ->

@@ -1,7 +1,7 @@
 package com.dashlane.login.pages.biometric
 
 import androidx.biometric.BiometricPrompt
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.MasterPasswordResetIntroDialogActivity

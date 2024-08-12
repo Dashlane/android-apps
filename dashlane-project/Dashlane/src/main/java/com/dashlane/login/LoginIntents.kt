@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyActivity
 import com.dashlane.login.devicelimit.DeviceLimitActivity
@@ -24,6 +24,7 @@ import com.dashlane.notification.EXTRA_BREACH_NOTIFICATION_FORCE_REFRESH
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.util.clearTask
 import com.dashlane.util.clearTop
+import com.dashlane.util.getBaseActivity
 
 object LoginIntents {
 
@@ -138,18 +139,18 @@ object LoginIntents {
         }
 
     fun createSsoLoginActivityIntent(
-        activity: Activity,
+        context: Context,
         login: String,
         serviceProviderUrl: String,
         isSsoProvider: Boolean,
         migrateToMasterPasswordUser: Boolean
     ): Intent =
-        Intent(activity, LoginSsoActivity::class.java).apply {
+        Intent(context, LoginSsoActivity::class.java).apply {
             putExtra(LoginSsoActivity.KEY_LOGIN, login)
             putExtra(LoginSsoActivity.KEY_SERVICE_PROVIDER_URL, serviceProviderUrl)
             putExtra(LoginSsoActivity.KEY_IS_SSO_PROVIDER, isSsoProvider)
             putExtra(LoginSsoActivity.KEY_MIGRATE_TO_MASTER_PASSWORD_USER, migrateToMasterPasswordUser)
-            copyOriginExtras(activity.intent)
+            context.getBaseActivity()?.let { copyOriginExtras(it.intent) }
         }
 
     fun createEnforce2faLimitActivityIntent(activity: Activity, clearTask: Boolean = true): Intent =

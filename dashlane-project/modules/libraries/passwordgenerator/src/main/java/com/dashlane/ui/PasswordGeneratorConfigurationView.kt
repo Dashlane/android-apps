@@ -20,6 +20,15 @@ class PasswordGeneratorConfigurationView(context: Context, attrSet: AttributeSet
     private val ambiguous: ToggleView
 
     var listener: ConfigurationChangeListener? = null
+    var enable: Boolean = true
+        set(value) {
+            slider.isEnabled = value
+            digit.readOnly = true
+            letters.readOnly = true
+            symbols.readOnly = true
+            ambiguous.readOnly = true
+            field = value
+        }
 
     private val sliderChangeListener = Slider.OnChangeListener { slider, value, fromUser ->
         if (value > 0) {

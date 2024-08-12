@@ -2,7 +2,9 @@ package com.dashlane.ui.screens.settings.list.general
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.autofill.phishing.AutofillPhishingLogger
 import com.dashlane.followupnotification.domain.FollowUpNotificationSettings
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.Trigger
@@ -21,8 +23,8 @@ import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.DarkThemeHelper
 import com.dashlane.util.inject.OptionalProvider
 import kotlinx.coroutines.CoroutineScope
@@ -47,14 +49,19 @@ class RootSettingsGeneralList(
     dataSync: DataSync,
     dialogHelper: DialogHelper,
     teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
+    autofillPhishingLogger: AutofillPhishingLogger,
+    frozenStateManager: FrozenStateManager,
 ) {
 
     private val settingsGeneralAutoLoginList = SettingsGeneralAutoLoginList(
-        context,
-        lockManager,
-        inAppLoginManager,
-        navigator,
-        userPreferencesManager
+        context = context,
+        lockManager = lockManager,
+        inAppLoginManager = inAppLoginManager,
+        navigator = navigator,
+        userPreferencesManager = userPreferencesManager,
+        userFeaturesChecker = userFeaturesChecker,
+        autofillPhishingLogger = autofillPhishingLogger,
+        frozenStateManager = frozenStateManager,
     )
 
     private val settingsGeneralNotificationsList = SettingsGeneralNotificationsList(
@@ -69,6 +76,7 @@ class RootSettingsGeneralList(
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
         dialogHelper = dialogHelper,
         teamSpaceAccessorProvider = teamSpaceAccessorProvider,
+        navigator = navigator,
     )
 
     private val displayHeader = SettingHeader(context.getString(R.string.settings_display_category))

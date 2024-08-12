@@ -19,8 +19,8 @@ import com.dashlane.ui.fragments.PasswordGeneratorFragment
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 
 @OptIn(ObsoleteCoroutinesApi::class)
 @AndroidEntryPoint
@@ -108,6 +108,7 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
     annotation class Origin
 
     companion object {
+        const val DIALOG_PASSWORD_GENERATOR_TAG = "PASSWORD_GENERATOR_POPUP"
         const val PASSWORD_GENERATOR_ARG_ORIGIN = "password_generator_arg_origin"
         const val PASSWORD_GENERATOR_ARG_DOMAIN = "password_generator_arg_domain"
         const val PASSWORD_GENERATOR_REQUEST_KEY = "password_generator_request_key"

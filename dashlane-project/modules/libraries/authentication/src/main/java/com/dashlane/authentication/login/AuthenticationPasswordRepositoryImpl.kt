@@ -36,10 +36,10 @@ import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.exceptions.DashlaneApiHttpException
 import com.dashlane.server.api.exceptions.DashlaneApiIoException
 import com.dashlane.server.api.time.toInstant
-import com.dashlane.session.AppKey
-import com.dashlane.session.LocalKey
-import com.dashlane.session.Username
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.user.Username
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.serializer.XmlException
 import java.time.Instant

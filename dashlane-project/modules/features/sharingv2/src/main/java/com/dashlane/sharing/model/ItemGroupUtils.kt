@@ -50,6 +50,22 @@ fun ItemGroup.getUserGroupMembers(
     } ?: emptyList()
 }
 
+fun ItemGroup.getCollectionMembers(
+    myCollections: List<Collection>,
+    onlyAcceptedOrPending: Boolean
+): List<CollectionDownload> {
+    val myCollectionIds = myCollections.map { it.uuid }
+    return collections?.filter {
+        it.uuid in myCollectionIds
+    }?.let { result ->
+        if (onlyAcceptedOrPending) {
+            result.filter { it.isAcceptedOrPending }
+        } else {
+            result
+        }
+    } ?: emptyList()
+}
+
 fun ItemGroup.getCollectionDownloads(
     myCollections: List<Collection>,
     onlyAcceptedOrPending: Boolean
@@ -103,31 +119,34 @@ fun ItemGroup.isUserAccepted(username: String): Boolean =
 fun ItemGroup.isUserAcceptedOrPending(username: String): Boolean =
     getUser(username)?.isAcceptedOrPending == true
 
-fun ItemGroup.canLostAccess(login: String, userGroups: List<UserGroup>): Boolean {
-    val userGroupMembers = getUserGroupMembers(userGroups, true)
-    if (userGroupMembers.isNotEmpty()) {
-        return false 
+fun ItemGroup.canLostAccess(
+    login: String,
+    myUserGroups: List<UserGroup>,
+    myCollections: List<Collection>
+): Boolean {
+    if (
+        getUserGroupMembers(myUserGroups, true).isNotEmpty() ||
+        getCollectionMembers(myCollections, true).isNotEmpty()
+    ) {
+        return false
     }
+
     return canLostAccessBecauseOfUsers(login)
 }
 
 private fun ItemGroup.canLostAccessBecauseOfUsers(login: String): Boolean {
-    val me = getUser(login) ?: return true
-    if (!me.isAdmin) return true
-    return countAdminUsers > 1
+    return !isUserSolitaryAdmin(login)
 }
 
 fun ItemGroup.isUserSolitaryAdmin(userId: String): Boolean {
-    if (hasAdminUserGroups()) return false
+    if (hasAdminUserGroups() || hasAdminCollections()) return false
     val adminCount = countAdminUsers
     return adminCount == 1 && Permission.ADMIN == getUserPermission(userId)
 }
 
 fun ItemGroup.isUserGroupSolitaryAdmin(groupId: String): Boolean {
     groups ?: return false
-    if (hasAdminUsers() || !hasAdminUserGroups()) {
-        return false
-    }
+    if (hasAdminCollections() || hasAdminUsers()) return false
     if (countAdminUserGroups != 1) return false
     val userGroup = getUserGroupMember(groupId) ?: return false
     return userGroup.isAdmin && userGroup.isAccepted
@@ -138,6 +157,8 @@ fun ItemGroup.hasAdminUsers(): Boolean = users?.hasAdminUsers() == true
 
 @VisibleForTesting
 fun ItemGroup.hasAdminUserGroups(): Boolean = groups?.hasAdminUserGroup() == true
+
+private fun ItemGroup.hasAdminCollections(): Boolean = collections?.hasAdminCollection() == true
 
 fun ItemGroup.getUserPermission(userId: String): Permission? = getUser(userId)?.permission
 
@@ -164,4 +185,7 @@ private fun List<UserDownload>.hasAdminUsers(): Boolean =
     find { it.isAccepted && it.isAdmin } != null
 
 private fun List<UserGroupMember>.hasAdminUserGroup(): Boolean =
+    find { it.isAccepted && it.isAdmin } != null
+
+private fun List<CollectionDownload>.hasAdminCollection(): Boolean =
     find { it.isAccepted && it.isAdmin } != null

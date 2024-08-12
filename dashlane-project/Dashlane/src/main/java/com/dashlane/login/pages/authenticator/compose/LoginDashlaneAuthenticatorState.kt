@@ -1,23 +1,22 @@
 package com.dashlane.login.pages.authenticator.compose
 
 import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.mvvm.State
 
-sealed class LoginDashlaneAuthenticatorState {
+data class LoginDashlaneAuthenticatorState(
+    val email: String? = null,
+    val isLoading: Boolean = false,
+    val isSuccess: Boolean = false,
+    val error: LoginDashlaneAuthenticatorError? = null
+) : State
 
-    object Initial : LoginDashlaneAuthenticatorState()
-    object Loading : LoginDashlaneAuthenticatorState()
-
-    object Canceled : LoginDashlaneAuthenticatorState()
-    data class Success(
-        val registeredUserDevice: RegisteredUserDevice,
-        val authTicket: String
-    ) : LoginDashlaneAuthenticatorState()
-
-    data class Error(val error: LoginDashlaneAuthenticatorError) :
-        LoginDashlaneAuthenticatorState()
+sealed class LoginDashlaneAuthenticatorNavigationState : State {
+    data object Canceled : LoginDashlaneAuthenticatorNavigationState()
+    data class Success(val registeredUserDevice: RegisteredUserDevice, val authTicket: String) : LoginDashlaneAuthenticatorNavigationState()
 }
 
-sealed class LoginDashlaneAuthenticatorError : Exception() {
-    object Network : LoginDashlaneAuthenticatorError()
-    object Offline : LoginDashlaneAuthenticatorError()
+sealed class LoginDashlaneAuthenticatorError {
+    data object ExpiredVersion : LoginDashlaneAuthenticatorError()
+    data object Timeout : LoginDashlaneAuthenticatorError()
+    data object Generic : LoginDashlaneAuthenticatorError()
 }

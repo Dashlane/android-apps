@@ -1,32 +1,30 @@
 package com.dashlane.login.pages.totp.compose
 
 import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.hermes.generated.definitions.VerificationMode
+import com.dashlane.mvvm.State
 
-sealed class LoginTotpState {
-    abstract val data: LoginTotpData
-
-    data class Initial(override val data: LoginTotpData) : LoginTotpState()
-    data class Loading(override val data: LoginTotpData) : LoginTotpState()
-    data class Success(
-        override val data: LoginTotpData,
-        val registeredUserDevice: RegisteredUserDevice,
-        val authTicket: String
-    ) : LoginTotpState()
-
-    data class Error(override val data: LoginTotpData, val error: LoginTotpError) : LoginTotpState()
-}
-
-data class LoginTotpData(
-    val email: String? = null,
+data class LoginTotpState(
+    val email: String,
+    val verificationMode: VerificationMode? = null,
     val otp: String? = null,
-    val recoveryToken: String? = null,
+    val isLoading: Boolean = false,
+    val isAuthenticatorEnabled: Boolean = false,
+    val error: LoginTotpError? = null,
+    val isRecoveryError: Boolean = false,
     val showHelpDialog: Boolean = false,
     val showRecoveryCodeDialog: Boolean = false,
     val showSendTextMessageDialog: Boolean = false,
     val showTextMessageDialog: Boolean = false
-)
+) : State
+
+sealed class LoginTotpNavigationState : State {
+    data class GoToPush(val email: String) : LoginTotpNavigationState()
+    data class Success(val registeredUserDevice: RegisteredUserDevice, val authTicket: String) : LoginTotpNavigationState()
+}
 
 sealed class LoginTotpError : Exception() {
+    data object InvalidTokenLockedOut : LoginTotpError()
     data object InvalidToken : LoginTotpError()
     data object AlreadyUsed : LoginTotpError()
     data object Network : LoginTotpError()

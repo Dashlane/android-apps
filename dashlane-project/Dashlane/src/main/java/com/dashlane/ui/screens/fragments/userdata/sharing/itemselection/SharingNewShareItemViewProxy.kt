@@ -17,7 +17,7 @@ import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
 import com.dashlane.ui.widgets.view.empty.SharingItemSelectionEmptyScreen
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityNameHolderService
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import kotlinx.coroutines.CoroutineScope

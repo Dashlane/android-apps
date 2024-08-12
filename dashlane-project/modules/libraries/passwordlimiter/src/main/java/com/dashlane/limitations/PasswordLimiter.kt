@@ -1,9 +1,9 @@
 package com.dashlane.limitations
 
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.filter.counterFilter
-import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
@@ -12,18 +12,22 @@ class PasswordLimiter @Inject constructor(
     private val userFeatureChecker: UserFeaturesChecker
 ) {
     val hasPasswordLimit: Boolean
-        get() = userFeatureChecker.has(PremiumStatus.Capabilitie.Capability.PASSWORDSLIMIT)
+        get() = userFeatureChecker.has(PremiumStatus.PremiumCapability.Capability.PASSWORDSLIMIT)
 
     val passwordLimitCount: Long?
-        get() = userFeatureChecker.getCapabilityInfo(PremiumStatus.Capabilitie.Capability.PASSWORDSLIMIT)?.limit
+        get() = userFeatureChecker.getCapabilityInfo(PremiumStatus.PremiumCapability.Capability.PASSWORDSLIMIT)?.limit
 
     enum class UserLimit {
         USER_NO_LIMIT,
         USER_APPROACHING_LIMIT,
-        USER_LIMIT_REACHED;
+        USER_LIMIT_REACHED,
+        USER_LIMIT_EXCEEDED;
     }
 
-    fun isPasswordLimitReached() = checkUserLimit() == UserLimit.USER_LIMIT_REACHED
+    fun isPasswordLimitReached() = checkUserLimit() in
+        arrayOf(UserLimit.USER_LIMIT_REACHED, UserLimit.USER_LIMIT_EXCEEDED)
+
+    fun isPasswordLimitExceeded() = checkUserLimit() == UserLimit.USER_LIMIT_EXCEEDED
 
     fun passwordRemainingBeforeLimit(): Long {
         if (checkUserLimit() != UserLimit.USER_NO_LIMIT) {
@@ -40,7 +44,8 @@ class PasswordLimiter @Inject constructor(
         }
         val nbPasswordsSaved = getCountAuthentifiant()
         return when {
-            nbPasswordsSaved >= passwordLimit -> UserLimit.USER_LIMIT_REACHED
+            nbPasswordsSaved > passwordLimit -> UserLimit.USER_LIMIT_EXCEEDED
+            nbPasswordsSaved == passwordLimit.toInt() -> UserLimit.USER_LIMIT_REACHED
             nbPasswordsSaved + PASSWORD_LIMIT_LOOMING >= passwordLimit -> UserLimit.USER_APPROACHING_LIMIT
             else -> UserLimit.USER_NO_LIMIT
         }

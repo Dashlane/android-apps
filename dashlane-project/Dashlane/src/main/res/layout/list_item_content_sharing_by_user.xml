@@ -10,18 +10,20 @@
     android:minHeight="@dimen/list_sharing_item_content_min_height"
     >
 
-    <ImageView
+    <com.dashlane.design.component.compat.view.ThumbnailView
         android:id="@+id/icon"
-        android:layout_width="@dimen/list_sharing_item_content_icon_width"
-        android:layout_height="@dimen/list_sharing_item_content_icon_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/spacing_normal"
         android:layout_marginTop="@dimen/spacing_normal"
         android:layout_marginBottom="@dimen/spacing_normal"
         android:importantForAccessibility="no"
-        android:scaleType="fitCenter"
         dashlane:layout_constraintBottom_toBottomOf="parent"
         dashlane:layout_constraintStart_toStartOf="parent"
         dashlane:layout_constraintTop_toTopOf="parent"
+        app:thumbnailSize="medium"
+        app:thumbnailType="userSingle"
+        android:src="@drawable/ic_sharing_user_group"
         />
 
     <TextView

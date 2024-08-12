@@ -7,15 +7,15 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter.Companion.COMBINED_SPACE_FILTER_ID
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter.Companion.PERSONAL_SPACE_FILTER_ID
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 interface CurrentTeamSpaceUiFilter {
 
@@ -56,7 +56,8 @@ class CurrentTeamSpaceUiFilterImpl @Inject constructor(
     override fun updateFilter(teamSpace: TeamSpace) {
         session?.let {
             userSecureStorage.storeCurrentSpaceFilter(
-                session = it,
+                it.localKey,
+                it.username,
                 filterId = teamSpace.filterId
             )
             loadFilter()
@@ -72,7 +73,7 @@ class CurrentTeamSpaceUiFilterImpl @Inject constructor(
                 return@launch
             }
 
-            val cachedFilterId: String? = session?.let { userSecureStorage.readCurrentSpaceFilter(it) }
+            val cachedFilterId: String? = session?.let { userSecureStorage.readCurrentSpaceFilter(it.localKey, it.username) }
             val filter = teamSpaceAccessorProvider.get()?.availableSpaces
                 ?.firstOrNull { it.filterId == cachedFilterId && it !is TeamSpace.Business.Past }
                 ?: TeamSpace.Combined

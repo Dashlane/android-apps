@@ -1,22 +1,13 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
 import android.content.Context
-import androidx.appcompat.content.res.AppCompatResources
 import com.dashlane.R
-import com.dashlane.ui.drawable.CircleDrawable
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 
 class SharingCenterUserGroupItem(
     context: Context,
     val userGroup: SharingContact.UserGroup
 ) : SharingContactItem(context, userGroup.name) {
-    init {
-        icon = AppCompatResources.getDrawable(context, R.drawable.ic_sharing_user_group)!!
-            .mutate().let {
-                it.setTint(context.getColor(R.color.text_neutral_standard))
-                CircleDrawable.with(context, R.color.container_agnostic_neutral_standard, it)
-            }
-    }
 
     private val memberCount: Int
         get() = userGroup.memberCount

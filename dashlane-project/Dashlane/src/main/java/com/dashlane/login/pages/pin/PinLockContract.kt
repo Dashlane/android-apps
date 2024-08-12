@@ -40,8 +40,6 @@ interface PinLockContract {
         fun clearInput()
 
         fun animateError()
-
-        fun newPinConfirmed(disableAnimationEffect: Boolean)
     }
 
     interface DataProvider : LoginLockBaseContract.DataProvider {

@@ -6,8 +6,8 @@ import androidx.fragment.app.FragmentActivity
 import com.dashlane.notificator.Notificator
 import com.dashlane.teamspaces.R
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.canUseSecureNotes
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseSecureNotes
 import com.dashlane.util.inject.OptionalProvider
 import javax.inject.Inject
 

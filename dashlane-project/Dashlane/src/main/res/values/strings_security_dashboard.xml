@@ -61,12 +61,6 @@
     <string name="identity_protection_package_learn_more">Learn more</string>
 
     
-    <string name="credit_monitoring_active_title">Credit Monitoring</string>
-    <string name="credit_monitoring_active_description_1">Monitor your credit score and history from your CreditView Dashboard.</string>
-    <string name="credit_monitoring_active_description_2">Receive email alerts when your credit may change.</string>
-    <string name="credit_monitoring_active_description_3">Compare your score to the national average.</string>
-    <string name="credit_monitoring_active_cta">Check my CreditView</string>
-
     <string name="identity_protection_active_title">Identity Theft Insurance</string>
     <string name="identity_protection_active_description_1">If you’ve suffered losses due to identity theft, call %1$s to file a claim.</string>
     <string name="identity_protection_phone_number" translatable="false">1-866-434-3572</string>

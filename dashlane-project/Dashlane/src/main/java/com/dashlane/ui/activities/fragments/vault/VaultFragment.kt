@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.MenuProvider
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.limitations.PasswordLimiter
@@ -40,6 +41,28 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
     @Inject
     lateinit var teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator
 
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.fragment_vault_menu, menu)
+            if (notificationBadgeActor.hasUnread) {
+                val alertMenu = menu.findItem(R.id.menu_alert)
+                alertMenu.icon = ResourcesCompat.getDrawable(
+                    resources,
+                    R.drawable.action_bar_menu_alert_with_dot,
+                    context?.theme
+                )
+            }
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            if (menuItem.itemId == R.id.menu_alert) {
+                presenter.onMenuAlertClicked()
+                return true
+            }
+            return false
+        }
+    }
+
     private var fabPresenter: FabDef.IPresenter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -66,6 +89,7 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
                 }
             }
         }
+        requireActivity().addMenuProvider(menuProvider)
 
         notificationBadgeActor.subscribe(lifecycleScope, this)
         return layout
@@ -78,6 +102,7 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        requireActivity().removeMenuProvider(menuProvider)
         fabPresenter?.onDestroyView()
     }
 
@@ -104,27 +129,6 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         presenter.onSaveInstanceState(outState)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.fragment_vault_menu, menu)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        if (notificationBadgeActor.hasUnread) {
-            val alertMenu = menu.findItem(R.id.menu_alert)
-            alertMenu.icon = ResourcesCompat.getDrawable(resources, R.drawable.action_bar_menu_alert_with_dot, context?.theme)
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_alert) {
-            presenter.onMenuAlertClicked()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     override fun onNotificationBadgeUpdated() {

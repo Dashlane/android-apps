@@ -1,9 +1,7 @@
 package com.dashlane.vault.model
 
-import com.dashlane.url.root
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
 fun createPasskey(
@@ -36,29 +34,25 @@ fun createPasskey(
 }
 
 val SyncObject.Passkey.urlForGoToWebsite: String?
-    get() = toSummary<SummaryObject.Passkey>().urlForGoToWebsite
+    get() = urlForGoToWebsite(rpId)
 
 val SummaryObject.Passkey.urlForGoToWebsite: String?
-    get() {
-        return rpId?.toUrlOrNull(defaultSchemeHttp = true)?.toString()
-    }
+    get() = urlForGoToWebsite(rpId)
 
-val SyncObject.Passkey.urlForUsageLog: String
-    get() = toSummary<SummaryObject.Passkey>().urlForUsageLog
-
-val SummaryObject.Passkey.urlForUsageLog: String
-    get() {
-        return rpId?.toUrlOrNull()?.root ?: "client__not_valid_url"
-    }
+private fun urlForGoToWebsite(rpId: String?): String? =
+    rpId?.toUrlOrNull(defaultSchemeHttp = true)?.toString()
 
 val SyncObject.Passkey.title: String?
-    get() = toSummary<SummaryObject.Passkey>().title
+    get() = getTitle(itemName = itemName, rpId = rpId)
 
 val SummaryObject.Passkey.title: String?
-    get() = itemName?.removeSurrounding("\"")?.takeIf { it.isNotSemanticallyNull() }
+    get() = getTitle(itemName = itemName, rpId = rpId)
+
+private fun getTitle(itemName: String?, rpId: String?): String? =
+    itemName?.removeSurrounding("\"")?.takeIf { it.isNotSemanticallyNull() }
         ?: rpId?.toUrlOrNull()?.host?.takeIf { it.isNotSemanticallyNull() }
 
 fun VaultItem<SyncObject.Passkey>.copySyncObject(builder: SyncObject.Passkey.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.Passkey> {
+    VaultItem<SyncObject.Passkey> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

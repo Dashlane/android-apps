@@ -1,15 +1,21 @@
 package com.dashlane.ui.activities.fragments.vault
 
+import android.content.Context
 import android.os.Bundle
-import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.AnnouncementTags
+import com.dashlane.authenticator.AuthenticatorSunsetChecker
+import com.dashlane.authenticator.PasswordManagerServiceStubImpl
 import com.dashlane.core.sync.getAgnosticMessageFeedback
+import com.dashlane.design.iconography.IconTokens
+import com.dashlane.design.theme.color.Mood
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierDeletedEvent
 import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.frozenaccount.FrozenStateManager
+import com.dashlane.frozenaccount.tracking.FrozenStateLogger
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.limitations.PasswordLimitationLogger
@@ -18,12 +24,15 @@ import com.dashlane.limitations.PasswordLimiter.Companion.PASSWORD_LIMIT_LOOMING
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.session.SessionManager
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.setCurrentPageView
+import com.dashlane.home.vaultlist.Filter
+import com.dashlane.util.toIdentityFormat
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -45,12 +54,18 @@ class VaultPresenter @Inject constructor(
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
     private val passwordLimiter: PasswordLimiter,
     private val passwordLimitationLogger: PasswordLimitationLogger,
+    private val frozenStateLogger: FrozenStateLogger,
     private val sessionManager: SessionManager,
-    private val accountStatusRepository: AccountStatusRepository
+    private val accountStatusRepository: AccountStatusRepository,
+    private val frozenStateManager: FrozenStateManager,
+    private val authenticatorSunsetChecker: AuthenticatorSunsetChecker
 ) : BasePresenter<Vault.DataProvider, Vault.View>(),
     Vault.Presenter {
 
     override val filter = MutableStateFlow(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
+
+    private val requireContext: Context
+        get() = context!!
 
     init {
         
@@ -88,6 +103,8 @@ class VaultPresenter @Inject constructor(
 
     override fun onStartFragment() {
         appEvents.register(this, SyncFinishedEvent::class.java, false) {
+            
+            mayShowAnnouncement()
             onSyncFinished(it)
         }
         appEvents.register(this, DataIdentifierDeletedEvent::class.java, false) {
@@ -162,6 +179,16 @@ class VaultPresenter @Inject constructor(
         navigator.goToOffers()
     }
 
+    private fun onAccountFrozenAnnouncementClicked() {
+        frozenStateLogger.logVaultBannerClicked()
+        navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+    }
+
+    private fun onAuthenticatorSunsetAnnouncementClicked() {
+        authenticatorSunsetChecker.markDisplayed()
+        navigator.goToAuthenticatorSunset()
+    }
+
     private fun onSyncFinished(syncFinishedEvent: SyncFinishedEvent) {
         if (activity == null) {
             return
@@ -183,31 +210,59 @@ class VaultPresenter @Inject constructor(
 
     private fun mayShowAnnouncement() {
         when {
+            frozenStateManager.isAccountFrozen -> {
+                view.showAnnouncement(
+                    iconToken = IconTokens.feedbackFailOutlined,
+                    title = requireContext.getString(R.string.vault_announcement_frozen_account_title),
+                    description = requireContext.getString(
+                        R.string.vault_announcement_frozen_account_description,
+                        passwordLimiter.passwordLimitCount.toString()
+                    ),
+                    mood = Mood.Danger,
+                    onClick = this::onAccountFrozenAnnouncementClicked
+                )
+            }
+            authenticatorSunsetChecker.shouldDisplaySunsetBanner -> {
+                view.showAnnouncement(
+                    iconToken = IconTokens.feedbackInfoOutlined,
+                    title = requireContext.getString(
+                        R.string.sunset_announcement_title,
+                        PasswordManagerServiceStubImpl.discontinuationDate.toIdentityFormat(requireContext.resources)
+                    ),
+                    description = requireContext.getString(R.string.sunset_announcement_description),
+                    mood = Mood.Brand,
+                    onClick = this::onAuthenticatorSunsetAnnouncementClicked
+                )
+            }
             passwordLimiter.isPasswordLimitReached() -> {
                 view.showAnnouncement(
-                    R.layout.include_vault_password_limit_announcement,
+                    iconToken = IconTokens.premiumOutlined,
+                    description = requireContext.getString(R.string.vault_announcement_password_limit_title),
+                    mood = Mood.Warning,
                     onClick = this::onPasswordLimitAnnouncementClicked
                 )
             }
             passwordLimiter.passwordRemainingBeforeLimit() in 0..PASSWORD_LIMIT_LOOMING -> {
-                val viewCreated = view.showAnnouncement(
-                    R.layout.include_vault_password_limit_remaining_announcement,
-                    onClick = this::onPasswordLimitAnnouncementClicked
-                )
-                viewCreated?.findViewById<TextView>(R.id.vault_announcement_text)?.text =
-                    viewCreated?.context?.getString(
+                view.showAnnouncement(
+                    iconToken = IconTokens.premiumOutlined,
+                    description = requireContext.getString(
                         R.string.vault_announcement_password_limit_remaining_title,
                         passwordLimiter.passwordRemainingBeforeLimit()
-                    )
+                    ),
+                    mood = Mood.Brand,
+                    onClick = this::onPasswordLimitAnnouncementClicked
+                )
             }
             inAppLoginManager.isDisabledForApp() -> {
                 view.showAnnouncement(
-                    R.layout.include_vault_autofill_announcement,
+                    iconToken = IconTokens.featureAutofillOutlined,
+                    description = requireContext.getString(R.string.vault_announcement_autofill_title),
+                    mood = Mood.Neutral,
                     onClick = this::onAutofillAnnouncementClicked
                 )
             }
             else -> {
-                view.showAnnouncement(null)
+                view.clearAnnouncements()
             }
         }
     }

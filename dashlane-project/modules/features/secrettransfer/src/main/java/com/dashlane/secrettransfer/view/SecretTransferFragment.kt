@@ -19,7 +19,7 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.navigation.Navigator
 import com.dashlane.secrettransfer.view.intro.SecretTransferIntroScreen
 import com.dashlane.secrettransfer.view.universal.pending.SecretTransferPendingScreen
-import com.dashlane.ui.widgets.compose.LoadingScreen
+import com.dashlane.ui.common.compose.components.LoadingScreen
 import com.dashlane.util.compose.BackPressedDispatcherBridge
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

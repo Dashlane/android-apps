@@ -12,14 +12,17 @@ import com.dashlane.R
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.screens.settings.item.SettingChange
 import com.dashlane.ui.screens.settings.item.SettingHeader
+import com.dashlane.ui.screens.settings.item.SettingSocialMediaLinks
 import com.dashlane.util.SnackbarUtils
 import kotlinx.coroutines.launch
+import java.net.URL
 
 class SettingsViewProxy(
     private val recyclerView: RecyclerView,
     private val toolbarProvider: () -> Toolbar,
     private val viewModel: SettingsViewModelContract,
-    private val lifecycle: Lifecycle
+    private val lifecycle: Lifecycle,
+    private val onOpenSocialMediaLink: (URL) -> Unit,
 ) {
     private val settingChangeListener = object : SettingChange.Listener {
         override fun onSettingsInvalidate() {
@@ -46,6 +49,20 @@ class SettingsViewProxy(
             var wasVisible = false
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.use2faSettingStateChanges.collect { visible ->
+                    if (wasVisible != visible) {
+                        wasVisible = visible
+                        refreshUi()
+                    } else {
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        }
+
+        lifecycle.coroutineScope.launch {
+            var wasVisible = false
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.accountRecoveryKeyStateChanges.collect { visible ->
                     if (wasVisible != visible) {
                         wasVisible = visible
                         refreshUi()
@@ -88,11 +105,20 @@ class SettingsViewProxy(
                     latestHeader = newHeader
                 }
                 (it as? SettingChange.Listenable)?.listener = settingChangeListener
-                items.add(
-                    SettingInRecyclerView(it).apply {
-                        onSettingInteraction = { viewModel.onSettingInteraction() }
-                    }
-                )
+                when (it) {
+                    is SettingSocialMediaLinks ->
+                        items.add(
+                            SettingSocialMediaLinkInRecyclerView(
+                                settingItem = it,
+                                onSocialMediaClicked = onOpenSocialMediaLink
+                            )
+                        )
+                    else -> items.add(
+                        SettingInRecyclerView(it).apply {
+                            onSettingInteraction = { viewModel.onSettingInteraction() }
+                        }
+                    )
+                }
             }
 
         if (viewModel.shouldHighlightSetting) {

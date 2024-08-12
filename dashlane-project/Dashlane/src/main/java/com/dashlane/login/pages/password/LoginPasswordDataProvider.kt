@@ -1,7 +1,7 @@
 package com.dashlane.login.pages.password
 
 import android.content.Intent
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryState
 import com.dashlane.authentication.AuthenticationDeviceCredentialsInvalidException
 import com.dashlane.authentication.AuthenticationEmptyPasswordException
@@ -32,11 +32,11 @@ import com.dashlane.login.pages.password.LoginPasswordContract.InvalidPasswordEx
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.util.installlogs.DataLossTrackingLogger
 import javax.inject.Inject
@@ -45,7 +45,6 @@ import kotlinx.coroutines.runBlocking
 class LoginPasswordDataProvider @Inject constructor(
     private val successIntentFactory: LoginSuccessIntentFactory,
     private val dataReset: LoginDataReset,
-    private val loggerFactory: LoginPasswordLogger.Factory,
     private val userPreferencesManager: UserPreferencesManager,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val loginStrategy: LoginStrategy,
@@ -65,14 +64,8 @@ class LoginPasswordDataProvider @Inject constructor(
     LoginPasswordContract.DataProvider {
 
     var registeredUserDevice: RegisteredUserDevice? = null
-        set(value) {
-            field = value
-            registeredUserDevice?.let { logger = loggerFactory.create(it, it.toVerification()) }
-        }
 
     var authTicket: String? = null
-
-    private lateinit var logger: LoginPasswordLogger
 
     override val username: String
         get() = registeredUserDevice!!.login
@@ -265,16 +258,10 @@ class LoginPasswordDataProvider @Inject constructor(
     }
 
     private fun handleEmptyPassword(cause: AuthenticationEmptyPasswordException? = null): Nothing {
-        logger.logEmptyPassword()
         throw InvalidPasswordException(InvalidReason.EMPTY, cause)
     }
 
     private fun handleInvalidPasswordError(cause: AuthenticationInvalidPasswordException): Nothing {
-        if (canMakeBiometricRecovery) {
-            logger.logPasswordInvalidWithRecovery()
-        } else {
-            logger.logPasswordInvalid()
-        }
         throw InvalidPasswordException(cause = cause)
     }
 
@@ -293,7 +280,6 @@ class LoginPasswordDataProvider @Inject constructor(
     }
 
     private fun handleNetworkError(e: AuthenticationException): Nothing {
-        logger.logNetworkError(LoginPasswordLogger.NW_ERR_OFFLINE)
         throw LoginBaseContract.OfflineException(e)
     }
 

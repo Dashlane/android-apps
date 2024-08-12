@@ -41,7 +41,6 @@ class UserBenefitStatusProviderImpl @Inject constructor() : UserBenefitStatusPro
             isFamilyUser && isPremiumPlus -> Type.FamilyPlus(isFamilyAdmin)
             isPremiumPlus -> Type.PremiumPlusIndividual
             isAdvanced -> Type.AdvancedIndividual
-
             isFamilyUser && isPremium -> Type.Family(isFamilyAdmin)
             isPremium -> Type.PremiumIndividual
             premiumStatus.isPremium -> Type.Unknown

@@ -1,14 +1,17 @@
 package com.dashlane.dagger.singleton
 
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateRefresher
 import com.dashlane.activatetotp.ActivateTotpAuthenticatorConnection
 import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
 import com.dashlane.authentication.AuthenticationLocalKeyRepositoryImpl
 import com.dashlane.authentication.UserStorage
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.authenticator.AuthenticatorAppConnection
+import com.dashlane.authenticator.AuthenticatorSunsetChecker
+import com.dashlane.authenticator.AuthenticatorSunsetCheckerImpl
 import com.dashlane.authenticator.PasswordManagerServiceStubImpl
 import com.dashlane.authenticator.ipc.PasswordManagerService
-import com.dashlane.sync.DataSync
 import com.dashlane.core.DataSyncImpl
 import com.dashlane.core.sharing.SharingDaoMemoryDataAccessProvider
 import com.dashlane.core.sharing.SharingDaoMemoryDataAccessProviderImpl
@@ -42,6 +45,7 @@ import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.session.repository.UserCryptographyRepositoryImpl
 import com.dashlane.sharing.SharingKeysHelper
 import com.dashlane.sharing.SharingKeysHelperImpl
+import com.dashlane.sync.DataSync
 import com.dashlane.sync.sharing.SharingSync
 import com.dashlane.ui.premium.inappbilling.InAppBillingDebugPreferenceImpl
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
@@ -131,8 +135,14 @@ interface BinderModule {
     fun bindUse2faSettingStateRefresher(impl: Use2faSettingStateHolder): Use2faSettingStateRefresher
 
     @Binds
+    fun bindAccountRecoveryKeyStateRefresher(impl: AccountRecoveryKeySettingStateHolder): AccountRecoveryKeySettingStateRefresher
+
+    @Binds
     fun bindActivateTotpServerKeyChanger(impl: MasterPasswordChangerImpl): ActivateTotpServerKeyChanger
 
     @Binds
     fun bindActivateTotpAuthenticatorConnection(impl: AuthenticatorAppConnection): ActivateTotpAuthenticatorConnection
+
+    @Binds
+    fun bindAuthenticatorSunsetChecker(impl: AuthenticatorSunsetCheckerImpl): AuthenticatorSunsetChecker
 }

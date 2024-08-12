@@ -1,8 +1,6 @@
 package com.dashlane.login.pages.enforce2fa
 
-import android.content.Intent
 import com.dashlane.R
-import com.dashlane.activatetotp.DownloadAuthenticatorAppIntroActivity
 import com.dashlane.events.AppEvents
 import com.dashlane.events.clearLastEvent
 import com.dashlane.limitations.Enforce2faLimiter
@@ -12,8 +10,8 @@ import com.dashlane.login.LoginIntents
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.intro.IntroScreenContract
-import com.dashlane.util.inject.qualifiers.ActivityLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ActivityLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.skocken.presentation.presenter.BasePresenter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -61,18 +59,14 @@ class Enforce2faLimitPresenter @Inject constructor(
         view.apply {
             setImageResource(imageResId = R.drawable.picto_authenticator)
             setTitle(R.string.login_dialog_enforce_twofa_limit_title)
-            setDescription(R.string.login_dialog_enforce_twofa_limit_description)
-            setPositiveButton(R.string.login_dialog_enforce_twofa_positive_button)
-            setNegativeButton(R.string.login_dialog_enforce_twofa_negative_button)
+            setDescription(R.string.login_dialog_enforce_twofa_limit_description_new)
+            setPositiveButton(R.string.login_dialog_enforce_twofa_negative_button)
         }
     }
 
-    override fun onClickPositiveButton() {
-        redirectionDone = true
-        context?.startActivity(Intent(context, DownloadAuthenticatorAppIntroActivity::class.java))
-    }
+    override fun onClickNegativeButton() = Unit
 
-    override fun onClickNegativeButton() {
+    override fun onClickPositiveButton() {
         activityLifecycleCoroutineScope.launch(mainCoroutineDispatcher) {
             sessionManager.session?.let {
                 appEvents.clearLastEvent<UnlockEvent>()

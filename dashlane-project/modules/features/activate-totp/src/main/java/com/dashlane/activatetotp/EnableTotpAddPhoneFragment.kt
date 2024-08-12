@@ -146,7 +146,7 @@ internal class EnableTotpAddPhoneFragment : Fragment() {
     }
 
     private fun getPrefilledPhone(): Pair<Country, String>? = vaultDataQuery
-        .queryAll(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.PHONE)))
+        .queryAllLegacy(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.PHONE)))
         .map { it.syncObject as SyncObject.Phone }
         .takeIf { it.size == 1 }
         ?.first()

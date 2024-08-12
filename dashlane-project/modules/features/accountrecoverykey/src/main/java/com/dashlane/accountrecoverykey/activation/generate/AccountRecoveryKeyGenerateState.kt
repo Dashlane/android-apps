@@ -1,6 +1,6 @@
 package com.dashlane.accountrecoverykey.activation.generate
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 
 sealed class AccountRecoveryKeyGenerateState {
     abstract val data: AccountRecoveryKeyGenerateData

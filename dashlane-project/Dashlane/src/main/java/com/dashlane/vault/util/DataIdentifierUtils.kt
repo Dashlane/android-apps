@@ -79,7 +79,7 @@ fun VaultItem<*>.copyWithDefaultValue(context: Context, session: Session?): Vaul
             context
         )
         else -> this
-    } as VaultItem<*>
+    }
 }
 
 @CheckResult
@@ -147,16 +147,17 @@ private fun VaultItem<SyncObject.Authentifiant>.copyWithUpdatedAuthentifiantTitl
     }
 }
 
-private fun copyAddressWithDefaultValue(vaultItem: VaultItem<SyncObject.Address>, context: Context):
-        VaultItem<SyncObject.Address> =
+private fun copyAddressWithDefaultValue(
+    vaultItem: VaultItem<SyncObject.Address>,
+    context: Context
+): VaultItem<SyncObject.Address> =
     vaultItem.takeUnless { it.syncObject.addressName.isSemanticallyNull() }
         ?: vaultItem.copySyncObject { addressName = context.getString(R.string.address) }
 
 private fun copyAuthCategoryWithDefaultValue(
     vaultItem: VaultItem<SyncObject.AuthCategory>,
     context: Context
-):
-        VaultItem<SyncObject.AuthCategory> {
+): VaultItem<SyncObject.AuthCategory> {
     return if (vaultItem.syncObject.categoryName.isSemanticallyNull()) {
         vaultItem.copySyncObject {
             categoryName = context.getString(R.string.unspecified_category)
@@ -169,8 +170,7 @@ private fun copyAuthCategoryWithDefaultValue(
 private fun copyBankStatementWithDefaultValue(
     bankStatement: VaultItem<SyncObject.BankStatement>,
     context: Context
-):
-        VaultItem<SyncObject.BankStatement> {
+): VaultItem<SyncObject.BankStatement> {
     if (!requireBankStatementCopy(bankStatement)) return bankStatement
 
     val name = if (bankStatement.syncObject.bankAccountName.isNullOrBlank() ||
@@ -194,12 +194,14 @@ private fun copyBankStatementWithDefaultValue(
 
 private fun requireBankStatementCopy(vaultItem: VaultItem<SyncObject.BankStatement>) =
     vaultItem.syncObject.bankAccountName.isNullOrBlank() ||
-            vaultItem.syncObject.bankAccountName.isSemanticallyNull() ||
-            vaultItem.syncObject.bankAccountBank == null ||
-            vaultItem.syncObject.localeFormat == null
+        vaultItem.syncObject.bankAccountName.isSemanticallyNull() ||
+        vaultItem.syncObject.bankAccountBank == null ||
+        vaultItem.syncObject.localeFormat == null
 
-private fun copyCompanyWithDefaultValue(vaultItem: VaultItem<SyncObject.Company>, context: Context):
-        VaultItem<SyncObject.Company> {
+private fun copyCompanyWithDefaultValue(
+    vaultItem: VaultItem<SyncObject.Company>,
+    context: Context
+): VaultItem<SyncObject.Company> {
     return if (vaultItem.syncObject.name.isSemanticallyNull()) {
         vaultItem.copySyncObject { name = context.getString(R.string.company) }
     } else {
@@ -218,8 +220,7 @@ private fun copyEmailWithDefaultValue(
     }
 }
 
-private fun copyPaymentCreditCardWithDefaultValue(creditCard: VaultItem<SyncObject.PaymentCreditCard>):
-        VaultItem<SyncObject.PaymentCreditCard> {
+private fun copyPaymentCreditCardWithDefaultValue(creditCard: VaultItem<SyncObject.PaymentCreditCard>): VaultItem<SyncObject.PaymentCreditCard> {
     if (creditCard.syncObject.bank != null && creditCard.syncObject.localeFormat != null
     ) {
         return creditCard
@@ -240,8 +241,7 @@ private fun copyPaymentCreditCardWithDefaultValue(creditCard: VaultItem<SyncObje
         }
 }
 
-private fun copyPaymentPaypalWithDefaultValue(vaultItem: VaultItem<SyncObject.PaymentPaypal>):
-        VaultItem<SyncObject.PaymentPaypal> {
+private fun copyPaymentPaypalWithDefaultValue(vaultItem: VaultItem<SyncObject.PaymentPaypal>): VaultItem<SyncObject.PaymentPaypal> {
     return if (vaultItem.syncObject.name.isSemanticallyNull()) {
         vaultItem.copySyncObject { name = SyncObject.PaymentPaypal.PAYPAL }
     } else {
@@ -252,8 +252,7 @@ private fun copyPaymentPaypalWithDefaultValue(vaultItem: VaultItem<SyncObject.Pa
 private fun copyPersonalWebsiteWithDefaultValue(
     vaultItem: VaultItem<SyncObject.PersonalWebsite>,
     context: Context
-):
-        VaultItem<SyncObject.PersonalWebsite> {
+): VaultItem<SyncObject.PersonalWebsite> {
     if (vaultItem.syncObject.name.isNotSemanticallyNull()) {
         return vaultItem
     }
@@ -280,8 +279,7 @@ private fun copyPhoneWithDefaultValue(
 private fun copySecureNoteWithDefaultValue(
     vaultItem: VaultItem<SyncObject.SecureNote>,
     context: Context
-):
-        VaultItem<SyncObject.SecureNote> {
+): VaultItem<SyncObject.SecureNote> {
     
     if (!vaultItem.syncObject.title.isSemanticallyNull() && !vaultItem.syncObject.content.isSemanticallyNull()) {
         return vaultItem

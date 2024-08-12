@@ -2,7 +2,9 @@
 <resources>
     <string name="setting_backup_category">Backup</string>
     <string name="setting_backup_export">Export your Vault</string>
+    <string name="setting_backup_export_csv">Export data to .CSV</string>
     <string name="setting_backup_export_description">Back up your Dashlane data to an encrypted file</string>
+    <string name="setting_backup_export_csv_description">Backup your Dashlane data to a readable format</string>
     <string name="setting_backup_import">Restore your Vault</string>
     <string name="setting_backup_import_description">Restore your data from an encrypted backup</string>
 

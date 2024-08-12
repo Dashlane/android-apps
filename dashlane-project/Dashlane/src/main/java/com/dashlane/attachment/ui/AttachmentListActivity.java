@@ -29,7 +29,7 @@ import com.dashlane.storage.userdata.accessor.VaultDataQuery;
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter;
 import com.dashlane.sync.DataSync;
 import com.dashlane.ui.activities.DashlaneActivity;
-import com.dashlane.userfeatures.UserFeaturesChecker;
+import com.dashlane.featureflipping.UserFeaturesChecker;
 import com.dashlane.vault.VaultItemLogger;
 import com.dashlane.vault.model.VaultItem;
 import com.dashlane.xml.domain.SyncObjectType;
@@ -135,7 +135,7 @@ public class AttachmentListActivity extends DashlaneActivity {
         String itemId = extras.getString(ITEM_ID);
         VaultItem vaultItem = null;
         if (itemType != null && itemId != null) {
-            vaultItem = vaultDataQuery.query(new VaultFilter(itemId, itemType));
+            vaultItem = vaultDataQuery.queryLegacy(new VaultFilter(itemId, itemType));
         }
         if (vaultItem == null) {
             finish();

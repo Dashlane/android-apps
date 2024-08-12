@@ -9,6 +9,7 @@ import android.content.IntentSender
 import android.os.Bundle
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.frozenautofill.FrozenAutofillActivity
 import com.dashlane.util.registerExportedReceiverCompat
 import com.google.android.gms.auth.api.phone.SmsCodeAutofillClient
 import com.google.android.gms.auth.api.phone.SmsCodeRetriever
@@ -97,8 +98,12 @@ class SmsOtpAutofillActivity : AutoFillResponseActivity() {
         internal fun getIntentSenderForDataset(
             context: Context,
             summary: AutoFillHintSummary,
-            forKeyboard: Boolean
+            forKeyboard: Boolean,
+            isAccountFrozen: Boolean
         ): IntentSender {
+            if (isAccountFrozen) {
+                return FrozenAutofillActivity.getPendingIntent(context, summary)
+            }
             val intent = createIntent(context, summary, SmsOtpAutofillActivity::class)
             intent.putExtra(EXTRA_FOR_KEYBOARD_AUTOFILL, forKeyboard)
             return createIntentSender(context, intent)

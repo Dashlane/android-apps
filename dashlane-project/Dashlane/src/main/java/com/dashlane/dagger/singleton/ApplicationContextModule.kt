@@ -6,6 +6,7 @@ import android.app.AlarmManager
 import android.app.DownloadManager
 import android.app.KeyguardManager
 import android.app.NotificationManager
+import android.app.backup.BackupManager
 import android.content.ClipboardManager
 import android.content.ContentResolver
 import android.content.Context
@@ -113,4 +114,7 @@ object ApplicationContextModule {
     @Provides
     fun provideUsbManager(@ApplicationContext context: Context): UsbManager? =
         context.getSystemService(Context.USB_SERVICE) as UsbManager?
+
+    @Provides
+    fun provideBackupManager(@ApplicationContext context: Context): BackupManager = BackupManager(context)
 }

@@ -1,5 +1,6 @@
 package com.dashlane.util.clipboard.vault
 
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.generated.definitions.Highlight
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.FrequentSearch
@@ -10,23 +11,25 @@ import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.util.toHighlight
 import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.model.UserPermission
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import javax.inject.Inject
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class VaultItemCopyServiceImpl @Inject constructor(
+    @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
     private val vaultDataQuery: VaultDataQuery,
     private val frequentSearch: FrequentSearch,
     private val dataSaver: DataSaver,
     private val clipboardCopy: ClipboardCopy,
     private val vaultItemCopyListenerHolder: VaultItemCopyListenerHolder,
-    private val vaultItemFieldContentService: VaultItemFieldContentService
+    private val vaultItemFieldContentService: VaultItemFieldContentService,
+    private val frozenStateManager: FrozenStateManager
 ) : VaultItemCopyService {
     override fun handleCopy(
         notificationId: String,
@@ -127,9 +130,8 @@ class VaultItemCopyServiceImpl @Inject constructor(
         return true
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun markAsViewed(item: SummaryObject) {
-        GlobalScope.launch {
+        applicationCoroutineScope.launch {
             val vaultItem = vaultDataQuery.query(
                 vaultFilter {
                     specificUid(item.id)
@@ -145,16 +147,16 @@ class VaultItemCopyServiceImpl @Inject constructor(
     }
 
     private fun getSyncObjectFromVault(itemId: String, syncObjectType: SyncObjectType) =
-        vaultDataQuery.query(
+        vaultDataQuery.queryLegacy(
             vaultFilter {
                 specificUid(itemId)
                 specificDataType(syncObjectType)
             }
         )
 
-    override fun hasContent(item: SummaryObject, copyField: CopyField): Boolean {
-        if (UserPermission.LIMITED == item.sharingPermission) return false
-
-        return vaultItemFieldContentService.hasContent(item, copyField)
+    override fun hasContent(item: SummaryObject, copyField: CopyField): Boolean = when {
+        item.sharingPermission == UserPermission.LIMITED ||
+            frozenStateManager.isAccountFrozen -> false
+        else -> vaultItemFieldContentService.hasContent(item, copyField)
     }
 }

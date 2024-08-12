@@ -15,7 +15,8 @@ sealed class AuthenticatorDashboardUiState {
 
     data class HasLogins(
         val logins: List<CredentialItem>,
-        val nbItemsShown: Int = DEFAULT_ITEMS_SHOWN
+        val nbItemsShown: Int = DEFAULT_ITEMS_SHOWN,
+        val isAccountFrozen: Boolean
     ) : AuthenticatorDashboardUiState() {
         @Parcelize
         data class CredentialItem(

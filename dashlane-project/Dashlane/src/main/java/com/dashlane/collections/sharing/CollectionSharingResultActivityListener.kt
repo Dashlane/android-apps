@@ -61,7 +61,6 @@ class CollectionSharingResultActivityListener @Inject constructor(
                 collectionId = collectionId,
                 businessSpace = isBusiness,
                 sharedCollection = true,
-                shareEnabled = true,
                 shareAllowed = true
             )
         }

@@ -5,7 +5,7 @@ import com.dashlane.accountstatus.premiumstatus.isPremium
 import com.dashlane.breach.BreachManager
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

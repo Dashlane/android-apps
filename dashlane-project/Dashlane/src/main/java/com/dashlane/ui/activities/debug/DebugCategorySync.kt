@@ -46,7 +46,7 @@ internal class DebugCategorySync @Inject constructor(
         }
 
         val list = vaultDataQuery
-            .queryAll(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.DATA_CHANGE_HISTORY)))
+            .queryAllLegacy(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.DATA_CHANGE_HISTORY)))
             .mapNotNull { it.syncObject as? SyncObject.DataChangeHistory }
         val html = list.joinToString("\n") { changeHistory -> changeHistory.html() }
 

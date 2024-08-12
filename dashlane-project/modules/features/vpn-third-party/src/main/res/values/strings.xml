@@ -52,14 +52,14 @@
     <string name="vpn_third_party_account_activating">Finalizing your account…</string>
     <string name="vpn_third_party_account_activated">Account created</string>
     <string name="vpn_third_party_account_activation_error_title">Something went wrong</string>
-    <string name="vpn_third_party_account_activation_error_body">We’re having trouble activating your account right now. Please try again, and contact Customer Support if it doesn’t work.</string>
+    <string name="vpn_third_party_account_activation_error_body">We’re having trouble activating your account right now. Please try again. If you still have an issue, visit our help center.</string>
     <string name="vpn_third_party_account_activation_error_positive_button">Try again</string>
-    <string name="vpn_third_party_account_activation_error_negative_button">Contact support</string>
+    <string name="vpn_third_party_account_activation_error_negative_button">Learn more about Hotspot Shield errors in our Help Center.</string>
 
     <string name="vpn_third_party_account_activation_error_email_title">This email is already in use</string>
     <string name="vpn_third_party_account_activation_error_email_body">Try another email or contact Hotspot Shield support for help.</string>
     <string name="vpn_third_party_account_activation_error_email_positive_button">Try again</string>
-    <string name="vpn_third_party_account_activation_error_email_negative_button">Contact support</string>
+    <string name="vpn_third_party_account_activation_error_email_negative_button">Learn more about Hotspot Shield errors in our Help Center.</string>
 
     <string name="menu_third_party_vpn_new">NEW</string>
     <string name="vpn_third_party_notification_center_title">Try our improved VPN experience</string>

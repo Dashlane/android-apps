@@ -29,7 +29,7 @@ import com.dashlane.server.api.endpoints.secrettransfer.exceptions.TransferExpir
 import com.dashlane.server.api.exceptions.DashlaneApiHttp504Exception
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.widgets.compose.Passphrase
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher

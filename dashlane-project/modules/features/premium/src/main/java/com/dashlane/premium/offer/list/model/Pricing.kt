@@ -1,6 +1,6 @@
 package com.dashlane.premium.offer.list.model
 
-import android.content.Context
+import android.content.res.Resources
 import com.dashlane.premium.R
 import com.dashlane.premium.offer.common.model.ProductPeriodicity
 import com.dashlane.premium.utils.PriceUtils.MICRO
@@ -10,44 +10,44 @@ import java.util.Locale
 
 sealed class Pricing {
     abstract val basePlanData: Data
-    abstract fun getBarredText(context: Context): String?
-    abstract fun getPriceText(context: Context): String
-    abstract fun getAdditionalInfoText(context: Context): String?
+    abstract fun getBarredText(resources: Resources): String?
+    abstract fun getPriceText(resources: Resources): String
+    abstract fun getAdditionalInfoText(resources: Resources): String?
 
-    internal fun getLocale(context: Context) = Locale(context.getString(R.string.language_iso_639_1))
-    internal fun basePlanFormattedPrice(context: Context): String =
+    internal fun getLocale(resources: Resources) = Locale(resources.getString(R.string.language_iso_639_1))
+    internal fun basePlanFormattedPrice(resources: Resources): String =
         (basePlanData.priceValueMicro / MICRO.toDouble()).toFormattedPrice(
             basePlanData.currencyCode,
-            getLocale(context)
+            getLocale(resources)
         )
 
     data class Base(
         override val basePlanData: Data
     ) : Pricing() {
-        override fun getBarredText(context: Context): String? = null
+        override fun getBarredText(resources: Resources): String? = null
 
-        override fun getPriceText(context: Context): String {
-            val periodicitySuffixString = context.getString(basePlanData.periodicity.suffixRes)
-            return basePlanFormattedPrice(context) + periodicitySuffixString
+        override fun getPriceText(resources: Resources): String {
+            val periodicitySuffixString = resources.getString(basePlanData.periodicity.suffixRes)
+            return basePlanFormattedPrice(resources) + periodicitySuffixString
         }
 
-        override fun getAdditionalInfoText(context: Context): String? = null
+        override fun getAdditionalInfoText(resources: Resources): String? = null
     }
 
     sealed class Discount : Pricing() {
         abstract val introData: Data
 
-        internal fun introOfferUnitFormattedPrice(context: Context): String {
+        internal fun introOfferUnitFormattedPrice(resources: Resources): String {
             return (introData.priceValueMicro.toDouble() / introData.cycleLength / MICRO).toFormattedPrice(
                 introData.currencyCode,
-                getLocale(context)
+                getLocale(resources)
             )
         }
 
-        internal fun introOfferFormattedPrice(context: Context): String {
+        internal fun introOfferFormattedPrice(resources: Resources): String {
             return (introData.priceValueMicro / MICRO.toDouble()).toFormattedPrice(
                 introData.currencyCode,
-                getLocale(context)
+                getLocale(resources)
             )
         }
 
@@ -55,27 +55,27 @@ sealed class Pricing {
             override val basePlanData: Data,
             override val introData: Data
         ) : Discount() {
-            override fun getBarredText(context: Context): String = basePlanFormattedPrice(context)
+            override fun getBarredText(resources: Resources): String = basePlanFormattedPrice(resources)
 
-            override fun getPriceText(context: Context): String {
-                val periodicitySuffixString = context.getString(introData.periodicity.suffixRes)
-                return introOfferUnitFormattedPrice(context) + periodicitySuffixString
+            override fun getPriceText(resources: Resources): String {
+                val periodicitySuffixString = resources.getString(introData.periodicity.suffixRes)
+                return introOfferUnitFormattedPrice(resources) + periodicitySuffixString
             }
 
-            override fun getAdditionalInfoText(context: Context): String? = null
+            override fun getAdditionalInfoText(resources: Resources): String? = null
         }
 
         data class MismatchPricingCycle(
             override val basePlanData: Data,
             override val introData: Data
         ) : Discount() {
-            override fun getBarredText(context: Context): String? = null
+            override fun getBarredText(resources: Resources): String? = null
 
-            override fun getPriceText(context: Context): String {
+            override fun getPriceText(resources: Resources): String {
                 val offerTotalLength = introData.cycleCount * introData.cycleLength
-                val formattedPrice = introOfferUnitFormattedPrice(context)
+                val formattedPrice = introOfferUnitFormattedPrice(resources)
                 val isRecurringPayment = introData.cycleCount > 1
-                val introPeriodicitySuffixString = context.getString(introData.periodicity.suffixRes)
+                val introPeriodicitySuffixString = resources.getString(introData.periodicity.suffixRes)
                 return if (offerTotalLength == 1 || isRecurringPayment) {
                     val textResource = when (introData.periodicity) {
                         ProductPeriodicity.MONTHLY -> R.plurals.plans_offers_mismatch_cycles_recurring_payment_price_monthly
@@ -89,7 +89,7 @@ sealed class Pricing {
                             TextResource.Arg.StringArg(introPeriodicitySuffixString),
                             TextResource.Arg.IntArg(offerTotalLength)
                         )
-                    ).format(context.resources)
+                    ).format(resources)
                 } else {
                     val textResource = when (introData.periodicity) {
                         ProductPeriodicity.MONTHLY -> R.plurals.plans_offers_mismatch_cycles_single_payment_price_monthly
@@ -99,18 +99,18 @@ sealed class Pricing {
                         pluralsRes = textResource,
                         quantity = offerTotalLength,
                         args = listOf(
-                            TextResource.Arg.StringArg(introOfferFormattedPrice(context) + introPeriodicitySuffixString),
+                            TextResource.Arg.StringArg(introOfferFormattedPrice(resources) + introPeriodicitySuffixString),
                             TextResource.Arg.IntArg(offerTotalLength)
                         )
-                    ).format(context.resources)
+                    ).format(resources)
                 }
             }
 
-            override fun getAdditionalInfoText(context: Context): String {
-                val periodicitySuffixString = context.getString(basePlanData.periodicity.suffixRes)
-                return context.getString(
+            override fun getAdditionalInfoText(resources: Resources): String {
+                val periodicitySuffixString = resources.getString(basePlanData.periodicity.suffixRes)
+                return resources.getString(
                     R.string.plans_offers_mismatch_cycles_info,
-                    basePlanFormattedPrice(context),
+                    basePlanFormattedPrice(resources),
                     periodicitySuffixString
                 )
             }

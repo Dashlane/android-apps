@@ -8,107 +8,6 @@
     >
 
     <TextView
-        android:id="@+id/monitoring_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/credit_monitoring_active_title"
-        android:textAppearance="?textAppearanceHeadline6"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <TextView
-        android:id="@+id/transunion_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/powered_by_transunion"
-        android:textAppearance="?textAppearanceCaption"
-        android:textColor="?colorOnBackgroundMedium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/monitoring_title"
-        />
-
-    <TextView
-        android:id="@+id/monitoring_description_1"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="16dp"
-        android:textAppearance="?textAppearanceBody2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/transunion_text"
-        tools:text="@string/credit_monitoring_active_description_1"
-        />
-
-    <TextView
-        android:id="@+id/monitoring_description_2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:textAppearance="?textAppearanceBody2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/monitoring_description_1"
-        tools:text="@string/credit_monitoring_active_description_2"
-        />
-
-    <TextView
-        android:id="@+id/monitoring_description_3"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:textAppearance="?textAppearanceBody2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/monitoring_description_2"
-        tools:text="@string/credit_monitoring_active_description_3"
-        />
-
-    <Button
-        android:id="@+id/monitoring_button"
-        style="?borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/credit_monitoring_active_cta"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/monitoring_description_3"
-        />
-
-    <include
-        android:id="@+id/separator_1"
-        layout="@layout/item_id_separator"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/monitoring_button"
-        />
-
-    <TextView
         android:id="@+id/protection_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -120,7 +19,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/separator_1"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <TextView

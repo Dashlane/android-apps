@@ -20,7 +20,7 @@ import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.authentication.AuthTotpService
 import com.dashlane.server.api.endpoints.authentication.exceptions.PhoneValidationFailedException
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CompletableDeferred

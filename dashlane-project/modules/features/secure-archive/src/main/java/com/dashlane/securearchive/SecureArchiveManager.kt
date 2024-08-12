@@ -21,34 +21,32 @@ import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.FileUtils
-import com.dashlane.util.generateUniqueIdentifier
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.tryOrNull
-import com.dashlane.vault.model.SyncState
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.model.copySyncObject
-import com.dashlane.vault.model.toVaultItem
 import com.dashlane.xml.XmlBackup
-import com.dashlane.xml.XmlTransaction
-import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import com.dashlane.xml.domain.toObject
 import com.dashlane.xml.domain.toTransaction
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import java.io.File
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 
 class SecureArchiveManager @Inject constructor(
     @ApplicationContext
     private val context: Context,
+    @IoCoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
     private val vaultDataQuery: VaultDataQuery,
+    private val secureArchiveDataImporter: SecureArchiveDataImporter,
     private val dataSaver: DataSaver,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val cryptography: Cryptography,
@@ -74,26 +72,29 @@ class SecureArchiveManager @Inject constructor(
         !readSecureArchive(uri)?.data?.value.isNullOrEmpty()
     }
 
-    suspend fun import(uri: Uri, password: String): List<VaultItem<*>> = withContext(Dispatchers.Default) {
-        val data = readSecureArchive(uri)!!
+    suspend fun import(uri: Uri, password: String): List<VaultItem<*>> =
+        withContext(ioDispatcher) {
+            val data = readSecureArchive(uri)!!
 
-        yield()
+            yield()
 
-        val fullBackup = CryptographyKey.ofPassword(password)
-            .use { cryptographyKey -> cryptography.createDecryptionEngine(cryptographyKey).forXml() }
-            .use { decryptionEngine -> decryptionEngine.decryptSecureArchive(data)!! }
+            val fullBackup = CryptographyKey.ofPassword(password)
+                .use { cryptographyKey ->
+                    cryptography.createDecryptionEngine(cryptographyKey).forXml()
+                }
+                .use { decryptionEngine -> decryptionEngine.decryptSecureArchive(data)!! }
 
-        yield()
+            yield()
 
-        val savedItems = fullBackup.generateNewVaultList()
-            .filter { dataSaver.save(it) }
+            val savedItems = secureArchiveDataImporter.generateNewVaultList(fullBackup)
+                .filter { dataSaver.save(it) }
 
-        dataSync.sync()
+            dataSync.sync()
 
-        savedItems
-    }
+            savedItems
+        }
 
-    suspend fun export(password: String): List<VaultItem<*>> = withContext(Dispatchers.Default) {
+    suspend fun export(password: String): List<VaultItem<*>> = withContext(ioDispatcher) {
         if (password.isEmpty()) throw InvalidPassword()
 
         val filter = vaultFilter {
@@ -110,10 +111,15 @@ class SecureArchiveManager @Inject constructor(
         yield()
 
         val keyDerivation = CryptographyMarker.Flexible.KeyDerivation.Default.argon2d
-        val fixedSalt = CryptographyFixedSalt(saltGenerator.generateRandomSalt(keyDerivation.saltLength))
+        val fixedSalt =
+            CryptographyFixedSalt(saltGenerator.generateRandomSalt(keyDerivation.saltLength))
         val archive = CryptographyKey.ofPassword(password)
             .use { cryptographyKey ->
-                cryptography.createFlexibleArgon2dEncryptionEngine(cryptographyKey, fixedSalt, keyDerivation).forXml()
+                cryptography.createFlexibleArgon2dEncryptionEngine(
+                    cryptographyKey,
+                    fixedSalt,
+                    keyDerivation
+                ).forXml()
             }
             .use { encryptionEngine ->
                 encryptionEngine.encryptSecureArchive(idsList, fullBackupXmlNode)
@@ -122,7 +128,10 @@ class SecureArchiveManager @Inject constructor(
         yield()
 
         try {
-            fileUtils.writeFileToPublicFolder(fileName, "application/octet-stream") { outputStream ->
+            fileUtils.writeFileToPublicFolder(
+                fileName,
+                "application/octet-stream"
+            ) { outputStream ->
                 outputStream.writer().use { writer ->
                     archiveWriter.write(writer, archive)
                 }
@@ -143,52 +152,6 @@ class SecureArchiveManager @Inject constructor(
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             inputStream.reader().use { archiveReader.read(it) }
         }
-    }
-
-    private fun XmlBackup.generateNewVaultList(): List<VaultItem<*>> {
-        val oldToNewIds = mutableMapOf<String, String>()
-        val transactionList = toTransactionList()
-        return transactionList.mapNotNull { transactionXml ->
-            SyncObjectType.forXmlNameOrNull(transactionXml.type)?.takeUnless {
-                
-                
-                it == SyncObjectType.SETTINGS || it == SyncObjectType.COLLECTION
-            }?.let { type ->
-                val syncObject = transactionXml.toObject(type)
-                val newId = generateUniqueIdentifier()
-                
-                syncObject.id?.let { oldToNewIds[it] = newId }
-                syncObject.toVaultItem(
-                    overrideUid = newId,
-                    overrideAnonymousUid = generateUniqueIdentifier(),
-                    syncState = SyncState.MODIFIED
-                )
-            }
-        } + collectionsWithItemLinkUpdated(transactionList, oldToNewIds)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun collectionsWithItemLinkUpdated(
-        transactionList: List<XmlTransaction>,
-        oldToNewIds: Map<String, String>
-    ) = transactionList.mapNotNull { transactionXml ->
-        SyncObjectType.forXmlNameOrNull(transactionXml.type)
-            ?.takeIf { it == SyncObjectType.COLLECTION }?.let { type ->
-                val collection = transactionXml.toObject(type).toVaultItem(
-                    overrideUid = generateUniqueIdentifier(),
-                    overrideAnonymousUid = generateUniqueIdentifier(),
-                    syncState = SyncState.MODIFIED
-                ) as VaultItem<SyncObject.Collection>
-                collection.copySyncObject {
-                    val newVaultItems = vaultItems?.mapNotNull newVaultItem@{ vaultItem ->
-                        val newId = vaultItem.id?.let { oldToNewIds[vaultItem.id] }
-                        
-                            ?: return@newVaultItem null
-                        vaultItem.copy { id = newId }
-                    }
-                    vaultItems = newVaultItems
-                }
-            }
     }
 
     private fun List<VaultItem<*>>.toSyncBackupWithIdsList(): Pair<XmlBackup, MutableList<String>> {

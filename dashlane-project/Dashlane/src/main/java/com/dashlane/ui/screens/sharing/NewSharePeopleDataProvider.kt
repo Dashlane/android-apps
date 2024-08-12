@@ -16,7 +16,7 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.sharing.exception.SharingAlreadyAccessException
 import com.dashlane.sharing.exception.SharingException
 import com.dashlane.sharing.internal.builder.request.SharingRequestRepository
@@ -28,8 +28,8 @@ import com.dashlane.sharing.util.AuditLogHelper
 import com.dashlane.sync.DataIdentifierExtraDataWrapper
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.sharing.SharingContact.SharingContactUser
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
@@ -195,7 +195,7 @@ class NewSharePeopleDataProvider @Inject constructor(
     ) = if (login in contacts) throw SharingAlreadyAccessException() else Unit
 
     private fun getMyUserGroups(login: String): List<UserGroup> =
-        sharingDao.loadUserGroupsAcceptedOrPending(login) 
+        sharingDao.loadUserGroupsAcceptedOrPendingLegacy(login) 
 
     private fun getItemsForEmailing(
         items: List<Pair<ItemToShare, ItemForEmailing>>,
@@ -242,7 +242,7 @@ class NewSharePeopleDataProvider @Inject constructor(
         dataType: SyncObjectType,
         itemUid: String
     ): DataIdentifierExtraDataWrapper<out SyncObject>? = if (dataType in SHAREABLE) {
-        sharingDao.getItemWithExtraData(itemUid, dataType)
+        sharingDao.getItemWithExtraDataLegacy(itemUid, dataType)
     } else {
         null
     }

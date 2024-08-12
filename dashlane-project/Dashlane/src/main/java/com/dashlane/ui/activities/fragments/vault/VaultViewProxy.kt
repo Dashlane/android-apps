@@ -1,15 +1,19 @@
 package com.dashlane.ui.activities.fragments.vault
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.dashlane.R
+import com.dashlane.design.iconography.IconToken
+import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.color.Mood
 import com.dashlane.ui.activities.fragments.vault.list.VaultListFragment
+import com.dashlane.ui.common.compose.components.banner.VaultBanner
 import com.dashlane.util.SnackbarUtils
+import com.dashlane.home.vaultlist.Filter
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -74,14 +78,27 @@ class VaultViewProxy(
         filterTabLayout.selectTab(filterTabLayout.getTabAt(position))
     }
 
-    override fun showAnnouncement(@LayoutRes layout: Int?, onClick: () -> Unit): View? {
+    override fun clearAnnouncements() {
         announcementView.removeAllViews()
-        if (layout != null) {
-            val viewCreated = LayoutInflater.from(context).inflate(layout, announcementView)
-            announcementView.setOnClickListener { onClick() }
-            return viewCreated
-        }
-        return null
+    }
+
+    override fun showAnnouncement(iconToken: IconToken, title: String?, description: String, mood: Mood, onClick: () -> Unit) {
+        clearAnnouncements()
+        announcementView.addView(
+            ComposeView(context).apply {
+                setContent {
+                    DashlaneTheme {
+                        VaultBanner(
+                            iconToken = iconToken,
+                            title = title,
+                            description = description,
+                            mood = mood,
+                            onClick = onClick
+                        )
+                    }
+                }
+            }
+        )
     }
 
     override fun showSnackbar(stringRes: Int) {

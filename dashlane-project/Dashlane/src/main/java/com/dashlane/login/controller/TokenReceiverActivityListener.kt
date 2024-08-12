@@ -9,19 +9,13 @@ import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dashlane.R
 import com.dashlane.async.BroadcastConstants
+import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.navigation.NavigationConstants
-import com.dashlane.network.webservices.authentication.GetTokenService
-import com.dashlane.notification.model.TokenJsonProvider
-import com.dashlane.notification.model.TokenNotificationHandler
-import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.Toaster
-import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,14 +24,8 @@ class TokenReceiverActivityListener @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockRepository: LockRepository,
     private val toaster: Toaster,
-    private val legacyTokenService: GetTokenService,
-    @ApplicationContext
-    private val context: Context,
-    private val tokenJsonProvider: TokenJsonProvider,
-    private val preferencesManager: UserPreferencesManager,
-    private val globalPreferencesManager: GlobalPreferencesManager,
-    private val clock: Clock,
-    private val loginTokensModule: LoginTokensModule
+    private val loginTokensModule: LoginTokensModule,
+    private val developerInfoLogger: DeveloperInfoLogger
 ) : AbstractActivityLifecycleListener() {
 
     private var receiver: NewTokenReceiver? = null
@@ -87,28 +75,14 @@ class TokenReceiverActivityListener @Inject constructor(
 
         val pushToken = loginTokensModule.tokenHashmap[username] ?: return
         val tokenGcmShouldNotify = pushToken.shouldNotify(username)
-        loginTokensModule.tokenShouldNotifyHashmap[username] = tokenGcmShouldNotify
 
         if (tokenGcmShouldNotify) {
-            val tokenNotificationHandler = TokenNotificationHandler(
-                context = context,
-                message = pushToken.fcmMessage,
-                tokenJsonProvider = tokenJsonProvider,
-                sessionManager = sessionManager,
-                preferencesManager = preferencesManager,
-                legacyTokenService = legacyTokenService,
-                globalPreferencesManager = globalPreferencesManager,
-                clock = clock,
-                loginTokensModule = loginTokensModule
-            )
             TokenChecker(
-                legacyTokenService,
-                tokenNotificationHandler,
-                loginTokensModule
+                loginTokensModule,
+                developerInfoLogger
             ).checkAndDisplayTokenIfNeeded(
                 activity,
-                username,
-                session.uki
+                username
             )
         }
     }

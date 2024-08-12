@@ -7,8 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
@@ -19,8 +21,6 @@ import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.ui.Feature
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -38,11 +38,14 @@ class SharingCenterViewModel @Inject constructor(
     private val navigator: Navigator,
     private val appEvents: AppEvents,
     private val dataSync: DataSync,
-    private val userFeaturesChecker: UserFeaturesChecker,
-    private val restrictionNotificator: TeamSpaceRestrictionNotificator
+    private val restrictionNotificator: TeamSpaceRestrictionNotificator,
+    private val frozenStateManager: FrozenStateManager,
 ) : ViewModel(), SharingCenterViewModelContract {
     private val session: Session?
         get() = sessionManager.session
+
+    private val isAccountFrozen: Boolean
+        get() = frozenStateManager.isAccountFrozen
 
     private val dataFlow = MutableStateFlow(Data())
 
@@ -50,9 +53,6 @@ class SharingCenterViewModel @Inject constructor(
 
     override val uiState: MutableSharedFlow<SharingCenterViewModelContract.UIState> =
         MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-
-    private val hasSharedCollection: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
 
     init {
         
@@ -151,16 +151,11 @@ class SharingCenterViewModel @Inject constructor(
         val login = session?.username?.email ?: return
         val myUserGroups = userGroups.filter { it.getUser(login)?.isAccepted == true }
         val myUserGroupsIds = myUserGroups.map { it.groupId }
-        val myCollections =
-            if (hasSharedCollection) {
-                collections.filter { collection ->
-                    collection.getUser(login)?.isAccepted == true || collection.userGroups?.find {
-                        it.uuid in myUserGroupsIds
-                    }?.isAccepted == true
-                }
-            } else {
-                emptyList()
-            }
+        val myCollections = collections.filter { collection ->
+            collection.getUser(login)?.isAccepted == true || collection.userGroups?.find {
+                it.uuid in myUserGroupsIds
+            }?.isAccepted == true
+        }
         val myItemGroups = itemGroups.filter { itemGroup ->
             itemGroup.collections?.any {
                 myCollections.any { collection ->
@@ -215,11 +210,7 @@ class SharingCenterViewModel @Inject constructor(
                 val data = Data(
                     dataProvider.getItemGroups(),
                     dataProvider.getUserGroups(),
-                    if (hasSharedCollection) {
-                        dataProvider.getCollections()
-                    } else {
-                        emptyList()
-                    }
+                    dataProvider.getCollections()
                 )
                 dataFlow.tryEmit(data)
             }
@@ -231,6 +222,11 @@ class SharingCenterViewModel @Inject constructor(
     }
 
     override fun onClickNewShare(activity: Fragment) {
+        if (isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            return
+        }
+
         proceedItemIfTeamspaceAllows(activity.requireActivity()) {
             navigator.goToNewShare()
         }
@@ -255,6 +251,11 @@ class SharingCenterViewModel @Inject constructor(
         )
 
     override fun acceptItemGroup(invite: SharingContact.ItemInvite) {
+        if (isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            return
+        }
+
         uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestLoading)
         viewModelScope.launch {
             runCatching {
@@ -269,6 +270,11 @@ class SharingCenterViewModel @Inject constructor(
     }
 
     override fun acceptUserGroup(invite: SharingContact.UserGroupInvite) {
+        if (isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            return
+        }
+
         uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestLoading)
         viewModelScope.launch {
             runCatching {
@@ -289,6 +295,11 @@ class SharingCenterViewModel @Inject constructor(
     }
 
     override fun acceptCollection(invite: SharingContact.CollectionInvite) {
+        if (isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            return
+        }
+
         uiState.tryEmit(SharingCenterViewModelContract.UIState.RequestLoading)
         viewModelScope.launch {
             runCatching {

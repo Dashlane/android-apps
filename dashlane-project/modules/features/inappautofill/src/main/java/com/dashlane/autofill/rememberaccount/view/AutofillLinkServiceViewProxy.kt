@@ -5,7 +5,6 @@ import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
@@ -13,21 +12,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.autofill.api.R
+import com.dashlane.autofill.formdetector.model.ApplicationFormSource
+import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.autofill.util.formSourceIdentifier
 import com.dashlane.autofill.viewallaccounts.view.AutofillViewAllItemsActivity.Companion.LINK_SERVICE_REQUEST_KEY
 import com.dashlane.autofill.viewallaccounts.view.AutofillViewAllItemsActivity.Companion.LINK_SERVICE_SHOULD_AUTOFILL
 import com.dashlane.autofill.viewallaccounts.view.AutofillViewAllItemsActivity.Companion.LINK_SERVICE_SHOULD_LINK
-import com.dashlane.autofill.formdetector.model.ApplicationFormSource
-import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.hermes.generated.definitions.Space
 import com.dashlane.teamspaces.isSpaceItem
-import com.dashlane.ui.VaultItemImageHelper
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.PackageUtilities
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.valueWithoutWww
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.titleForList
+import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.model.urlForUI
 import kotlinx.coroutines.launch
@@ -41,7 +41,7 @@ class AutofillLinkServiceViewProxy(
 
     private val titleView: TextView = view.findViewById(R.id.title)
     private val descriptionView: TextView = view.findViewById(R.id.detail)
-    private val vaultImageView: ImageView = view.findViewById(R.id.vault_image)
+    private val vaultImageView: ThumbnailDomainIconView = view.findViewById(R.id.vault_image)
     private val vaultUrlView: TextView = view.findViewById(R.id.vault_url)
     private val vaultLoginView: TextView = view.findViewById(R.id.vault_login)
 
@@ -71,8 +71,6 @@ class AutofillLinkServiceViewProxy(
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     viewModel.state.collect {
                         if (it is AutofillLinkServiceState.OnDataLoaded) {
-                            val imageDrawable =
-                                VaultItemImageHelper.getIconDrawableFromSummaryObject(requireContext(), it.item)
                             when (viewModel.getFormSource()) {
                                 is ApplicationFormSource -> {
                                     val appName = PackageUtilities.getApplicationNameFromPackage(
@@ -91,7 +89,7 @@ class AutofillLinkServiceViewProxy(
                             }
                             vaultUrlView.text = it.item.urlForUI()
                             vaultLoginView.text = it.item.loginForUi
-                            vaultImageView.setImageDrawable(imageDrawable)
+                            vaultImageView.domainUrl = it.item.urlDomain
                         }
                     }
                 }

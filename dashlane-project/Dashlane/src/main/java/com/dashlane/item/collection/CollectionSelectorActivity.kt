@@ -52,6 +52,7 @@ import com.dashlane.util.DeviceUtils
 import com.dashlane.vault.model.toSanitizedCollectionName
 import dagger.hilt.android.AndroidEntryPoint
 
+@Deprecated("This version is deprecated, please check with the team before any modification.")
 @AndroidEntryPoint
 class CollectionSelectorActivity : DashlaneActivity() {
 

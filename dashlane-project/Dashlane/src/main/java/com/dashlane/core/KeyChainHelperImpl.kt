@@ -2,7 +2,7 @@ package com.dashlane.core
 
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.toObfuscated
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.keychain.KeyChainManager
 import com.dashlane.util.tryOrNull
 import kotlinx.coroutines.CoroutineScope

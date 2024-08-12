@@ -3,6 +3,7 @@ package com.dashlane.login.sso.migration
 import android.content.Context
 import android.content.Intent
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateRefresher
 import com.dashlane.authentication.SsoServerKeyFactory
 import com.dashlane.authentication.login.AuthenticationAuthTicketHelper
 import com.dashlane.authentication.sso.utils.UserSsoInfo
@@ -16,7 +17,7 @@ import com.dashlane.login.lock.OnboardingApplicationLockActivity
 import com.dashlane.masterpassword.MasterPasswordChanger
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 import com.skocken.presentation.provider.BaseDataProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -31,6 +32,7 @@ class MigrationToSsoMemberDataProvider @Inject constructor(
     private val lockManager: LockManager,
     private val intent: Intent,
     private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
+    private val accountRecoveryKeySettingStateRefresher: AccountRecoveryKeySettingStateRefresher,
 ) : BaseDataProvider<MigrationToSsoMemberContract.Presenter>(),
     MigrationToSsoMemberContract.DataProvider {
 
@@ -57,6 +59,7 @@ class MigrationToSsoMemberDataProvider @Inject constructor(
         val shouldLaunchInitialSync = userPreferencesManager.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
 
         accountRecoveryKeyRepository.disableRecoveryKey(DeleteKeyReason.VAULT_KEY_CHANGED)
+        accountRecoveryKeySettingStateRefresher.refresh()
         lockManager.unlock(LockPass.ofPassword(ssoKey))
 
         return if (shouldLaunchInitialSync) {

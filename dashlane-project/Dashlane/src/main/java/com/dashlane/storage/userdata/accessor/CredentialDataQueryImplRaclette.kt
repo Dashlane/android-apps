@@ -16,7 +16,7 @@ class CredentialDataQueryImplRaclette @Inject constructor(
         val ids = queryAll(createFilter()).filterNot {
             it.isPasswordEmpty
         }.map { it.id }
-        return vaultDataQueryImplNew.queryAll(
+        return vaultDataQueryImplNew.queryAllLegacy(
             vaultFilter {
             specificUid(ids)
             specificDataType(SyncObjectType.AUTHENTIFIANT)

@@ -2,6 +2,7 @@ package com.dashlane.login.accountrecoverykey
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.toObfuscated
@@ -22,7 +23,13 @@ class LoginAccountRecoveryKeyViewModel @Inject constructor(
         logRepository.queueEvent(UseAccountRecoveryKey(FlowStep.CANCEL))
     }
 
-    fun deviceRegistered(registeredUserDevice: RegisteredUserDevice, authTicket: String) {
+    fun updateAccountType(accountType: UserAccountInfo.AccountType) {
+        viewModelScope.launch {
+            loginAccountRecoveryKeyRepository.updateAccountType(accountType)
+        }
+    }
+
+    fun deviceRegistered(registeredUserDevice: RegisteredUserDevice, authTicket: String?) {
         viewModelScope.launch {
             loginAccountRecoveryKeyRepository.updateRegisteredDevice(registeredUserDevice, authTicket)
         }

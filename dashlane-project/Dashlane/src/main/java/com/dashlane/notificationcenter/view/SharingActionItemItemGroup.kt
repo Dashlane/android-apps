@@ -89,7 +89,7 @@ data class SharingActionItemItemGroup(
             referrer: String
         ) {
             val itemId = itemGroup.items?.firstOrNull()?.itemId ?: return
-            val extraData = actionItem.sharingDao.loadItemContentExtraData(itemId)
+            val extraData = actionItem.sharingDao.loadItemContentExtraDataLegacy(itemId)
             val vaultItem = actionItem.xmlConverter.fromXml(itemId, extraData)?.vaultItem
             val item: SummaryObject? = vaultItem?.toSummary()
 

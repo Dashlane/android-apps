@@ -20,18 +20,29 @@ class PaywallActivity : DashlaneActivity() {
                 PaywallScreen(
                     viewModel = viewModel,
                     navigateUp = {
-                        viewModel.onClickClose()
+                        viewModel.onNavigateUp()
                         finish()
                     },
                     navigateToOffer = {
                         viewModel.onClickUpgrade()
                         finish()
+                    },
+                    onCloseClick = {
+                        viewModel.onClickClose()
+                        finish()
+                    },
+                    onCancelClick = {
+                        viewModel.onClickCancel()
+                        finish()
+                    },
+                    onAllOffersClick = {
+                        viewModel.onClickAllOffers()
                     }
                 )
             }
         }
         if (savedInstanceState == null) {
-            this.setCurrentPageView(viewModel.paywallIntroState.page)
+            viewModel.paywallIntroState.page?.let { this.setCurrentPageView(it) }
         }
     }
 
@@ -43,6 +54,6 @@ class PaywallActivity : DashlaneActivity() {
     }
 
     companion object {
-        const val PAYWALL_INTRO_TYPE_KEY = "paywallIntroType"
+        const val PAYWALL_INTRO_TYPE_ARG = "paywallIntroType"
     }
 }

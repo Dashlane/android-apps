@@ -22,6 +22,9 @@ import com.dashlane.cryptography.forXml
 import com.dashlane.cryptography.generateFixedSalt
 import com.dashlane.cryptography.toCryptographyMarkerOrNull
 import com.dashlane.cryptography.use
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.crypto.keys.serverKeyUtf8Bytes
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.account.SharingKeys
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
@@ -35,20 +38,17 @@ import com.dashlane.server.api.endpoints.sync.SyncUploadTransaction
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.time.InstantEpochMilli
 import com.dashlane.server.api.time.toInstant
-import com.dashlane.session.AppKey
 import com.dashlane.session.Session
-import com.dashlane.session.VaultKey
-import com.dashlane.session.serverKeyUtf8Bytes
 import com.dashlane.sync.vault.SyncVault
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.toObject
 import com.dashlane.xml.domain.toTransaction
 import com.dashlane.xml.serializer.XmlException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SyncCryptoChangerImpl @Inject constructor(
     private val cryptography: Cryptography,

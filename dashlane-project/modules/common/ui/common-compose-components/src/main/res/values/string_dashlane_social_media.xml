@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="facebook" translatable="false">Facebook</string>
+    <string name="twitter" translatable="false">X/Twitter</string>
+    <string name="instagram" translatable="false">Instagram</string>
+    <string name="youtube" translatable="false">Youtube</string>
+    <string name="reddit" translatable="false">Reddit</string>
+    <string name="linkedin" translatable="false">Linkedin</string>
+</resources>

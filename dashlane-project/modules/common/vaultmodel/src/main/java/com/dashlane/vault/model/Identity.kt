@@ -35,13 +35,15 @@ fun createIdentity(
 
 val SummaryObject.Identity.identityPartialOrFullNameNoLogin: String?
     get() {
-        val firstname = firstName ?: ""
-        val lastname = lastName ?: ""
-        val value = "$firstname $lastname"
-        return value.takeIf { it.isNotSemanticallyNull() }
+        return buildList {
+            add(firstName ?: "")
+            add(lastName ?: "")
+        }.filter {
+            it.isNotSemanticallyNull()
+        }.joinToString(" ")
     }
 
 fun VaultItem<SyncObject.Identity>.copySyncObject(builder: SyncObject.Identity.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.Identity> {
+    VaultItem<SyncObject.Identity> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

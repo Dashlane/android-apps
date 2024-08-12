@@ -4,22 +4,26 @@ import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.AutofillOrigin
 import com.dashlane.autofill.AutofillOrigin.INLINE_AUTOFILL_KEYBOARD
 import com.dashlane.autofill.AutofillOrigin.IN_APP_LOGIN
-import com.dashlane.autofill.ui.AutofillFeature
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import com.dashlane.autofill.util.AutofillLogUtil
 import com.dashlane.ext.application.TrustedBrowserApplication
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.Sha256Hash
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.AutofillButton
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
 import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.hermes.generated.definitions.DomainType
 import com.dashlane.hermes.generated.definitions.FieldsFilled
 import com.dashlane.hermes.generated.definitions.FormType
+import com.dashlane.hermes.generated.definitions.ItemId
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.hermes.generated.definitions.MatchType
+import com.dashlane.hermes.generated.definitions.PhishingRisk
 import com.dashlane.hermes.generated.events.anonymous.AutofillSuggestAnonymous
 import com.dashlane.hermes.generated.events.anonymous.PerformAutofillAnonymous
+import com.dashlane.hermes.generated.events.user.AutofillClick
 import com.dashlane.hermes.generated.events.user.AutofillSuggest
 import com.dashlane.hermes.generated.events.user.PerformAutofill
 import com.dashlane.url.UrlDomain
@@ -44,14 +48,16 @@ class AutofillUsageLog @Inject constructor(
         @AutofillOrigin origin: Int,
         packageName: String,
         isNativeApp: Boolean,
-        totalCount: Int
+        totalCount: Int,
+        phishingAttemptLevel: PhishingAttemptLevel
     ) {
         onShowList(
             origin = origin,
             packageName = packageName,
             itemType = ItemType.CREDENTIAL,
             isNativeApp = isNativeApp,
-            totalCount = totalCount
+            totalCount = totalCount,
+            phishingAttemptLevel = phishingAttemptLevel
         )
     }
 
@@ -59,14 +65,16 @@ class AutofillUsageLog @Inject constructor(
         @AutofillOrigin origin: Int,
         packageName: String,
         isNativeApp: Boolean,
-        totalCount: Int
+        totalCount: Int,
+        phishingAttemptLevel: PhishingAttemptLevel
     ) {
         onShowList(
             origin = origin,
             packageName = packageName,
             itemType = ItemType.CREDIT_CARD,
             isNativeApp = isNativeApp,
-            totalCount = totalCount
+            totalCount = totalCount,
+            phishingAttemptLevel = phishingAttemptLevel
         )
     }
 
@@ -74,14 +82,16 @@ class AutofillUsageLog @Inject constructor(
         @AutofillOrigin origin: Int,
         packageName: String,
         isNativeApp: Boolean,
-        totalCount: Int
+        totalCount: Int,
+        phishingAttemptLevel: PhishingAttemptLevel
     ) {
         onShowList(
             origin = origin,
             packageName = packageName,
             itemType = ItemType.CREDIT_CARD,
             isNativeApp = isNativeApp,
-            totalCount = totalCount
+            totalCount = totalCount,
+            phishingAttemptLevel = phishingAttemptLevel,
         )
     }
 
@@ -90,10 +100,10 @@ class AutofillUsageLog @Inject constructor(
         packageName: String,
         websiteUrlDomain: UrlDomain?,
         itemUrlDomain: UrlDomain?,
-        autofillFeature: AutofillFeature,
         matchType: MatchType,
         autofillOrigin: HermesAutofillOrigin,
-        autofillMechanism: AutofillMechanism
+        autofillMechanism: AutofillMechanism,
+        credentialId: String?,
     ) {
         logPerformAutofill(
             websiteUrlDomain = websiteUrlDomain,
@@ -102,7 +112,8 @@ class AutofillUsageLog @Inject constructor(
             autofillMechanism = autofillMechanism,
             matchType = matchType,
             fieldsFilled = FieldsFilled(credential = 1),
-            formType = FormType.LOGIN
+            formType = FormType.LOGIN,
+            credentialId = credentialId,
         )
     }
 
@@ -113,7 +124,8 @@ class AutofillUsageLog @Inject constructor(
         autofillMechanism: AutofillMechanism,
         matchType: MatchType,
         fieldsFilled: FieldsFilled,
-        formType: FormType
+        formType: FormType,
+        credentialId: String?,
     ) {
         val domainWrapper = AutofillLogUtil.extractDomainFrom(urlDomain = websiteUrlDomain, packageName = packageName)
         val browser = packageName.takeIf {
@@ -128,7 +140,8 @@ class AutofillUsageLog @Inject constructor(
                 matchType = matchType,
                 fieldsFilled = fieldsFilled,
                 formTypeList = listOf(formType),
-                mobileBrowserName = browser
+                mobileBrowserName = browser,
+                credentialFilledItemId = credentialId?.let { ItemId(it) }
             )
         )
 
@@ -151,10 +164,10 @@ class AutofillUsageLog @Inject constructor(
         @AutofillOrigin origin: Int,
         packageName: String,
         websiteUrlDomain: UrlDomain?,
-        autofillFeature: AutofillFeature,
         matchType: MatchType,
         autofillOrigin: HermesAutofillOrigin,
-        autofillMechanism: AutofillMechanism
+        autofillMechanism: AutofillMechanism,
+        credentialId: String,
     ) {
         logPerformAutofill(
             websiteUrlDomain = websiteUrlDomain,
@@ -163,7 +176,8 @@ class AutofillUsageLog @Inject constructor(
             autofillMechanism = autofillMechanism,
             matchType = matchType,
             fieldsFilled = FieldsFilled(creditCard = 1),
-            formType = FormType.PAYMENT
+            formType = FormType.PAYMENT,
+            credentialId = credentialId,
         )
     }
 
@@ -171,10 +185,10 @@ class AutofillUsageLog @Inject constructor(
         origin: Int,
         packageName: String,
         websiteUrlDomain: UrlDomain?,
-        autofillFeature: AutofillFeature,
         matchType: MatchType,
         autofillOrigin: HermesAutofillOrigin,
-        autofillMechanism: AutofillMechanism
+        autofillMechanism: AutofillMechanism,
+        credentialId: String,
     ) {
         logPerformAutofill(
             websiteUrlDomain = websiteUrlDomain,
@@ -183,7 +197,16 @@ class AutofillUsageLog @Inject constructor(
             autofillMechanism = autofillMechanism,
             matchType = matchType,
             fieldsFilled = FieldsFilled(email = 1),
-            formType = FormType.LOGIN
+            formType = FormType.LOGIN,
+            credentialId = credentialId,
+        )
+    }
+
+    override fun onAutoFillWarningClick() {
+        logRepository.queueEvent(
+            AutofillClick(
+                autofillButton = AutofillButton.PHISHING_RISK,
+            )
         )
     }
 
@@ -192,7 +215,8 @@ class AutofillUsageLog @Inject constructor(
         packageName: String,
         itemType: ItemType,
         isNativeApp: Boolean,
-        totalCount: Int
+        totalCount: Int,
+        phishingAttemptLevel: PhishingAttemptLevel
     ) {
         val domainType = if (isNativeApp) {
             DomainType.APP
@@ -203,6 +227,11 @@ class AutofillUsageLog @Inject constructor(
             INLINE_AUTOFILL_KEYBOARD -> AnyPage.AUTOFILL_KEYBOARD_SUGGESTION
             IN_APP_LOGIN -> AnyPage.AUTOFILL_ACCESSIBILITY_SUGGESTION
             else -> AnyPage.AUTOFILL_DROPDOWN_SUGGESTION
+        }
+        val phishingRisk = when (phishingAttemptLevel) {
+            PhishingAttemptLevel.NONE -> PhishingRisk.NONE
+            PhishingAttemptLevel.MODERATE -> PhishingRisk.MODERATE
+            PhishingAttemptLevel.HIGH -> PhishingRisk.HIGH
         }
 
         
@@ -216,14 +245,16 @@ class AutofillUsageLog @Inject constructor(
             AutofillSuggestAnonymous(
                 vaultTypeList = listOf(itemType),
                 domain = Domain(Sha256Hash.of(packageName), domainType),
-                isNativeApp = isNativeApp
+                isNativeApp = isNativeApp,
+                phishingRisk = phishingRisk,
             )
         )
         logRepository.queueEvent(
             AutofillSuggest(
                 webcardItemTotalCount = totalCount,
                 vaultTypeList = listOf(itemType),
-                isNativeApp = isNativeApp
+                isNativeApp = isNativeApp,
+                phishingRisk = phishingRisk,
             )
         )
     }

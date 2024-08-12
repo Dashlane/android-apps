@@ -1,94 +1,88 @@
 package com.dashlane.item.delete
 
-import android.app.Dialog
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.ui.dialogs.fragment.WaiterDialogFragment
-import com.dashlane.ui.util.DialogHelper
-import com.dashlane.util.setCurrentPageView
+import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.navigation.Navigator
+import com.dashlane.util.Toaster
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class DeleteVaultItemFragment : DialogFragment() {
 
-    private var isShared: Boolean = false
-    private var itemId: String = ""
+    @Inject
+    lateinit var navigator: Navigator
 
     @Inject
-    lateinit var provider: DeleteVaultItemProvider
+    lateinit var logger: DeleteVaultItemLogger
 
     @Inject
-    lateinit var deleteVaultItemLogger: DeleteVaultItemLogger
-    private val presenter = DeleteVaultItemPresenter()
+    lateinit var toaster: Toaster
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private val viewModel by viewModels<DeleteVaultItemViewModel>()
 
-        this.setCurrentPageView(AnyPage.CONFIRM_ITEM_DELETION)
-        itemId = DeleteVaultItemFragmentArgs.fromBundle(requireArguments()).itemId
-        isShared = DeleteVaultItemFragmentArgs.fromBundle(requireArguments()).isShared
-        val viewProxy = DeleteVaultItemViewProxy(requireActivity(), this, parentFragmentManager)
-        presenter.coroutineScope = lifecycleScope
-        presenter.setProvider(provider)
-        presenter.setView(viewProxy)
-        viewProxy.setPresenter(presenter)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                DashlaneTheme {
+                    LaunchedEffect(key1 = viewModel) {
+                        viewModel.navigationState.collect { state ->
+                            when (state) {
+                                DeleteVaultItemViewModel.NavigationState.Failure -> deleteError()
+                                DeleteVaultItemViewModel.NavigationState.Success -> itemDeleted()
+                            }
+                        }
+                    }
+
+                    val state = viewModel.uiState.collectAsStateWithLifecycle()
+                    DeleteVaultItemScreen(
+                        state = state.value,
+                        onConfirmed = { viewModel.deleteItem() },
+                        onCancelled = { closeDialog() }
+                    )
+                }
+            }
+        }
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog: AlertDialog = DialogHelper().builder(requireActivity())
-            .setTitle(
-                if (isShared) {
-                    resources.getString(R.string.sharing_confirmation_popup_title_delete_from_service)
-                } else {
-                    resources.getString(R.string.delete_item)
-                }
-            )
-            .setMessage(
-                if (isShared) {
-                    resources.getString(R.string.sharing_confirmation_popup_description_delete_from_service)
-                } else {
-                    resources.getString(R.string.please_confirm_you_would_like_to_delete_the_item)
-                }
-            )
-            .setPositiveButton(
-                if (isShared) {
-                    resources.getString(R.string.sharing_confirmation_popup_btn_confirm_delete_from_service)
-                } else {
-                    resources.getString(R.string.delete)
-                },
-                null
-            )
-            .setNegativeButton(
-                if (isShared) {
-                    resources.getString(R.string.sharing_confirmation_popup_btn_cancel_delete_from_service)
-                } else {
-                    resources.getString(R.string.cancel)
-                }
-            ) { _, _ -> deleteVaultItemLogger.logItemDeletionCanceled() }
-            .create()
-        dialog.setOnShowListener {
-            onDialogShown(dialog)
-        }
-        return dialog
+    private fun closeDialog() {
+        logger.logItemDeletionCanceled()
+        dismiss()
     }
 
-    private fun onDialogShown(dialog: AlertDialog) {
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            WaiterDialogFragment.showWaiter(
-                false,
-                resources.getString(R.string.contacting_dashlane),
-                resources.getString(R.string.contacting_dashlane),
-                childFragmentManager
-            )
-            dialog.hide()
-            deleteVaultItemLogger.logItemDeletionConfirmed()
-            presenter.deleteItem(itemId)
-        }
+    private fun itemDeleted() {
+        toaster.show(R.string.item_deleted, Toast.LENGTH_SHORT)
+        parentFragmentManager.setFragmentResult(
+            DELETE_VAULT_ITEM_RESULT,
+            bundleOf(DELETE_VAULT_ITEM_SUCCESS to true)
+        )
+        closeDialog()
+    }
+
+    private fun deleteError() {
+        toaster.show(R.string.network_failed_notification, Toast.LENGTH_LONG)
+        parentFragmentManager.setFragmentResult(
+            DELETE_VAULT_ITEM_RESULT,
+            bundleOf(DELETE_VAULT_ITEM_SUCCESS to false)
+        )
+        closeDialog()
     }
 
     companion object {

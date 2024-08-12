@@ -42,17 +42,7 @@ class SmartSpaceCategorizationDatabaseAccessor @Inject constructor(
         return genericDataQuery.queryAll(filter)
     }
 
-    fun getAuthentifiantsVaultItems(ids: List<String>): List<VaultItem<SyncObject>> {
-        val vaultFilter = vaultFilter {
-            specificDataType(SyncObjectType.AUTHENTIFIANT)
-            specificUid(ids)
-            spaceFilter = NoRestrictionSpaceFilter
-            allStatusFilter()
-        }
-        return vaultDataQuery.queryAll(vaultFilter)
-    }
-
-    fun getVaultItems(ids: List<String>): List<VaultItem<SyncObject>> {
+    suspend fun getVaultItems(ids: List<String>): List<VaultItem<SyncObject>> {
         val vaultFilter = vaultFilter {
             specificUid(ids)
             spaceFilter = NoRestrictionSpaceFilter
@@ -62,7 +52,7 @@ class SmartSpaceCategorizationDatabaseAccessor @Inject constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun getGeneratedPasswords(): List<VaultItem<SyncObject.GeneratedPassword>> {
+    suspend fun getGeneratedPasswords(): List<VaultItem<SyncObject.GeneratedPassword>> {
         val vaultFilter = vaultFilter {
             specificDataType(SyncObjectType.GENERATED_PASSWORD)
         }

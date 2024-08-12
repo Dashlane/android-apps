@@ -9,15 +9,14 @@
     android:paddingTop="@dimen/spacing_normal"
     android:paddingBottom="@dimen/spacing_big">
 
-    <ImageView
+    <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
         android:id="@+id/vpn_third_party_account_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/vpn_third_party_hotspot_shield_name"
-        android:scaleType="fitXY"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_hotspot_shield_account_icon" />
+        app:thumbnailSize="medium"/>
 
     <TextView
         android:id="@+id/vpn_third_party_account_name"
@@ -46,10 +45,19 @@
         android:text="@string/vpn_third_party_account_login"
         android:textAppearance="?textAppearanceBody2"
         android:textColor="@color/text_neutral_quiet"
-        app:drawableRightCompat="@drawable/ic_lock"
-        app:drawableTint="@color/text_neutral_quiet"
         app:layout_constraintStart_toStartOf="@+id/vpn_third_party_account_icon"
         app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_account_icon" />
+
+    <ImageView
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_lock_filled"
+        app:layout_constraintTop_toTopOf="@id/vpn_third_party_account_login_title"
+        app:layout_constraintBottom_toBottomOf="@id/vpn_third_party_account_login_title"
+        app:layout_constraintStart_toEndOf="@id/vpn_third_party_account_login_title"
+        app:tint="@color/text_neutral_quiet"
+        />
 
     <TextView
         android:id="@+id/vpn_third_party_account_login"
@@ -83,10 +91,19 @@
         android:text="@string/vpn_third_party_account_password"
         android:textAppearance="?textAppearanceBody2"
         android:textColor="@color/text_neutral_quiet"
-        app:drawableRightCompat="@drawable/ic_lock"
-        app:drawableTint="@color/text_neutral_quiet"
         app:layout_constraintStart_toStartOf="@+id/vpn_third_party_account_icon"
         app:layout_constraintTop_toBottomOf="@+id/vpn_third_party_account_login" />
+
+    <ImageView
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_lock_filled"
+        app:layout_constraintTop_toTopOf="@id/vpn_third_party_account_password_title"
+        app:layout_constraintBottom_toBottomOf="@id/vpn_third_party_account_password_title"
+        app:layout_constraintStart_toEndOf="@id/vpn_third_party_account_password_title"
+        app:tint="@color/text_neutral_quiet"
+        />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/vpn_third_party_account_password"

@@ -67,6 +67,13 @@ fun SummaryObject.matchForceDomains(domains: List<String>): Boolean {
     }
 }
 
+fun List<SummaryObject>.matchForceDomains(domains: List<String>): List<SummaryObject> {
+    
+    return filter { summaryObject ->
+        summaryObject.matchForceDomains(domains)
+    }
+}
+
 private fun isAuthentifiantMatchingDomain(authentifiant: SummaryObject.Authentifiant, domain: String): Boolean {
     return authentifiant.email?.contains(domain, ignoreCase = true) == true ||
         authentifiant.login?.contains(domain, ignoreCase = true) == true ||

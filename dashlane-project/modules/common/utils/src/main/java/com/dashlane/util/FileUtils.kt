@@ -11,7 +11,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

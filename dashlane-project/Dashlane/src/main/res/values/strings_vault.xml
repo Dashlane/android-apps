@@ -20,4 +20,71 @@
 
     <string name="vault_offline_sync_error_message">You’re offline. We need an active internet connection to refresh and sync your vault.</string>
     <string name="vault_unknown_sync_error_message">We had an issue refreshing your vault. Please try again later.</string>
+
+    
+    <string name="vault_collection_title">Collections</string>
+    
+    <string name="vault_add_collection">Add collection</string>
+    
+    <string name="vault_manage_collections">Manage collections</string>
+    
+    <string name="vault_no_collection">No collection linked</string>
+    
+    <string name="vault_delete_login">Delete login</string>
+    
+    <string name="vault_setup_2fa">Setup Two-Factor Authenticator</string>
+    
+    <string name="vault_action_copy">Copy</string>
+    
+    <string name="vault_action_open">Open</string>
+    
+    <string name="vault_login_detail_title">Login details</string>
+    
+    <string name="vault_health_detail">Health details</string>
+    
+    <string name="vault_password_strength">Strength</string>
+    
+    <string name="vault_password_safety">Safety</string>
+    
+    <string name="vault_organisation">Organisation</string>
+    
+    <plurals name="vault_linked_services_manage">
+        <item quantity="one">Manage %1$d linked service</item>
+        <item quantity="other">Manage %1$d linked services</item>
+    </plurals>
+    
+    <plurals name="vault_password_safety_reused">
+        <item quantity="one">Reused %1$d time</item>
+        <item quantity="other">Reused %1$d times</item>
+    </plurals>
+    
+    <string name="weak_password_info_title">This password is weak</string>
+    
+    <string name="weak_password_info_content">Generate a new stronger password to secure your account.</string>
+    
+    <string name="weak_password_info_action">Generate now</string>
+    
+    <string name="compromised_password_info_title">This password is compromised</string>
+    
+    <string name="compromised_password_info_content">This password is compromised due to a Dark Web Monitoring leak. Change your password to secure your account.</string>
+    
+    <string name="compromised_password_info_action">Change now</string>
+    
+    <string name="vault_linked_services_add">Add a linked website</string>
+    
+    <string name="vault_shared_with">Shared with</string>
+    
+    <string name="vault_view_all_shared_users">View all</string>
+    
+    <string name="vault_limited_rights_infobox_title">This item is shared with limited rights</string>
+    
+    <string name="vault_limited_rights_infobox_content">You can only autofill the content or remove it from your vault.</string>
+    
+    <string name="vault_saved">Changes saved</string>
+    
+    <string name="vault_password_compromised">Password compromised</string>
+    
+    <string name="reused_password_info_title">This password is reused</string>
+    
+    <string name="reused_password_info_content">This password is compromised multiple times across your vault. Make your password unique to secure your account.</string>
 </resources>

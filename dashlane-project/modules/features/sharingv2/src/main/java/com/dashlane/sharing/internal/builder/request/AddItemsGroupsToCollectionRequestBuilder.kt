@@ -9,8 +9,9 @@ import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException.AddItemsGroupToCollectionRequestException
+import com.dashlane.sharing.util.AuditLogHelper
 import com.dashlane.sharing.util.SharingCryptographyHelper
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -19,7 +20,8 @@ class AddItemsGroupsToCollectionRequestBuilder @Inject constructor(
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     private val sharingCryptography: SharingCryptographyHelper,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val auditLogHelper: AuditLogHelper
 ) {
 
     private val session: Session?
@@ -62,12 +64,14 @@ class AddItemsGroupsToCollectionRequestBuilder @Inject constructor(
             ) ?: throw AddItemsGroupToCollectionRequestException(
                 "Accept Signature can't be generated"
             )
+            val auditLogDetails = auditLogHelper.buildAuditLogDetails(itemGroup = itemGroup)
             AddItemGroupsToCollectionService.Request.ItemGroup(
                 uuid = UuidFormat(itemGroup.groupId),
                 itemGroupKey = itemGroupKeyEncrypted,
                 permission = ADMIN, 
                 proposeSignature = proposeSignature,
-                acceptSignature = acceptSignature
+                acceptSignature = acceptSignature,
+                auditLogDetails = auditLogDetails
             )
         }
         AddItemGroupsToCollectionService.Request(

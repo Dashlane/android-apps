@@ -8,8 +8,8 @@ import com.dashlane.hermes.generated.events.user.FirstLaunch
 import com.dashlane.hermes.generated.events.user.PasswordManagerLaunch
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.util.getPackageInfoCompat
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.Reusable
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher

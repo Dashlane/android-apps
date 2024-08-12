@@ -21,10 +21,9 @@ import androidx.credentials.provider.CallingAppInfo
 import androidx.credentials.provider.CredentialProviderService
 import androidx.credentials.provider.ProviderClearCredentialStateRequest
 import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
+import com.dashlane.credentialmanager.model.PasskeyPrivilegedApplications
 import com.dashlane.credentialmanager.model.PrivilegedAllowlist
-import com.dashlane.credentialmanager.model.formatHexString
 import com.dashlane.credentialsmanager.R
-import com.dashlane.ext.application.TrustedBrowserApplication
 import com.dashlane.util.stackTraceToSafeString
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.AndroidEntryPoint
@@ -124,22 +123,7 @@ class DashlaneCredentialProviderService : CredentialProviderService() {
     }
 
     private fun verifyOrigin(callingAppInfo: CallingAppInfo?): Boolean {
-        val privilegedAllowlist = PrivilegedAllowlist(
-            apps = TrustedBrowserApplication.getAllTrustedBrowsers().map {
-                PrivilegedAllowlist.PrivilegedAllowlistType(
-                    type = "android",
-                    info = PrivilegedAllowlist.PrivilegedAllowlistApp(
-                        packageName = it.packageName,
-                        signatures = it.signatures?.sha256Signatures?.map { sha256 ->
-                            PrivilegedAllowlist.PrivilegedAllowlistSignature(
-                                build = "release",
-                                sha256 = formatHexString(sha256)
-                            )
-                        } ?: emptyList()
-                    )
-                )
-            }
-        )
+        val privilegedAllowlist = PasskeyPrivilegedApplications.allowList
         return try {
             callingAppInfo?.getOrigin(moshi.adapter(PrivilegedAllowlist::class.java).toJson(privilegedAllowlist))
             true

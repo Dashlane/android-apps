@@ -31,7 +31,7 @@ class PasswordAnalysisItemWrapper(
         @Suppress("UNCHECKED_CAST")
         override fun onClickItemAction(v: View, item: SummaryObject) {
             if (item !is SummaryObject.Authentifiant) return
-            val vaultItem = vaultDataQuery.query(
+            val vaultItem = vaultDataQuery.queryLegacy(
                 vaultFilter {
                     specificUid(item.id)
                 }

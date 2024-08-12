@@ -4,13 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.navigation.Navigator
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.sharing.exception.SharingAlreadyAccessException
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.sharing.SharingContact.SharingContactUser
 import com.dashlane.useractivity.SharingDeveloperLogger
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

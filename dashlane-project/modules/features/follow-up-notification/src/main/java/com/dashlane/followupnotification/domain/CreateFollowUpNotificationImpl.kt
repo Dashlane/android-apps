@@ -27,7 +27,7 @@ class CreateFollowUpNotificationImpl @Inject constructor(
         summaryObject: SummaryObject,
         copyField: CopyField?
     ): FollowUpNotification? {
-        val vaultItem = vaultDataQuery.query(vaultFilter { specificUid(summaryObject.id) })
+        val vaultItem = vaultDataQuery.queryLegacy(vaultFilter { specificUid(summaryObject.id) })
         if (!isFollowUpNotificationNeeded(summaryObject, copyField)) return null
         val followUpNotificationsType =
             summaryObject.getFollowUpType(context, vaultItem?.syncObject?.localeFormat) ?: return null

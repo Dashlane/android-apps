@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="phishing_warning_title_high">High phishing risk detected</string>
+    
+    <string name="phishing_warning_title_moderate">Moderate phishing risk detected</string>
+    
+    <string name="phishing_warning_content">We detected potential phishing risk on this website. Please check the web address and proceed with caution.</string>
+    
+    <string name="phishing_warning_go_back">Go back</string>
+    
+    <string name="phishing_warning_title_autofill">Do you trust this website?</string>
+    
+    <string name="phishing_warning_trust">Trust and autofill</string>
+    
+    <string name="phishing_warning_not_trust">Don’t trust</string>
+    
+    <string name="phishing_warning_trust_description">Please check the web address before filling your login details. We detected moderate phishing risk.</string>
+    
+    <string name="phishing_warning_trust_description_high">Please check the web address before filling your login details. We detected high phishing risk.</string>
+    
+    <string name="phishing_warning_trusted_url">Trusted URL</string>
+    
+    <string name="phishing_warning_current_url">Current URL</string>
+    
+    <string name="phishing_do_not_warn_me_again">Don’t warn me again on this website</string>
+</resources>

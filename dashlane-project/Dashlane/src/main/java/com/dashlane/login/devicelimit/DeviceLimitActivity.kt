@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import com.dashlane.R
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.getDevicesLimitValue
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.getDevicesLimitValue
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

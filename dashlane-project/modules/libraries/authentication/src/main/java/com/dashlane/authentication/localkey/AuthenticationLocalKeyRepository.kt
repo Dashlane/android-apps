@@ -1,9 +1,9 @@
 package com.dashlane.authentication.localkey
 
 import com.dashlane.cryptography.CryptographyMarker
-import com.dashlane.session.AppKey
-import com.dashlane.session.LocalKey
-import com.dashlane.session.Username
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.user.Username
 
 interface AuthenticationLocalKeyRepository {
 

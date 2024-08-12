@@ -5,7 +5,6 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.AutofillOrigin
 import com.dashlane.autofill.accessibility.AutoFillAccessibilityViewNode
-import com.dashlane.autofill.ui.AutofillFeature
 import com.dashlane.autofill.formdetector.model.AccessibilityLoginForm
 import com.dashlane.autofill.formdetector.model.AutoFillViewNode
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
@@ -81,10 +80,10 @@ class LoginFormFiller(private val autofillUsageLog: AutofillAnalyzerDef.IAutofil
             packageName = loginForm.packageName,
             websiteUrlDomain = loginForm.websiteUrl?.toUrlDomainOrNull(),
             itemUrlDomain = authentifiant.urlDomain?.toUrlDomainOrNull(),
-            autofillFeature = AutofillFeature.SUGGESTION,
             matchType = MatchType.REGULAR,
             autofillOrigin = HermesAutofillOrigin.DROPDOWN,
-            autofillMechanism = AutofillMechanism.ANDROID_ACCESSIBILITY
+            autofillMechanism = AutofillMechanism.ANDROID_ACCESSIBILITY,
+            credentialId = authentifiant.id,
         )
     }
 

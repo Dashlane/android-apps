@@ -2,13 +2,13 @@ package com.dashlane.secrettransfer.view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.secrettransfer.GetKeyExchangeTransferInfoService
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

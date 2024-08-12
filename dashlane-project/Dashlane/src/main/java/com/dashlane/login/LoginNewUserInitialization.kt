@@ -1,12 +1,12 @@
 package com.dashlane.login
 
-import com.dashlane.account.UserAccountInfo
-import com.dashlane.session.AppKey
-import com.dashlane.session.LocalKey
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionResult
-import com.dashlane.session.Username
-import com.dashlane.session.VaultKey
+import com.dashlane.user.Username
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 

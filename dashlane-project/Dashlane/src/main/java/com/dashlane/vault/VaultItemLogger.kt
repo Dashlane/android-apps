@@ -16,13 +16,11 @@ import com.dashlane.hermes.generated.definitions.ItemTypeWithLink
 import com.dashlane.hermes.generated.definitions.Space
 import com.dashlane.hermes.generated.events.anonymous.CopyVaultItemFieldAnonymous
 import com.dashlane.hermes.generated.events.anonymous.OpenExternalVaultItemLinkAnonymous
-import com.dashlane.hermes.generated.events.anonymous.RestorePasswordAnonymous
 import com.dashlane.hermes.generated.events.anonymous.RevealVaultItemFieldAnonymous
 import com.dashlane.hermes.generated.events.anonymous.UpdateCredentialAnonymous
 import com.dashlane.hermes.generated.events.user.CopyVaultItemField
 import com.dashlane.hermes.generated.events.user.DownloadVaultItemAttachment
 import com.dashlane.hermes.generated.events.user.OpenExternalVaultItemLink
-import com.dashlane.hermes.generated.events.user.RestorePassword
 import com.dashlane.hermes.generated.events.user.RevealVaultItemField
 import com.dashlane.hermes.generated.events.user.SelectVaultItem
 import com.dashlane.hermes.generated.events.user.UpdateVaultItem
@@ -202,11 +200,6 @@ class VaultItemLogger @Inject constructor(
                 itemType = itemType
             )
         )
-    }
-
-    fun logPasswordRestored(itemId: String, url: String?) {
-        logRepository.queueEvent(RestorePassword(ItemId(id = itemId)))
-        logRepository.queueEvent(RestorePasswordAnonymous(TrackingLogUtils.createWebDomainForLog(url.orEmpty())))
     }
 }
 

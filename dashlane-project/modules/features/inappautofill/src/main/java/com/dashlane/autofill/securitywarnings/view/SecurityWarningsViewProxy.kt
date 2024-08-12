@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.api.R
+import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.internal.AutofillFormSourcesStrings
 import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
 import com.dashlane.autofill.securitywarnings.data.SecurityWarningAction
@@ -14,9 +15,7 @@ import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsServ
 import com.dashlane.autofill.securitywarnings.model.SecurityWarningsProcessor
 import com.dashlane.autofill.securitywarnings.model.SecurityWarningsView
 import com.dashlane.autofill.ui.AutoFillResponseActivity
-import com.dashlane.autofill.ui.AutofillFeature
 import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
-import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.util.Toaster
 import com.dashlane.util.getParcelableCompat
@@ -121,7 +120,6 @@ internal open class SecurityWarningsViewProxy(
         }
         autoFillResponseActivity.finishWithResult(
             itemToFill = unlockedAuthentifiant.itemToFill,
-            autofillFeature = AutofillFeature.SUGGESTION,
             matchType = matchType
         )
     }

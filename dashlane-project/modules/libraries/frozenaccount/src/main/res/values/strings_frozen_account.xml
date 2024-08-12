@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="frozen_account_paywall_title_header">Your account is now read-only</string>
+    
+    <string name="frozen_account_paywall_title">Upgrade to unlock all features</string>
+
+    
+    <string name="frozen_account_paywall_read_only_redirection">Learn what read-only means</string>
+
+    
+    <string name="frozen_account_paywall_cta_close">Close</string>
+    
+    <string name="frozen_account_paywall_cta_see_plans">See plan options</string>
+
+    
+    <string name="frozen_account_paywall_benefit_unlimited_logins_and_passkeys">Unlimited password &amp; passkey storage</string>
+    
+    <string name="frozen_account_paywall_benefit_unlimited_devices">Syncing across unlimited devices</string>
+    
+    <string name="frozen_account_paywall_benefit_dark_web_monitoring_and_vpn">Advanced features including Dark Web Monitoring and a VPN</string>
+
+    
+    <string name="frozen_account_free_plan_detail_warning">You’re over the %1$s-password limit, so
+        your account is read-only. Remove passwords or select a different plan to regain full access to your account.</string>
+    
+    <string name="frozen_account_free_plan_cta_manage_login">Manage logins</string>
+    
+    <string name="frozen_account_free_plan_cta_keep_free">Keep free</string>
+
+    
+    <string name="frozen_account_item_edit_banner_title">You can’t edit because your account is frozen.</string>
+    
+    <string name="frozen_account_item_edit_banner_description">You have over %1$s passwords saved. Reduce the number of passwords or upgrade to edit all your items.</string>
+
+    
+    <string name="action_item_frozen_account_title">Your account is read-only</string>
+    
+    <string name="action_item_frozen_account_description">You have over %1$s passwords saved. Remove passwords or upgrade to regain full access to your account.</string>
+
+</resources>

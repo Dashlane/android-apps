@@ -51,7 +51,7 @@ class AuditLogHelper @Inject constructor(
         return isProfessionalSpace && (teamspace as? TeamSpace.Business)?.isCollectSensitiveDataActivityLogsEnabled ?: false
     }
 
-    private fun loadSummary(itemId: String, vaultDataQuery: VaultDataQuery) = vaultDataQuery.query(
+    private fun loadSummary(itemId: String, vaultDataQuery: VaultDataQuery) = vaultDataQuery.queryLegacy(
         vaultFilter {
             specificUid(itemId)
             ignoreUserLock()

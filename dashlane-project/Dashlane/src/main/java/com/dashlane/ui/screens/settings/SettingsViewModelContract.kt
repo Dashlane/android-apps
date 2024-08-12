@@ -8,6 +8,7 @@ interface SettingsViewModelContract {
     val settingScreenItem: SettingScreenItem
     val syncFeedbacks: Flow<Int>
     val use2faSettingStateChanges: Flow<Boolean>
+    val accountRecoveryKeyStateChanges: Flow<Boolean>
 
     var shouldHighlightSetting: Boolean
     var pendingAdapterPosition: Int

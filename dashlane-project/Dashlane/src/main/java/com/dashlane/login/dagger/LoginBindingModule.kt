@@ -1,13 +1,13 @@
 package com.dashlane.login.dagger
 
+import com.dashlane.login.LoginLogger
+import com.dashlane.login.LoginLoggerImpl
 import com.dashlane.login.pages.email.LoginEmailContract
 import com.dashlane.login.pages.email.LoginEmailDataProvider
 import com.dashlane.login.pages.email.LoginEmailLogger
 import com.dashlane.login.pages.email.LoginEmailLoggerImpl
 import com.dashlane.login.pages.password.LoginPasswordContract
 import com.dashlane.login.pages.password.LoginPasswordDataProvider
-import com.dashlane.login.pages.password.LoginPasswordLogger
-import com.dashlane.login.pages.password.LoginPasswordLoggerImpl
 import com.dashlane.login.pages.pin.PinLockContract
 import com.dashlane.login.pages.pin.PinLockDataProvider
 import com.dashlane.login.pages.sso.SsoLockContract
@@ -26,8 +26,11 @@ import com.dashlane.login.root.LoginContract
 import com.dashlane.login.root.LoginDataProvider
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 @Module(includes = [AuthBindingModule::class])
+@InstallIn(SingletonComponent::class)
 interface LoginBindingModule {
     @Binds
     fun bindDataProvider(loginDataProvider: LoginDataProvider): LoginContract.DataProvider
@@ -48,9 +51,6 @@ interface LoginBindingModule {
     fun bindTotpLoggerFactory(loggerFactory: LoginTotpLoggerImpl.Factory): LoginTotpLogger.Factory
 
     @Binds
-    fun bindPasswordLoggerFactory(loggerFactory: LoginPasswordLoggerImpl.Factory): LoginPasswordLogger.Factory
-
-    @Binds
     fun bindNfcServiceDetector(nfcServiceDetector: NfcServiceDetectorImpl): NfcServiceDetector
 
     @Binds
@@ -64,4 +64,7 @@ interface LoginBindingModule {
 
     @Binds
     fun bindSsoLockDataProvider(impl: SsoLockDataProvider): SsoLockContract.DataProvider
+
+    @Binds
+    fun bindsLoginLogger(impl: LoginLoggerImpl): LoginLogger
 }

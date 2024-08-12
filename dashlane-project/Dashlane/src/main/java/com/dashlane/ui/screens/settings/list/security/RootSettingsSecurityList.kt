@@ -3,7 +3,7 @@ package com.dashlane.ui.screens.settings.list.security
 import android.content.Context
 import com.dashlane.R
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
 import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
 import com.dashlane.activatetotp.ActivateTotpLogger
 import com.dashlane.biometricrecovery.BiometricRecovery
@@ -15,7 +15,9 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.SecurityHelper
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
+import com.dashlane.session.UserDataRepository
 import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.storage.userdata.RichIconsSettingProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.ScreenshotPolicy
@@ -25,12 +27,10 @@ import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.Toaster
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
 @Suppress("UseDataClass")
@@ -57,11 +57,11 @@ class RootSettingsSecurityList(
     use2faSettingStateHolder: Use2faSettingStateHolder,
     activateTotpLogger: ActivateTotpLogger,
     userFeaturesChecker: UserFeaturesChecker,
-    accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
     teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
-    @IoCoroutineDispatcher
-    ioDispatcher: CoroutineDispatcher,
     subscriptionCodeRepository: SubscriptionCodeRepository,
+    accountRecoveryKeySettingStateHolder: AccountRecoveryKeySettingStateHolder,
+    userDataRepository: UserDataRepository,
+    richIconsSettingProvider: RichIconsSettingProvider
 ) {
 
     private val settingsSecurityApplicationLockList = SettingsSecurityApplicationLockList(
@@ -78,9 +78,9 @@ class RootSettingsSecurityList(
         use2faSettingStateHolder = use2faSettingStateHolder,
         activateTotpLogger = activateTotpLogger,
         sessionCredentialsSaver = sessionCredentialsSaver,
-        accountRecoveryKeyRepository = accountRecoveryKeyRepository,
         navigator = navigator,
-        teamspaceNotificator = teamspaceRestrictionNotificator
+        teamspaceNotificator = teamspaceRestrictionNotificator,
+        accountRecoveryKeySettingStateHolder = accountRecoveryKeySettingStateHolder,
     )
 
     private val settingsSecurityMiscList = SettingsSecurityMiscList(
@@ -99,7 +99,8 @@ class RootSettingsSecurityList(
         userFeaturesChecker = userFeaturesChecker,
         userAccountStorage = userAccountStorage,
         subscriptionCodeRepository = subscriptionCodeRepository,
-        ioDispatcher = ioDispatcher,
+        userDataRepository = userDataRepository,
+        richIconsSettingProvider = richIconsSettingProvider
     )
 
     val root = SettingScreenItem(

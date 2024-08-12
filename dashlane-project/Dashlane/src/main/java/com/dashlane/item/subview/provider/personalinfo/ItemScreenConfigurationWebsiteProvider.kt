@@ -2,6 +2,7 @@ package com.dashlane.item.subview.provider.personalinfo
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -53,9 +54,13 @@ class ItemScreenConfigurationWebsiteProvider(
         context: Context,
         item: VaultItem<*>
     ): ItemHeader {
-        val iconDrawable = createDefaultHeaderIcon(context, item.syncObject)
         val websiteTitle = context.getString(R.string.personal_website)
-        return ItemHeader(createMenus(), websiteTitle, iconDrawable)
+        return ItemHeader(
+            menuActions = createMenus(),
+            title = websiteTitle,
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_DOMAIN_ICON.value,
+            thumbnailIconRes = getHeaderIcon(item.syncObject),
+        )
     }
 
     private fun createSubViews(

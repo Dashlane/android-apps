@@ -10,12 +10,11 @@ import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordErrors.
 import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordErrors.NO_MATCHING_CREDENTIAL
 import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordErrors.USER_LOGGED_OUT
 import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordResultHandler
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.model.toItemToFill
 import com.dashlane.autofill.navigation.AutofillNavigatorImpl
 import com.dashlane.autofill.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.autofill.ui.AutoFillResponseActivity
-import com.dashlane.autofill.ui.AutofillFeature
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.bottomnavigation.delegatenavigation.DelegateNavigationBottomSheetFragment
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.util.Toaster
@@ -73,7 +72,6 @@ class AutofillChangePasswordActivity :
     ) {
         finishWithResult(
             itemToFill = result.toItemToFill(oldPassword = oldItem.password),
-            autofillFeature = AutofillFeature.CHANGE_PASSWORD,
             matchType = MatchType.REGULAR
         )
     }

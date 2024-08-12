@@ -15,6 +15,7 @@ import com.dashlane.autofill.accessibility.AutoFillAccessibilityViewNode
 import com.dashlane.autofill.accessibility.DashlaneAccessibilityService
 import com.dashlane.autofill.accessibility.filler.LoginFormFiller
 import com.dashlane.autofill.formdetector.model.AccessibilityLoginForm
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.ui.DashlaneBubble
 import com.dashlane.ui.InAppLoginWindow
@@ -120,7 +121,8 @@ class AlwaysOnUiManager(
                 origin = AutofillOrigin.IN_APP_LOGIN,
                 packageName = packageName,
                 isNativeApp = loginForm.websiteUrl != null,
-                totalCount = results
+                totalCount = results,
+                phishingAttemptLevel = PhishingAttemptLevel.NONE
             )
         }
 

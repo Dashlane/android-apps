@@ -39,7 +39,7 @@ class SearchServiceImpl @Inject constructor(
     private val vaultItemLogger: VaultItemLogger,
     private val navigator: Navigator,
     private val teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
-    private val passwordLimiter: PasswordLimiter,
+    private val passwordLimiter: PasswordLimiter
 ) : SearchService {
 
     override fun getDefaultSearchRequest() = SearchRequest.DefaultRequest.FromRecent
@@ -76,6 +76,6 @@ class SearchServiceImpl @Inject constructor(
         rootView = layout,
         teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
         navigator = navigator,
-        passwordLimiter = passwordLimiter,
+        passwordLimiter = passwordLimiter
     )
 }

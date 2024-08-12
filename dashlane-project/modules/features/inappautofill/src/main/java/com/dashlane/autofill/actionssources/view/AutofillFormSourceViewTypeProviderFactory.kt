@@ -11,6 +11,8 @@ interface AutofillFormSourceViewTypeProviderFactory {
         val title: String
         val type: String
 
-        fun buildDrawable(context: Context): Drawable
+        fun getUrlDomain(): String?
+        fun isApp(): Boolean
+        fun getAppDrawable(context: Context): Drawable?
     }
 }

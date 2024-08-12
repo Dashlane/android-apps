@@ -31,7 +31,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
@@ -40,7 +40,7 @@ import com.dashlane.design.component.TextField
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.CircularProgressIndicator
+import com.dashlane.ui.common.compose.components.CircularProgressIndicator
 import com.dashlane.util.compose.GenericSeparatorVisualTransformation
 
 @Composable

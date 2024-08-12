@@ -3,6 +3,7 @@ package com.dashlane.authentication.login
 import com.dashlane.server.api.endpoints.authentication.AuthSsoInfo
 
 data class SsoInfo(
+    val login: String,
     val serviceProviderUrl: String,
     val isNitroProvider: Boolean,
     val migration: Migration?
@@ -10,7 +11,8 @@ data class SsoInfo(
     enum class Migration { TO_SSO_MEMBER, TO_MASTER_PASSWORD_USER }
 }
 
-internal fun AuthSsoInfo.toAuthenticationSsoInfo() = SsoInfo(
+internal fun AuthSsoInfo.toAuthenticationSsoInfo(login: String) = SsoInfo(
+    login = login,
     serviceProviderUrl = serviceProviderUrl,
     isNitroProvider = isNitroProvider ?: false,
     migration = migration?.let {

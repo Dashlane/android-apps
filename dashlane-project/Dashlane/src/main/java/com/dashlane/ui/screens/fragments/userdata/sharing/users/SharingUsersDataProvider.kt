@@ -11,30 +11,24 @@ import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class SharingUsersDataProvider @Inject constructor(
     private val sharingDao: SharingDao,
     private val genericDataQuery: GenericDataQuery,
     private val sharingDataProvider: SharingDataProvider,
     @IoCoroutineDispatcher
-    private val ioCoroutineDispatcher: CoroutineDispatcher,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val ioCoroutineDispatcher: CoroutineDispatcher
 ) {
-    private val showSharedCollections: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
-
     suspend fun getContactsForItem(itemId: String): List<SharingModels> {
         return withContext(ioCoroutineDispatcher) {
             val itemGroup = sharingDao.loadItemGroupForItem(itemId)
                 ?: return@withContext emptyList<SharingModels>()
-            val collections = sharingDataProvider.getCollections(itemId, needsAdminRights = false)
+            val collections = sharingDataProvider.getCollections(itemId)
             val summaryObject = genericDataQuery.queryFirst(
                 genericFilter {
                     specificUid(itemId)
@@ -74,24 +68,20 @@ class SharingUsersDataProvider @Inject constructor(
         collections: List<Collection>,
         itemGroup: ItemGroup,
         summaryObject: SummaryObject
-    ) = if (showSharedCollections) {
-        collections.map {
-            it.users?.map { userCollection ->
-                SharingModels.ItemUser(
-                    userId = userCollection.login,
-                    isAccepted = userCollection.isAccepted,
-                    isPending = userCollection.isPending,
-                    isMemberAdmin = userCollection.isAdmin,
-                    sharingStatusResource = userCollection.getSharingStatusResource(),
-                    itemGroup = itemGroup,
-                    item = summaryObject,
-                    isItemInCollection = true
-                )
-            } ?: emptyList()
-        }.flatten()
-    } else {
-        emptyList()
-    }
+    ) = collections.map {
+        it.users?.map { userCollection ->
+            SharingModels.ItemUser(
+                userId = userCollection.login,
+                isAccepted = userCollection.isAccepted,
+                isPending = userCollection.isPending,
+                isMemberAdmin = userCollection.isAdmin,
+                sharingStatusResource = userCollection.getSharingStatusResource(),
+                itemGroup = itemGroup,
+                item = summaryObject,
+                isItemInCollection = true
+            )
+        } ?: emptyList()
+    }.flatten()
 
     private fun loadGroups(
         itemGroup: ItemGroup,
@@ -118,23 +108,19 @@ class SharingUsersDataProvider @Inject constructor(
         collections: List<Collection>,
         itemGroup: ItemGroup,
         summaryObject: SummaryObject
-    ) = if (showSharedCollections) {
-        collections.map {
-            it.userGroups?.map { userCollectionGroup ->
-                SharingModels.ItemUserGroup(
-                    groupId = userCollectionGroup.uuid,
-                    name = userCollectionGroup.name,
-                    isAccepted = userCollectionGroup.isAccepted,
-                    isPending = userCollectionGroup.isPending,
-                    isMemberAdmin = userCollectionGroup.isAdmin,
-                    sharingStatusResource = userCollectionGroup.getSharingStatusResource(),
-                    itemGroup = itemGroup,
-                    item = summaryObject,
-                    isItemInCollection = true
-                )
-            } ?: emptyList()
-        }.flatten()
-    } else {
-        emptyList()
-    }
+    ) = collections.map {
+        it.userGroups?.map { userCollectionGroup ->
+            SharingModels.ItemUserGroup(
+                groupId = userCollectionGroup.uuid,
+                name = userCollectionGroup.name,
+                isAccepted = userCollectionGroup.isAccepted,
+                isPending = userCollectionGroup.isPending,
+                isMemberAdmin = userCollectionGroup.isAdmin,
+                sharingStatusResource = userCollectionGroup.getSharingStatusResource(),
+                itemGroup = itemGroup,
+                item = summaryObject,
+                isItemInCollection = true
+            )
+        } ?: emptyList()
+    }.flatten()
 }

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordErrors
 import com.dashlane.autofill.changepassword.domain.CredentialUpdateInfo
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.vault.model.loginForUi

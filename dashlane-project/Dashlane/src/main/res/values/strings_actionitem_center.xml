@@ -18,15 +18,13 @@
     <string name="action_item_free_trial_started_title">Your free trial has started!</string>
     <string name="action_item_free_trial_started_description">Try out Dashlane Premium for free.</string>
     <string name="action_item_trial_upgrade_recommendation_title">Enjoying our Premium features?</string>
-    <string name="action_item_trial_upgrade_recommendation_description_essentials">Based on app usage, our Essentials plan looks like a good fit for you. Upgrade today.</string>
     <string name="action_item_trial_upgrade_recommendation_description_premium">Based on app usage, our Premium plan looks like a good fit for you. Upgrade today.</string>
-    <string name="action_item_trial_upgrade_recommendation_description_family">Based on app usage, our Friends &amp; Family plan looks like a good fit for you. Upgrade today.</string>
     
     <string name="action_item_password_limit_reached_title">You\'ve reached the %1$d-login limit</string>
     
     <string name="action_item_password_limit_warning_title">You\'ve added %1$d out of %2$d logins</string>
     
-    <string name="action_item_password_limit_description">Upgrade to Advanced to get unlimited logins and sync across 2 devices.</string>
+    <string name="action_item_password_limit_description">Upgrade to Essentials to get unlimited logins and sync across 2 devices.</string>
 
     
     <string name="section_header_see_all_button_with_count">See all (%1$d)</string>

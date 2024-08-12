@@ -1,11 +1,13 @@
 package com.dashlane.account
 
 import com.dashlane.device.DeviceInfoRepository
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.Session
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.UserSecureStorageManager
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.UserSecuritySettings
 import javax.inject.Inject
 
 class UserAccountStorageImpl @Inject constructor(
@@ -16,7 +18,8 @@ class UserAccountStorageImpl @Inject constructor(
 
     override fun saveUserAccountInfo(
         userAccountInfo: UserAccountInfo,
-        session: Session,
+        localKey: LocalKey,
+        secretKey: String,
         allowOverwriteAccessKey: Boolean
     ) {
         val username = userAccountInfo.username
@@ -46,7 +49,7 @@ class UserAccountStorageImpl @Inject constructor(
             
             preferences.putLong(ConstantsPrefs.SECURITY_SETTINGS, it.asFlags().toLong())
         }
-        userSecureStorageManager.storeSecretKey(session, session.secretKey)
+        userSecureStorageManager.storeSecretKey(localKey, Username.ofEmail(username), secretKey)
     }
 
     override fun get(username: Username): UserAccountInfo? {

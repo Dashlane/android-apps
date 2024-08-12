@@ -20,7 +20,7 @@ import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.JsonSerialization
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.Cache
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.util.time.TimeMeasurement
 import com.dashlane.util.tryOrNull

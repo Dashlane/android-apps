@@ -1,7 +1,9 @@
 package com.dashlane.account
 
-import com.dashlane.session.Session
-import com.dashlane.session.Username
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.UserSecuritySettings
+import com.dashlane.user.Username
 
 interface UserAccountStorage {
 
@@ -12,7 +14,8 @@ interface UserAccountStorage {
 
     fun saveUserAccountInfo(
         userAccountInfo: UserAccountInfo,
-        session: Session,
+        localKey: LocalKey,
+        secretKey: String,
         allowOverwriteAccessKey: Boolean
     )
 

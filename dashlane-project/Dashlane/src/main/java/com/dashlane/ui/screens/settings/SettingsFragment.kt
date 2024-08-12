@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.dashlane.R
+import com.dashlane.item.subview.action.LoginOpener
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
+import java.net.URL
 
 @AndroidEntryPoint
 class SettingsFragment : AbstractContentFragment() {
@@ -18,7 +20,7 @@ class SettingsFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val recyclerView = RecyclerView(inflater.context)
 
@@ -26,7 +28,8 @@ class SettingsFragment : AbstractContentFragment() {
             recyclerView,
             { requireActivity().findViewById(R.id.toolbar) },
             viewModel,
-            viewLifecycleOwner.lifecycle
+            viewLifecycleOwner.lifecycle,
+            onOpenSocialMediaLink = ::openSocialMediaLink,
         )
 
         setCurrentPageView(viewModel.settingScreenItem.page)
@@ -39,5 +42,13 @@ class SettingsFragment : AbstractContentFragment() {
 
         setHasOptionsMenu(true)
         requireActivity().invalidateOptionsMenu()
+    }
+
+    private fun openSocialMediaLink(url: URL) {
+        LoginOpener(this.requireActivity()).show(
+            url = url.toString(),
+            packageNames = setOf(),
+            listener = null
+        )
     }
 }

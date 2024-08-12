@@ -14,7 +14,7 @@ import com.dashlane.R
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
 import com.dashlane.help.HelpCenterLink
-import com.dashlane.login.LoginActivity
+import com.dashlane.pin.settings.PinSettingsActivity
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.SecurityHelper
@@ -22,7 +22,6 @@ import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.ui.screens.activities.onboarding.hardwareauth.HardwareAuthActivationActivity
-import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.util.clearTop
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getParcelableExtraCompat
@@ -52,9 +51,6 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
     @Inject
     lateinit var userPreferencesManager: UserPreferencesManager
 
-    @Inject
-    lateinit var sensibleSettingsClickHelper: SensibleSettingsClickHelper
-
     private lateinit var presenter: Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +77,6 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
             biometricAuthModule = biometricAuthModule,
             securityHelper = securityHelper,
             biometricRecovery = biometricRecovery,
-            sensibleSettingsClickHelper = sensibleSettingsClickHelper,
             nextIntent = nextIntent,
             fromUse2fa = fromUse2fa
         )
@@ -139,7 +134,6 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         private val biometricAuthModule: BiometricAuthModule,
         private val securityHelper: SecurityHelper,
         private val biometricRecovery: BiometricRecovery,
-        private val sensibleSettingsClickHelper: SensibleSettingsClickHelper,
         private val nextIntent: Intent,
         private val fromUse2fa: Boolean
     ) : BasePresenter<IntroScreenContract.DataProvider, ViewProxy>(),
@@ -175,13 +169,10 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         }
 
         override fun onClickPositiveButton() {
-            val context = context ?: return
-            sensibleSettingsClickHelper.perform(context) {
-                if (uiConfig.hasBiometrics) {
-                    showBiometricActivation()
-                } else {
-                    showPinCodeSetter()
-                }
+            if (uiConfig.hasBiometrics) {
+                showBiometricActivation()
+            } else {
+                showPinCodeSetter()
             }
         }
 
@@ -194,7 +185,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         override fun onClickNeutralButton() = Unit
 
         override fun onClickLink(position: Int, label: Int) {
-            uiConfig.link?.uri?.let {
+            uiConfig.link?.androidUri?.let {
                 context?.launchUrl(it)
             }
         }
@@ -210,13 +201,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
 
         private fun showPinCodeSetter() {
             activity?.run {
-                startActivityForResult(
-                    Intent(context, LoginActivity::class.java)
-                        .putExtra(LockSetting.EXTRA_IS_LOCK_CANCELABLE, true)
-                        .putExtra(LockSetting.EXTRA_LOCK_TYPE_IS_PIN_SET, true)
-                        .clearTop(),
-                    REQUEST_CODE_SET_PIN
-                )
+                startActivityForResult(Intent(context, PinSettingsActivity::class.java), REQUEST_CODE_SET_PIN)
             }
         }
 

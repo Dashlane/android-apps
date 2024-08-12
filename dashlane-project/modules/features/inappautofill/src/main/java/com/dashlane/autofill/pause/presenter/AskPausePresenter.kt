@@ -3,8 +3,8 @@ package com.dashlane.autofill.pause.presenter
 import com.dashlane.autofill.pause.model.PauseDurations
 import com.dashlane.autofill.pause.AskPauseContract
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

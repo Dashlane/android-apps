@@ -1,12 +1,12 @@
 package com.dashlane.session.repository
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.Session
 import com.dashlane.session.UserDataRepository
-import com.dashlane.session.isServerKeyNotNull
+import com.dashlane.crypto.keys.isServerKeyNotNull
 import com.dashlane.settings.SettingsManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.xml.domain.SyncObject
@@ -59,7 +59,8 @@ open class UserDataRepositoryImpl @Inject constructor(
                 )
                 userAccountStorage.get().saveUserAccountInfo(
                     userAccountInfo,
-                    session,
+                    session.localKey,
+                    session.secretKey,
                     allowOverwriteAccessKey
                 )
 

@@ -5,15 +5,14 @@ import com.dashlane.hermes.generated.definitions.Button
 import com.dashlane.hermes.generated.events.user.Click
 import javax.inject.Inject
 
-class DeleteVaultItemLogger @Inject constructor(private val logRepository: LogRepository) :
-    DeleteVaultItemContract.Logger {
-    override fun logItemDeletionConfirmed() {
+class DeleteVaultItemLogger @Inject constructor(private val logRepository: LogRepository) {
+    fun logItemDeletionConfirmed() {
         logRepository.queueEvent(
             Click(Button.OK)
         )
     }
 
-    override fun logItemDeletionCanceled() {
+    fun logItemDeletionCanceled() {
         logRepository.queueEvent(
             Click(Button.CANCEL)
         )

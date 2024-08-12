@@ -7,9 +7,11 @@ import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.cryptography.decryptFile
+import com.dashlane.network.tools.authorization
 import com.dashlane.network.webservices.DownloadFileService
 import com.dashlane.securefile.SecureFile
-import com.dashlane.securefile.services.GetDownloadLinkService
+import com.dashlane.server.api.endpoints.securefile.GetSecureFileDownloadLinkService
+import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.SessionManager
 import com.dashlane.util.FileUtils
 import com.dashlane.util.isSemanticallyNull
@@ -28,7 +30,7 @@ import javax.inject.Inject
 class SecureFileStorageImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sessionManager: SessionManager,
-    private val downloadLinkService: GetDownloadLinkService,
+    private val getSecureFileDownloadLinkService: GetSecureFileDownloadLinkService,
     private val downloadService: DownloadFileService,
     private val cryptography: Cryptography,
     private val fileUtils: FileUtils
@@ -58,17 +60,17 @@ class SecureFileStorageImpl @Inject constructor(
             body.source().use { source ->
                 (
                     object : ForwardingSink(secureFile.file.sink()) {
-                    var downloadedSize = 0L
+                        var downloadedSize = 0L
 
-                    override fun write(source: Buffer, byteCount: Long) {
-                        super.write(source, byteCount)
-                        downloadedSize += byteCount
-                        progression.trySend(downloadedSize * 100F / body.contentLength())
+                        override fun write(source: Buffer, byteCount: Long) {
+                            super.write(source, byteCount)
+                            downloadedSize += byteCount
+                            progression.trySend(downloadedSize * 100F / body.contentLength())
+                        }
                     }
-                }
-                ).buffer().use { sink ->
-                    sink.writeAll(source)
-                }
+                    ).buffer().use { sink ->
+                        sink.writeAll(source)
+                    }
             }
         }
     }
@@ -116,20 +118,17 @@ class SecureFileStorageImpl @Inject constructor(
     }
 
     private suspend fun fetchDownloadLink(id: String): String {
-        val session = sessionManager.session ?: throw DownloadAccessException()
-        val uki = session.uki
+        try {
+            val session = sessionManager.session ?: throw DownloadAccessException()
+            val response = getSecureFileDownloadLinkService.execute(
+                userAuthorization = session.authorization,
+                request = GetSecureFileDownloadLinkService.Request(
+                    key = id,
+                )
+            )
 
-        val response = downloadLinkService.execute(
-            session.userId,
-            uki,
-            id
-        )
-
-        val link = response.content?.url
-
-        return if (response.code == 200 && link != null) {
-            link
-        } else {
+            return response.data.url
+        } catch (_: DashlaneApiException) {
             throw DownloadAccessException()
         }
     }

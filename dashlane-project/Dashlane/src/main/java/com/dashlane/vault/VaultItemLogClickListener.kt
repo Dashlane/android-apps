@@ -24,7 +24,7 @@ class VaultItemLogClickListener<T>(
             val trackIndex =
                 itemListContext.container == ItemListContext.Container.SEARCH || highlight != Highlight.NONE
             dataType?.toItemTypeOrNull()?.let {
-                val id = summaryObject.anonymousId ?: return
+                val id = summaryObject.anonymousId ?: return@run
                 vaultItemLogger.logSelect(
                     highlight = itemListContext.section.toHighlight(),
                     itemId = id,

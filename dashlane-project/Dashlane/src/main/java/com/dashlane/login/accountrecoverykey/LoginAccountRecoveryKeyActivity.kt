@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.login.LoginIntents

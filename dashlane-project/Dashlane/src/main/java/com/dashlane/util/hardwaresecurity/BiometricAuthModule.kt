@@ -10,7 +10,7 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
@@ -162,11 +162,13 @@ class BiometricAuthModule @Inject constructor(
 
     fun enableFeature() {
         if (!isHardwareSetUp()) return
+        userPreferencesManager.authenticatorInvalidatedBiometric = false
         userPreferencesManager.putBoolean(ConstantsPrefs.USE_GOOGLE_FINGERPRINT, true)
     }
 
     fun disableFeature() {
         if (!isHardwareSetUp()) return
+        userPreferencesManager.authenticatorEnrolledBiometric = false
         userPreferencesManager.putBoolean(ConstantsPrefs.USE_GOOGLE_FINGERPRINT, false)
     }
 
@@ -190,7 +192,7 @@ class BiometricAuthModule @Inject constructor(
         return messageToUser
     }
 
-    private fun getPromptAuthenticator(biometricActivationStatus: BiometricActivationStatus): Int {
+    fun getPromptAuthenticator(biometricActivationStatus: BiometricActivationStatus): Int {
         return when (biometricActivationStatus) {
             BiometricActivationStatus.NOT_ENABLED,
             BiometricActivationStatus.INSUFFICIENT_STRENGTH -> -1
@@ -204,7 +206,7 @@ class BiometricAuthModule @Inject constructor(
         return " 0x$code"
     }
 
-    private fun checkBiometricStatus(username: String, biometricActivationStatus: BiometricActivationStatus): Result {
+    fun checkBiometricStatus(username: String, biometricActivationStatus: BiometricActivationStatus): Result {
         return when (biometricActivationStatus) {
             BiometricActivationStatus.ENABLED_WEAK -> Result.BiometricEnrolled(null)
             BiometricActivationStatus.ENABLED_STRONG -> {

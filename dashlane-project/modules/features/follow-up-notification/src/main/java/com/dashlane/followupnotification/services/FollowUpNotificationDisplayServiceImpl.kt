@@ -11,16 +11,15 @@ import com.dashlane.util.notification.DashlaneNotificationBuilder
 import com.dashlane.util.notification.NotificationHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import javax.inject.Named
 
 class FollowUpNotificationDisplayServiceImpl @Inject constructor(
     @ApplicationContext val context: Context,
-    @Named("autoRemovalElapsedTime") val notificationAutoRemovalTime: Long,
     private val followUpNotificationDiscoveryService: FollowUpNotificationDiscoveryService
 ) : FollowUpNotificationDisplayService {
-    companion object {
+    private companion object {
         const val ACTIVE_FOLLOW_UP_NOTIFICATION_ID = 0x037
         const val PASSIVE_FOLLOW_UP_NOTIFICATION_ID = 0x047
+        const val NOTIFICATION_AUTO_REMOVAL_TIME = 30_000L
     }
 
     private var onScreenFollowUpNotificationId: String? = null
@@ -35,7 +34,7 @@ class FollowUpNotificationDisplayServiceImpl @Inject constructor(
             setLocalOnly()
             setContentTitle(context.getString(R.string.dashlane_main_app_name))
             setContentText(context.getString(R.string.follow_up_notification_collapse_text))
-            setWhenWithChronometer(notificationAutoRemovalTime, true)
+            setWhenWithChronometer(NOTIFICATION_AUTO_REMOVAL_TIME, true)
             setCustomView(remoteViews)
             setOnlyAlertOnce()
             setChannel(NotificationHelper.Channel.FOLLOW_UP_NOTIFICATION)

@@ -1,10 +1,15 @@
 package com.dashlane.navigation
 
+import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDirections
+import androidx.navigation.NavType
+import com.dashlane.cryptography.ObfuscatedByteArray
+import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.ui.fragments.BaseDialogFragment
+import com.dashlane.util.getSerializableCompat
 
 object NavigationUtils {
 
@@ -42,5 +47,19 @@ object NavigationUtils {
                 fragment.dismiss()
             }
         }
+    }
+}
+
+class ObfuscatedByteArrayParamType : NavType<ObfuscatedByteArray>(isNullableAllowed = false) {
+    override fun get(bundle: Bundle, key: String): ObfuscatedByteArray? {
+        return bundle.getSerializableCompat(key, ObfuscatedByteArray::class.java)
+    }
+
+    override fun parseValue(value: String): ObfuscatedByteArray {
+        return value.encodeUtf8ToObfuscated()
+    }
+
+    override fun put(bundle: Bundle, key: String, value: ObfuscatedByteArray) {
+        bundle.putSerializable(key, value)
     }
 }

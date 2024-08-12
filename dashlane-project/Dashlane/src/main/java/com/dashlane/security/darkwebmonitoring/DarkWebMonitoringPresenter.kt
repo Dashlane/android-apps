@@ -5,7 +5,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
-import androidx.lifecycle.LifecycleOwner
 import com.dashlane.R
 import com.dashlane.darkweb.DarkWebEmailStatus
 import com.dashlane.darkweb.DarkWebEmailStatus.Companion.STATUS_PENDING
@@ -19,16 +18,13 @@ import com.dashlane.security.darkwebmonitoring.item.DarkWebHeaderItem
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.widgets.view.empty.EmptyScreenConfiguration.Builder
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -44,24 +40,12 @@ class DarkWebMonitoringPresenter @Inject constructor(
     dataProvider: DarkWebMonitoringContract.DataProvider,
     private val lockManager: LockManager,
     private val navigator: Navigator,
-    private val viewModel: DarkWebMonitoringAlertViewModel,
-    lifecycleOwner: LifecycleOwner
+    private val viewModel: DarkWebMonitoringAlertViewModel
 ) :
     BasePresenter<DarkWebMonitoringContract.DataProvider, DarkWebMonitoringContract.ViewProxy>(),
     DarkWebMonitoringContract.Presenter,
     DarkWebEmailItem.DeleteListener {
 
-    private val refreshActor = fragmentLifecycleCoroutineScope.actor<Unit> {
-        consumeEach {
-            val breach = launch {
-                viewModel.darkwebBreaches.value = provider.getDarkwebBreaches()
-            }
-            val email = launch {
-                viewModel.darkwebEmailStatuses.value = provider.getDarkwebEmailStatuses()
-            }
-            joinAll(breach, email)
-        }
-    }
     private val emailAppIntent = Intent.makeMainSelectorActivity(
         Intent.ACTION_MAIN,
         Intent.CATEGORY_APP_EMAIL
@@ -72,27 +56,19 @@ class DarkWebMonitoringPresenter @Inject constructor(
 
     init {
         setProvider(dataProvider)
-        viewModel.darkwebBreaches.observe(lifecycleOwner) {
-            refreshView()
-        }
-
-        viewModel.darkwebEmailStatuses.observe(lifecycleOwner) {
-            refreshView()
-        }
     }
 
-    private fun refreshView() {
+    private fun refreshView(state: DarkWebStatus) {
         val context = context ?: return
-        val breaches = viewModel.darkwebBreaches.value
-        val emailStatuses = viewModel.darkwebEmailStatuses.value
+        val breaches = state.breaches
+        val emailStatuses = state.emailStatus
         if (emailStatuses.isNullOrEmpty()) {
             view.showDarkwebInactiveScene()
             return
         }
         val pendingBreaches =
-            breaches?.filter { it.localBreach.status != SyncObject.SecurityBreach.Status.SOLVED }
-        val pendingItems = if (pendingBreaches?.isEmpty() == true &&
-            emailStatuses.any { it.status == STATUS_PENDING }
+            breaches.filter { it.localBreach.status != SyncObject.SecurityBreach.Status.SOLVED }
+        val pendingItems = if (pendingBreaches.isEmpty() && emailStatuses.any { it.status == STATUS_PENDING }
         ) {
             
             listOf(
@@ -122,7 +98,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
             )
         }
         val resolvedItems = createBreachItems(
-            breaches?.filter { it.localBreach.status == SyncObject.SecurityBreach.Status.SOLVED },
+            breaches.filter { it.localBreach.status == SyncObject.SecurityBreach.Status.SOLVED },
             DarkWebEmptyItem(
                 Builder()
                     .setImage(getDrawable(context, R.drawable.ic_empty_breaches_resolved))
@@ -169,7 +145,14 @@ class DarkWebMonitoringPresenter @Inject constructor(
 
     override fun onViewVisible() {
         provider.listenForChanges()
-        fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) { refreshList() }
+        fragmentLifecycleCoroutineScope.launch {
+            viewModel.breachesState.collect {
+                when (it) {
+                    null -> view.showLoadingScreen()
+                    else -> refreshView(it)
+                }
+            }
+        }
     }
 
     override fun onViewHidden() {
@@ -182,7 +165,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
     }
 
     override fun requireRefresh() {
-        fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) { refreshList() }
+        fragmentLifecycleCoroutineScope.launch { refreshList() }
     }
 
     override fun onClick(item: DashlaneRecyclerAdapter.ViewTypeProvider) {
@@ -194,7 +177,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
     }
 
     override fun onDeleteClicked(item: DarkWebEmailStatus) {
-        fragmentLifecycleCoroutineScope.launch(mainCoroutineDispatcher) {
+        fragmentLifecycleCoroutineScope.launch {
             provider.unlistenDarkWeb(item.email)
             refreshList()
         }
@@ -210,7 +193,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
 
     private suspend fun refreshList() {
         lockManager.waitUnlock()
-        refreshActor.trySend(Unit)
+        viewModel.refresh()
     }
 
     private fun navigateToSetupMailDarkWeb() {
@@ -220,7 +203,7 @@ class DarkWebMonitoringPresenter @Inject constructor(
     }
 
     override fun onCreateOptionsMenu(inflater: MenuInflater, menu: Menu) {
-        if (selectedItems.size > 0) {
+        if (selectedItems.isNotEmpty()) {
             menu.clear()
             inflater.inflate(R.menu.delete_menu, menu)
         }
@@ -228,21 +211,22 @@ class DarkWebMonitoringPresenter @Inject constructor(
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        return when (item.itemId) {
             android.R.id.home -> {
-                if (selectedItems.size > 0) {
+                if (selectedItems.isNotEmpty()) {
                     selectedItems.clear()
                     view.updateActionBar(updateTitle = true)
                     activity?.invalidateOptionsMenu()
-                    return true
+                    true
+                } else {
+                    false
                 }
-                return false
             }
             R.id.menu_delete -> {
                 deleteSelectedItems()
-                return true
+                true
             }
-            else -> return false
+            else -> false
         }
     }
 

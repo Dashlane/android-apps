@@ -8,10 +8,12 @@
     <string name="plans_on_going_trial">You’re on a free trial</string>
     <string name="plans_on_going_plan">Your current plan</string>
 
-
-    <string name="plans_essentials_title">Essentials</string>
-    <string name="plans_essentials_description">Get unlimited logins synced across &lt;strong&gt;2 devices&lt;/strong&gt;.</string>
-
+    
+    <string name="plans_free_title">Free</string>
+    
+    <string name="plans_free_description">Explore Dashlane for free with &lt;strong&gt;limited features access&lt;/strong&gt;, up to %1$s passwords.</string>
+    
+    <string name="plans_free_description_for_frozen_account">You’re over this plan’s %1$s-password limit. Select a different plan for unlimited storage.</string>
     
     <string name="plans_advanced_title">Advanced</string>
     
@@ -77,11 +79,9 @@
 
     <string name="plans_offers_mismatch_cycles_info">Then %1$s %2$s</string>
 
-    <string name="plans_yearly_saving_tag">SAVE %1$s</string>
-    <string name="plans_best_yearly_saving_tag">SAVE UP TO %1$s</string>
 
-    <string name="plan_details_essentials_title">Essentials</string>
-
+    
+    <string name="plan_details_free_title">Free</string>
     
     <string name="plan_details_advanced_title">Advanced</string>
 

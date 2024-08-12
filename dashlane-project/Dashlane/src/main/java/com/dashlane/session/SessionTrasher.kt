@@ -4,6 +4,7 @@ import com.dashlane.database.DatabaseProvider
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
+import com.dashlane.user.Username
 import javax.inject.Inject
 
 class SessionTrasher @Inject constructor(

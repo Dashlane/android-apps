@@ -1,20 +1,22 @@
 package com.dashlane.login.pages.password
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
-import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.limitations.DeviceLimitActivityListener
 import com.dashlane.limitations.Enforce2faLimiter
 import com.dashlane.login.LoginMode
 import com.dashlane.login.LoginNewUserInitialization
+import com.dashlane.login.LoginStrategy
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionResult
-import com.dashlane.session.Username
+import com.dashlane.user.Username
+import com.dashlane.sync.DataSync
 import javax.inject.Inject
 
 class LoginPasswordRepository @Inject constructor(
@@ -24,6 +26,7 @@ class LoginPasswordRepository @Inject constructor(
     private val enforce2faLimiter: Enforce2faLimiter,
     private val dataSync: DataSync,
     private val loginNewUserInitialization: LoginNewUserInitialization,
+    private val loginStrategy: LoginStrategy
 ) {
 
     suspend fun createSessionForLocalPassword(
@@ -96,5 +99,23 @@ class LoginPasswordRepository @Inject constructor(
         enforce2faLimiter.isFirstLogin = true
 
         return sessionResult.session
+    }
+
+    suspend fun getLocalStrategy(session: Session): LoginStrategy.Strategy {
+        val shouldLaunchInitialSync = userPreferencesManager.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
+        val strategy = when {
+            
+            shouldLaunchInitialSync -> loginStrategy.getStrategy(session)
+            else -> LoginStrategy.Strategy.UNLOCK
+        }
+        return strategy
+    }
+
+    suspend fun getRemoteStrategy(session: Session, securityFeatures: Set<SecurityFeature>): LoginStrategy.Strategy {
+        val strategy = loginStrategy.getStrategy(session, securityFeatures)
+        if (strategy == LoginStrategy.Strategy.MONOBUCKET) {
+            userPreferencesManager.ukiRequiresMonobucketConfirmation = true
+        }
+        return strategy
     }
 }

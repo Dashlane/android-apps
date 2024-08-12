@@ -1,12 +1,9 @@
 package com.dashlane.util
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import com.dashlane.ui.drawable.PlaceholderForTextDrawableFactory
-import com.dashlane.util.graphics.CredentialRemoteDrawable
 
 fun Drawable.toBitmap(): Bitmap = when {
     this is BitmapDrawable -> bitmap
@@ -16,27 +13,4 @@ fun Drawable.toBitmap(): Bitmap = when {
         setBounds(0, 0, canvas.width, canvas.height)
         draw(canvas)
     }
-}
-
-fun Context.getImageDrawableByWebsiteUrl(title: String?, websiteUrl: String?): Drawable {
-    val drawable = CredentialRemoteDrawable(
-        this,
-        this.getThemeAttrColor(R.attr.colorPrimary)
-    )
-    drawable.preferImageBackgroundColor = true
-    drawable.loadImage(websiteUrl, getPlaceholder(title))
-    return drawable
-}
-
-fun Context.getImageDrawableByWebsiteUrl(title: String?): Drawable {
-    return getImageDrawableByWebsiteUrl(title, title)
-}
-
-fun Context.getPlaceholder(originalTitle: String?): Drawable {
-    return PlaceholderForTextDrawableFactory.buildDrawable(
-        this,
-        originalTitle,
-        getThemeAttrColor(com.dashlane.ui.R.attr.colorOnPrimary),
-        getThemeAttrColor(R.attr.colorPrimary)
-    )
 }

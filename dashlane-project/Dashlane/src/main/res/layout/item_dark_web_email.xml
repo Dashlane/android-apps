@@ -10,11 +10,12 @@
     android:padding="@dimen/spacing_normal"
     >
 
-    <ImageView
+    <com.dashlane.design.component.compat.view.ThumbnailView
         android:id="@+id/icon"
-        android:layout_width="@dimen/list_sharing_item_content_icon_width"
-        android:layout_height="@dimen/list_sharing_item_content_icon_height"
-        android:scaleType="fitCenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:thumbnailType="userSingle"
+        app:thumbnailSize="medium"
         dashlane:layout_constraintBottom_toBottomOf="parent"
         dashlane:layout_constraintStart_toStartOf="parent"
         dashlane:layout_constraintTop_toTopOf="parent"

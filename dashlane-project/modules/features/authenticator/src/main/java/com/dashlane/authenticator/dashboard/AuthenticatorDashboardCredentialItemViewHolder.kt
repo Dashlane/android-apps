@@ -1,7 +1,6 @@
 package com.dashlane.authenticator.dashboard
 
 import android.content.Context
-import android.graphics.Color
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -12,17 +11,16 @@ import com.dashlane.authenticator.R
 import com.dashlane.authenticator.dashboard.AuthenticatorDashboardCredentialItemAdapter.Listener
 import com.dashlane.authenticator.dashboard.AuthenticatorDashboardUiState.HasLogins.CredentialItem
 import com.dashlane.authenticator.item.AuthenticatorViewProxy
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.ui.widgets.view.ExpandableCardView
 import com.dashlane.util.getBaseActivity
-import com.dashlane.util.graphics.CredentialRemoteDrawable
-import com.dashlane.util.graphics.RoundRectDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class AuthenticatorDashboardCredentialItemViewHolder(v: View) :
     EfficientViewHolder<CredentialItem>(v) {
     private val name = findViewByIdEfficient<TextView>(R.id.authenticator_credential_item_name)!!
     private val login = findViewByIdEfficient<TextView>(R.id.authenticator_credential_item_login)!!
-    private val logo = findViewByIdEfficient<ImageView>(R.id.authenticator_credential_item_icon)!!
+    private val logo = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.authenticator_credential_item_icon)!!
     private val code = findViewByIdEfficient<TextView>(R.id.authenticator_credential_item_code)!!
     private val countdown =
         findViewByIdEfficient<ImageView>(R.id.authenticator_credential_item_countdown)!!
@@ -30,16 +28,12 @@ class AuthenticatorDashboardCredentialItemViewHolder(v: View) :
     private val delete =
         findViewByIdEfficient<ImageView>(R.id.authenticator_credential_item_delete)!!
     private val arrow = findViewByIdEfficient<ImageView>(R.id.collapse_arrow)!!
-    private val drawable = CredentialRemoteDrawable(v.context, Color.WHITE).also {
-        it.preferImageBackgroundColor = true
-    }
     lateinit var listener: Listener
 
     override fun updateView(context: Context, item: CredentialItem?) {
         item ?: return
         name.text = item.title
         login.text = item.username
-        logo.setImageDrawable(drawable)
         (view as ExpandableCardView).setExpanded(item.expanded, false)
         val scope = (context.getBaseActivity()!! as AppCompatActivity).lifecycleScope
         AuthenticatorViewProxy(code, countdown, scope, item.otp) {
@@ -48,11 +42,7 @@ class AuthenticatorDashboardCredentialItemViewHolder(v: View) :
         }
         copy.setOnClickListener { item.otp.getPin()?.let { listener.onOtpCopy(it.code, item.id, item.domain) } }
         delete.setOnClickListener { listener.onOtpDelete(item, item.otp.issuer) }
-        try {
-            drawable.loadImage(item.domain, RoundRectDrawable(context, Color.WHITE))
-        } catch (e: IllegalArgumentException) {
-            
-        }
+        logo.domainUrl = item.domain
         setMode(item)
     }
 

@@ -10,8 +10,8 @@ import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.ui.adapters.text.factory.SearchListTextResolver
 import com.dashlane.ui.screens.fragments.search.SearchRequest
+import com.dashlane.search.textfactory.SearchListTextResolver
 import com.dashlane.ui.screens.settings.SearchableSettingInRecyclerView
 import com.dashlane.vault.summary.SummaryObject
 

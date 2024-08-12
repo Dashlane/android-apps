@@ -14,30 +14,22 @@ import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingUserGroupUser
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import javax.inject.Inject
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class UserGroupDataProvider @Inject constructor(
     private val sharingDao: SharingDao,
     private val genericDataQuery: GenericDataQuery,
     private val sharingDataProvider: SharingDataProvider,
     @IoCoroutineDispatcher
-    private val ioCoroutineDispatcher: CoroutineDispatcher,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val ioCoroutineDispatcher: CoroutineDispatcher
 ) {
     suspend fun getItemsForUserGroup(userGroupId: String):
         List<SharingModels.ItemUserGroup> {
         return withContext(ioCoroutineDispatcher) {
-            val acceptedCollections =
-                if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
-                    sharingDataProvider.getAcceptedCollectionsForGroup(userGroupId)
-                } else {
-                    emptyList()
-                }
+            val acceptedCollections = sharingDataProvider.getAcceptedCollectionsForGroup(userGroupId)
             val itemGroups = sharingDao.loadAllItemGroup()
                 .filter {
                     it.getUserGroupMember(userGroupId)?.isAccepted == true ||

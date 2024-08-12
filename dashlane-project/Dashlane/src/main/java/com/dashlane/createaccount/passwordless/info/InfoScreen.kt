@@ -17,7 +17,7 @@ import com.dashlane.design.component.ButtonMediumBar
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.ContentStepper
+import com.dashlane.ui.common.compose.components.ContentStepper
 
 @Composable
 fun InfoScreen(

@@ -32,7 +32,7 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.DashlaneCheckbox
+import com.dashlane.ui.common.compose.components.DashlaneCheckbox
 
 @Composable
 fun TermsAndConditionsScreen(

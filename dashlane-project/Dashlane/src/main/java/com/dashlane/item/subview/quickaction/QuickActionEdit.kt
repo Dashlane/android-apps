@@ -23,9 +23,10 @@ class QuickActionEdit(private val summaryObject: SummaryObject, private val navi
         fun createActionIfCanEdit(
             summaryObject: SummaryObject,
             sharingPolicy: SharingPolicyDataProvider,
-            navigator: Navigator
+            navigator: Navigator,
+            isAccountFrozen: Boolean
         ): QuickActionEdit? {
-            return if (sharingPolicy.canEditItem(summaryObject, false)) {
+            return if (sharingPolicy.canEditItem(summaryObject, false) && !isAccountFrozen) {
                 return QuickActionEdit(summaryObject, navigator)
             } else {
                 null

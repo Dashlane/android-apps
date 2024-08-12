@@ -9,14 +9,6 @@
     
     <attr name="gdPageIndicatorStyle" format="reference"/>
 
-    <declare-styleable name="AutoBorderedImageView">
-        <attr name="defaultBackground" format="reference"/>
-        <attr name="borderDrawable" format="reference"/>
-        <attr name="applyBorderOnColors" format="reference"/>
-        <attr name="borderColor" format="color"/>
-        <attr name="applyDominantColorOnDefaultBackground" format="boolean"/>
-    </declare-styleable>
-
     <declare-styleable name="ScrimInsetsView">
         <attr name="dashlaneInsetForeground" format="reference|color"/>
     </declare-styleable>

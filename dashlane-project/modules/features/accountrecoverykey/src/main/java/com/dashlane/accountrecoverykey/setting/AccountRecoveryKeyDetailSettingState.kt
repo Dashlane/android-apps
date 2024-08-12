@@ -1,6 +1,6 @@
 package com.dashlane.accountrecoverykey.setting
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 
 sealed class AccountRecoveryKeyDetailSettingState {
     abstract val data: AccountRecoveryKeyDetailSettingData

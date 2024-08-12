@@ -15,8 +15,6 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.summary.SummaryObject
@@ -24,6 +22,7 @@ import com.dashlane.vault.summary.toSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,7 +32,6 @@ class CollectionsListViewModel @Inject constructor(
     private val accountStatusRepository: AccountStatusRepository,
     private val sessionManager: SessionManager,
     private val sharingDataProvider: SharingDataProvider,
-    private val userFeaturesChecker: UserFeaturesChecker,
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
     private val collectionLimiter: CollectionLimiter,
     private val collectionDataQuery: CollectionDataQuery,
@@ -43,16 +41,15 @@ class CollectionsListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ViewState>(ViewState.Loading(ViewData(emptyList())))
     val uiState = _uiState.asStateFlow()
 
-    private val shareEnabled: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
-
-    private val allowAllRoles: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_ROLES)
-
     init {
         refreshCollections()
         viewModelScope.launch {
             dataSaver.savedItemFlow.collect {
+                refreshCollections()
+            }
+        }
+        viewModelScope.launch {
+            sharingDataProvider.updatedItemFlow.collect {
                 refreshCollections()
             }
         }
@@ -80,11 +77,7 @@ class CollectionsListViewModel @Inject constructor(
                     forCurrentSpace()
                 }
             )
-            val sharedCollections = if (shareEnabled) {
-                sharingDataProvider.getAcceptedCollections(needsAdminRights = !allowAllRoles)
-            } else {
-                emptyList()
-            }
+            val sharedCollections = sharingDataProvider.getAcceptedCollections(needsAdminRights = false)
             val collectionLimit = collectionLimiter.checkCollectionLimit(isShared = false)
             val allCollections =
                 collections.mapNotNull { it.toCollectionViewData(collectionLimit) } + sharedCollections.mapNotNull {
@@ -103,15 +96,18 @@ class CollectionsListViewModel @Inject constructor(
     private fun SummaryObject.Collection.toCollectionViewData(userLimit: CollectionLimiter.UserLimit) =
         name?.let { name ->
             val spaceData = spaceData(teamSpaceAccessorProvider)
+            val shareAllowedAndEnabled = spaceData?.businessSpace == true
             CollectionViewData(
                 id = id,
                 name = name,
                 itemCount = vaultItems?.size ?: 0,
                 spaceData = spaceData,
                 shared = false,
-                shareEnabled = shareEnabled && spaceData?.businessSpace == true,
-                shareAllowed = true,
-                shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN
+                shareEnabled = shareAllowedAndEnabled,
+                shareAllowed = shareAllowedAndEnabled,
+                shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN,
+                editAllowed = true,
+                deleteAllowed = true
             )
         }
 
@@ -120,25 +116,69 @@ class CollectionsListViewModel @Inject constructor(
             
             return null
         }
+        val isAdmin = sharingDataProvider.isAdmin(this)
         return CollectionViewData(
             id = uuid,
             name = name,
             itemCount = size,
             spaceData = businessSpaceData(teamSpaceAccessorProvider),
             shared = true,
-            shareEnabled = shareEnabled,
-            shareAllowed = sharingDataProvider.isCollectionShareAllowed(this),
-            shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN
+            shareEnabled = true,
+            shareAllowed = isAdmin,
+            shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN,
+            editAllowed = isAdmin,
+            deleteAllowed = isAdmin
         )
     }
 
-    fun deleteClicked(id: String) {
+    fun deleteClicked(id: String, shared: Boolean) {
         viewModelScope.launch {
+            if (shared) {
+                deleteSharedCollection(collectionId = id)
+                return@launch
+            }
             val collection = collectionDataQuery.queryById(id)
             if (collection != null) {
                 val collectionToDelete = collection.copy(syncState = SyncState.DELETED)
                 dataSaver.save(collectionToDelete)
                 vaultActivityLogger.sendCollectionDeletedActivityLog(collection = collection.toSummary())
+            }
+        }
+    }
+
+    fun dismissDialogClicked() {
+        _uiState.update {
+            ViewState.List(it.viewData.copy())
+        }
+    }
+
+    private suspend fun deleteSharedCollection(collectionId: String) {
+        val collections =
+            sharingDataProvider.getAcceptedCollections(needsAdminRights = false).filter {
+                it.uuid == collectionId
+            }
+        val collection = collections.firstOrNull() ?: return
+
+        if (!sharingDataProvider.isDeleteAllowed(collection)) {
+            _uiState.emit(ViewState.RevokeAccessPrompt(_uiState.value.viewData, collectionId))
+            return
+        }
+
+        runCatching {
+            sharingDataProvider.deleteCollection(collection, true)
+        }.onSuccess {
+            _uiState.update {
+                ViewState.List(
+                    viewData = it.viewData.copy(
+                        collections = it.viewData.collections.filterNot { collectionViewData ->
+                            collectionViewData.id == collectionId
+                        }
+                    )
+                )
+            }
+        }.onFailure {
+            _uiState.update {
+                ViewState.SharedCollectionDeleteError(viewData = it.viewData)
             }
         }
     }

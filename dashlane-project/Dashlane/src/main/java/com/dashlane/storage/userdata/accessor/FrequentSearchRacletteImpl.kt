@@ -54,16 +54,7 @@ class FrequentSearchRacletteImpl @Inject constructor(
         }
     }
 
-    override fun getFrequentlySearchedItems(max: Int): List<SummaryObject> {
-        if (lockHelper.forbidDataAccess()) return emptyList()
-        val searchRepository = searchRepository ?: return emptyList()
-        val items =
-            searchRepository.load().items.sortedWith(compareBy({ it.hitCount }, { it.lastUsed }))
-                .reversed().take(max)
-        return getSummaryObjects(items)
-    }
-
-    override fun getLastSearchedItems(max: Int): List<SummaryObject> {
+    override suspend fun getLastSearchedItems(max: Int): List<SummaryObject> {
         if (lockHelper.forbidDataAccess()) return emptyList()
         val searchRepository = searchRepository ?: return emptyList()
         val items =

@@ -3,6 +3,8 @@ package com.dashlane.ui.screens.settings
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingState
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
 import com.dashlane.core.sync.getAgnosticMessageFeedback
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
@@ -28,7 +30,8 @@ class SettingsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val userSettingsLogRepository: UserSettingsLogRepository,
     private val logRepository: LogRepository,
-    private val use2faSettingStateHolder: Use2faSettingStateHolder
+    private val use2faSettingStateHolder: Use2faSettingStateHolder,
+    private val accountRecoveryKeySettingStateHolder: AccountRecoveryKeySettingStateHolder,
 ) : ViewModel(), SettingsViewModelContract {
     override val targetId = SettingsFragmentArgs.fromSavedStateHandle(savedStateHandle).id
 
@@ -49,12 +52,19 @@ class SettingsViewModel @Inject constructor(
         .map { it.visible }
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
+    override val accountRecoveryKeyStateChanges = accountRecoveryKeySettingStateHolder.uiState
+        .map { it != AccountRecoveryKeySettingState.Hidden }
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed())
+
     private var currentUserSettings: UserSettings? = null
 
     init {
         if (settingScreenItem.page == AnyPage.SETTINGS_SECURITY) {
             
-            viewModelScope.launch { use2faSettingStateHolder.refresh() }
+            viewModelScope.launch {
+                use2faSettingStateHolder.refresh()
+                accountRecoveryKeySettingStateHolder.refresh()
+            }
         }
     }
 

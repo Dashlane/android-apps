@@ -17,7 +17,7 @@ class CollectionDataQueryImpl @Inject constructor(
 
     override fun queryByName(name: String, filter: CollectionFilter): VaultItem<SyncObject.Collection>? =
         queryFirst(filter.apply { this.name = name })?.let {
-            vaultDataQuery.query(
+            vaultDataQuery.queryLegacy(
                 vaultFilter {
                 spaceFilter = filter
                 dataTypeFilter = filter
@@ -27,7 +27,7 @@ class CollectionDataQueryImpl @Inject constructor(
         }
 
     override fun queryById(id: String): VaultItem<SyncObject.Collection>? =
-        vaultDataQuery.query(
+        vaultDataQuery.queryLegacy(
             vaultFilter {
             val filter = createFilter()
             spaceFilter = filter
@@ -37,7 +37,7 @@ class CollectionDataQueryImpl @Inject constructor(
         )?.asVaultItemOfClassOrNull(SyncObject.Collection::class.java)
 
     override fun queryByIds(ids: List<String>): List<VaultItem<SyncObject.Collection>> =
-        vaultDataQuery.queryAll(
+        vaultDataQuery.queryAllLegacy(
             vaultFilter {
                 val filter = createFilter()
                 spaceFilter = filter

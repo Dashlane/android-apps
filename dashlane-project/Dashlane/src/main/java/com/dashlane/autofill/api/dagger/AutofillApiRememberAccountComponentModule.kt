@@ -2,19 +2,22 @@ package com.dashlane.autofill.api.dagger
 
 import com.dashlane.autofill.api.rememberaccount.ApplicationFormSourceAuthentifiantPreferencesLinker
 import com.dashlane.autofill.api.rememberaccount.AutofillApiRememberAccountToasterImpl
-import com.dashlane.autofill.rememberaccount.AutofillApiRememberedAccountToaster
 import com.dashlane.autofill.api.rememberaccount.WebDomainFormSourceAuthentifiantPreferencesLinker
 import com.dashlane.autofill.api.rememberaccount.linkedservices.ApplicationFormSourceAuthentifiantLinker
 import com.dashlane.autofill.api.rememberaccount.linkedservices.WebDomainFormSourceAuthentifiantLinker
+import com.dashlane.autofill.rememberaccount.AutofillApiRememberedAccountToaster
 import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProvider
 import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProviderImpl
 import com.dashlane.autofill.rememberaccount.services.FormSourceAuthentifiantLinker
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
+@InstallIn(SingletonComponent::class)
 internal abstract class AutofillApiRememberAccountComponentModule {
     @Singleton
     @Binds

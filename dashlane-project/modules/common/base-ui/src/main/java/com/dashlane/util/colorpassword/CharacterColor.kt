@@ -26,9 +26,9 @@ class CharacterColor(private val context: Context) {
         }
     }
 
-    private fun getColorDigit(context: Context): Int = context.getColor(R.color.text_oddity_passwordDigits)
+    private fun getColorDigit(context: Context): Int = context.getColor(R.color.text_oddity_password_digits)
 
-    private fun getColorSymbol(context: Context): Int = context.getColor(R.color.text_oddity_passwordSymbols)
+    private fun getColorSymbol(context: Context): Int = context.getColor(R.color.text_oddity_password_symbols)
 
     private fun getColorLetter(context: Context): Int = context.getColor(R.color.text_neutral_catchy)
 }

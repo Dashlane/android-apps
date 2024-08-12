@@ -84,6 +84,12 @@ sealed class TeamSpace {
                 is Past -> space.teamInfo.forcedDomainsEnabled == true
             }
 
+        val isRichIconsEnabled: Boolean
+            get() = when (this) {
+                is Current -> space.teamInfo.richIconsEnabled == true
+                is Past -> space.teamInfo.richIconsEnabled == true
+            }
+
         val isCollectSensitiveDataActivityLogsEnabled: Boolean
             get() = when (this) {
                 is Current -> space.teamInfo.collectSensitiveDataAuditLogsEnabled == true

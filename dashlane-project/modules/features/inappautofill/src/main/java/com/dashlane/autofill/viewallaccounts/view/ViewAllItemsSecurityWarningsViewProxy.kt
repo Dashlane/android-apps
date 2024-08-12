@@ -11,7 +11,6 @@ import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProvider
 import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
 import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsService
 import com.dashlane.autofill.securitywarnings.view.SecurityWarningsViewProxy
-import com.dashlane.autofill.ui.AutofillFeature
 import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.viewallaccounts.services.ViewAllAccountSelectionNotifier
 import com.dashlane.hermes.generated.definitions.MatchType
@@ -103,7 +102,6 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
         }
         autofillViewAllItemsActivity.finishWithResult(
             itemToFill = unlockedAuthentifiant.itemToFill,
-            autofillFeature = AutofillFeature.VIEW_ALL_ACCOUNTS,
             matchType = MatchType.EXPLORE_PASSWORDS
         )
     }

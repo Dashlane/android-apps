@@ -28,8 +28,8 @@
     <string name="export_file_confirm_title">Save a copy to Download folder</string>
     <string name="export_public_folder_done">File exported to Download folder.</string>
     <string name="open_public_folder">Open Downloads</string>
-    <string name="decryption_error">We couldn\'t decrypt this file. Please contact Support for help.</string>
-    <string name="export_error">We couldn\'t save this file to storage. Please contact Support for help.</string>
+    <string name="decryption_error">We couldn\'t decrypt this file. Learn how to get help.</string>
+    <string name="export_error">We couldn\'t save this file to storage. Learn how to get help and visit our help center.</string>
     <string name="storage_error">Something went wrong. We could\'t find a valid storage to save the file.</string>
 
     <plurals name="attachment_quantity">

@@ -4,16 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.activatetotp.ActivateTotpAuthenticatorConnection
 import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
+import com.dashlane.crypto.keys.isServerKeyNotNull
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.authentication.AuthTotpDeactivationService
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationTotpService
 import com.dashlane.session.SessionManager
-import com.dashlane.session.isServerKeyNotNull
 import com.dashlane.ui.screens.settings.Use2faSettingStateRefresher
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -66,11 +66,16 @@ internal class DisableTotpDeactivationViewModel @Inject constructor(
             }
 
             use2faSettingStateRefresher.refresh()
-            activateTotpAuthenticatorConnection.deleteDashlaneTokenAsync(session.userId).await()
+
+            
+            
+            runCatching { activateTotpAuthenticatorConnection.deleteDashlaneTokenAsync(session.userId).await() }
 
             emit(DisableTotpDeactivationState.Success)
         }
-            .catch { error -> emit(DisableTotpDeactivationState.Error(error = error)) }
+            .catch { error ->
+                emit(DisableTotpDeactivationState.Error(error = error))
+            }
             .onEach { state -> mutableSharedFlow.emit(state) }
             .flowOn(defaultDispatcher)
             .launchIn(viewModelScope)

@@ -4,7 +4,7 @@ import android.content.Context
 import com.adjust.sdk.Adjust
 import com.adjust.sdk.AndroidIdUtil
 import com.dashlane.hermes.generated.definitions.Android
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

@@ -19,6 +19,7 @@ interface DarkWebMonitoringContract {
             emails: List<DarkWebEmailItem>
         )
 
+        fun showLoadingScreen()
         fun showDarkwebInactiveScene()
         fun goToPendingTab()
         fun updateActionBar(updateTitle: Boolean)

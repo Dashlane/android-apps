@@ -4,7 +4,7 @@ import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.PasswordStrengthScore
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.skocken.presentation.provider.BaseDataProvider
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope

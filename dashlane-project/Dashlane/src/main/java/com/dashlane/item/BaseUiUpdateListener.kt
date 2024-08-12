@@ -7,7 +7,6 @@ import com.dashlane.R
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
-import com.dashlane.ui.util.DialogHelper
 
 abstract class BaseUiUpdateListener(private val activity: AppCompatActivity, private val navigator: Navigator) :
     ItemEditViewContract.View.UiUpdateListener {
@@ -97,16 +96,6 @@ abstract class BaseUiUpdateListener(private val activity: AppCompatActivity, pri
             .show(activity.supportFragmentManager, NFC_DIALOG_SUCCESS_TAG)
     }
 
-    override fun showRestorePromptDialog() {
-        DialogHelper().builder(activity, R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog)
-            .setTitle(activity.getString(R.string.infobox_restore_dialog_title))
-            .setMessage(activity.getString(R.string.infobox_restore_dialog_message))
-            .setPositiveButton(activity.getString(R.string.infobox_restore_dialog_positive_button)) { _, _ -> notifyRestorePassword() }
-            .setNegativeButton(activity.getString(R.string.infobox_restore_dialog_negative_button)) { _, _ -> }
-            .setCancelable(true)
-            .show()
-    }
-
     override fun openLinkedServices(
         itemId: String,
         fromViewOnly: Boolean,
@@ -128,7 +117,8 @@ abstract class BaseUiUpdateListener(private val activity: AppCompatActivity, pri
             fromViewOnly,
             temporaryPrivateCollectionsName,
             temporarySharedCollectionsId,
-            spaceId
+            spaceId,
+            isLimited = false
         )
     }
 

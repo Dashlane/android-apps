@@ -18,6 +18,8 @@ import com.dashlane.session.repository.RacletteDatabase
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.util.FileUtils
 import com.dashlane.util.showToaster
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.groupBySyncObjectType
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -29,9 +31,15 @@ import org.json.JSONObject
 import java.io.File
 import javax.inject.Inject
 import kotlin.math.round
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 internal class RacletteDebugCategory @Inject constructor(
     @ActivityContext override val context: Context,
+    @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     val userDatabaseRepository: UserDatabaseRepository,
     val cryptography: Cryptography,
     val databaseProvider: DatabaseProvider,
@@ -47,7 +55,7 @@ internal class RacletteDebugCategory @Inject constructor(
         get() = userDatabaseRepository.getRacletteDatabase(session)
 
     private val isRacletteDatabaseExist: Boolean
-        get() = databaseProvider.exist(session.userId)
+        get() = runBlocking { databaseProvider.exist(session.userId) }
 
     private val decryptionEngine: DecryptionEngine
         get() = cryptography.createDecryptionEngine(session.localKey.cryptographyKey)
@@ -70,72 +78,70 @@ internal class RacletteDebugCategory @Inject constructor(
         get() = "Raclette"
 
     private fun addRacletteItems(group: PreferenceGroup, racletteDatabase: RacletteDatabase) {
-        val databaseName = session.userId.encodeUtf8().sha256().hex() + ".aes"
+        applicationCoroutineScope.launch {
+            withContext(ioDispatcher) {
+                val databaseName = session.userId.encodeUtf8().sha256().hex() + ".aes"
 
-        val file = File(File(context.filesDir, "databases"), databaseName)
-        val content = File(file, "content")
-        val summaries = File(content, "summaries")
-        val sharing = File(content, "sharing")
-        val summaryFile = File(summaries, "summary.json.aes")
-        val syncSummaryFile = File(summaries, "sync_summary.json.aes")
-        val dataChangeHistorySummaryFile = File(summaries, "data_change_history_summary.json.aes")
-        val sharingItemGroupsFile = File(sharing, "item_groups.json.aes")
-        val sharingUserGroupsFile = File(sharing, "user_groups.json.aes")
-        val sharingItemContentsFile = File(sharing, "item_contents.json.aes")
-        val sharingCollectionsFile = File(sharing, "collection.json.aes")
+                val file = File(File(context.filesDir, "databases"), databaseName)
+                val content = File(file, "content")
+                val summaries = File(content, "summaries")
+                val sharing = File(content, "sharing")
+                val summaryFile = File(summaries, "summary.json.aes")
+                val syncSummaryFile = File(summaries, "sync_summary.json.aes")
+                val dataChangeHistorySummaryFile = File(summaries, "data_change_history_summary.json.aes")
+                val sharingItemGroupsFile = File(sharing, "item_groups.json.aes")
+                val sharingUserGroupsFile = File(sharing, "user_groups.json.aes")
+                val sharingItemContentsFile = File(sharing, "item_contents.json.aes")
+                val sharingCollectionsFile = File(sharing, "collection.json.aes")
 
-        addSizeItems(file, group, summaryFile, syncSummaryFile, dataChangeHistorySummaryFile)
+                addSizeItems(file, group, summaryFile, syncSummaryFile, dataChangeHistorySummaryFile)
 
-        val decMemory = racletteDatabase.memorySummaryRepository.databaseSummary!!.data
-            .groupBySyncObjectType().toSortedMap().map {
-                "${it.key.xmlObjectName} ${it.value.size}"
-            }.joinToString("\n")
-        addPreferenceButton(group, "Summary", decMemory) { showFile(summaryFile) }
+                val decMemory = racletteDatabase.memorySummaryRepository.databaseSummary!!.data
+                    .groupBySyncObjectType().toSortedMap().map {
+                        "${it.key.xmlObjectName} ${it.value.size}"
+                    }.joinToString("\n")
+                addPreferenceButton(group, "Summary", decMemory) { showFile(summaryFile) }
 
-        val decSyncMemory = racletteDatabase.memorySummaryRepository.databaseSyncSummary!!.items
-            .groupBySyncObjectType().toSortedMap().map {
-                "${it.key.xmlObjectName} ${it.value.size}"
-            }.joinToString("\n")
-        addPreferenceButton(group, "SyncSummary", decSyncMemory) { showFile(syncSummaryFile) }
+                val decSyncMemory = racletteDatabase.memorySummaryRepository.databaseSyncSummary!!.items
+                    .groupBySyncObjectType().toSortedMap().map {
+                        "${it.key.xmlObjectName} ${it.value.size}"
+                    }.joinToString("\n")
+                addPreferenceButton(group, "SyncSummary", decSyncMemory) { showFile(syncSummaryFile) }
 
-        addPreferenceButton(
-            group,
-            "DataChangeHistorySummary",
-            racletteDatabase.memorySummaryRepository
-                .databaseDataChangeHistorySummary?.data?.size.toString()
-        ) { showFile(dataChangeHistorySummaryFile) }
+                addPreferenceButton(
+                    group,
+                    "DataChangeHistorySummary",
+                    racletteDatabase.memorySummaryRepository
+                        .databaseDataChangeHistorySummary?.data?.size.toString()
+                ) { showFile(dataChangeHistorySummaryFile) }
 
-        addPreferenceButton(
-            group,
-            "Sharing ItemGroups",
-            racletteDatabase.sharingRepository
-                .loadItemGroups()
-                .size.toString()
-        ) { showFile(sharingItemGroupsFile) }
+                addPreferenceButton(
+                    group = group,
+                    title = "Sharing ItemGroups",
+                    description = racletteDatabase.sharingRepository.loadItemGroups().size.toString()
+                ) { showFile(sharingItemGroupsFile) }
 
-        val userGroups = racletteDatabase.sharingRepository
-            .loadUserGroups()
-        addPreferenceButton(
-            group,
-            "Sharing UserGroups",
-            "${userGroups.size}\n${userGroups.joinToString("\n") { it.name }}"
-        ) { showFile(sharingUserGroupsFile) }
+                val userGroups = racletteDatabase.sharingRepository.loadUserGroups()
+                addPreferenceButton(
+                    group = group,
+                    title = "Sharing UserGroups",
+                    description = "${userGroups.size}\n${userGroups.joinToString("\n") { it.name }}"
+                ) { showFile(sharingUserGroupsFile) }
 
-        val collections = racletteDatabase.sharingRepository
-            .loadCollections()
-        addPreferenceButton(
-            group,
-            "Sharing Collection",
-            "${collections.size}\n${collections.joinToString("\n") { it.name }}"
-        ) { showFile(sharingCollectionsFile) }
+                val collections = racletteDatabase.sharingRepository.loadCollections()
+                addPreferenceButton(
+                    group = group,
+                    title = "Sharing Collection",
+                    description = "${collections.size}\n${collections.joinToString("\n") { it.name }}"
+                ) { showFile(sharingCollectionsFile) }
 
-        addPreferenceButton(
-            group,
-            "Sharing ItemContent",
-            racletteDatabase.sharingRepository
-                .loadItemContents()
-                .size.toString()
-        ) { showFile(sharingItemContentsFile) }
+                addPreferenceButton(
+                    group = group,
+                    title = "Sharing ItemContent",
+                    description = racletteDatabase.sharingRepository.loadItemContents().size.toString()
+                ) { showFile(sharingItemContentsFile) }
+            }
+        }
     }
 
     private fun addSizeItems(

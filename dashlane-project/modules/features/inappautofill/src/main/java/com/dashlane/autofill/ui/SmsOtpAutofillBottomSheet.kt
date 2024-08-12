@@ -42,7 +42,6 @@ class SmsOtpAutofillBottomSheet(private val activity: SmsOtpAutofillActivity) {
         autofillButton.setOnClickListener {
             activity.finishWithResult(
                 itemToFill = OtpItemToFill(code = codeTextView.text.toString()),
-                autofillFeature = AutofillFeature.SMS_OTP_CODE,
                 matchType = MatchType.REGULAR
             )
         }
@@ -71,7 +70,6 @@ class SmsOtpAutofillBottomSheet(private val activity: SmsOtpAutofillActivity) {
         codeTextView.setOnClickListener {
             activity.finishWithResult(
                 itemToFill = OtpItemToFill(code = code),
-                autofillFeature = AutofillFeature.SMS_OTP_CODE,
                 matchType = MatchType.REGULAR
             )
         }

@@ -6,7 +6,7 @@ import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
 import com.dashlane.util.tryOrNull
-import com.dashlane.vault.util.IdentityNameHolderService
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 import com.dashlane.vault.util.getComparableField
 import java.util.Locale
 

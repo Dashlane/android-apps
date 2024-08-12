@@ -1,13 +1,13 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.view.View
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailView
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
 import com.dashlane.ui.adapter.util.DiffUtilComparator
-import com.dashlane.ui.drawable.ContactDrawable
 import com.dashlane.util.isValidEmail
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
@@ -16,11 +16,6 @@ abstract class SharingContactItem(
     val line1: String,
     private val updateActionView: EfficientViewHolder<SharingContactItem>.() -> Unit = {}
 ) : MultiColumnViewTypeProvider, DiffUtilComparator<SharingContactItem> {
-    var icon: Drawable? = if (line1.isValidEmail()) {
-        ContactDrawable.newInstance(context, line1)
-    } else {
-        null
-    }
 
     abstract fun getLine2(): String
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = VIEW_TYPE
@@ -35,9 +30,16 @@ abstract class SharingContactItem(
     class ItemViewHolder(itemView: View) : EfficientViewHolder<SharingContactItem>(itemView) {
         override fun updateView(context: Context, sharingContactItem: SharingContactItem?) {
             sharingContactItem ?: return
-            if (sharingContactItem.icon != null) {
-                setImageDrawable(R.id.icon, sharingContactItem.icon)
+            findViewByIdEfficient<ThumbnailView>(R.id.icon)?.let { thumbnailView ->
+                if (sharingContactItem.line1.isValidEmail()) {
+                    thumbnailView.thumbnailType = ThumbnailViewType.USER_SINGLE.value
+                    thumbnailView.thumbnailUrl = sharingContactItem.line1
+                } else {
+                    thumbnailView.thumbnailType = ThumbnailViewType.ICON.value
+                    thumbnailView.iconRes = R.drawable.ic_group_outlined
+                }
             }
+
             setText(R.id.item_line1, sharingContactItem.line1)
             setText(R.id.item_line2, sharingContactItem.getLine2())
 

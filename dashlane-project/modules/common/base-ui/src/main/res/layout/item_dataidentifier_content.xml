@@ -12,17 +12,59 @@
     android:paddingEnd="@dimen/spacing_small"
     >
 
-    <ImageView
-        android:id="@+id/item_icon"
-        android:layout_width="@dimen/item_icon_width"
-        android:layout_height="@dimen/item_icon_height"
+    <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
+        android:id="@+id/item_thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_small"
         android:layout_marginBottom="@dimen/spacing_small"
-        android:scaleType="fitXY"
+        app:thumbnailType="vaultItemDomainIcon"
+        app:thumbnailSize="medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
+
+    <com.dashlane.design.component.compat.view.ThumbnailView
+        android:id="@+id/item_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_marginBottom="@dimen/spacing_small"
+        android:src="@drawable/ic_collection_outlined"
+        app:thumbnailType="icon"
+        app:thumbnailSize="medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/item_icon_app"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@id/item_thumbnail"
+        app:layout_constraintStart_toStartOf="@id/item_thumbnail"
+        app:layout_constraintEnd_toEndOf="@id/item_thumbnail"
+        app:layout_constraintTop_toTopOf="@id/item_thumbnail"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/thumbnail_barrier_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="item_icon,item_thumbnail"
+        app:barrierDirection="end"/>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/thumbnail_barrier_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="item_icon,item_thumbnail"
+        app:barrierDirection="top"/>
+
 
     <TextView
         android:id="@+id/item_title"
@@ -34,11 +76,11 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAppearance="?textAppearanceSubtitle1"
-        app:layout_constraintEnd_toStartOf="@+id/lock_image"
+        app:layout_constraintEnd_toStartOf="@+id/passkey_image"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toEndOf="@+id/item_icon"
-        app:layout_constraintTop_toTopOf="@+id/item_icon"
+        app:layout_constraintStart_toEndOf="@+id/thumbnail_barrier_end"
+        app:layout_constraintTop_toTopOf="@+id/thumbnail_barrier_top"
         app:layout_constraintWidth_default="wrap"
         tools:text="Twitter"
         />
@@ -117,15 +159,32 @@
         />
 
     <ImageView
+        android:id="@+id/passkey_image"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:src="@drawable/ic_passkey_outlined"
+        android:visibility="gone"
+        android:contentDescription="@string/datatype_passkey"
+        app:layout_constraintBottom_toBottomOf="@+id/item_title"
+        app:layout_constraintEnd_toStartOf="@+id/lock_image"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/item_title"
+        app:layout_constraintTop_toTopOf="@+id/item_title"
+        app:tint="@color/text_neutral_quiet"
+        tools:visibility="visible"
+        />
+
+    <ImageView
         android:id="@+id/lock_image"
         android:layout_width="12dp"
         android:layout_height="12dp"
+        android:layout_marginStart="4dp"
         android:src="@drawable/ic_locked"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/item_title"
         app:layout_constraintEnd_toStartOf="@+id/shared_image"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/item_title"
+        app:layout_constraintStart_toEndOf="@+id/passkey_image"
         app:layout_constraintTop_toTopOf="@+id/item_title"
         app:tint="@color/text_neutral_quiet"
         tools:visibility="visible"

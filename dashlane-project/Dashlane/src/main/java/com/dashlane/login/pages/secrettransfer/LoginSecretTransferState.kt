@@ -1,6 +1,6 @@
 package com.dashlane.login.pages.secrettransfer
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 

@@ -1,7 +1,7 @@
 package com.dashlane.authentication.create
 
 import android.widget.EditText
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.AuthenticationException
 import com.dashlane.cryptography.ObfuscatedByteArray
 

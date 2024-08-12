@@ -12,6 +12,7 @@ import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavDestination
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.navigation.Navigator
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.ui.widgets.view.ExpandableCardView
 import com.dashlane.ui.widgets.view.Infobox
 import com.dashlane.util.clipboard.ClipboardCopy
@@ -26,6 +27,7 @@ class VpnThirdPartyViewProxy(
     private val defaultEmail: String?,
     private val suggestions: List<String>?
 ) : BaseViewProxy<VpnThirdPartyContract.Presenter>(fragment), VpnThirdPartyContract.ViewProxy {
+    private val thumbnail: ThumbnailDomainIconView = findViewByIdEfficient(R.id.vpn_third_party_account_icon)!!
     private val infobox: Infobox = findViewByIdEfficient(R.id.vpn_third_party_infobox)!!
     private val title: TextView = findViewByIdEfficient(R.id.vpn_third_party_title)!!
     private val subtitle: TextView = findViewByIdEfficient(R.id.vpn_third_party_subtitle)!!
@@ -49,6 +51,7 @@ class VpnThirdPartyViewProxy(
     init {
         setupFaqCards()
         setupInfobox()
+        thumbnail.domainUrl = HOTSPOT_URL
     }
 
     override fun showInfobox() {
@@ -137,7 +140,7 @@ class VpnThirdPartyViewProxy(
             .setTextWithLinks(
                 R.string.vpn_third_party_faq_question_3_body,
                 listOf(
-                    R.string.vpn_third_party_faq_question_3_link_faq to HelpCenterLink.ARTICLE_THIRD_PARTY_VPN_FAQ.uri,
+                    R.string.vpn_third_party_faq_question_3_link_faq to HelpCenterLink.ARTICLE_THIRD_PARTY_VPN_FAQ.androidUri,
                     R.string.vpn_third_party_faq_question_3_link_hotspot_shield_support to "https://support.hotspotshield.com".toUri()
                 )
             )
@@ -152,5 +155,9 @@ class VpnThirdPartyViewProxy(
             infobox.isVisible = false
             presenter.onDismissClicked()
         }
+    }
+
+    companion object {
+        private const val HOTSPOT_URL = "https://hotspotshield.com"
     }
 }

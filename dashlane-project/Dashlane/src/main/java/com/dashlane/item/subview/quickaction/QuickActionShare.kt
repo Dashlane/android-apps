@@ -19,9 +19,10 @@ class QuickActionShare(
         fun createActionIfShareAvailable(
             summaryObject: SummaryObject,
             sharingPolicy: SharingPolicyDataProvider,
-            restrictionNotificator: TeamSpaceRestrictionNotificator
+            restrictionNotificator: TeamSpaceRestrictionNotificator,
+            isAccountFrozen: Boolean = false
         ): QuickActionShare? {
-            if (sharingPolicy.canShareItem(summaryObject)) {
+            if (sharingPolicy.canShareItem(summaryObject) && !isAccountFrozen) {
                 if (summaryObject is SummaryObject.SecureNote) {
                     if (!summaryObject.hasAttachments()) {
                         return QuickActionShare(summaryObject, restrictionNotificator)

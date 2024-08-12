@@ -6,7 +6,6 @@ import android.os.Build
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCESS_KEY
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCOUNT_CREATION_DATE
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCOUNT_TYPE
-import com.dashlane.preference.ConstantsPrefs.Companion.AUTHENTICATOR_GET_STARTED_DISPLAYED
 import com.dashlane.preference.ConstantsPrefs.Companion.BIOMETRIC_SEAL_PADDING_MIGRATION_ATTEMPT
 import com.dashlane.preference.ConstantsPrefs.Companion.CREDENTIALS_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP
@@ -19,14 +18,19 @@ import com.dashlane.preference.ConstantsPrefs.Companion.FOLLOW_UP_NOTIFICATION_S
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_AUTOMATIC_2FA_TOKEN_COPY
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_FINISHED_M2D
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_SEEN_KEYBOARD_ON_BOARDING_SUGGESTION
+import com.dashlane.preference.ConstantsPrefs.Companion.TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.IN_APP_REVIEW_NEXT_SCHEDULE_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.IN_APP_REVIEW_PREVIOUS_VERSION_CODE
+import com.dashlane.preference.ConstantsPrefs.Companion.IS_ANTI_PHISHING_ENABLED
 import com.dashlane.preference.ConstantsPrefs.Companion.KEYBOARD_AUTOFILL_ANNOUNCEMENT_TIMESTAMP
+import com.dashlane.preference.ConstantsPrefs.Companion.LABS_ACTIVATED
 import com.dashlane.preference.ConstantsPrefs.Companion.LAST_OS_VERSION
 import com.dashlane.preference.ConstantsPrefs.Companion.LAST_SHOWN_AVAILABLE_UPDATE_DATE
 import com.dashlane.preference.ConstantsPrefs.Companion.MPLESS_ARK_ENABLED
 import com.dashlane.preference.ConstantsPrefs.Companion.MP_RESET_RECOVERY_STARTED
 import com.dashlane.preference.ConstantsPrefs.Companion.PASSWORD_RESTORE_INFO_BOX_CLOSED
+import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_MODEL_LAST_CHECK_TIMESTAMP
+import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_WARNING_IGNORED_WEBSITES
 import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_ON
 import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_TRY_COUNT
 import com.dashlane.preference.ConstantsPrefs.Companion.PUBLIC_USER_ID
@@ -36,6 +40,7 @@ import com.dashlane.preference.ConstantsPrefs.Companion.RSA_PUBLIC_KEY
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_2FA_DISABLED
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_ON_LOGIN_PAYWALL
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_SHOULD_SYNC
+import com.dashlane.preference.ConstantsPrefs.Companion.SUNSET_BANNER_DISPLAYED
 import com.dashlane.preference.ConstantsPrefs.Companion.UKI_TEMPORARY_MONOBUCKET
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_ACTIVITY_UPDATE_DATE
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_NUMBER_DEVICES
@@ -46,7 +51,7 @@ import com.dashlane.preference.ConstantsPrefs.Companion.VAULT_REPORT_LATEST_TRIG
 import com.dashlane.preference.ConstantsPrefs.Companion.VPN_THIRD_PARTY_GET_STARTED_DISPLAYED
 import com.dashlane.preference.ConstantsPrefs.Companion.VPN_THIRD_PARTY_INFOBOX_DISMISSED
 import com.dashlane.session.SessionManager
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.util.MD5Hash
 import java.time.Instant
 
@@ -95,8 +100,13 @@ abstract class UserPreferencesManager(
 
     var hasAutomatic2faTokenCopy by booleanPreference(HAS_AUTOMATIC_2FA_TOKEN_COPY, true)
 
+    var isAntiPhishingEnable by booleanPreference(IS_ANTI_PHISHING_ENABLED, true)
+
     
     var registeredAuthenticatorPushId by stringPreference(REGISTERED_AUTHENTICATOR_PUSH_ID)
+
+    var authenticatorInvalidatedBiometric by booleanPreference(ConstantsPrefs.AUTHENTICATOR_INVALIDATED_BIOMETRIC)
+    var authenticatorEnrolledBiometric by booleanPreference(ConstantsPrefs.AUTHENTICATOR_ENROLLED_BIOMETRIC)
 
     var lastShownAvailableUpdateDate: Instant
         get() = Instant.ofEpochSecond(getLong(LAST_SHOWN_AVAILABLE_UPDATE_DATE, 0))
@@ -159,11 +169,6 @@ abstract class UserPreferencesManager(
         false
     )
 
-    var isAuthenticatorGetStartedDisplayed by booleanPreference(
-        AUTHENTICATOR_GET_STARTED_DISPLAYED,
-        false
-    )
-
     var cryptoMigrationAttemptDate: Instant?
         get() =
             if (contains(CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP)) {
@@ -203,27 +208,42 @@ abstract class UserPreferencesManager(
             putLong(USER_ACTIVITY_UPDATE_DATE, value.epochSecond)
         }
 
+    var latestCheckPhishingModelVersion: Instant
+        get() = Instant.ofEpochSecond(getLong(PHISHING_MODEL_LAST_CHECK_TIMESTAMP, 0))
+        set(value) {
+            putLong(PHISHING_MODEL_LAST_CHECK_TIMESTAMP, value.epochSecond)
+        }
+
     var subscriptionCode by stringPreference(USER_SUBSCRIPTION_CODE)
 
     var mplessARKEnabled by booleanPreference(MPLESS_ARK_ENABLED)
 
-    fun getPasswordChangedInfoBoxClosedInstant(itemId: String): Instant? {
-        return getList(PASSWORD_RESTORE_INFO_BOX_CLOSED)
-            ?.map { it.split(PAIR_SEPARATOR) }
-            ?.map { Pair(it.getOrNull(0), it.getOrNull(1)) }
-            ?.firstOrNull { it.first == itemId }
-            ?.second
-            ?.let { Instant.ofEpochSecond(it.toLong()) }
-    }
+    var trialEndedAnnouncementTimestamp by longPreference(TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP)
 
-    fun setPasswordChangedInfoBoxClosedInstant(itemId: String) {
+    var hasSunsetBannerDisplayed by booleanPreference(SUNSET_BANNER_DISPLAYED, false)
+
+    fun cleanPasswordChangedInfoBoxForItem(itemId: String) {
         val list = getList(PASSWORD_RESTORE_INFO_BOX_CLOSED)?.toMutableList() ?: mutableListOf()
         
         list.removeAll { it.startsWith(itemId) }
+    }
 
-        
-        list.add(itemId + PAIR_SEPARATOR + Instant.now().epochSecond)
-        putList(PASSWORD_RESTORE_INFO_BOX_CLOSED, list)
+    fun getLabsActivated(): List<String> {
+        return getList(LABS_ACTIVATED) ?: emptyList()
+    }
+
+    fun setLabsActivated(list: List<String>) {
+        putList(LABS_ACTIVATED, list)
+    }
+
+    fun addPhishingWebsiteIgnored(website: String) {
+        val list = getList(PHISHING_WARNING_IGNORED_WEBSITES)?.toMutableList() ?: mutableListOf()
+        list.add(website)
+        putList(PHISHING_WARNING_IGNORED_WEBSITES, list)
+    }
+
+    fun getPhishingWebsiteIgnored(): List<String> {
+        return getList(PHISHING_WARNING_IGNORED_WEBSITES) ?: emptyList()
     }
 
     fun preferencesFor(username: Username): UserPreferencesManager =

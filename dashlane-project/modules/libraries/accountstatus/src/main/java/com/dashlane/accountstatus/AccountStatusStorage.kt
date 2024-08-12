@@ -1,7 +1,9 @@
 package com.dashlane.accountstatus
 
 import android.util.Log
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.session.Session
+import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.util.anonymize
 import com.google.gson.Gson
@@ -9,27 +11,27 @@ import com.google.gson.JsonSyntaxException
 import javax.inject.Inject
 
 interface AccountStatusStorage {
-    fun saveAccountStatus(session: Session, newStatus: AccountStatus): Boolean
+    fun saveAccountStatus(localKey: LocalKey, username: Username, newStatus: AccountStatus): Boolean
 
-    fun readAccountStatus(session: Session): AccountStatus?
+    fun readAccountStatus(localKey: LocalKey, username: Username): AccountStatus?
 }
 
 class AccountStatusStorageImpl @Inject constructor(
     private val userSecureDataStorageManager: UserSecureStorageManager,
     private val gson: Gson
 ) : AccountStatusStorage {
-    override fun saveAccountStatus(session: Session, newStatus: AccountStatus): Boolean {
+    override fun saveAccountStatus(localKey: LocalKey, username: Username, newStatus: AccountStatus): Boolean {
         val jsonStatus = gson.toJson(newStatus)
         if (jsonStatus.isNullOrBlank()) return false
 
-        userSecureDataStorageManager.storeAccountStatus(session, jsonStatus)
+        userSecureDataStorageManager.storeAccountStatus(localKey, username, jsonStatus)
 
-        return newStatus == readAccountStatus(session)
+        return newStatus == readAccountStatus(localKey, username)
     }
 
-    override fun readAccountStatus(session: Session): AccountStatus? =
+    override fun readAccountStatus(localKey: LocalKey, username: Username,): AccountStatus? =
         try {
-            val storedStatus = userSecureDataStorageManager.readAccountStatus(session) ?: throw NullPointerException()
+            val storedStatus = userSecureDataStorageManager.readAccountStatus(localKey, username) ?: throw NullPointerException()
             val result = gson.fromJson(
                 storedStatus,
                 AccountStatus::class.java

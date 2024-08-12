@@ -9,8 +9,8 @@ import com.dashlane.navigation.NavigationHelper.Destination.MainPath.GET_PREMIUM
 import com.dashlane.navigation.NavigationHelper.Destination.MainPath.VPN
 import com.dashlane.navigation.NavigationHelper.Destination.SecondaryPath
 import com.dashlane.navigation.NavigationHelper.Destination.SecondaryPath.GetPremium
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.premium.offer.common.model.OfferType
-import com.dashlane.premium.paywall.common.PaywallIntroType
 import com.dashlane.xml.domain.SyncObjectType
 
 class NavDeepLinkHelper(
@@ -63,7 +63,7 @@ class NavDeepLinkHelper(
             }
             host == DARK_WEB_MONITORING_PREMIUM_PROMPT -> {
                 navigator.goToPaywall(
-                    type = PaywallIntroType.DARK_WEB_MONITORING.toString()
+                    type = PaywallIntroType.DARK_WEB_MONITORING
                 )
                 true
             }
@@ -134,7 +134,7 @@ class NavDeepLinkHelper(
 
     private fun handleGetPremiumDeeplink(pathSegments: List<String>) {
         val offerType = when {
-            pathSegments.contains(GetPremium.ESSENTIALS_OFFER) -> OfferType.ADVANCED
+            pathSegments.contains(GetPremium.ADVANCED_OFFER) -> OfferType.ADVANCED
             pathSegments.contains(GetPremium.PREMIUM_OFFER) -> OfferType.PREMIUM
             pathSegments.contains(GetPremium.FAMILY_OFFER) -> OfferType.FAMILY
             else -> null

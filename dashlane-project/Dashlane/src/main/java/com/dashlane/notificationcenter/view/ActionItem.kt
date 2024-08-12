@@ -14,6 +14,8 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     val title: Int
     val titleFormatArgs: List<Any>
         get() = emptyList()
+    val descriptionFormatArgs: List<Any>
+        get() = emptyList()
     val description: Int
     val icon: Int
     override val trackingKey: String
@@ -104,30 +106,14 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
 
     data class TrialUpgradeRecommendationActionItem(
         override val actionItemsRepository: NotificationCenterRepository,
-        private val offerType: OfferType
     ) : ActionItem {
         override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
         override val type: ActionItemType = ActionItemType.TRIAL_UPGRADE_RECOMMENDATION
         override val title: Int = R.string.action_item_trial_upgrade_recommendation_title
         override val description: Int
-            get() = when (offerType) {
-                OfferType.ADVANCED -> R.string.action_item_trial_upgrade_recommendation_description_essentials
-                OfferType.PREMIUM -> R.string.action_item_trial_upgrade_recommendation_description_premium
-                OfferType.FAMILY -> R.string.action_item_trial_upgrade_recommendation_description_family
-            }
+            get() = R.string.action_item_trial_upgrade_recommendation_description_premium
         override val icon: Int = R.drawable.ic_action_item_premium_related
         override val action: NotificationCenterDef.Presenter.() -> Unit = { startUpgrade(offerType = null) }
-    }
-
-    data class AuthenticatorAnnouncementItem(
-        override val actionItemsRepository: NotificationCenterRepository
-    ) : ActionItem {
-        override val section = ActionItemSection.WHATS_NEW
-        override val type = ActionItemType.AUTHENTICATOR_ANNOUNCEMENT
-        override val title = R.string.authenticator_notification_center_title
-        override val description = R.string.authenticator_notification_center_body
-        override val icon = R.drawable.ic_action_item_authenticator
-        override val action: NotificationCenterDef.Presenter.() -> Unit = { startAuthenticator() }
     }
 
     data class PasswordLimitReachedActionItem(
@@ -140,7 +126,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val description: Int = R.string.action_item_password_limit_description
         override val icon: Int = R.drawable.ic_action_item_premium_related
         override val action: NotificationCenterDef.Presenter.() -> Unit =
-            { startGoEssentials() }
+            { startUpgrade(offerType = OfferType.PREMIUM) }
         override val titleFormatArgs: List<Any>
             get() = listOf(passwordLimit)
     }
@@ -156,9 +142,24 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val description: Int = R.string.action_item_password_limit_description
         override val icon: Int = R.drawable.ic_action_item_premium_related
         override val action: NotificationCenterDef.Presenter.() -> Unit =
-            { startGoEssentials() }
+            { startUpgrade(offerType = OfferType.PREMIUM) }
         override val titleFormatArgs: List<Any>
             get() = listOf(passwordCount, passwordLimit)
+    }
+
+    data class PasswordLimitExceededActionItem(
+        override val actionItemsRepository: NotificationCenterRepository,
+        private val passwordLimit: Int
+    ) : ActionItem {
+        override val type: ActionItemType = ActionItemType.PASSWORD_LIMIT_EXCEEDED
+        override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
+        override val title: Int = R.string.action_item_frozen_account_title
+        override val description: Int = R.string.action_item_frozen_account_description
+        override val icon: Int = R.drawable.ic_action_item_premium_related
+        override val action: NotificationCenterDef.Presenter.() -> Unit =
+            { openFrozenStatePaywall() }
+        override val descriptionFormatArgs: List<Any>
+            get() = listOf(passwordLimit)
     }
 
     class ViewHolder(view: View) : ReadStateViewHolder<ActionItem>(view) {
@@ -168,7 +169,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
             super.updateView(context, item)
             item ?: return
             setText(R.id.title, context.getString(item.title, *item.titleFormatArgs.toTypedArray()))
-            setText(R.id.description, context.getString(item.description))
+            setText(R.id.description, context.getString(item.description, *item.descriptionFormatArgs.toTypedArray()))
             setImageDrawable(
                 R.id.icon,
                 CircleDrawable.with(

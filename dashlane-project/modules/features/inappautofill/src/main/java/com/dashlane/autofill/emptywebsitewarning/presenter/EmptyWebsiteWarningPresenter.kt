@@ -2,7 +2,7 @@ package com.dashlane.autofill.emptywebsitewarning.presenter
 
 import com.dashlane.autofill.emptywebsitewarning.EmptyWebsiteWarningContract
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.model.getLoginForUi
+import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
@@ -20,7 +20,7 @@ class EmptyWebsiteWarningPresenter @Inject constructor(
         return EmptyWebsiteWarningContract.AccountWrapper(
             uid,
             authentifiant.title ?: "",
-            authentifiant.getLoginForUi(false) ?: "",
+            authentifiant.loginForUi ?: "",
             currentUrl
         )
     }

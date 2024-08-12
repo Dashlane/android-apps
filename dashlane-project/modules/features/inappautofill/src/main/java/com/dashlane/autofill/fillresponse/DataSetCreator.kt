@@ -2,22 +2,25 @@ package com.dashlane.autofill.fillresponse
 
 import android.content.Context
 import android.widget.inline.InlinePresentationSpec
+import com.dashlane.autofill.api.util.AutofillValueFactory
 import com.dashlane.autofill.emptywebsitewarning.view.EmptyWebsiteWarningActivity
 import com.dashlane.autofill.fillresponse.filler.AuthentifiantFiller
 import com.dashlane.autofill.fillresponse.filler.CreditCardFiller
 import com.dashlane.autofill.fillresponse.filler.EmailFiller
 import com.dashlane.autofill.fillresponse.filler.OtpCodeFiller
 import com.dashlane.autofill.fillresponse.filler.PauseFiller
+import com.dashlane.autofill.fillresponse.filler.PhishingWarningFiller
 import com.dashlane.autofill.fillresponse.filler.ViewAllAccountsFiller
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.model.AuthentifiantItemToFill
 import com.dashlane.autofill.model.CreditCardItemToFill
 import com.dashlane.autofill.model.EmailItemToFill
 import com.dashlane.autofill.model.ItemToFill
 import com.dashlane.autofill.model.OtpItemToFill
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import com.dashlane.autofill.ui.SmsOtpAutofillActivity
 import com.dashlane.autofill.unlockfill.AutofillAuthActivity
-import com.dashlane.autofill.api.util.AutofillValueFactory
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
@@ -30,7 +33,8 @@ internal interface DataSetCreator {
         itemToFill: ItemToFill,
         requireLock: Boolean,
         isGuidedChangePassword: Boolean,
-        inlineSpec: InlinePresentationSpec?
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
     ): DatasetWrapperBuilder?
 
     fun createForOnBoarding(inlineSpec: InlinePresentationSpec?): DatasetWrapperBuilder?
@@ -43,7 +47,8 @@ internal interface DataSetCreator {
     fun createViewAllItems(
         summary: AutoFillHintSummary,
         hasFillResponse: Boolean,
-        inlineSpec: InlinePresentationSpec?
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
     ): DatasetWrapperBuilder?
 
     fun createForPause(
@@ -74,7 +79,14 @@ internal interface DataSetCreator {
     fun createForPinnedItem(
         summary: AutoFillHintSummary,
         hasFillResponse: Boolean,
-        inlineSpec: InlinePresentationSpec?
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
+    ): DatasetWrapperBuilder?
+
+    fun createForPhishingWarning(
+        summary: AutoFillHintSummary,
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
     ): DatasetWrapperBuilder?
 
     fun fill(
@@ -95,15 +107,21 @@ internal class DataSetCreatorImpl @Inject constructor(
     private val pauseActionIntentProvider: PauseActionIntentProvider,
     private val createAccountActionIntentProvider: CreateAccountActionIntentProvider,
     private val changePasswordActionIntentProvider: ChangePasswordActionIntentProvider,
-    private val emptyWebsiteWarningIntentProvider: EmptyWebsiteWarningIntentProvider
+    private val emptyWebsiteWarningIntentProvider: EmptyWebsiteWarningIntentProvider,
+    private val phishingWarningIntentProvider: PhishingWarningIntentProvider,
+    private val frozenStateManager: FrozenStateManager,
 ) : DataSetCreator {
+
+    private val isAccountFrozen: Boolean
+        get() = frozenStateManager.isAccountFrozen
 
     override fun create(
         summary: AutoFillHintSummary,
         itemToFill: ItemToFill,
         requireLock: Boolean,
         isGuidedChangePassword: Boolean,
-        inlineSpec: InlinePresentationSpec?
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
     ): DatasetWrapperBuilder? {
         val remoteView = remoteViewProvider.forItem(itemToFill) ?: return null
         val remoteViewInline = inlinePresentationProvider?.forItem(itemToFill, inlineSpec)
@@ -115,19 +133,22 @@ internal class DataSetCreatorImpl @Inject constructor(
         if (requireLock) {
             val intentSender = if (showEmptyWebsiteWarning(summary.webDomain, itemToFill)) {
                 emptyWebsiteWarningIntentProvider.getEmptyWebsiteWarningSender(
-                    applicationContext,
-                    itemToFill.itemId,
-                    summary,
-                    itemToFill.matchType ?: MatchType.REGULAR
+                    context = applicationContext,
+                    itemId = itemToFill.itemId,
+                    summary = summary,
+                    matchType = itemToFill.matchType ?: MatchType.REGULAR,
+                    isAccountFrozen = isAccountFrozen
                 )
             } else {
                 AutofillAuthActivity.getAuthIntentSenderForDataset(
-                    applicationContext,
-                    itemToFill,
-                    summary,
-                    inlineSpec.isAvailable(),
-                    isGuidedChangePassword,
-                    itemToFill.matchType
+                    context = applicationContext,
+                    itemToFill = itemToFill,
+                    summary = summary,
+                    forKeyboard = inlineSpec.isAvailable(),
+                    guidedChangePasswordFlow = isGuidedChangePassword,
+                    matchType = itemToFill.matchType,
+                    phishingAttemptLevel = phishingAttemptLevel,
+                    isAccountFrozen = isAccountFrozen
                 )
             }
             dataSetBuilder.setAuthentication(intentSender)
@@ -179,9 +200,10 @@ internal class DataSetCreatorImpl @Inject constructor(
         }
         dataSetBuilder.setAuthentication(
             SmsOtpAutofillActivity.getIntentSenderForDataset(
-                applicationContext,
-                summary,
-                forKeyboard = inlineSpec.isAvailable()
+                context = applicationContext,
+                summary = summary,
+                forKeyboard = inlineSpec.isAvailable(),
+                isAccountFrozen = isAccountFrozen
             )
         )
         return dataSetBuilder
@@ -190,7 +212,8 @@ internal class DataSetCreatorImpl @Inject constructor(
     override fun createViewAllItems(
         summary: AutoFillHintSummary,
         hasFillResponse: Boolean,
-        inlineSpec: InlinePresentationSpec?
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
     ): DatasetWrapperBuilder? {
         val remoteView = if (hasFillResponse) {
             remoteViewProvider.forViewAllItems()
@@ -211,10 +234,12 @@ internal class DataSetCreatorImpl @Inject constructor(
 
         dataSetBuilder.setAuthentication(
             viewAllAccountsActionIntentProvider.getViewAllAccountsIntentSender(
-                applicationContext,
-                summary,
-                hasFillResponse,
-                forKeyboard = inlineSpec.isAvailable()
+                context = applicationContext,
+                summary = summary,
+                hadCredentials = hasFillResponse,
+                forKeyboard = inlineSpec.isAvailable(),
+                phishingAttemptLevel = phishingAttemptLevel,
+                isAccountFrozen = isAccountFrozen
             )
         )
 
@@ -224,10 +249,13 @@ internal class DataSetCreatorImpl @Inject constructor(
     override fun createForPinnedItem(
         summary: AutoFillHintSummary,
         hasFillResponse: Boolean,
-        inlineSpec: InlinePresentationSpec?
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
     ): DatasetWrapperBuilder? {
-        val remoteView = remoteViewProvider.emptyView()
-        val dataSetBuilder = DatasetWrapperBuilder(remoteView, inlinePresentationProvider?.forPinnedItem(inlineSpec))
+        val dataSetBuilder = DatasetWrapperBuilder(
+            remoteViewProvider.emptyView(),
+            inlinePresentationProvider?.forPinnedItem(inlineSpec, phishingAttemptLevel)
+        )
 
         val hasValue = fillForViewAllItems(dataSetBuilder, summary)
         if (!hasValue) {
@@ -236,13 +264,42 @@ internal class DataSetCreatorImpl @Inject constructor(
 
         dataSetBuilder.setAuthentication(
             viewAllAccountsActionIntentProvider.getViewAllAccountsIntentSender(
-                applicationContext,
-                summary,
-                hasFillResponse,
-                forKeyboard = inlineSpec.isAvailable()
+                context = applicationContext,
+                summary = summary,
+                hadCredentials = hasFillResponse,
+                forKeyboard = inlineSpec.isAvailable(),
+                phishingAttemptLevel = phishingAttemptLevel,
+                isAccountFrozen = isAccountFrozen
             )
         )
         return dataSetBuilder
+    }
+
+    override fun createForPhishingWarning(
+        summary: AutoFillHintSummary,
+        inlineSpec: InlinePresentationSpec?,
+        phishingAttemptLevel: PhishingAttemptLevel
+    ): DatasetWrapperBuilder? {
+        val datasetBuilder = DatasetWrapperBuilder(
+            remoteViewProvider.emptyView(),
+            inlinePresentationProvider?.forPhishingWarning(inlineSpec, phishingAttemptLevel)
+        )
+
+        
+        val hasValue = PhishingWarningFiller(autofillValueFactory).fill(datasetBuilder, summary)
+        if (!hasValue) {
+            return null
+        }
+
+        datasetBuilder.setAuthentication(
+            phishingWarningIntentProvider.getPhishingIntentAction(
+                context = applicationContext,
+                summary = summary,
+                phishingAttemptLevel = phishingAttemptLevel,
+                isAccountFrozen = isAccountFrozen
+            )
+        )
+        return datasetBuilder
     }
 
     override fun createForPause(
@@ -287,10 +344,11 @@ internal class DataSetCreatorImpl @Inject constructor(
 
         dataSetBuilder.setAuthentication(
             createAccountActionIntentProvider.getCreateAccountIntentSender(
-                applicationContext,
-                summary,
-                hasFillResponse,
-                forKeyboard = inlineSpec.isAvailable()
+                context = applicationContext,
+                summary = summary,
+                hadCredentials = hasFillResponse,
+                forKeyboard = inlineSpec.isAvailable(),
+                isAccountFrozen = isAccountFrozen
             )
         )
 
@@ -313,9 +371,10 @@ internal class DataSetCreatorImpl @Inject constructor(
         }
         dataSetBuilder.setAuthentication(
             changePasswordActionIntentProvider.getChangePasswordIntentSender(
-                applicationContext,
-                summary,
-                forKeyboard = inlineSpec.isAvailable()
+                context = applicationContext,
+                summary = summary,
+                forKeyboard = inlineSpec.isAvailable(),
+                isAccountFrozen = isAccountFrozen
             )
         )
 

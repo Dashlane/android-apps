@@ -2,6 +2,7 @@ package com.dashlane.item.subview.provider.personalinfo
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -57,8 +58,12 @@ class ItemScreenConfigurationIdentityProvider(
         context: Context,
         item: VaultItem<*>
     ): ItemHeader {
-        val iconDrawable = createDefaultHeaderIcon(context, item.syncObject)
-        return ItemHeader(createMenus(), context.getString(R.string.identity), iconDrawable)
+        return ItemHeader(
+            menuActions = createMenus(),
+            title = context.getString(R.string.identity),
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_OTHER_ICON.value,
+            thumbnailIconRes = getHeaderIcon(item.syncObject),
+        )
     }
 
     private fun createSubViews(
@@ -133,7 +138,7 @@ class ItemScreenConfigurationIdentityProvider(
         listener: ItemEditViewContract.View.UiUpdateListener
     ): ItemSubView<*> {
         val birthLocalDate = item.syncObject.birthDate
-        val formattedString = birthLocalDate?.toIdentityFormat(context)
+        val formattedString = birthLocalDate?.toIdentityFormat(context.resources)
 
         return if (editMode) {
             ItemEditValueDateSubView(
@@ -145,7 +150,7 @@ class ItemScreenConfigurationIdentityProvider(
                 addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                     override fun onValueChanged(origin: Any, newValue: LocalDate?) {
                         val subView = this@apply
-                        subView.formattedDate = newValue?.toIdentityFormat(context)
+                        subView.formattedDate = newValue?.toIdentityFormat(context.resources)
                         subView.value = newValue
                         listener.notifySubViewChanged(this@apply)
                     }

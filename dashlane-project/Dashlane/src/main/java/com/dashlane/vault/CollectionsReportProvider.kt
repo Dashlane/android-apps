@@ -2,7 +2,7 @@ package com.dashlane.vault
 
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.filter.collectionFilter
-import com.dashlane.storage.userdata.accessor.queryAll
+import com.dashlane.storage.userdata.accessor.queryAllLegacy
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
@@ -34,7 +34,7 @@ class CollectionsReportProvider @Inject constructor(
     fun computeLoginsWithMultipleCollectionsCount(teamSpace: TeamSpace): Int =
         computeLoginsWithMultipleCollectionCount(queryAllCollectionsForSpace(teamSpace))
 
-    private fun queryAllCollectionsForSpace(teamSpace: TeamSpace) = collectionDataQuery.queryAll {
+    private fun queryAllCollectionsForSpace(teamSpace: TeamSpace) = collectionDataQuery.queryAllLegacy {
         collectionFilter {
             ignoreUserLock()
             specificSpace(teamSpace)

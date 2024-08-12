@@ -1,7 +1,6 @@
 package com.dashlane.security.darkwebmonitoring
 
 import android.content.res.ColorStateList
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
@@ -16,6 +15,7 @@ import androidx.transition.TransitionManager
 import androidx.viewpager.widget.ViewPager
 import com.dashlane.R
 import com.dashlane.darkweb.DarkWebEmailStatus
+import com.dashlane.databinding.FragmentDarkwebMonitoringBinding
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.security.darkwebmonitoring.item.DarkWebEmailItem
 import com.dashlane.security.darkwebmonitoring.item.DarkWebEmailPlaceholderItem
@@ -27,12 +27,14 @@ import com.dashlane.util.setCurrentPageView
 import com.google.android.material.tabs.TabLayout
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
-class DarkWebMonitoringViewProxy(view: View, val activity: DashlaneActivity) :
-    BaseViewProxy<DarkWebMonitoringContract.Presenter>(view),
-    DarkWebMonitoringContract.ViewProxy {
+class DarkWebMonitoringViewProxy(
+    private val binding: FragmentDarkwebMonitoringBinding,
+    val activity: DashlaneActivity
+) : BaseViewProxy<DarkWebMonitoringContract.Presenter>(binding.root), DarkWebMonitoringContract.ViewProxy {
 
     private val darkWebEmailsAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
-    private val sceneContainer = findViewByIdEfficient<FrameLayout>(R.id.scene_container)!!
+    private val sceneContainer: FrameLayout
+        get() = binding.sceneContainer
     private var viewPagerAdapter: DarkWebMonitoringPagerAdapter? = null
 
     init {
@@ -54,6 +56,10 @@ class DarkWebMonitoringViewProxy(view: View, val activity: DashlaneActivity) :
             viewPagerAdapter = DarkWebMonitoringPagerAdapter(activity, context, presenter, pendingItems, resolvedItems)
             goToRecyclerScene(emails)
         }
+    }
+
+    override fun showLoadingScreen() {
+        transitionIfNeeded(R.layout.item_dark_web_loading)
     }
 
     override fun showDarkwebInactiveScene() {
@@ -80,7 +86,7 @@ class DarkWebMonitoringViewProxy(view: View, val activity: DashlaneActivity) :
     }
 
     override fun updateActionBar(updateTitle: Boolean) {
-        if (presenter.selectedItems.size == 0) {
+        if (presenter.selectedItems.isEmpty()) {
             setupActionBar(updateTitle)
         } else {
             setupSelectedActionBar()

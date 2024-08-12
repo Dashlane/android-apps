@@ -20,10 +20,11 @@ internal data class Offers(
 ) : OffersState()
 
 data class OfferDetails(
-    val warning: TextResource? = null,
-    val benefits: List<TextResource>,
+    val warning: String? = null,
+    val benefits: List<String>,
     val monthlyProduct: Product? = null,
-    val yearlyProduct: Product? = null
+    val yearlyProduct: Product? = null,
+    val extraCtaString: String? = null
 ) : OffersState() {
 
     data class Product(

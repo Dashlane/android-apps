@@ -102,14 +102,20 @@ class CredentialManagerHandlerImpl @Inject constructor(
                         passkeyRequestOptions.rpId,
                         passkeyRequestOptions.allowCredentials ?: listOf()
                     ).map { summary ->
+                        val userDisplayName = if (summary.userDisplayName.isNullOrEmpty()) {
+                            
+                            context.getString(R.string.credential_manager_unknown)
+                        } else {
+                            summary.userDisplayName!!
+                        }
                         PublicKeyCredentialEntry.Builder(
                             context,
-                            summary.userDisplayName.orEmpty(),
+                            userDisplayName,
                             pendingIntentForGet(context, summary.id),
                             option
                         ).setLastUsedTime(summary.locallyViewedDate)
                             .setIcon(Icon.createWithResource(context, R.drawable.day_night_logo))
-                            .setDisplayName(summary.userDisplayName)
+                            .setDisplayName(userDisplayName)
                             .build()
                     }.also {
                         credentialManagerLogger.logSuggestPasskeyLogin(request.callingAppInfo, it.size)

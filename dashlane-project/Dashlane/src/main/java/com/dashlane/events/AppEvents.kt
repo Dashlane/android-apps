@@ -3,7 +3,7 @@ package com.dashlane.events
 import com.dashlane.event.AppEvent
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking

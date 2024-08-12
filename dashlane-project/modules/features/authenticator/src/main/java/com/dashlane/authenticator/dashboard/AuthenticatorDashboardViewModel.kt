@@ -21,12 +21,15 @@ import com.dashlane.authenticator.dashboard.AuthenticatorDashboardUiState.Progre
 import com.dashlane.authenticator.otp
 import com.dashlane.authenticator.updateOtp
 import com.dashlane.authenticator.util.SetUpAuthenticatorResultContract
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.lock.LockHelper
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.util.isNotSemanticallyNull
@@ -38,7 +41,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
@@ -51,6 +53,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class AuthenticatorDashboardViewModel @Inject constructor(
@@ -59,18 +62,21 @@ class AuthenticatorDashboardViewModel @Inject constructor(
     private val credentialDataQuery: CredentialDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private val dataSaver: DataSaver,
+    private val dataSync: DataSync,
     private val logger: AuthenticatorLogger,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val frozenStateManager: FrozenStateManager,
+    private val navigator: Navigator,
 ) : ViewModel(), AuthenticatorDashboardViewModelContract {
     private val userCommand = Channel<UserCommand>(1)
     private val editMode: Boolean
         get() = editState.value == EditLogins
 
+    private val isAccountFrozen: Boolean
+        get() = frozenStateManager.isAccountFrozen
+
     var otpUri: Uri? = null
     private lateinit var loadedCredentials: List<CredentialItem>
 
-    override val isFirstVisit: Boolean
-        get() = !userPreferencesManager.isAuthenticatorGetStartedDisplayed
     override val urlDomainRegistry = urlDomainRegistryFactory.create()
 
     @OptIn(FlowPreview::class)
@@ -83,16 +89,18 @@ class AuthenticatorDashboardViewModel @Inject constructor(
                         command.otp,
                         vaultDataQuery,
                         dataSaver,
+                        dataSync,
                         logger,
                         updateModificationDate = command.updateModificationDate
                     )
+
                     emit(refreshOtpCredentials())
                 }
                 is SeeAllCommand -> flow {
-                    emit(HasLogins(loadedCredentials, loadedCredentials.size))
+                    emit(HasLogins(loadedCredentials, loadedCredentials.size, isAccountFrozen))
                 }
                 is SeeLessCommand -> flow {
-                    emit(HasLogins(loadedCredentials))
+                    emit(HasLogins(logins = loadedCredentials, isAccountFrozen = isAccountFrozen))
                 }
             }
         }
@@ -109,7 +117,13 @@ class AuthenticatorDashboardViewModel @Inject constructor(
         userCommand.trySend(OtpSetupCommand(itemId, otp, updateModificationDate = false))
     }
 
-    override fun onOtpCodeCopy(itemId: String, domain: String?) = logger.logCopyOtpCode(itemId, domain)
+    override fun onOtpCodeCopy(itemId: String, domain: String?): Boolean = if (isAccountFrozen) {
+        navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+        false
+    } else {
+        logger.logCopyOtpCode(itemId, domain)
+        true
+    }
 
     override fun onSuccessAddOtp(itemId: String?, otp: Otp) = logger.logCompleteAdd2fa(itemId, otp)
 
@@ -131,6 +145,11 @@ class AuthenticatorDashboardViewModel @Inject constructor(
     }
 
     override fun onSetupAuthenticator(activityResultLauncher: ActivityResultLauncher<Unit?>) {
+        if (isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            return
+        }
+
         viewModelScope.launch(Dispatchers.Main) {
             activityResultLauncher.launch(null)
         }
@@ -153,6 +172,11 @@ class AuthenticatorDashboardViewModel @Inject constructor(
     }
 
     override fun onEditClicked() {
+        if (isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            return
+        }
+
         editState.value = EditLogins
     }
 
@@ -160,13 +184,9 @@ class AuthenticatorDashboardViewModel @Inject constructor(
         editState.value = ViewLogins
     }
 
-    override fun onOnboardingDisplayed() {
-        userPreferencesManager.isAuthenticatorGetStartedDisplayed = true
-    }
-
     override fun getCredentials() = credentialDataQuery.queryAll()
 
-    private fun refreshOtpCredentials(): AuthenticatorDashboardUiState {
+    private suspend fun refreshOtpCredentials(): AuthenticatorDashboardUiState {
         val otpCredentials = getOtpCredentials(getCredentials())
         val originalCredentials = (uiState.value as? HasLogins)?.logins
         
@@ -188,13 +208,13 @@ class AuthenticatorDashboardViewModel @Inject constructor(
             otpCredentials.isEmpty() -> NoOtp
             else -> {
                 loadedCredentials = otpCredentials
-                HasLogins(loadedCredentials)
+                HasLogins(logins = loadedCredentials, isAccountFrozen = isAccountFrozen)
             }
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun getOtpCredentials(credentials: List<SummaryObject.Authentifiant>) =
+    private suspend fun getOtpCredentials(credentials: List<SummaryObject.Authentifiant>) =
         vaultDataQuery.queryAll(
             vaultFilter {
                 specificUid(credentials.filter { it.hasOtpUrl }.map { it.id })

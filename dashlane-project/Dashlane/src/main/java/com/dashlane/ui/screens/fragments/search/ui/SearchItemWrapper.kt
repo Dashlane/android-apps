@@ -2,11 +2,11 @@ package com.dashlane.ui.screens.fragments.search.ui
 
 import android.content.Context
 import com.dashlane.search.MatchedSearchResult
+import com.dashlane.search.textfactory.SearchListTextResolver
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemDoubleWrapper
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
-import com.dashlane.ui.adapters.text.factory.SearchListTextResolver
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.textfactory.list.StatusText
 
 open class SearchItemWrapper<D : SummaryObject>(
     private val matchResult: MatchedSearchResult,
@@ -16,20 +16,18 @@ open class SearchItemWrapper<D : SummaryObject>(
 ) : VaultItemDoubleWrapper<D>(itemWrapper) {
 
     override fun getTitle(context: Context): StatusText = if (matchedText == null) {
-        searchListTextResolver.getLine1(context, originalItemWrapper.summaryObject)
+        searchListTextResolver.getLine1(originalItemWrapper.summaryObject)
     } else {
         searchListTextResolver.getHighlightedLine1(
-            context,
             originalItemWrapper.summaryObject,
             matchedText
         )
     }
 
     override fun getDescription(context: Context): StatusText = if (matchedText == null) {
-        searchListTextResolver.getLine2(context, originalItemWrapper.summaryObject)
+        searchListTextResolver.getLine2(originalItemWrapper.summaryObject)
     } else {
         searchListTextResolver.getHighlightedLine2(
-            context,
             originalItemWrapper.summaryObject,
             matchedText,
             matchResult.match.field

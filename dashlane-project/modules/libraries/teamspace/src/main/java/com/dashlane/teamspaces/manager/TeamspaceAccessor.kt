@@ -3,9 +3,9 @@ package com.dashlane.teamspaces.manager
 import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.B2bStatus.CurrentTeam.TeamInfo.TwoFAEnforced
 import com.dashlane.session.Session
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.teamspaces.model.TwoFAEnforced
 
 interface TeamSpaceAccessor {
     val isB2bUser: Boolean
@@ -37,6 +37,8 @@ interface TeamSpaceAccessor {
     val isForcedDomainsEnabled: Boolean
 
     val isVaultExportEnabled: Boolean
+
+    val isRichIconsEnabled: Boolean
 
     fun getOrDefault(teamId: String?): TeamSpace
 
@@ -75,6 +77,9 @@ class TeamSpaceAccessorImpl(
     override val isSharingDisabled: Boolean
         get() = currentBusinessTeam?.isSharingDisabled == true
 
+    override val isRichIconsEnabled: Boolean
+        get() = currentBusinessTeam?.isRichIconsEnabled != false
+
     override val isLockOnExitEnabled: Boolean
         get() = currentBusinessTeam?.isLockOnExitEnabled == true
     override val isForcedDomainsEnabled: Boolean
@@ -89,8 +94,8 @@ class TeamSpaceAccessorImpl(
 
     override val is2FAEnforced: Boolean
         get() = when (currentBusinessTeam?.space?.teamInfo?.twoFAEnforced) {
-            TwoFAEnforced.LOGIN.value,
-            TwoFAEnforced.NEW_DEVICE.value -> true
+            TwoFAEnforced.LOGIN,
+            TwoFAEnforced.NEWDEVICE -> true
             else -> false
         }
 

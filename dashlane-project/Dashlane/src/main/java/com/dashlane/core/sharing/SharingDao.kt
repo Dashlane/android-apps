@@ -1,5 +1,6 @@
 package com.dashlane.core.sharing
 
+import androidx.annotation.Discouraged
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
@@ -32,21 +33,36 @@ interface SharingDao {
     suspend fun updateItemTimestamp(uid: String, timestamp: Long)
 
     suspend fun getItemKeyTimestamp(uid: String): Pair<String, Long>?
-    fun isDirtyForSharing(id: String, type: SyncObjectType): Boolean
+    suspend fun isDirtyForSharing(id: String, type: SyncObjectType): Boolean
 
     suspend fun getDirtyForSharing(): List<DataIdentifierExtraDataWrapper<out SyncObject>>
 
     suspend fun markAsShared(uids: List<String>)
 
-    fun loadItemGroup(itemGroupUid: String): ItemGroup?
+    @Discouraged("Use the suspend version instead")
+    fun loadItemGroupLegacy(itemGroupUid: String): ItemGroup?
+    suspend fun loadItemGroup(itemGroupUid: String): ItemGroup?
 
-    fun loadAllItemGroup(): List<ItemGroup>
+    @Discouraged("Use the suspend version instead")
+    fun loadAllItemGroupLegacy(): List<ItemGroup>
+    suspend fun loadAllItemGroup(): List<ItemGroup>
 
-    fun loadAllUserGroup(): List<UserGroup>
+    @Discouraged("Use the suspend version instead")
+    fun loadAllUserGroupLegacy(): List<UserGroup>
+    suspend fun loadAllUserGroup(): List<UserGroup>
 
-    fun loadUserGroupsAcceptedOrPending(userId: String): List<UserGroup>
+    @Discouraged("Use the suspend version instead")
+    fun loadUserGroupsAcceptedOrPendingLegacy(userId: String): List<UserGroup>
+    suspend fun loadUserGroupsAcceptedOrPending(userId: String): List<UserGroup>
 
-    fun loadAllCollection(): List<Collection>
+    @Discouraged("Use the suspend version instead")
+    fun loadAllCollectionLegacy(): List<Collection>
+    suspend fun loadAllCollection(): List<Collection>
+
+    fun loadCollectionsAcceptedOrPending(
+        userId: String,
+        myUserGroupsAcceptedOrPending: List<UserGroup>
+    ): List<Collection>
 
     suspend fun saveAsLocalItem(
         identifier: String,
@@ -59,25 +75,32 @@ interface SharingDao {
         userPermission: String
     )
 
-    fun loadItemContentExtraData(itemUid: String): String?
+    @Discouraged("Use the suspend version instead")
+    fun loadItemContentExtraDataLegacy(itemUid: String): String?
+    suspend fun loadItemContentExtraData(itemUid: String): String?
+
     suspend fun deleteItemGroups(memory: SharingDaoMemoryDataAccess, itemGroupsUid: List<String>)
     suspend fun deleteLocallyItemGroupAndItems(
         memory: SharingDaoMemoryDataAccess,
         itemGroup: ItemGroup
     )
 
-    fun getExtraData(uid: String): String?
+    @Discouraged("Use the suspend version instead")
+    fun loadItemGroupForItemLegacy(itemUID: String): ItemGroup?
+    suspend fun loadItemGroupForItem(itemUID: String): ItemGroup?
 
-    fun loadItemGroupForItem(itemUID: String): ItemGroup?
+    @Discouraged("Use the suspend version instead")
+    fun loadUserGroupsAcceptedLegacy(userId: String): List<UserGroup>?
+    suspend fun loadUserGroupsAccepted(userId: String): List<UserGroup>?
 
-    fun loadUserGroupsAccepted(userId: String): List<UserGroup>?
+    @Discouraged("Use the suspend version instead")
+    fun loadUserGroupLegacy(userGroupId: String): UserGroup?
+    suspend fun loadUserGroup(userGroupId: String): UserGroup?
 
-    fun loadUserGroup(userGroupId: String): UserGroup?
+    @Discouraged("Use the suspend version instead")
+    fun getItemWithExtraDataLegacy(id: String, dataType: SyncObjectType): DataIdentifierExtraDataWrapper<SyncObject>?
 
-    fun getItemWithExtraData(
-        id: String,
-        dataType: SyncObjectType
-    ): DataIdentifierExtraDataWrapper<SyncObject>?
+    suspend fun getItemWithExtraData(id: String, dataType: SyncObjectType): DataIdentifierExtraDataWrapper<SyncObject>?
 
     suspend fun duplicateDataIdentifier(itemId: String): VaultItem<*>? {
         val vaultItem = loadVaultItem(itemId) ?: return null

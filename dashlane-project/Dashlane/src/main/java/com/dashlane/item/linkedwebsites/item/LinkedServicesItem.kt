@@ -17,8 +17,8 @@ import androidx.core.widget.TextViewCompat
 import com.dashlane.R
 import com.dashlane.design.component.compat.view.BadgeView
 import com.dashlane.design.component.compat.view.ButtonMediumView
-import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.util.DeviceUtils
 import com.dashlane.util.dpToPx
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
@@ -65,13 +65,9 @@ data class LinkedWebsitesItem(
             textChangerListener.actualItem = item
             view.findViewById<LinearLayout>(R.id.editable_layout).isVisible = item.isEditable
             view.findViewById<LinearLayout>(R.id.view_only_layout).isVisible = !item.isEditable
-            if (item.isMain) {
-                view.findViewById<ImageView>(R.id.website_icon_image).apply {
-                    setImageDrawable(VaultItemImageHelper.getAuthentifiantIcon(context, item.defaultUrl, null))
-                }
+            view.findViewById<ThumbnailDomainIconView>(R.id.website_icon_image).apply {
+                domainUrl = item.defaultUrl
             }
-            view.findViewById<ImageView>(R.id.website_icon_image).isVisible = item.isMain
-            view.findViewById<ImageView>(R.id.website_icon).isVisible = !item.isMain
             if (item.isEditable) {
                 view.findViewById<EditText>(R.id.website_url)?.also {
                     
@@ -179,8 +175,8 @@ data class LinkedServicesHeaderItem(@StringRes val title: Int, val locked: Boole
             view.findViewById<TextView>(R.id.title).apply {
                 text = context.getString(item.title)
                 if (item.locked) {
-                    setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock, 0, 0, 0)
-                    compoundDrawablePadding = context.dpToPx(4)
+                    setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_filled, 0, 0, 0)
+                    compoundDrawablePadding = context.dpToPx(8)
                     val color = ContextCompat.getColor(context, R.color.text_neutral_standard)
                     TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(color))
                 } else {

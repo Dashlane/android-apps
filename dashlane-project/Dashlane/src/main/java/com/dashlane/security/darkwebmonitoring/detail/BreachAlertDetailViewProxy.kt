@@ -4,7 +4,6 @@ import android.app.Activity
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,11 +12,11 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.dashlane.R
 import com.dashlane.item.subview.view.InfoboxViewProvider
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.addOnFieldVisibilityToggleListener
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getBaseActivity
-import com.dashlane.util.getImageDrawableByWebsiteUrl
 import com.google.android.material.textfield.TextInputLayout
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
@@ -25,7 +24,7 @@ class BreachAlertDetailViewProxy(rootView: View, activityLifecycleScope: Lifecyc
     BaseViewProxy<BreachAlertDetail.Presenter>(rootView), BreachAlertDetail.ViewProxy {
     private val domainTextView = findViewByIdEfficient<TextView>(R.id.domain)!!
     private val subtitleTextView = findViewByIdEfficient<TextView>(R.id.subtitle)!!
-    private val logoDomain = findViewByIdEfficient<ImageView>(R.id.logo_domain)!!
+    private val logoDomain = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.logo_domain)!!
     private val websiteLabelView = findViewByIdEfficient<TextView>(R.id.breach_website_label)!!
     private val websiteView = findViewByIdEfficient<TextView>(R.id.breach_website)!!
     private val emailLabelView = findViewByIdEfficient<View>(R.id.breach_mail_label)!!
@@ -75,8 +74,7 @@ class BreachAlertDetailViewProxy(rootView: View, activityLifecycleScope: Lifecyc
         if (domain != null) {
             domainTextView.visibility = View.VISIBLE
             domainTextView.text = domain
-            val domainDrawable = context.getImageDrawableByWebsiteUrl(domain)
-            logoDomain.setImageDrawable(domainDrawable)
+            logoDomain.domainUrl = domain
             logoDomain.contentDescription = context.getString(R.string.and_accessibility_domain_item_logo, domain)
         } else {
             domainTextView.visibility = View.GONE

@@ -2,7 +2,7 @@ package com.dashlane.ui.screens.settings.list.security
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
 import com.dashlane.cryptography.CryptographyMarker
@@ -15,7 +15,9 @@ import com.dashlane.navigation.Navigator
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
+import com.dashlane.session.UserDataRepository
 import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.storage.userdata.RichIconsSettingProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.screens.settings.SettingPrivacySetting
@@ -24,13 +26,11 @@ import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.Toaster
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -50,7 +50,8 @@ class SettingsSecurityMiscList(
     userFeaturesChecker: UserFeaturesChecker,
     userAccountStorage: UserAccountStorage,
     subscriptionCodeRepository: SubscriptionCodeRepository,
-    @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher
+    userDataRepository: UserDataRepository,
+    richIconsSettingProvider: RichIconsSettingProvider
 ) {
 
     private val miscHeader =
@@ -212,7 +213,6 @@ class SettingsSecurityMiscList(
                 SettingPrivacySetting(
                     context = context,
                     subscriptionCodeRepository = subscriptionCodeRepository,
-                    ioDispatcher = ioDispatcher,
                     toaster = toaster
                 ).open()
             }
@@ -230,6 +230,32 @@ class SettingsSecurityMiscList(
         override fun onClick(context: Context) = navigator.goToManageDevicesFromSettings()
     }
 
+    private val showRichIconsItem = object : SettingItem, SettingCheckable {
+        override val id = "show-rich-icons"
+        override val header = miscHeader
+        override val title = context.getString(R.string.setting_show_rich_icons_title)
+        override val description = context.getString(R.string.setting_show_rich_icons_description)
+        override fun isEnable() = richIconsSettingProvider.editable
+        override fun isVisible() = true
+        override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
+        override fun isChecked(context: Context): Boolean = richIconsSettingProvider.richIcons
+        override fun onCheckChanged(context: Context, enable: Boolean) {
+            if (!isEnable()) {
+                dialogHelper
+                    .builder(context)
+                    .setTitle(R.string.setting_rich_icons_force_title)
+                    .setMessage(R.string.setting_rich_icons_force_description)
+                    .setPositiveButton(R.string.ok, null)
+                    .show()
+            } else {
+                sessionManager.session?.let {
+                    val settingsManager = userDataRepository.getSettingsManager(it)
+                    settingsManager.updateSettings(settingsManager.getSettings().copy { richIcons = enable })
+                }
+            }
+        }
+    }
+
     fun getAll() = listOf(
         allowScreenshotItem,
         clearClipboardItem,
@@ -237,6 +263,7 @@ class SettingsSecurityMiscList(
         changeMasterPasswordSettingItem,
         keyDerivationItem,
         privacyAndDataSettingItem,
-        manageDevicesItem
+        manageDevicesItem,
+        showRichIconsItem
     )
 }

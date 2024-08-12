@@ -65,6 +65,8 @@ import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.session.repository.UserDatabaseRepositoryImpl
 import com.dashlane.sharing.SharingSyncCommunicator
 import com.dashlane.sharing.SharingSyncCommunicatorImpl
+import com.dashlane.storage.userdata.RichIconsSettingProvider
+import com.dashlane.storage.userdata.RichIconsSettingProviderImpl
 import com.dashlane.ui.M2xIntentFactory
 import com.dashlane.ui.M2xIntentFactoryImpl
 import com.dashlane.ui.adapter.CsvImportViewTypeProviderImpl
@@ -77,9 +79,12 @@ import com.dashlane.useractivity.SharingDeveloperLoggerImpl
 import com.dashlane.vpn.thirdparty.VpnThirdPartyAuthentifiantHelper
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
+@InstallIn(SingletonComponent::class)
 interface SingletonAbstractModule {
     @Binds
     fun bindDeviceIdRepository(impl: DeviceInfoRepositoryImpl): DeviceInfoRepository
@@ -198,4 +203,7 @@ interface SingletonAbstractModule {
 
     @Binds
     fun bindCredentialManagerDatabase(impl: CredentialManagerDAOImpl): CredentialManagerDAO
+
+    @Binds
+    fun bindsRichIconsSettingProvider(richIconsSettingProvider: RichIconsSettingProviderImpl): RichIconsSettingProvider
 }

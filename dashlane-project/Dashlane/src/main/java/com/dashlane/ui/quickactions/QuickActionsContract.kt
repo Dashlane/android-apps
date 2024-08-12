@@ -1,8 +1,8 @@
 package com.dashlane.ui.quickactions
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import com.dashlane.item.subview.Action
+import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.vault.summary.SummaryObject
 import com.skocken.presentation.definition.Base
@@ -10,7 +10,13 @@ import com.skocken.presentation.definition.Base
 interface QuickActionsContract {
     interface ViewProxy : Base.IView {
         fun setActions(actions: List<Action>)
-        fun setItemDetail(drawable: Drawable?, title: String?)
+        fun setItemDetail(
+            title: String?,
+            thumbnailType: Int?,
+            thumbnailIconRes: Int?,
+            thumbnailColorRes: Int?,
+            thumbnailUrlDomain: String?
+        )
     }
 
     interface Presenter : Base.IPresenter {
@@ -21,7 +27,7 @@ interface QuickActionsContract {
     interface DataProvider : Base.IDataProvider {
         fun getVaultItem(itemId: String): SummaryObject?
         fun getActions(itemId: String, itemListContext: ItemListContext): List<Action>
-        fun getItemIcon(context: Context, itemId: String): Drawable?
+        fun getItemThumbnail(context: Context, itemId: String): VaultItemImageHelper.ThumbnailViewConfiguration?
         fun getItemTitle(context: Context, itemId: String): String?
     }
 

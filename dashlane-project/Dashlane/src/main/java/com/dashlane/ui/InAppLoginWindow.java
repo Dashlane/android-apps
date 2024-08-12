@@ -18,9 +18,6 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.dashlane.R;
 import com.dashlane.autofill.accessibility.AccessibilityEventHandler;
 import com.dashlane.autofill.accessibility.DashlaneAccessibilityService;
@@ -32,7 +29,6 @@ import com.dashlane.core.helpers.PackageSignatureStatus;
 import com.dashlane.debug.DaDaDa;
 import com.dashlane.debug.DeveloperUtilities;
 import com.dashlane.login.lock.LockManager;
-import com.dashlane.navigation.NavigationConstants;
 import com.dashlane.navigation.NavigationHelper;
 import com.dashlane.security.DashlaneIntent;
 import com.dashlane.session.SessionManager;
@@ -48,6 +44,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import dagger.hilt.android.AndroidEntryPoint;
 import wei.mark.standout.StandOutWindow;
 import wei.mark.standout.constants.StandOutFlags;
@@ -58,8 +56,8 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements View.
     public static final int WINDOW_ID = InAppLoginWindow.class.hashCode();
     public static final int MAX_SUGGESTION_SHOWN = 3;
     static int UNLOCK_COUNT = 0;
-    private static int sWindowLayoutResId = R.layout.window_dashlane_bubble_content;
-    private static int sItemLayoutResId = R.layout.list_item_in_app_login_suggestion;
+    private static final int sWindowLayoutResId = R.layout.window_dashlane_bubble_content;
+    private static final int sItemLayoutResId = R.layout.list_item_in_app_login_suggestion;
     private static int[] sWindowDimensions = new int[]{0, 0};
     @Inject
     PackageNameSignatureHelper packageNameSignatureHelper;
@@ -211,7 +209,7 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements View.
     @Override
     public void onPickSuggestion(int position) {
         boolean isDebugLock = false;
-        if (DeveloperUtilities.systemIsInDebug(getApplicationContext()) && dadada.isInAppAutologinLockDebug()) {
+        if (dadada.isEnabled() && dadada.isInAppAutologinLockDebug()) {
             isDebugLock = (UNLOCK_COUNT % 2 == 0);
             ++UNLOCK_COUNT;
         }
@@ -256,7 +254,6 @@ public class InAppLoginWindow extends AbstractDashlaneSubwindow implements View.
         createNewAccount.setAction(Intent.ACTION_VIEW);
         createNewAccount.setData(createNewAccountUri);
         createNewAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        createNewAccount.putExtra(NavigationConstants.HOME_FORCE_CHANGE_CONTENT, true);
         startActivity(createNewAccount);
         StandOutWindow.closeAll(this, InAppLoginWindow.class);
     }

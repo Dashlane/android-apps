@@ -31,8 +31,8 @@ import com.dashlane.server.api.endpoints.mpless.MplessCompleteTransferService
 import com.dashlane.server.api.endpoints.mpless.MplessCryptography
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

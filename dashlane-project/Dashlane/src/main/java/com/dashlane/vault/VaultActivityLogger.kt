@@ -14,8 +14,8 @@ import com.dashlane.server.api.time.toInstant
 import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.userfeatures.FeatureFlip.VAULT_ACTIVITY_LOGS
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.FeatureFlip.VAULT_ACTIVITY_LOGS
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
@@ -95,6 +95,11 @@ class VaultActivityLogger @Inject constructor(
             ADD -> USER_CREATED_CREDENTIAL
             EDIT -> USER_MODIFIED_CREDENTIAL
             DELETE -> USER_DELETED_CREDENTIAL
+            Action.ADD_CUSTOM_FIELD,
+            Action.DELETE_CUSTOM_FIELD,
+            Action.EDIT_CUSTOM_FIELD ->
+                
+                return
         }
         val properties = ActivityLog.Properties(domain_url = authentifiant.urlDomain ?: "")
 

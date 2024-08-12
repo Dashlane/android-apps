@@ -146,7 +146,6 @@ internal class CurrentPlanViewModel @Inject constructor(
         FREE -> buildTitle(R.string.current_plan_title_free)
         TRIAL -> TextResource.StringText(R.string.current_plan_title_trial)
         CurrentPlanType.ADVANCED -> buildTitle(R.string.plans_advanced_title)
-        CurrentPlanType.ESSENTIALS -> buildTitle(R.string.current_plan_title_essentials)
         PREMIUM_FREE_FOR_LIFE ->
             buildTitle(
                 R.string.current_plan_title_premium,
@@ -190,8 +189,7 @@ internal class CurrentPlanViewModel @Inject constructor(
                 text = TextResource.StringText(R.string.current_plan_suggestion_upgrade_to_premium_from_free_text)
             ) to buildCta(secondaryCta = PREMIUM)
         }
-        CurrentPlanType.ADVANCED,
-        CurrentPlanType.ESSENTIALS -> {
+        CurrentPlanType.ADVANCED -> {
             CurrentPlan.Suggestion(
                 title = TextResource.StringText(R.string.current_plan_suggestion_upgrade_to_premium_title),
                 text = TextResource.StringText(R.string.current_plan_suggestion_upgrade_to_premium_text)

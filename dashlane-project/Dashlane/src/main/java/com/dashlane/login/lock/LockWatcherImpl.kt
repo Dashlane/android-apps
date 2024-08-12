@@ -6,7 +6,7 @@ import com.dashlane.lock.LockHelper
 import com.dashlane.lock.LockWatcher
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope

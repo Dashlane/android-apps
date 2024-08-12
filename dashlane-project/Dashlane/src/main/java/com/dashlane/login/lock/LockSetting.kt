@@ -11,8 +11,8 @@ import kotlinx.parcelize.Parcelize
 data class LockSetting(
     var isLoggedIn: Boolean = false,
     val unlockReason: UnlockEvent.Reason? = null,
-    val isPinSetter: Boolean = false,
     val isLockCancelable: Boolean = false,
+    val isShowMPForRemember: Boolean = false,
     val lockType: Int = LockTypeManager.LOCK_TYPE_UNSPECIFIED,
     val topicLock: String? = null,
     val subTopicLock: String? = null,
@@ -20,10 +20,10 @@ data class LockSetting(
     val lockReferrer: String? = null,
     val lockWebsite: String? = null,
     val redirectToHome: Boolean = false,
-    val allowBypass: Boolean = false
+    val allowBypass: Boolean = false,
+    val isMasterPasswordReset: Boolean = false,
 ) : Parcelable {
     companion object {
-        const val EXTRA_LOCK_TYPE_IS_PIN_SET = "extra_lock_type_is_pin_set"
         const val EXTRA_LOCK_TYPE = "extra_lock_type"
         const val EXTRA_SUB_TOPIC_LOCK = "extra_lock_sub_type"
 
@@ -34,13 +34,13 @@ data class LockSetting(
         const val EXTRA_DOMAIN = "extra_domain"
 
         const val EXTRA_REDIRECT_TO_HOME = "extra_redirect_to_home"
+        const val EXTRA_IS_MASTER_PASSWORD_RESET = "extra_is_master_password_reset"
 
         @JvmStatic
         fun buildFrom(bundle: Bundle?): LockSetting = if (bundle != null) {
             val unlockReason = bundle.getParcelableCompat<UnlockEvent.Reason>(EXTRA_LOCK_REASON)
             LockSetting(
                 unlockReason = unlockReason,
-                isPinSetter = bundle.getBoolean(EXTRA_LOCK_TYPE_IS_PIN_SET, false),
                 isLockCancelable = if (unlockReason != null) {
                     unlockReason !is UnlockEvent.Reason.AppAccess && unlockReason !is UnlockEvent.Reason.AccessFromAutofillApi
                 } else {
@@ -52,7 +52,8 @@ data class LockSetting(
                 shouldThemeAsDialog = bundle.getBoolean(EXTRA_AS_DIALOG, false),
                 lockReferrer = getLockReferrer(bundle),
                 lockWebsite = bundle.getString(EXTRA_DOMAIN),
-                redirectToHome = bundle.getBoolean(EXTRA_REDIRECT_TO_HOME, false)
+                redirectToHome = bundle.getBoolean(EXTRA_REDIRECT_TO_HOME, false),
+                isMasterPasswordReset = bundle.getBoolean(EXTRA_IS_MASTER_PASSWORD_RESET, false)
             )
         } else {
             LockSetting()

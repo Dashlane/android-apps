@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="sunset_announcement_title">Important Update: We will be discontinuing the
+        separate Authenticator app on %1$s</string>
+    
+    <string name="sunset_announcement_description">Tap for details</string>
+
+    
+    <string name="sunset_info_title">What’s happening with your tokens?</string>
+    
+    <string name="sunset_info_description">For 2FA tokens for your vault items,
+        &lt;strong&gt;they are accessible in the tools section of this app under
+        Authenticator.&lt;/strong&gt;\nIf you have the Dashlane 2FA token stored in Dashlane Authenticator, please see below:</string>
+    
+    <string name="sunset_info_step1">Disable 2FA from your Dashlane security settings from your mobile app or Dashlane web extension</string>
+    
+    <string name="sunset_info_step2">Install a new Authenticator App (e.g., Google Authenticator) </string>
+    
+    <string name="sunset_info_step3">Reconfigure 2FA for your Dashlane account from your security settings on the Dashlane web extension</string>
+    
+    <string name="sunset_info_cta_setting">Open Security settings</string>
+    
+    <string name="sunset_info_cta_learn_more">Learn about token relocation</string>
+</resources>

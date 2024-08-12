@@ -51,6 +51,7 @@ class NitroSsoWebView(
             
             @SuppressLint("SetJavaScriptEnabled")
             settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
 
             addJavascriptInterface(
                 SamlCatcherJavascriptInterface(

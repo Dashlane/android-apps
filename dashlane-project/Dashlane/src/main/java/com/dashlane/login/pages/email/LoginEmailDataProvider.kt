@@ -4,9 +4,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorageImpl
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.AuthenticationAccountNotFoundException
 import com.dashlane.authentication.AuthenticationContactSsoAdministratorException
 import com.dashlane.authentication.AuthenticationEmptyEmailException
@@ -37,7 +37,7 @@ import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.server.api.endpoints.account.AccountExistsService
 import com.dashlane.util.Toaster
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -109,7 +109,7 @@ class LoginEmailDataProvider @Inject constructor(
             val userStatus = emailRepository.getUserStatus(user)
 
             userStatus.ssoInfo
-                ?.toMigrationToSsoMemberInfo(email)
+                ?.toMigrationToSsoMemberInfo()
                 ?.let(presenter::setMigrationToSsoMember)
 
             handleUserStatus(userStatus)

@@ -57,8 +57,8 @@ class AuthenticatorIntro : DashlaneActivity() {
                 setResult(
                     RESULT_CANCELED,
                     Intent().apply {
-                    putExtra(RESULT_ITEM_ID, itemId)
-                }
+                        putExtra(RESULT_ITEM_ID, itemId)
+                    }
                 )
                 finish()
             }
@@ -123,21 +123,21 @@ class AuthenticatorIntro : DashlaneActivity() {
                 setResult(
                     RESULT_OK,
                     Intent().apply {
-                    putExtra(RESULT_ITEM_ID, itemId)
-                    if (otp is Totp) {
-                        putExtra(RESULT_OTP, otp)
-                    } else if (otp is Hotp) {
-                        putExtra(RESULT_OTP, otp)
+                        putExtra(RESULT_ITEM_ID, itemId)
+                        if (otp is Totp) {
+                            putExtra(RESULT_OTP, otp)
+                        } else if (otp is Hotp) {
+                            putExtra(RESULT_OTP, otp)
+                        }
                     }
-                }
                 )
                 
                 itemId?.let {
                     logger.logCompleteAdd2fa(it, otp)
                     startActivity(
                         successIntent.apply {
-                        putExtra(EXTRA_CREDENTIAL_NAME, credentialName ?: otp.issuer)
-                    }
+                            putExtra(EXTRA_CREDENTIAL_NAME, credentialName ?: otp.issuer)
+                        }
                     )
                 }
                 
@@ -212,7 +212,7 @@ class AuthenticatorIntro : DashlaneActivity() {
         }
 
         override fun onClickLink(position: Int, label: Int) {
-            context?.launchUrl(HelpCenterLink.ARTICLE_AUTHENTICATOR.uri)
+            context?.launchUrl(HelpCenterLink.ARTICLE_AUTHENTICATOR.androidUri)
         }
     }
 

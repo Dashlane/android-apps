@@ -84,11 +84,6 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
             EfficientAdapter.OnItemLongClickListener<AttachmentItem> { _, _, item, position ->
                 toggleAttachmentSelection(item!!, position)
             }
-        adapter.onIconClickListener = object : AttachmentViewHolder.OnIconClickListener {
-            override fun onIconClicked(item: AttachmentItem, position: Int) {
-                toggleAttachmentSelection(item, position)
-            }
-        }
         adapter.onAttachmentListChangesListener = object : AttachmentAdapter.OnAttachmentListChangesListener {
             override fun onItemAdded(item: AttachmentItem) {
                 presenter.addAttachment(item)

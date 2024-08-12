@@ -2,7 +2,7 @@ package com.dashlane.login
 
 import android.app.Activity
 import android.content.Intent
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.login.devicelimit.UnlinkDevicesActivity
 import com.dashlane.login.monobucket.MonobucketActivity

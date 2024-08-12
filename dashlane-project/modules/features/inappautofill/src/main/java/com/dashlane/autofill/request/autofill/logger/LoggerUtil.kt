@@ -4,6 +4,7 @@ import androidx.annotation.CheckResult
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.AutofillOrigin
 import com.dashlane.autofill.formdetector.AutoFillFormType
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import com.dashlane.hermes.generated.definitions.AutofillOrigin as HermesAutofillOrigin
 
 internal fun AutofillAnalyzerDef.IAutofillUsageLog.logShowList(
@@ -11,14 +12,16 @@ internal fun AutofillAnalyzerDef.IAutofillUsageLog.logShowList(
     @AutoFillFormType.FormType formType: Int,
     forKeyboard: Boolean,
     isNativeApp: Boolean,
-    totalCount: Int
+    totalCount: Int,
+    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     when (formType) {
         AutoFillFormType.CREDIT_CARD -> onShowCreditCardList(
             origin = getAutofillApiOrigin(forKeyboard),
             packageName = packageName,
             isNativeApp = isNativeApp,
-            totalCount = totalCount
+            totalCount = totalCount,
+            phishingAttemptLevel = phishingAttemptLevel,
         )
         AutoFillFormType.CREDENTIAL,
         AutoFillFormType.USERNAME_ONLY,
@@ -26,13 +29,15 @@ internal fun AutofillAnalyzerDef.IAutofillUsageLog.logShowList(
             origin = getAutofillApiOrigin(forKeyboard),
             packageName = packageName,
             isNativeApp = isNativeApp,
-            totalCount = totalCount
+            totalCount = totalCount,
+            phishingAttemptLevel = phishingAttemptLevel,
         )
         AutoFillFormType.EMAIL_ONLY -> onShowEmailList(
             origin = getAutofillApiOrigin(forKeyboard),
             packageName = packageName,
             isNativeApp = isNativeApp,
-            totalCount = totalCount
+            totalCount = totalCount,
+            phishingAttemptLevel = phishingAttemptLevel,
         )
         else -> Unit
     }

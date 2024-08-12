@@ -1,7 +1,7 @@
 package com.dashlane.login.lock
 
 import androidx.biometric.BiometricPrompt
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 
 sealed class LockPass {
     data class PinPass(val pin: String) : LockPass()

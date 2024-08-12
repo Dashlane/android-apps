@@ -1,7 +1,7 @@
 package com.dashlane.authentication
 
 import com.dashlane.cryptography.CryptographyKeyGenerator
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.VaultKey
 import javax.inject.Inject
 
 interface RemoteKeyFactory {

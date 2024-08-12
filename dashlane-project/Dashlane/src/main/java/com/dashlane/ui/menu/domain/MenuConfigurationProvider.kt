@@ -7,17 +7,16 @@ import com.dashlane.notification.badge.NotificationBadgeActor
 import com.dashlane.premium.offer.common.UserBenefitStatusProvider
 import com.dashlane.premium.offer.common.model.UserBenefitStatus
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.session.SessionManager
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.checklist.ChecklistHelper
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.canShowVpn
-import com.dashlane.userfeatures.canUpgradeToGetVpn
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canShowVpn
+import com.dashlane.featureflipping.canUpgradeToGetVpn
 import com.dashlane.util.inject.OptionalProvider
 import java.time.Clock
 import javax.inject.Inject
@@ -90,9 +89,6 @@ class MenuConfigurationProvider @Inject constructor(
         get() = !userFeaturesChecker.has(Capability.SECUREWIFI) &&
             userFeaturesChecker.canUpgradeToGetVpn()
 
-    private val isCollectionSharingVisible: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
-
     private fun canUpgradePremium() = when (val statusType = userPremiumStatusType) {
         is UserBenefitStatus.Type.Family -> statusType.isAdmin
         is UserBenefitStatus.Type.FamilyPlus -> statusType.isAdmin
@@ -109,7 +105,6 @@ class MenuConfigurationProvider @Inject constructor(
             hasDataLeak = hasDataLeak,
             remainingDays = remainingDays,
             isVPNVisible = isVPNVisible,
-            isCollectionSharingVisible = isCollectionSharingVisible,
             canUpgradeToGetVPN = canUpgradeToGetVPN,
             canChangeSpace = canChangeSpace,
             currentSpace = currentSpaceFilter,
@@ -129,7 +124,6 @@ data class MenuConfiguration(
     val hasDataLeak: Boolean,
     val remainingDays: Long,
     val isVPNVisible: Boolean,
-    val isCollectionSharingVisible: Boolean,
     val canUpgradeToGetVPN: Boolean,
     val canChangeSpace: Boolean,
     val currentSpace: TeamSpace?,

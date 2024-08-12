@@ -85,6 +85,7 @@
         android:required="false" />
 
     <application
+        android:usesCleartextTraffic="true"
         android:name="com.dashlane.DashlaneApplication"
         android:allowBackup="true"
         android:backupAgent="com.dashlane.backup.DashlaneBackupAgent"
@@ -252,6 +253,10 @@
             android:exported="false"
             android:theme="@style/Theme.Dashlane.DialogWhenTablet"
             android:windowSoftInputMode="adjustResize" />
+        
+        <activity
+            android:name=".item.passwordhistory.PasswordHistoryActivity"
+            android:parentActivityName=".item.ItemEditViewActivity" />
 
         <activity
             android:name=".ui.util.FinishingActivity"
@@ -287,7 +292,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".item.linkedwebsites.LinkedServicesActivity"
+            android:name=".item.linkedwebsites.old.LinkedServicesActivity"
             android:theme="@style/Theme.Dashlane.DialogWhenTablet"
             android:windowSoftInputMode="adjustResize" />
 
@@ -495,6 +500,19 @@
 
         <activity
             android:name=".createaccount.passwordless.MplessAccountCreationActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".pin.settings.PinSettingsActivity"
+            android:theme="@style/Theme.Dashlane.Modal"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".authenticator.AuthenticatorSunsetActivity"
+            android:theme="@style/Theme.Dashlane.Modal" />
+
+        <activity
+            android:name=".accountrecoverykey.AccountRecoveryKeyActivity"
             android:windowSoftInputMode="adjustResize" />
 
         

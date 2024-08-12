@@ -23,7 +23,6 @@ import androidx.navigation.compose.rememberNavController
 import com.dashlane.R
 import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation
 import com.dashlane.accountrecoverykey.arkSetupGraph
-import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.arkSetupDestination
 import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.biometricsSetupDestination
 import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.confirmationDestination
 import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.infoDestination
@@ -32,14 +31,14 @@ import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.t
 import com.dashlane.createaccount.passwordless.biometrics.BiometricsSetupScreen
 import com.dashlane.createaccount.passwordless.confirmation.ConfirmationScreen
 import com.dashlane.createaccount.passwordless.info.InfoScreen
-import com.dashlane.createaccount.passwordless.pincodesetup.PinSetupScreen
 import com.dashlane.createaccount.passwordless.termsandconditions.TermsAndConditionsScreen
 import com.dashlane.design.component.Icon
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.help.HelpCenterLink
-import com.dashlane.ui.widgets.compose.TopBarState
-import com.dashlane.ui.widgets.compose.system.DashlaneTopAppBar
+import com.dashlane.pin.setup.PinSetupScreen
+import com.dashlane.ui.common.compose.components.components.DashlaneTopAppBar
+import com.dashlane.ui.common.compose.components.TopBarState
 import com.dashlane.util.compose.navigateAndPopupToStart
 
 object MplessAccountCreationNavigation {
@@ -48,7 +47,6 @@ object MplessAccountCreationNavigation {
     const val biometricsSetupDestination = "biometricsSetupScreen"
     const val termsAndConditionsDestination = "termsAndConditionsScreen"
     const val confirmationDestination = "confirmationScreen"
-    const val arkSetupDestination = "arkSetup"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +85,7 @@ fun MplessAccountCreationNavigation(
     }
 
     Scaffold(
+        containerColor = DashlaneTheme.colors.backgroundAlternate,
         topBar = {
             AnimatedVisibility(
                 visible = topBarState.value.visible,
@@ -118,7 +117,7 @@ fun MplessAccountCreationNavigation(
             composable(infoDestination) {
                 InfoScreen(
                     modifier = Modifier.padding(contentPadding),
-                    onLearnMoreClick = { onOpenHelpCenterPage(HelpCenterLink.ARTICLE_MASTER_PASSWORDLESS_ACCOUNT_INFO.uri) },
+                    onLearnMoreClick = { onOpenHelpCenterPage(HelpCenterLink.ARTICLE_MASTER_PASSWORDLESS_ACCOUNT_INFO.androidUri) },
                     onNextClick = { navController.navigate(pinSetupDestination) }
                 )
             }
@@ -126,6 +125,7 @@ fun MplessAccountCreationNavigation(
                 PinSetupScreen(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
+                    isCancellable = false,
                     onPinChosen = { newPin ->
                         viewModel.onNewPin(newPin)
                         navController.navigate(biometricsSetupDestination)
@@ -165,7 +165,7 @@ fun MplessAccountCreationNavigation(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     mpLessViewModel = viewModel,
-                    onAccountCreated = { navController.navigateAndPopupToStart(arkSetupDestination) },
+                    onAccountCreated = { navController.navigateAndPopupToStart(AccountRecoveryKeySetupNavigation.introDestination) },
                     onErrorMessageToDisplay = { errorRes ->
                         displayErrorMessage(errorRes)
                         navController.popBackStack()
@@ -179,7 +179,6 @@ fun MplessAccountCreationNavigation(
             arkSetupGraph(
                 navController = navController,
                 contentPadding = contentPadding,
-                arkRoute = arkSetupDestination,
                 onArkGenerated = onAccountCreated,
                 onCancel = onAccountCreated,
                 userCanExitFlow = false

@@ -7,10 +7,10 @@ import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.IntentSender
+import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.pausedautofillsettings.PausedAutofillActivity
 import com.dashlane.autofill.util.AutofillNavigationService
 import com.dashlane.autofill.util.AutofillNavigationService.Companion.REQUEST_KEYBOARD_AUTOFILL_ON_BOARDING
-import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
 import com.dashlane.security.DashlaneIntent
@@ -59,6 +59,19 @@ class AutofillNavigationServiceImpl @Inject constructor(
         autofillFormSource: AutoFillFormSource
     ) {
         activity.startActivity(PausedAutofillActivity.newIntent(context, autofillFormSource))
+    }
+
+    override fun navigateToFrozenAccountPaywall(
+        activity: Activity
+    ) {
+        activity.startActivity(
+            Intent(
+                ACTION_VIEW,
+                NavigationUriBuilder()
+                    .host(NavigationHelper.Destination.MainPath.GET_PREMIUM)
+                    .build()
+            )
+        )
     }
 
     override fun getLongPressActionOnInline(): PendingIntent {

@@ -3,7 +3,6 @@
     <string name="plan_action_bar_title">Your plan: %1$s</string>
     <string name="plan_free_action_bar_title">Free</string>
     <string name="plan_trial_action_bar_title">Premium (30-day trial)</string>
-    <string name="plan_essentials_action_bar_title">Essentials</string>
     <string name="plan_premium_action_bar_title">Premium</string>
     <string name="plan_premium_family_action_bar_title">Friends &amp; Family</string>
     <string name="plan_premium_plus_action_bar_title">Premium Plus</string>
@@ -15,6 +14,8 @@
     <string name="plan_premium_plus_title">Premium Plus</string>
 
     <string name="no_date_plan_subtitle">Upgrade to get the best of Dashlane</string>
+    
+    <string name="frozen_state_subtitle">Your account is read-only</string>
 
     <string name="plan_activating_features">Activating your new features...</string>
     <string name="plan_bought_thanks_title">Thanks for signing up for %1$s!</string>

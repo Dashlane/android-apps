@@ -31,7 +31,6 @@ sealed class CollectionSharingViewState {
         val userGroups: List<UserGroup> = emptyList(),
         val individuals: List<Individual> = emptyList(),
         val showSharingButton: Boolean = false,
-        val showRoles: Boolean = false,
         val sharedCollectionId: String? = null,
         val collectionName: String? = null,
         val showSearch: Boolean = false,

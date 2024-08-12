@@ -1,5 +1,6 @@
 package com.dashlane.session.repository
 
+import androidx.annotation.Discouraged
 import com.dashlane.login.LoginInfo
 import com.dashlane.session.Session
 
@@ -15,7 +16,10 @@ interface UserDatabaseRepository {
 
     fun cleanupRacletteDatabase(session: Session)
 
-    fun isRacletteDatabaseAccessible(session: Session): Boolean
+    @Discouraged("Use the suspend version instead")
+    fun isRacletteDatabaseAccessibleLegacy(session: Session): Boolean
+
+    suspend fun isRacletteDatabaseAccessible(session: Session): Boolean
 }
 
 typealias RacletteDatabase = com.dashlane.database.Database

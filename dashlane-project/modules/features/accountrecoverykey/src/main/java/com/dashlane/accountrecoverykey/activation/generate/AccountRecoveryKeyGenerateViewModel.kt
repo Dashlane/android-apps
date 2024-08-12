@@ -2,7 +2,7 @@ package com.dashlane.accountrecoverykey.activation.generate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage

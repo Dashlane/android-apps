@@ -1,5 +1,6 @@
 package com.dashlane.premium.offer.list
 
+import android.content.Context
 import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.premium.R
 import com.dashlane.premium.offer.common.ProductDetailsManager
@@ -24,13 +25,15 @@ import com.dashlane.premium.offer.list.model.CurrentOffer
 import com.dashlane.server.api.endpoints.payments.StoreOffer
 import com.dashlane.server.api.endpoints.payments.StoreOffersService
 import com.dashlane.server.api.exceptions.DashlaneApiException
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.canShowVpn
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canShowVpn
 import com.dashlane.util.inject.OptionalProvider
 import com.skocken.presentation.provider.BaseDataProvider
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 internal class OfferListDataProvider @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val accountStatusProvider: OptionalProvider<AccountStatus>,
     private val storeOffersManager: StoreOffersManager,
     private val storeOffersFormatter: StoreOffersFormatter,
@@ -52,7 +55,7 @@ internal class OfferListDataProvider @Inject constructor(
                 yearlyOfferTypes = getOrderedAvailableOfferTypesWithoutPlayStore(storeOffers, YEARLY),
                 currentOffer = currentOffer,
                 vpnMentionAllowed = isVpnMentionAllowed()
-            ).build()
+            ).build(context.resources)
         }
         if (formattedOffers.isEmpty()) {
             return OffersState.NoValidOfferAvailable
@@ -67,7 +70,7 @@ internal class OfferListDataProvider @Inject constructor(
             yearlySavings = yearlySavings,
             currentOffer = getCurrentOfferInfo(formattedStatus),
             vpnMentionAllowed = isVpnMentionAllowed()
-        ).build()
+        ).build(context.resources)
     }
 
     private suspend fun getStoreOffers(): StoreOffersService.Data? {
@@ -120,7 +123,6 @@ internal class OfferListDataProvider @Inject constructor(
     ): CurrentOffer? {
         val currentOfferType = when (formattedStatus.type) {
             Type.Trial -> return CurrentOffer(PREMIUM, MONTHLY, R.string.plans_on_going_trial)
-            Type.EssentialsIndividual,
             Type.AdvancedIndividual -> ADVANCED
             Type.PremiumIndividual -> PREMIUM
             is Type.Family -> FAMILY

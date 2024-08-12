@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.dashlane.R
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -22,8 +23,8 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.canUseSecureNotes
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseSecureNotes
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -40,7 +41,8 @@ class ItemScreenConfigurationSecureNoteProvider(
     private val sharingPolicy: SharingPolicyDataProvider,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val restrictionNotificator: TeamSpaceRestrictionNotificator
+    private val restrictionNotificator: TeamSpaceRestrictionNotificator,
+    private val frozenStateManager: FrozenStateManager,
 ) : ItemScreenConfigurationProvider() {
 
     private val secureNoteDisabled
@@ -133,7 +135,7 @@ class ItemScreenConfigurationSecureNoteProvider(
 
         
         if (canShare(item)) {
-            menuActions.add(NewShareMenuAction(item, restrictionNotificator))
+            menuActions.add(NewShareMenuAction(item.toSummary(), restrictionNotificator))
         }
 
         listener.notifyColorChanged(
@@ -276,12 +278,13 @@ class ItemScreenConfigurationSecureNoteProvider(
     }
 
     private fun canEdit(item: VaultItem<SyncObject.SecureNote>) =
-        !secureNoteDisabled && sharingPolicy.canEditItem(item.toSummary(), !item.hasBeenSaved)
+        !secureNoteDisabled && sharingPolicy.canEditItem(item.toSummary(), !item.hasBeenSaved) && !frozenStateManager.isAccountFrozen
 
     private fun canShare(item: VaultItem<SyncObject.SecureNote>) =
         !secureNoteDisabled && item.hasBeenSaved &&
             sharingPolicy.canShareItem(item.toSummary()) &&
-            !item.toSummary<SummaryObject.SecureNote>().hasAttachments()
+            !item.toSummary<SummaryObject.SecureNote>().hasAttachments() &&
+            !frozenStateManager.isAccountFrozen
 }
 
 @Suppress("UNCHECKED_CAST")

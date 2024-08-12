@@ -1,7 +1,7 @@
 package com.dashlane.secrettransfer.domain
 
-import com.dashlane.account.UserAccountInfo
 import android.os.Parcelable
+import com.dashlane.user.UserAccountInfo
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parcelize
@@ -11,17 +11,17 @@ private const val VERSION = 1
 @Parcelize
 @JsonClass(generateAdapter = true)
 data class SecretTransferPayload(
-    val login: String,
+    @Json(name = "login") val login: String,
     @Json(name = "key") val vaultKey: VaultKey,
-    val token: String?,
-    val version: Int = VERSION
+    @Json(name = "token") val token: String?,
+    @Json(name = "version") val version: Int = VERSION
 ) : Parcelable {
 
     @Parcelize
     @JsonClass(generateAdapter = true)
     data class VaultKey(
-        val type: Type,
-        val value: String
+        @Json(name = "type") val type: Type,
+        @Json(name = "value") val value: String
     ) : Parcelable
 
     @JsonClass(generateAdapter = false)

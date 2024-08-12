@@ -3,6 +3,7 @@ package com.dashlane.accountrecoverykey.activation.confirm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateRefresher
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
@@ -11,7 +12,6 @@ import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.events.user.CreateAccountRecoveryKey
 import com.dashlane.sync.DataSync
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -20,12 +20,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class AccountRecoveryKeyConfirmViewModel @Inject constructor(
     private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
     private val logRepository: LogRepository,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
+    private val accountRecoveryKeySettingStateRefresher: AccountRecoveryKeySettingStateRefresher,
 ) : ViewModel() {
 
     private val stateFlow = MutableStateFlow<AccountRecoveryKeyConfirmState>(AccountRecoveryKeyConfirmState.Initial(AccountRecoveryKeyConfirmData()))
@@ -51,6 +53,7 @@ class AccountRecoveryKeyConfirmViewModel @Inject constructor(
                 .onSuccess {
                     logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY_SUCCESS)
                     emit(AccountRecoveryKeyConfirmState.KeyConfirmed(stateFlow.value.data))
+                    accountRecoveryKeySettingStateRefresher.refresh()
                 }
                 .onFailure { throw it }
         }

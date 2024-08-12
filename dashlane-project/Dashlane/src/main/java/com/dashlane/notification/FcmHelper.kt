@@ -5,7 +5,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.ui.ApplicationForegroundChecker
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.isValueNull
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope

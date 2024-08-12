@@ -7,10 +7,10 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.CallToAction
 import com.dashlane.login.Device
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

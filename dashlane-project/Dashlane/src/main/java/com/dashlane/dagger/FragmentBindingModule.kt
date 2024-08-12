@@ -1,7 +1,7 @@
 package com.dashlane.dagger
 
 import androidx.lifecycle.LifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

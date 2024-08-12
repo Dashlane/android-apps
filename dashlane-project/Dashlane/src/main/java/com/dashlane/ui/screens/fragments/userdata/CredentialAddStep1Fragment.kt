@@ -12,10 +12,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
-import com.dashlane.core.popularWebsitesToIconWrappers
 import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.iconcrawler.mapIconWrappersToUrlDomainIcons
 import com.dashlane.limitations.PasswordLimitationLogger
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.loaders.InstalledAppAndPopularWebsiteLoader
@@ -34,7 +32,6 @@ import com.dashlane.ui.widgets.view.ExpandableCardView
 import com.dashlane.ui.widgets.view.ImportMethodItem
 import com.dashlane.ui.widgets.view.Infobox
 import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
-import com.dashlane.url.icon.UrlDomainIconAndroidRepository
 import com.dashlane.url.registry.UrlDomainRegistryFactory
 import com.dashlane.util.DeviceUtils.hideKeyboard
 import com.dashlane.util.setCurrentPageView
@@ -57,9 +54,6 @@ class CredentialAddStep1Fragment :
 
     @Inject
     lateinit var urlDomainRegistryFactory: UrlDomainRegistryFactory
-
-    @Inject
-    lateinit var iconAndroidRepository: UrlDomainIconAndroidRepository
 
     @Inject
     lateinit var dataCounter: DataCounter
@@ -233,8 +227,6 @@ class CredentialAddStep1Fragment :
     }
 
     override fun onLoadFinished(result: List<String>?) {
-        iconAndroidRepository
-            .get(popularWebsitesToIconWrappers(result).mapIconWrappersToUrlDomainIcons())
         this.popularWebsites = result ?: emptyList()
         suggestionsActor.trySend(websiteUrlInput.editText?.text?.toString().orEmpty())
     }

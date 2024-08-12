@@ -3,23 +3,24 @@ package com.dashlane.login.pages.secrettransfer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.biometricsSetupDestination
 import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.pinSetupDestination
 import com.dashlane.createaccount.passwordless.biometrics.BiometricsSetupScreen
-import com.dashlane.createaccount.passwordless.pincodesetup.PinSetupScreen
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.login.LoginIntents
-import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.LOGIN_KEY
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.totpDestination
 import com.dashlane.login.pages.authenticator.compose.LoginDashlaneAuthenticatorScreen
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.EMAIL_KEY
+import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.START_DESTINATION_KEY
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.authenticator
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.authorizeDestination
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.chooseTypeDestination
@@ -36,7 +37,8 @@ import com.dashlane.login.pages.secrettransfer.help.lostkey.LostKeyScreen
 import com.dashlane.login.pages.secrettransfer.qrcode.QrCodeScreen
 import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroScreen
 import com.dashlane.login.pages.totp.compose.LoginTotpScreen
-import com.dashlane.secrettransfer.domain.SecretTransferAnalytics
+import com.dashlane.login.root.LoginDestination.LOGIN_KEY
+import com.dashlane.pin.setup.PinSetupScreen
 import com.dashlane.util.compose.navigateAndPopupToStart
 
 object LoginSecretTransferNavigation {
@@ -50,12 +52,12 @@ object LoginSecretTransferNavigation {
     const val authenticator = "secretTransfer/authenticator"
 
     const val EMAIL_KEY = "email"
+    const val START_DESTINATION_KEY = "startDestination"
 }
 
 @Suppress("LongMethod")
 @Composable
 fun LoginSecretTransferNavigation(
-    secretTransferAnalytics: SecretTransferAnalytics,
     loginSecretTransferViewModel: LoginSecretTransferViewModel = hiltViewModel(),
     startDestination: String,
     email: String?,
@@ -77,13 +79,18 @@ fun LoginSecretTransferNavigation(
         onCancel()
     }
 
+    val onSuccessWithLog = {
+        loginSecretTransferViewModel.logPageView(AnyPage.SETTINGS_ADD_NEW_DEVICE_SUCCESS)
+        onSuccess()
+    }
+
     NavHost(
         startDestination = startDestination,
         navController = navController
 
     ) {
         composable(chooseTypeDestination) {
-            secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER)
+            loginSecretTransferViewModel.logPageView(AnyPage.LOGIN_DEVICE_TRANSFER)
             ChooseTypeScreen(
                 viewModel = hiltViewModel(),
                 email = email,
@@ -124,7 +131,7 @@ fun LoginSecretTransferNavigation(
                 }
             )
         ) { backStackEntry ->
-            secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER_ACCOUNT_RECOVERY_KEY)
+            loginSecretTransferViewModel.logPageView(AnyPage.LOGIN_DEVICE_TRANSFER_ACCOUNT_RECOVERY_KEY)
             RecoveryHelpScreen(
                 viewModel = hiltViewModel(),
                 email = backStackEntry.arguments?.getString(EMAIL_KEY),
@@ -180,13 +187,16 @@ fun LoginSecretTransferNavigation(
         ) {
             LoginTotpScreen(
                 viewModel = hiltViewModel(),
-                login = it.arguments?.getString(LOGIN_KEY) ?: "",
+                verificationMode = VerificationMode.OTP2,
                 goToNext = { registeredUserDevice, _ ->
                     loginSecretTransferViewModel.deviceRegistered(
                         registeredUserDevice = registeredUserDevice as? RegisteredUserDevice.Remote
                             ?: throw IllegalStateException("Should always be Remote for SecretTransfer")
                     )
                     navController.navigate(authorizeDestination)
+                },
+                goToPush = {
+                    
                 }
             )
         }
@@ -217,15 +227,16 @@ fun LoginSecretTransferNavigation(
                 onSuccess = { accountType ->
                     when (accountType) {
                         UserAccountInfo.AccountType.InvisibleMasterPassword -> navController.navigate(pinSetupDestination)
-                        UserAccountInfo.AccountType.MasterPassword -> onSuccess()
+                        UserAccountInfo.AccountType.MasterPassword -> onSuccessWithLog()
                     }
                 }
             )
         }
         composable(route = pinSetupDestination) {
-            secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER_SET_PIN)
+            loginSecretTransferViewModel.logPageView(AnyPage.LOGIN_DEVICE_TRANSFER_SET_PIN)
             PinSetupScreen(
                 viewModel = hiltViewModel(),
+                isCancellable = false,
                 onPinChosen = { pin ->
                     loginSecretTransferViewModel.pinSetup(pin)
                     navController.navigate(biometricsSetupDestination)
@@ -233,23 +244,52 @@ fun LoginSecretTransferNavigation(
             )
         }
         composable(route = biometricsSetupDestination) {
-            secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER_SETUP_BIOMETRICS)
+            loginSecretTransferViewModel.logPageView(AnyPage.LOGIN_DEVICE_TRANSFER_SETUP_BIOMETRICS)
             BiometricsSetupScreen(
                 viewModel = hiltViewModel(),
                 onSkip = {
-                    secretTransferAnalytics.completeDeviceTransfer(false)
-                    onSuccess()
+                    loginSecretTransferViewModel.logCompleteTransfer(biometricsEnabled = false)
+                    onSuccessWithLog()
                 },
                 onBiometricsDisabled = {
-                    secretTransferAnalytics.completeDeviceTransfer(false)
-                    onSuccess()
+                    loginSecretTransferViewModel.logCompleteTransfer(biometricsEnabled = false)
+                    onSuccessWithLog()
                 },
                 onBiometricsEnabled = {
                     loginSecretTransferViewModel.onEnableBiometrics()
-                    secretTransferAnalytics.completeDeviceTransfer(true)
-                    onSuccess()
+                    loginSecretTransferViewModel.logCompleteTransfer(biometricsEnabled = true)
+                    onSuccessWithLog()
                 }
             )
         }
+    }
+}
+
+fun NavGraphBuilder.secretTransferNavigation(
+    route: String,
+    onSuccess: () -> Unit,
+    onCancel: () -> Unit
+) {
+    composable(
+        route = route +
+            "?$START_DESTINATION_KEY={$START_DESTINATION_KEY}" +
+            "&$LOGIN_KEY={$LOGIN_KEY}",
+        arguments = listOf(
+            navArgument(START_DESTINATION_KEY) { type = NavType.StringType },
+            navArgument(LOGIN_KEY) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val secretTransferStartDestination = backStackEntry.arguments?.getString(START_DESTINATION_KEY) ?: chooseTypeDestination
+        val email = backStackEntry.arguments?.getString(LOGIN_KEY)
+        LoginSecretTransferNavigation(
+            startDestination = secretTransferStartDestination,
+            email = email,
+            onSuccess = onSuccess,
+            onCancel = onCancel
+        )
     }
 }

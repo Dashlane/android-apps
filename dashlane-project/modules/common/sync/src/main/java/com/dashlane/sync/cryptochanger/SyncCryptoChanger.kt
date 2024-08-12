@@ -3,7 +3,7 @@ package com.dashlane.sync.cryptochanger
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.session.Session
 import com.dashlane.sync.vault.SyncVault
 import com.dashlane.xml.domain.SyncObject

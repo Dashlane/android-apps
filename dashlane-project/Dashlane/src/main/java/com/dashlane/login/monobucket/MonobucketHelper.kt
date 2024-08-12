@@ -4,8 +4,8 @@ import com.dashlane.login.Device
 import com.dashlane.login.getMostRecentDevice
 import com.dashlane.login.toDevice
 import com.dashlane.server.api.endpoints.devices.ListDevicesService
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
+import com.dashlane.featureflipping.UserFeaturesChecker
 
 class MonobucketHelper(
     private val userFeaturesChecker: UserFeaturesChecker,

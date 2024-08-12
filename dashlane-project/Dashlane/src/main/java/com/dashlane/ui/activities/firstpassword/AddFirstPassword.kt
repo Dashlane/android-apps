@@ -1,6 +1,5 @@
 package com.dashlane.ui.activities.firstpassword
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
@@ -19,7 +18,7 @@ interface AddFirstPassword {
 
     interface ViewProxy : Base.IView {
         fun setLogin(email: String)
-        fun setupToolbar(drawable: Drawable)
+        fun setupToolbar(domain: String?)
         fun displayAutofillDemoPrompt()
         fun dismissAutofillDemoPrompt()
     }

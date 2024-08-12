@@ -7,6 +7,11 @@
     <string name="inline_change_password_title">Change password</string>
     <string name="inline_logged_out_state_title">Autofill with Dashlane</string>
     <string name="inline_sms_otp_title">Fill SMS code</string>
+    
+    <string name="inline_phishing_high">High phishing risk</string>
+    
+    <string name="inline_phishing_moderate">Moderate phishing risk</string>
+
 
     <string name="inline_credit_card_fallback_title">Credit Card</string>
     <string name="inline_account_fallback_title">Account</string>

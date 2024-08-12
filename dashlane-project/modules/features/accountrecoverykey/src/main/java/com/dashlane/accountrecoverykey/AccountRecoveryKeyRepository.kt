@@ -1,6 +1,6 @@
 package com.dashlane.accountrecoverykey
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.SettingsFactory
 import com.dashlane.authentication.UserStorage
@@ -16,6 +16,7 @@ import com.dashlane.hermes.generated.definitions.DeleteKeyReason
 import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.events.user.CreateAccountRecoveryKey
 import com.dashlane.hermes.generated.events.user.DeleteAccountRecoveryKey
+import com.dashlane.crypto.keys.userKeyBytes
 import com.dashlane.network.tools.authorization
 import com.dashlane.password.generator.PasswordGenerator
 import com.dashlane.preference.UserPreferencesManager
@@ -29,14 +30,12 @@ import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionObserver
 import com.dashlane.session.UserDataRepository
-import com.dashlane.session.userKeyBytes
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.runBlocking
 
 private const val SESSION_ERROR_MESSAGE = "Invalid session"
 
@@ -44,7 +43,6 @@ interface AccountRecoveryKeyRepository {
 
     val arkStatusFlow: SharedFlow<AccountRecoveryState>
 
-    fun getAccountRecoveryStatusBlocking(): AccountRecoveryState
     suspend fun getAccountRecoveryStatusAsync(): AccountRecoveryState
     suspend fun requestActivation(): Result<String>
     suspend fun confirmRecoveryKey(keyToBeConfirmed: String): Boolean
@@ -85,13 +83,6 @@ class AccountRecoveryKeyRepositoryImpl @Inject constructor(
                 recoveryId = null
             }
         })
-    }
-
-    
-    override fun getAccountRecoveryStatusBlocking(): AccountRecoveryState {
-        return arkStatusFlow.replayCache.firstOrNull() ?: runBlocking {
-            getAccountRecoveryStatusAsync()
-        }
     }
 
     override suspend fun getAccountRecoveryStatusAsync(): AccountRecoveryState {

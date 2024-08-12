@@ -1,6 +1,5 @@
 package com.dashlane.dagger.singleton
 
-import android.app.backup.BackupManager
 import android.content.Context
 import com.braze.Braze
 import com.braze.ui.inappmessage.BrazeInAppMessageManager
@@ -19,10 +18,8 @@ import com.dashlane.debug.DashlaneBuildConfig
 import com.dashlane.events.AppEvents
 import com.dashlane.login.lock.LockManager
 import com.dashlane.network.inject.RetrofitModule
-import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.preference.UserPreferencesManager.UserLoggedIn
-import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.endpoints.authentication.AuthLoginService
 import com.dashlane.server.api.endpoints.payments.StoreOffersService
 import com.dashlane.session.SessionInitializer
@@ -40,22 +37,21 @@ import com.dashlane.ui.activities.onboarding.HomeActivityIntentCoordinator
 import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.url.assetlinks.UrlDomainAssetLinkService
-import com.dashlane.url.icon.UrlDomainIconAndroidRepository
-import com.dashlane.url.icon.UrlDomainIconDataStore
-import com.dashlane.url.icon.UrlDomainIconDatabase
-import com.dashlane.url.icon.UrlDomainIconRepository
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Call
 import java.time.Clock
 import javax.inject.Singleton
 
 @Module(includes = [BinderModule::class, UserDataAccessorModule::class, RetrofitModule::class, InAppLoginModule::class, TrackingModule::class])
+@InstallIn(SingletonComponent::class)
 open class SingletonModule {
 
     @Provides
@@ -81,14 +77,6 @@ open class SingletonModule {
     @Provides
     fun provideUrlDomainAssetLinkService(callFactory: Call.Factory): UrlDomainAssetLinkService {
         return UrlDomainAssetLinkService(callFactory)
-    }
-
-    @Singleton
-    @Provides
-    open fun provideGlobalPreferencesManager(
-        @ApplicationContext context: Context
-    ): GlobalPreferencesManager {
-        return GlobalPreferencesManager(context, BackupManager(context))
     }
 
     @Singleton
@@ -155,41 +143,6 @@ open class SingletonModule {
     @Singleton
     fun provideSessionInitializer(sessionManager: SessionManagerImpl): SessionInitializer {
         return sessionManager
-    }
-
-    @Provides
-    fun provideUrlDomainIconAndroidRepository(
-        iconRepository: UrlDomainIconRepository,
-        @ApplicationContext context: Context
-    ): UrlDomainIconAndroidRepository {
-        return UrlDomainIconAndroidRepository(iconRepository, context)
-    }
-
-    @Singleton
-    @Provides
-    fun provideUrlDomainIconRepository(
-        @ApplicationCoroutineScope applicationCoroutineScope: CoroutineScope,
-        dataStore: UrlDomainIconDataStore,
-        dashlaneApi: DashlaneApi
-    ): UrlDomainIconRepository {
-        return UrlDomainIconRepository(
-            applicationCoroutineScope,
-            dataStore,
-            dashlaneApi.endpoints.iconcrawler.iconService,
-            dashlaneApi.dashlaneTime
-        )
-    }
-
-    @Singleton
-    @Provides
-    fun provideUrlDomainIconDataStore(database: UrlDomainIconDatabase): UrlDomainIconDataStore {
-        return UrlDomainIconDataStore(database)
-    }
-
-    @Singleton
-    @Provides
-    fun provideUrlDomainIconRoomDatabase(@ApplicationContext context: Context): UrlDomainIconDatabase {
-        return UrlDomainIconDatabase.invoke(context)
     }
 
     @Provides

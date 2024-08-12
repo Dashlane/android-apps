@@ -86,22 +86,13 @@ fun SyncObject.Authentifiant.Companion.getDefaultName(value: String?): String {
 }
 
 val SyncObject.Authentifiant.loginForUi
-    get() = toSummary<SummaryObject.Authentifiant>().loginForUi
+    get() = getLoginForUi(email = email, login = login)
 
 val SummaryObject.Authentifiant.loginForUi
-    get() =
-        getLoginForUi(false)
+    get() = getLoginForUi(email = email, login = login)
 
-fun SummaryObject.Authentifiant.getLoginForUi(preferEmail: Boolean): String? {
-    var login: String? = if (preferEmail) email else login
-    if (login.isSemanticallyNull()) {
-        login = if (preferEmail) this.login else email
-    }
-    if (login.isSemanticallyNull()) {
-        login = null
-    }
-    return login
-}
+private fun getLoginForUi(email: String?, login: String?): String? =
+        login.takeIf { it.isNotSemanticallyNull() } ?: email.takeIf { it.isNotSemanticallyNull() }
 
 fun SyncObject.Authentifiant.isLoginEmail() =
     login.isSemanticallyNull() && email.isNotSemanticallyNull()
@@ -145,7 +136,7 @@ val SummaryObject.Authentifiant.urlForGoToWebsite: String?
 val String.getUrlDisplayName: String?
     get() = toUrlOrNull(false)?.root
 
-fun SummaryObject.Authentifiant.urlForUI(): String? = if (useFixedUrl == true) {
+fun SummaryObject.Authentifiant.urlForUI(): String? = if (useFixedUrl == true && userSelectedUrl.isNotSemanticallyNull()) {
     userSelectedUrl
 } else {
     url

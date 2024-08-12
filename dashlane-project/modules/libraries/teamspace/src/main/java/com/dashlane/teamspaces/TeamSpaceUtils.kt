@@ -1,7 +1,10 @@
 package com.dashlane.teamspaces
 
+import android.content.Context
 import com.dashlane.hermes.generated.definitions.Space
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.SpaceName
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isValueNull
 import com.dashlane.vault.model.VaultItem
@@ -43,4 +46,9 @@ fun VaultItem<*>.getTeamSpaceLog() = if (isSpaceItem() &&
     Space.PROFESSIONAL
 } else {
     Space.PERSONAL
+}
+
+fun TeamSpace.stringName(context: Context) = when (val name = name) {
+    is SpaceName.TeamName -> name.value
+    is SpaceName.FixName -> context.getString(name.nameRes)
 }

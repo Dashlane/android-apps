@@ -7,7 +7,12 @@ import com.skocken.presentation.definition.Base
 
 internal interface OfferListContract {
     interface ViewProxy : Base.IView {
-        fun showAvailableOffers(offers: Offers)
+        fun showAvailableOffers(
+            offers: Offers,
+            isUserFree: Boolean,
+            isUserFrozen: Boolean,
+            passwordLimit: Long?
+        )
 
         fun showEmptyState()
 

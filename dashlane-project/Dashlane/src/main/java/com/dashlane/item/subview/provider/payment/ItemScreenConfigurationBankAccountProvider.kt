@@ -2,6 +2,7 @@ package com.dashlane.item.subview.provider.payment
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
@@ -25,7 +26,6 @@ import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.BankDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
-import com.dashlane.util.graphics.getDominantColor
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
@@ -77,17 +77,17 @@ class ItemScreenConfigurationBankAccountProvider(
         context: Context,
         item: VaultItem<SyncObject.BankStatement>
     ): ItemHeader {
-        val iconDrawable = createDefaultHeaderIcon(context, item.syncObject)?.apply {
-            isWithBorder = false
-            backgroundColor = getDominantColor(image)
-        }
-
         val bankTitle = if (item.syncObject.bankAccountName.isNullOrBlank()) {
             context.getString(R.string.bank_statement)
         } else {
             item.syncObject.bankAccountName
         }
-        return ItemHeader(createMenus(), bankTitle, iconDrawable)
+        return ItemHeader(
+            menuActions = createMenus(),
+            title = bankTitle,
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_OTHER_ICON.value,
+            thumbnailIconRes = getHeaderIcon(item.syncObject),
+        )
     }
 
     private fun createSubViews(

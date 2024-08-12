@@ -15,6 +15,7 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
         old: VaultItem<T>?,
         new: VaultItem<T>
     ): VaultItem<SyncObject.DataChangeHistory>? {
+        old ?: return null 
         try {
             val dataType = new.syncObjectType
             val itemUid = new.uid
@@ -28,9 +29,9 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
                 return objectHistory
                     .copy(
                         syncObject = objectHistory.syncObject.copy {
-                        objectTitle = newChangeSet.title
-                        changeSets = addChangeSet(objectHistory.syncObject.changeSets, newChangeSet)
-                    }
+                            objectTitle = newChangeSet.title
+                            changeSets = addChangeSet(objectHistory.syncObject.changeSets, newChangeSet)
+                        }
                     )
                     .copyWithAttrs { syncState = SyncState.MODIFIED }
             }
@@ -62,11 +63,11 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
         VaultItem<SyncObject.DataChangeHistory> {
         return VaultItem(
             syncObject = SyncObject.DataChangeHistory {
-            this.objectType = objectType.transactionType
-            this.objectId = objectUid
-        }
+                this.objectType = objectType.transactionType
+                this.objectId = objectUid
+            }
         )
     }
 
-    abstract fun newChangeSet(oldItem: VaultItem<T>?, newItem: VaultItem<T>): SyncObject.DataChangeHistory.ChangeSet
+    abstract fun newChangeSet(oldItem: VaultItem<T>, newItem: VaultItem<T>): SyncObject.DataChangeHistory.ChangeSet
 }

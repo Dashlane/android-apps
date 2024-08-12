@@ -7,7 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,10 +17,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,10 +42,11 @@ import com.dashlane.design.component.InfoboxButton
 import com.dashlane.design.component.InfoboxLarge
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.Toggle
+import com.dashlane.design.component.cardBackground
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.CircularProgressIndicator
+import com.dashlane.ui.common.compose.components.CircularProgressIndicator
 import com.dashlane.util.launchUrl
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -65,7 +64,7 @@ class DashlaneLabsFragment : Fragment() {
     }
 
     @Composable
-    fun DashlaneLabsScreen(viewModel: DashlaneLabsViewModels = viewModel()) {
+    fun DashlaneLabsScreen(viewModel: DashlaneLabsViewModel = viewModel()) {
         val menuHost: MenuHost = requireActivity()
         val menuProvider = remember {
             object : MenuProvider {
@@ -115,8 +114,11 @@ class DashlaneLabsFragment : Fragment() {
                 }
                 when (uiState) {
                     is DashlaneLabsState.Loaded -> {
-                        items(uiState.viewData.features) {
-                            FeatureItem(feature = it)
+                        items(uiState.viewData.labFeatures) {
+                            FeatureItem(
+                                toggleClicked = { enable -> viewModel.toggleLabFeature(it.featureName, enable) },
+                                feature = it
+                            )
                         }
                     }
                     is DashlaneLabsState.Loading -> {
@@ -130,45 +132,38 @@ class DashlaneLabsFragment : Fragment() {
     }
 
     @Composable
-    fun FeatureItem(feature: String) {
-        Box(
-            modifier = Modifier.background(
-                DashlaneTheme.colors.containerAgnosticNeutralSupershy,
-                RoundedCornerShape(12.dp)
-            )
+    fun FeatureItem(toggleClicked: (Boolean) -> Unit, feature: ViewData.Lab) {
+        Row(
+            modifier = Modifier
+                .cardBackground()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.Top
         ) {
-            Row(
+            Column(
                 modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.Top
+                    .weight(1f)
+                    .padding(top = 8.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(top = 8.dp)
-                ) {
-                    Text(
-                        text = feature,
-                        style = DashlaneTheme.typography.titleBlockMedium,
-                        color = DashlaneTheme.colors.textNeutralCatchy,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = "Quick description for the feature. Quick description for the feature. Quick description for the feature.",
-                        style = DashlaneTheme.typography.bodyReducedRegular,
-                        color = DashlaneTheme.colors.textNeutralQuiet,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Toggle(
-                    modifier = Modifier.padding(start = 16.dp),
-                    checked = true,
-                    onCheckedChange = { }
+                Text(
+                    text = feature.displayName,
+                    style = DashlaneTheme.typography.titleBlockMedium,
+                    color = DashlaneTheme.colors.textNeutralCatchy,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = feature.displayDescription,
+                    style = DashlaneTheme.typography.bodyReducedRegular,
+                    color = DashlaneTheme.colors.textNeutralQuiet,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+            Toggle(
+                modifier = Modifier.padding(start = 16.dp),
+                checked = feature.enabled,
+                onCheckedChange = toggleClicked
+            )
         }
     }
 
@@ -176,12 +171,20 @@ class DashlaneLabsFragment : Fragment() {
     @Preview
     fun FeatureItemPreview() {
         DashlanePreview {
-            FeatureItem("Feature name")
+            FeatureItem(
+                toggleClicked = {},
+                feature = ViewData.Lab(
+                    featureName = "",
+                    displayName = "Feature name",
+                    displayDescription = "Feature description",
+                    enabled = true
+                )
+            )
         }
     }
 
     @Composable
-    fun HelpDialog(viewModel: DashlaneLabsViewModels) {
+    fun HelpDialog(viewModel: DashlaneLabsViewModel) {
         Dialog(
             title = stringResource(id = R.string.dashlane_labs_title),
             description = {

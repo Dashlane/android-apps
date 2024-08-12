@@ -12,6 +12,7 @@ import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.definition.Base
 import kotlinx.coroutines.CoroutineScope
 
@@ -49,8 +50,6 @@ interface ItemEditViewContract {
 
             fun notifyRestorePassword()
 
-            fun notifyCloseRestorePasswordInfoBox()
-
             fun notifyPotentialBarCodeScan(requestCode: Int, resultCode: Int, data: Intent?)
 
             fun notifyNotEnoughDataToSave(@StringRes message: Int)
@@ -63,8 +62,6 @@ interface ItemEditViewContract {
                 subviewToFocus: ItemSubView<*>? = null,
                 dismissAction: () -> Unit = {}
             )
-
-            fun showRestorePromptDialog()
 
             fun openLinkedServices(
                 itemId: String,
@@ -91,15 +88,17 @@ interface ItemEditViewContract {
 
         fun setup(context: Context, options: ItemEditViewSetupOptions)
 
-        fun createMenu(menu: Menu, teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator): Boolean
+        fun createMenu(
+            menu: Menu,
+            teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
+            openItemHistory: (SyncObject.Authentifiant) -> Unit,
+        ): Boolean
 
         fun selectMenuItem(item: MenuItem): Boolean
 
         fun deleteClicked()
 
-        fun restorePasswordClicked()
-
-        fun closeRestorePasswordClicked()
+        fun onPasswordRestored()
 
         fun otpRefreshed(otp: Otp)
 
@@ -156,21 +155,14 @@ interface ItemEditViewContract {
             listener: View.UiUpdateListener
         )
 
-        suspend fun restorePassword(): Boolean
-
-        suspend fun closeRestorePassword()
+        suspend fun onPasswordRestored(): Boolean
 
         fun onNewIntent(intent: Intent, coroutineScope: CoroutineScope)
 
         fun logViewDisplay()
 
-        fun setTemporaryLinkedServices(
-            context: Context,
-            listener: View.UiUpdateListener,
-            temporaryWebsites: List<String>?,
-            temporaryApps: List<String>?
-        )
-
         fun getAdditionalData(): Bundle
+
+        fun hasPasswordHistory(authentifiant: SyncObject.Authentifiant): Boolean
     }
 }

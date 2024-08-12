@@ -17,7 +17,7 @@ import com.dashlane.teamspaces.db.SmartSpaceCategorizationManager
 import com.dashlane.teamspaces.manager.SpaceDeletedNotifier
 import com.dashlane.useractivity.UserActivitySender
 import com.dashlane.util.NetworkStateProvider
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration

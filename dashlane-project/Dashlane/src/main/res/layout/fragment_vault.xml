@@ -72,7 +72,6 @@
                 android:layout_height="wrap_content"
                 >
 
-                <include layout="@layout/include_vault_autofill_announcement" />
             </FrameLayout>
 
         </com.google.android.material.appbar.AppBarLayout>

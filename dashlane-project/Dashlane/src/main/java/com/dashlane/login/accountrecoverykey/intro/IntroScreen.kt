@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.ui.widgets.compose.GenericErrorContent
 import com.dashlane.ui.widgets.compose.IndeterminateLoading
@@ -23,14 +22,13 @@ fun IntroScreen(
     viewModel: IntroViewModel,
     registeredUserDevice: RegisteredUserDevice,
     authTicket: String?,
-    accountType: UserAccountInfo.AccountType,
     goToARK: () -> Unit,
     goToTOTP: () -> Unit,
     goToToken: () -> Unit,
     onCancel: () -> Unit
 ) {
     LaunchedEffect(viewModel) {
-        viewModel.arkFlowStarted(registeredUserDevice, authTicket, accountType)
+        viewModel.arkFlowStarted(registeredUserDevice, authTicket)
     }
 
     val uiState by viewModel.uiState.collectAsState()

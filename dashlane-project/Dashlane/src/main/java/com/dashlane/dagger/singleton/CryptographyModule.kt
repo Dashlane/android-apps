@@ -15,12 +15,15 @@ import com.dashlane.cryptography.SharingCryptography
 import com.dashlane.cryptography.jni.JniCryptography
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import java.security.SecureRandom
 import javax.inject.Singleton
 import kotlin.random.Random
 import kotlin.random.asKotlinRandom
 
 @Module
+@InstallIn(SingletonComponent::class)
 object CryptographyModule {
     @Provides
     @Singleton

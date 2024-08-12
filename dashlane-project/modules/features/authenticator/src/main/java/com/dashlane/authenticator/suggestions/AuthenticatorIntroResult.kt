@@ -16,7 +16,7 @@ import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.Ha
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.vault.model.isSemanticallyNull
 
-internal class AuthenticatorIntroResult : ActivityResultContract<CredentialItem, Pair<String?, Otp?>>() {
+class AuthenticatorIntroResult : ActivityResultContract<CredentialItem, Pair<String?, Otp?>>() {
     override fun createIntent(context: Context, item: CredentialItem): Intent {
         return Intent(context, AuthenticatorIntro::class.java).apply {
             putExtra(

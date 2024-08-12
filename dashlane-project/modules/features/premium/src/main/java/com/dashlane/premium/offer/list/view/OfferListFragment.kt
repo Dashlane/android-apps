@@ -9,8 +9,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.AnnouncementTags
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.premium.R
 import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.premium.offer.common.model.OfferType.valueOf
@@ -20,8 +22,9 @@ import com.dashlane.premium.offer.list.OfferListDataProvider
 import com.dashlane.premium.offer.list.OfferListPresenter
 import com.dashlane.premium.offer.list.OfferListViewProxy
 import com.dashlane.premium.offer.list.view.OfferListFragmentDirections.Companion.goToOffersDetailsFromOffersOverview
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.coroutines.getDeferredViewModel
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -44,6 +47,12 @@ class OfferListFragment : Fragment() {
 
     @Inject
     internal lateinit var userFeaturesChecker: UserFeaturesChecker
+
+    @Inject
+    internal lateinit var frozenStateManager: FrozenStateManager
+
+    @Inject
+    internal lateinit var accountStatusProvider: OptionalProvider<AccountStatus>
 
     private var presenter: OfferListContract.Presenter? = null
 
@@ -75,7 +84,9 @@ class OfferListFragment : Fragment() {
             coroutineScope = lifecycleScope,
             viewModel = viewModel,
             navController = navController,
-            logger = logger
+            logger = logger,
+            frozenStateManager = frozenStateManager,
+            accountStatusProvider = accountStatusProvider
         ).apply {
             setView(OfferListViewProxy(view))
             setProvider(provider)

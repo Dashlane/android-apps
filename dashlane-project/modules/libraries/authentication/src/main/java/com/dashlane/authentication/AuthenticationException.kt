@@ -121,6 +121,11 @@ open class AuthenticationTeamException(
     cause: Throwable? = null
 ) : AuthenticationException(message, cause)
 
+open class AuthenticationDeactivatedUserException(
+    message: String? = null,
+    cause: Throwable? = null
+) : AuthenticationException(message, cause)
+
 internal fun DashlaneApiException.toAuthenticationException(
     message: String? = null,
     endpoint: AuthenticationNetworkException.Endpoint? = null

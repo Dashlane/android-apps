@@ -26,7 +26,7 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.login.pages.secrettransfer.qrcode.DashlaneLogo
+import com.dashlane.ui.widgets.compose.DashlaneLogo
 
 @Composable
 fun ChooseTypeScreen(
@@ -82,7 +82,7 @@ fun ChooseTypeContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        DashlaneLogo()
+        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
         Text(
             text = stringResource(id = R.string.login_secret_transfer_choose_type_title),
             style = DashlaneTheme.typography.titleSectionLarge,

@@ -18,5 +18,5 @@ interface DataQuery<T : SummaryObject, F : BaseFilter> {
 inline fun <T : SummaryObject, F : BaseFilter> DataQuery<T, F>.queryFirst(filterConfiguration: F.() -> Unit = {}) =
     queryFirst(createFilter().apply(filterConfiguration))
 
-inline fun <T : SummaryObject, F : BaseFilter> DataQuery<T, F>.queryAll(filterConfiguration: F.() -> Unit = {}) =
+inline fun <T : SummaryObject, F : BaseFilter> DataQuery<T, F>.queryAllLegacy(filterConfiguration: F.() -> Unit = {}) =
     queryAll(createFilter().apply(filterConfiguration))

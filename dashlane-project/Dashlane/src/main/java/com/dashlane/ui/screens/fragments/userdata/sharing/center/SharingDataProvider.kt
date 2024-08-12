@@ -5,13 +5,15 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.vault.summary.SummaryObject
+import kotlinx.coroutines.flow.SharedFlow
 
 interface SharingDataProvider {
+    val updatedItemFlow: SharedFlow<Unit>
     suspend fun getItemGroups(): List<ItemGroup>
     suspend fun getUserGroups(): List<UserGroup>
     suspend fun getUserGroupsAccepted(login: String): List<UserGroup>
     suspend fun getCollections(): List<Collection>
-    suspend fun getCollections(itemId: String, needsAdminRights: Boolean): List<Collection>
+    suspend fun getCollections(itemId: String): List<Collection>
     suspend fun getAcceptedCollections(needsAdminRights: Boolean): List<Collection>
     suspend fun getAcceptedCollections(
         userId: String,
@@ -21,8 +23,12 @@ interface SharingDataProvider {
     suspend fun getAcceptedCollectionsForGroup(userGroupId: String): List<Collection>
 
     suspend fun getAcceptedCollectionsItems(uuid: String): List<SummaryObject>
+
+    fun isDeleteAllowed(collection: Collection): Boolean
+    suspend fun deleteCollection(collection: Collection, handleConflict: Boolean)
+
     suspend fun getTeamLogins(): List<String>
-    suspend fun isCollectionShareAllowed(collection: Collection): Boolean
+    suspend fun isAdmin(collection: Collection): Boolean
     fun getSummaryObject(itemId: String): SummaryObject?
     suspend fun acceptItemGroupInvite(
         itemGroup: ItemGroup,

@@ -2,7 +2,7 @@ package com.dashlane.login.lock
 
 import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.session.SessionManager
-import com.dashlane.session.userKeyBytes
+import com.dashlane.crypto.keys.userKeyBytes
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import javax.inject.Inject
@@ -14,7 +14,7 @@ class LockValidator @Inject constructor(
     private val developerInfoLogger: DeveloperInfoLogger
 ) {
     private val expectedPin: String?
-        get() = sessionManager.session?.let(userSecureStorageManager::readPin)
+        get() = sessionManager.session?.let { userSecureStorageManager.readPin(it.localKey, it.username) }
 
     fun check(pass: LockPass): Boolean {
         return when (pass) {

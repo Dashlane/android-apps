@@ -3,6 +3,7 @@ package com.dashlane.item.subview.provider.credential
 import android.content.Context
 import android.os.Build
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
@@ -20,7 +21,6 @@ import com.dashlane.item.subview.readonly.ItemInfoboxSubView
 import com.dashlane.item.subview.readonly.ItemReadValueTextSubView
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.url.name
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.clipboard.vault.CopyField
@@ -55,23 +55,23 @@ class ItemScreenConfigurationPasskeyProvider(
         item as VaultItem<SyncObject.Passkey>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(item)
         )
     }
 
     private fun createHeader(
-        context: Context,
         item: VaultItem<SyncObject.Passkey>
     ): ItemHeader {
         val passkeySyncObject = item.syncObject
-        val urlIconDrawable = VaultItemImageHelper.getIconDrawableFromSyncObject(
-            context,
-            item.syncObject
-        )
         val menuActions = mutableListOf<MenuAction>().apply {
             addAll(createMenus())
         }
-        return ItemHeader(menuActions, passkeySyncObject.title, urlIconDrawable)
+        return ItemHeader(
+            menuActions = menuActions,
+            title = passkeySyncObject.title,
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_DOMAIN_ICON.value,
+            thumbnailUrl = item.syncObject.urlForGoToWebsite,
+        )
     }
 
     private fun createSubViews(

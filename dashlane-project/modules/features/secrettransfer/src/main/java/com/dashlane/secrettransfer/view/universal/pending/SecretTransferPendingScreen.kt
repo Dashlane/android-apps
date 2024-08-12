@@ -31,8 +31,8 @@ import com.dashlane.secrettransfer.R
 import com.dashlane.secrettransfer.view.SecretTransfer
 import com.dashlane.secrettransfer.view.success.SecretTransferSuccess
 import com.dashlane.secrettransfer.view.universal.passphrase.PassphraseVerificationScreen
+import com.dashlane.ui.common.compose.components.LoadingScreen
 import com.dashlane.ui.widgets.compose.GenericErrorContent
-import com.dashlane.ui.widgets.compose.LoadingScreen
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.getBaseActivity
 import kotlinx.coroutines.delay

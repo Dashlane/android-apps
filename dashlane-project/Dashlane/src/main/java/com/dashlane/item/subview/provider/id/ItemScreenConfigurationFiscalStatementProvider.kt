@@ -2,6 +2,7 @@ package com.dashlane.item.subview.provider.id
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -65,9 +66,13 @@ class ItemScreenConfigurationFiscalStatementProvider(
         context: Context,
         item: VaultItem<*>
     ): ItemHeader {
-        val iconDrawable = createDefaultHeaderIcon(context, item.syncObject)
         val fiscalTitle = context.getString(R.string.fiscal_statement)
-        return ItemHeader(createMenus(), fiscalTitle, iconDrawable)
+        return ItemHeader(
+            menuActions = createMenus(),
+            title = fiscalTitle,
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_OTHER_ICON.value,
+            thumbnailIconRes = getHeaderIcon(item.syncObject),
+        )
     }
 
     private fun createSubViews(

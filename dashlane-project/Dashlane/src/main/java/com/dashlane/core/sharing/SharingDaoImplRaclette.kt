@@ -12,6 +12,7 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserDatabaseRepository
+import com.dashlane.sharing.model.getMyCollectionsAcceptedOrPending
 import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.toCollections
 import com.dashlane.sharing.model.toItemGroup
@@ -40,6 +41,7 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 @Singleton
@@ -108,9 +110,9 @@ class SharingDaoImplRaclette @Inject constructor(
         return itemContent.itemKeyBase64 to itemContent.timestamp
     }
 
-    override fun isDirtyForSharing(id: String, type: SyncObjectType): Boolean {
+    override suspend fun isDirtyForSharing(id: String, type: SyncObjectType): Boolean {
         val vaultObjectRepository = vaultObjectRepository ?: return false
-        return vaultObjectRepository[Id.of(id)]?.hasDirtySharedField ?: false
+        return vaultObjectRepository.get(Id.of(id))?.hasDirtySharedField ?: false
     }
 
     override suspend fun getDirtyForSharing(): List<DataIdentifierExtraDataWrapper<out SyncObject>> {
@@ -119,7 +121,7 @@ class SharingDaoImplRaclette @Inject constructor(
         val ids = getDirtyItemIds() ?: return emptyList()
         return ids.mapNotNull {
             val id = Id.of(it)
-            val vaultItem = vaultObjectRepository[id] ?: return@mapNotNull null
+            val vaultItem = vaultObjectRepository.get(id) ?: return@mapNotNull null
             val extraData = backupRepository?.load(id)
                 ?.let { backup -> XmlSerializer.serializeTransaction(backup) }
             DataIdentifierExtraDataWrapper(
@@ -137,7 +139,7 @@ class SharingDaoImplRaclette @Inject constructor(
         runCatching {
             val updated = ids.mapNotNull {
                 val id = Id.of(it)
-                val vaultItem = vaultObjectRepository[id] ?: return@mapNotNull null
+                val vaultItem = vaultObjectRepository.get(id) ?: return@mapNotNull null
                 vaultItem.copy(
                     hasDirtySharedField = false
                 )
@@ -148,22 +150,30 @@ class SharingDaoImplRaclette @Inject constructor(
         }.onFailure { racletteLogger.exception(it) }.getOrThrow()
     }
 
-    override fun loadItemGroup(itemGroupUid: String): ItemGroup? {
+    override fun loadItemGroupLegacy(itemGroupUid: String): ItemGroup? = runBlocking { loadItemGroup(itemGroupUid) }
+
+    override suspend fun loadItemGroup(itemGroupUid: String): ItemGroup? {
         val sharingRepository = sharingRepository ?: return null
         return sharingRepository.loadItemGroups().find { it.groupId == itemGroupUid }?.toItemGroup()
     }
 
-    override fun loadAllItemGroup(): List<ItemGroup> {
+    override fun loadAllItemGroupLegacy(): List<ItemGroup> = runBlocking { loadAllItemGroup() }
+
+    override suspend fun loadAllItemGroup(): List<ItemGroup> {
         val sharingRepository = sharingRepository ?: return emptyList()
         return sharingRepository.loadItemGroups().toItemGroups()
     }
 
-    override fun loadAllUserGroup(): List<UserGroup> {
+    override fun loadAllUserGroupLegacy(): List<UserGroup> = runBlocking { loadAllUserGroup() }
+
+    override suspend fun loadAllUserGroup(): List<UserGroup> {
         val sharingRepository = sharingRepository ?: return emptyList()
         return sharingRepository.loadUserGroups().toUserGroups()
     }
 
-    override fun loadUserGroupsAcceptedOrPending(userId: String): List<UserGroup> {
+    override fun loadUserGroupsAcceptedOrPendingLegacy(userId: String): List<UserGroup> = runBlocking { loadUserGroupsAcceptedOrPending(userId) }
+
+    override suspend fun loadUserGroupsAcceptedOrPending(userId: String): List<UserGroup> {
         val sharingRepository = sharingRepository ?: return emptyList()
         return sharingRepository.loadUserGroups().toUserGroups().filter {
             val found = it.users.find { user -> user.userId == userId } ?: return@filter false
@@ -171,9 +181,18 @@ class SharingDaoImplRaclette @Inject constructor(
         }
     }
 
-    override fun loadAllCollection(): List<Collection> {
+    override fun loadAllCollectionLegacy(): List<Collection> = runBlocking { loadAllCollection() }
+
+    override suspend fun loadAllCollection(): List<Collection> {
         val sharingRepository = sharingRepository ?: return emptyList()
         return sharingRepository.loadCollections().toCollections()
+    }
+
+    override fun loadCollectionsAcceptedOrPending(
+        userId: String,
+        myUserGroupsAcceptedOrPending: List<UserGroup>
+    ): List<Collection> {
+        return loadAllCollectionLegacy().getMyCollectionsAcceptedOrPending(userId, myUserGroupsAcceptedOrPending)
     }
 
     override suspend fun deleteItemGroups(
@@ -228,32 +247,39 @@ class SharingDaoImplRaclette @Inject constructor(
         databaseItemSaver.saveItemFromSharingSync(newObjectToSave)
     }
 
-    override fun loadItemContentExtraData(itemUid: String): String? {
+    override fun loadItemContentExtraDataLegacy(itemUid: String): String? = runBlocking { loadItemContentExtraData(itemUid) }
+    override suspend fun loadItemContentExtraData(itemUid: String): String? {
         val sharingRepository = sharingRepository ?: return null
         return sharingRepository.loadItemContents().find { it.itemId == itemUid }?.extraData
     }
 
-    override fun getExtraData(uid: String): String? = loadItemContentExtraData(uid)
-
-    override fun loadItemGroupForItem(itemUID: String): ItemGroup? {
+    override fun loadItemGroupForItemLegacy(itemUID: String): ItemGroup? = runBlocking { loadItemGroupForItem(itemUID) }
+    override suspend fun loadItemGroupForItem(itemUID: String): ItemGroup? {
         val sharingRepository = sharingRepository ?: return null
         return sharingRepository.loadItemGroups().find { itemGroup ->
             itemGroup.items.any { it.itemId == itemUID }
         }?.toItemGroup()
     }
 
-    override fun loadUserGroupsAccepted(userId: String): List<UserGroup>? {
+    override fun loadUserGroupsAcceptedLegacy(userId: String): List<UserGroup>? = runBlocking { loadUserGroupsAccepted(userId) }
+    override suspend fun loadUserGroupsAccepted(userId: String): List<UserGroup>? {
         val sharingRepository = sharingRepository ?: return null
         return sharingRepository.loadUserGroups().filter { userGroup ->
             userGroup.users.any { it.userId == userId }
         }.toUserGroups()
     }
 
-    override fun loadUserGroup(userGroupId: String): UserGroup? {
+    override fun loadUserGroupLegacy(userGroupId: String): UserGroup? = runBlocking { loadUserGroup(userGroupId) }
+
+    override suspend fun loadUserGroup(userGroupId: String): UserGroup? {
         return loadAllUserGroup().find { it.groupId == userGroupId }
     }
 
-    override fun getItemWithExtraData(
+    override fun getItemWithExtraDataLegacy(id: String, dataType: SyncObjectType): DataIdentifierExtraDataWrapper<SyncObject>? {
+        return runBlocking { getItemWithExtraData(id, dataType) }
+    }
+
+    override suspend fun getItemWithExtraData(
         id: String,
         dataType: SyncObjectType
     ): DataIdentifierExtraDataWrapper<SyncObject>? =

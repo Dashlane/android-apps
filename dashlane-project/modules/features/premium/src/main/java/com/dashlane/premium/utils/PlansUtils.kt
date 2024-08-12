@@ -22,7 +22,6 @@ object PlansUtils {
             familyUser && isPremiumPlus -> R.string.plan_premium_plus_family_action_bar_title
             isPremiumPlus -> R.string.plan_premium_plus_action_bar_title
             isAdvanced -> R.string.plans_advanced_title
-
             familyUser && premiumStatus.isPremium -> R.string.plan_premium_family_action_bar_title
             premiumStatus.isPremium -> R.string.plan_premium_action_bar_title
             else -> R.string.plan_free_action_bar_title
