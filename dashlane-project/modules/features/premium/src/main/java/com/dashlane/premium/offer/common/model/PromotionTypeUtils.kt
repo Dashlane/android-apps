@@ -80,4 +80,5 @@ fun OfferType.plansResId(): Int = when (this) {
     OfferType.ADVANCED -> R.string.plans_advanced_title
     OfferType.PREMIUM -> R.string.plans_premium_title
     OfferType.FAMILY -> R.string.plans_family_title
+    OfferType.FREE -> R.string.plan_free_action_bar_title 
 }

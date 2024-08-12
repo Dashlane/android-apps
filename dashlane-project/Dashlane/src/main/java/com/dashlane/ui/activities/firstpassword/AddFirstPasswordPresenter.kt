@@ -2,13 +2,12 @@ package com.dashlane.ui.activities.firstpassword
 
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
-import com.dashlane.sync.DataSync
 import com.dashlane.guidedonboarding.R
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
+import com.dashlane.sync.DataSync
 import com.dashlane.ui.activities.firstpassword.autofilldemo.AutofillDemoActivity
 import com.dashlane.ui.activities.firstpassword.faq.FAQFirstPasswordActivity
-import com.dashlane.util.getImageDrawableByWebsiteUrl
 import com.dashlane.util.getSerializableCompat
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.util.startActivity
@@ -36,7 +35,7 @@ class AddFirstPasswordPresenter @Inject constructor(
 
     override fun onCreate(url: String, savedInstanceState: Bundle?) {
         this.url = url
-        view.setupToolbar(view.context.getImageDrawableByWebsiteUrl(url))
+        view.setupToolbar(url)
         prefillLogin()
 
         displayAutofillDemo = savedInstanceState?.getBoolean(EXTRA_DISPLAY_AUTOFILL_PROMPT) ?: false

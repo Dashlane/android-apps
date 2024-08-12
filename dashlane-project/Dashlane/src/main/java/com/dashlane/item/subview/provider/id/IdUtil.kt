@@ -165,7 +165,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
 ): ItemSubViewImpl<LocalDate?>? {
     val birthDateHint = context.getString(R.string.date_of_birth)
     val birthDateLocalDate = birthDate(item)
-    val birthDateFormatted = birthDateLocalDate?.toIdentityFormat(context)
+    val birthDateFormatted = birthDateLocalDate?.toIdentityFormat(context.resources)
 
     return when {
         editMode -> ItemEditValueDateSubView(
@@ -178,7 +178,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
                 addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                     override fun onValueChanged(origin: Any, newValue: LocalDate?) {
                         val subView = origin as ItemEditValueDateSubView
-                        subView.formattedDate = newValue?.toIdentityFormat(context)
+                        subView.formattedDate = newValue?.toIdentityFormat(context.resources)
                         subView.value = newValue
                         listener.notifySubViewChanged(subView)
                     }
@@ -208,7 +208,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
     val otherLabel = context.getString(R.string.other)
     val linkedIdentityHeader = context.getString(R.string.identity)
     val fullNameToIdentity: Map<String, VaultItem<SyncObject.Identity>> =
-        vaultDataQuery.queryAll(
+        vaultDataQuery.queryAllLegacy(
             vaultFilter {
                 specificDataType(SyncObjectType.IDENTITY)
             }
@@ -283,7 +283,7 @@ fun <T : SyncObject> createIdDateField(
     valueUpdate: (VaultItem<*>, LocalDate?) -> VaultItem<*>?,
     vaultItemCopy: VaultItemCopyService
 ): ItemSubView<*>? {
-    val issueDateFormatted = dateLocalDate?.toIdentityFormat(context)
+    val issueDateFormatted = dateLocalDate?.toIdentityFormat(context.resources)
     return when {
         editMode -> ItemEditValueDateSubView(
             dateHint,
@@ -294,7 +294,7 @@ fun <T : SyncObject> createIdDateField(
             addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                 override fun onValueChanged(origin: Any, newValue: LocalDate?) {
                     val subView = origin as ItemEditValueDateSubView
-                    subView.formattedDate = newValue?.toIdentityFormat(context)
+                    subView.formattedDate = newValue?.toIdentityFormat(context.resources)
                     subView.value = newValue
                     listener.notifySubViewChanged(subView)
                 }

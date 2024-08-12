@@ -6,10 +6,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.Legal
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.inappbilling.BillingManager
 import com.dashlane.inappbilling.ConnectionScope
 import com.dashlane.inappbilling.ServiceResult
+import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.Navigator
 import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.premium.offer.common.PurchaseCheckingCoordinator
@@ -19,7 +21,6 @@ import com.dashlane.premium.offer.common.model.Offers
 import com.dashlane.premium.offer.common.model.OffersState
 import com.dashlane.premium.offer.common.model.ProductDetailsWrapper
 import com.dashlane.premium.offer.common.model.ProductPeriodicity
-import com.dashlane.premium.offer.details.view.OfferDetailsFragmentArgs
 import com.dashlane.premium.offer.list.model.OfferOverview
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +36,8 @@ class OfferDetailsViewModel @Inject constructor(
     private val billingManager: BillingManager,
     private val purchaseCheckingCoordinator: PurchaseCheckingCoordinator,
     private val logger: OffersLogger,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val frozenStateManager: FrozenStateManager,
 ) : ViewModel() {
 
     @get:StringRes
@@ -112,6 +114,13 @@ class OfferDetailsViewModel @Inject constructor(
         }
     }
 
+    fun navigateToVaultPasswordSection() {
+        if (frozenStateManager.isAccountFrozen) {
+            logger.onManagePasswordClicked()
+        }
+        navigator.goToHome(filter = NavigationHelper.Destination.MainPath.PASSWORDS)
+    }
+
     private fun logState(state: OffersState) {
         val hasIntroOffers = state.containsIntroOffers()
         when (state) {
@@ -133,7 +142,7 @@ class OfferDetailsViewModel @Inject constructor(
             productPeriodicity = intendedPeriodicity,
             offerType = offerType,
             sku = product.productId,
-            price = product.priceInfo.baseOfferPriceValue, 
+            price = product.priceInfo.baseOfferPriceValue,
             currency = product.priceInfo.currencyCode
         )
     }
@@ -160,7 +169,7 @@ class OfferDetailsViewModel @Inject constructor(
             productPeriodicity = intendedPeriodicity,
             offerType = offerType,
             sku = product.productId,
-            price = product.priceInfo.baseOfferPriceValue, 
+            price = product.priceInfo.baseOfferPriceValue,
             currency = product.priceInfo.currencyCode
         )
     }
@@ -174,7 +183,7 @@ class OfferDetailsViewModel @Inject constructor(
         else -> false
     }
 
-    fun getCtaString(priceInfo: OfferDetails.PriceInfo?) = provider.getCtaString(priceInfo)
+    fun getCtaString(priceInfo: OfferDetails.PriceInfo) = provider.getCtaString(priceInfo)
 
     fun getMonthlyInfoString(priceInfo: OfferDetails.PriceInfo?) =
         provider.getMonthlyInfoString(priceInfo)

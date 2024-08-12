@@ -13,24 +13,21 @@ import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.COLLECTION_NAME_MAX_LENGTH
 import com.dashlane.vault.model.toSanitizedCollectionName
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class CollectionSelectorViewModel @Inject constructor(
     private val collectionDataQuery: CollectionDataQuery,
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val sharingDataProvider: SharingDataProvider,
-    private val userFeaturesChecker: UserFeaturesChecker,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _suggestedCollections = MutableStateFlow(listOf<Collection>())
@@ -46,7 +43,7 @@ class CollectionSelectorViewModel @Inject constructor(
     var userPrompt by mutableStateOf("")
         private set
 
-    private val navArgs = CollectionSelectorActivityArgs.fromSavedStateHandle(savedStateHandle)
+    private val navArgs = CollectionSelectorFragmentArgs.fromSavedStateHandle(savedStateHandle)
 
     init {
         viewModelScope.launch {
@@ -62,7 +59,7 @@ class CollectionSelectorViewModel @Inject constructor(
     }
 
     fun confirmAddToSharedCollection(collection: Collection) {
-        _uiState.tryEmit(ShowConfirmDialog(collection))
+        _uiState.tryEmit(ShowConfirmDialog(collection, navArgs.isLimited))
     }
 
     fun cancelAddToSharedCollection() {
@@ -83,21 +80,13 @@ class CollectionSelectorViewModel @Inject constructor(
                 val name = it.name ?: return@mapNotNull null
                 Collection(it.id, name, false)
             }
-        val sharedCollections =
-            if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
-                if (navArgs.spaceId == TeamSpace.Personal.teamId) {
-                    emptyList()
-                } else {
-                    
-                    
-                    val showAll = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_ROLES)
-                    sharingDataProvider.getAcceptedCollections(needsAdminRights = !showAll).map {
-                        Collection(it.uuid, it.name, true)
-                    }
-                }
-            } else {
-                emptyList()
+        val sharedCollections = if (navArgs.spaceId == TeamSpace.Personal.teamId) {
+            emptyList()
+        } else {
+            sharingDataProvider.getAcceptedCollections(needsAdminRights = false).map {
+                Collection(it.uuid, it.name, true)
             }
+        }
         val collections = (privateCollections + sharedCollections)
             .filterForPrompt(prompt.toSanitizedCollectionName())
             .filterNotLinkedToItem()
@@ -118,6 +107,6 @@ class CollectionSelectorViewModel @Inject constructor(
 
     sealed class UiState {
         data object Nothing : UiState()
-        data class ShowConfirmDialog(val collection: Collection) : UiState()
+        data class ShowConfirmDialog(val collection: Collection, val isLimited: Boolean) : UiState()
     }
 }

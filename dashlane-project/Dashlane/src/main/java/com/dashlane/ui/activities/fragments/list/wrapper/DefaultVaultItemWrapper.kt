@@ -1,22 +1,20 @@
 package com.dashlane.ui.activities.fragments.list.wrapper
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
-import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.activities.fragments.list.action.CopyItemFieldListItemAction
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.action.QuickActionsItemAction
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.util.ViewTypeUtils
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
+import com.dashlane.vault.textfactory.list.StatusText
 import com.dashlane.vault.util.hasAttachments
 import com.dashlane.vault.util.valueOfFromDataIdentifier
 import com.dashlane.xml.domain.SyncObjectType
@@ -42,13 +40,10 @@ open class DefaultVaultItemWrapper<D : SummaryObject>(
         get() = summaryObject.hasAttachments()
 
     override fun getTitle(context: Context): StatusText =
-        dataIdentifierListTextResolver.getLine1(context, summaryObject)
+        dataIdentifierListTextResolver.getLine1(summaryObject)
 
     override fun getDescription(context: Context): StatusText =
-        dataIdentifierListTextResolver.getLine2(context, summaryObject)
-
-    override fun getImageDrawable(context: Context): Drawable? =
-        VaultItemImageHelper.getIconDrawableFromSummaryObject(context, summaryObject)
+        dataIdentifierListTextResolver.getLine2(summaryObject)
 
     override fun getListItemActions(): List<ListItemAction> {
         return listOfNotNull(

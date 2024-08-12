@@ -17,8 +17,8 @@ import com.dashlane.cryptography.encryptByteArrayToBase64String
 import com.dashlane.cryptography.encryptUtf8ToBase64String
 import com.dashlane.cryptography.encryptXmlTransactionToBase64String
 import com.dashlane.cryptography.use
-import com.dashlane.session.AppKey
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.toObject

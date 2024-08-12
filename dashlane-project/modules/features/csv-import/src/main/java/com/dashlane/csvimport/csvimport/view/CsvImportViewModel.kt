@@ -17,7 +17,7 @@ import com.dashlane.hermes.generated.definitions.ImportDataStatus
 import com.dashlane.hermes.generated.definitions.ImportDataStep
 import com.dashlane.hermes.generated.definitions.ImportSource
 import com.dashlane.hermes.generated.events.user.ImportData
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

@@ -24,13 +24,12 @@ import com.dashlane.search.MatchedSearchResult
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
-import com.dashlane.ui.adapters.text.factory.SearchListTextResolver
 import com.dashlane.ui.fab.FabDef
 import com.dashlane.ui.fab.FabPresenter
 import com.dashlane.ui.screens.fragments.search.ui.SearchListViewHelper
+import com.dashlane.search.textfactory.SearchListTextResolver
 import com.dashlane.ui.screens.settings.SearchableSettingInRecyclerView
 import com.dashlane.util.DeviceUtils.hideKeyboard
 import com.dashlane.util.animation.fadeIn
@@ -41,13 +40,14 @@ import com.dashlane.util.tryOrNull
 import com.dashlane.vault.VaultItemLogClickListener
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.util.valueOfFromDataIdentifier
+import com.dashlane.home.vaultlist.Filter
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchFragment :

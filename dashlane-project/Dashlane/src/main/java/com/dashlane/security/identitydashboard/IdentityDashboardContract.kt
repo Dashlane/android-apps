@@ -28,7 +28,5 @@ interface IdentityDashboardContract {
 
         fun listenForChanges()
         fun unlistenForChanges()
-
-        suspend fun getCreditMonitoringLink(): String?
     }
 }

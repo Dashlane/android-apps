@@ -1,7 +1,5 @@
 package com.dashlane.ui.quickactions
 
-import android.graphics.drawable.Drawable
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.DrawableRes
@@ -20,6 +18,7 @@ import com.dashlane.session.repository.getLockManager
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.ui.activities.fragments.list.action.ActionItemHelper
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.vault.summary.SummaryObject
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.skocken.presentation.viewproxy.BaseViewProxy
@@ -84,8 +83,19 @@ class QuickActionsViewProxy(
         }
     }
 
-    override fun setItemDetail(drawable: Drawable?, title: String?) {
-        findViewByIdEfficient<ImageView>(R.id.quick_actions_icon)?.setImageDrawable(drawable)
+    override fun setItemDetail(
+        title: String?,
+        thumbnailType: Int?,
+        thumbnailIconRes: Int?,
+        thumbnailColorRes: Int?,
+        thumbnailUrlDomain: String?
+    ) {
+        findViewByIdEfficient<ThumbnailDomainIconView>(R.id.quick_actions_icon)?.apply {
+            thumbnailType?.let { this.thumbnailType = it }
+            thumbnailColorRes?.let { this.color = context.getColor(it) }
+            thumbnailIconRes?.let { this.iconRes = it }
+            thumbnailUrlDomain?.let { this.domainUrl = it }
+        }
         findViewByIdEfficient<TextView>(R.id.quick_actions_title)?.text = title
     }
 

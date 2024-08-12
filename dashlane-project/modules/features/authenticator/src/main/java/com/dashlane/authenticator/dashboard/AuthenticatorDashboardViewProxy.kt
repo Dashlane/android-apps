@@ -72,8 +72,11 @@ class AuthenticatorDashboardViewProxy(
         
         
         override fun onOtpCopy(code: String, itemId: String, domain: String?) {
-            viewModel.onOtpCodeCopy(itemId, domain)
-            copyCallback.invoke(code)
+            val canCopy = viewModel.onOtpCodeCopy(itemId, domain)
+
+            if (canCopy) {
+                copyCallback.invoke(code)
+            }
         }
 
         override fun onOtpDelete(item: CredentialItem, issuer: String?) {
@@ -157,10 +160,6 @@ class AuthenticatorDashboardViewProxy(
                                     setupSeeButton(!allItemsShown, size())
                                     notifyDataSetChanged()
                                 }
-                            }
-                            if (viewModel.isFirstVisit) {
-                                navigator.goToGetStartedFromAuthenticator()
-                                viewModel.onOnboardingDisplayed()
                             }
                         }
 

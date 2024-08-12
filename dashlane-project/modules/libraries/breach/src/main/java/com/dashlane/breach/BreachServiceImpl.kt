@@ -3,7 +3,7 @@ package com.dashlane.breach
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.breaches.GetBreachesService
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async

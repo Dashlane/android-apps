@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="autofill_frozen_bottom_sheet_title">Your account is read-only</string>
+    
+    <string name="autofill_frozen_bottom_sheet_description">You have over %1$s passwords saved. Remove passwords or upgrade to regain full access to your account.</string>
+    
+    <string name="autofill_frozen_bottom_sheet_cta_negative">Not now</string>
+    
+    <string name="autofill_frozen_bottom_sheet_cta_positive">Get more Storage</string>
+</resources>

@@ -18,19 +18,24 @@ import com.dashlane.preference.ConstantsPrefs.Companion.SKIP_INTRO
 import com.dashlane.preference.ConstantsPrefs.Companion.UITEST_FORCE_SCREENSHOT
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_LIST_HISTORY
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_LIST_HISTORY_MAX_SIZE
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.tryOrNull
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.time.Instant
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GlobalPreferencesManager(
-    private val context: Context,
+@Singleton
+class GlobalPreferencesManager @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val backupManager: BackupManager
 ) : DashlanePreferencesManager() {
 
     override val sharedPreferences: SharedPreferences? = PreferenceManager.getDefaultSharedPreferences(context)
+
     val lastModificationTime: Long
         get() {
             val packageName = context.packageName

@@ -1,6 +1,9 @@
 package com.dashlane.premium.offer.list
 
 import androidx.navigation.NavController
+import com.dashlane.accountstatus.AccountStatus
+import com.dashlane.accountstatus.premiumstatus.isFree
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.premium.offer.common.model.Offers
@@ -9,6 +12,7 @@ import com.dashlane.premium.offer.common.model.ProductPeriodicity
 import com.dashlane.premium.offer.list.model.OfferOverview
 import com.dashlane.premium.offer.list.view.OfferListFragmentDirections.Companion.goToOffersDetailsFromOffersOverview
 import com.dashlane.util.coroutines.DeferredViewModel
+import com.dashlane.util.inject.OptionalProvider
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +24,9 @@ internal class OfferListPresenter(
     private val coroutineScope: CoroutineScope,
     viewModel: DeferredViewModel<OffersState?>,
     private val navController: NavController,
-    private val logger: OffersLogger
+    private val logger: OffersLogger,
+    private val frozenStateManager: FrozenStateManager,
+    private val accountStatusProvider: OptionalProvider<AccountStatus>,
 ) :
     OfferListContract.Presenter,
     BasePresenter<OfferListContract.DataProvider, OfferListContract.ViewProxy>() {
@@ -49,7 +55,12 @@ internal class OfferListPresenter(
             val offers = deferred.await()
             logState(offers)
             if (offers is Offers) {
-                view.showAvailableOffers(offers)
+                view.showAvailableOffers(
+                    offers = offers,
+                    isUserFree = accountStatusProvider.get()?.premiumStatus?.isFree == true,
+                    isUserFrozen = frozenStateManager.isAccountFrozen,
+                    passwordLimit = frozenStateManager.passwordLimitCount
+                )
             } else {
                 view.showEmptyState()
             }

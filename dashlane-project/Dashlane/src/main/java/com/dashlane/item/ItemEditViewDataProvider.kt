@@ -5,14 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import com.dashlane.R
 import com.dashlane.applinkfetcher.AuthentifiantAppLinkDownloader
-import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
-import com.dashlane.autofill.LinkedServicesHelper
 import com.dashlane.collections.sharing.item.CollectionSharingItemDataProvider
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.CollectionAction
-import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.hermes.generated.events.user.UpdateCollection
 import com.dashlane.item.collection.getAllCollections
@@ -28,10 +26,7 @@ import com.dashlane.item.subview.provider.EditableSubViewFactory
 import com.dashlane.item.subview.provider.ItemScreenConfigurationSecureNoteProvider
 import com.dashlane.item.subview.provider.ReadOnlySubViewFactory
 import com.dashlane.item.subview.provider.SubViewFactory
-import com.dashlane.item.subview.provider.credential.ItemScreenConfigurationAuthentifiantProvider
 import com.dashlane.item.subview.provider.credential.ItemScreenConfigurationPasskeyProvider
-import com.dashlane.item.subview.provider.credential.PasswordChangedInfoBoxDataProvider
-import com.dashlane.item.subview.provider.credential.getPreviousPassword
 import com.dashlane.item.subview.provider.id.ItemScreenConfigurationDriverLicenseProvider
 import com.dashlane.item.subview.provider.id.ItemScreenConfigurationFiscalStatementProvider
 import com.dashlane.item.subview.provider.id.ItemScreenConfigurationIdCardProvider
@@ -47,17 +42,16 @@ import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationId
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationPhoneProvider
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationWebsiteProvider
 import com.dashlane.login.lock.LockManager
-import com.dashlane.navigation.Navigator
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.EmailSuggestionProvider
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataChangeHistoryQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.GeneratedPasswordQuery
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
+import com.dashlane.storage.userdata.accessor.filter.DataChangeHistoryFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.getTeamSpaceLog
@@ -67,7 +61,7 @@ import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.date.RelativeDateFormatter
 import com.dashlane.util.date.RelativeDateFormatterImpl
@@ -77,10 +71,11 @@ import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.VaultItemLogger
+import com.dashlane.vault.history.DataChangeHistoryField
+import com.dashlane.vault.history.password
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.model.addAuthId
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.createAddress
 import com.dashlane.vault.model.createAuthentifiant
@@ -127,29 +122,25 @@ class ItemEditViewDataProvider @Inject constructor(
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val currentTeamSpaceFilter: CurrentTeamSpaceUiFilter,
     private val vaultDataQuery: VaultDataQuery,
+    private val dataChangeHistoryQuery: DataChangeHistoryQuery,
     private val collectionDataQuery: CollectionDataQuery,
     private val dataSaver: DataSaver,
-    private val generatedPasswordQuery: GeneratedPasswordQuery,
     private val genericDataQuery: GenericDataQuery,
-    private val dataChangeHistoryQuery: DataChangeHistoryQuery,
     private val sessionManager: SessionManager,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val appLinkDownloader: AuthentifiantAppLinkDownloader,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     private val lockManager: LockManager,
-    private val navigator: Navigator,
     private val vaultItemLogger: VaultItemLogger,
     private val activityLogger: VaultActivityLogger,
     private val sharingPolicy: SharingPolicyDataProvider,
     private val sharingDataProvider: SharingDataProvider,
-    private val linkedServicesHelper: LinkedServicesHelper,
     private val dataSync: DataSync,
-    private val authenticatorLogger: AuthenticatorLogger,
     private val hermesLogRepository: LogRepository,
     private val vaultItemCopy: VaultItemCopyService,
     private val collectionSharingItemDataProvider: CollectionSharingItemDataProvider,
-    private val passwordChangedInfoBoxDataProvider: PasswordChangedInfoBoxDataProvider,
     private val teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
+    private val frozenStateManager: FrozenStateManager,
     clock: Clock
 ) : BaseDataProvider<ItemEditViewContract.Presenter>(), ItemEditViewContract.DataProvider {
 
@@ -251,27 +242,6 @@ class ItemEditViewDataProvider @Inject constructor(
         }
 
         when (options.dataType) {
-            SyncObjectType.AUTHENTIFIANT -> {
-                provider = ItemScreenConfigurationAuthentifiantProvider(
-                    teamSpaceAccessor = teamSpaceAccessor,
-                    sharingPolicy = sharingPolicy,
-                    emailSuggestionProvider = emailSuggestionProvider,
-                    navigator = navigator,
-                    vaultItemLogger = vaultItemLogger,
-                    dateTimeFieldFactory = dateTimeFieldFactory,
-                    scannedOtp = options.scannedOtp,
-                    linkedServicesHelper = linkedServicesHelper,
-                    userFeaturesChecker = userFeaturesChecker,
-                    authenticatorLogger = authenticatorLogger,
-                    vaultItemCopy = vaultItemCopy,
-                    sharingDataProvider = sharingDataProvider,
-                    relativeDateFormatter = relativeDateFormatter,
-                    passwordChangedInfoBoxDataProvider = passwordChangedInfoBoxDataProvider,
-                    vaultDataQuery = vaultDataQuery,
-                    collectionDataQuery = collectionDataQuery
-                )
-            }
-
             SyncObjectType.IDENTITY ->
                 provider = ItemScreenConfigurationIdentityProvider(
                     teamSpaceAccessor = teamSpaceAccessor,
@@ -315,7 +285,8 @@ class ItemEditViewDataProvider @Inject constructor(
                     sharingPolicy = sharingPolicy,
                     userFeaturesChecker = userFeaturesChecker,
                     dateTimeFieldFactory = dateTimeFieldFactory,
-                    restrictionNotificator = teamspaceRestrictionNotificator
+                    restrictionNotificator = teamspaceRestrictionNotificator,
+                    frozenStateManager = frozenStateManager
                 )
 
             SyncObjectType.ADDRESS ->
@@ -431,8 +402,7 @@ class ItemEditViewDataProvider @Inject constructor(
         val collections = teamSpaceAccessor.getAllCollections(
             item,
             collectionDataQuery,
-            sharingDataProvider,
-            userFeaturesChecker
+            sharingDataProvider
         )
         state = State(
             options.dataType,
@@ -475,51 +445,27 @@ class ItemEditViewDataProvider @Inject constructor(
         logDisplayPendingSetup = state == null
     }
 
-    override fun setTemporaryLinkedServices(
-        context: Context,
-        listener: ItemEditViewContract.View.UiUpdateListener,
-        temporaryWebsites: List<String>?,
-        temporaryApps: List<String>?
-    ) {
-        val itemScreenProvider = state?.itemScreenConfigurationProvider
-        if (itemScreenProvider is ItemScreenConfigurationAuthentifiantProvider) {
-            itemScreenProvider.temporaryLinkedWebsites = temporaryWebsites
-            itemScreenProvider.temporaryLinkedApps = temporaryApps
-
-            val canDelete = sharingPolicy.isDeleteAllowed(false, state!!.item)
-
-            
-            if (temporaryWebsites != null) {
-                itemScreenProvider.editedFields += Field.ASSOCIATED_WEBSITES_LIST
-            } else {
-                itemScreenProvider.editedFields -= Field.ASSOCIATED_WEBSITES_LIST
-            }
-            if (temporaryApps != null) {
-                itemScreenProvider.editedFields += Field.ASSOCIATED_APPS_LIST
-            } else {
-                itemScreenProvider.editedFields -= Field.ASSOCIATED_APPS_LIST
-            }
-
-            
-            val restoreItemFromUI = state!!.itemScreenConfigurationProvider.gatherFromUi(
-                state!!.item,
-                state!!.screenConfiguration.itemSubViews,
-                state!!.screenConfiguration.itemHeader
-            )
-            state = state!!.copy(
-                screenConfiguration = state!!.itemScreenConfigurationProvider.createScreenConfiguration(
-                    context,
-                    restoreItemFromUI,
-                    getSubViewFactory(isEditMode),
-                    isEditMode,
-                    canDelete,
-                    listener
-                )
-            )
-        }
-    }
-
     override fun getAdditionalData(): Bundle = state!!.itemScreenConfigurationProvider.saveAdditionalData()
+
+    override fun hasPasswordHistory(authentifiant: SyncObject.Authentifiant): Boolean {
+        val id = authentifiant.id ?: return false
+        val filter = DataChangeHistoryFilter(
+            objectType = SyncObjectType.AUTHENTIFIANT,
+            objectUid = id
+        )
+        val changeSets =
+            dataChangeHistoryQuery.query(filter)?.syncObject?.changeSets
+                ?.filter {
+                    it.changedProperties?.contains(DataChangeHistoryField.PASSWORD.field) ?: false
+                }?.sortedByDescending { it.modificationDate } ?: return false
+
+        return changeSets.filterIndexed { index, item ->
+            
+            (index == 0 && item.password != authentifiant.password.toString() && item.password != null && item.modificationDate != null) ||
+                
+                (index != 0 && item.password != null && changeSets[index - 1].modificationDate != null)
+        }.isNotEmpty()
+    }
 
     override fun changeMode(context: Context, editMode: Boolean, listener: ItemEditViewContract.View.UiUpdateListener) {
         if (state == null) {
@@ -541,26 +487,12 @@ class ItemEditViewDataProvider @Inject constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override suspend fun restorePassword(): Boolean {
+    override suspend fun onPasswordRestored(): Boolean {
         val item = state!!.item as VaultItem<SyncObject.Authentifiant>
-        val (lastChangeDate, previousPassword) = item.getPreviousPassword(
-            currentPassword = item.syncObject.password?.toString(),
-            dataChangeHistoryQuery = dataChangeHistoryQuery
-        ) ?: return false
-        val itemToSave = item.copySyncObject {
-            password = previousPassword.toSyncObfuscatedValue()
-            modificationDatetime = lastChangeDate
-        }.copyWithAttrs {
-            userModificationDate = Instant.now()
-            setStateModifiedIfNotDeleted()
-        }
-        val isRestored = saveItem(itemToSave)
-        vaultItemLogger.logPasswordRestored(itemToSave.uid, itemToSave.syncObject.urlForGoToWebsite)
-        return isRestored
-    }
 
-    override suspend fun closeRestorePassword() {
-        passwordChangedInfoBoxDataProvider.setInfoBoxClosed(state!!.item)
+        val updatedItem = getItem(uid = item.uid, type = item.syncObjectType) as VaultItem<SyncObject.Authentifiant>
+        state = state!!.copy(item = updatedItem)
+        return true
     }
 
     override fun getScreenConfiguration(): ScreenConfiguration {
@@ -607,9 +539,6 @@ class ItemEditViewDataProvider @Inject constructor(
 
             
             val removedLinkedApps = itemToSave.getRemovedLinkedApps(state.item)
-
-            
-            updateGeneratedPassword(itemToSave.uid)
 
             
             saveItem(itemToSave)
@@ -675,7 +604,7 @@ class ItemEditViewDataProvider @Inject constructor(
         if (collectionListSubView != null) { 
             val sharedCollectionsFromUi = collectionListSubView.value.value.filter { it.shared }
             val sharedCollectionsForItem =
-                sharingDataProvider.getCollections(itemToSave.uid, needsAdminRights = false)
+                sharingDataProvider.getCollections(itemToSave.uid)
             val sharedCollectionToAdd = sharedCollectionsFromUi.filter {
                 it.id != null && sharedCollectionsForItem.none { c -> c.uuid == it.id }
             }
@@ -847,21 +776,6 @@ class ItemEditViewDataProvider @Inject constructor(
         }
     }
 
-    private suspend fun updateGeneratedPassword(savedItemId: String) {
-        val provider = state?.itemScreenConfigurationProvider
-        if (provider is ItemScreenConfigurationAuthentifiantProvider) {
-            provider.lastGeneratedPasswordId?.let { id ->
-                generatedPasswordQuery.queryAllNotRevoked()
-                    .firstOrNull { it.uid == id }
-                    ?.addAuthId(savedItemId)
-                    ?.copyWithAttrs { syncState = SyncState.MODIFIED }
-                    ?.let {
-                        dataSaver.save(it)
-                    }
-            }
-        }
-    }
-
     private fun logSavedItem(
         action: Action,
         itemToSave: VaultItem<*>,
@@ -977,11 +891,9 @@ class ItemEditViewDataProvider @Inject constructor(
         removedApps: List<String>?,
         collectionCount: Int?
     ) {
-        val fields = (state?.itemScreenConfigurationProvider as? ItemScreenConfigurationAuthentifiantProvider?)
-            ?.editedFields
         vaultItemLogger.logUpdate(
             action = action,
-            editedFields = fields?.takeIf { action == Action.EDIT }?.toList(),
+            editedFields = null,
             itemId = item.uid,
             itemType = item.syncObjectType.toItemType(),
             space = item.getTeamSpaceLog(),
@@ -991,7 +903,6 @@ class ItemEditViewDataProvider @Inject constructor(
             removedApps = removedApps,
             collectionCount = collectionCount
         )
-        fields?.clear()
         activityLogger.sendAuthentifiantActivityLog(vaultItem = item, action = action)
     }
 

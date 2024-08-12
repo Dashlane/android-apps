@@ -11,6 +11,8 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.util.isNotSemanticallyNull
+import com.dashlane.vault.model.urlDomain
+import com.dashlane.vault.summary.SummaryObject
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class SharingInvitationItem(
@@ -62,25 +64,21 @@ class SharingInvitationItem(
         override fun updateView(context: Context, item: SharingInvitationItem?) {
             item ?: return
             viewBinding.sharingPendingInviteTitle.text = item.displayTitle
-            updateViewItemGroup(context, item)
+            updateViewItemGroup(item)
         }
 
         private fun updateViewItemGroup(
-            context: Context,
             item: SharingInvitationItem
         ) {
             val accept = viewBinding.sharingPendingInviteBtnAccept
             val refuse = viewBinding.sharingPendingInviteBtnRefuse
             val pendingInvite = item.itemInvite
             val vaultItem = pendingInvite.item
-            val itemWrapper = item.itemWrapperProvider(
-                vaultItem,
-                ItemListContext.Container.NONE.asListContext(ItemListContext.Section.NONE),
-            )!!
-            val image = itemWrapper.getImageDrawable(context)
-            viewBinding.sharingPendingInviteIcon.apply {
-                setImageDrawable(image)
-                isVisible = true
+            if (vaultItem is SummaryObject.Authentifiant) {
+                viewBinding.sharingPendingInviteIcon.apply {
+                    domainUrl = vaultItem.urlDomain
+                    isVisible = true
+                }
             }
             viewBinding.sharingPendingInviteIconRound.isVisible = false
             viewBinding.sharingPendingInviteDescription.text = item.displaySubtitle

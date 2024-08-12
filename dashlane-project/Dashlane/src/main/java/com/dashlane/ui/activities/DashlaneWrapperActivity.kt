@@ -8,10 +8,16 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import com.dashlane.R
+import com.dashlane.navigation.Navigator
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DashlaneWrapperActivity : DashlaneActivity() {
+
+    @Inject
+    lateinit var navigator: Navigator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashlane_wrapper)

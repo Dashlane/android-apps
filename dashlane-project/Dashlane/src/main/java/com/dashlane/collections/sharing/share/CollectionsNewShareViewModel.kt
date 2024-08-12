@@ -19,7 +19,7 @@ import com.dashlane.core.sharing.handleCollectionSharingResult
 import com.dashlane.network.tools.authorization
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.server.api.Authorization
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.CreateCollectionService
 import com.dashlane.server.api.endpoints.sharinguserdevice.InviteCollectionMembersService
@@ -35,18 +35,17 @@ import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataUpdateProvider
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.model.SyncState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @Suppress("LargeClass")
 @HiltViewModel
@@ -85,21 +84,13 @@ class CollectionsNewShareViewModel @Inject constructor(
     private val selectedIndividuals = mutableListOf<String>()
     private val showSharingButton: Boolean
         get() = selectedGroups.isNotEmpty() || selectedIndividuals.isNotEmpty()
-    private val shareEnabled: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)
-    private val showRoles: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_ROLES)
 
     init {
-        loadGroupsAndIndividuals(collectionId, shareEnabled)
+        loadGroupsAndIndividuals(collectionId)
     }
 
-    private fun loadGroupsAndIndividuals(collectionId: String, shareEnabled: Boolean) {
+    private fun loadGroupsAndIndividuals(collectionId: String) {
         viewModelScope.launch(defaultDispatcher) {
-            if (!shareEnabled) {
-                _uiState.emit(SharingFailed())
-                return@launch
-            }
             val isSharingAllowedByTeam: Boolean =
                 teamSpaceAccessorProvider.get()?.isSharingDisabled == false &&
                     userFeaturesChecker.has(Capability.COLLECTIONSHARING)
@@ -128,7 +119,6 @@ class CollectionsNewShareViewModel @Inject constructor(
                 individuals,
                 collectionName = getCollectionName(collectionId),
                 showSharingButton = showSharingButton,
-                showRoles = showRoles,
                 showSharingLimit = getCollectionLimit()
             )
             _uiState.emit(ShowList(viewData))

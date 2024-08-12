@@ -9,10 +9,8 @@ import com.dashlane.login.lock.LockManager
 import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.pages.LoginLockBasePresenter
 import com.dashlane.login.root.LoginPresenter
-import com.dashlane.ui.screens.settings.WarningRememberMasterPasswordDialog
 import com.dashlane.ui.widgets.PinCodeKeyboardView
 import com.dashlane.util.Toaster
-import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -23,7 +21,6 @@ class PinLockPresenter(
     lockManager: LockManager,
     sso: Boolean,
     toaster: Toaster,
-    private val warningRememberMasterPasswordDialog: WarningRememberMasterPasswordDialog,
 ) : LoginLockBasePresenter<PinLockContract.DataProvider, PinLockContract.ViewProxy>(
     rootPresenter = rootPresenter,
     coroutineScope = coroutineScope,
@@ -34,18 +31,8 @@ class PinLockPresenter(
 
     override val lockTypeName: Int = LockTypeManager.LOCK_TYPE_PIN_CODE
 
-    private var endAnimationExpectedTimestamp: Long = 0
-
     private val logOutResId =
         if (sso) R.string.sso_lock_use_sso else R.string.fragment_lock_pin_button_use_master_password
-
-    override fun onStart() {
-        super.onStart()
-        
-        if (lockManager.isLocked && provider.lockSetting.isPinSetter) {
-            lockManager.showLockActivity(context!!)
-        }
-    }
 
     override fun onNextClicked() {
         
@@ -85,30 +72,6 @@ class PinLockPresenter(
             Toast.LENGTH_LONG,
             Toaster.Position.TOP
         )
-    }
-
-    override fun newPinConfirmed(disableAnimationEffect: Boolean) {
-        val animationDuration = view.animateSuccess(disableAnimationEffect)
-        endAnimationExpectedTimestamp = System.currentTimeMillis() + animationDuration
-        
-        warningRememberMasterPasswordDialog.showIfNecessary(
-            context = view.context,
-            onMasterPasswordRememberedIfPossible = ::onNewPinConfirmedAndMasterPasswordStored,
-            onRememberMasterPasswordDeclined = { activity?.finish() }
-        )
-    }
-
-    private fun onNewPinConfirmedAndMasterPasswordStored() {
-        provider.savePinValue()
-
-        val timeLeftBeforeEndAnimation = max(0, endAnimationExpectedTimestamp - System.currentTimeMillis())
-
-        launch {
-            if (timeLeftBeforeEndAnimation > 0) {
-                delay(timeLeftBeforeEndAnimation)
-            }
-            finishSuccessfully()
-        }
     }
 
     override fun onUnlockSuccess() {
@@ -192,20 +155,12 @@ class PinLockPresenter(
         provider.apply {
             currentStep = savedInstanceState?.getInt(SAVED_STATE_CURRENT_STEP, 0) ?: 0
             userPin.clear().append(savedInstanceState?.getString(SAVED_STATE_CURRENT_PIN) ?: "")
-            if (lockSetting.isPinSetter) {
-                firstStepPin = savedInstanceState?.getString(SAVED_STATE_EXPECTED_PIN)
-            }
         }
     }
 
     private fun initTopicAndQuestion() {
-        if (provider.lockSetting.isPinSetter) {
-            view.setTopic(view.context.getString(R.string.pin_dialog_set_topic))
-            view.setQuestion(view.context.getString(R.string.pin_dialog_set_question))
-        } else {
-            view.setTopic(view.context.getString(R.string.enter_pin))
-            view.setQuestion(provider.username)
-        }
+        view.setTopic(view.context.getString(R.string.enter_pin))
+        view.setQuestion(provider.username)
     }
 
     private fun setFailedAttempts() {

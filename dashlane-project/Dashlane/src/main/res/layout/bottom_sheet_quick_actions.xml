@@ -12,10 +12,12 @@
         android:layout_height="wrap_content"
         >
 
-        <ImageView
+        <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
             android:id="@+id/quick_actions_icon"
-            android:layout_width="56dp"
-            android:layout_height="36dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:thumbnailType="vaultItemDomainIcon"
+            app:thumbnailSize="medium"
             android:layout_marginStart="@dimen/spacing_normal"
             android:layout_marginTop="@dimen/spacing_normal"
             app:layout_constraintStart_toStartOf="parent"

@@ -9,7 +9,7 @@ import com.dashlane.server.api.endpoints.darkwebmonitoring.DarkWebMonitoringList
 import com.dashlane.server.api.endpoints.darkwebmonitoring.DarkWebMonitoringRegisterEmailService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

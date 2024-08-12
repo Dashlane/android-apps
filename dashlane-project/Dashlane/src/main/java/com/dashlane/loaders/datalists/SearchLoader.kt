@@ -7,36 +7,26 @@ import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
-import com.dashlane.ui.screens.fragments.search.util.SearchSorterProvider
 import com.dashlane.ui.screens.settings.list.RootSettingsList
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class SearchLoader @Inject constructor(
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
     private val genericDataQuery: GenericDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private var settingsList: RootSettingsList,
-    searchSorterProvider: SearchSorterProvider,
-    identityNameHolderService: IdentityNameHolderService
+    private val searchSorter: SearchSorter,
 ) {
 
     private var lastResult: CacheResult? = null
-    private val searchSorter: SearchSorter
-
-    init {
-        val textResolver = DataIdentifierListTextResolver(identityNameHolderService)
-        searchSorter = searchSorterProvider.getSearchSorter(textResolver, identityNameHolderService)
-    }
 
     suspend fun filterByQuery(query: String): List<MatchedSearchResult> {
         val allItems = prepareItemsForQuery(query)
@@ -70,7 +60,7 @@ class SearchLoader @Inject constructor(
             specificDataType(SyncObjectType.AUTHENTIFIANT)
             specificUid(authentifiantId)
         }
-        return vaultDataQuery.query(loadFilter)?.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
+        return vaultDataQuery.queryLegacy(loadFilter)?.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
     }
 
     private class CacheResult(private val queryString: String, val result: List<MatchedSearchResult>) {

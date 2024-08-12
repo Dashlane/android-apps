@@ -77,14 +77,10 @@
     <string name="none">None</string>
     <string name="login_alt">Open</string>
     <string name="incomplete">Incomplete</string>
-    <string name="building">Building</string>
-    <string name="floor">Floor</string>
-    <string name="appartment">Apartment</string>
     <string name="issue_place">Place of issue</string>
     <string name="rate_no_thx">No, thanks</string>
     <string name="go_button">GO</string>
     <string name="secure_note_is_locked">Note is locked!</string>
-    <string name="item_expired">Expired</string>
     <string name="action_bar_password_generator">Generator</string>
     <string name="action_bar_password_generated">Generated passwords</string>
     <string name="action_bar_settings">Settings</string>
@@ -146,30 +142,7 @@
     <string name="paypal_hint_name">Item name</string>
     <string name="paypal_hint_login">Username</string>
     <string name="paypal_hint_password">Password</string>
-    <string name="datatype_address">Addresses</string>
-    <string name="datatype_auth_category">Login category</string>
-    <string name="datatype_authentifiant">Login</string>
-    <string name="datatype_company">Company</string>
-    <string name="datatype_driver_licence">Driver\'s licenses</string>
-    <string name="datatype_email">Emails</string>
-    <string name="datatype_fiscal_statement">Tax numbers</string>
-    <string name="datatype_id_card">ID cards</string>
-    <string name="datatype_identity">Names</string>
-    <string name="datatype_passport">Passports</string>
-    <string name="datatype_paymentpaypal">Paypal</string>
-    <string name="datatype_paymentcreditcard">Credit/debit cards</string>
-    <string name="datatype_personal_website">Personal websites</string>
-    <string name="datatype_phone">Phones</string>
-    <string name="datatype_social_security_statement">Social security numbers</string>
-    <string name="datatype_secure_note">Secure Note</string>
-    <string name="datatype_secure_note_category">Secure Note category</string>
-    <string name="datatype_bank_statement">Bank accounts</string>
-    
-    <string name="datatype_passkey">Passkey</string>
     <string name="gcmtint_token_is">Your verification code is %1$s</string>
-    <string name="gcmtint_token_for_user">You received a verification code (%1$s)</string>
-    <string name="gcmtint_token_for_unique_user">You received a verification code</string>
-    <string name="gcmtint">Verification code</string>
     <string name="gcmmessage">Verification code</string>
     <string name="menu_v2_password_button">Logins</string>
     <string name="menu_v2_secure_notes_button">Secure Notes</string>
@@ -226,6 +199,10 @@
     <string name="settings_use_2fa_auth_app_installed">2FA with Dashlane Authenticator</string>
     <string name="settings_use_2fa_description">2FA is an extra layer of security for your account. When logging in or adding a new device, we’ll ask you to enter a 6-digit token from your authenticator app.</string>
     <string name="settings_use_2fa_description_auth_app_installed">2-factor authentication (2FA) is an extra layer of security for your account. When logging in or adding a new device, we’ll verify your identity using the Authenticator app.</string>
+
+    
+    <string name="settings_social_media_header">Find us on social media</string>
+
     <string name="push_token_toast_unlock_to_get_token">Please unlock to view your verification code.</string>
     <string name="menu_help_center">Help</string>
     <string name="activity_title_licenses">Licenses</string>
@@ -321,12 +298,10 @@
     <string name="fragment_credential_create_step1_popular_websites">Popular websites</string>
     <string name="fragment_credential_create_step1_suggestions">Suggestions</string>
     <string name="action_bar_title_credential_create_step1">Add a login</string>
-    <string name="delete_password">DELETE LOGIN</string>
     <string name="toolbar_menu_title_secure_note_color">Color</string>
     <string name="toolbar_menu_title_secure_note_lock">Lock/unlock</string>
     <string name="toolbar_menu_title_secure_note_category">Category</string>
     <string name="alphabet_indexer_grouping_numbers_0_9">0-9</string>
-    <string name="item_expiring_soon">Expiring soon</string>
     <string name="creditcard_new_label">Credit Card</string>
     <string name="dropdown_select_incentive">Select</string>
     <string name="settings_use_lock_timeout_description">Lock the app after %1$s of inactivity</string>
@@ -362,7 +337,6 @@
     <string name="menu_user_profile_status_free">Free plan</string>
     <string name="menu_user_profile_status_legacy">Free (pre-2.0) plan</string>
     <string name="menu_user_profile_status_trial">Premium trial</string>
-    <string name="menu_user_profile_status_essentials">Essentials plan</string>
     <string name="menu_user_profile_status_premium">Premium plan</string>
     <string name="menu_user_profile_status_premium_family">Family plan</string>
     <string name="menu_user_profile_status_premium_plus">Premium Plus plan</string>
@@ -445,9 +419,6 @@
     <string name="sharing_shared_group_items_other">%1$d items</string>
     <string name="sharing_shared_group_members_one">%1$d member</string>
     <string name="sharing_shared_group_members_other">%1$d members</string>
-    <string name="dialog_allow_remember_mp_description">Use biometrics or a PIN to unlock your Dashlane app quickly and securely.</string>
-    <string name="dialog_allow_remember_mp_accept">OK</string>
-    <string name="dialog_allow_remember_mp_deny">Cancel</string>
     <string name="breach_alert_popup_multiple_title">New security alerts</string>
     <string name="breach_alert_popup_multiple_description">You have %1$d new security alerts. View them now to see the details for each alert and take action.</string>
     <string name="breach_alert_popup_regular_title">Security alert for %1$s</string>
@@ -471,7 +442,7 @@
     <string name="totp_failed">Incorrect or expired 2FA token Please check your token and try again.</string>
     <string name="totp_failed_locked_out">2FA token verification failed. Please check your token or try again later.</string>
     <string name="password_empty">Password Error. Please provide your Master Password.</string>
-    <string name="login_sync_error">Sync failed, please try again or contact user support if the issue persists</string>
+    <string name="login_sync_error">Sync failed. Please try again or visit our help center.</string>
     <string name="cannot_connect_to_server">Cannot connect to server.</string>
     <string name="offline">You are offline.</string>
     <string name="request_duo_challenge_timed_out">The Duo notification has timed out. Please try again.</string>
@@ -485,7 +456,6 @@
     <string name="setting_privacy_title">Privacy and data settings</string>
     <string name="setting_privacy_message">View and edit your privacy and data settings</string>
     <string name="activity_title_disclaimer">Disclaimer</string>
-    <string name="incomplete_reason_missing_password_list_line_2">Add password</string>
     <string name="change_master_password_create_title">Create a strong and memorable Master Password</string>
     <string name="change_master_password_confirm_title">Re-enter your new Master Password to be sure you remember it</string>
     <string name="change_master_password_activity_label">New Master Password</string>
@@ -528,23 +498,10 @@
     <string name="unlock_message_item_biometrics">Unlock this item with your biometrics</string>
     <string name="unlock_message_secure_note_master_password">Unlock this Secure Note with your Master Password</string>
     <string name="unlock_message_secure_note_biometrics">Unlock this Secure Note with your biometrics</string>
-    <string name="infobox_change_password_title">Change your password and avoid reusing it for other accounts.</string>
-    <string name="infobox_change_password_button">Change password</string>
-    
-    <string name="infobox_restore_password_title_v2">Your password has been updated %1$s.</string>
-    
-    <string name="infobox_restore_password_description">Having trouble logging in? You can restore your previous password.</string>
-    <string name="infobox_restore_password_button">Restore</string>
-    
-    <string name="infobox_restore_password_button_worked">It works</string>
-    <string name="infobox_restore_dialog_title">Restore your previous password?</string>
-    <string name="infobox_restore_dialog_message">Your new password won’t be available anymore</string>
-    <string name="infobox_restore_dialog_positive_button">Restore</string>
-    <string name="infobox_restore_dialog_negative_button">Cancel</string>
     
     <string name="infobox_passkey_not_usable">Using Dashlane to save and sign in with passkeys is only supported on Android 14 and higher.</string>
     
-    <string name="infobox_password_limit_reached_title">You\'ve reached your Free plan password limit</string>
+    <string name="infobox_password_limit_reached_title">You’ve reached your Free plan password limit</string>
     <plurals name="failed_attempt">
         <item quantity="one">%1$d failed attempt</item>
         <item quantity="other">%1$d failed attempts</item>

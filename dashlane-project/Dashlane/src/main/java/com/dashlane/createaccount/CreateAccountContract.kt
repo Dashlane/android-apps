@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordContract
 import com.dashlane.createaccount.pages.confirmpassword.CreateAccountConfirmPasswordContract

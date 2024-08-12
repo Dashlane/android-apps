@@ -10,6 +10,7 @@ interface EmptyWebsiteWarningIntentProvider {
         context: Context,
         itemId: String,
         summary: AutoFillHintSummary,
-        matchType: MatchType
+        matchType: MatchType,
+        isAccountFrozen: Boolean
     ): IntentSender
 }

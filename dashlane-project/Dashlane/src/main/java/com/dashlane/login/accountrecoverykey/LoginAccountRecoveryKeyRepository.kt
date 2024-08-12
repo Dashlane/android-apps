@@ -1,6 +1,6 @@
 package com.dashlane.login.accountrecoverykey
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryState
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.cryptography.Cryptography
@@ -9,6 +9,7 @@ import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.decryptBase64ToByteArray
 import com.dashlane.cryptography.toObfuscated
+import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.accountrecovery.AccountRecoveryDeactivateService
 import com.dashlane.server.api.endpoints.accountrecovery.AccountRecoveryGetEncryptedVaultKeyService
@@ -36,7 +37,8 @@ class LoginAccountRecoveryKeyRepository @Inject constructor(
     private val accountRecoveryGetEncryptedVaultKeyService: AccountRecoveryGetEncryptedVaultKeyService,
     private val accountRecoveryDeactivateService: AccountRecoveryDeactivateService,
     private val auth2faUnauthenticatedSettingsService: Auth2faUnauthenticatedSettingsService,
-    private val cryptography: Cryptography
+    private val cryptography: Cryptography,
+    private val userPreferencesManager: UserPreferencesManager
 ) {
 
     private val stateFlow = MutableStateFlow(LoginAccountRecoveryKeyData())
@@ -108,10 +110,12 @@ class LoginAccountRecoveryKeyRepository @Inject constructor(
             }
     }
 
-    suspend fun disableRecoveryKeyAfterUse(authorization: Authorization.User) {
+    suspend fun disableRecoveryKeyAfterUse(accountType: UserAccountInfo.AccountType, authorization: Authorization.User) {
         runCatching {
             val request = AccountRecoveryDeactivateService.Request(AccountRecoveryDeactivateService.Request.Reason.KEY_USED)
             accountRecoveryDeactivateService.execute(authorization, request)
+
+            if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) userPreferencesManager.mplessARKEnabled = false
         }.onFailure {
         }
     }

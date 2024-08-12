@@ -13,7 +13,7 @@ import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

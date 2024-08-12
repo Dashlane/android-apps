@@ -10,8 +10,8 @@ import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.skocken.presentation.definition.Base
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher

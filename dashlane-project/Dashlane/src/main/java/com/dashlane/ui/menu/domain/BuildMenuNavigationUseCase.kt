@@ -152,11 +152,6 @@ class BuildMenuNavigationUseCase(
         get() = MenuItemModel.NavigationItem(
             iconToken = IconTokens.folderOutlined,
             iconTokenSelected = IconTokens.folderFilled,
-            endIcon = if (menuConfiguration.isCollectionSharingVisible) {
-                MenuItemModel.NavigationItem.EndIcon.NewLabel
-            } else {
-                null
-            },
             titleResId = R.string.menu_collections,
             isSelected = isSelected(arrayOf(R.id.nav_collections_list))
         ) {
@@ -235,7 +230,6 @@ class BuildMenuNavigationUseCase(
         UserBenefitStatus.Type.Legacy -> R.string.menu_user_profile_status_legacy
         UserBenefitStatus.Type.Trial -> R.string.menu_user_profile_status_trial
         UserBenefitStatus.Type.AdvancedIndividual -> R.string.plans_advanced_title
-        UserBenefitStatus.Type.EssentialsIndividual -> R.string.menu_user_profile_status_essentials
         UserBenefitStatus.Type.PremiumIndividual -> R.string.menu_user_profile_status_premium
         UserBenefitStatus.Type.PremiumPlusIndividual -> R.string.menu_user_profile_status_premium_plus
         is UserBenefitStatus.Type.Family -> R.string.menu_user_profile_status_premium_family

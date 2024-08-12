@@ -5,9 +5,9 @@ import com.dashlane.navigation.Navigator
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
 import javax.inject.Inject
 
 class ItemWrapperProvider @Inject constructor(

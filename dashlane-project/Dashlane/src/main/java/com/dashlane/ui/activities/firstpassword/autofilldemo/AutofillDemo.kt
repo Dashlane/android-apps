@@ -1,6 +1,5 @@
 package com.dashlane.ui.activities.firstpassword.autofilldemo
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.annotation.IdRes
 import com.skocken.presentation.definition.Base
@@ -15,7 +14,7 @@ interface AutofillDemo {
     }
 
     interface ViewProxy : Base.IView {
-        fun setWebsiteIcon(drawable: Drawable)
+        fun setWebsiteIcon(domain: String?)
         fun showAutofillSuggestion(login: String?, url: String, editTextId: Int)
         fun setCredential(login: String?, password: String?)
         fun hideAutofillSuggestion()

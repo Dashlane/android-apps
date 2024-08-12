@@ -31,6 +31,7 @@ import com.dashlane.design.component.TextField
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
+import com.dashlane.util.SnackbarUtils
 import com.dashlane.vault.model.toSanitizedCollectionName
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -67,7 +68,8 @@ class CollectionEditFragment : AbstractContentFragment() {
 
         when (uiState) {
             is ViewState.Form,
-            is ViewState.Error -> {
+            is ViewState.Error,
+            is ViewState.Saving -> {
                 CollectionEditForm(uiState, viewModel)
             }
 
@@ -82,6 +84,7 @@ class CollectionEditFragment : AbstractContentFragment() {
     }
 
     @Composable
+    @Suppress("LongMethod")
     private fun CollectionEditForm(
         uiState: ViewState,
         viewModel: CollectionsEditViewModel
@@ -111,6 +114,19 @@ class CollectionEditFragment : AbstractContentFragment() {
                 }
             }
         }
+        LaunchedEffect(key1 = uiState) {
+            val snackError = (uiState as? ViewState.Error)?.snackError ?: return@LaunchedEffect
+            when (snackError) {
+                SnackError.SHARED_COLLECTION_RENAME_GENERIC_ERROR -> {
+                    activity?.let { activity ->
+                        SnackbarUtils.showSnackbar(
+                            activity,
+                            activity.getString(R.string.collection_edit_shared_error_generic)
+                        )
+                    }
+                }
+            }
+        }
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -126,8 +142,8 @@ class CollectionEditFragment : AbstractContentFragment() {
                 value = uiState.viewData.collectionName,
                 onValueChange = viewModel::onNameChanged,
                 label = stringResource(id = R.string.collection_add_collection_name_field_label),
-                isError = uiState is ViewState.Error,
-                feedbackText = getErrorMessageResId((uiState as? ViewState.Error)?.errorType)?.let {
+                isError = uiState is ViewState.Error && uiState.fieldError != null,
+                feedbackText = getErrorMessageResId((uiState as? ViewState.Error)?.fieldError)?.let {
                     stringResource(id = it)
                 }
             )
@@ -147,9 +163,9 @@ class CollectionEditFragment : AbstractContentFragment() {
     }
 
     @StringRes
-    private fun getErrorMessageResId(errorType: ErrorType?): Int? = when (errorType) {
-        ErrorType.COLLECTION_ALREADY_EXISTS -> R.string.collection_add_error_collection_already_exist
-        ErrorType.EMPTY_NAME -> null
+    private fun getErrorMessageResId(errorType: FieldError?): Int? = when (errorType) {
+        FieldError.COLLECTION_ALREADY_EXISTS -> R.string.collection_add_error_collection_already_exist
+        FieldError.EMPTY_NAME -> null
         else -> null
     }
 }

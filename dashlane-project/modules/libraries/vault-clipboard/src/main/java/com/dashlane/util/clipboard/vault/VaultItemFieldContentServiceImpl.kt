@@ -69,7 +69,7 @@ class VaultItemFieldContentServiceImpl @Inject constructor(
     }
 
     private fun getVaultItem(itemId: String, syncObjectType: SyncObjectType): VaultItem<*>? {
-        return vaultDataQuery.query(
+        return vaultDataQuery.queryLegacy(
             vaultFilter {
                 specificUid(itemId)
                 specificDataType(syncObjectType)
@@ -81,7 +81,7 @@ class VaultItemFieldContentServiceImpl @Inject constructor(
         return when (this) {
             is CopyContent.Ready.StringValue -> content
             is CopyContent.Ready.ObfuscatedValue -> content?.toString()
-            is CopyContent.Ready.Date -> content?.toIdentityFormat(context)
+            is CopyContent.Ready.Date -> content?.toIdentityFormat(context.resources)
             is CopyContent.Ready.YearMonth -> content?.toExpirationDateFormat()
         }
     }

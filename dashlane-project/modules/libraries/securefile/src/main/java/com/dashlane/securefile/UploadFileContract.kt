@@ -16,8 +16,6 @@ interface UploadFileContract {
         ): SecureFile
 
         suspend fun uploadSecureFile(
-            username: String,
-            uki: String,
             secureFile: SecureFile,
             secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
         )
@@ -27,8 +25,6 @@ interface UploadFileContract {
         fun notifyMaxStorageSpaceReached(
             secureFile: SecureFile,
             secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
-            code: Int,
-            message: String
         )
 
         fun notifyFileUploadFailed(

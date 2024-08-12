@@ -8,6 +8,7 @@ interface ChangePasswordActionIntentProvider {
     fun getChangePasswordIntentSender(
         context: Context,
         summary: AutoFillHintSummary,
-        forKeyboard: Boolean
+        forKeyboard: Boolean,
+        isAccountFrozen: Boolean
     ): IntentSender
 }

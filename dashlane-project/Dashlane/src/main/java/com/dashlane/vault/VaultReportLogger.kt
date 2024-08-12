@@ -20,15 +20,11 @@ import com.dashlane.storage.userdata.accessor.filter.counterFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_ID
-import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_PASSWORD
-import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_PAYMENT
-import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_PERSONAL_INFO
-import com.dashlane.ui.activities.fragments.vault.Filter.FILTER_SECURE_NOTE
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.obfuscated.isNullOrEmpty
+import com.dashlane.home.vaultlist.Filter
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -97,35 +93,35 @@ class VaultReportLogger @Inject constructor(
             val credentials = vaultDataQuery.queryAll(
                 vaultFilter {
                     ignoreUserLock()
-                    specificDataType(FILTER_PASSWORD.syncObjectTypes)
+                    specificDataType(Filter.FILTER_PASSWORD.syncObjectTypes)
                     specificSpace(teamspace)
                 }
             )
             val totalSecureNotes = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
-                    specificDataType(FILTER_SECURE_NOTE.syncObjectTypes)
+                    specificDataType(Filter.FILTER_SECURE_NOTE.syncObjectTypes)
                     specificSpace(teamspace)
                 }
             )
             val totalPayments = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
-                    specificDataType(FILTER_PAYMENT.syncObjectTypes)
+                    specificDataType(Filter.FILTER_PAYMENT.syncObjectTypes)
                     specificSpace(teamspace)
                 }
             )
             val totalPersonalInfo = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
-                    specificDataType(FILTER_PERSONAL_INFO.syncObjectTypes)
+                    specificDataType(Filter.FILTER_PERSONAL_INFO.syncObjectTypes)
                     specificSpace(teamspace)
                 }
             )
             val totalIds = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
-                    specificDataType(FILTER_ID.syncObjectTypes)
+                    specificDataType(Filter.FILTER_ID.syncObjectTypes)
                     specificSpace(teamspace)
                 }
             )
@@ -181,7 +177,7 @@ class VaultReportLogger @Inject constructor(
                 ),
                 collectionsPerItemAverageCount = collectionsReportProvider.computeCollectionPerItemAverageCount(
                     teamspace
-                )
+                ),
             )
         }
 

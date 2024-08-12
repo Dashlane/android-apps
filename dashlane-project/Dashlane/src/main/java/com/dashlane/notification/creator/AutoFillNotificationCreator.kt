@@ -19,7 +19,7 @@ import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.SplashScreenActivity
 import com.dashlane.autofill.onboarding.OnboardingInAppLoginActivity
 import com.dashlane.util.clearTask
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.notification.buildNotification
 import dagger.assisted.Assisted

@@ -32,6 +32,8 @@ class ConstantsPrefs {
         internal const val USER_ACTIVITY_UPDATE_DATE = "userActivityUpdateDate"
         internal const val USER_SUBSCRIPTION_CODE = "userSubscriptionCode"
         internal const val MPLESS_ARK_ENABLED = "mplessARKEnabled"
+        internal const val AUTHENTICATOR_INVALIDATED_BIOMETRIC = "authenticatorInvalidatedBiometric"
+        internal const val AUTHENTICATOR_ENROLLED_BIOMETRIC = "authenticatorEnrolledBiometric"
 
         internal const val CREDENTIALS_TIMESTAMP = "credentials_timestamp"
 
@@ -57,7 +59,6 @@ class ConstantsPrefs {
         const val ACCOUNT_TYPE = "pref_account_type"
         const val SECURITY_SETTINGS = "loginSecuritySettings"
         const val CLEAR_CLIPBOARD_ON_TIMEOUT = "clearclipboard"
-        const val TOKEN_RETRIEVED_ON_PUSH = "tokenRetrievedOnPush"
         const val PASSWORD_GENERATOR_LENGTH = "pwdGeneratorLength"
         const val PASSWORD_GENERATOR_DIGITS = "pwdGeneratorDigits"
         const val PASSWORD_GENERATOR_LETTERS = "pwdGeneratorLetters"
@@ -67,10 +68,7 @@ class ConstantsPrefs {
         const val PREMIUM_RENEWAL_FIRST_NOTIFICATION_DONE = "premium_renewal_first_notification_done"
         const val PREMIUM_RENEWAL_SECOND_NOTIFICATION_DONE = "premium_renewal_second_notification_done"
         const val PREMIUM_RENEWAL_THIRD_NOTIFICATION_DONE = "premium_renewal_third_notification_done"
-        const val FULL_REFERRER = "full_referrer"
         const val REFERRED_BY = "referred_by"
-        const val REFERRER_ORIGIN_PACKAGE = "referrer_origin_package"
-        const val INSTALLATION_TIMESTAMP = "installation_timestamp"
         const val IN_APP_REVIEW_NEXT_SCHEDULE_TIMESTAMP = "nextRateTime"
         const val IN_APP_REVIEW_PREVIOUS_VERSION_CODE = "inAppReviewPreviousVersion"
         const val CALL_PERMISSION = "call_permission"
@@ -139,14 +137,25 @@ class ConstantsPrefs {
 
         const val VAULT_REPORT_LATEST_TRIGGER_TIMESTAMP = "vault_report_latest_trigger_timestamp"
 
-        const val AUTHENTICATOR_GET_STARTED_DISPLAYED = "authenticator_get_started_displayed"
-
         const val BIOMETRIC_SEAL_PADDING_MIGRATION_ATTEMPT = "biometric_seal_padding_migration"
 
         const val IS_FIRST_PASSWORD_MANAGER_LAUNCH_LOG_SENT = "is_first_password_manager_launch_log_sent"
 
         const val HAS_AUTOMATIC_2FA_TOKEN_COPY = "has_automatic_2fa_token_copy"
 
+        @Deprecated("Preference to be cleared on June 2024")
         const val PASSWORD_RESTORE_INFO_BOX_CLOSED = "password_restore_info_box_closed"
+
+        const val IS_ANTI_PHISHING_ENABLED = "is_anti_phishing_enabled"
+
+        const val PHISHING_MODEL_LAST_CHECK_TIMESTAMP = "phishing_model_last_check_timestamp"
+
+        const val PHISHING_WARNING_IGNORED_WEBSITES = "phishing_warning_ignored_websites"
+
+        const val LABS_ACTIVATED = "labs_activated"
+
+        const val TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP = "trial_ended_announcement_display_timestamp"
+
+        const val SUNSET_BANNER_DISPLAYED = "sunset_banner_displayed"
     }
 }

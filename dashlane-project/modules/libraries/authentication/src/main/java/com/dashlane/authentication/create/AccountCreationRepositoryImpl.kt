@@ -37,8 +37,8 @@ import com.dashlane.server.api.endpoints.account.CreateAccountSsoService
 import com.dashlane.server.api.endpoints.country.GetIpCountryService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.time.toInstantEpochSecond
-import com.dashlane.session.AppKey
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

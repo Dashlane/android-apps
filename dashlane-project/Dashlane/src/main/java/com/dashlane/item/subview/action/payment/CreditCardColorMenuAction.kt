@@ -9,10 +9,11 @@ import com.dashlane.item.subview.action.ItemEditMenuAction
 import com.dashlane.ui.adapters.viewedit.CreditCardColorArrayAdapter
 import com.dashlane.ui.fragments.BottomSheetListDialogFragment
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 
 class CreditCardColorMenuAction(
-    item: VaultItem<SyncObject.PaymentCreditCard>,
+    item: SummaryObject.PaymentCreditCard,
     private val colorSelectAction: (SyncObject.PaymentCreditCard.Color) -> Unit = {},
     updateAction: (VaultItem<*>) -> VaultItem<*>?
 ) : ItemEditMenuAction(
@@ -21,7 +22,7 @@ class CreditCardColorMenuAction(
     MenuItem.SHOW_AS_ACTION_ALWAYS,
     valueUpdate = updateAction
 ) {
-    var selectedColor = item.syncObject.color ?: SyncObject.PaymentCreditCard.Color.NO_TYPE
+    var selectedColor = item.color ?: SyncObject.PaymentCreditCard.Color.NO_TYPE
         set(value) {
             field = value
             colorSelectAction.invoke(value)

@@ -8,5 +8,4 @@ import javax.inject.Singleton
 @Singleton
 class LoginTokensModule @Inject constructor() {
     val tokenHashmap = HashMap<String, TokenNotificationHandler>()
-    val tokenShouldNotifyHashmap = HashMap<String, Boolean>()
 }

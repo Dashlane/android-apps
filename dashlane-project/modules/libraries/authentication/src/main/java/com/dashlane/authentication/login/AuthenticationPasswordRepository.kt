@@ -8,9 +8,9 @@ import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.SharingKeys
-import com.dashlane.session.AppKey
-import com.dashlane.session.LocalKey
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import java.time.Instant
 

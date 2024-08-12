@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 
 @Keep
 enum class OfferType {
+    FREE,
     ADVANCED,
     PREMIUM,
     FAMILY

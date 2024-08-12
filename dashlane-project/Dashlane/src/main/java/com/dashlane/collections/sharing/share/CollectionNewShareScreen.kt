@@ -3,12 +3,8 @@ package com.dashlane.collections.sharing.share
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
@@ -22,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,7 +27,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dashlane.R
 import com.dashlane.collections.CollectionLoading
 import com.dashlane.collections.sharing.CollectionSharingAppBarListener
-import com.dashlane.collections.sharing.CollectionSharingGroupIcon
 import com.dashlane.collections.sharing.CollectionSharingListTitle
 import com.dashlane.collections.sharing.CollectionSharingTopAppBar
 import com.dashlane.collections.sharing.CollectionSharingViewState
@@ -44,15 +40,17 @@ import com.dashlane.collections.sharing.CollectionSharingViewState.UserGroup
 import com.dashlane.collections.sharing.CollectionSharingViewState.ViewData
 import com.dashlane.design.component.ButtonLarge
 import com.dashlane.design.component.ButtonLayout
-import com.dashlane.design.component.Checkbox
 import com.dashlane.design.component.InfoboxMedium
+import com.dashlane.design.component.ListItem
 import com.dashlane.design.component.Text
-import com.dashlane.design.component.tooling.setCheckboxSemantic
+import com.dashlane.design.component.ThumbnailType
+import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood.Brand
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.contact.ContactIcon
+import com.dashlane.design.theme.typography.withSearchHighlight
+import com.dashlane.util.MD5Hash
 
 const val COLLECTION_ROLE_SEPARATOR = " • "
 
@@ -84,7 +82,6 @@ internal fun CollectionNewShareScreen(
                     AvailableRecipientsList(
                         viewData,
                         viewData.showSharingButton,
-                        viewData.showRoles,
                         searchQuery.value,
                         viewModel
                     )
@@ -139,7 +136,6 @@ private fun CollectionNewShareTopBar(
 private fun AvailableRecipientsList(
     viewData: ViewData,
     showSharingButton: Boolean,
-    showRoles: Boolean,
     searchQuery: String,
     userInteractionListener: UserInteractionListener
 ) {
@@ -148,7 +144,7 @@ private fun AvailableRecipientsList(
             if (viewData.showSharingLimit) {
                 InfoboxSharingLimit()
             } else {
-                InfoboxPermission(showRoles)
+                InfoboxPermission()
             }
         }
         LazyColumn(
@@ -166,7 +162,11 @@ private fun AvailableRecipientsList(
                     CollectionSharingListTitle(stringResource(R.string.collection_new_share_groups_section_title))
                 }
                 items(filteredUserGroups) { group ->
-                    UserGroupItem(group, showRoles, userInteractionListener::onGroupSelectionChange)
+                    UserGroupItem(
+                        group = group,
+                        searchQuery = searchQuery,
+                        onSelectionChange = userInteractionListener::onGroupSelectionChange
+                    )
                 }
             }
             val filteredIndividuals = if (searchQuery.isNotEmpty()) {
@@ -180,9 +180,9 @@ private fun AvailableRecipientsList(
                 item { CollectionSharingListTitle(stringResource(R.string.collection_new_share_individuals_section_title)) }
                 items(filteredIndividuals) { individual ->
                     IndividualItem(
-                        individual,
-                        showRoles,
-                        userInteractionListener::onIndividualSelectionChange
+                        individual = individual,
+                        searchQuery = searchQuery,
+                        onSelectionChange = userInteractionListener::onIndividualSelectionChange
                     )
                 }
             }
@@ -206,20 +206,12 @@ private fun InfoboxSharingLimit() {
 }
 
 @Composable
-private fun InfoboxPermission(showRoles: Boolean) {
+private fun InfoboxPermission() {
     InfoboxMedium(
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
         mood = Brand,
-        title = if (showRoles) {
-            stringResource(id = R.string.collection_new_share_infobox_title_roles)
-        } else {
-            stringResource(id = R.string.collection_new_share_infobox_title)
-        },
-        description = if (showRoles) {
-            stringResource(id = R.string.collection_new_share_infobox_description_roles)
-        } else {
-            stringResource(id = R.string.collection_new_share_infobox_description)
-        }
+        title = stringResource(id = R.string.collection_new_share_infobox_title_roles),
+        description = stringResource(id = R.string.collection_new_share_infobox_description_roles)
     )
 }
 
@@ -251,98 +243,41 @@ private fun NoResultsItem() {
 @Composable
 private fun UserGroupItem(
     group: UserGroup,
-    showRoles: Boolean,
+    searchQuery: String,
     onSelectionChange: (UserGroup) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .setCheckboxSemantic(
-                value = group.selected,
-                enabled = true,
-            ) { onSelectionChange.invoke(group) }
-            .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-
-    ) {
-        Checkbox(checked = group.selected)
-        Spacer(modifier = Modifier.width(8.dp))
-        CollectionSharingGroupIcon()
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = group.name,
-                style = DashlaneTheme.typography.bodyStandardRegular,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            val statusText = if (showRoles) {
-                pluralStringResource(
-                    id = R.plurals.collections_new_share_group_members,
-                    count = group.membersCount,
-                    formatArgs = arrayOf(group.membersCount)
-                ) + COLLECTION_ROLE_SEPARATOR + stringResource(id = R.string.collection_role_manager)
-            } else {
-                pluralStringResource(
-                    id = R.plurals.collections_new_share_group_members,
-                    count = group.membersCount,
-                    formatArgs = arrayOf(group.membersCount)
-                )
-            }
-            Text(
-                text = statusText,
-                style = DashlaneTheme.typography.bodyReducedRegular,
-                color = DashlaneTheme.colors.textNeutralQuiet,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
+    val statusText = pluralStringResource(
+        id = R.plurals.collections_new_share_group_members,
+        count = group.membersCount,
+        formatArgs = arrayOf(group.membersCount)
+    ) + COLLECTION_ROLE_SEPARATOR + stringResource(id = R.string.collection_role_manager)
+    ListItem(
+        modifier = Modifier.padding(horizontal = 8.dp),
+        checked = group.selected,
+        thumbnailType = ThumbnailType.Icon(token = IconTokens.groupOutlined),
+        title = group.name.withSearchHighlight(match = searchQuery, ignoreCase = true),
+        description = AnnotatedString(statusText),
+        onClick = { onSelectionChange(group) },
+    )
 }
 
 @Composable
 private fun IndividualItem(
     individual: Individual,
-    showRoles: Boolean,
+    searchQuery: String,
     onSelectionChange: (Individual) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .setCheckboxSemantic(
-                value = individual.selected,
-                enabled = true,
-            ) { onSelectionChange.invoke(individual) }
-            .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(checked = individual.selected)
-        Spacer(modifier = Modifier.width(8.dp))
-        ContactIcon(
-            email = individual.username,
-            modifier = Modifier.size(36.dp)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = individual.username,
-                style = DashlaneTheme.typography.bodyStandardRegular,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            if (showRoles) {
-                Text(
-                    text = stringResource(id = R.string.collection_role_manager),
-                    style = DashlaneTheme.typography.bodyReducedRegular,
-                    color = DashlaneTheme.colors.textNeutralQuiet,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
+    val url = remember(individual.username) {
+        "https://www.gravatar.com/avatar/${MD5Hash.hash(individual.username)}?s=200&r=pg&d=404"
     }
+    ListItem(
+        modifier = Modifier.padding(horizontal = 8.dp),
+        checked = individual.selected,
+        thumbnailType = ThumbnailType.User.Single(url = url),
+        title = individual.username.withSearchHighlight(match = searchQuery, ignoreCase = true),
+        description = AnnotatedString(stringResource(id = R.string.collection_role_manager)),
+        onClick = { onSelectionChange(individual) }
+    )
 }
 
 @Preview
@@ -367,7 +302,6 @@ fun PreviewShareBusinessCollection() {
                 )
             ),
             showSharingButton = true,
-            showRoles = true,
             searchQuery = "",
             userInteractionListener = object : UserInteractionListener {
                 override fun onGroupSelectionChange(group: UserGroup) {

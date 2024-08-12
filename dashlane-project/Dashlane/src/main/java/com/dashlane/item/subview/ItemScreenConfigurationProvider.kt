@@ -14,13 +14,13 @@ import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.readonly.EmptyLinkedServicesSubView
 import com.dashlane.item.subview.readonly.ItemLinkedServicesSubView
 import com.dashlane.ui.VaultItemImageHelper
-import com.dashlane.util.graphics.RoundRectDrawable
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices
 import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps
 import com.dashlane.xml.domain.SyncObject.Authentifiant.LinkedServices.AssociatedDomains
+import com.dashlane.xml.domain.objectType
 
 abstract class ItemScreenConfigurationProvider {
     abstract fun createScreenConfiguration(
@@ -129,10 +129,7 @@ abstract class ItemScreenConfigurationProvider {
         return mutableListOf()
     }
 
-    fun createDefaultHeaderIcon(
-        context: Context,
+    fun getHeaderIcon(
         item: SyncObject
-    ): RoundRectDrawable? {
-        return VaultItemImageHelper.getIconDrawableFromSyncObject(context, item)
-    }
+    ): Int? = with(VaultItemImageHelper) { item.objectType.getThumbnailIcon() }
 }

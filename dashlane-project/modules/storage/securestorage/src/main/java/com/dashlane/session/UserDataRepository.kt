@@ -1,6 +1,6 @@
 package com.dashlane.session
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.settings.SettingsManager
 import com.dashlane.xml.domain.SyncObject
 

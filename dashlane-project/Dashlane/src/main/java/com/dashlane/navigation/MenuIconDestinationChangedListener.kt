@@ -30,7 +30,7 @@ class MenuIconDestinationChangedListener(
             
             
             delay(1)
-            val shouldShowMenu = dashlaneActivity.shouldShowMenu(arguments)
+            val shouldShowMenu = dashlaneActivity.shouldShowMenu(arguments, controller.currentDestination)
             if (shouldShowMenu) {
                 dashlaneActivity.drawerToggleDelegate?.setActionBarUpIndicator(
                     drawable,
@@ -44,8 +44,7 @@ class MenuIconDestinationChangedListener(
         }
     }
 
-    private fun DashlaneActivity.shouldShowMenu(arguments: Bundle?): Boolean {
-        val currentDestination = navigator.currentDestination
+    private fun DashlaneActivity.shouldShowMenu(arguments: Bundle?, currentDestination: NavDestination?): Boolean {
         val isSettingsMainSection = currentDestination?.id == R.id.nav_settings &&
             arguments != null && fromBundle(arguments).id == null
         if (!isSettingsMainSection && !topLevelDestinations.contains(currentDestination?.id)) {

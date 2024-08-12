@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 import com.dashlane.followupnotification.R
-import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.toBitmap
 import com.dashlane.vault.summary.SummaryObject
@@ -20,7 +19,7 @@ enum class FollowUpNotificationsTypes(
 ) {
     PASSWORDS(
         SyncObjectType.AUTHENTIFIANT,
-        R.drawable.ic_thumbnail_password,
+        R.drawable.ic_item_login_outlined,
         CopyField.Login,
         CopyField.Email,
         CopyField.Password,
@@ -28,70 +27,70 @@ enum class FollowUpNotificationsTypes(
     ),
     ADDRESS(
         SyncObjectType.ADDRESS,
-        R.drawable.ic_thumbnail_address,
+        R.drawable.ic_home_outlined,
         CopyField.Address,
         CopyField.City,
         CopyField.ZipCode
     ),
     BANK_ACCOUNT(
         SyncObjectType.BANK_STATEMENT,
-        R.drawable.ic_thumbnail_bank_account,
+        R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountBicSwift,
         CopyField.BankAccountIban
     ),
     BANK_ACCOUNT_US(
         SyncObjectType.BANK_STATEMENT,
-        R.drawable.ic_thumbnail_bank_account,
+        R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountRoutingNumber,
         CopyField.BankAccountAccountNumber
     ),
     BANK_ACCOUNT_MX(
         SyncObjectType.BANK_STATEMENT,
-        R.drawable.ic_thumbnail_bank_account,
+        R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountBicSwift,
         CopyField.BankAccountClabe
     ),
     BANK_ACCOUNT_GB(
         SyncObjectType.BANK_STATEMENT,
-        R.drawable.ic_thumbnail_bank_account,
+        R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountSortCode,
         CopyField.BankAccountAccountNumber
     ),
     DRIVERS_LICENSE(
         SyncObjectType.DRIVER_LICENCE,
-        R.drawable.ic_thumbnail_driving_license,
+        R.drawable.ic_item_drivers_license_outlined,
         CopyField.DriverLicenseNumber,
         CopyField.DriverLicenseIssueDate,
         CopyField.DriverLicenseExpirationDate
     ),
     ID_CARD(
         SyncObjectType.ID_CARD,
-        R.drawable.ic_thumbnail_id_card,
+        R.drawable.ic_item_personal_info_outlined,
         CopyField.IdsNumber,
         CopyField.IdsIssueDate,
         CopyField.IdsExpirationDate
     ),
     PASSPORT(
         SyncObjectType.PASSPORT,
-        R.drawable.ic_thumbnail_passport,
+        R.drawable.ic_item_passport_outlined,
         CopyField.PassportNumber,
         CopyField.PassportIssueDate,
         CopyField.PassportExpirationDate
     ),
     PAYMENTS_CARD(
         SyncObjectType.PAYMENT_CREDIT_CARD,
-        R.drawable.ic_thumbnail_credit_card,
+        R.drawable.ic_item_payment_outlined,
         CopyField.PaymentsNumber,
         CopyField.PaymentsSecurityCode,
         CopyField.PaymentsExpirationDate
     ),
     PAYPAL(
         SyncObjectType.PAYMENT_PAYPAL,
-        R.drawable.ic_thumbnail_paypal,
+        R.drawable.ic_item_login_outlined,
         CopyField.PayPalLogin,
         CopyField.PayPalPassword
     )
@@ -109,10 +108,8 @@ internal fun SummaryObject.getFollowUpType(context: Context, country: Country?):
     } else {
         FollowUpNotificationsTypes.values().firstOrNull { it.syncObjectType == syncObjectType }
     }?.also {
-        it.icon = if (it == FollowUpNotificationsTypes.PAYMENTS_CARD) {
-            VaultItemImageHelper.getIconDrawableFromSummaryObject(context, this)?.toBitmap()
-        } else {
-            AppCompatResources.getDrawable(context, it.iconId)?.toBitmap()
-        }
+        it.icon = AppCompatResources.getDrawable(context, it.iconId)?.apply {
+            setTint(context.resources.getColor(R.color.text_neutral_standard, context.theme))
+        }?.toBitmap()
     }
 }

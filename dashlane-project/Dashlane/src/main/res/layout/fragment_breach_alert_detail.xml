@@ -14,15 +14,17 @@
         android:padding="@dimen/spacing_big"
         >
 
-        <ImageView
+        <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
             android:id="@+id/logo_domain"
-            android:layout_width="48dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_huge"
             android:importantForAccessibility="no"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:thumbnailSize="large"
+            app:thumbnailType="vaultItemDomainIcon"
             />
 
         <TextView

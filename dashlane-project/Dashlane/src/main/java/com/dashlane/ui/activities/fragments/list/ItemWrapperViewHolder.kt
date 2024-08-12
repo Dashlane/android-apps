@@ -10,21 +10,23 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.Target
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailView
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.teamspaces.TeamSpaceUtils.getTeamSpaceId
 import com.dashlane.teamspaces.adapter.TeamspaceDrawableProvider
 import com.dashlane.teamspaces.isSpaceItem
+import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrDrawable
-import com.dashlane.util.graphics.CredentialRemoteDrawable
 import com.dashlane.util.toHighlightedSpannable
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.textfactory.list.StatusText
 import com.dashlane.vault.util.isProtected
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
@@ -33,12 +35,13 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
     public override fun updateView(context: Context, item: VaultItemWrapper<out SummaryObject>?) {
         item?.let {
             updateText(context, item)
-            updateImage(context, item)
+            updateImage(item)
             updateActionItem(item)
             updateSharingItem(item)
             updateTeamspaceIcon(item)
             updateAttachmentIcon(item)
             updateLockIcon(item)
+            updatePasskeyIcon(item)
         }
     }
 
@@ -84,19 +87,32 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
         setTextColor(R.id.item_subtitle, context.getThemeAttrColor(subtitleColorAttr))
     }
 
-    fun updateImage(context: Context, item: VaultItemWrapper<out SummaryObject>) {
-        findViewByIdEfficient<ImageView>(R.id.item_icon)?.let {
-            val actualDrawable = it.drawable
-            val newDrawable = item.getImageDrawable(context)
-            if (newDrawable !is CredentialRemoteDrawable && actualDrawable is CredentialRemoteDrawable) {
-                cancelRequest(context, actualDrawable.target)
-            }
-            it.setImageDrawable(newDrawable)
-        }
-    }
+    fun updateImage(item: VaultItemWrapper<out SummaryObject>) {
+        val iconView = findViewByIdEfficient<ThumbnailView>(R.id.item_icon) ?: return
+        val domainThumbnailView = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.item_thumbnail) ?: return
 
-    private fun cancelRequest(context: Context, target: Target<*>) {
-        Glide.with(context).clear(target)
+        val thumbnailViewConfiguration = VaultItemImageHelper.getThumbnailViewConfiguration(item.summaryObject)
+
+        if (thumbnailViewConfiguration.type == ThumbnailViewType.VAULT_ITEM_DOMAIN_ICON) {
+            iconView.isVisible = false
+            if (domainThumbnailView.domainUrl != thumbnailViewConfiguration.urlDomain) {
+                domainThumbnailView.thumbnailUrl = null
+            }
+            domainThumbnailView.apply {
+                isVisible = true
+                domainUrl = thumbnailViewConfiguration.urlDomain
+            }
+        } else {
+            domainThumbnailView.isVisible = false
+            iconView.apply {
+                isVisible = true
+                thumbnailType = thumbnailViewConfiguration.type.value
+                thumbnailViewConfiguration.iconRes?.let { iconRes = it }
+                thumbnailViewConfiguration.colorRes?.let {
+                    color = ResourcesCompat.getColor(view.resources, it, null)
+                }
+            }
+        }
     }
 
     fun updateSharingItem(item: VaultItemWrapper<out SummaryObject>) {
@@ -105,6 +121,10 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
 
     fun updateLockIcon(item: VaultItemWrapper<out SummaryObject>) {
         findViewByIdEfficient<ImageView>(R.id.lock_image)?.isVisible = item.summaryObject.isProtected
+    }
+
+    fun updatePasskeyIcon(item: VaultItemWrapper<out SummaryObject>) {
+        findViewByIdEfficient<ImageView>(R.id.passkey_image)?.isVisible = item.summaryObject is SummaryObject.Passkey
     }
 
     fun updateTeamspaceIcon(item: VaultItemWrapper<out SummaryObject>) {

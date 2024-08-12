@@ -3,7 +3,6 @@ package com.dashlane
 import android.app.Application
 import android.app.backup.BackupManager
 import android.content.Context
-import com.dashlane.abtesting.OfflineExperimentReporter
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.announcements.AnnouncementCenter
@@ -27,10 +26,12 @@ import com.dashlane.notification.FcmHelper
 import com.dashlane.preference.CleanupPreferencesManager
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.abtesting.OfflineExperimentReporter
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
 import com.dashlane.session.observer.AnnouncementCenterObserver
+import com.dashlane.session.observer.AntiPhishingObserver
 import com.dashlane.session.observer.BackupTokenObserver
 import com.dashlane.session.observer.BroadcastManagerObserver
 import com.dashlane.session.observer.CryptographyMigrationObserver
@@ -49,6 +50,7 @@ import com.dashlane.ui.ActivityLifecycleListener
 import com.dashlane.ui.endoflife.EndOfLife
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 import com.dashlane.update.AppUpdateInstaller
+import com.dashlane.urldomain.CleanupLegacyUrlDomainIconDatabase
 import com.dashlane.util.DarkThemeHelper
 import com.dashlane.util.log.UserSupportFileLoggerApplicationCreated
 import com.dashlane.util.notification.NotificationHelper
@@ -104,6 +106,8 @@ class DashlaneApplicationObserver @Inject constructor(
     private val userSettingsLogRepository: UserSettingsLogRepository,
     private val syncBroadcastManager: SyncBroadcastManager,
     private val cleanupPreferencesManager: CleanupPreferencesManager,
+    private val antiPhishingObserver: AntiPhishingObserver,
+    private val cleanupLegacyUrlDomainIconDatabase: CleanupLegacyUrlDomainIconDatabase,
 ) : ApplicationObserver {
     override fun onCreate(application: DashlaneApplication) {
         init()
@@ -122,6 +126,7 @@ class DashlaneApplicationObserver @Inject constructor(
         vaultReportLogger.start()
         authenticatorAppConnection.loadOtpsForBackup()
         cleanupPreferencesManager.cleanup()
+        cleanupLegacyUrlDomainIconDatabase()
     }
 
     override fun onTerminate(application: DashlaneApplication) {
@@ -187,5 +192,6 @@ class DashlaneApplicationObserver @Inject constructor(
             )
         )
         sessionManager.attach(dataSync)
+        sessionManager.attach(antiPhishingObserver)
     }
 }

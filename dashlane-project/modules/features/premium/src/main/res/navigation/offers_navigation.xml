@@ -6,7 +6,7 @@
     app:startDestination="@id/nav_offers_overview">
     <fragment
         android:id="@+id/nav_offers_details"
-        android:name="com.dashlane.premium.offer.details.view.OfferDetailsFragment"
+        android:name="com.dashlane.premium.offer.details.OfferDetailsFragment"
         tools:layout="@layout/fragment_offer_details">
         <argument
             android:name="offerType"

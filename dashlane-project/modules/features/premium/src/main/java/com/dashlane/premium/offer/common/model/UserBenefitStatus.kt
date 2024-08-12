@@ -6,7 +6,6 @@ data class UserBenefitStatus(val type: Type, val renewPeriodicity: RenewPeriodic
         object Free : Type()
         object Trial : Type()
         object AdvancedIndividual : Type()
-        object EssentialsIndividual : Type() 
         object PremiumIndividual : Type()
         object PremiumPlusIndividual : Type()
         data class Family(val isAdmin: Boolean) : Type()

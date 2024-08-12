@@ -1,7 +1,11 @@
 package com.dashlane.session
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.login.LoginMode
+import com.dashlane.user.Username
 import com.dashlane.xml.domain.SyncObject
 
 interface SessionInitializer {

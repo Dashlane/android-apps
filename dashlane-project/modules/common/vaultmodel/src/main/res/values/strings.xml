@@ -11,6 +11,7 @@
     <string name="title_none_of_these">None of these</string>
     <string name="securenote">Secure Note</string>
     <string name="securenote_name">Untitled note</string>
+    <string name="secure_note_is_locked">Note is locked!</string>
     <string name="no_color">No color</string>
     <string name="blue">Blue</string>
     <string name="purple">Purple</string>
@@ -40,4 +41,35 @@
     <string name="no_gender">No gender specified</string>
     <string name="website">Website</string>
     <string name="phone">Phone number</string>
+    <string name="building">Building</string>
+    <string name="floor">Floor</string>
+    <string name="appartment">Apartment</string>
+    <string name="creditcard">Credit/Debit Card</string>
+    <string name="driver_license">Driver\'s License</string>
+    <string name="fiscal_statement">Tax number</string>
+    <string name="id_card">ID card</string>
+    <string name="social_security">Social Security</string>
+    <string name="passport">Passport</string>
+    <string name="paypal">PayPal</string>
+    <string name="personal_website">Website</string>
+    
+    <string name="datatype_address">Addresses</string>
+    <string name="datatype_auth_category">Login category</string>
+    <string name="datatype_authentifiant">Login</string>
+    <string name="datatype_company">Company</string>
+    <string name="datatype_driver_licence">Driver\'s licenses</string>
+    <string name="datatype_email">Emails</string>
+    <string name="datatype_fiscal_statement">Tax numbers</string>
+    <string name="datatype_id_card">ID cards</string>
+    <string name="datatype_identity">Names</string>
+    <string name="datatype_passport">Passports</string>
+    <string name="datatype_paymentpaypal">Paypal</string>
+    <string name="datatype_paymentcreditcard">Credit/debit cards</string>
+    <string name="datatype_personal_website">Personal websites</string>
+    <string name="datatype_phone">Phones</string>
+    <string name="datatype_social_security_statement">Social security numbers</string>
+    <string name="datatype_secure_note">Secure Note</string>
+    <string name="datatype_secure_note_category">Secure Note category</string>
+    <string name="datatype_bank_statement">Bank accounts</string>
+    <string name="datatype_passkey">Passkey</string>
 </resources>

@@ -1,11 +1,15 @@
 package com.dashlane.session
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.abtesting.RemoteConfiguration
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.use
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.hermes.LogRepository
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.login.LoginInfo
 import com.dashlane.login.LoginLogger
 import com.dashlane.login.LoginMode
@@ -15,16 +19,17 @@ import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureStorageManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.user.Username
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SessionManagerImpl @Inject constructor(
@@ -114,13 +119,13 @@ class SessionManagerImpl @Inject constructor(
                 val secureStorageManager = userSecureStorageManager.get()
                 val session = it.session
                 if (sharingPrivateKey != null) {
-                    secureStorageManager.storeRsaPrivateKey(session, sharingPrivateKey)
+                    secureStorageManager.storeRsaPrivateKey(session.localKey, session.username, sharingPrivateKey)
                 }
                 if (remoteKey != null) {
                     secureStorageManager.secureStorageManager.storeRemoteKey(username, localKey, remoteKey)
                 }
-                secureStorageManager.storeDeviceAnalyticsId(session, deviceAnalyticsId)
-                secureStorageManager.storeUserAnalyticsId(session, userAnalyticsId)
+                secureStorageManager.storeDeviceAnalyticsId(session.localKey, session.username, deviceAnalyticsId)
+                secureStorageManager.storeUserAnalyticsId(session.localKey, session.username, userAnalyticsId)
             }
         }
     }
@@ -174,6 +179,7 @@ class SessionManagerImpl @Inject constructor(
         
         notifySessionEnded(session, byUser, forceLogout)
         userDataRepository.get().sessionCleanup(session, forceLogout)
+        userDatabaseRepository.get().sessionCleanup(session, forceLogout)
         _session = null
     }
 

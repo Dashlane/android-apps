@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="trial_ended_user_title_header">Your Premium trial ended</string>
+    
+    <string name="trial_ended_user_title">Upgrade to unlock all features</string>
+
+    
+    <string name="trial_ended_user_title_header_for_frozen_account">Your trial ended and your account is now read-only</string>
+    
+    <string name="trial_ended_user_title_for_frozen_account">Upgrade to Premium for:</string>
+
+    
+    <string name="vault_announcement_frozen_account_title">Your account is read-only</string>
+    
+    <string name="vault_announcement_frozen_account_description">You have over %1$s passwords saved. Remove passwords or upgrade to regain full access to your account.</string>
+</resources>

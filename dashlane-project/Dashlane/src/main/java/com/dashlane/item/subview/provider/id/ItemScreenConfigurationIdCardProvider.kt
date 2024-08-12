@@ -2,6 +2,7 @@ package com.dashlane.item.subview.provider.id
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
 import com.dashlane.item.header.ItemHeader
@@ -59,9 +60,13 @@ class ItemScreenConfigurationIdCardProvider(
         context: Context,
         item: VaultItem<*>
     ): ItemHeader {
-        val iconDrawable = createDefaultHeaderIcon(context, item.syncObject)
         val title = context.getString(R.string.id_card)
-        return ItemHeader(createMenus(), title, iconDrawable)
+        return ItemHeader(
+            menuActions = createMenus(),
+            title = title,
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_OTHER_ICON.value,
+            thumbnailIconRes = getHeaderIcon(item.syncObject),
+        )
     }
 
     private fun createSubViews(

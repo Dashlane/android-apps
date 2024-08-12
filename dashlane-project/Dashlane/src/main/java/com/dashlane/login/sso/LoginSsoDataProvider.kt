@@ -2,9 +2,9 @@ package com.dashlane.login.sso
 
 import android.content.Context
 import android.content.Intent
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.authentication.login.AuthenticationSsoRepository
@@ -21,7 +21,7 @@ import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionResult
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.sync.DataSync
 import com.dashlane.util.clearTask
 import com.dashlane.util.generateUniqueIdentifier

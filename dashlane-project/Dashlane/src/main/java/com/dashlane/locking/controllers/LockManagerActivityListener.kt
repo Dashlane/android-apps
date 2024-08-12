@@ -5,14 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.lock.LockWatcher
-import com.dashlane.lock.ScreenOverLockProtectionView
+import com.dashlane.ui.ScreenOverLockProtectionView
 import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.LoginActivity
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.ui.AbstractActivityLifecycleListener
-import com.dashlane.ui.activities.DashlaneActivity
 import javax.inject.Inject
 
 class LockManagerActivityListener @Inject constructor(

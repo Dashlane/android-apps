@@ -3,10 +3,10 @@ package com.dashlane.authentication
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.cryptography.decodeUtf8ToString
-import com.dashlane.session.AppKey
-import com.dashlane.session.LocalKey
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.session.SessionTrasher
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.LocalKeyRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureStorageManager

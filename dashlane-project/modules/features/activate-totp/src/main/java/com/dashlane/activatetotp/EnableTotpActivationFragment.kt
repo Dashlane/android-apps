@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.whenCreated
 import androidx.navigation.fragment.findNavController
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.activatetotp.databinding.ActivateTotpLoadingBinding
 import com.dashlane.authenticator.UriParser
 import com.dashlane.hermes.generated.definitions.TwoFactorAuthenticationError
@@ -24,7 +24,7 @@ import com.dashlane.server.api.endpoints.authentication.AuthVerificationTotpServ
 import com.dashlane.server.api.exceptions.DashlaneApiIoException
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.screens.settings.Use2faSettingStateRefresher
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.tryOrNull
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel

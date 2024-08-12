@@ -89,6 +89,11 @@
             app:popEnterAnim="@anim/nav_default_enter_anim"
             app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
+    <action
+        android:id="@+id/go_to_new_item_edit"
+        app:destination="@id/nav_new_item_edit"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
     <activity
         android:id="@+id/nav_item_edit_view"
         android:name="com.dashlane.item.ItemEditViewActivity"
@@ -101,7 +106,7 @@
         <argument
             android:name="data_type"
             android:defaultValue="KWAuthentifiant"
-            app:argType="string"/>
+            app:argType="string" />
         <argument
             android:name="force_edit"
             android:defaultValue="false"
@@ -147,6 +152,31 @@
             app:argType="string"
             app:nullable="false" />
     </activity>
+    <fragment
+        android:id="@+id/nav_collection_selector_fragment"
+        android:name="com.dashlane.item.collection.CollectionSelectorFragment"
+        android:label="@string/collection_selector_activity_title">
+        <argument
+            android:name="temporaryPrivateCollectionsName"
+            app:argType="string[]"
+            app:nullable="false" />
+        <argument
+            android:name="temporarySharedCollectionsId"
+            app:argType="string[]"
+            app:nullable="false" />
+        <argument
+            android:name="fromView"
+            app:argType="boolean"
+            app:nullable="false" />
+        <argument
+            android:name="spaceId"
+            app:argType="string"
+            app:nullable="false" />
+        <argument
+            android:name="isLimited"
+            app:argType="boolean"
+            app:nullable="false" />
+    </fragment>
     <action
         android:id="@+id/go_to_authenticator_dashboard"
         app:destination="@id/nav_authenticator_dashboard"
@@ -348,6 +378,9 @@
         <action
             android:id="@+id/settings_to_dashlane_labs"
             app:destination="@id/nav_dashlane_labs" />
+        <action
+            android:id="@+id/settings_to_guided_web_csv_export"
+            app:destination="@id/guided_web_csv_export" />
     </fragment>
     <activity
         android:id="@+id/nav_download_authenticator_app"
@@ -434,6 +467,9 @@
             android:name="collectionId"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="sharedCollection"
+            app:argType="boolean" />
     </fragment>
     <fragment
         android:id="@+id/nav_breach_alert_detail"
@@ -467,8 +503,7 @@
     <activity
         android:id="@+id/nav_m2w_intro"
         android:name="com.dashlane.m2w.M2wIntroActivity"
-        tools:layout="@layout/activity_intro">
-    </activity>
+        tools:layout="@layout/activity_intro" />
     <activity
         android:id="@+id/nav_autofill_paused_and_linked"
         android:name="com.dashlane.autofill.actionssources.view.ActionsSourcesActivity"
@@ -503,8 +538,7 @@
     <activity
         android:id="@+id/nav_in_app_login_intro"
         android:name="com.dashlane.ui.activities.onboarding.InAppLoginIntroActivity"
-        tools:layout="@layout/activity_intro">
-    </activity>
+        tools:layout="@layout/activity_intro" />
     <fragment
         android:id="@+id/nav_credential_add_step_1"
         android:name="com.dashlane.ui.screens.fragments.userdata.CredentialAddStep1Fragment"
@@ -543,8 +577,11 @@
         android:name="com.dashlane.premium.paywall.common.PaywallActivity">
         <argument
             android:name="paywallIntroType"
-            app:argType="com.dashlane.premium.paywall.common.PaywallIntroType" />
+            app:argType="com.dashlane.navigation.paywall.PaywallIntroType" />
     </activity>
+    <activity
+        android:id="@+id/nav_authenticator_sunset"
+        android:name="com.dashlane.authenticator.AuthenticatorSunsetActivity"/>
     <activity
         android:id="@+id/nav_guided_password_change"
         android:name="com.dashlane.guidedpasswordchange.OnboardingGuidedPasswordChangeActivity">
@@ -561,8 +598,7 @@
     </activity>
     <activity
         android:id="@+id/nav_current_plan"
-        android:name="com.dashlane.premium.current.CurrentPlanActivity">
-    </activity>
+        android:name="com.dashlane.premium.current.CurrentPlanActivity" />
     <fragment
         android:id="@+id/nav_authenticator_dashboard"
         android:name="com.dashlane.authenticator.AuthenticatorDashboardFragment"
@@ -571,25 +607,19 @@
             android:name="otpUri"
             app:argType="android.net.Uri"
             app:nullable="true" />
-        <action
-            android:id="@+id/go_to_get_started_from_authenticator_dashboard"
-            app:destination="@id/nav_authenticator_get_started_dialog" />
     </fragment>
     <fragment
         android:id="@+id/nav_authenticator_suggestions"
         android:name="com.dashlane.authenticator.AuthenticatorSuggestionsFragment"
         android:label="@string/action_bar_title_authenticator">
-        <action
-            android:id="@+id/go_to_get_started_from_authenticator_suggestions"
-            app:destination="@id/nav_authenticator_get_started_dialog" />
         <argument
             android:name="hasSetupOtpCredentials"
             app:argType="boolean" />
     </fragment>
-    <fragment
+    <activity
         android:id="@+id/nav_account_recovery_key"
-        android:name="com.dashlane.accountrecoverykey.AccountRecoveryKeyFragment"
-        android:label="@string/account_recovery_key_setting_title" >
+        android:name="com.dashlane.accountrecoverykey.AccountRecoveryKeyActivity"
+        android:label="@string/account_recovery_key_setting_title">
         <argument
             android:name="id"
             android:defaultValue="@null"
@@ -597,14 +627,14 @@
             app:nullable="true" />
         <argument
             android:name="startDestination"
-            app:nullable="true"
             android:defaultValue="@null"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <argument
             android:name="userCanExitFlow"
             android:defaultValue="true"
             app:argType="boolean" />
-    </fragment>
+    </activity>
     <fragment
         android:id="@+id/nav_dashlane_labs"
         android:name="com.dashlane.labs.DashlaneLabsFragment"
@@ -617,9 +647,10 @@
             android:name="collectionId"
             app:argType="string" />
     </activity>
-    <dialog
-        android:id="@+id/nav_authenticator_get_started_dialog"
-        android:name="com.dashlane.authenticator.GetStartedAuthenticatorBottomSheetDialogFragment" />
+    <activity
+        android:id="@+id/guided_web_csv_export"
+        android:name="com.dashlane.csvexport.intro.CsvExportFromWebActivity"
+        android:label="@string/csv_export_on_web_app_bar_title" />
     <dialog
         android:id="@+id/nav_vpn_third_party_get_started_dialog"
         android:name="com.dashlane.vpn.thirdparty.GetStartedVpnBottomSheetDialogFragment" />
@@ -682,6 +713,51 @@
             app:popEnterAnim="@anim/fadein_activity"
             app:popExitAnim="@anim/fadeout_activity" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_collection_details"
+        android:name="com.dashlane.collections.details.CollectionDetailsFragment">
+        <action
+            android:id="@+id/collection_details_to_collection_edit"
+            app:destination="@id/nav_collection_edit"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/collection_details_to_collection_new_share"
+            app:destination="@id/nav_collection_new_share"
+            app:enterAnim="@anim/fadein_activity"
+            app:exitAnim="@anim/fadeout_activity"
+            app:popEnterAnim="@anim/fadein_activity"
+            app:popExitAnim="@anim/fadeout_activity" />
+        <action
+            android:id="@+id/collections_details_to_collection_shared_access"
+            app:destination="@id/nav_collection_shared_access"
+            app:enterAnim="@anim/fadein_activity"
+            app:exitAnim="@anim/fadeout_activity"
+            app:popEnterAnim="@anim/fadein_activity"
+            app:popExitAnim="@anim/fadeout_activity" />
+        <argument
+            android:name="shareAllowed"
+            app:argType="boolean" />
+        <argument
+            android:name="collectionId"
+            app:argType="string" />
+        <argument
+            android:name="businessSpace"
+            app:argType="boolean" />
+        <argument
+            android:name="sharedCollection"
+            app:argType="boolean" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_password_history"
+        android:name="com.dashlane.item.passwordhistory.PasswordHistoryFragment"
+        android:label="@string/password_history_action_bar_title">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+    </fragment>
     <action
         android:id="@+id/go_to_home"
         app:destination="@id/nav_home"
@@ -742,6 +818,74 @@
         app:exitAnim="@anim/fadeout_activity"
         app:popEnterAnim="@anim/fadein_activity"
         app:popExitAnim="@anim/fadeout_activity" />
+    <fragment
+        android:id="@+id/nav_new_item_edit"
+        android:name="com.dashlane.item.v3.ItemEditFragment"
+        android:label="">
+        <argument
+            android:name="uid"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="data_type"
+            android:defaultValue="KWAuthentifiant"
+            app:argType="string" />
+        <argument
+            android:name="url"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="otp"
+            android:defaultValue="@null"
+            app:argType="com.dashlane.authenticator.Otp"
+            app:nullable="true" />
+        <argument
+            android:name="force_edit"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <action
+            android:id="@+id/action_nav_new_item_edit_to_linkedServicesFragment"
+            app:destination="@id/nav_linked_services" />
+        <action
+            android:id="@+id/action_nav_new_item_edit_to_nav_collection_selector_fragment"
+            app:destination="@id/nav_collection_selector_fragment" />
+        <action
+            android:id="@+id/action_nav_new_item_edit_to_nav_password_history"
+            app:destination="@id/nav_password_history" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_linked_services"
+        android:name="com.dashlane.item.linkedwebsites.LinkedServicesFragment"
+        android:label="@string/multi_domain_credentials_title">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="fromViewOnly"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="addNew"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="temporaryWebsites"
+            android:defaultValue="@null"
+            app:argType="string[]"
+            app:nullable="true" />
+        <argument
+            android:name="temporaryApps"
+            android:defaultValue="@null"
+            app:argType="string[]"
+            app:nullable="true" />
+        <argument
+            android:name="url"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
     <action
         android:id="@+id/go_to_sharing_center"
         app:destination="@id/nav_sharing_center"
@@ -865,6 +1009,13 @@
         app:popEnterAnim="@anim/fadein_activity"
         app:popExitAnim="@anim/fadeout_activity" />
     <action
+        android:id="@+id/go_to_authenticator_sunset"
+        app:destination="@id/nav_authenticator_sunset"
+        app:enterAnim="@anim/fadein_activity"
+        app:exitAnim="@anim/fadeout_activity"
+        app:popEnterAnim="@anim/fadein_activity"
+        app:popExitAnim="@anim/fadeout_activity" />
+    <action
         android:id="@+id/go_to_breach_alert_detail"
         app:destination="@id/nav_breach_alert_detail"
         app:enterAnim="@anim/nav_default_enter_anim"
@@ -904,7 +1055,7 @@
         app:enterAnim="@anim/nav_default_enter_anim"
         app:exitAnim="@anim/nav_default_exit_anim"
         app:popEnterAnim="@anim/nav_default_enter_anim"
-        app:popExitAnim="@anim/nav_default_exit_anim" >
+        app:popExitAnim="@anim/nav_default_exit_anim">
         <argument
             android:name="id"
             android:defaultValue="@null"
@@ -937,47 +1088,6 @@
         app:exitAnim="@anim/nav_default_exit_anim"
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim" />
-    <fragment
-        android:id="@+id/nav_collection_details"
-        android:name="com.dashlane.collections.details.CollectionDetailsFragment">
-        <action
-            android:id="@+id/collection_details_to_collection_edit"
-            app:destination="@id/nav_collection_edit"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_enter_anim"
-            app:popExitAnim="@anim/nav_default_exit_anim" />
-        <action
-            android:id="@+id/collection_details_to_collection_new_share"
-            app:destination="@id/nav_collection_new_share"
-            app:enterAnim="@anim/fadein_activity"
-            app:exitAnim="@anim/fadeout_activity"
-            app:popEnterAnim="@anim/fadein_activity"
-            app:popExitAnim="@anim/fadeout_activity" />
-        <action
-            android:id="@+id/collections_details_to_collection_shared_access"
-            app:destination="@id/nav_collection_shared_access"
-            app:enterAnim="@anim/fadein_activity"
-            app:exitAnim="@anim/fadeout_activity"
-            app:popEnterAnim="@anim/fadein_activity"
-            app:popExitAnim="@anim/fadeout_activity" />
-        <argument
-            android:name="shareEnabled"
-            app:argType="boolean" />
-        <argument
-            android:name="shareAllowed"
-            app:argType="boolean" />
-        <argument
-            android:name="collectionId"
-            app:argType="string" />
-        <argument
-            android:name="businessSpace"
-            app:argType="boolean" />
-        <argument
-            android:name="sharedCollection"
-            app:argType="boolean" />
-    </fragment>
 
     <include app:graph="@navigation/secret_transfer_navigation" />
-
 </navigation>

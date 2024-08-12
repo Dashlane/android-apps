@@ -1,7 +1,7 @@
 package com.dashlane.login.pages.totp
 
 import com.dashlane.account.UserAccountStorageImpl
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.AuthenticationAccountConfigurationChangedException
 import com.dashlane.authentication.AuthenticationException
 import com.dashlane.authentication.AuthenticationExpiredVersionException

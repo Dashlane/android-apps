@@ -2,6 +2,7 @@ package com.dashlane.item.subview.provider.payment
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
@@ -18,7 +19,6 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
-import com.dashlane.util.graphics.getDominantColor
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
@@ -48,22 +48,20 @@ class ItemScreenConfigurationPaypalProvider(
         item as VaultItem<SyncObject.PaymentPaypal>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(item)
         )
     }
 
     private fun createHeader(
-        context: Context,
         item: VaultItem<SyncObject.PaymentPaypal>
     ): ItemHeader {
-        val iconDrawable = createDefaultHeaderIcon(context, item.syncObject)?.apply {
-            val dominantColor = getDominantColor(image)
-            isWithBorder = false
-            backgroundColor = dominantColor
-        }
-
         val paypalTitle = item.syncObject.name
-        return ItemHeader(createMenus(), paypalTitle, iconDrawable)
+        return ItemHeader(
+            menuActions = createMenus(),
+            title = paypalTitle,
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_OTHER_ICON.value,
+            thumbnailIconRes = getHeaderIcon(item.syncObject),
+        )
     }
 
     private fun createSubViews(

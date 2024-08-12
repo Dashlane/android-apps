@@ -23,8 +23,8 @@ import com.dashlane.server.api.endpoints.authentication.AuthRegistrationDevice
 import com.dashlane.server.api.endpoints.authentication.PerformExtraDeviceVerificationService
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
 import com.dashlane.server.api.time.toInstant
-import com.dashlane.session.AppKey
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.serializer.XmlException
 import javax.inject.Inject

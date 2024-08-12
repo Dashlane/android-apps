@@ -9,7 +9,7 @@ import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.util.getImageDrawableByWebsiteUrl
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 data class DarkWebBreachItem(val breach: BreachWrapper) : DashlaneRecyclerAdapter.ViewTypeProvider {
@@ -23,6 +23,7 @@ data class DarkWebBreachItem(val breach: BreachWrapper) : DashlaneRecyclerAdapte
         override fun updateView(context: Context, item: DarkWebBreachItem?) {
             item ?: return
             val newAlertIcon = view.findViewById<ImageView>(R.id.new_alert)
+            val thumbnail = view.findViewById<ThumbnailDomainIconView>(R.id.thumbnail)
             val icon = view.findViewById<ImageView>(R.id.icon)
             val domainView = view.findViewById<TextView>(R.id.domain)
             val selectedBackground = view.findViewById<View>(R.id.selected_background)
@@ -43,10 +44,12 @@ data class DarkWebBreachItem(val breach: BreachWrapper) : DashlaneRecyclerAdapte
             }?.joinToString()
 
             if (item.selected) {
-                icon.setImageResource(R.drawable.ic_dwm_item_selected)
+                thumbnail.visibility = View.INVISIBLE
+                icon.visibility = View.VISIBLE
             } else {
-                val domainDrawable = view.context.getImageDrawableByWebsiteUrl(domain)
-                icon.setImageDrawable(domainDrawable)
+                thumbnail.visibility = View.VISIBLE
+                icon.visibility = View.GONE
+                thumbnail.domainUrl = domain
             }
             selectedBackground.isVisible = item.selected
         }

@@ -4,26 +4,28 @@ import com.android.billingclient.api.Purchase
 import com.dashlane.inappbilling.BillingManager
 import com.dashlane.inappbilling.ServiceResult
 import com.dashlane.inappbilling.withServiceConnection
-import com.dashlane.network.webservices.VerifyReceiptService
+import com.dashlane.network.tools.authorization
 import com.dashlane.premium.offer.common.OffersLogger
+import com.dashlane.server.api.Authorization
+import com.dashlane.server.api.endpoints.payments.VerifyPlaystoreReceiptService
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import java.util.Locale
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.util.Locale
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class BillingVerification @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
-    private val verifyReceiptService: VerifyReceiptService,
+    private val verifyPlaystoreReceiptService: VerifyPlaystoreReceiptService,
     private val billingManager: BillingManager,
     private val logger: OffersLogger,
     private val refreshPremiumAfterPurchase: RefreshPremiumAfterPurchase
@@ -60,25 +62,31 @@ class BillingVerification @Inject constructor(
     ) {
         val acknowledged = purchase.isAcknowledgedCompat()
         if (acknowledged) return
-        val planId = purchase.products.firstOrNull()
+        val planId = purchase.products.firstOrNull() ?: return
         logger.logVerifyingReceiptAcknowledgeNeeded(planId)
         val session = session ?: return
         logger.logVerifyingReceiptHasSession(planId)
 
         val verifyReceipt = runCatching {
             logger.logVerifyingReceiptStart(planId)
-            verifyReceipt(purchase, currency, price, session.userId, session.uki)
+            verifyReceipt(
+                purchase = purchase,
+                plan = planId,
+                currency = currency,
+                price = price,
+                authorization = session.authorization
+            )
         }.getOrElse {
-            errorListener.invoke()
+            errorListener()
             null
         }
         refreshPremiumAfterPurchase.execute(errorListener)
         if (verifyReceipt?.success != true) {
-            errorListener.invoke()
+            errorListener()
             return
         }
         logger.logVerifyingReceiptSuccess(planId)
-        if (verifyReceipt.isRenewable) {
+        if (verifyReceipt.planType == PLAYSTORE_RENEWABLE) {
             acknowledge(purchase)
         } else {
             consume(purchase)
@@ -89,25 +97,28 @@ class BillingVerification @Inject constructor(
         billingManager.withServiceConnection { consume(purchase.purchaseToken) }
     }
 
-    private suspend fun acknowledge(purchase: Purchase) =
+    private suspend fun acknowledge(purchase: Purchase) {
         billingManager.withServiceConnection { acknowledge(purchase.purchaseToken) }
+    }
 
     private suspend fun verifyReceipt(
         purchase: Purchase,
+        plan: String,
         currency: String? = null,
         price: Float? = null,
-        userName: String,
-        uki: String
-    ): VerifyReceiptService.VerifyReceiptResponse {
+        authorization: Authorization.User,
+    ): VerifyPlaystoreReceiptService.Data {
         val purchaseToken = purchase.purchaseToken
-        return verifyReceiptService.verifyReceipt(
-            login = userName,
-            uki = uki,
-            receipt = purchaseToken,
-            plan = purchase.products.firstOrNull(),
-            currency = currency,
-            amount = price?.let { String.format(Locale.US, "%.2f", it) }
-        )
+        return verifyPlaystoreReceiptService.execute(
+            userAuthorization = authorization,
+            request = VerifyPlaystoreReceiptService.Request(
+                receipt = purchaseToken,
+                plan = plan,
+                transactionIdentifier = purchase.orderId,
+                amount = price?.let { String.format(Locale.US, "%.2f", it) },
+                currency = currency,
+            )
+        ).data
     }
 
     private fun shouldSkip(): Boolean {
@@ -122,5 +133,6 @@ class BillingVerification @Inject constructor(
 
     companion object {
         private val MIN_INTERVAL_REFRESH = TimeUnit.MINUTES.toMillis(2) 
+        private const val PLAYSTORE_RENEWABLE = "playstore_renewable"
     }
 }

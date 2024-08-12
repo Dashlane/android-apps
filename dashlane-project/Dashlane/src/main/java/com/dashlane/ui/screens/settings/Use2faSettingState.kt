@@ -10,7 +10,7 @@ sealed class Use2faSettingState {
         override val enabled: Boolean
             get() = true
         override val visible: Boolean
-            get() = true
+            get() = false
         override val checked: Boolean
             get() = false
         override val loaded: Boolean
@@ -32,8 +32,9 @@ sealed class Use2faSettingState {
         override val enabled: Boolean,
         override val checked: Boolean
     ) : Use2faSettingState() {
+
         override val visible: Boolean
-            get() = true
+            get() = checked
         override val loaded: Boolean
             get() = true
     }

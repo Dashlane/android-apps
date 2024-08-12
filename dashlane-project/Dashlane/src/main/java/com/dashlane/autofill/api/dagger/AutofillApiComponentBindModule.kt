@@ -8,6 +8,7 @@ import com.dashlane.autofill.api.AutofillEmptyWebsiteWarningServiceImpl
 import com.dashlane.autofill.api.AutofillFormSourcesStringsFromContext
 import com.dashlane.autofill.changepassword.AutofillChangePasswordActivityIntentProvider
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
+import com.dashlane.autofill.core.AutofillPhishingLoggerImpl
 import com.dashlane.autofill.core.AutofillUsageLog
 import com.dashlane.autofill.core.domain.AutofillSecurityApplication
 import com.dashlane.autofill.createaccount.AutofillCreateAccountActivityIntentProvider
@@ -17,12 +18,17 @@ import com.dashlane.autofill.fillresponse.ChangePasswordActionIntentProvider
 import com.dashlane.autofill.fillresponse.CreateAccountActionIntentProvider
 import com.dashlane.autofill.fillresponse.EmptyWebsiteWarningIntentProvider
 import com.dashlane.autofill.fillresponse.PauseActionIntentProvider
+import com.dashlane.autofill.fillresponse.PhishingWarningIntentProvider
 import com.dashlane.autofill.fillresponse.ViewAllAccountsActionIntentProvider
 import com.dashlane.autofill.internal.ApplicationFormSourceDeviceStatus
 import com.dashlane.autofill.internal.AutofillFormSourcesStrings
 import com.dashlane.autofill.internal.AutofillLimiter
 import com.dashlane.autofill.pause.AutofillPauseActivityIntentProvider
 import com.dashlane.autofill.pause.services.PausedAutofillLimiter
+import com.dashlane.autofill.phishing.AutofillPhishingActivityIntentProvider
+import com.dashlane.autofill.phishing.AutofillPhishingLogger
+import com.dashlane.autofill.phishing.PhishingWarningDataProvider
+import com.dashlane.autofill.phishing.PhishingWarningDataProviderImpl
 import com.dashlane.autofill.ui.AutofillPerformedCallback
 import com.dashlane.autofill.ui.AutofillPerformedCallbackImpl
 import com.dashlane.autofill.viewallaccounts.AutofillViewAllItemsActivityIntentProvider
@@ -88,4 +94,14 @@ interface AutofillApiComponentBindModule {
 
     @Binds
     fun bindAutofillEmptyWebsiteWarningService(impl: AutofillEmptyWebsiteWarningServiceImpl): AutofillEmptyWebsiteWarningService
+
+    @Binds
+    fun bindPhishingWarningIntent(impl: AutofillPhishingActivityIntentProvider): PhishingWarningIntentProvider
+
+    @Binds
+    fun bindPhishingWarningDataProvider(impl: PhishingWarningDataProviderImpl): PhishingWarningDataProvider
+
+    @Singleton
+    @Binds
+    fun bindsAutofillPhishingLogger(impl: AutofillPhishingLoggerImpl): AutofillPhishingLogger
 }

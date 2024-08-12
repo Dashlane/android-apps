@@ -10,8 +10,6 @@ import com.dashlane.util.IntentFactory.sendShareWithFriendsIntent
 import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.Toaster
 import com.dashlane.util.isNotSemanticallyNull
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 
 object InviteFriendsIntentHelper {
     suspend fun launchInviteFriendsIntent(
@@ -19,23 +17,20 @@ object InviteFriendsIntentHelper {
         toaster: Toaster,
         subscriptionCodeRepository: SubscriptionCodeRepository,
         sharingLinkService: GetSharingLinkService,
-        ioDispatcher: CoroutineDispatcher,
         networkStateProvider: NetworkStateProvider,
     ) {
         if (networkStateProvider.isOn()) {
             try {
-                withContext(ioDispatcher) {
-                    val subscriptionCode = subscriptionCodeRepository.get()
-                    val response = sharingLinkService.execute(
-                        request = GetSharingLinkService.Request(
-                            userKey = subscriptionCode,
-                        )
+                val subscriptionCode = subscriptionCodeRepository.get()
+                val response = sharingLinkService.execute(
+                    request = GetSharingLinkService.Request(
+                        userKey = subscriptionCode,
                     )
+                )
 
-                    val sharingId = response.data.sharingId
-                    if (sharingId.isNotSemanticallyNull()) {
-                        sendShareWithFriendsIntent(context, toaster, sharingId)
-                    }
+                val sharingId = response.data.sharingId
+                if (sharingId.isNotSemanticallyNull()) {
+                    sendShareWithFriendsIntent(context, toaster, sharingId)
                 }
             } catch (ex: DashlaneApiException) {
                 toaster.show(R.string.network_failed_notification, Toast.LENGTH_LONG)

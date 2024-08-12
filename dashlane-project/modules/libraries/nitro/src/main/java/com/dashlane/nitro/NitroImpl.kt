@@ -14,7 +14,7 @@ import com.dashlane.nitro.cryptography.sodium.SodiumCryptography
 import com.dashlane.nitro.util.encodeHex
 import com.dashlane.server.api.ConnectivityCheck
 import com.dashlane.server.api.DashlaneApiClient
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.Reusable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

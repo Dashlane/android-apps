@@ -2,7 +2,7 @@ package com.dashlane.ui.activities.fragments.checklist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.navigation.Navigator
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.ui.activities.fragments.checklist.ChecklistData.ItemState

@@ -10,7 +10,7 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 
 fun VaultDataQuery.getSharableItem(uid: String): VaultItem<*>? {
-    return query(
+    return queryLegacy(
         VaultFilter(
             dataTypeFilter = ShareableDataTypeFilter,
             uidFilter = SpecificUidFilter(uid)

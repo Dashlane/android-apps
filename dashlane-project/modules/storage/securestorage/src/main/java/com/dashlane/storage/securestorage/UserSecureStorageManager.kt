@@ -2,8 +2,8 @@ package com.dashlane.storage.securestorage
 
 import com.dashlane.cryptography.decodeUtf8ToString
 import com.dashlane.cryptography.encodeUtf8ToByteArray
-import com.dashlane.session.Session
-import com.dashlane.session.Username
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.user.Username
 
 class UserSecureStorageManager(
     val secureStorageManager: SecureStorageManager
@@ -12,66 +12,66 @@ class UserSecureStorageManager(
         secureStorageManager.isKeyDataStored(username, SecureDataKey.SECRET_KEY)
 
     fun storeSecretKey(
-        session: Session,
+        localKey: LocalKey,
+        username: Username,
         data: String
     ) {
-        session.localKey.use {
+        localKey.use {
             secureStorageManager.storeKeyData(
                 data.encodeToByteArray(),
                 SecureDataKey.SECRET_KEY,
-                session.username,
+                username,
                 it
             )
         }
     }
 
-    fun storeSettings(session: Session, data: String) {
-        session.localKey.use {
+    fun storeSettings(localKey: LocalKey, username: Username, data: String) {
+        localKey.use {
             secureStorageManager.storeKeyData(
                 data.encodeToByteArray(),
                 SecureDataKey.SETTINGS,
-                session.username,
+                username,
                 it
             )
         }
     }
 
-    fun readSettings(session: Session): String? =
-        session.localKey.use {
-            secureStorageManager.getKeyData(SecureDataKey.SETTINGS, session.username, it)?.decodeUtf8ToString()
+    fun readSettings(localKey: LocalKey, username: Username): String? =
+        localKey.use {
+            secureStorageManager.getKeyData(SecureDataKey.SETTINGS, username, it)?.decodeUtf8ToString()
         }
 
-    fun storeRsaPrivateKey(session: Session, data: String) {
-        session.localKey.use {
+    fun storeRsaPrivateKey(localKey: LocalKey, username: Username, data: String) {
+        localKey.use {
             secureStorageManager.storeKeyData(
                 data.encodeToByteArray(),
                 SecureDataKey.RSA_PRIVATE_KEY,
-                session.username,
+                username,
                 it
             )
         }
     }
 
-    fun readRsaPrivateKey(session: Session): String? =
-        session.localKey.use {
-            secureStorageManager.getKeyData(SecureDataKey.RSA_PRIVATE_KEY, session.username, it)?.decodeUtf8ToString()
+    fun readRsaPrivateKey(localKey: LocalKey, username: Username): String? =
+        localKey.use {
+            secureStorageManager.getKeyData(SecureDataKey.RSA_PRIVATE_KEY, username, it)?.decodeUtf8ToString()
         }
 
-    fun storePin(session: Session?, data: String) {
-        session ?: return
-        session.localKey.use {
+    fun storePin(localKey: LocalKey, username: Username, data: String) {
+        localKey.use {
             secureStorageManager.storeKeyData(
                 data.encodeToByteArray(),
                 SecureDataKey.PIN_CODE,
-                session.username,
+                username,
                 it
             )
         }
     }
 
-    fun readPin(session: Session): String? =
-        session.localKey.use {
-            secureStorageManager.getKeyData(SecureDataKey.PIN_CODE, session.username, it)
+    fun readPin(localKey: LocalKey, username: Username): String? =
+        localKey.use {
+            secureStorageManager.getKeyData(SecureDataKey.PIN_CODE, username, it)
                 ?.decodeUtf8ToString()
         }
 
@@ -80,12 +80,12 @@ class UserSecureStorageManager(
         secureStorageManager.removeKeyData(secureDataStorage, SecureDataKey.PIN_CODE)
     }
 
-    fun storeUserFeature(session: Session, data: String) =
-        session.localKey.use { secureStorageManager.storeKeyData(data.encodeToByteArray(), SecureDataKey.USER_FEATURE_FLIPS, session.username, it) }
+    fun storeUserFeature(localKey: LocalKey, username: Username, data: String) =
+        localKey.use { secureStorageManager.storeKeyData(data.encodeToByteArray(), SecureDataKey.USER_FEATURE_FLIPS, username, it) }
 
-    fun readUserFeature(session: Session): String? =
-        session.localKey.use {
-            secureStorageManager.getKeyData(SecureDataKey.USER_FEATURE_FLIPS, session.username, it)
+    fun readUserFeature(localKey: LocalKey, username: Username): String? =
+        localKey.use {
+            secureStorageManager.getKeyData(SecureDataKey.USER_FEATURE_FLIPS, username, it)
                 ?.decodeUtf8ToString()
         }
 
@@ -93,119 +93,110 @@ class UserSecureStorageManager(
         secureStorageManager.wipeUserData(username)
     }
 
-    fun storePremiumServerStatus(session: Session, data: String) {
-        session.localKey.use {
-            secureStorageManager.storeKeyData(data.encodeToByteArray(), SecureDataKey.LEGACY_PREMIUM_SERVER_RESPONSE, session.username, it)
-        }
-    }
-
-    fun readPremiumServerStatus(session: Session): String? =
-        session.localKey.use { secureStorageManager.getKeyData(SecureDataKey.LEGACY_PREMIUM_SERVER_RESPONSE, session.username, it) }
-            ?.decodeUtf8ToString()
-
     fun storeAccountStatus(
-        session: Session,
+        localKey: LocalKey,
+        username: Username,
         jsonStatus: String
     ) {
-        session.localKey.use { lk ->
+        localKey.use { lk ->
             secureStorageManager.storeKeyData(
                 keyData = jsonStatus.encodeToByteArray(),
                 keyIdentifier = SecureDataKey.ACCOUNT_STATUS_CACHE,
-                username = session.username,
+                username = username,
                 localKey = lk
             )
         }
     }
 
-    fun readAccountStatus(session: Session): String? =
-        session.localKey.use { lk ->
+    fun readAccountStatus(localKey: LocalKey, username: Username): String? =
+        localKey.use { lk ->
             secureStorageManager.getKeyData(
                 keyIdentifier = SecureDataKey.ACCOUNT_STATUS_CACHE,
-                username = session.username,
+                username = username,
                 localKey = lk
             )
         }?.decodeUtf8ToString()
 
-    fun storeDeviceAnalyticsId(session: Session, id: String?) {
+    fun storeDeviceAnalyticsId(localKey: LocalKey, username: Username, id: String?) {
         if (id == null) {
-            val secureDataStorage = secureStorageManager.getSecureDataStorage(session.username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
+            val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
             secureStorageManager.removeKeyData(secureDataStorage, SecureDataKey.DEVICE_ANALYTICS_ID)
         } else {
             secureStorageManager.storeKeyData(
-                id.encodeUtf8ToByteArray(),
-                SecureDataKey.DEVICE_ANALYTICS_ID,
-                session.username,
-                session.localKey
+                keyData = id.encodeUtf8ToByteArray(),
+                keyIdentifier = SecureDataKey.DEVICE_ANALYTICS_ID,
+                username = username,
+                localKey = localKey
             )
         }
     }
 
-    fun readDeviceAnalyticsId(session: Session): String? {
+    fun readDeviceAnalyticsId(localKey: LocalKey, username: Username): String? {
         return secureStorageManager.getKeyData(
             SecureDataKey.DEVICE_ANALYTICS_ID,
-            session.username,
-            session.localKey
+            username,
+            localKey
         )?.decodeUtf8ToString()
     }
 
-    fun storeUserAnalyticsId(session: Session, id: String?) {
+    fun storeUserAnalyticsId(localKey: LocalKey, username: Username, id: String?) {
         if (id == null) {
-            val secureDataStorage = secureStorageManager.getSecureDataStorage(session.username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
+            val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
             secureStorageManager.removeKeyData(secureDataStorage, SecureDataKey.USER_ANALYTICS_ID)
         } else {
             secureStorageManager.storeKeyData(
-                id.encodeUtf8ToByteArray(),
-                SecureDataKey.USER_ANALYTICS_ID,
-                session.username,
-                session.localKey
+                keyData = id.encodeUtf8ToByteArray(),
+                keyIdentifier = SecureDataKey.USER_ANALYTICS_ID,
+                username = username,
+                localKey = localKey
             )
         }
     }
 
-    fun readUserAnalyticsId(session: Session): String? {
+    fun readUserAnalyticsId(localKey: LocalKey, username: Username): String? {
         return secureStorageManager.getKeyData(
             SecureDataKey.USER_ANALYTICS_ID,
-            session.username,
-            session.localKey
+            username,
+            localKey
         )?.decodeUtf8ToString()
     }
 
-    fun storeUserActivity(session: Session, id: String?) {
+    fun storeUserActivity(localKey: LocalKey, username: Username, id: String?) {
         if (id == null) {
-            val secureDataStorage = secureStorageManager.getSecureDataStorage(session.username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
+            val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
             secureStorageManager.removeKeyData(secureDataStorage, SecureDataKey.USER_ACTIVITY)
         } else {
             secureStorageManager.storeKeyData(
                 id.encodeUtf8ToByteArray(),
                 SecureDataKey.USER_ACTIVITY,
-                session.username,
-                session.localKey
+                username,
+                localKey
             )
         }
     }
 
-    fun readUserActivity(session: Session): String? {
+    fun readUserActivity(localKey: LocalKey, username: Username): String? {
         return secureStorageManager.getKeyData(
-            SecureDataKey.USER_ACTIVITY,
-            session.username,
-            session.localKey
+            keyIdentifier = SecureDataKey.USER_ACTIVITY,
+            username = username,
+            localKey = localKey
         )?.decodeUtf8ToString()
     }
 
-    fun storeCurrentSpaceFilter(session: Session, filterId: String) {
+    fun storeCurrentSpaceFilter(localKey: LocalKey, username: Username, filterId: String) {
         secureStorageManager.storeKeyData(
-            filterId.encodeUtf8ToByteArray(),
-            SecureDataKey.CURRENT_SPACE_ID_FILTER,
-            session.username,
-            session.localKey
+            keyData = filterId.encodeUtf8ToByteArray(),
+            keyIdentifier = SecureDataKey.CURRENT_SPACE_ID_FILTER,
+            username = username,
+            localKey = localKey
         )
     }
 
-    fun readCurrentSpaceFilter(session: Session): String? {
+    fun readCurrentSpaceFilter(localKey: LocalKey, username: Username): String? {
         return secureStorageManager.getKeyData(
-            SecureDataKey.CURRENT_SPACE_ID_FILTER,
-            session.username,
-            session.localKey
+            keyIdentifier = SecureDataKey.CURRENT_SPACE_ID_FILTER,
+            username = username,
+            localKey = localKey
         )?.decodeUtf8ToString()
     }
 }

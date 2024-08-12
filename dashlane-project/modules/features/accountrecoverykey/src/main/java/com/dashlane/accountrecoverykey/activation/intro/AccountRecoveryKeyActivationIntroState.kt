@@ -1,6 +1,6 @@
 package com.dashlane.accountrecoverykey.activation.intro
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 
 sealed class AccountRecoveryKeyActivationIntroState {
     abstract val data: AccountRecoveryKeyActivationIntroData

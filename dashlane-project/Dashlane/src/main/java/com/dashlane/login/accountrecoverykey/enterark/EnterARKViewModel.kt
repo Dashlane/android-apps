@@ -3,7 +3,7 @@ package com.dashlane.login.accountrecoverykey.enterark
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
@@ -11,8 +11,8 @@ import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.definitions.UseKeyErrorName
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
-import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.login.root.LoginDestination.LOGIN_KEY
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,7 +36,7 @@ class EnterARKViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val login = savedStateHandle.get<String>(LoginAccountRecoveryNavigation.LOGIN_KEY) ?: throw IllegalStateException("Email is empty")
+    private val login = savedStateHandle.get<String>(LOGIN_KEY) ?: throw IllegalStateException("Email is empty")
 
     private val stateFlow: MutableStateFlow<EnterARKState>
     val uiState: StateFlow<EnterARKState>

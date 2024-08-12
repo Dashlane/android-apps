@@ -64,7 +64,7 @@ open class TeamspaceForceDeletionSharingWorker @Inject constructor(
         dataSaver.save(updated)
     }
 
-    private fun getItemGroups(
+    private suspend fun getItemGroups(
         itemsUidToRevoke: List<String>
     ): List<ItemGroup> {
         val allItemGroups = sharingDao.loadAllItemGroup()

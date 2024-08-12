@@ -57,7 +57,7 @@ class CredentialLoaderImpl @Inject constructor(
     }
 
     override fun loadSyncObject(itemId: String): VaultItem<SyncObject>? {
-        return vaultDataQuery.query(
+        return vaultDataQuery.queryLegacy(
             vaultFilter {
                 specificUid(itemId)
             }

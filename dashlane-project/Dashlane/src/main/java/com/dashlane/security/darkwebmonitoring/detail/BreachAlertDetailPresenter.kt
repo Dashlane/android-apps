@@ -12,14 +12,15 @@ import com.dashlane.security.darkwebmonitoring.DarkWebMonitoringAlertViewModel
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.security.identitydashboard.breach.getDataInvolvedFormatted
 import com.dashlane.util.getFormattedSpannable
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.util.setCurrentPageView
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.presenter.BasePresenter
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,7 +31,9 @@ class BreachAlertDetailPresenter @Inject constructor(
     private val fragmentLifecycleCoroutineScope: CoroutineScope,
     private val viewModel: DarkWebMonitoringAlertViewModel,
     private val navigator: Navigator,
-    private val logger: BreachAlertDetail.Logger
+    private val logger: BreachAlertDetail.Logger,
+    @MainCoroutineDispatcher
+    private val mainDispatcher: CoroutineDispatcher
 ) : BasePresenter<BreachAlertDetail.DataProvider, BreachAlertDetail.ViewProxy>(), BreachAlertDetail.Presenter {
 
     private var breachWrapper = initialBreach
@@ -62,7 +65,7 @@ class BreachAlertDetailPresenter @Inject constructor(
         setupAdvices()
 
         if (breachWrapper.localBreach.status != SyncObject.SecurityBreach.Status.SOLVED && !hasFollowedAdvice) {
-            fragmentLifecycleCoroutineScope.launch(Dispatchers.Main) {
+            fragmentLifecycleCoroutineScope.launch {
                 provider.markAsViewed(breachWrapper)
             }
         }
@@ -70,7 +73,7 @@ class BreachAlertDetailPresenter @Inject constructor(
 
     override fun onResume() {
         if (hasFollowedAdvice) {
-            reload()
+            viewModel.refresh()
             hasFollowedAdvice = false
         }
     }
@@ -171,7 +174,7 @@ class BreachAlertDetailPresenter @Inject constructor(
                     passwordAdvice = view.resources.getString(R.string.dwm_alert_detail_advice_password)
                     passwordAdviceButton = view.resources.getString(R.string.dwm_alert_detail_change_password_cta)
                     passwordAdviceButtonAction = {
-                        fragmentLifecycleCoroutineScope.launch(Dispatchers.Main) {
+                        fragmentLifecycleCoroutineScope.launch(mainDispatcher) {
                             val itemId = breachWrapper.linkedAuthentifiant.first()
                             val credential = provider.getCredential(itemId)
                             val userName = credential?.login ?: credential?.email
@@ -208,9 +211,9 @@ class BreachAlertDetailPresenter @Inject constructor(
                 false,
                 view.resources.getString(R.string.dwm_alert_detail_mark_done_cta)
             ) {
-                fragmentLifecycleCoroutineScope.launch(Dispatchers.Main) {
+                fragmentLifecycleCoroutineScope.launch(mainDispatcher) {
                     provider.markAsResolved(breachWrapper)
-                    reload()
+                    viewModel.refresh()
                 }
             }
         }
@@ -237,27 +240,15 @@ class BreachAlertDetailPresenter @Inject constructor(
 
     override fun deleteBreach(activityLifecycleScope: LifecycleCoroutineScope) {
         logger.logDelete(breachWrapper)
-        fragmentLifecycleCoroutineScope.launch(Dispatchers.Main) {
+        fragmentLifecycleCoroutineScope.launch(mainDispatcher) {
             provider.deleteBreach(breachWrapper)
             view.showUndoDeletion(activity!!) {
-                activityLifecycleScope.launch(Dispatchers.Main) {
+                activityLifecycleScope.launch(mainDispatcher) {
                     provider.restoreBreach(breachWrapper)
-                    viewModel.darkwebBreaches.value = provider.getDarkwebBreaches()
+                    viewModel.refresh()
                 }
             }
             navigator.popBackStack()
-        }
-    }
-
-    private fun reload() {
-        fragmentLifecycleCoroutineScope.launch {
-            val breaches = provider.getDarkwebBreaches()
-            viewModel.darkwebBreaches.value = breaches
-            breaches.find {
-                breachWrapper.localBreach.breachId == it.localBreach.breachId && breachWrapper.publicBreach == it.publicBreach
-            }?.also {
-                breachWrapper = it
-            }
         }
     }
 }

@@ -3,8 +3,8 @@ package com.dashlane.crashreport.reporter
 import android.content.Context
 import com.dashlane.BuildConfig
 import com.dashlane.crashreport.CrashReporterManager
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.PackageUtilities.getInstallerOrigin
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid

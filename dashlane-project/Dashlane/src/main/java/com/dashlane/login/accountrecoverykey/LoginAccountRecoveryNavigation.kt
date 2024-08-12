@@ -7,12 +7,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.createaccount.passwordless.biometrics.BiometricsSetupScreen
-import com.dashlane.createaccount.passwordless.pincodesetup.PinSetupScreen
+import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.login.LoginStrategy
-import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.LOGIN_KEY
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.biometricsSetupDestination
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.changeMasterPasswordDestination
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryNavigation.emailTokenDestination
@@ -26,7 +25,9 @@ import com.dashlane.login.accountrecoverykey.intro.IntroScreen
 import com.dashlane.login.accountrecoverykey.recovery.RecoveryScreen
 import com.dashlane.login.pages.token.compose.LoginTokenScreen
 import com.dashlane.login.pages.totp.compose.LoginTotpScreen
+import com.dashlane.login.root.LoginDestination.LOGIN_KEY
 import com.dashlane.masterpassword.compose.ChangeMasterPasswordScreen
+import com.dashlane.pin.setup.PinSetupScreen
 import com.dashlane.util.compose.navigateAndPopupToStart
 
 object LoginAccountRecoveryNavigation {
@@ -38,8 +39,6 @@ object LoginAccountRecoveryNavigation {
     const val pinSetupDestination = "ark/pin"
     const val biometricsSetupDestination = "ark/biometric"
     const val changeMasterPasswordDestination = "ark/changeMasterPassword"
-
-    const val LOGIN_KEY = "login"
 }
 
 @Suppress("LongMethod")
@@ -55,6 +54,8 @@ fun LoginAccountRecoveryNavigation(
     val navController = rememberNavController()
     val login = registeredUserDevice.login
 
+    mainViewModel.updateAccountType(accountType)
+
     NavHost(
         startDestination = "$introDestination/{$LOGIN_KEY}",
         navController = navController
@@ -67,7 +68,6 @@ fun LoginAccountRecoveryNavigation(
                 viewModel = hiltViewModel(),
                 registeredUserDevice = registeredUserDevice,
                 authTicket = authTicket,
-                accountType = accountType,
                 goToARK = { navController.navigateAndPopupToStart("$enterARKDestination/$login") },
                 goToToken = { navController.navigateAndPopupToStart("$emailTokenDestination/$login") },
                 goToTOTP = { navController.navigateAndPopupToStart("$totpDestination/$login") },
@@ -96,7 +96,6 @@ fun LoginAccountRecoveryNavigation(
         ) {
             LoginTokenScreen(
                 viewModel = hiltViewModel(),
-                login = it.arguments?.getString(LOGIN_KEY) ?: "",
                 goToNext = { registeredUserDevice, authTicket ->
                     mainViewModel.deviceRegistered(registeredUserDevice, authTicket)
                     navController.navigate("$enterARKDestination/$login")
@@ -106,10 +105,13 @@ fun LoginAccountRecoveryNavigation(
         composable(route = "$totpDestination/{$LOGIN_KEY}", arguments = listOf(navArgument(LOGIN_KEY) { type = NavType.StringType })) {
             LoginTotpScreen(
                 viewModel = hiltViewModel(),
-                login = it.arguments?.getString(LOGIN_KEY) ?: "",
+                verificationMode = VerificationMode.OTP2,
                 goToNext = { registeredUserDevice, authTicket ->
                     mainViewModel.deviceRegistered(registeredUserDevice, authTicket)
                     navController.navigate("$enterARKDestination/$login")
+                },
+                goToPush = {
+                    
                 }
             )
         }
@@ -133,6 +135,7 @@ fun LoginAccountRecoveryNavigation(
         composable(route = pinSetupDestination) {
             PinSetupScreen(
                 viewModel = hiltViewModel(),
+                isCancellable = false,
                 onPinChosen = { pin ->
                     mainViewModel.pinSetup(pin)
                     navController.navigate(biometricsSetupDestination)

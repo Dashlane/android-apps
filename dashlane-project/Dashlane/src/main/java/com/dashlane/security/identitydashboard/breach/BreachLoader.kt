@@ -100,7 +100,7 @@ class BreachLoader @Inject constructor(
             SyncObject.SecurityBreach.Status.VIEWED,
             SyncObject.SecurityBreach.Status.SOLVED
         )
-        return vaultDataQuery.queryAll(filter)
+        return vaultDataQuery.queryAllLegacy(filter)
             .filterIsInstance<VaultItem<SyncObject.SecurityBreach>>()
             .filter { it.syncObject.status in breachStatusFilter }
     }
@@ -111,7 +111,7 @@ class BreachLoader @Inject constructor(
             specificDataType(SyncObjectType.AUTHENTIFIANT)
             forCurrentSpace()
         }
-        return vaultDataQuery.queryAll(filter).map { it.syncObject }.filterIsInstance<SyncObject.Authentifiant>()
+        return vaultDataQuery.queryAllLegacy(filter).map { it.syncObject }.filterIsInstance<SyncObject.Authentifiant>()
     }
 
     private fun toBreach(localBreach: AnalyzedBreach) =

@@ -10,8 +10,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.databinding.FragmentDarkwebMonitoringBinding
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
@@ -46,14 +46,14 @@ class DarkWebMonitoringFragment : AbstractContentFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         setCurrentPageView(AnyPage.TOOLS_DARK_WEB_MONITORING)
-        val view = inflater.inflate(R.layout.fragment_darkweb_monitoring, container, false)
+        val binding = FragmentDarkwebMonitoringBinding.inflate(layoutInflater, container, false)
         val viewProxy: DarkWebMonitoringContract.ViewProxy =
-            DarkWebMonitoringViewProxy(view, requireActivity() as DashlaneActivity)
+            DarkWebMonitoringViewProxy(binding, requireActivity() as DashlaneActivity)
         presenter.setView(viewProxy)
         setHasOptionsMenu(true)
-        return view
+        return binding.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -16,7 +16,7 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-class VaultItemCopyModule {
+object VaultItemCopyModule {
 
     @Provides
     fun providersVaultItemCopyService(impl: VaultItemCopyServiceImpl): VaultItemCopyService = impl

@@ -55,10 +55,6 @@
     <string name="and_accessibility_secret_transfer_qrcode">Scan QR Code</string>
 
     
-    <string name="and_accessibility_text_edit_reveal">Reveal</string>
-    
-    <string name="and_accessibility_text_edit_hide">Hide</string>
-    
     <string name="and_accessibility_action_text_clear">Clear</string>
     
     <string name="and_accessibility_content_desc_fingerprint_logo">Fingerprint</string>

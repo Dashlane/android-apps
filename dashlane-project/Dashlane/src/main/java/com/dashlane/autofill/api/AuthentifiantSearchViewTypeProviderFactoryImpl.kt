@@ -5,8 +5,8 @@ import com.dashlane.search.MatchedSearchResult
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.ui.adapters.text.factory.SearchListTextResolver
 import com.dashlane.ui.screens.fragments.search.ui.SearchItemWrapper
+import com.dashlane.search.textfactory.SearchListTextResolver
 import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
 

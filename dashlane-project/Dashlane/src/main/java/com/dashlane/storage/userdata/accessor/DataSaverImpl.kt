@@ -13,10 +13,10 @@ import com.dashlane.vault.model.copyWithSpaceId
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.objectType
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class DataSaverImpl @Inject constructor(
@@ -112,7 +112,7 @@ class DataSaverImpl @Inject constructor(
                     specificUid(items.map { it.uid })
                     specificDataType(dataType)
                 }
-                vaultDataQuery.queryAll(filter)
+                vaultDataQuery.queryAllLegacy(filter)
             }.flatten()
         val newItems = itemsToSave.filterExistingItems(existingItems)
         return existingItems to newItems

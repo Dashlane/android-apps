@@ -5,54 +5,33 @@ import android.view.LayoutInflater
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
-import com.dashlane.network.webservices.authentication.GetTokenService
-import com.dashlane.notification.model.TokenNotificationHandler
+import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.util.isNotSemanticallyNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.IOException
 
 class TokenChecker(
-    private val getTokenService: GetTokenService,
-    private val tokenNotificationHandler: TokenNotificationHandler,
-    private val loginTokensModule: LoginTokensModule
+    private val loginTokensModule: LoginTokensModule,
+    private val developerInfoLogger: DeveloperInfoLogger,
 ) {
 
-    fun checkAndDisplayTokenIfNeeded(activity: DashlaneActivity, username: String, uki: String) {
+    fun checkAndDisplayTokenIfNeeded(activity: DashlaneActivity, username: String) {
         activity.lifecycleScope.launch(Dispatchers.Main) {
-            retrieveToken(username, uki)?.let {
-                val pushToken = loginTokensModule.tokenHashmap[username]
-                if (pushToken != null) {
-                    pushToken.setShown()
-                    pushToken.clearNotification(activity)
-                    loginTokensModule.tokenHashmap.remove(username)
-                    loginTokensModule.tokenShouldNotifyHashmap[username] = false
-                }
-                showTokenDialog(activity, it)
-            }
-        }
-    }
+            val pushToken = loginTokensModule.tokenHashmap[username]
+            if (pushToken != null) {
+                pushToken.clearNotification(activity)
+                loginTokensModule.tokenHashmap.remove(username)
 
-    private suspend fun retrieveToken(username: String, uki: String): String? = withContext(Dispatchers.Default) {
-        
-        val lastToken = tokenNotificationHandler.lastTokenForCurrentUser
-        if (lastToken.isNotSemanticallyNull()) {
-            tokenNotificationHandler.removeSavedToken()
-            lastToken
-        } else {
-            val currentToken = loginTokensModule.tokenHashmap[username]
-            
-            if (currentToken == null || currentToken.needWebserviceCall()) {
-                try {
-                    getTokenService.execute(username, uki).content?.token
-                } catch (e: IOException) {
-                    null
+                val token = pushToken.token
+                if (token != null) {
+                    showTokenDialog(activity, token)
+                } else {
+                    developerInfoLogger.log(
+                        action = "token_checker",
+                        message = "can't display dialog because token is null"
+                    )
                 }
-            } else {
-                currentToken.token
             }
         }
     }

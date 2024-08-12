@@ -6,26 +6,17 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.SpaceColor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
-internal fun SummaryObject.spaceData(teamSpaceAccessorProvider: TeamSpaceAccessorProvider): SpaceData? {
-    val teamSpaceAccessor = teamSpaceAccessorProvider.get() ?: return null
-
-    val teamspace = if (teamSpaceAccessor.canChangeTeamspace) {
-        teamSpaceAccessor.availableSpaces.minus(TeamSpace.Combined).find { it.teamId == spaceId } ?: TeamSpace.Personal
-    } else {
-        null
-    }
-    return teamspace?.spaceData()
-}
+internal fun SummaryObject.spaceData(teamSpaceAccessorProvider: TeamSpaceAccessorProvider): SpaceData? =
+    spaceData(spaceId, teamSpaceAccessorProvider)
 
 internal fun businessSpaceData(teamSpaceAccessorProvider: TeamSpaceAccessorProvider) =
     teamSpaceAccessorProvider.get()?.availableSpaces
         ?.minus(setOf(TeamSpace.Combined, TeamSpace.Personal))?.first()?.spaceData()
 
 internal fun SyncObject.Collection.spaceData(teamSpaceAccessorProvider: TeamSpaceAccessorProvider) =
-    toSummary<SummaryObject.Collection>().spaceData(teamSpaceAccessorProvider)
+    spaceData(spaceId, teamSpaceAccessorProvider)
 
 private fun TeamSpace.spaceData() = SpaceData(
     spaceLetter = displayLetter,
@@ -37,6 +28,18 @@ private fun TeamSpace.spaceData() = SpaceData(
     },
     businessSpace = teamId != TeamSpace.Personal.teamId
 )
+
+private fun spaceData(spaceId: String?, teamSpaceAccessorProvider: TeamSpaceAccessorProvider): SpaceData? {
+    val teamSpaceAccessor = teamSpaceAccessorProvider.get() ?: return null
+
+    val teamspace = if (teamSpaceAccessor.canChangeTeamspace) {
+        teamSpaceAccessor.availableSpaces.minus(TeamSpace.Combined)
+            .find { it.teamId == spaceId } ?: TeamSpace.Personal
+    } else {
+        null
+    }
+    return teamspace?.spaceData()
+}
 
 data class SpaceData(
     val spaceLetter: Char,

@@ -22,7 +22,6 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.toItemType
 import com.dashlane.xml.domain.SyncObject
-import com.skocken.presentation.provider.BaseDataProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -36,9 +35,9 @@ class DeleteVaultItemProvider @Inject constructor(
     private val deleteFileManager: DeleteFileManager,
     private val sharingPolicy: SharingPolicyDataProvider,
     private val dataSync: DataSync
-) : BaseDataProvider<DeleteVaultItemContract.Presenter>(), DeleteVaultItemContract.DataProvider {
+) {
 
-    override suspend fun deleteItem(itemId: String): Boolean {
+    suspend fun deleteItem(itemId: String): Boolean {
         val itemFilter = vaultFilter {
             specificUid(itemId)
         }

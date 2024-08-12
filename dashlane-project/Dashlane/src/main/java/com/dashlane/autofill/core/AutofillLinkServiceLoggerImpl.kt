@@ -1,9 +1,9 @@
 package com.dashlane.autofill.core
 
-import com.dashlane.autofill.rememberaccount.view.AutofillLinkServiceLogger
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
+import com.dashlane.autofill.rememberaccount.view.AutofillLinkServiceLogger
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.Sha256Hash
 import com.dashlane.hermes.generated.definitions.Action
@@ -39,7 +39,11 @@ class AutofillLinkServiceLoggerImpl @Inject constructor(
             is WebDomainFormSource -> Field.ASSOCIATED_WEBSITES_LIST
         }
         logRepository.queueEvent(
-            CallToAction(false, listOf(LINK_WEBSITE, DO_NOT_LINK_WEBSITE), LINK_WEBSITE)
+            CallToAction(
+                hasChosenNoAction = false,
+                callToActionList = listOf(LINK_WEBSITE, DO_NOT_LINK_WEBSITE),
+                chosenAction = LINK_WEBSITE,
+            )
         )
         logRepository.queueEvent(
             UpdateVaultItem(
@@ -70,7 +74,11 @@ class AutofillLinkServiceLoggerImpl @Inject constructor(
 
     override fun logLinkServiceRefused() {
         logRepository.queueEvent(
-            CallToAction(false, listOf(LINK_WEBSITE, DO_NOT_LINK_WEBSITE), DO_NOT_LINK_WEBSITE)
+            CallToAction(
+                hasChosenNoAction = false,
+                callToActionList = listOf(LINK_WEBSITE, DO_NOT_LINK_WEBSITE),
+                chosenAction = DO_NOT_LINK_WEBSITE,
+            )
         )
     }
 

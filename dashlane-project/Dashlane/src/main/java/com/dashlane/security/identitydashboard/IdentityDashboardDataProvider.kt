@@ -6,9 +6,9 @@ import com.dashlane.events.clearLastEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
 import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.skocken.presentation.provider.BaseDataProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -18,7 +18,6 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class IdentityDashboardDataProvider @Inject constructor(
-    private val creditMonitoringManager: CreditMonitoringManager,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
     private val appEvents: AppEvents,
@@ -36,10 +35,6 @@ class IdentityDashboardDataProvider @Inject constructor(
 
     override fun shouldIdentityRestorationBeVisible(): Boolean {
         return userFeaturesChecker.has(Capability.IDENTITYRESTORATION)
-    }
-
-    override suspend fun getCreditMonitoringLink(): String? {
-        return creditMonitoringManager.getLink()
     }
 
     override fun getAuthentifiantsSecurityInfoAsync(forceRefresh: Boolean): Deferred<AuthentifiantSecurityEvaluator.Result?> {

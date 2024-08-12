@@ -17,6 +17,8 @@ interface OffersLogger {
 
     fun onOfferListFinishing()
 
+    fun onManagePasswordClicked()
+
     fun showOfferDetails(
         productPeriodicity: ProductPeriodicity?,
         offerType: OfferType,

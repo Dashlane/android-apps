@@ -21,7 +21,7 @@ import com.dashlane.autofill.util.AutofillNavigationService
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.ToasterImpl
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint

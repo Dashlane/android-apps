@@ -20,8 +20,8 @@ import com.dashlane.url.assetlinks.UrlDomainAssetLinkService
 import com.dashlane.url.assetlinks.getAssetLinksOrNull
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject

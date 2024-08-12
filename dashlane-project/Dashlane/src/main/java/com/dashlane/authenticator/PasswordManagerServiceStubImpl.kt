@@ -56,6 +56,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.runBlocking
+import java.time.LocalDate
 
 @Singleton
 class PasswordManagerServiceStubImpl @Inject constructor(
@@ -80,6 +81,9 @@ class PasswordManagerServiceStubImpl @Inject constructor(
 ) {
     
     private val pairedCallingUids = CopyOnWriteArraySet<Int>()
+
+    val isPaired: Boolean
+        get() = pairedCallingUids.isNotEmpty()
 
     init {
         sessionManager.attach(object : SessionObserver {
@@ -108,7 +112,9 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     }
 
     override fun pairWithBiometric(): String? {
-        if (getState() != PasswordManagerState.PAIRABLE_BIOMETRIC) return null
+        val lockState = getState()
+        if (lockState != PasswordManagerState.PAIRABLE_BIOMETRIC && lockState != PasswordManagerState.BIOMETRIC_ENROLLMENT) return null
+        if (lockState == PasswordManagerState.BIOMETRIC_ENROLLMENT) userPreferencesManager.authenticatorEnrolledBiometric = true
         val userId = sessionManager.session?.userId ?: return null
         addPairedCallingUids()
         return userId
@@ -144,6 +150,12 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         return userId
     }
 
+    override fun unpair() {
+        userPreferencesManager.authenticatorInvalidatedBiometric = true
+        userPreferencesManager.authenticatorEnrolledBiometric = false
+        pairedCallingUids.clear()
+    }
+
     override fun setPushId(userId: String, pushId: String): Boolean {
         if (!getState().isPaired()) return false
 
@@ -169,7 +181,6 @@ class PasswordManagerServiceStubImpl @Inject constructor(
     }
 
     override fun getUserId(): String? {
-        if (!getState().isPaired()) return null
         return sessionManager.session?.userId
     }
 
@@ -198,7 +209,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
             if (hasOtp) filter { it.hasOtpUrl } else this
         }
 
-        return vaultDataQuery.queryAll(
+        return vaultDataQuery.queryAllLegacy(
             vaultFilter {
                 ignoreUserLock()
                 specificUid(items.map { it.id })
@@ -220,7 +231,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
             authentifiant.toVaultItem(creationDate)
         } else {
             vaultDataQuery
-                .query(
+                .queryLegacy(
                     VaultFilter().apply {
                         ignoreUserLock()
                         specificDataType(SyncObjectType.AUTHENTIFIANT)
@@ -268,7 +279,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
         if (!getState().isPaired() || authentifiant.id == null) return null
 
         val vaultItem = vaultDataQuery
-            .query(
+            .queryLegacy(
                 VaultFilter().apply {
                     ignoreUserLock()
                     specificUid(authentifiant.id!!)
@@ -302,7 +313,13 @@ class PasswordManagerServiceStubImpl @Inject constructor(
 
     private fun getLockTypeStatePaired(): PasswordManagerState {
         return when (lockManager.getLockType()) {
-            LockTypeManager.LOCK_TYPE_BIOMETRIC -> PasswordManagerState.PAIRED_BIOMETRIC
+            LockTypeManager.LOCK_TYPE_BIOMETRIC -> {
+                when {
+                    userPreferencesManager.authenticatorInvalidatedBiometric -> PasswordManagerState.NO_LOCK
+                    userPreferencesManager.authenticatorEnrolledBiometric -> PasswordManagerState.PAIRED_BIOMETRIC
+                    else -> PasswordManagerState.BIOMETRIC_ENROLLMENT
+                }
+            }
             LockTypeManager.LOCK_TYPE_PIN_CODE -> PasswordManagerState.PAIRED_PIN
             else -> PasswordManagerState.NO_LOCK
         }
@@ -310,7 +327,13 @@ class PasswordManagerServiceStubImpl @Inject constructor(
 
     private fun getLockTypeStatePairable(): PasswordManagerState {
         return when (lockManager.getLockType()) {
-            LockTypeManager.LOCK_TYPE_BIOMETRIC -> PasswordManagerState.PAIRABLE_BIOMETRIC
+            LockTypeManager.LOCK_TYPE_BIOMETRIC -> {
+                when {
+                    userPreferencesManager.authenticatorInvalidatedBiometric -> PasswordManagerState.NO_LOCK
+                    userPreferencesManager.authenticatorEnrolledBiometric -> PasswordManagerState.PAIRABLE_BIOMETRIC
+                    else -> PasswordManagerState.BIOMETRIC_ENROLLMENT
+                }
+            }
             LockTypeManager.LOCK_TYPE_PIN_CODE -> PasswordManagerState.PAIRABLE_PIN
             else -> PasswordManagerState.NO_LOCK
         }
@@ -403,5 +426,7 @@ class PasswordManagerServiceStubImpl @Inject constructor(
                     }
                 }
             }
+
+        val discontinuationDate = LocalDate.of(2024, 5, 13)
     }
 }

@@ -8,21 +8,18 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isPending
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import javax.inject.Inject
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class SharingInvitationRepositoryImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val sharingDao: SharingDao,
     @DefaultCoroutineDispatcher
     private val defaultDispatcher: CoroutineDispatcher,
-    private val userFeaturesChecker: UserFeaturesChecker,
     private val sharingUserDataUtils: SharingUserDataUtils,
 ) : SharingInvitationRepository {
 
@@ -77,9 +74,6 @@ class SharingInvitationRepositoryImpl @Inject constructor(
     }
 
     private suspend fun loadCollections() = withContext(defaultDispatcher) {
-        if (!userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
-            return@withContext emptyList()
-        }
         sharingDao.loadAllCollection()
     }
 

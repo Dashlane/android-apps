@@ -5,10 +5,10 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.databinding.SharingPendingInvitationLayoutBinding
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.sharing.model.getUser
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
-import com.dashlane.ui.drawable.CircleDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class SharingInvitationCollection(
@@ -53,14 +53,8 @@ class SharingInvitationCollection(
             val accept = viewBinding.sharingPendingInviteBtnAccept
             val refuse = viewBinding.sharingPendingInviteBtnRefuse
             viewBinding.sharingPendingInviteIconRound.apply {
-                setImageDrawable(
-                    CircleDrawable.with(
-                        context = context,
-                        backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
-                        drawableRes = R.drawable.ic_folder_outlined,
-                        drawableTintColorRes = R.color.text_brand_standard
-                    )
-                )
+                thumbnailType = ThumbnailViewType.ICON.value
+                iconRes = R.drawable.ic_collection_outlined
                 isVisible = true
             }
             viewBinding.sharingPendingInviteIcon.isVisible = false

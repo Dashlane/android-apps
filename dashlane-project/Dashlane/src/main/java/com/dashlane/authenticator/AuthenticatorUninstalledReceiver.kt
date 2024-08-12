@@ -10,7 +10,7 @@ import com.dashlane.server.api.endpoints.authenticator.exceptions.AuthenticatorD
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +39,7 @@ class AuthenticatorUninstalledReceiver : BroadcastReceiver() {
             unSetAuthenticatorService: UnSetAuthenticatorService
         ) {
             val prefs = userPreferencesManager.preferencesFor(session.username)
+            prefs.authenticatorEnrolledBiometric = false
             if (prefs.registeredAuthenticatorPushId == null) {
                 
                 return

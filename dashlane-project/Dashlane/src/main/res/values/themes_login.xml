@@ -12,4 +12,8 @@
         <item name="colorBiometricText">@color/text_inverse_catchy</item>
     </style>
 
+    <style name="Theme.Dashlane.Login.Compose" parent="Theme.Dashlane.Login.TranslucentWindow">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
 </resources>

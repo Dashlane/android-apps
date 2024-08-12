@@ -25,6 +25,9 @@ class InAppLoginIntroActivity : DashlaneActivity() {
     lateinit var globalPreferencesManager: GlobalPreferencesManager
 
     @Inject
+    lateinit var navigator: Navigator
+
+    @Inject
     lateinit var autoFillNotificationCreator: AutoFillNotificationCreator
 
     override fun onCreate(savedInstanceState: Bundle?) {

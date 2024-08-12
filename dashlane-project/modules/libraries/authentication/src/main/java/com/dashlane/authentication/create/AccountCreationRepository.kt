@@ -8,8 +8,8 @@ import com.dashlane.authentication.TermsOfService
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.SharingKeys
 import com.dashlane.server.api.endpoints.AccountType
-import com.dashlane.session.AppKey
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 
 interface AccountCreationRepository {

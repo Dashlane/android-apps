@@ -38,6 +38,12 @@
     
     <string name="collection_edit_title">Edit collection</string>
     
+    <string name="collection_edit_shared_error_generic">An error occurred. Please try again later.</string>
+    
+    <string name="collection_error_sharing_collection_containing_items_with_attachments">Unable to share collections containing secure notes with attachments.</string>
+    
+    <string name="collection_delete_shared_error_generic">An error occurred. Please try again later.</string>
+    
     <string name="collection_add_collection_name_field_label">Collection name</string>
     
     <string name="collection_add_collection_space_field_label">Space</string>
@@ -86,10 +92,6 @@
         <item quantity="one">%1$d user</item>
         <item quantity="other">%1$d users</item>
     </plurals>
-    
-    <string name="collection_new_share_infobox_title">Permissions</string>
-    
-    <string name="collection_new_share_infobox_description">Selected groups and individuals can share, edit, and manage access to the Collection. The items shared within the Collection will be granted Full Rights.</string>
     <string name="collection_new_share_groups_section_title">Groups</string>
     <string name="collection_new_share_individuals_section_title">Individuals</string>
     <string name="collection_new_share_title">Share Collection</string>
@@ -137,9 +139,27 @@
     
     <string name="collection_new_share_infobox_title_roles">Permissions</string>
     
-    <string name="collection_new_share_infobox_description_roles">Selected users will default to the Manager role and can share, edit, and manage access to the Collection. To share with an Editor role, please use the Web App.</string>
+    <string name="collection_new_share_infobox_description_roles">Selected users will default to the Manager role and can manage access to the Collection. To share with an Editor role, use the Web App.</string>
     
     <string name="collection_shared_access_infobox_title_roles">Permissions</string>
     
     <string name="collection_shared_access_infobox_description_roles">Editor role cannot manage or revoke access to the Shared Collection.</string>
+    
+    <string name="collections_revoke_to_delete_dialog_title">Unable to Delete</string>
+    
+    <string name="collections_revoke_to_delete_dialog_text">Unable to delete this shared Collection since it is shared with other users and groups. Please revoke access from the other users and groups before deleting.</string>
+    
+    <string name="collections_revoke_to_delete_dialog_positive_button">Revoke access</string>
+    
+    <string name="collections_revoke_to_delete_dialog_negative_button">Cancel</string>
+    
+    <string name="collection_detail_section_title_logins">Logins</string>
+    
+    <string name="collection_detail_section_title_secure_notes">Secure notes</string>
+    
+    <string name="collection_detail_dialog_limited_title">Insufficient Permissions</string>
+    
+    <string name="collection_detail_dialog_limited_description">You only have limited right
+    permission to this item. Adding this item to a shared collection requires full rights
+        on the item.</string>
 </resources>

@@ -72,7 +72,7 @@ class AccountStatusRepositoryImpl @Inject constructor(
     override suspend fun refreshFor(session: Session): Boolean {
         return runCatching {
             val accountStatus = accountStatusService.fetchAccountStatus(session)
-            if (!accountStatusStorage.saveAccountStatus(session, accountStatus)) {
+            if (!accountStatusStorage.saveAccountStatus(session.localKey, session.username, accountStatus)) {
                 throw IOException("PremiumStatus update failed")
             }
             updateAccountStatusForSession(session, accountStatus)
@@ -84,7 +84,7 @@ class AccountStatusRepositoryImpl @Inject constructor(
     }
 
     override suspend fun reloadStatus(session: Session): AccountStatus {
-        val status = accountStatusStorage.readAccountStatus(session) ?: DEFAULT_ACCOUNT_STATUS
+        val status = accountStatusStorage.readAccountStatus(session.localKey, session.username) ?: DEFAULT_ACCOUNT_STATUS
         updateAccountStatusForSession(session, status)
         return status
     }

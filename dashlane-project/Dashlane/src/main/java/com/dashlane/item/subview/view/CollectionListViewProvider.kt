@@ -73,8 +73,7 @@ object CollectionListViewProvider {
                 if (collections.value.isNotEmpty()) {
                     CategoryChipList {
                         collections.value.forEach { collection ->
-                            val canDelete = !collection.shared || item.canUpdateSharedCollection
-                            val editMode = item.editMode && canDelete
+                            val editMode = item.editMode
                             CategoryChip(
                                 label = collection.name,
                                 editMode = editMode,

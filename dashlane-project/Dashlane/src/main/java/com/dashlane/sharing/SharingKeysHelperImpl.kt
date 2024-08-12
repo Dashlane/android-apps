@@ -18,8 +18,8 @@ class SharingKeysHelperImpl @Inject constructor(
         }
 
     override var privateKey: String?
-        get() = sessionManager.session?.let(userSecureStorageManager::readRsaPrivateKey)
+        get() = sessionManager.session?.let { userSecureStorageManager.readRsaPrivateKey(it.localKey, it.username) }
         set(value) {
-            value?.let { sessionManager.session?.let { session -> userSecureStorageManager.storeRsaPrivateKey(session, it) } }
+            value?.let { sessionManager.session?.let { session -> userSecureStorageManager.storeRsaPrivateKey(session.localKey, session.username, it) } }
         }
 }

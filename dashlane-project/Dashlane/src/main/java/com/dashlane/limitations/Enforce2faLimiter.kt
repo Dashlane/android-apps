@@ -13,8 +13,8 @@ import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher

@@ -14,7 +14,7 @@ import com.dashlane.R
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.login.pages.secrettransfer.qrcode.DashlaneLogo
+import com.dashlane.ui.widgets.compose.DashlaneLogo
 import com.dashlane.ui.widgets.compose.Passphrase
 import com.dashlane.ui.widgets.compose.PassphraseLayout
 
@@ -29,7 +29,7 @@ fun PassphraseIdentificationScreen(
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
-        DashlaneLogo()
+        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
         Text(
             text = stringResource(id = R.string.login_universal_d2d_passphrase_identification_title),
             style = DashlaneTheme.typography.titleSectionLarge,
@@ -59,7 +59,7 @@ fun PassphraseVerificationScreenPreview() {
                 Passphrase.Word("carrot"),
                 Passphrase.Word("whales"),
                 Passphrase.Word("potatoes"),
-                Passphrase.Missing(value = "plant", userInput = "", isError = true),
+                Passphrase.Word("plant"),
                 Passphrase.Word("mascara")
             )
         )

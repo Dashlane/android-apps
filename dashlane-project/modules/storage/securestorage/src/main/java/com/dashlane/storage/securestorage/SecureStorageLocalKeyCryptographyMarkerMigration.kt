@@ -9,7 +9,7 @@ import com.dashlane.cryptography.changeCryptographyForBase64
 import com.dashlane.cryptography.createEncryptionEngine
 import com.dashlane.cryptography.generateFixedSalt
 import com.dashlane.cryptography.getCryptographyMarker
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.session.Session
 import com.dashlane.storage.securestorage.cryptography.FlexibleDecryptionEngineFactory
 import javax.inject.Inject
@@ -25,7 +25,7 @@ class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
     ) {
         val secureDataStorage =
             secureDataStorageFactory.create(session.username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED)
-        val cipheredLocalKey = secureDataStorage.read(SecureDataKey.LOCAL_KEY) ?: return
+        val cipheredLocalKey = secureDataStorage.readLegacy(SecureDataKey.LOCAL_KEY) ?: return
 
         val currentMarker = cipheredLocalKey.getCryptographyMarker()
 
@@ -39,7 +39,7 @@ class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
                 }
             }
         }
-        secureDataStorage.write(SecureDataKey.LOCAL_KEY, cipheredLocalKeyUpdatedMarker)
+        secureDataStorage.writeLegacy(SecureDataKey.LOCAL_KEY, cipheredLocalKeyUpdatedMarker)
     }
 
     private fun createEncryptionEngine(

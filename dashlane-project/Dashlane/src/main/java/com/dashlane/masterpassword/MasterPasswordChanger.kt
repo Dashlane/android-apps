@@ -1,8 +1,8 @@
 package com.dashlane.masterpassword
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.cryptography.CryptographyKeyGenerator
@@ -15,19 +15,19 @@ import com.dashlane.cryptography.use
 import com.dashlane.debug.DaDaDa
 import com.dashlane.exception.NotLoggedInException
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.crypto.keys.serverKeyUtf8Bytes
 import com.dashlane.login.LoginMode
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
-import com.dashlane.session.AppKey
 import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.session.UserDataRepository
-import com.dashlane.session.Username
-import com.dashlane.session.VaultKey
+import com.dashlane.user.Username
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.session.repository.getCryptographyMarkerOrDefault
-import com.dashlane.session.serverKeyUtf8Bytes
 import com.dashlane.storage.securestorage.LocalKeyRepository
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureDataStorage
@@ -129,7 +129,7 @@ class MasterPasswordChangerImpl @Inject constructor(
             
             val accountType = sessionManager.session?.username?.let { username -> userAccountStorage[username]?.accountType }
             return accountType != UserAccountInfo.AccountType.InvisibleMasterPassword &&
-                userDatabaseRepository.isRacletteDatabaseAccessible(session)
+                userDatabaseRepository.isRacletteDatabaseAccessibleLegacy(session)
         }
 
     override var job: Job? = null

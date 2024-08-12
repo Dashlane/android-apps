@@ -74,7 +74,7 @@
                 android:lines="1"
                 android:textColor="@color/text_neutral_catchy"
                 android:textSize="16sp"
-                tools:drawableEnd="@drawable/ic_clear"
+                tools:drawableEnd="@drawable/ic_action_clear_content_filled"
                 tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 

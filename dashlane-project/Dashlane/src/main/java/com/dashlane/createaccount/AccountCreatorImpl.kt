@@ -1,7 +1,7 @@
 package com.dashlane.createaccount
 
 import android.widget.EditText
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.authentication.TermsOfService
 import com.dashlane.authentication.create.AccountCreationRepository
@@ -22,19 +22,19 @@ import com.dashlane.notification.LocalNotificationCreator
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.server.api.endpoints.AccountType
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionResult
 import com.dashlane.session.SessionTrasher
-import com.dashlane.session.Username
-import com.dashlane.session.VaultKey
+import com.dashlane.user.Username
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -288,7 +288,7 @@ class AccountCreatorImpl @Inject constructor(
                 true
             )
 
-            userSecureStorageManager.storePin(session, pinCode)
+            userSecureStorageManager.storePin(session.localKey, session.username, pinCode)
             sessionCredentialsSaver.saveCredentials(session)
         }
 

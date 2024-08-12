@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.text.format.Formatter
 import android.view.View
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -21,30 +20,21 @@ class AttachmentViewHolder(val v: View) : EfficientViewHolder<AttachmentItem>(v)
         fun onIconClicked(item: AttachmentItem, position: Int)
     }
 
-    private val icon = findViewByIdEfficient<ImageView>(R.id.attachment_item_icon)!!
+    private val selectedIcon = findViewByIdEfficient<View>(R.id.attachment_item_selected)!!
+    private val icon = findViewByIdEfficient<View>(R.id.attachment_item_thumbnail)!!
     private val name = findViewByIdEfficient<TextView>(R.id.attachment_item_name)!!
     private val description = findViewByIdEfficient<TextView>(R.id.attachment_item_description)!!
     private val progressBar = findViewByIdEfficient<ProgressBar>(R.id.attachment_item_progress)!!
-    var iconClickListener: OnIconClickListener? = null
 
     override fun updateView(context: Context, item: AttachmentItem?) {
         item ?: return
-        icon.setOnClickListener {
-            iconClickListener?.onIconClicked(item, bindingAdapterPosition)
-        }
-        icon.setOnLongClickListener {
-            iconClickListener?.onIconClicked(item, bindingAdapterPosition)
-            true
-        }
 
         name.text = item.filename
         if (item.downloadState == AttachmentItem.DownloadState.DOWNLOADING) {
-            icon.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
             progressBar.progress = item.downloadProgress
             description.text = context.getString(R.string.downloading_file_progress, "${item.downloadProgress}%")
         } else {
-            icon.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
 
             val userModificationDatetime = item.userModificationDatetime
@@ -56,20 +46,16 @@ class AttachmentViewHolder(val v: View) : EfficientViewHolder<AttachmentItem>(v)
                     Formatter.formatShortFileSize(context, item.localSize!!)
                 )
             }
-            if (item.downloadState == AttachmentItem.DownloadState.DOWNLOADED) {
-                
-                icon.setImageResource(R.drawable.ic_attachment_clipboard_downloaded)
-            } else {
-                icon.setImageResource(R.drawable.ic_attachment_clipboard_default)
-            }
         }
 
         if (item.selected) {
             v.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.item_highlighted_background_tint))
-            icon.visibility = View.VISIBLE
+            icon.visibility = View.INVISIBLE
+            selectedIcon.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
-            icon.setImageResource(R.drawable.ic_attachment_selected)
         } else {
+            icon.visibility = View.VISIBLE
+            selectedIcon.visibility = View.GONE
             v.setBackgroundColor(Color.TRANSPARENT)
         }
     }

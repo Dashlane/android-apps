@@ -25,9 +25,9 @@ import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
@@ -296,7 +296,7 @@ class BreachManager @Inject constructor(
             ignoreUserLock()
             specificDataType(SyncObjectType.SECURITY_BREACH)
         }
-        return vaultDataQuery.queryAll(filter).filter { it.syncObject is SyncObject.SecurityBreach }
+        return vaultDataQuery.queryAllLegacy(filter).filter { it.syncObject is SyncObject.SecurityBreach }
             .map { it as VaultItem<SyncObject.SecurityBreach> }
             .associateBy { it.syncObject.breachId ?: "" }
     }
@@ -318,7 +318,7 @@ class BreachManager @Inject constructor(
             }
         }
 
-        return vaultDataQuery.queryAll(
+        return vaultDataQuery.queryAllLegacy(
             vaultFilter {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)

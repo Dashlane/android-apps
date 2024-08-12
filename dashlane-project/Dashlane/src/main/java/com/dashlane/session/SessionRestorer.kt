@@ -13,6 +13,8 @@ import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.cryptography.toObfuscated
 import com.dashlane.cryptography.use
 import com.dashlane.device.DeviceInfoRepository
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.login.LoginDataReset
 import com.dashlane.login.LoginMode
 import com.dashlane.login.lock.LockManager
@@ -23,6 +25,7 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureDataStorage
 import com.dashlane.storage.securestorage.SecureStorageManager
+import com.dashlane.user.Username
 import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.util.installlogs.DataLossTrackingLogger
 import dagger.Lazy
@@ -175,7 +178,7 @@ class SessionRestorer @Inject constructor(
 
             is AuthenticationDeviceRepository.AccessKeyStatus.Valid -> {
                 restoredSessionMigrationToSsoMemberInfo =
-                    accessKeyStatus.ssoInfo?.toMigrationToSsoMemberInfo(username.email)
+                    accessKeyStatus.ssoInfo?.toMigrationToSsoMemberInfo()
             }
         }
     }
@@ -193,7 +196,7 @@ class SessionRestorer @Inject constructor(
         migrateAccountManager(username)
 
         val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
-        val bytes = secureDataStorage.read(SecureDataKey.LOCAL_KEY)?.value?.decodeBase64ToByteArrayOrNull() ?: return null
+        val bytes = secureDataStorage.readLegacy(SecureDataKey.LOCAL_KEY)?.value?.decodeBase64ToByteArrayOrNull() ?: return null
 
         val localKeyBytes = try {
             cryptoObjectHelper.decrypt(CryptoObjectHelper.LocalKeyLock(username.email), bytes)

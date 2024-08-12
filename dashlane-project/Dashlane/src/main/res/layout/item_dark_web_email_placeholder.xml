@@ -8,19 +8,16 @@
     android:padding="@dimen/spacing_normal"
     >
 
-    <ImageView
+    <com.dashlane.design.component.compat.view.ThumbnailView
         android:id="@+id/icon"
-        android:layout_width="@dimen/list_sharing_item_content_icon_width"
-        android:layout_height="@dimen/list_sharing_item_content_icon_height"
-        android:background="@drawable/background_circle"
-        android:backgroundTint="@color/container_expressive_brand_quiet_idle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:importantForAccessibility="no"
-        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_empty_personalinfo"
-        app:tint="@color/text_brand_standard"
+        app:thumbnailSize="medium"
+        app:thumbnailType="userSingle"
         />
 
     <TextView

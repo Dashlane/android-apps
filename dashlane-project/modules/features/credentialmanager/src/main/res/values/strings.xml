@@ -10,4 +10,6 @@
     <string name="credential_manager_create_password_description">Save your password into Dashlane and use it securely from any platform</string>
     
     <string name="credential_manager_locked">Dashlane is locked</string>
+    
+    <string name="credential_manager_unknown">Unknown</string>
 </resources>

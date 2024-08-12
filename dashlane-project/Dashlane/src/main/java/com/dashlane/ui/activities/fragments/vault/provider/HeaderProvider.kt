@@ -2,7 +2,7 @@ package com.dashlane.ui.activities.fragments.vault.provider
 
 import android.content.Context
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.vault.util.IdentityNameHolderService
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 
 interface HeaderProvider {
     fun getHeaderFor(

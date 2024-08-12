@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.autofill.actionssources.model.ActionsSourcesDataProvider
 import com.dashlane.autofill.actionssources.model.ActionsSourcesError
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

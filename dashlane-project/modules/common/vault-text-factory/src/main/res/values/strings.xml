@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="incomplete_reason_missing_password_list_line_2">Add password</string>
+    <string name="incomplete">Incomplete</string>
+    <string name="item_expired">Expired</string>
+    <string name="secure_note_is_locked">Note is locked!</string>
+    <string name="item_expiring_soon">Expiring soon</string>
+</resources>

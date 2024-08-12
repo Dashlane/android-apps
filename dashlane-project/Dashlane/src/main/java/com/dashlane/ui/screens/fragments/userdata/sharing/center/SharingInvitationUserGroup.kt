@@ -5,10 +5,10 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.databinding.SharingPendingInvitationLayoutBinding
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.sharing.model.getUser
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
-import com.dashlane.ui.drawable.CircleDrawable
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class SharingInvitationUserGroup(
@@ -46,11 +46,10 @@ class SharingInvitationUserGroup(
         override fun updateView(context: Context, item: SharingInvitationUserGroup?) {
             item ?: return
             viewBinding.sharingPendingInviteTitle.text = item.displayTitle
-            updateViewUserGroup(context, item)
+            updateViewUserGroup(item)
         }
 
         private fun updateViewUserGroup(
-            context: Context,
             item: SharingInvitationUserGroup
         ) {
             val accept = viewBinding.sharingPendingInviteBtnAccept
@@ -59,14 +58,8 @@ class SharingInvitationUserGroup(
             val pendingInvite = item.groupInvite
             val userGroup = pendingInvite.userGroup
             viewBinding.sharingPendingInviteIconRound.apply {
-                setImageDrawable(
-                    CircleDrawable.with(
-                        context = context,
-                        backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
-                        drawableRes = R.drawable.ic_group_outlined,
-                        drawableTintColorRes = R.color.text_brand_standard
-                    )
-                )
+                thumbnailType = ThumbnailViewType.ICON.value
+                iconRes = R.drawable.ic_group_outlined
                 isVisible = true
             }
             viewBinding.sharingPendingInviteIcon.isVisible = false

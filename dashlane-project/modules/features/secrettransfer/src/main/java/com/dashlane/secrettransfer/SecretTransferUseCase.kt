@@ -1,15 +1,15 @@
 package com.dashlane.secrettransfer
 
-import com.dashlane.account.UserAccountInfo
-import com.dashlane.account.UserAccountInfo.AccountType
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.UserAccountInfo.AccountType
 import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.encodeUtf8ToByteArray
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.nitro.cryptography.sodium.SodiumCryptography
 import com.dashlane.passphrase.generator.PassphraseGenerator
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.authentication.AuthRegistrationExtraDeviceTokenGeneratorService
-import com.dashlane.session.AppKey
 import com.dashlane.ui.widgets.compose.Passphrase
 import kotlin.random.Random
 

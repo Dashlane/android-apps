@@ -17,7 +17,7 @@ fun SyncObject.SecureNoteType.getLabelId(): Int {
     }
 }
 
-fun SyncObject.SecureNoteType.getColorId(): Int {
+fun SyncObject.SecureNoteType?.getColorId(): Int {
     return when (this) {
         SyncObject.SecureNoteType.EARTH -> R.color.securenote_color_brown
         SyncObject.SecureNoteType.GRAY -> R.color.securenote_color_gray
@@ -27,8 +27,9 @@ fun SyncObject.SecureNoteType.getColorId(): Int {
         SyncObject.SecureNoteType.PURPLE -> R.color.securenote_color_purple
         SyncObject.SecureNoteType.YELLOW -> R.color.securenote_color_yellow
         SyncObject.SecureNoteType.GREEN -> R.color.securenote_color_green
-        SyncObject.SecureNoteType.NO_TYPE -> R.color.securenote_color_gray
         SyncObject.SecureNoteType.ORANGE -> R.color.securenote_color_orange
+        SyncObject.SecureNoteType.NO_TYPE,
+        null -> R.color.securenote_color_gray
     }
 }
 

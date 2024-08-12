@@ -5,22 +5,33 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import com.dashlane.R
+import com.dashlane.autofill.onboarding.OnboardingType
+import com.dashlane.autofill.phishing.AutofillPhishingLogger
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.autofill.onboarding.OnboardingType
+import com.dashlane.ui.screens.settings.item.SettingChange
 import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseAntiPhishing
 
 class SettingsGeneralAutoLoginList(
     private val context: Context,
     private val lockManager: LockManager,
+    private val frozenStateManager: FrozenStateManager,
     inAppLoginManager: InAppLoginManager,
     navigator: Navigator,
-    userPreferencesManager: UserPreferencesManager
+    userPreferencesManager: UserPreferencesManager,
+    userFeaturesChecker: UserFeaturesChecker,
+    autofillPhishingLogger: AutofillPhishingLogger,
 ) {
+
+    private val isAutofillEnabled = !frozenStateManager.isAccountFrozen
 
     private val autoLoginHeader =
         SettingHeader(context.getString(R.string.setting_in_app_login_category))
@@ -30,13 +41,23 @@ class SettingsGeneralAutoLoginList(
         override val id = "autologin-app"
         override val header = autoLoginHeader
         override val title = context.getString(R.string.setting_in_app_login_enabled_title)
-        override val description = context.getString(R.string.setting_in_app_login_enabled_description)
-        override fun isEnable() = true
+        override val description = if (frozenStateManager.isAccountFrozen) {
+            context.getString(R.string.setting_in_app_login_frozen_state_description)
+        } else {
+            context.getString(R.string.setting_in_app_login_enabled_description)
+        }
+
+        override fun isEnable() = isAutofillEnabled
         override fun isVisible() = true
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) = inAppLoginManager.isEnableForApp()
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
+            if (frozenStateManager.isAccountFrozen) {
+                navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+                return
+            }
+
             if (enable) {
                 navigator.goToInAppLogin()
             } else {
@@ -55,7 +76,7 @@ class SettingsGeneralAutoLoginList(
         override val header = autoLoginHeader
         override val title = context.getString(R.string.setting_in_app_login_browser_enabled_title)
         override val description = context.getString(R.string.setting_in_app_login_browser_enabled_description)
-        override fun isEnable() = true
+        override fun isEnable() = isAutofillEnabled
         override fun isVisible() = true
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
@@ -83,7 +104,8 @@ class SettingsGeneralAutoLoginList(
             navigator.goToAutofillPauseAndLinkedFromSettings()
     }
 
-    private val autoLoginInlineItem = object : SettingItem, SettingCheckable {
+    private val autoLoginInlineItem = object : SettingItem, SettingCheckable, SettingChange.Listenable {
+        override var listener: SettingChange.Listener? = null
         override val id = "inline-autologin"
         override val header = autoLoginHeader
         override val title = context.getString(R.string.inline_autofill_settings_title_2)
@@ -97,12 +119,37 @@ class SettingsGeneralAutoLoginList(
         override fun onCheckChanged(context: Context, enable: Boolean) {
             if (!autoLoginAppItem.isChecked(context)) return
             userPreferencesManager.hasInlineAutofill = enable
+            listener?.onSettingsInvalidate()
+        }
+    }
+
+    private val antiPhishing = object : SettingItem, SettingCheckable {
+        override val id = "antiphishing"
+        override val header = autoLoginHeader
+        override val title = context.getString(R.string.settings_anti_phishing)
+        override val description = context.getString(R.string.settings_anti_phishing_description)
+
+        override fun isEnable() = autoLoginAppItem.isChecked(context)
+        override fun isVisible() = userFeaturesChecker.canUseAntiPhishing() && autoLoginInlineItem.isChecked(context)
+
+        override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
+        override fun isChecked(context: Context) = userPreferencesManager.isAntiPhishingEnable
+        override fun onCheckChanged(context: Context, enable: Boolean) {
+            if (!autoLoginAppItem.isChecked(context)) return
+            userPreferencesManager.isAntiPhishingEnable = enable
+            autofillPhishingLogger.logSettingChanged(enable)
         }
     }
 
     fun getAll(): List<SettingItem> {
         val accessibilityItem = if (isAccessibilityAvailable()) autoLoginWebsiteItem else null
-        return listOfNotNull(autoLoginAppItem, accessibilityItem, pausedAndLinkedItem, autoLoginInlineItem)
+        return listOfNotNull(
+            autoLoginAppItem,
+            accessibilityItem,
+            pausedAndLinkedItem,
+            autoLoginInlineItem,
+            antiPhishing
+        )
     }
 
     private fun isAccessibilityAvailable() = context.resources.getBoolean(R.bool.is_accessibility_supported)

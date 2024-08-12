@@ -12,7 +12,7 @@ import com.dashlane.session.SessionManager
 import com.dashlane.sharing.exception.RequestBuilderException
 import com.dashlane.sharing.internal.model.UserToUpdate
 import com.dashlane.sharing.util.SharingCryptographyHelper
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

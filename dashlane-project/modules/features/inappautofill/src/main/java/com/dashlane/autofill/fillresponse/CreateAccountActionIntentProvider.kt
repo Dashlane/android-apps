@@ -9,6 +9,7 @@ interface CreateAccountActionIntentProvider {
         context: Context,
         summary: AutoFillHintSummary,
         hadCredentials: Boolean,
-        forKeyboard: Boolean
+        forKeyboard: Boolean,
+        isAccountFrozen: Boolean
     ): IntentSender
 }

@@ -55,7 +55,7 @@ class AuthenticationDeviceRepositoryImpl(
                 .verifications
                 .firstOrNull { it.type == AuthVerification.Type.SSO }
                 ?.ssoInfo
-                ?.toAuthenticationSsoInfo()
+                ?.toAuthenticationSsoInfo(login)
         )
     }
 }

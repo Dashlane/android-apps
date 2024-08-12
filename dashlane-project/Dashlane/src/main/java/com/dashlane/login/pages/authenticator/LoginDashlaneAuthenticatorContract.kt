@@ -20,7 +20,7 @@ interface LoginDashlaneAuthenticatorContract {
     interface DataProvider : LoginBaseContract.DataProvider {
         val secondFactor: AuthenticationSecondFactor
 
-        suspend fun executeAuthenticatorAuthentication(): RegisteredUserDevice
+        suspend fun executeAuthenticatorAuthentication(): Pair<RegisteredUserDevice, String?>
 
         suspend fun sendEmailToken(emailToken: AuthenticationSecondFactor.EmailToken)
     }

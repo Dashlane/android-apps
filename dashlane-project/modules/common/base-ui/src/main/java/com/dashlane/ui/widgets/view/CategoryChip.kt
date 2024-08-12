@@ -1,9 +1,11 @@
 package com.dashlane.ui.widgets.view
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.runtime.Composable
@@ -20,9 +22,7 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.BooleanProvider
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.R
-import com.google.accompanist.flowlayout.FlowRow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryChip(
     label: String,
@@ -74,14 +74,20 @@ fun CategoryChip(
                 disabledSelectedBorderColor = DashlaneTheme.colors.borderNeutralQuietIdle,
                 borderWidth = 1.dp,
                 selectedBorderWidth = 1.dp,
+                enabled = true,
+                selected = false
             )
         )
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CategoryChipList(modifier: Modifier = Modifier, content: @Composable (() -> Unit) = { }) {
-    FlowRow(modifier = modifier, mainAxisSpacing = 16.dp) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         content()
     }
 }

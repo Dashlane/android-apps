@@ -34,7 +34,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class FollowUpNotificationComponentModule {
+object FollowUpNotificationComponentModule {
     @Provides
     fun providesFollowUpNotificationFlags(impl: FollowUpNotificationFlagsImpl):
             FollowUpNotificationFlags = impl

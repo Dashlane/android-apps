@@ -15,12 +15,12 @@ import com.dashlane.ui.activities.fragments.list.wrapper.DefaultVaultItemWrapper
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemDoubleWrapper
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
 import com.dashlane.ui.adapter.ItemListContext.Container
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
 import com.dashlane.util.ViewTypeUtils
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
+import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 

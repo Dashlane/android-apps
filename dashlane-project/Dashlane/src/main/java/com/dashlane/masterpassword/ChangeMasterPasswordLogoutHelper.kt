@@ -13,7 +13,7 @@ class ChangeMasterPasswordLogoutHelper @Inject constructor(
     fun logout(activity: Activity) {
         val session = sessionManager.session ?: return
 
-        runBlocking { sessionManager.destroySession(session, byUser = false) }
+        runBlocking { sessionManager.destroySession(session, byUser = false, forceLogout = false) }
 
         activity.startActivity(
             LoginIntents.createLoginActivityIntent(activity)

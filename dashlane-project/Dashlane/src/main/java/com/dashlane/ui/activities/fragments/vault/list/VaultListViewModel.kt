@@ -10,7 +10,6 @@ import com.dashlane.events.registerAsFlow
 import com.dashlane.navigation.Navigator
 import com.dashlane.sync.DataSync
 import com.dashlane.sync.DataSyncState
-import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.activities.fragments.vault.ScrollToTopEvent
 import com.dashlane.ui.activities.fragments.vault.list.VaultListDataProvider.BoundedListSortMode
 import com.dashlane.ui.activities.fragments.vault.list.VaultListDataProvider.UnboundedListSortMode
@@ -22,12 +21,12 @@ import com.dashlane.ui.widgets.view.empty.PaymentsEmptyScreen
 import com.dashlane.ui.widgets.view.empty.PersonalInfoEmptyScreen
 import com.dashlane.ui.widgets.view.empty.SecureNotesEmptyScreen
 import com.dashlane.ui.widgets.view.empty.VaultAllItemsEmptyScreen
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.home.vaultlist.Filter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +35,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @HiltViewModel
 class VaultListViewModel @Inject constructor(

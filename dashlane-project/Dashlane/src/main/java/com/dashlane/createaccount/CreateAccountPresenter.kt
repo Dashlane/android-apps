@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.pages.CreateAccountBaseContract
 import com.dashlane.createaccount.pages.choosepassword.CreateAccountChoosePasswordPresenter

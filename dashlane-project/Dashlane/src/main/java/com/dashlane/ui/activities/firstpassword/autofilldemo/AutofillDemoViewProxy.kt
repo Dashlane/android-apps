@@ -1,11 +1,9 @@
 package com.dashlane.ui.activities.firstpassword.autofilldemo
 
-import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +11,7 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dashlane.R
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.util.KeyboardVisibilityDetector
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
@@ -22,7 +21,7 @@ class AutofillDemoViewProxy(activity: AppCompatActivity) :
 
     private val mainView = findViewByIdEfficient<ConstraintLayout>(R.id.autofill_demo_constraint_layout)!!
     private val scrollView = findViewByIdEfficient<ScrollView>(R.id.scroll_view)!!
-    private val websiteIcon = findViewByIdEfficient<ImageView>(R.id.website_icon)!!
+    private val websiteIcon = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.website_icon)!!
     private val editTextLogin = findViewByIdEfficient<EditText>(R.id.edit_text_login)!!
     private val editTextPassword = findViewByIdEfficient<EditText>(R.id.edit_text_password)!!
     private val autofillPreview = findViewByIdEfficient<CardView>(R.id.autofill_preview)!!
@@ -76,8 +75,8 @@ class AutofillDemoViewProxy(activity: AppCompatActivity) :
         autofillPreview.setOnClickListener { presenter.onAutofillTriggered() }
     }
 
-    override fun setWebsiteIcon(drawable: Drawable) {
-        websiteIcon.setImageDrawable(drawable)
+    override fun setWebsiteIcon(domain: String?) {
+        websiteIcon.domainUrl = domain
     }
 
     override fun setCredential(login: String?, password: String?) {

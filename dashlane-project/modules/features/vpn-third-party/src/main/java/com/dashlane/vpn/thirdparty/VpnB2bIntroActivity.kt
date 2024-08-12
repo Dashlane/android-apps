@@ -24,7 +24,7 @@ class VpnB2bIntroActivity : DashlaneActivity() {
         override fun onViewChanged() {
             super.onViewChanged()
             viewOrNull?.apply {
-                this.setImageResource(R.drawable.vpn_intro_logo)
+                this.setImageResource(R.drawable.ic_feature_vpn_outlined)
                 setTitle(R.string.vpn_intro_title_b2b)
                 setDescription(R.string.vpn_intro_body_b2b)
                 setNegativeButton(R.string.vpn_intro_button_close_b2b)

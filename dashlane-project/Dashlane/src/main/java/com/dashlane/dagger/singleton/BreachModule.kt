@@ -3,7 +3,6 @@ package com.dashlane.dagger.singleton
 import com.dashlane.breach.BreachService
 import com.dashlane.breach.BreachServiceImpl
 import com.dashlane.breach.GetFileBreachesService
-import com.dashlane.network.inject.LegacyWebservicesApi
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -22,7 +21,7 @@ interface BreachModule {
     companion object {
 
         @Provides
-        fun provideGetFileBreachesService(@LegacyWebservicesApi retrofit: Retrofit): GetFileBreachesService =
+        fun provideGetFileBreachesService(retrofit: Retrofit): GetFileBreachesService =
             retrofit.create()
     }
 }

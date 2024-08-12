@@ -34,13 +34,17 @@ import com.dashlane.sharing.util.SharingCryptographyHelper
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.xml.domain.objectType
 import dagger.Lazy
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Suppress("LargeClass")
+@Singleton
 class SharingItemUpdater @Inject constructor(
     private val sharingCryptographyHelper: SharingCryptographyHelper,
     private val sharingDao: SharingDao,
@@ -55,6 +59,10 @@ class SharingItemUpdater @Inject constructor(
     private val appEvents: AppEvents
 ) {
     private val mutex = Mutex()
+
+    
+    private val _updatedItemFlow = MutableSharedFlow<Unit>()
+    val updatedItemFlow = _updatedItemFlow.asSharedFlow()
 
     @Throws(NotLoggedInException::class)
     suspend fun update(request: SharingItemUpdaterRequest) {
@@ -74,6 +82,7 @@ class SharingItemUpdater @Inject constructor(
                     update(memory, request, session, groupVerification)
                     close()
                 }
+                _updatedItemFlow.emit(Unit)
             }
         }
     }

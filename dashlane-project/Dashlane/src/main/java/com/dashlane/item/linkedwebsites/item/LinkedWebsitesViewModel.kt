@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.dashlane.R
 import com.dashlane.ext.application.KnownLinkedDomains
-import com.dashlane.item.linkedwebsites.LinkedServicesActivity
+import com.dashlane.item.linkedwebsites.LinkedServicesFragmentArgs
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.vault.model.VaultItem
@@ -13,10 +13,10 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
 @HiltViewModel
 class LinkedWebsitesViewModel @Inject constructor(
@@ -28,10 +28,7 @@ class LinkedWebsitesViewModel @Inject constructor(
     private val _state: MutableStateFlow<LinkedWebsitesUIState> = MutableStateFlow(
         LinkedWebsitesUIState(viewProvider = listOf(), null)
     )
-    private val addNew = savedStateHandle.get<Boolean>(LinkedServicesActivity.PARAM_ADD_NEW)!!
-    private val urlDomain = savedStateHandle.get<String>(LinkedServicesActivity.PARAM_URL_DOMAIN)
-    private val temporaryLinkedWebsites =
-        savedStateHandle.get<Array<String>>(LinkedServicesActivity.PARAM_TEMPORARY_WEBSITES)!!.toList()
+    private val args = LinkedServicesFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private var vaultItem: VaultItem<SyncObject.Authentifiant>? = null
     private val editableResult = mutableMapOf<String, String>()
     private var isEditMode = false
@@ -58,11 +55,11 @@ class LinkedWebsitesViewModel @Inject constructor(
     }
 
     private fun buildMainWebsite(): List<DashlaneRecyclerAdapter.ViewTypeProvider> {
-        return urlDomain?.let {
+        return args.url?.let {
             listOf(
                 LinkedServicesHeaderItem(R.string.multi_domain_credentials_main_website, false),
                 LinkedWebsitesItem(
-                    urlDomain,
+                    it,
                     isMain = true,
                     isEditable = false,
                     isPageEditMode = isEditMode,
@@ -77,26 +74,26 @@ class LinkedWebsitesViewModel @Inject constructor(
 
     private fun buildAddedByYouWebsites(): List<DashlaneRecyclerAdapter.ViewTypeProvider> {
         val items = mutableListOf<DashlaneRecyclerAdapter.ViewTypeProvider>()
-        if (temporaryLinkedWebsites.isNotEmpty() || isEditMode) {
+        if (!args.temporaryWebsites.isNullOrEmpty() || isEditMode) {
             items.add(LinkedServicesHeaderItem(R.string.multi_domain_credentials_added_by_you, false))
         }
-        temporaryLinkedWebsites.forEach {
+        args.temporaryWebsites?.forEach {
             items.add(
                 LinkedWebsitesItem(
-                it,
-                isEditable = isEditMode,
-                isPageEditMode = isEditMode,
-                onValueUpdated = this::onWebsiteValueUpdated,
-                getUrlValue = this::getUrlValue,
-                removeWebsiteListener = this::removeWebsite,
-                openWebsiteListener = this::openWebsite
-            ).apply {
-                editableResult[uid] = it
-            }
+                    it,
+                    isEditable = isEditMode,
+                    isPageEditMode = isEditMode,
+                    onValueUpdated = this::onWebsiteValueUpdated,
+                    getUrlValue = this::getUrlValue,
+                    removeWebsiteListener = this::removeWebsite,
+                    openWebsiteListener = this::openWebsite
+                ).apply {
+                    editableResult[uid] = it
+                }
             )
         }
         if (isEditMode) {
-            if (addNew) {
+            if (args.addNew) {
                 items.add(
                     LinkedWebsitesItem(
                         "",
@@ -117,7 +114,7 @@ class LinkedWebsitesViewModel @Inject constructor(
 
     private fun buildAddedByDashlaneWebsites(): List<DashlaneRecyclerAdapter.ViewTypeProvider> {
         val items = mutableListOf<DashlaneRecyclerAdapter.ViewTypeProvider>()
-        KnownLinkedDomains.getMatchingLinkedDomainSet(urlDomain)?.also {
+        KnownLinkedDomains.getMatchingLinkedDomainSet(args.url)?.also {
             if (it.isNotEmpty()) {
                 items.add(LinkedServicesHeaderItem(R.string.multi_domain_credentials_automatically_added, true))
             }

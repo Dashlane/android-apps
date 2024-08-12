@@ -30,7 +30,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class HttpModule {
+object HttpModule {
 
     @Singleton
     @Provides

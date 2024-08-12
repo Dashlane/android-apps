@@ -26,9 +26,7 @@ import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sync.DataSync
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +44,6 @@ class CollectionSharedAccessViewModel @Inject constructor(
     private val dataSync: DataSync,
     @DefaultCoroutineDispatcher
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    private val userFeaturesChecker: UserFeaturesChecker,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val session: Session
@@ -59,8 +56,6 @@ class CollectionSharedAccessViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
     private val navArgs = CollectionSharedAccessActivityArgs.fromSavedStateHandle(savedStateHandle)
     private val collectionId = navArgs.collectionId
-    private val canShowRoles: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION_ROLES)
 
     init {
         loadGroupsAndIndividuals(collectionId)
@@ -102,12 +97,11 @@ class CollectionSharedAccessViewModel @Inject constructor(
                     permission = it.permission
                 )
             }?.sortedWith(compareBy({ it.accepted }, { it.username })) ?: emptyList()
-            val isAdmin = sharingDataProvider.isCollectionShareAllowed(collection)
+            val isAdmin = sharingDataProvider.isAdmin(collection)
             val viewData = ViewData(
                 userGroups,
                 individuals,
-                isAdmin = isAdmin,
-                showRoles = canShowRoles
+                isAdmin = isAdmin
             )
             _uiState.emit(ShowList(viewData))
         }

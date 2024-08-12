@@ -1,7 +1,6 @@
 package com.dashlane.ui.activities.fragments.list.wrapper
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
@@ -12,9 +11,9 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvid
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.ItemListContextProvider
 import com.dashlane.ui.adapter.util.DiffUtilComparator
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextFactory.StatusText
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.textfactory.list.StatusText
 import com.dashlane.xml.domain.SyncObjectType
 
 interface VaultItemWrapper<D : SummaryObject> :
@@ -36,7 +35,6 @@ interface VaultItemWrapper<D : SummaryObject> :
     fun getListItemActions(): List<ListItemAction>
     fun getTitle(context: Context): StatusText
     fun getDescription(context: Context): StatusText
-    fun getImageDrawable(context: Context): Drawable?
     override fun getSpanSize(spanCount: Int): Int
     fun setViewType(overrideViewType: DashlaneRecyclerAdapter.ViewType<VaultItemWrapper<out SummaryObject>>)
 }

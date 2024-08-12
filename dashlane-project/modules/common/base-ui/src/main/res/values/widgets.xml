@@ -92,8 +92,8 @@
         <item name="android:textAppearance">?textAppearanceBody2</item>
         <item name="android:textColor">@color/text_neutral_catchy</item>
         <item name="switchTextAppearance">?textAppearanceBody2</item>
-        <item name="thumbTint">@color/switch_thumb_tint</item>
-        <item name="trackTint">@color/switch_track_tint</item>
+        <item name="android:thumbTint">@color/switch_thumb_tint</item>
+        <item name="android:trackTint">@color/switch_track_tint</item>
     </style>
 
     

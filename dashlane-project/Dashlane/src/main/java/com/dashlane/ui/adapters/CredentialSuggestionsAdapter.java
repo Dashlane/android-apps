@@ -13,7 +13,6 @@ import com.dashlane.R;
 import com.dashlane.help.HelpCenterLink;
 import com.dashlane.ui.InAppLoginWindow;
 import com.dashlane.ui.controllers.interfaces.SuggestionPicker;
-import com.dashlane.ui.drawable.ContactDrawable;
 import com.dashlane.util.StringUtils;
 import com.dashlane.vault.model.AuthentifiantKt;
 import com.dashlane.vault.summary.SummaryObject;
@@ -22,8 +21,8 @@ import java.util.List;
 
 
 public class CredentialSuggestionsAdapter
-        extends ArrayAdapter<InAppLoginWindow.AuthentifiantWithWarningInfo>
-        implements View.OnClickListener {
+    extends ArrayAdapter<InAppLoginWindow.AuthentifiantWithWarningInfo>
+    implements View.OnClickListener {
 
     private int mLayoutRes;
     private SuggestionPicker mPickerCallback;
@@ -58,14 +57,13 @@ public class CredentialSuggestionsAdapter
             holder.unsecureImage.setVisibility(View.VISIBLE);
             holder.unsecureImage.setOnClickListener(view -> {
                 Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(HelpCenterLink.ARTICLE_AUTOFILL_WARNING.getUri());
+                i.setData(HelpCenterLink.ARTICLE_AUTOFILL_WARNING.getAndroidUri());
                 view.getContext().startActivity(i);
             });
         } else {
             holder.unsecureLabel.setVisibility(View.GONE);
             holder.unsecureImage.setVisibility(View.GONE);
         }
-        ContactDrawable.toImageView(holder.icon, loginForUi);
         return convertView;
     }
 

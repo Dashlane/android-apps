@@ -8,14 +8,12 @@ import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DarkWebSetupCompleteEvent
 import com.dashlane.login.controller.LoginTokensModule
-import com.dashlane.network.webservices.authentication.GetTokenService
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
 import com.dashlane.notification.FcmMessage
 import com.dashlane.notification.model.DarkWebAlertNotificationHandler
 import com.dashlane.notification.model.PublicBreachAlertNotificationHandler
 import com.dashlane.notification.model.SyncNotificationHandler
-import com.dashlane.notification.model.TokenJsonProvider
 import com.dashlane.notification.model.TokenNotificationHandler
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
@@ -42,9 +40,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
         val sessionManager: SessionManager
         val breachManager: BreachManager
         val breachLoader: BreachLoader
-        val tokenJsonProvider: TokenJsonProvider
         val preferencesManager: UserPreferencesManager
-        val legacyTokenService: GetTokenService
         val globalPreferencesManager: GlobalPreferencesManager
         val clock: Clock
         val loginTokensModule: LoginTokensModule
@@ -115,10 +111,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
                 TokenNotificationHandler(
                     context,
                     fcmMessage,
-                    entryPoint.tokenJsonProvider,
                     entryPoint.sessionManager,
-                    entryPoint.preferencesManager,
-                    entryPoint.legacyTokenService,
                     entryPoint.globalPreferencesManager,
                     entryPoint.clock,
                     entryPoint.loginTokensModule

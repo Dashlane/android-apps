@@ -18,8 +18,8 @@ import com.dashlane.securefile.extensions.getFileSize
 import com.dashlane.securefile.extensions.getFileType
 import com.dashlane.securefile.extensions.toSecureFileInfo
 import com.dashlane.session.SessionManager
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.getSecureFilesMaxFileSize
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.getSecureFilesMaxFileSize
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.xml.domain.SyncObject
@@ -63,8 +63,6 @@ class UploadAttachmentsPresenter(
     override fun notifyMaxStorageSpaceReached(
         secureFile: SecureFile,
         secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
-        code: Int,
-        message: String
     ) {
         
         context?.apply { view.showError(getString(R.string.upload_file_no_space)) }
@@ -133,7 +131,6 @@ class UploadAttachmentsPresenter(
                 )
                 val session = sessionManager.session!!
                 val username = session.userId
-                val uki = session.uki
                 val fileSize = contentResolver.getFileSize(uri)
                 
                 val secureFileInfo = secureFile.toSecureFileInfo(username).copySyncObject {
@@ -141,7 +138,7 @@ class UploadAttachmentsPresenter(
                     localSize = fileSize
                 }
                 
-                provider.uploadSecureFile(username, uki, secureFile, secureFileInfo)
+                provider.uploadSecureFile(secureFile, secureFileInfo)
             } catch (e: Exception) {
                 
                 

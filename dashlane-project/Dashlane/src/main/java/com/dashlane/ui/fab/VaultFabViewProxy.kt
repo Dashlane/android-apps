@@ -6,15 +6,15 @@ import com.dashlane.R
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.navigation.Navigator
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
-import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.fab.FabViewUtil.LastMenuItemHiddenCallBack
 import com.dashlane.ui.fab.FabViewUtil.hideFabMenuItems
+import com.dashlane.home.vaultlist.Filter
 
 class VaultFabViewProxy(
     rootView: View,
     teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
     navigator: Navigator,
-    private val passwordLimiter: PasswordLimiter
+    private val passwordLimiter: PasswordLimiter,
 ) :
     FabViewProxy(rootView) {
     private val fabMenuItemNavigator: VaultFabMenuItemNavigator =

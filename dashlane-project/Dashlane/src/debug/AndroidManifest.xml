@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        
+        <receiver android:name=".debug.broadcast.SettingConfigurationBroadcastReceiver"
+            android:exported="true"
+            android:enabled="true"
+            android:permission="com.dashlane.permission.SEND_CONFIGURATION">
+            <intent-filter>
+                <action android:name="${applicationId}.SETTING_DEBUG_CONFIGURATION" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".debug.broadcast.TriggerCrashBroadcastReceiver"
+            android:exported="true"
+            android:enabled="true"
+            android:permission="com.dashlane.permission.SEND_CONFIGURATION">
+            <intent-filter>
+                <action android:name="${applicationId}.CRASH_TRIGGER" />
+                <action android:name="${applicationId}.FAST_LOGIN" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".debug.broadcast.ResetAutofillSecurityBroadcastReceiver"
+            android:exported="true"
+            android:enabled="true"
+            android:permission="com.dashlane.permission.SEND_CONFIGURATION">
+            <intent-filter>
+                <action android:name="${applicationId}.RESET_AUTOFILL_SECURITY_WARNING" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".debug.broadcast.FastLoginBroadcastReceiver"
+            android:exported="true"
+            android:enabled="true"
+            android:permission="com.dashlane.permission.SEND_CONFIGURATION">
+            <intent-filter>
+                <action android:name="${applicationId}.FAST_LOGIN" />
+            </intent-filter>
+        </receiver>
+
+        
+        <activity android:name="androidx.fragment.app.FragmentActivity" />
+    </application>
+</manifest>

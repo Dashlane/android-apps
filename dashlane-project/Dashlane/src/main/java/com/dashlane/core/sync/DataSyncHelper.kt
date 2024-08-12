@@ -180,7 +180,6 @@ private fun Session.toServerCredentials() = ServerCredentials(
     login = userId,
     accessKey = accessKey,
     secretKey = secretKey,
-    uki = uki
 )
 
 @SuppressWarnings("fb-contrib:UMTP_UNBOUND_METHOD_TEMPLATE_PARAMETER")

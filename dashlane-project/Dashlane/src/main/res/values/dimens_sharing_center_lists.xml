@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="list_sharing_item_content_min_height">56dp</dimen>
-    <dimen name="list_sharing_item_content_icon_width">40dp</dimen>
-    <dimen name="list_sharing_item_content_icon_height">40dp</dimen>
     <dimen name="list_sharing_item_content_line2_margin_top">2.5dp</dimen>
-
-    <dimen name="list_sharing_item_content_icon_item_width">72dp</dimen>
-    <dimen name="list_sharing_item_content_icon_item_height">40dp</dimen>
 
     <dimen name="list_sharing_user_content_icon_item_width">40dp</dimen>
     <dimen name="list_sharing_user_content_icon_item_height">40dp</dimen>

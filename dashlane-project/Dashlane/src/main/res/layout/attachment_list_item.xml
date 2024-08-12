@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,11 +7,10 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?selectableItemBackground"
-    android:paddingStart="@dimen/spacing_big"
-    android:paddingTop="@dimen/spacing_small"
-    android:paddingEnd="@dimen/spacing_big"
     android:paddingBottom="@dimen/spacing_big"
-    >
+    android:paddingEnd="@dimen/spacing_big"
+    android:paddingStart="@dimen/spacing_big"
+    android:paddingTop="@dimen/spacing_small">
 
     <TextView
         android:id="@+id/attachment_item_description"
@@ -24,10 +22,9 @@
         android:maxLines="1"
         android:textAppearance="?textAppearanceBody2"
         android:textColor="?colorOnBackgroundMedium"
-        app:layout_constraintStart_toEndOf="@+id/attachment_left_column"
+        app:layout_constraintStart_toEndOf="@+id/attachment_item_thumbnail"
         app:layout_constraintTop_toBottomOf="@+id/attachment_item_name"
-        tools:text="Jan 9, 2014 - 13.5mb"
-        />
+        tools:text="Jan 9, 2014 - 13.5mb" />
 
     <TextView
         android:id="@+id/attachment_item_name"
@@ -39,39 +36,47 @@
         android:maxLines="1"
         android:textAppearance="?textAppearanceSubtitle1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/attachment_left_column"
+        app:layout_constraintStart_toEndOf="@+id/attachment_item_thumbnail"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="My_first_upload.pdf"
-        />
+        tools:text="My_first_upload.pdf" />
 
-    <FrameLayout
-        android:id="@+id/attachment_left_column"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <com.dashlane.design.component.compat.view.ThumbnailView
+        android:id="@+id/attachment_item_thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_attachment_outlined"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        >
+        app:thumbnailType="icon" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/attachment_item_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:importantForAccessibility="no"
-            app:srcCompat="@drawable/ic_attachment_clipboard_default"
-            />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/attachment_item_selected"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@id/attachment_item_thumbnail"
+        app:layout_constraintEnd_toEndOf="@id/attachment_item_thumbnail"
+        app:layout_constraintStart_toStartOf="@id/attachment_item_thumbnail"
+        app:layout_constraintTop_toTopOf="@id/attachment_item_thumbnail"
+        app:srcCompat="@drawable/ic_attachment_selected" />
 
-        <ProgressBar
-            android:id="@+id/attachment_item_progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:indeterminate="false"
-            android:indeterminateOnly="false"
-            android:max="100"
-            android:progressDrawable="@drawable/progress_circular"
-            />
-
-    </FrameLayout>
+    <ProgressBar
+        android:id="@+id/attachment_item_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:indeterminate="false"
+        android:indeterminateOnly="false"
+        android:max="100"
+        android:visibility="gone"
+        android:progressDrawable="@drawable/progress_circular"
+        app:layout_constraintBottom_toBottomOf="@id/attachment_item_thumbnail"
+        app:layout_constraintEnd_toEndOf="@id/attachment_item_thumbnail"
+        app:layout_constraintStart_toStartOf="@id/attachment_item_thumbnail"
+        app:layout_constraintTop_toTopOf="@id/attachment_item_thumbnail"
+        tools:progress="50" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

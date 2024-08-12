@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -24,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
@@ -33,15 +37,15 @@ import com.dashlane.design.component.PasswordField
 import com.dashlane.design.component.PasswordFieldFeedback
 import com.dashlane.design.component.PasswordStrengthIndicator
 import com.dashlane.design.component.Text
-import com.dashlane.design.component.tooling.TextFieldAction
-import com.dashlane.design.component.tooling.TextFieldActions
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.masterpassword.tips.MasterPasswordTipsActivity
+import com.dashlane.util.compose.passwordFieldActions
 
 @Composable
 fun ChangeMasterPasswordScreen(
     viewModel: ChangeMasterPasswordViewModel,
+    hasSteps: Boolean = true,
     goToNext: (ObfuscatedByteArray) -> Unit,
     goBack: () -> Unit
 ) {
@@ -66,6 +70,7 @@ fun ChangeMasterPasswordScreen(
         isConfirming = uiState.data.isConfirming,
         isMatching = uiState.data.isMatching,
         nextIsEnabled = uiState.data.isNextEnabled,
+        hasSteps = hasSteps,
         password = uiState.data.password,
         passwordStrength = uiState.data.passwordStrength,
         onPasswordChange = viewModel::onPasswordChange,
@@ -89,6 +94,7 @@ fun ChangeMasterPasswordContent(
     isConfirming: Boolean,
     isMatching: Boolean,
     nextIsEnabled: Boolean,
+    hasSteps: Boolean,
     password: String,
     passwordStrength: PasswordStrengthIndicator.Strength?,
     onPasswordChange: (String) -> Unit,
@@ -112,12 +118,14 @@ fun ChangeMasterPasswordContent(
                 .weight(1f)
         ) {
             Spacer(modifier = Modifier.weight(0.3f))
-            Text(
-                text = stringResource(id = R.string.login_account_recovery_key_enter_step, if (isConfirming) 3 else 2, 3),
-                style = DashlaneTheme.typography.bodyHelperRegular,
-                color = DashlaneTheme.colors.textNeutralQuiet,
-                modifier = Modifier.padding(top = 16.dp)
-            )
+            if (hasSteps) {
+                Text(
+                    text = stringResource(id = R.string.login_account_recovery_key_enter_step, if (isConfirming) 3 else 2, 3),
+                    style = DashlaneTheme.typography.bodyHelperRegular,
+                    color = DashlaneTheme.colors.textNeutralQuiet,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
             Text(
                 text = if (isConfirming) stringResource(id = R.string.change_master_password_ark_confirm_title) else stringResource(id = R.string.change_master_password_ark_create_title),
                 style = DashlaneTheme.typography.titleSectionLarge,
@@ -130,6 +138,7 @@ fun ChangeMasterPasswordContent(
                 color = DashlaneTheme.colors.textNeutralStandard,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
+            val newMPObfuscatedState = rememberSaveable { mutableStateOf(true) }
             PasswordField(
                 modifier = modifier
                     .testTag("newMP")
@@ -142,12 +151,15 @@ fun ChangeMasterPasswordContent(
                 label = stringResource(id = R.string.change_master_password_create_text_edit_label),
                 placeholder = stringResource(id = R.string.change_master_password_create_text_edit_placeholder),
                 enabled = !isConfirming,
-                actions = passwordFieldActions(),
+                obfuscated = newMPObfuscatedState.value,
+                actions = passwordFieldActions(obfuscatedState = newMPObfuscatedState),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 feedback = passwordStrength
                     ?.let { PasswordFieldFeedback.Strength(it) }
                     ?: PasswordFieldFeedback.Text(stringResource(id = R.string.change_master_password_create_text_edit_feedback)),
             )
             if (isConfirming) {
+                val confirmationObfuscatedState = rememberSaveable { mutableStateOf(true) }
                 PasswordField(
                     modifier = modifier
                         .testTag("confirmNewMP")
@@ -159,7 +171,9 @@ fun ChangeMasterPasswordContent(
                     onValueChange = onConfirmPasswordChange,
                     label = stringResource(id = R.string.change_master_password_confirm_text_edit_label),
                     placeholder = stringResource(id = R.string.change_master_password_confirm_text_edit_placeholder),
-                    actions = passwordFieldActions(),
+                    obfuscated = confirmationObfuscatedState.value,
+                    actions = passwordFieldActions(obfuscatedState = confirmationObfuscatedState),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     feedback = confirmPasswordFeedback(confirmPassword, isMatching),
                     isError = !isMatching && confirmPassword.isNotEmpty()
                 )
@@ -177,16 +191,6 @@ fun ChangeMasterPasswordContent(
 }
 
 @Composable
-private fun passwordFieldActions(): TextFieldActions.Password = TextFieldActions.Password(
-    hideRevealAction = TextFieldAction.HideReveal(
-        contentDescriptionToHide = stringResource(id = R.string.and_accessibility_text_edit_hide),
-        contentDescriptionToReveal = stringResource(id = R.string.and_accessibility_text_edit_reveal)
-    ),
-    genericAction = null,
-    passwordGeneratorAction = null
-)
-
-@Composable
 private fun confirmPasswordFeedback(confirmPassword: String, isMatching: Boolean): PasswordFieldFeedback? = when {
     confirmPassword.isEmpty() -> null
     isMatching -> PasswordFieldFeedback.Text(stringResource(id = R.string.change_master_password_confirm_text_edit_feedback_matching))
@@ -201,6 +205,7 @@ fun ChangeMasterPasswordContentPreview() {
             isConfirming = false,
             isMatching = false,
             nextIsEnabled = false,
+            hasSteps = true,
             password = "password",
             passwordStrength = PasswordStrengthIndicator.Strength.ACCEPTABLE,
             onPasswordChange = { },
@@ -220,6 +225,7 @@ fun ChangeMasterPasswordContentConfirmingPreview() {
             isConfirming = true,
             isMatching = true,
             nextIsEnabled = true,
+            hasSteps = false,
             password = "password",
             passwordStrength = PasswordStrengthIndicator.Strength.ACCEPTABLE,
             onPasswordChange = { },

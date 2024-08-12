@@ -22,7 +22,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
@@ -30,7 +30,7 @@ import com.dashlane.design.component.Toggle
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.accountrecoverykey.R
-import com.dashlane.ui.widgets.compose.CircularProgressIndicator
+import com.dashlane.ui.common.compose.components.CircularProgressIndicator
 
 const val ARK_TOGGLE_TEST_TAG = "arkToggle"
 
@@ -121,7 +121,7 @@ fun AccountRecoveryKeyDetailSettingContent(
                     CircularProgressIndicator(Modifier.size(28.dp))
                 } else {
                     Toggle(
-                        modifier = modifier.testTag(ARK_TOGGLE_TEST_TAG),
+                        modifier = Modifier.testTag(ARK_TOGGLE_TEST_TAG),
                         checked = enabled,
                         onCheckedChange = { onToggleClicked(it) },
                     )

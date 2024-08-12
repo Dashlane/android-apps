@@ -2,6 +2,7 @@ package com.dashlane.authentication.login
 
 import com.dashlane.authentication.AuthenticationAccountNotFoundException
 import com.dashlane.authentication.AuthenticationContactSsoAdministratorException
+import com.dashlane.authentication.AuthenticationDeactivatedUserException
 import com.dashlane.authentication.AuthenticationEmptyEmailException
 import com.dashlane.authentication.AuthenticationInvalidEmailException
 import com.dashlane.authentication.AuthenticationNetworkException
@@ -30,6 +31,7 @@ import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
 import com.dashlane.server.api.endpoints.authentication.AuthSendEmailTokenService
 import com.dashlane.server.api.endpoints.authentication.AuthU2fChallenge
 import com.dashlane.server.api.endpoints.authentication.AuthVerification
+import com.dashlane.server.api.endpoints.authentication.exceptions.DeactivatedUserException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceDeactivatedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceNotFoundException
 import com.dashlane.server.api.endpoints.authentication.exceptions.SsoBlockedException
@@ -159,13 +161,15 @@ class AuthenticationEmailRepositoryImpl(
             throw AuthenticationContactSsoAdministratorException(cause = e)
         } catch (e: TeamGenericErrorException) {
             throw AuthenticationTeamException(cause = e)
+        } catch (e: DeactivatedUserException) {
+            throw AuthenticationDeactivatedUserException(cause = e)
         } catch (e: DashlaneApiException) {
             throw e.toAuthenticationException(endpoint = AuthenticationNetworkException.Endpoint.REGISTRATION)
         }
 
         val responseData = response.data
         val verification = responseData.verifications.associateBy { it.type }
-        val ssoInfo = verification[AuthVerification.Type.SSO]?.ssoInfo?.toAuthenticationSsoInfo()
+        val ssoInfo = verification[AuthVerification.Type.SSO]?.ssoInfo?.toAuthenticationSsoInfo(login)
 
         val secondFactor = when {
             AuthVerification.Type.EMAIL_TOKEN in verification -> AuthenticationSecondFactorEmailToken(
@@ -220,24 +224,22 @@ class AuthenticationEmailRepositoryImpl(
 
         val verification = responseData.verifications.associateBy { it.type }
 
-        val ssoInfo = verification[AuthVerification.Type.SSO]?.ssoInfo?.toAuthenticationSsoInfo()
+        val ssoInfo = verification[AuthVerification.Type.SSO]?.ssoInfo?.toAuthenticationSsoInfo(userDevice.login)
 
         return when {
-            verification.isEmpty() -> {
+            
+            verification.isEmpty() || (verification.size == 1 && AuthVerification.Type.DASHLANE_AUTHENTICATOR in verification) -> {
                 when (responseData.accountType) {
                     AccountType.MASTERPASSWORD -> userDevice.toRequiresPassword(ssoInfo)
                     AccountType.INVISIBLEMASTERPASSWORD -> RequiresDeviceRegistration.SecondFactor(
-                        secondFactor = AuthenticationSecondFactorEmailToken(
-                            login = userDevice.login,
-                            verification = verification
-                        ),
+                        secondFactor = AuthenticationSecondFactorEmailToken(login = userDevice.login, verification = verification),
                         accountType = responseData.accountType,
                         ssoInfo = null
                     )
                 }
             }
-            AuthVerification.Type.DASHLANE_AUTHENTICATOR in verification ||
-                AuthVerification.Type.TOTP in verification -> RequiresServerKey(
+
+            AuthVerification.Type.TOTP in verification -> RequiresServerKey(
                 AuthenticationSecondFactorTotp(userDevice.login, verification),
                 ssoInfo
             )

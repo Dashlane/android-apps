@@ -20,7 +20,7 @@ import com.dashlane.sharing.internal.model.UserToInvite
 import com.dashlane.sharing.model.isUserAcceptedOrPending
 import com.dashlane.sharing.model.isUserGroupAcceptedOrPending
 import com.dashlane.sharing.util.SharingCryptographyHelper
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

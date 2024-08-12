@@ -14,7 +14,7 @@ class LoginSsoLoggerImpl @Inject constructor(
     private val loginLogger = LoginLogger(logRepository)
 
     override fun logLoginStart() {
-        loginLogger.logAskAuthentication(LoginMode.Sso)
+        loginLogger.logAskAuthentication(loginMode = LoginMode.Sso, unlockEventReason = null)
     }
 
     override fun logInvalidSso() {

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.server.api.Response
 import com.dashlane.server.api.endpoints.authentication.RequestOtpRecoveryCodesByPhoneService
 import com.dashlane.session.SessionManager
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

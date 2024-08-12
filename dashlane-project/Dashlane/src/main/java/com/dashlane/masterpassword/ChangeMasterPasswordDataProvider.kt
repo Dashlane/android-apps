@@ -1,6 +1,7 @@
 package com.dashlane.masterpassword
 
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateRefresher
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.hermes.generated.definitions.DeleteKeyReason
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
@@ -9,7 +10,8 @@ import javax.inject.Inject
 
 class ChangeMasterPasswordDataProvider @Inject constructor(
     private val masterPasswordChanger: MasterPasswordChanger,
-    private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository
+    private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
+    private val accountRecoveryKeySettingStateRefresher: AccountRecoveryKeySettingStateRefresher,
 ) :
     BaseDataProvider<ChangeMasterPasswordContract.Presenter>(), ChangeMasterPasswordContract.DataProvider {
 
@@ -25,8 +27,11 @@ class ChangeMasterPasswordDataProvider @Inject constructor(
         } else {
             null
         }
-        masterPasswordChanger.updateMasterPassword(newPassword, uploadReason)
-        accountRecoveryKeyRepository.disableRecoveryKey(DeleteKeyReason.VAULT_KEY_CHANGED)
+        val result = masterPasswordChanger.updateMasterPassword(newPassword, uploadReason)
+        if (result) {
+            accountRecoveryKeyRepository.disableRecoveryKey(DeleteKeyReason.VAULT_KEY_CHANGED)
+            accountRecoveryKeySettingStateRefresher.refresh()
+        }
     }
 
     override suspend fun migrateToMasterPasswordUser(password: ObfuscatedByteArray, authTicket: String) {

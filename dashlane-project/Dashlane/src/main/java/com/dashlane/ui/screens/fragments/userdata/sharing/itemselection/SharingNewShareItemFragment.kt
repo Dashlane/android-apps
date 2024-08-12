@@ -8,7 +8,7 @@ import androidx.fragment.app.viewModels
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
-import com.dashlane.vault.util.IdentityNameHolderService
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

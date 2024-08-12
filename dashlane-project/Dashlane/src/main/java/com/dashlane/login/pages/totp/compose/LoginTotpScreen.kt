@@ -1,111 +1,109 @@
 package com.dashlane.login.pages.totp.compose
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonLayout
+import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.ButtonMediumBar
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.TextField
 import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.CircularProgressIndicator
+import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.ui.widgets.compose.DashlaneLogo
+import com.dashlane.util.isNotSemanticallyNull
 
 @Composable
+@Suppress("LongMethod")
 fun LoginTotpScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginTotpViewModel,
-    login: String,
-    goToNext: (RegisteredUserDevice, String) -> Unit
+    verificationMode: VerificationMode,
+    goToNext: (RegisteredUserDevice, String) -> Unit,
+    goToPush: (String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState) {
-        when (val state = uiState) {
-            is LoginTotpState.Success -> {
-                viewModel.hasNavigated()
-                goToNext(state.registeredUserDevice, state.authTicket)
+    LaunchedEffect(viewModel) {
+        viewModel.viewStarted(verificationMode = verificationMode)
+        viewModel.navigationState.collect { state ->
+            when (state) {
+                is LoginTotpNavigationState.GoToPush -> goToPush(state.email)
+                is LoginTotpNavigationState.Success -> goToNext(state.registeredUserDevice, state.authTicket)
             }
-
-            else -> Unit
         }
-    }
-
-    val errorMessage: String? = when ((uiState as? LoginTotpState.Error)?.error) {
-        LoginTotpError.InvalidToken -> stringResource(id = R.string.totp_failed)
-        LoginTotpError.AlreadyUsed -> stringResource(id = R.string.login_totp_error_message_already_used)
-        LoginTotpError.Network -> stringResource(id = R.string.cannot_connect_to_server)
-        LoginTotpError.Offline -> stringResource(id = R.string.offline)
-        null -> null
     }
 
     LoginTotpContent(
         modifier = modifier,
-        login = login,
-        otp = uiState.data.otp ?: "",
-        isLoading = uiState is LoginTotpState.Loading,
-        errorMessage = errorMessage,
-        isError = uiState is LoginTotpState.Error,
+        email = uiState.email,
+        otp = uiState.otp ?: "",
+        isAuthenticatorEnabled = uiState.isAuthenticatorEnabled,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.error?.toErrorMessage(),
         onNext = viewModel::onNext,
+        onPush = viewModel::pushClicked,
         onHelp = viewModel::helpClicked,
         onOtpChange = viewModel::onOTPChange,
     )
 
     when {
-        uiState.data.showHelpDialog -> {
+        uiState.showHelpDialog -> {
             HelpDialog(
                 onUseRecoveryCode = viewModel::recoveryCodeClicked,
                 onUseTextMessage = viewModel::textMessageClicked,
                 onCancel = viewModel::recoveryCancelled
             )
         }
-        uiState.data.showRecoveryCodeDialog -> {
+        uiState.showRecoveryCodeDialog -> {
             RecoveryCodeDialog(
                 message = stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_description),
+                isLoading = uiState.isLoading,
+                errorMessage = if (uiState.isRecoveryError) stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_error) else null,
                 onInputRecoveryCode = viewModel::onRecoveryTokenComplete,
                 onCancel = viewModel::recoveryCancelled
             )
         }
-        uiState.data.showTextMessageDialog -> {
+        uiState.showTextMessageDialog -> {
             RecoveryCodeDialog(
                 message = stringResource(id = R.string.login_totp_enter_token_recovery_dialog_phone_backup_description),
+                isLoading = uiState.isLoading,
+                errorMessage = if (uiState.isRecoveryError) stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_error) else null,
                 onInputRecoveryCode = viewModel::onRecoveryTokenComplete,
                 onCancel = viewModel::recoveryCancelled
             )
         }
-        uiState.data.showSendTextMessageDialog -> {
+        uiState.showSendTextMessageDialog -> {
             SendTextMessageDialog(
                 onSendTextMessage = viewModel::sendTextMessageClicked,
                 onCancel = viewModel::recoveryCancelled
@@ -115,26 +113,31 @@ fun LoginTotpScreen(
 }
 
 @Composable
+@Suppress("LongMethod")
 fun LoginTotpContent(
     modifier: Modifier = Modifier,
-    login: String,
+    email: String,
     otp: String,
+    isAuthenticatorEnabled: Boolean,
     isLoading: Boolean,
     errorMessage: String?,
-    isError: Boolean,
     onNext: () -> Unit,
+    onPush: () -> Unit,
     onHelp: () -> Unit,
     onOtpChange: (String) -> Unit,
 ) {
+    val focusRequester = remember { FocusRequester() }
+    var textFieldLoaded by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        DashlaneLogo()
+        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
         Text(
-            text = login,
+            text = email,
             style = DashlaneTheme.typography.bodyStandardRegular,
             color = DashlaneTheme.colors.textNeutralStandard,
             modifier = Modifier
@@ -151,37 +154,43 @@ fun LoginTotpContent(
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .focusRequester(focusRequester)
+                .onGloballyPositioned {
+                    if (!textFieldLoaded) {
+                        focusRequester.requestFocus()
+                        textFieldLoaded = true
+                    }
+                }
                 .padding(top = 24.dp),
             value = otp,
             onValueChange = { newValue: String -> onOtpChange(newValue.filter { char -> char.isDigit() }) },
             label = stringResource(id = R.string.login_totp_text_field_label),
-            isError = isError,
-            feedbackText = if (isError) errorMessage else null,
+            isError = errorMessage != null,
+            feedbackText = errorMessage,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 capitalization = KeyboardCapitalization.Characters,
                 imeAction = ImeAction.Next
             ),
         )
+        if (isAuthenticatorEnabled) {
+            ButtonMedium(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 32.dp),
+                onClick = onPush,
+                intensity = Intensity.Supershy,
+                layout = ButtonLayout.TextOnly(text = stringResource(id = R.string.login_totp_use_dashlane_authenticator))
+            )
+        }
         Spacer(modifier = Modifier.weight(1f))
-
         ButtonMediumBar(
-            modifier = modifier
-                .align(Alignment.End),
-            primaryText = stringResource(id = R.string.login_totp_next_button),
-            secondaryText = stringResource(id = R.string.login_totp_use_recovery_code),
+            primaryButtonLayout = if (isLoading) ButtonLayout.IndeterminateProgress else ButtonLayout.TextOnly(text = stringResource(id = R.string.login_totp_next_button)),
+            isPrimaryButtonEnabled = otp.isNotSemanticallyNull() && !isLoading,
             onPrimaryButtonClick = onNext,
+            secondaryButtonLayout = ButtonLayout.TextOnly(text = stringResource(id = R.string.login_totp_use_recovery_code)),
             onSecondaryButtonClick = onHelp
         )
-    }
-
-    if (isLoading) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CircularProgressIndicator()
-        }
     }
 }
 
@@ -201,67 +210,38 @@ fun HelpDialog(
         additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_totp_enter_token_recovery_dialog_choice_button_negative)),
         additionalActionClick = onUseTextMessage,
         onDismissRequest = onCancel,
-        isDestructive = false,
-        properties = DialogProperties()
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecoveryCodeDialog(
     message: String,
+    isLoading: Boolean,
+    errorMessage: String?,
     onInputRecoveryCode: (String) -> Unit,
     onCancel: () -> Unit
 ) {
     var value by rememberSaveable { mutableStateOf("") }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onCancel,
-        properties = DialogProperties()
+        title = stringResource(id = R.string.disable_totp_enter_token_recovery_dialog_title),
+        mainActionLayout = if (isLoading) ButtonLayout.IndeterminateProgress else ButtonLayout.TextOnly(stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_button_positive)),
+        mainActionClick = { onInputRecoveryCode(value) },
+        additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_button_negative)),
+        additionalActionClick = onCancel
     ) {
-        val shape = RoundedCornerShape(size = 12.dp)
-        val containerColor = DashlaneTheme.colors.containerAgnosticNeutralSupershy
-        val tonalElevation = 1.dp
-        Surface(
-            shape = shape,
-            color = containerColor,
-            tonalElevation = tonalElevation,
-        ) {
-            Column(
-                modifier = Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 18.dp)
-            ) {
-                Text(
-                    modifier = Modifier
-                        .semantics { heading() }
-                        .padding(bottom = 8.dp),
-                    text = stringResource(id = R.string.disable_totp_enter_token_recovery_dialog_title),
-                    color = DashlaneTheme.colors.textNeutralCatchy,
-                    style = DashlaneTheme.typography.titleSectionMedium
-                )
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .weight(weight = 1f, fill = false)
-                        .padding(top = 8.dp, bottom = 8.dp)
-                ) {
-                    Text(text = message)
-                }
-                TextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    value = value,
-                    onValueChange = { newValue -> value = newValue.filter { char -> char.isLetterOrDigit() } },
-                    label = stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_hint)
-                )
-                ButtonMediumBar(
-                    primaryButtonLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_button_positive)),
-                    onPrimaryButtonClick = { onInputRecoveryCode(value) },
-                    secondaryButtonLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_button_negative)),
-                    onSecondaryButtonClick = onCancel
-                )
-            }
-        }
+        Text(text = message)
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = value,
+            isError = errorMessage != null,
+            feedbackText = errorMessage,
+            onValueChange = { newValue -> value = newValue.filter { char -> char.isLetterOrDigit() } },
+            label = stringResource(id = R.string.login_totp_enter_token_recovery_dialog_backup_hint)
+        )
     }
 }
 
@@ -280,9 +260,18 @@ fun SendTextMessageDialog(
         additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_totp_enter_token_recovery_dialog_phone_button_negative)),
         additionalActionClick = onCancel,
         onDismissRequest = onCancel,
-        isDestructive = false,
-        properties = DialogProperties()
     )
+}
+
+@Composable
+fun LoginTotpError.toErrorMessage(): String {
+    return when (this) {
+        LoginTotpError.InvalidTokenLockedOut -> stringResource(id = R.string.totp_failed_locked_out)
+        LoginTotpError.InvalidToken -> stringResource(id = R.string.totp_failed)
+        LoginTotpError.AlreadyUsed -> stringResource(id = R.string.login_totp_error_message_already_used)
+        LoginTotpError.Network -> stringResource(id = R.string.cannot_connect_to_server)
+        LoginTotpError.Offline -> stringResource(id = R.string.offline)
+    }
 }
 
 @Preview
@@ -290,14 +279,15 @@ fun SendTextMessageDialog(
 fun LoginTotpContentPreview() {
     DashlanePreview {
         LoginTotpContent(
-            login = "randomemail@provider.com",
+            email = "randomemail@provider.com",
             otp = "123",
             onOtpChange = {},
+            isAuthenticatorEnabled = true,
             isLoading = true,
             errorMessage = "Error",
             onNext = {},
+            onPush = {},
             onHelp = {},
-            isError = false
         )
     }
 }
@@ -320,6 +310,8 @@ fun RecoveryCodeDialogPreview() {
     DashlanePreview {
         RecoveryCodeDialog(
             message = "Message",
+            isLoading = true,
+            errorMessage = "Error",
             onInputRecoveryCode = {},
             onCancel = {},
         )

@@ -5,8 +5,9 @@ import android.os.Bundle
 import android.view.autofill.AutofillValue
 import android.widget.inline.InlinePresentationSpec
 import com.dashlane.autofill.addPreviousEntriesFrom
-import com.dashlane.autofill.model.ItemToFill
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.model.ItemToFill
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import java.util.LinkedList
 
 internal fun FillResponseWrapper.Builder.buildCreateAccount(
@@ -22,23 +23,47 @@ internal fun FillResponseWrapper.Builder.buildCreateAccount(
 
 internal fun FillResponseWrapper.Builder.buildPinnedItem(
     updatedEntriesSummary: AutoFillHintSummary,
-    hasDataSet: Boolean
+    hasDataSet: Boolean,
+    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     pinnedItemDataSet = dataSetCreator.createForPinnedItem(
         summary = updatedEntriesSummary,
         hasFillResponse = hasDataSet,
-        inlineSpec = inlineSpecs?.popOrLast()
+        inlineSpec = inlineSpecs?.popOrLast(),
+        phishingAttemptLevel = phishingAttemptLevel
     )
 }
 
 internal fun FillResponseWrapper.Builder.buildViewAllAccount(
     updatedEntriesSummary: AutoFillHintSummary,
-    hasDataSet: Boolean
+    hasDataSet: Boolean,
+    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     viewAllAccountsDataSet = dataSetCreator.createViewAllItems(
         summary = updatedEntriesSummary,
         hasFillResponse = hasDataSet,
-        inlineSpec = inlineSpecs?.popOrLast()
+        inlineSpec = inlineSpecs?.popOrLast(),
+        phishingAttemptLevel = phishingAttemptLevel
+    )
+}
+
+internal fun FillResponseWrapper.Builder.buildPhishingAttempt(
+    summary: AutoFillHintSummary,
+    phishingAttemptLevel: PhishingAttemptLevel
+) {
+    
+    if (phishingAttemptLevel == PhishingAttemptLevel.NONE) return
+
+    
+    buildPinnedItem(
+        updatedEntriesSummary = summary,
+        hasDataSet = false,
+        phishingAttemptLevel = phishingAttemptLevel
+    )
+    phishingDataSet = dataSetCreator.createForPhishingWarning(
+        summary = summary,
+        inlineSpec = inlineSpecs?.popOrLast(),
+        phishingAttemptLevel = phishingAttemptLevel
     )
 }
 
@@ -57,7 +82,8 @@ internal fun FillResponseWrapper.Builder.buildResults(
     updatedEntriesSummary: AutoFillHintSummary,
     isOtp: Boolean,
     isGuidedChangePassword: Boolean,
-    result: List<ItemToFill>?
+    result: List<ItemToFill>?,
+    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     setClientState(Bundle().apply { addPreviousEntriesFrom(updatedEntriesSummary) })
     val otpItemDataSet = if (isOtp) {
@@ -75,7 +101,8 @@ internal fun FillResponseWrapper.Builder.buildResults(
             itemToFill = itemToFill,
             requireLock = true,
             isGuidedChangePassword = isGuidedChangePassword,
-            inlineSpec = inlineSpecs?.popOrLast()
+            inlineSpec = inlineSpecs?.popOrLast(),
+            phishingAttemptLevel = phishingAttemptLevel
         )
     }
     vaultItemDataSet?.plus(otpItemDataSet)?.filterNotNull()?.let { itemDataSets.addAll(it) }
@@ -120,7 +147,8 @@ internal fun FillResponseWrapper.Builder.buildOptionsItems(
     inlines: LinkedList<InlinePresentationSpec>?,
     isOtp: Boolean,
     hasResult: Boolean,
-    isViewAllAccountEnabled: Boolean
+    isViewAllAccountEnabled: Boolean,
+    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     val hasItemsDataSet = hasItemDataSet()
     val hasChangePassword = hasItemsDataSet && isChangePassword
@@ -134,7 +162,8 @@ internal fun FillResponseWrapper.Builder.buildOptionsItems(
     if (isViewAllAccountEnabled) {
         buildViewAllAccount(
             updatedEntriesSummary = updatedEntriesSummary,
-            hasDataSet = hasItemsDataSet
+            hasDataSet = hasItemsDataSet,
+            phishingAttemptLevel = phishingAttemptLevel
         )
         buildCreateAccount(
             updatedEntriesSummary = updatedEntriesSummary,
@@ -143,7 +172,8 @@ internal fun FillResponseWrapper.Builder.buildOptionsItems(
     }
     buildPinnedItem(
         updatedEntriesSummary = updatedEntriesSummary,
-        hasDataSet = hasItemsDataSet
+        hasDataSet = hasItemsDataSet,
+        phishingAttemptLevel = PhishingAttemptLevel.NONE 
     )
 
     

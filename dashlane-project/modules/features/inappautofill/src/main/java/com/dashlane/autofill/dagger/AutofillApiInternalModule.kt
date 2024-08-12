@@ -15,7 +15,7 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal class AutofillApiInternalModule {
+internal object AutofillApiInternalModule {
 
     @Provides
     fun providesAutofillValueFactory(): AutofillValueFactory {

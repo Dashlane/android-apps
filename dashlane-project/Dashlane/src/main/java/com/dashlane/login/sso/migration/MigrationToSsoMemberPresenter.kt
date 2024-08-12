@@ -14,8 +14,8 @@ import com.dashlane.masterpassword.ChangeMasterPasswordLogoutHelper
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getParcelableExtraCompat
-import com.dashlane.util.inject.qualifiers.ActivityLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainImmediateCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ActivityLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainImmediateCoroutineDispatcher
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher

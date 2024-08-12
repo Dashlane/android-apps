@@ -73,7 +73,9 @@ class AuthenticatorSuggestionsViewProxy(
         }
     private val listener =
         EfficientAdapter.OnItemClickListener<HasLogins.CredentialItem> { _, _, item, _ ->
-            otpResultLauncher.launch(item)
+            viewModel.launchOrShowFrozenAccountPaywall() {
+                otpResultLauncher.launch(item)
+            }
         }
     private val setupAuthenticatorResultLauncher =
         SetUpAuthenticatorResultContract().register(
@@ -115,7 +117,6 @@ class AuthenticatorSuggestionsViewProxy(
                         emptyScreen.isVisible = true
                         suggestionsScreen.isVisible = false
                         faqVisible(true)
-                        mayShowOnboarding(viewModel)
                     }
                     is HasLogins -> {
                         emptyScreen.isVisible = false
@@ -142,14 +143,12 @@ class AuthenticatorSuggestionsViewProxy(
                         
                         
                         faqVisible(someItemsHidden || state.logins.size <= DEFAULT_ITEMS_SHOWN)
-                        mayShowOnboarding(viewModel)
                     }
                     is AllSetup -> {
                         emptyScreenAllSetup.isVisible = true
                         emptyScreen.isVisible = false
                         suggestionsScreen.isVisible = false
                         faqVisible(true)
-                        mayShowOnboarding(viewModel)
                     }
                     is SetupComplete -> navigator.popBackStack()
                 }
@@ -160,13 +159,6 @@ class AuthenticatorSuggestionsViewProxy(
     private fun faqVisible(visible: Boolean) {
         faq.isVisible = visible
         faqTitle.isVisible = visible
-    }
-
-    private fun mayShowOnboarding(viewModel: AuthenticatorSuggestionsViewModelContract) {
-        if (viewModel.isFirstVisit) {
-            navigator.goToGetStartedFromAuthenticatorSuggestions()
-            viewModel.onOnboardingDisplayed()
-        }
     }
 
     private fun setupFaqCards() {
@@ -184,7 +176,7 @@ class AuthenticatorSuggestionsViewProxy(
             val button = expandableCard.findViewById<Button>(R.id.authenticator_faq_question_button)
             when (index) {
                 0, 1 -> button.setOnClickListener {
-                    button.context.launchUrl(HelpCenterLink.ARTICLE_AUTHENTICATOR.uri)
+                    button.context.launchUrl(HelpCenterLink.ARTICLE_AUTHENTICATOR.androidUri)
                 }
                 else -> button.setOnClickListener {
                     button.context.launchUrl("https://support.dashlane.com/hc/requests/new")

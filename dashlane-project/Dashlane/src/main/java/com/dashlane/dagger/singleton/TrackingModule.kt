@@ -30,7 +30,7 @@ import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.SessionManager
 import com.dashlane.useractivity.InMemoryLogStorage
 import com.dashlane.useractivity.TestLogChecker
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.stackTraceToSafeString
 import com.dashlane.util.tryOrNull
 import com.google.gson.Gson

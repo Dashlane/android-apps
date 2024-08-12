@@ -2,7 +2,6 @@ package com.dashlane.login.accountrecoverykey.intro
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.account.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.FlowStep
@@ -10,7 +9,7 @@ import com.dashlane.hermes.generated.definitions.UseKeyErrorName
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -38,14 +37,13 @@ class IntroViewModel @Inject constructor(
         viewModelScope.launch { stateFlow.emit(IntroState.Initial) }
     }
 
-    fun arkFlowStarted(registeredUserDevice: RegisteredUserDevice, authTicket: String?, accountType: UserAccountInfo.AccountType) {
+    fun arkFlowStarted(registeredUserDevice: RegisteredUserDevice, authTicket: String?) {
         viewModelScope.launch {
             if (stateFlow.value !is IntroState.Initial) return@launch
 
             logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.START))
-            loginAccountRecoveryKeyRepository.updateAccountType(accountType)
 
-            if (authTicket != null && registeredUserDevice is RegisteredUserDevice.Remote) {
+            if (authTicket != null) {
                 loginAccountRecoveryKeyRepository.updateRegisteredDevice(registeredUserDevice, authTicket)
                 stateFlow.emit(IntroState.GoToARK(authTicket = authTicket))
             } else {

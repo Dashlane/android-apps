@@ -1,6 +1,6 @@
 package com.dashlane.login.pages.totp
 
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 
 interface LoginTotpLogger {
 

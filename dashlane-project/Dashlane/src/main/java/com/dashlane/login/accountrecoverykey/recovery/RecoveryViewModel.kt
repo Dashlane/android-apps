@@ -1,10 +1,10 @@
 package com.dashlane.login.accountrecoverykey.recovery
+
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
 import com.dashlane.core.KeyChainHelper
 import com.dashlane.cryptography.ObfuscatedByteArray
@@ -28,11 +28,11 @@ import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -55,7 +55,6 @@ class RecoveryViewModel @Inject constructor(
     private val authenticationPasswordRepository: AuthenticationPasswordRepository,
     private val loginPasswordRepository: LoginPasswordRepository,
     private val userPreferencesManager: UserPreferencesManager,
-    private val loginStrategy: LoginStrategy,
     private val lockManager: LockManager,
     private val masterPasswordChanger: MasterPasswordChanger,
     private val keyChainHelper: KeyChainHelper,
@@ -125,7 +124,8 @@ class RecoveryViewModel @Inject constructor(
                 return@flow
             }
 
-            unlockAndDisableARK(masterPassword = newMasterPassword, authorization = session.authorization)
+            unlockMP(masterPassword = newMasterPassword)
+            disableARK(accountType = accountType, authorization = session.authorization)
 
             logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.COMPLETE))
             logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.LOGIN_MASTER_PASSWORD_ACCOUNT_RECOVERY_SUCCESS)
@@ -148,8 +148,11 @@ class RecoveryViewModel @Inject constructor(
             val (session, strategy) = validatePasswordAndCreateSession(obfuscatedVaultKey, registeredUserDevice, accountType)
 
             setupPinAndBiometric(session = session, pin = pin.decodeUtf8ToString(), biometricEnabled = biometricEnabled)
+            disableARK(accountType = accountType, authorization = session.authorization)
 
-            loginAccountRecoveryKeyRepository.clearData()
+            logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.COMPLETE))
+            logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.LOGIN_MASTER_PASSWORD_ACCOUNT_RECOVERY_SUCCESS)
+
             emit(RecoveryState.Finish(progress = 100, strategy = strategy))
         }
     }
@@ -204,22 +207,26 @@ class RecoveryViewModel @Inject constructor(
         return when (validatePasswordResult) {
             is AuthenticationPasswordRepository.Result.Local -> {
                 val session = loginPasswordRepository.createSessionForLocalPassword(registeredUserDevice, validatePasswordResult)
-                session to getLocalStrategy(session)
+                session to loginPasswordRepository.getLocalStrategy(session)
             }
             is AuthenticationPasswordRepository.Result.Remote -> {
                 val session = loginPasswordRepository.createSessionForRemotePassword(validatePasswordResult, accountType = accountType)
-                session to getRemoteStrategy(session, validatePasswordResult.securityFeatures)
+                session to loginPasswordRepository.getRemoteStrategy(session, validatePasswordResult.securityFeatures)
             }
         }
     }
 
-    private fun setupPinAndBiometric(session: Session, pin: String, biometricEnabled: Boolean) {
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    fun setupPinAndBiometric(session: Session, pin: String, biometricEnabled: Boolean) {
         keyChainHelper.initializeKeyStoreIfNeeded(session.userId)
         lockManager.setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
 
         userPreferencesManager.putBoolean(ConstantsPrefs.HOME_PAGE_GETTING_STARTED_PIN_IGNORE, true)
-        userSecureStorageManager.storePin(session, pin)
+        userSecureStorageManager.storePin(session.localKey, session.username, pin)
         sessionCredentialsSaver.saveCredentials(session)
+
+        lockManager.unlock(LockPass.ofPin(pin))
 
         if (biometricEnabled) {
             
@@ -230,35 +237,17 @@ class RecoveryViewModel @Inject constructor(
 
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
-    suspend fun getLocalStrategy(session: Session): LoginStrategy.Strategy? {
-        val shouldLaunchInitialSync = userPreferencesManager.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
-        val strategy = when {
-            
-            shouldLaunchInitialSync -> loginStrategy.getStrategy(session)
-            else -> null
-        }
-        return strategy
-    }
-
-    @VisibleForTesting
-    @Suppress("kotlin:S6313") 
-    suspend fun getRemoteStrategy(session: Session, securityFeatures: Set<SecurityFeature>): LoginStrategy.Strategy {
-        val strategy = loginStrategy.getStrategy(session, securityFeatures)
-        if (strategy == LoginStrategy.Strategy.MONOBUCKET) {
-            userPreferencesManager.ukiRequiresMonobucketConfirmation = true
-        }
-        return strategy
-    }
-
-    @VisibleForTesting
-    @Suppress("kotlin:S6313") 
-    suspend fun unlockAndDisableARK(masterPassword: ObfuscatedByteArray, authorization: Authorization.User) {
+    fun unlockMP(masterPassword: ObfuscatedByteArray) {
         lockManager.unlock(LockPass.ofPassword(AppKey.Password(masterPassword)))
         lockManager.hasEnteredMP = true
         
         kotlin.runCatching { lockManager.sendUnLock(UnlockEvent.Reason.AppAccess(), true) }
+    }
 
-        loginAccountRecoveryKeyRepository.disableRecoveryKeyAfterUse(authorization)
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    suspend fun disableARK(accountType: UserAccountInfo.AccountType, authorization: Authorization.User) {
+        loginAccountRecoveryKeyRepository.disableRecoveryKeyAfterUse(accountType, authorization)
         loginAccountRecoveryKeyRepository.clearData()
 
         userPreferencesManager.putBoolean(ConstantsPrefs.DISABLED_ACCOUNT_RECOVERY_KEY, true)

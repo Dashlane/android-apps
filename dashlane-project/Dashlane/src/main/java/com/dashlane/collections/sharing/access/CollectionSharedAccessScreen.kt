@@ -2,12 +2,8 @@ package com.dashlane.collections.sharing.access
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Scaffold
@@ -16,11 +12,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,7 +27,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dashlane.R
 import com.dashlane.collections.CollectionLoading
 import com.dashlane.collections.sharing.CollectionSharingAppBarListener
-import com.dashlane.collections.sharing.CollectionSharingGroupIcon
 import com.dashlane.collections.sharing.CollectionSharingListTitle
 import com.dashlane.collections.sharing.CollectionSharingTopAppBar
 import com.dashlane.collections.sharing.CollectionSharingViewState
@@ -43,16 +41,18 @@ import com.dashlane.collections.sharing.share.COLLECTION_ROLE_SEPARATOR
 import com.dashlane.design.component.ButtonLayout.TextOnly
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Dialog
-import com.dashlane.design.component.Icon
 import com.dashlane.design.component.InfoboxMedium
+import com.dashlane.design.component.ListItem
+import com.dashlane.design.component.ListItemActions
 import com.dashlane.design.component.Text
+import com.dashlane.design.component.ThumbnailType
 import com.dashlane.design.iconography.IconTokens
-import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.design.theme.typography.withSearchHighlight
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
-import com.dashlane.ui.widgets.compose.contact.ContactIcon
+import com.dashlane.util.MD5Hash
 
 var totalMemberCountBeforeRevoke = 0
 
@@ -83,7 +83,7 @@ internal fun CollectionSharedAccessScreen(
                 is Loading -> CollectionLoading()
                 is ShowList, is ConfirmRevoke -> {
                     Column {
-                        if (viewData.showRoles && !viewData.isAdmin) EditorPermissionInfobox()
+                        if (!viewData.isAdmin) EditorPermissionInfobox()
                         SharedGroupsAndUsersList(
                             viewData,
                             viewModel.login,
@@ -196,7 +196,12 @@ private fun SharedGroupsAndUsersList(
                     } else {
                         revokeGroupAction
                     }
-                UserGroupItem(group, viewData.isAdmin, viewData.showRoles, revokeAction)
+                UserGroupItem(
+                    group = group,
+                    canRevoke = viewData.isAdmin,
+                    searchQuery = searchQuery,
+                    revokeGroupAction = revokeAction
+                )
             }
         }
         val filteredIndividuals = if (searchQuery.isNotEmpty()) {
@@ -210,7 +215,12 @@ private fun SharedGroupsAndUsersList(
             item { CollectionSharingListTitle(stringResource(R.string.collection_new_share_individuals_section_title)) }
             items(filteredIndividuals) { individual ->
                 val revokeAction = if (individual.username == login) null else revokeUserAction
-                IndividualItem(individual, viewData.isAdmin, viewData.showRoles, revokeAction)
+                IndividualItem(
+                    individual = individual,
+                    canRevoke = viewData.isAdmin,
+                    searchQuery = searchQuery,
+                    revokeUserAction = revokeAction
+                )
             }
         }
     }
@@ -221,191 +231,159 @@ private fun SharedGroupsAndUsersList(
 private fun UserGroupItem(
     group: UserGroup,
     canRevoke: Boolean,
-    showRoles: Boolean,
+    searchQuery: String,
     revokeGroupAction: ((UserGroup) -> Unit)?
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val isAdmin = group.permission == Permission.ADMIN
-        CollectionSharingGroupIcon()
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            Text(
-                text = group.name,
-                style = DashlaneTheme.typography.bodyStandardRegular,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            val statusText = if (!showRoles) {
-                pluralStringResource(
-                    id = R.plurals.collections_new_share_group_members,
-                    count = group.membersCount,
-                    formatArgs = arrayOf(group.membersCount)
-                )
-            } else {
-                pluralStringResource(
-                    id = R.plurals.collections_new_share_group_members,
-                    count = group.membersCount,
-                    formatArgs = arrayOf(group.membersCount)
-                ) + COLLECTION_ROLE_SEPARATOR + if (isAdmin) {
-                    stringResource(id = R.string.collection_role_manager)
-                } else {
-                    stringResource(id = R.string.collection_role_editor)
+    val isAdmin = remember(group.permission) { group.permission == Permission.ADMIN }
+    val groupMemberCount = pluralStringResource(
+        id = R.plurals.collections_new_share_group_members,
+        count = group.membersCount,
+        formatArgs = arrayOf(group.membersCount)
+    )
+    val roleStatus = getRoleStatus(isAdmin)
+    val statusText = remember(groupMemberCount, roleStatus) {
+        groupMemberCount + COLLECTION_ROLE_SEPARATOR + roleStatus
+    }
+    val revokeLabel = stringResource(id = R.string.collection_shared_access_revoke_button_accessibility)
+    val actions = remember(revokeGroupAction) {
+        if (revokeGroupAction != null) {
+            object : ListItemActions {
+                @OptIn(ExperimentalComposeUiApi::class)
+                @Composable
+                override fun Content() {
+                    ButtonMedium(
+                        modifier = Modifier.semantics { invisibleToUser() },
+                        onClick = {
+                            if (canRevoke) revokeGroupAction(group)
+                        },
+                        layout = TextOnly(text = revokeLabel),
+                        mood = Mood.Warning,
+                        intensity = Intensity.Supershy,
+                        enabled = canRevoke
+                    )
+                }
+
+                override fun getCustomAccessibilityActions(): List<CustomAccessibilityAction> {
+                    return if (canRevoke) {
+                        listOf(
+                            CustomAccessibilityAction(
+                                label = revokeLabel,
+                                action = {
+                                    revokeGroupAction(group)
+                                    true
+                                },
+                            )
+                        )
+                    } else {
+                        emptyList()
+                    }
                 }
             }
-            Text(
-                text = statusText,
-                style = DashlaneTheme.typography.bodyReducedRegular,
-                color = DashlaneTheme.colors.textNeutralQuiet,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        } else {
+            null
         }
-        if (revokeGroupAction == null) return@Row
-        ButtonMedium(
-            onClick = {
-                if (canRevoke) revokeGroupAction.invoke(group)
-            },
-            layout = TextOnly(
-                text = stringResource(id = R.string.collection_shared_access_revoke_button_accessibility)
-            ),
-            mood = Mood.Warning,
-            intensity = Intensity.Catchy,
-            enabled = canRevoke
-        )
     }
+    ListItem(
+        modifier = Modifier.padding(horizontal = 8.dp),
+        thumbnailType = ThumbnailType.Icon(token = IconTokens.groupOutlined),
+        title = group.name.withSearchHighlight(match = searchQuery, ignoreCase = true),
+        description = AnnotatedString(statusText),
+        actions = actions,
+        onClick = null,
+    )
 }
 
 @Composable
 private fun IndividualItem(
     individual: Individual,
     canRevoke: Boolean,
-    showRoles: Boolean,
+    searchQuery: String,
     revokeUserAction: ((Individual) -> Unit)?
 ) {
-    val isAdmin = individual.permission == Permission.ADMIN
-    val isMyself = revokeUserAction == null
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ContactIcon(
-            email = individual.username,
-            modifier = Modifier.size(36.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            Text(
-                text = individual.username,
-                style = DashlaneTheme.typography.bodyStandardRegular,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            when {
-                !individual.accepted -> PendingStatus(showRoles, isAdmin)
-                isMyself -> RemoveMyselfStatus(isAdmin, showRoles)
-                showRoles -> Role(isAdmin)
+    val url = remember(individual.username) {
+        "https://www.gravatar.com/avatar/${MD5Hash.hash(individual.username)}?s=200&r=pg&d=404"
+    }
+    val statusText = getIndividualStatus(
+        individual = individual,
+        revokeUserAction = revokeUserAction
+    )
+    val revokeLabel = stringResource(id = R.string.collection_shared_access_revoke_button_accessibility)
+    val actions = remember(revokeUserAction) {
+        if (revokeUserAction != null) {
+            object : ListItemActions {
+                @OptIn(ExperimentalComposeUiApi::class)
+                @Composable
+                override fun Content() {
+                    ButtonMedium(
+                        modifier = Modifier.semantics { invisibleToUser() },
+                        onClick = {
+                            if (canRevoke) revokeUserAction(individual)
+                        },
+                        layout = TextOnly(text = revokeLabel),
+                        mood = Mood.Warning,
+                        intensity = Intensity.Supershy,
+                        enabled = canRevoke
+                    )
+                }
+
+                override fun getCustomAccessibilityActions(): List<CustomAccessibilityAction> {
+                    return if (canRevoke) {
+                        listOf(
+                            CustomAccessibilityAction(
+                                label = revokeLabel,
+                                action = {
+                                    revokeUserAction(individual)
+                                    true
+                                },
+                            )
+                        )
+                    } else {
+                        emptyList()
+                    }
+                }
             }
-        }
-        if (isMyself) return@Row
-        ButtonMedium(
-            onClick = {
-                if (canRevoke) revokeUserAction?.invoke(individual)
-            },
-            layout = TextOnly(
-                text = stringResource(id = R.string.collection_shared_access_revoke_button_accessibility)
-            ),
-            mood = Mood.Warning,
-            intensity = Intensity.Catchy,
-            enabled = canRevoke
-        )
-    }
-}
-
-@Composable
-private fun RemoveMyselfStatus(isAdmin: Boolean, showRoles: Boolean) {
-    val text = if (!showRoles) {
-        stringResource(id = R.string.collection_shared_access_item_member_myself)
-    } else {
-        val role = if (isAdmin) {
-            stringResource(id = R.string.collection_role_manager)
         } else {
-            stringResource(id = R.string.collection_role_editor)
+            null
         }
-        role + COLLECTION_ROLE_SEPARATOR +
-            stringResource(id = R.string.collection_shared_access_item_member_myself)
     }
-    Text(
-        text = text,
-        style = DashlaneTheme.typography.bodyReducedRegular,
-        color = DashlaneTheme.colors.textNeutralQuiet,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
+    ListItem(
+        modifier = Modifier.padding(horizontal = 8.dp),
+        thumbnailType = ThumbnailType.User.Single(url = url),
+        title = individual.username.withSearchHighlight(match = searchQuery, ignoreCase = true),
+        description = AnnotatedString(statusText),
+        actions = actions,
+        onClick = null,
     )
 }
 
 @Composable
-private fun PendingStatus(showRoles: Boolean, isAdmin: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            token = IconTokens.timeOutlined,
-            contentDescription = null,
-            tint = DashlaneTheme.colors.textWarningQuiet,
-            modifier = Modifier.size(12.dp)
-        )
-        Text(
-            modifier = Modifier.padding(start = 2.dp),
-            text = stringResource(id = R.string.collection_shared_access_item_invitation_pending),
-            style = DashlaneTheme.typography.bodyReducedRegular,
-            color = DashlaneTheme.colors.textWarningQuiet,
-            maxLines = 1
-        )
-        if (!showRoles) return@Row
-        val role = COLLECTION_ROLE_SEPARATOR + if (isAdmin) {
-            stringResource(id = R.string.collection_role_manager)
-        } else {
-            stringResource(id = R.string.collection_role_editor)
+private fun getIndividualStatus(
+    individual: Individual,
+    revokeUserAction: ((Individual) -> Unit)?
+): String {
+    val isAdmin = remember(individual.permission) { individual.permission == Permission.ADMIN }
+    val roleStatus = getRoleStatus(isAdmin)
+    val pendingStatus = stringResource(id = R.string.collection_shared_access_item_invitation_pending)
+    val removeMyselfStatus = stringResource(id = R.string.collection_shared_access_item_member_myself)
+    val description = remember(individual.accepted, revokeUserAction) {
+        when {
+            !individual.accepted -> {
+                roleStatus + COLLECTION_ROLE_SEPARATOR + pendingStatus
+            }
+            revokeUserAction == null -> {
+                roleStatus + COLLECTION_ROLE_SEPARATOR + removeMyselfStatus
+            }
+            else -> roleStatus
         }
-        Text(
-            text = role,
-            style = DashlaneTheme.typography.bodyReducedRegular,
-            color = DashlaneTheme.colors.textNeutralQuiet,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
     }
+    return description
 }
 
 @Composable
-private fun Role(isAdmin: Boolean) {
-    val role = if (isAdmin) {
-        stringResource(id = R.string.collection_role_manager)
-    } else {
-        stringResource(id = R.string.collection_role_editor)
-    }
-    Text(
-        text = role,
-        style = DashlaneTheme.typography.bodyReducedRegular,
-        color = DashlaneTheme.colors.textNeutralQuiet,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
+private fun getRoleStatus(isAdmin: Boolean) = if (isAdmin) {
+    stringResource(id = R.string.collection_role_manager)
+} else {
+    stringResource(id = R.string.collection_role_editor)
 }
 
 @Composable
@@ -453,12 +431,12 @@ fun PreviewSharedUsersAndGroups() {
     DashlanePreview {
         SharedGroupsAndUsersList(
             viewData = ViewData(
-                listOf(
+                userGroups = listOf(
                     UserGroup("1", "All", 324),
                     UserGroup("2", "Marketing", 34),
                     UserGroup("3", "Engineering", 16)
                 ),
-                listOf(
+                individuals = listOf(
                     Individual("randomemail@provider.com"),
                     Individual("randomemail@provider.com", accepted = false),
                     Individual("randomemail@provider.com"),
@@ -466,7 +444,8 @@ fun PreviewSharedUsersAndGroups() {
                     Individual("randomemail@provider.com"),
                     Individual("randomemail@provider.com"),
                     Individual("randomemail@provider.com")
-                )
+                ),
+                isAdmin = true,
             ),
             login = "randomemail@provider.com",
             searchQuery = "",

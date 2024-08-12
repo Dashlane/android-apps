@@ -3,9 +3,10 @@ package com.dashlane.utils
 import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.Instant
+import javax.inject.Inject
 import kotlin.random.Random
 
-class PasswordScrambler {
+class PasswordScrambler @Inject constructor() {
     private val random = Random(Instant.now().toEpochMilli())
 
     suspend fun runScramble(password: String, block: (String) -> Unit) {
@@ -39,6 +40,7 @@ class PasswordScrambler {
             block(password.subSequence(0, index).toString() + fakePassword)
             delay(stepDelay)
         }
+        block(password)
     }
 
     private fun generateRandomPassword(size: Int? = null): String {

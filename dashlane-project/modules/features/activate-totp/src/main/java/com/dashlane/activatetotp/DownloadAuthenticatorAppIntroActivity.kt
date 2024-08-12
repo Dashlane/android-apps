@@ -44,7 +44,7 @@ class DownloadAuthenticatorAppIntroActivity : DashlaneActivity() {
                         linkResIds = listOf(R.string.download_authenticator_app_intro_link),
                         positiveButtonResId = R.string.download_authenticator_app_intro_cta_positive,
                         onClickPositiveButton = { launchUrl("https://play.google.com/store/apps/details?id=com.dashlane.authenticator") },
-                        onClickLink = { _, _ -> launchUrl(HelpCenterLink.ARTICLE_AUTHENTICATOR_APP.uri) }
+                        onClickLink = { _, _ -> launchUrl(HelpCenterLink.ARTICLE_AUTHENTICATOR_APP.androidUri) }
                     )
 
                     setCurrentPageView(AnyPage.SETTINGS_SECURITY_TWO_FACTOR_AUTHENTICATION_ENABLE_DOWNLOAD_AUTHENTICATOR)

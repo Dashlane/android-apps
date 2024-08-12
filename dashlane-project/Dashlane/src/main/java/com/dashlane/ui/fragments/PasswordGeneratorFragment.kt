@@ -12,12 +12,16 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
-import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.lifecycle.coroutineScope
 import com.dashlane.R
+import com.dashlane.databinding.FragmentPasswordGeneratorBinding
+import com.dashlane.databinding.IncludeFragmentPasswordGeneratorHeaderBinding
 import com.dashlane.design.component.compat.view.ButtonMediumView
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.LogRepository
+import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.password.generator.PasswordGeneratorCriteria
 import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
 import com.dashlane.passwordgenerator.criteria
@@ -35,8 +39,8 @@ import com.dashlane.storage.userdata.accessor.filter.space.NoSpaceFilter
 import com.dashlane.ui.PasswordGeneratorConfigurationView
 import com.dashlane.ui.PasswordGeneratorConfigurationView.ConfigurationChangeListener
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorLogger
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.getThemeAttrColor
@@ -44,8 +48,6 @@ import com.dashlane.util.setProgressDrawablePrimaryTrack
 import com.dashlane.utils.PasswordScrambler
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.ref.WeakReference
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -53,6 +55,8 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.lang.ref.WeakReference
+import javax.inject.Inject
 
 @Suppress("LargeClass")
 @ObsoleteCoroutinesApi
@@ -77,22 +81,41 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     @Inject
     lateinit var sessionManager: SessionManager
 
+    @Inject
+    lateinit var frozenStateManager: FrozenStateManager
+
+    @Inject
+    lateinit var navigator: Navigator
+
+    @Inject
+    lateinit var passwordScrambler: PasswordScrambler
+
     private val eligibleToSpecialPrideMode: Boolean
         get() = userFeaturesChecker.has(FeatureFlip.SPECIAL_PRIDE_MODE)
 
     private var isAllowedToDisplayPreviouslyGenerated = false
     private var hasNavigationDrawer = false
 
-    private var generatedPasswordView: TextView? = null
-    private var passwordStrengthView: TextView? = null
-    private var passwordStrengthBar: ProgressBar? = null
-    private var passwordStrengthSpecialModeBar: ProgressBar? = null
-    private var copyPasswordButton: ButtonMediumView? = null
-    private var generatePasswordButton: ButtonMediumView? = null
-    private var header: CardView? = null
-    private var generatorConfiguration: PasswordGeneratorConfigurationView? = null
+    private lateinit var binding: FragmentPasswordGeneratorBinding
+
+    private val header: IncludeFragmentPasswordGeneratorHeaderBinding
+        get() = binding.passwordGeneratorHeader
+    private val generatorConfiguration: PasswordGeneratorConfigurationView
+        get() = binding.generatorConfiguration
+    private val generatedPasswordView: TextView
+        get() = header.generatedPassword
+    private val passwordStrengthView: TextView
+        get() = header.generatedPasswordStrength
+    private val passwordStrengthBar: ProgressBar
+        get() = header.passwordStrengthBar
+    private val passwordStrengthSpecialModeBar: ProgressBar
+        get() = header.passwordStrengthSpecialModeBar
+    private val copyPasswordButton: ButtonMediumView
+        get() = header.copyGeneratedPassword
+    private val generatePasswordButton: ButtonMediumView
+        get() = header.regeneratePassword
+
     private var toolbarRef = WeakReference<Toolbar?>(null)
-    private var passwordScrambler = PasswordScrambler()
 
     var passwordGenerationCallback: PasswordGenerationCallback? = null
     var log75Subtype: String? = null
@@ -117,13 +140,13 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
         parseArguments()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_password_generator, container, false)
-        findViewsReferences(view)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        binding = FragmentPasswordGeneratorBinding.inflate(layoutInflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initializeClickListeners()
         initializeSpecialModeBar()
         updateHeaderWith(null, null)
@@ -132,11 +155,11 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             resources.getInteger(R.integer.password_generator_max_length_generated_password)
         )
         
-        generatorConfiguration?.listener = this
-        generatedPasswordView?.addTextChangedListener(ColorTextWatcher(requireContext()))
+        binding.generatorConfiguration.listener = this
+        binding.passwordGeneratorHeader.generatedPassword.addTextChangedListener(ColorTextWatcher(requireContext()))
         setHasOptionsMenu(true)
         setMenuVisibility(false)
-        return view
+        setFrozenStateIfRequired()
     }
 
     override fun onStart() {
@@ -157,19 +180,17 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        passwordGenerationCallback?.let {
-            it.showPreviouslyGenerated()
-        }
+        passwordGenerationCallback?.showPreviouslyGenerated()
         return true
     }
 
     private suspend fun onPasswordGenerated(password: String, passwordStrength: PasswordStrengthScore?) {
         passwordGenerationCallback?.onPasswordGenerated()
         passwordScrambler.runScramble(password) { scrambledPassword ->
-            generatedPasswordView?.text = scrambledPassword
+            generatedPasswordView.text = scrambledPassword
         }
         updateHeaderWith(password, passwordStrength)
-        copyPasswordButton?.isClickable = true
+        copyPasswordButton.isClickable = true
     }
 
     override fun onDigitSwitched(criteria: PasswordGeneratorCriteria) {
@@ -205,30 +226,23 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
         }
     }
 
-    private fun findViewsReferences(view: View) {
-        generatedPasswordView = view.findViewById(R.id.generated_password)
-        passwordStrengthView = view.findViewById(R.id.generated_password_strength)
-        passwordStrengthBar = view.findViewById(R.id.password_strength_bar)
-        passwordStrengthSpecialModeBar = view.findViewById(R.id.password_strength_special_mode_bar)
-        copyPasswordButton = view.findViewById(R.id.copy_generated_password)
-        generatePasswordButton = view.findViewById(R.id.regenerate_password)
-        header = view.findViewById(R.id.password_generator_header)
-        generatorConfiguration = view.findViewById(R.id.generator_configuration)
-    }
-
     private fun initializeClickListeners() {
-        generatePasswordButton?.onClick = {
-            generatorConfiguration?.getConfiguration(null)?.let {
+        generatePasswordButton.onClick = {
+            generatorConfiguration.getConfiguration(null).let {
                 generatorActor.trySend(it)
             }
         }
-        copyPasswordButton?.onClick = {
-            copyAndSaveGeneratedPassword(null, true)
+        copyPasswordButton.onClick = {
+            if (frozenStateManager.isAccountFrozen) {
+                navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            } else {
+                copyAndSaveGeneratedPassword(null, true)
+            }
         }
     }
 
     private fun initializeSpecialModeBar() {
-        passwordStrengthSpecialModeBar?.let { passwordStrengthSpecialModeBar ->
+        passwordStrengthSpecialModeBar.let { passwordStrengthSpecialModeBar ->
             if (eligibleToSpecialPrideMode) {
                 val success =
                     passwordStrengthSpecialModeBar.setProgressDrawablePrimaryTrack(R.drawable.password_strength_pride_flag_bar)
@@ -250,14 +264,14 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
 
     private suspend fun generatePassword(configuration: PasswordGeneratorCriteria) {
         logger.logPasswordGenerate(configuration)
-        passwordStrengthView?.animate()?.alpha(0.0f)
-        copyPasswordButton?.isClickable = false
+        passwordStrengthView.animate()?.alpha(0.0f)
+        copyPasswordButton.isClickable = false
         val result = passwordGeneratorWrapper.generatePassword(configuration)
         onPasswordGenerated(result.password, result.passwordStrength)
     }
 
     private fun updateHeaderWith(password: String?, strength: PasswordStrengthScore?) {
-        val context = generatedPasswordView?.context ?: return
+        val context = generatedPasswordView.context ?: return
 
         val (strengthTitle, color, progress) = if (strength == null) {
             Triple(null, getDefaultDominantColor(context), 0)
@@ -269,36 +283,43 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             )
         }
         
-        generatedPasswordView?.let { view ->
+        generatedPasswordView.let { view ->
             view.text = password
             if (view.movementMethod == null) {
                 view.movementMethod = ScrollingMovementMethod()
             }
         }
         
-        passwordStrengthView?.text = strengthTitle
-        passwordStrengthView?.animate()?.alpha(1.0f)
-        passwordStrengthView?.tag = strength
+        passwordStrengthView.text = strengthTitle
+        passwordStrengthView.animate()?.alpha(1.0f)
+        passwordStrengthView.tag = strength
         val anim = StrengthBarAnimation(
-            passwordStrengthBar!!,
-            passwordStrengthBar!!.progress.toFloat(),
+            passwordStrengthBar,
+            passwordStrengthBar.progress.toFloat(),
             progress.toFloat(),
             color
         )
         anim.duration = 300
-        passwordStrengthBar?.startAnimation(anim)
+        passwordStrengthBar.startAnimation(anim)
         
         if (eligibleToSpecialPrideMode) {
             val isSafeEnoughForSpecialMode = strength?.isSafeEnoughForSpecialMode == true
             val alpha = if (isSafeEnoughForSpecialMode) 1f else 0f
             val duration = if (isSafeEnoughForSpecialMode) 400L else 250L
             val startDelay = if (isSafeEnoughForSpecialMode) 300L else 0L
-            passwordStrengthSpecialModeBar?.animate()
+            passwordStrengthSpecialModeBar.animate()
                 ?.alpha(alpha)
                 ?.setDuration(duration)
                 ?.setStartDelay(startDelay)
                 ?.start()
         }
+    }
+
+    private fun setFrozenStateIfRequired() {
+        if (!frozenStateManager.isAccountFrozen) return
+
+        generatePasswordButton.isEnabled = false
+        generatorConfiguration.enable = false
     }
 
     private fun getDefaultDominantColor(context: Context) = context.getThemeAttrColor(R.attr.colorPrimary)
@@ -311,7 +332,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
 
     private fun restoreDefaultPreferences(minLength: Int, maxLength: Int) {
         val defaultConfig = passwordGeneratorWrapper.criteria
-        generatorConfiguration?.setNewConfiguration(minLength, maxLength, defaultConfig)
+        generatorConfiguration.setNewConfiguration(minLength, maxLength, defaultConfig)
         generatorActor.trySend(defaultConfig)
     }
 
@@ -328,7 +349,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     }
 
     fun copyAndSaveGeneratedPassword(domain: String?, canCopyToClipboard: Boolean) {
-        val password = generatedPasswordView?.text?.toString() ?: return
+        val password = generatedPasswordView.text?.toString() ?: return
         val savedGeneratedPassword = runBlocking {
             passwordGeneratorWrapper.saveToPasswordHistory(
                 password,
@@ -339,12 +360,11 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
         if (canCopyToClipboard) {
             clipboardCopy.copyToClipboard(data = password, sensitiveData = true)
         }
-        val configuration = generatorConfiguration?.getConfiguration(null)
-        if (configuration != null) {
-            saveAsDefaultPreferences(configuration)
-        }
+        val configuration = generatorConfiguration.getConfiguration(null)
+        saveAsDefaultPreferences(configuration)
+
         if (passwordGenerationCallback != null) {
-            val tag = passwordStrengthView?.tag
+            val tag = passwordStrengthView.tag
             val passwordStrength = if (tag is PasswordStrength) tag else null
             passwordGenerationCallback?.passwordSaved(
                 savedGeneratedPassword,

@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
@@ -15,7 +15,7 @@ import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.EMAIL_KEY
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher

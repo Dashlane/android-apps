@@ -7,24 +7,30 @@ import android.widget.inline.InlinePresentationSpec
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.announcement.KeyboardAutofillService
 import com.dashlane.autofill.changepassword.AutoFillChangePasswordConfiguration
+import com.dashlane.autofill.formdetector.AutoFillFormType
+import com.dashlane.autofill.formdetector.field.AutoFillHint
+import com.dashlane.autofill.formdetector.model.ApplicationFormSource
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.getPreviousEntriesFrom
 import com.dashlane.autofill.model.ItemToFill
+import com.dashlane.autofill.phishing.PhishingAttemptLevel
+import com.dashlane.autofill.phishing.PhishingWarningDataProvider
+import com.dashlane.autofill.phishing.UrlPhishingClassificationHelper
 import com.dashlane.autofill.request.autofill.logger.logShowList
 import com.dashlane.autofill.setClassLoaderInDashlane
 import com.dashlane.autofill.unlockfill.AutofillAuthActivity
 import com.dashlane.autofill.util.AutofillNavigationService
 import com.dashlane.autofill.util.SaveInfoWrapper
 import com.dashlane.autofill.util.copyPlusEntries
-import com.dashlane.autofill.formdetector.AutoFillFormType
-import com.dashlane.autofill.formdetector.field.AutoFillHint
-import com.dashlane.autofill.formdetector.model.ApplicationFormSource
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseAntiPhishing
+import com.dashlane.preference.UserPreferencesManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.LinkedList
 import javax.inject.Inject
 
 internal interface FillResponseCreator {
-    fun createFor(
+    suspend fun createFor(
         clientState: Bundle?,
         summary: AutoFillHintSummary,
         result: List<ItemToFill>?,
@@ -42,11 +48,15 @@ internal class FillResponseCreatorImpl @Inject constructor(
     private val dataSetCreator: DataSetCreator,
     private val logger: AutofillAnalyzerDef.IAutofillUsageLog,
     private val navigationService: AutofillNavigationService,
-    private val keyboardAutofillService: KeyboardAutofillService
+    private val keyboardAutofillService: KeyboardAutofillService,
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val urlPhishingClassificationHelper: UrlPhishingClassificationHelper,
+    private val userPreferencesManager: UserPreferencesManager,
+    private val phishingWarningDataProvider: PhishingWarningDataProvider
 ) : FillResponseCreator {
 
     @Suppress("LongMethod")
-    override fun createFor(
+    override suspend fun createFor(
         clientState: Bundle?,
         summary: AutoFillHintSummary,
         result: List<ItemToFill>?,
@@ -72,6 +82,7 @@ internal class FillResponseCreatorImpl @Inject constructor(
             responseBuilder.setIgnoreAutofillIds(listOf(it))
         }
 
+        
         val isOtp = summary.formType == AutoFillFormType.OTP
         if (!isOtp && result == null) {
             val logOutIntentSender =
@@ -99,6 +110,16 @@ internal class FillResponseCreatorImpl @Inject constructor(
 
         val hasResult = !result.isNullOrEmpty()
 
+        val phishingAttemptLevel =
+            if (userFeaturesChecker.canUseAntiPhishing() &&
+                userPreferencesManager.isAntiPhishingEnable &&
+                !phishingWarningDataProvider.isWebsiteIgnored(summary.webDomain)
+            ) {
+                getPhishingLevel(summary.webDomain)
+            } else {
+                PhishingAttemptLevel.NONE
+            }
+
         
         if (keyboardAutofillService.canDisplayOnBoardingSuggestion() && inlineSpecs != null) {
             val onboardingIntentSender = navigationService.getOnBoardingIntentSender()
@@ -108,7 +129,13 @@ internal class FillResponseCreatorImpl @Inject constructor(
 
         
         if (canPopulateResponse(isOtp, hasResult, hasSaveInfo)) {
-            responseBuilder.buildResults(updatedEntriesSummary, isOtp, isGuidedChangePassword, result)
+            responseBuilder.buildResults(
+                updatedEntriesSummary,
+                isOtp,
+                isGuidedChangePassword,
+                result,
+                phishingAttemptLevel
+            )
         }
 
         
@@ -125,8 +152,14 @@ internal class FillResponseCreatorImpl @Inject constructor(
             inlines = inlines,
             isOtp = isOtp,
             hasResult = hasResult,
-            isViewAllAccountEnabled = isViewAllAccountEnabled
+            isViewAllAccountEnabled = isViewAllAccountEnabled,
+            phishingAttemptLevel = phishingAttemptLevel
         )
+
+        
+        if (phishingAttemptLevel != PhishingAttemptLevel.NONE) {
+            responseBuilder.buildPhishingAttempt(summary, phishingAttemptLevel)
+        }
 
         
         responseBuilder.setScrollingRemoteView(remoteViewProvider.forScrolling())
@@ -137,11 +170,15 @@ internal class FillResponseCreatorImpl @Inject constructor(
                 formType = summary.formType,
                 forKeyboard = hasInlineSpecs,
                 isNativeApp = summary.formSource is ApplicationFormSource,
-                totalCount = response.dataSets.count()
+                totalCount = response.dataSets.count(),
+                phishingAttemptLevel = phishingAttemptLevel,
             )
         }
         return response
     }
+
+    private suspend fun getPhishingLevel(url: String?): PhishingAttemptLevel =
+        url?.let { urlPhishingClassificationHelper.classifyWebsitePhishingLevel(url) } ?: PhishingAttemptLevel.NONE
 
     private fun canPopulateResponse(
         isOtp: Boolean,

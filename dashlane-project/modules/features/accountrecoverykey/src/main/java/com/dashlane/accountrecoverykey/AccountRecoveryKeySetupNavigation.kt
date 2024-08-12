@@ -7,7 +7,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation.confirmDestination
 import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation.generateDestination
 import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation.introDestination
@@ -27,46 +26,40 @@ object AccountRecoveryKeySetupNavigation {
 fun NavGraphBuilder.arkSetupGraph(
     navController: NavController,
     contentPadding: PaddingValues = PaddingValues(),
-    arkRoute: String,
     onArkGenerated: () -> Unit,
     onCancel: () -> Unit,
     userCanExitFlow: Boolean
 ) {
-    navigation(
-        startDestination = introDestination,
-        route = arkRoute
-    ) {
-        composable(introDestination) {
-            AccountRecoveryKeyActivationIntroScreen(
-                modifier = Modifier.padding(contentPadding),
-                viewModel = hiltViewModel(),
-                onBackPressed = { navController.navigateUp() },
-                onGenerateKeyClicked = { navController.navigate(generateDestination) },
-                userCanExitFlow = userCanExitFlow
-            )
-        }
-        composable(generateDestination) {
-            AccountRecoveryKeyGenerateScreen(
-                modifier = Modifier.padding(contentPadding),
-                viewModel = hiltViewModel(),
-                goToConfirm = { navController.navigate(confirmDestination) },
-                cancel = { navController.popBackStack() }
-            )
-        }
-        composable(confirmDestination) {
-            AccountRecoveryKeyConfirmScreen(
-                modifier = Modifier.padding(contentPadding),
-                viewModel = hiltViewModel(),
-                back = { navController.popBackStack() },
-                success = { navController.navigate(successDestination) },
-                cancel = onCancel
-            )
-        }
-        composable(successDestination) {
-            AccountRecoveryKeySuccessScreen(
-                modifier = Modifier.padding(contentPadding),
-                done = onArkGenerated,
-            )
-        }
+    composable(introDestination) {
+        AccountRecoveryKeyActivationIntroScreen(
+            modifier = Modifier.padding(contentPadding),
+            viewModel = hiltViewModel(),
+            onBackPressed = { navController.navigateUp() },
+            onGenerateKeyClicked = { navController.navigate(generateDestination) },
+            userCanExitFlow = userCanExitFlow
+        )
+    }
+    composable(generateDestination) {
+        AccountRecoveryKeyGenerateScreen(
+            modifier = Modifier.padding(contentPadding),
+            viewModel = hiltViewModel(),
+            goToConfirm = { navController.navigate(confirmDestination) },
+            cancel = { navController.popBackStack() }
+        )
+    }
+    composable(confirmDestination) {
+        AccountRecoveryKeyConfirmScreen(
+            modifier = Modifier.padding(contentPadding),
+            viewModel = hiltViewModel(),
+            back = { navController.popBackStack() },
+            success = { navController.navigate(successDestination) },
+            cancel = onCancel
+        )
+    }
+    composable(successDestination) {
+        AccountRecoveryKeySuccessScreen(
+            modifier = Modifier.padding(contentPadding),
+            done = onArkGenerated,
+        )
     }
 }

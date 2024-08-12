@@ -1,8 +1,6 @@
 package com.dashlane.notificationcenter
 
 import android.content.Context
-import com.dashlane.account.UserAccountInfo
-import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.accountstatus.premiumstatus.isTrial
 import com.dashlane.accountstatus.premiumstatus.remainingDays
@@ -10,9 +8,8 @@ import com.dashlane.announcements.modules.trialupgraderecommendation.TrialUpgrad
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
-import com.dashlane.darkweb.DarkWebEmailStatus
-import com.dashlane.darkweb.DarkWebMonitoringManager
 import com.dashlane.debug.DeveloperUtilities
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.login.lock.LockManager
@@ -31,7 +28,6 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.premium.offer.common.StoreOffersFormatter
 import com.dashlane.premium.offer.common.StoreOffersManager
 import com.dashlane.premium.offer.common.model.FormattedStoreOffer
-import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.premium.offer.common.model.ProductDetailsWrapper
 import com.dashlane.premium.offer.common.model.toPromotionType
 import com.dashlane.security.SecurityHelper
@@ -41,18 +37,18 @@ import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.tryOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.Clock
-import java.time.Instant
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import java.time.Clock
+import java.time.Instant
+import javax.inject.Inject
 
 @Suppress("LargeClass")
 class NotificationCenterRepositoryImpl @Inject constructor(
@@ -69,14 +65,13 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
     private val biometricRecovery: BiometricRecovery,
     private val accountStatusProvider: OptionalProvider<AccountStatus>,
-    private val darkWebMonitoringManager: DarkWebMonitoringManager,
     private val storeOffersManager: StoreOffersManager,
     private val storeOffersFormatter: StoreOffersFormatter,
-    private val userAccountStorage: UserAccountStorage,
     private val passwordLimiter: PasswordLimiter,
     private val clock: Clock,
     private val sharingDao: SharingDao,
-    @DefaultCoroutineDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher
+    @DefaultCoroutineDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher,
+    private val frozenStateManager: FrozenStateManager,
 ) : NotificationCenterRepository {
 
     private val hasBiometric
@@ -151,7 +146,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         )
 
         val whatIsNewItemTypes = mutableSetOf<ActionItemType>()
-        whatIsNewItemTypes.add(ActionItemType.AUTHENTICATOR_ANNOUNCEMENT)
 
         val yourAccountItemTypes = setOf(
             ActionItemType.PASSWORD_LIMIT_WARNING,
@@ -182,10 +176,10 @@ class NotificationCenterRepositoryImpl @Inject constructor(
             ActionItemType.TRIAL_UPGRADE_RECOMMENDATION -> listOf(
                 createTrialUpgradeRecommendationItem()
             )
-            ActionItemType.AUTHENTICATOR_ANNOUNCEMENT -> listOf(createAuthenticatorAnnouncementItem())
             ActionItemType.INTRODUCTORY_OFFERS -> createPromotionItems()
             ActionItemType.PASSWORD_LIMIT_WARNING -> listOf(createPasswordWarningLimitItem())
-            ActionItemType.PASSWORD_LIMIT_REACHED -> listOf(createPasswordLimitReachedItem())
+            ActionItemType.PASSWORD_LIMIT_REACHED,
+            ActionItemType.PASSWORD_LIMIT_EXCEEDED -> listOf(createPasswordLimitReachedItem())
         }
     }
 
@@ -227,10 +221,9 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         ActionItem.FreeTrialStartedActionItem(this)
             .takeIf { meetConditionFreeTrialStarted() }
 
-    private suspend fun createTrialUpgradeRecommendationItem(): ActionItem? =
+    private fun createTrialUpgradeRecommendationItem(): ActionItem? =
         if (meetConditionTrialUpgradeRecommendation()) {
-            val offerType = getTrialUpgradeRecommendationType()
-            ActionItem.TrialUpgradeRecommendationActionItem(this, offerType)
+            ActionItem.TrialUpgradeRecommendationActionItem(this)
         } else {
             null
         }
@@ -267,29 +260,13 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     }
 
     private fun createPasswordLimitReachedItem(): ActionItem? {
-        if (passwordLimiter.isPasswordLimitReached()) {
-            val passwordLimit = passwordLimiter.passwordLimitCount?.toInt() ?: return null
-            return ActionItem.PasswordLimitReachedActionItem(this, passwordLimit)
+        val passwordLimit = passwordLimiter.passwordLimitCount?.toInt() ?: return null
+        return when {
+            frozenStateManager.isAccountFrozen -> ActionItem.PasswordLimitExceededActionItem(this, passwordLimit)
+            passwordLimiter.isPasswordLimitReached() -> ActionItem.PasswordLimitReachedActionItem(this, passwordLimit)
+            else -> null
         }
-        return null
     }
-
-    private suspend fun getTrialUpgradeRecommendationType(): OfferType =
-        when (isDarkWebMonitoringSetup()) {
-            true -> OfferType.PREMIUM
-            else -> OfferType.ADVANCED
-        }
-
-    private suspend fun isDarkWebMonitoringSetup(): Boolean =
-        darkWebMonitoringManager.getEmailsWithStatus()
-            ?.any { it.status == DarkWebEmailStatus.STATUS_ACTIVE } ?: false
-
-    private fun createAuthenticatorAnnouncementItem() =
-        if (meetConditionAuthenticatorAnnouncement()) {
-            ActionItem.AuthenticatorAnnouncementItem(this)
-        } else {
-            null
-        }
 
     private fun meetConditionBiometric(
         type: ActionItemType,
@@ -331,10 +308,6 @@ class NotificationCenterRepositoryImpl @Inject constructor(
 
         return premiumStatus.isTrial && isTrialEnding
     }
-
-    private fun meetConditionAuthenticatorAnnouncement() =
-        !userPreferencesManager.isAuthenticatorGetStartedDisplayed &&
-            sessionManager.session?.username?.let { userAccountStorage[it]?.accountType is UserAccountInfo.AccountType.MasterPassword } ?: true
 
     private suspend fun loadBreachItems(limit: Int?): List<AlertActionItem> {
         val list = withContext(defaultCoroutineDispatcher) { breachLoader.getBreachesWrapper(limit) }
@@ -405,7 +378,7 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         filterTo(ArrayList()) { !isDismiss(it) && !isRead(it) }
 
     companion object {
-        private const val PREFERENCE_DISMISS = "action_item_dismiss_"
+        const val PREFERENCE_DISMISS = "action_item_dismiss_"
         private const val PREFERENCE_READ = "action_item_read_"
         private const val PREFERENCE_CREATION_DATE = "action_item_creation_date_"
 

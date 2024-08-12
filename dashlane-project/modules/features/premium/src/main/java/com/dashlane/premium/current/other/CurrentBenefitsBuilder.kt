@@ -4,13 +4,13 @@ import androidx.annotation.VisibleForTesting
 import com.dashlane.premium.R
 import com.dashlane.premium.current.CurrentPlanViewModel
 import com.dashlane.premium.current.model.CurrentPlan
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.ui.model.TextResource
 import com.dashlane.ui.model.TextResource.Arg
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.getDevicesLimitValue
-import com.dashlane.userfeatures.getFamilyBundleLimitValue
-import com.dashlane.userfeatures.getPasswordsLimitValue
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.getDevicesLimitValue
+import com.dashlane.featureflipping.getFamilyBundleLimitValue
+import com.dashlane.featureflipping.getPasswordsLimitValue
 
 internal class CurrentBenefitsBuilder(
     private val userFeaturesChecker: UserFeaturesChecker

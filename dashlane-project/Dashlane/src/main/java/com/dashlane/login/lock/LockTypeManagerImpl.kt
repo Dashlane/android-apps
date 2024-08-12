@@ -1,6 +1,6 @@
 package com.dashlane.login.lock
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.lock.LockHelper
@@ -121,7 +121,7 @@ class LockTypeManagerImpl @Inject constructor(
 
     private fun isPinSettingValid(): Boolean {
         val session = sessionManager.session ?: return false
-        val pin = userSecureStorageManager.readPin(session)
+        val pin = userSecureStorageManager.readPin(session.localKey, session.username)
         return pin.isNotSemanticallyNull()
     }
 

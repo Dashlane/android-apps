@@ -16,12 +16,10 @@ import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
-import javax.inject.Inject
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class SharingItemsDataProvider @Inject constructor(
     private val sharingDao: SharingDao,
@@ -29,8 +27,7 @@ class SharingItemsDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
     private val genericDataQuery: GenericDataQuery,
     @IoCoroutineDispatcher
-    private val ioCoroutineDispatcher: CoroutineDispatcher,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val ioCoroutineDispatcher: CoroutineDispatcher
 ) {
     private val session: Session?
         get() = sessionManager.session
@@ -42,12 +39,7 @@ class SharingItemsDataProvider @Inject constructor(
         return withContext(ioCoroutineDispatcher) {
             val itemGroups = sharingDao.loadAllItemGroup()
             val myUserGroupsAccepted = sharingDao.loadUserGroupsAccepted(username) ?: emptyList()
-            val myCollectionsAccepted =
-                if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
-                    sharingDataProvider.getAcceptedCollections(username, needsAdminRights = false)
-                } else {
-                    emptyList()
-                }
+            val myCollectionsAccepted = sharingDataProvider.getAcceptedCollections(username, needsAdminRights = false)
             val result = arrayListOf<SharingModels.ItemUser>()
             itemGroups.forEach { itemGroup ->
                 val contactUser = itemGroup.getUser(memberLogin)

@@ -1,28 +1,26 @@
 package com.dashlane.session.repository
 
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.database.DatabaseProvider
 import com.dashlane.login.LoginInfo
-import com.dashlane.session.LocalKey
 import com.dashlane.session.Session
 import com.dashlane.useractivity.RacletteLogger
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.runBlocking
 
 @Singleton
 open class UserDatabaseRepositoryImpl @Inject constructor(
     private val sessionCoroutineScopeRepository: SessionCoroutineScopeRepository,
     private val databaseProvider: DatabaseProvider,
-    private val racletteLogger: RacletteLogger
+    private val racletteLogger: RacletteLogger,
 ) : UserDatabaseRepository {
     override fun getRacletteDatabase(session: Session): RacletteDatabase? =
         databaseProvider.getDatabase(session.userId)
 
     override suspend fun sessionInitializing(session: Session, loginInfo: LoginInfo) {
         sessionCoroutineScopeRepository.getCoroutineScope(session)?.let {
-            withContext(it.coroutineContext) {
-                openRacletteDatabase(session)
-            }
+            openRacletteDatabase(session)
         }
     }
 
@@ -44,6 +42,11 @@ open class UserDatabaseRepositoryImpl @Inject constructor(
         databaseProvider.closeDatabase(session.userId)
     }
 
-    override fun isRacletteDatabaseAccessible(session: Session): Boolean =
-        databaseProvider.isAccessible(session.userId, session.localKey.cryptographyKey)
+    override fun isRacletteDatabaseAccessibleLegacy(session: Session): Boolean = runBlocking {
+        isRacletteDatabaseAccessible(session)
+    }
+
+    override suspend fun isRacletteDatabaseAccessible(session: Session): Boolean {
+        return databaseProvider.isAccessible(session.userId, session.localKey.cryptographyKey)
+    }
 }

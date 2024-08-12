@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Spinner
@@ -18,6 +17,7 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.LifecycleOwner
@@ -27,6 +27,7 @@ import com.dashlane.authenticator.AuthenticatorIntro.Companion.RESULT_OTP
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.item.AuthenticatorViewProxy
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.item.BaseUiUpdateListener.Companion.BOTTOM_SHEET_DIALOG_TAG
@@ -64,6 +65,7 @@ import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
 import com.dashlane.ui.credential.passwordgenerator.StrengthLevelUpdater
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 import com.dashlane.ui.screens.fragments.userdata.CredentialViewPasswordSafety
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.ui.widgets.view.tintProgressDrawable
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.computeStatusBarColor
@@ -190,9 +192,7 @@ class ItemEditViewViewProxy(
 
             override fun notifyDeleteClicked() = presenter.deleteClicked()
 
-            override fun notifyRestorePassword() = presenter.restorePasswordClicked()
-
-            override fun notifyCloseRestorePasswordInfoBox() = presenter.closeRestorePasswordClicked()
+            override fun notifyRestorePassword() = presenter.onPasswordRestored()
 
             override fun notifyOtpRefreshed(otp: Otp) = presenter.otpRefreshed(otp)
         }
@@ -321,8 +321,8 @@ class ItemEditViewViewProxy(
     }
 
     private fun setHeader(itemHeader: ItemHeader, isEditMode: Boolean) {
-        val toolbarLogo = findViewByIdEfficient<ImageView>(R.id.toolbar_logo)!!
-        val toolbarIcon = findViewByIdEfficient<ImageView>(R.id.toolbar_icon)!!
+        val toolbarLogo = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.toolbar_logo)!!
+        val toolbarIcon = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.toolbar_icon)!!
         val appBar = findViewByIdEfficient<AppBarLayout>(R.id.view_app_bar)!!
         title.text = itemHeader.title
         title.setTextColor(toolbarContentColor)
@@ -330,30 +330,38 @@ class ItemEditViewViewProxy(
         activity.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
-            itemHeader.image?.let {
+            if (itemHeader.thumbnailType != null) {
                 appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
                     val scroll = abs(verticalOffset) - appBarLayout.totalScrollRange
                     if (scroll == 0) {
                         
+                        toolbarIcon.animate().alpha(1f)
                         toolbarIcon.visibility = View.VISIBLE
                         isToolbarCollapsed = true
                     } else {
                         
+                        toolbarIcon.animate().alpha(0f)
                         toolbarIcon.visibility = View.GONE
                         isToolbarCollapsed = false
                     }
                 }
-                toolbarIcon.setImageDrawable(it)
-                toolbarLogo.setImageDrawable(it)
-                toolbarIcon.contentDescription =
-                    context.getString(R.string.and_accessibility_domain_item_logo, itemHeader.title)
-                toolbarLogo.contentDescription =
-                    context.getString(R.string.and_accessibility_domain_item_logo, itemHeader.title)
+                setupThumbnail(toolbarIcon, itemHeader)
+                setupThumbnail(toolbarLogo, itemHeader)
             }
         }
         appBar.setExpanded(!isEditMode && !isToolbarCollapsed, true)
-        ViewCompat.setNestedScrollingEnabled(scrollView as View, itemHeader.image != null)
+        ViewCompat.setNestedScrollingEnabled(scrollView as View, itemHeader.thumbnailType != null)
         activity.invalidateOptionsMenu()
+    }
+
+    private fun setupThumbnail(view: ThumbnailDomainIconView, itemHeader: ItemHeader) {
+        view.thumbnailType = itemHeader.thumbnailType ?: ThumbnailViewType.ICON.value
+        view.iconRes = R.drawable.ic_collection_outlined
+        view.domainUrl = itemHeader.thumbnailUrl
+        itemHeader.thumbnailIconRes?.let { view.iconRes = it }
+        itemHeader.thumbnailColor?.let { view.color = it }
+        view.isVisible = true
+        view.contentDescription = context.getString(R.string.and_accessibility_domain_item_logo, itemHeader.title)
     }
 
     private fun setSubViews(itemSubView: List<ItemSubView<*>>, isEditMode: Boolean) {

@@ -9,7 +9,6 @@ import androidx.lifecycle.Lifecycle
 import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.authentication.sso.GetUserSsoInfoActivity.Companion.createUserSsoInfoHandlingIntent
 import com.dashlane.authenticator.AuthenticatorAppConnection
-import com.dashlane.debug.DaDaDa
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
@@ -36,9 +35,6 @@ class SplashScreenActivity : FragmentActivity() {
     lateinit var syncBroadcastManager: SyncBroadcastManager
 
     @Inject
-    lateinit var dadada: DaDaDa
-
-    @Inject
     lateinit var globalPreferencesManager: GlobalPreferencesManager
 
     @Inject
@@ -60,7 +56,6 @@ class SplashScreenActivity : FragmentActivity() {
             finish()
             return
         }
-        dadada.refreshAsync(this)
         proceedWithLoading()
         if (savedInstanceState == null) {
             launchLogger.logLaunched()

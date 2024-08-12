@@ -10,11 +10,14 @@ import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.crashreport.CrashReporterManager
 import com.dashlane.events.AppEvents
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.followupnotification.services.FollowUpNotificationDiscoveryService
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.item.nfc.NfcHelper
 import com.dashlane.item.subview.ViewFactory
 import com.dashlane.login.lock.LockManager
+import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.SchemeUtils.getDataType
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.session.SessionManager
@@ -23,17 +26,16 @@ import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.util.Toaster
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.setCurrentPageView
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.model.hasBeenSaved
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.util.PresenterOwner
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ItemEditViewActivity :
@@ -81,9 +83,15 @@ class ItemEditViewActivity :
     @Inject
     lateinit var sessionCoroutineScope: SessionCoroutineScopeRepository
 
+    @Inject
+    lateinit var frozenStateManager: FrozenStateManager
+
     @ApplicationCoroutineScope
     @Inject
     lateinit var applicationCoroutineScope: CoroutineScope
+
+    @Inject
+    lateinit var navigator: Navigator
 
     lateinit var presenterOwner: PresenterOwner<ItemEditViewPresenter, ItemEditViewContract.View>
     lateinit var nfcHelper: NfcHelper
@@ -179,7 +187,11 @@ class ItemEditViewActivity :
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        return presenter.createMenu(menu, teamspaceRestrictionNotificator)
+        return presenter.createMenu(
+            menu = menu,
+            teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
+            openItemHistory = ::openItemHistory
+        )
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -202,7 +214,7 @@ class ItemEditViewActivity :
 
     override fun newViewProxy(
         presenter: ItemEditViewPresenter,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): ItemEditViewContract.View {
         return ItemEditViewViewProxy(
             activity = this,
@@ -230,6 +242,7 @@ class ItemEditViewActivity :
         presenter.userFeaturesChecker = userFeaturesChecker
         presenter.sharingPolicyDataProvider = sharingPolicyDataProvider
         presenter.appEvents = appEvents
+        presenter.frozenStateManager = frozenStateManager
         presenter.setProvider(dataProvider)
         val extras = intent.extras!!
         val args = ItemEditViewActivityArgs.fromBundle(extras)
@@ -273,7 +286,7 @@ class ItemEditViewActivity :
 
     private fun displayNotificationOnboardingIfNecessary(
         args: ItemEditViewActivityArgs,
-        dataType: SyncObjectType
+        dataType: SyncObjectType,
     ) {
         if (mFollowUpNotificationDiscoveryService.canDisplayReminderScreen(args.uid)) {
             navigator.goToFollowUpNotificationDiscoveryScreen(true)
@@ -290,6 +303,10 @@ class ItemEditViewActivity :
         }
         if (page == null) return
         this.setCurrentPageView(page)
+    }
+
+    private fun openItemHistory(authentifiant: SyncObject.Authentifiant) {
+        navigator.goToItemHistory(authentifiant.id!!)
     }
 
     companion object {

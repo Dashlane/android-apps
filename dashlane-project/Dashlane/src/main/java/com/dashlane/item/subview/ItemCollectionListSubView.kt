@@ -11,7 +11,6 @@ import kotlinx.parcelize.Parcelize
 @Keep
 class ItemCollectionListSubView(
     override var value: MutableState<List<Collection>>,
-    val canUpdateSharedCollection: Boolean,
     val editMode: Boolean,
     val header: MutableState<String>,
     val listener: ItemEditViewContract.View.UiUpdateListener? = null,

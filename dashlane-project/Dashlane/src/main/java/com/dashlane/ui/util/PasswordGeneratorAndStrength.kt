@@ -6,7 +6,7 @@ import com.dashlane.password.generator.generate
 import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.getPasswordStrengthScore
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

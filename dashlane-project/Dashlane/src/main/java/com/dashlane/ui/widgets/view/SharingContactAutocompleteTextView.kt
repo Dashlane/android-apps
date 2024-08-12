@@ -22,13 +22,13 @@ class SharingContactAutocompleteTextView(context: Context, attrs: AttributeSet) 
         performBestGuess(false)
     }
 
-    override fun getViewForObject(sharingContact: SharingContact?): View {
+    override fun getViewForObject(obj: SharingContact): View {
         val view = layoutInflater.inflate(
             R.layout.chips_text_sharing_contact,
             this@SharingContactAutocompleteTextView.parent as ViewGroup,
             false
         ) as SharingContactChipsView
-        view.setName(sharingContact.toString())
+        view.setName(obj.toString())
         return view
     }
 

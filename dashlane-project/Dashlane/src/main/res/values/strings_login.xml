@@ -31,10 +31,14 @@
 
     <string name="login_email_page_validate_button">Continue</string>
     
+    <string name="login_email_text_field_placeholder">Enter your email address</string>
+    
     <string name="login_email_page_secret_transfer_label">Logged in on a different mobile device?</string>
     
     <string name="login_email_page_secret_transfer_button">Log in with a QR code</string>
     <string name="login_password_page_login_button">Log in</string>
+    
+    <string name="login_email_error_user_deactivated">We\'re sorry, this account is no longer available. Please refer to the Help Center article for more information.</string>
 
     <string name="enter_masterpassword">Unlock with your Master Password</string>
     <string name="unlock_biometrics">Unlock with your biometrics</string>
@@ -48,21 +52,19 @@
     <string name="login_device_limit_subtitle">Upgrade to Premium to access your data on unlimited devices. Or, unlink a device to stay on your current plan.</string>
     <string name="login_device_limit_tip">Our Premium plan also includes unlimited logins, VPN, and Dark Web Monitoring.</string>
     <string name="login_device_limit_unregister_devices_title">Select the devices to unlink</string>
-    <string name="login_device_limit_unregister_devices_message_dynamic">The Essentials plan supports only %1$d devices. Unlink all but one from this list.</string>
+    <string name="login_device_limit_unregister_devices_message_dynamic">The plan supports only %1$d devices. Unlink all but one from this list.</string>
     <string name="login_device_limit_unregister_devices_caption">We’ll securely transfer your Dashlane data to your new device in the next step.</string>
     <string name="login_device_limit_unregister_device_date">Last active %1$s</string>
     <string name="login_sync_progress_device_limit_unregister">Unlinking selected device(s)</string>
     <string name="login_sync_progress_unlink_devices_error_title">Something went wrong</string>
-    <string name="login_sync_progress_unlink_devices_error_message">There was a problem with unlinking your device(s). Please try again or contact Dashlane Support for help.</string>
+    <string name="login_sync_progress_unlink_devices_error_message">There was a problem with unlinking your device(s). Please try again or visit our help center.</string>
     <string name="login_sync_progress_unlink_devices_error_positive_button">Try again</string>
     <string name="login_sync_progress_unlink_devices_error_negative_button">Cancel</string>
 
     
     <string name="login_dialog_enforce_twofa_limit_title">Set up 2FA to access your vault</string>
     
-    <string name="login_dialog_enforce_twofa_limit_description">Your company requires you to use 2-factor authentication (2FA) for additional security.\n\nYou can set up 2FA on this mobile device using Dashlane Authenticator. To use a different authenticator app, log in from your computer browser.</string>
-    
-    <string name="login_dialog_enforce_twofa_positive_button">Set up 2FA</string>
+    <string name="login_dialog_enforce_twofa_limit_description_new">Your company requires you to use 2-factor authentication (2FA) for additional security.\n\nYou can set up 2FA by use an authenticator app, log in from your computer browser.</string>
     
     <string name="login_dialog_enforce_twofa_negative_button">Log out</string>
 
@@ -175,11 +177,11 @@
     
     <string name="login_universal_d2d_generic_error_title">Error loading your account</string>
     
-    <string name="login_universal_d2d_generic_error_description">Please retry login or contact support.</string>
+    <string name="login_universal_d2d_generic_error_description">Please try logging in again or visit our help center.</string>
     
     <string name="login_universal_d2d_generic_error_primary_button">Go to login</string>
     
-    <string name="login_universal_d2d_generic_error_secondary_button">Contact support</string>
+    <string name="login_universal_d2d_generic_error_secondary_button">Visit Help Center.</string>
 
     
     <string name="login_universal_d2d_timeout_error_title">New device request has timed out</string>
@@ -199,6 +201,9 @@
     <string name="login_totp_use_recovery_code">Can’t access your app?</string>
     
     <string name="login_totp_error_message_already_used">This OTP was already used</string>
+
+    
+    <string name="login_token_text_field_label">Verification code</string>
     
     <string name="login_totp_enter_token_recovery_dialog_title">Can’t access your app?</string>
     
@@ -225,4 +230,9 @@
     <string name="login_totp_enter_token_recovery_dialog_phone_button_negative">Cancel</string>
     
     <string name="login_totp_enter_token_recovery_dialog_phone_backup_description">Enter one of the recovery codes you received by text message.</string>
+
+    
+    <string name="login_password_switch_account_label">Account</string>
+    
+    <string name="login_password_forgot_password_button">Forgot your password?</string>
 </resources>

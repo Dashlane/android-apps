@@ -1,6 +1,7 @@
 package com.dashlane.ui.screens.fragments
 
 import com.dashlane.core.sharing.SharingDao
+import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
@@ -11,8 +12,6 @@ import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.toPermission
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
@@ -23,8 +22,7 @@ import javax.inject.Inject
 class SharingPolicyDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
     private val sharingDao: SharingDao,
-    private val sharingDataProvider: SharingDataProvider,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val sharingDataProvider: SharingDataProvider
 ) {
     private fun getSharingPolicy(summaryObject: SummaryObject): Permission? {
         return if (summaryObject.isShared) {
@@ -40,25 +38,25 @@ class SharingPolicyDataProvider @Inject constructor(
         return permission == null || permission == Permission.ADMIN
     }
 
-    fun canEditItem(summaryObject: SummaryObject, itemIsNew: Boolean): Boolean {
-        return itemIsNew || getSharingPolicy(summaryObject).canEdit
+    fun canEditItem(
+        summaryObject: SummaryObject,
+        itemIsNew: Boolean,
+        isAccountFrozen: Boolean = false
+    ): Boolean {
+        return (itemIsNew || getSharingPolicy(summaryObject).canEdit) && !isAccountFrozen
     }
 
     private val Permission?.canEdit: Boolean
         get() = this == null || this == Permission.ADMIN
 
     fun getSharingCount(uid: String): Pair<Int, Int> {
-        val itemGroup: ItemGroup = sharingDao.loadItemGroupForItem(uid) ?: return 0 to 0
+        val itemGroup: ItemGroup = sharingDao.loadItemGroupForItemLegacy(uid) ?: return 0 to 0
         return getSharingCountUserAndUserGroup(itemGroup)
     }
 
     fun getSharingCountUserAndUserGroup(itemGroup: ItemGroup): Pair<Int, Int> {
-        val collections = if (userFeaturesChecker.has(FeatureFlip.SHARING_COLLECTION)) {
-            sharingDao.loadAllCollection().filter { collection ->
-                itemGroup.collections?.any { collection.uuid == it.uuid && it.isAccepted } == true
-            }
-        } else {
-            emptyList()
+        val collections = sharingDao.loadAllCollectionLegacy().filter { collection ->
+            itemGroup.collections?.any { collection.uuid == it.uuid && it.isAccepted } == true
         }
         val collectionUsers = collections.mapNotNull {
             it.users?.filter { user -> user.isAcceptedOrPending }
@@ -86,9 +84,12 @@ class SharingPolicyDataProvider @Inject constructor(
         }
         val session: Session = sessionManager.session ?: return false
         val username = session.userId
-        val userGroups: List<UserGroup> = sharingDao.loadUserGroupsAcceptedOrPending(username)
-        val itemGroup: ItemGroup = sharingDao.loadItemGroupForItem(uid) ?: return false
-        return itemGroup.canLostAccess(username, userGroups)
+        val myUserGroups: List<UserGroup> = sharingDao.loadUserGroupsAcceptedOrPendingLegacy(username)
+        val myCollections: List<Collection> =
+            sharingDao.loadCollectionsAcceptedOrPending(username, myUserGroups)
+
+        val itemGroup: ItemGroup = sharingDao.loadItemGroupForItemLegacy(uid) ?: return false
+        return itemGroup.canLostAccess(username, myUserGroups, myCollections)
     }
 
     fun isDeleteAllowed(isNewItem: Boolean, item: VaultItem<SyncObject>?): Boolean {

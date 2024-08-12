@@ -3,7 +3,7 @@ package com.dashlane.login.root
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.lock.UnlockEvent
@@ -29,7 +29,7 @@ interface LoginContract {
 
         fun transition(from: LoginBaseContract.Presenter?, to: LoginBaseContract.Presenter)
 
-        fun transitionToCompose(email: String?, startDestination: String)
+        fun transitionToSecretTransfer(email: String?, startDestination: String)
     }
 
     interface Presenter : Base.IPresenter {

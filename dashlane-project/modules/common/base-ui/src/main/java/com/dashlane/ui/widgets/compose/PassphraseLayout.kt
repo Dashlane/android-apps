@@ -1,11 +1,9 @@
 package com.dashlane.ui.widgets.compose
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.TextField
+import com.dashlane.design.component.cardBackground
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.R
@@ -28,10 +27,7 @@ fun PassphraseLayout(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                DashlaneTheme.colors.containerAgnosticNeutralSupershy,
-                RoundedCornerShape(10.dp)
-            )
+            .cardBackground()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

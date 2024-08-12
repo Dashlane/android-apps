@@ -3,6 +3,7 @@ package com.dashlane.item.subview.provider.payment
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.dashlane.R
+import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.item.ItemEditViewContract
@@ -184,11 +185,6 @@ class ItemScreenConfigurationCreditCardProvider(
         editMode: Boolean,
         listener: ItemEditViewContract.View.UiUpdateListener
     ): ItemHeader {
-        val cardColor = ContextCompat.getColor(context, colorResource)
-        val iconDrawable = createDefaultHeaderIcon(context, item.syncObject)?.apply {
-            backgroundColor = cardColor
-        }
-
         val menuActions = mutableListOf<MenuAction>()
         if (editMode) {
             
@@ -201,7 +197,7 @@ class ItemScreenConfigurationCreditCardProvider(
                 )
             }
             val colorMenuUpdate = copyForUpdatedColor()
-            menuActions.add(CreditCardColorMenuAction(item, colorSelectAction, colorMenuUpdate))
+            menuActions.add(CreditCardColorMenuAction(item.toSummary(), colorSelectAction, colorMenuUpdate))
         }
         menuActions.addAll(createMenus())
 
@@ -210,7 +206,13 @@ class ItemScreenConfigurationCreditCardProvider(
         } else {
             item.syncObject.name
         }
-        return ItemHeader(menuActions, creditCardTitle, iconDrawable)
+        return ItemHeader(
+            menuActions = menuActions,
+            title = creditCardTitle,
+            thumbnailType = ThumbnailViewType.VAULT_ITEM_LEGACY_OTHER_ICON.value,
+            thumbnailIconRes = getHeaderIcon(item.syncObject),
+            thumbnailColor = ContextCompat.getColor(context, colorResource)
+        )
     }
 
     @Suppress("UNCHECKED_CAST")

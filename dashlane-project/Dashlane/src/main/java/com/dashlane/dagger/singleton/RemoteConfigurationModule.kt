@@ -1,8 +1,8 @@
 package com.dashlane.dagger.singleton
 
-import com.dashlane.abtesting.RemoteAbTestManager
 import com.dashlane.featureflipping.FeatureFlipManager
-import com.dashlane.session.RemoteConfiguration
+import com.dashlane.abtesting.RemoteAbTestManager
+import com.dashlane.abtesting.RemoteConfiguration
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

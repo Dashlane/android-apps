@@ -15,7 +15,7 @@ import com.dashlane.guidedonboarding.darkwebmonitoring.OnboardingDarkWebMonitori
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

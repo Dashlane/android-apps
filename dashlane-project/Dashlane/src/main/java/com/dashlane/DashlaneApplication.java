@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.webkit.WebView;
 
 import com.braze.ui.inappmessage.BrazeInAppMessageManager;
+import com.dashlane.debug.DaDaDa;
 import com.dashlane.hermes.LogRepository;
 
 import java.util.List;
@@ -36,11 +37,15 @@ public class DashlaneApplication extends Application implements Configuration.Pr
     @Inject
     HiltWorkerFactory workerFactory;
 
+    @Inject
+    DaDaDa dadada;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         BrazeInAppMessageManager.getInstance().ensureSubscribedToInAppMessageEvents(getApplicationContext());
+        dadada.refreshAsync(this);
 
         updateWebViewDataDirectory();
         if (isMainApplicationThread()) {

@@ -76,12 +76,12 @@ interface NotificationCenterDef {
 
         fun startBiometricRecoverySetup(hasBiometricLockType: Boolean)
 
-        fun startGoEssentials()
-
         fun startCurrentPlan()
 
         fun startUpgrade(offerType: OfferType? = null)
 
         fun startAuthenticator()
+
+        fun openFrozenStatePaywall()
     }
 }

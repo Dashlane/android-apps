@@ -36,9 +36,9 @@ import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.secrettransfer.R
 import com.dashlane.secrettransfer.view.success.SecretTransferSuccess
-import com.dashlane.ui.widgets.compose.ContentStepper
+import com.dashlane.ui.common.compose.components.ContentStepper
+import com.dashlane.ui.common.compose.components.LoadingScreen
 import com.dashlane.ui.widgets.compose.GenericErrorContent
-import com.dashlane.ui.widgets.compose.LoadingScreen
 import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.delay
 

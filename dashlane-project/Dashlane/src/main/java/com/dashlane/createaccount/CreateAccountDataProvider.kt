@@ -1,7 +1,7 @@
 package com.dashlane.createaccount
 
 import android.view.LayoutInflater
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.AuthenticationException
 import com.dashlane.authentication.AuthenticationExpiredVersionException
 import com.dashlane.authentication.create.AccountCreator
@@ -14,7 +14,7 @@ import com.dashlane.createaccount.pages.email.CreateAccountEmailContract
 import com.dashlane.createaccount.pages.email.CreateAccountEmailDataProvider
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.login.root.LoginContract
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.log.AttributionsLogDataProvider
 import com.skocken.presentation.provider.BaseDataProvider
 import kotlinx.coroutines.CoroutineDispatcher

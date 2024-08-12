@@ -28,14 +28,15 @@
             app:layout_scrollFlags="scroll|enterAlways"
             />
 
-        <ImageView
+        <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
             android:id="@+id/website_icon"
-            android:layout_width="48dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_normal"
             android:layout_marginTop="@dimen/spacing_ultra_huge"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:thumbnailSize="large"
             />
 
         <TextView

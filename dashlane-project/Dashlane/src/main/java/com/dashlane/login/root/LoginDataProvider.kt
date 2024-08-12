@@ -2,7 +2,7 @@ package com.dashlane.login.root
 
 import android.content.Context
 import android.view.LayoutInflater
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorageImpl
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
@@ -29,7 +29,7 @@ import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.skocken.presentation.provider.BaseDataProvider
 import java.time.Duration
 import java.time.Instant

@@ -7,22 +7,15 @@ import com.dashlane.search.MatchPosition
 import com.dashlane.search.MatchedSearchResult
 import com.dashlane.search.SearchSorter
 import com.dashlane.search.fields.LegacySearchField
-import com.dashlane.ui.adapters.text.factory.DataIdentifierListTextResolver
-import com.dashlane.ui.screens.fragments.search.util.SearchSorterProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityNameHolderService
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
 class AutofillSearchUsingLoader @Inject constructor(
-    searchSorterProvider: SearchSorterProvider,
-    dataIdentifierListTextResolver: DataIdentifierListTextResolver,
-    identityNameHolderService: IdentityNameHolderService,
+    private val searchSorter: SearchSorter,
     private val searchLoader: SearchLoader
 ) : AutofillSearch {
-    private val searchSorter: SearchSorter = searchSorterProvider
-        .getSearchSorter(dataIdentifierListTextResolver, identityNameHolderService)
 
     override suspend fun loadAuthentifiants(): List<SummaryObject.Authentifiant> =
         searchLoader.loadCredentials()

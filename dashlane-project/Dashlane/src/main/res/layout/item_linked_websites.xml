@@ -49,24 +49,14 @@
         tools:visibility="visible"
         >
 
-        <ImageView
-            android:id="@+id/website_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center"
-            android:layout_marginEnd="4dp"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_web"
-            app:tint="@color/text_neutral_standard"
-            />
-
-        <ImageView
+        <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
             android:id="@+id/website_icon_image"
-            android:layout_width="48dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginEnd="4dp"
-            android:visibility="gone"
+            app:thumbnailType="vaultItemDomainIcon"
+            app:thumbnailSize="medium"
+            android:layout_marginEnd="8dp"
             />
 
         <TextView

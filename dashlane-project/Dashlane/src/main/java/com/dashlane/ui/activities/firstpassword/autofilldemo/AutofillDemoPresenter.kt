@@ -2,7 +2,6 @@ package com.dashlane.ui.activities.firstpassword.autofilldemo
 
 import android.os.Bundle
 import com.dashlane.navigation.Navigator
-import com.dashlane.util.getImageDrawableByWebsiteUrl
 import com.skocken.presentation.presenter.BasePresenter
 import javax.inject.Inject
 
@@ -24,7 +23,7 @@ class AutofillDemoPresenter @Inject constructor(
         this.url = url
         this.login = login
         this.password = password
-        view.setWebsiteIcon(view.context.getImageDrawableByWebsiteUrl(url))
+        view.setWebsiteIcon(url)
         finishEnabled = savedInstanceState?.getBoolean(EXTRA_FINISH_ENABLED) ?: false
         if (finishEnabled) {
             view.enableFinish()

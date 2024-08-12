@@ -1,10 +1,9 @@
 package com.dashlane.ui.activities.fragments.vault.list
 
 import android.content.Context
-import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.sync.DataSync
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
-import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.activities.fragments.vault.provider.CategoryHeaderProvider
 import com.dashlane.ui.activities.fragments.vault.provider.FirstLetterHeaderProvider
@@ -16,18 +15,19 @@ import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.ItemListContext.Container
 import com.dashlane.ui.adapter.ItemListContext.Section
-import com.dashlane.ui.adapters.text.factory.DataIdentifierTypeTextFactory
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.mostRecentAccessTime
-import com.dashlane.vault.util.IdentityNameHolderService
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
+import com.dashlane.vault.textfactory.list.DataIdentifierTypeTextFactory
 import com.dashlane.vault.util.comparatorAlphabeticAllVisibleItems
 import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
+import com.dashlane.home.vaultlist.Filter
 import com.dashlane.xml.domain.SyncObjectType
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class VaultListDataProvider @Inject constructor(
     private val dataSync: DataSync,

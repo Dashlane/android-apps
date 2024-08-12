@@ -5,7 +5,7 @@ import androidx.core.content.ContextCompat
 import com.dashlane.R
 import com.dashlane.item.subview.Action
 import com.dashlane.item.subview.action.showAttachments
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.vault.model.getColorId
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.util.attachmentsAllowed
@@ -33,9 +33,14 @@ class QuickActionOpenAttachment(private val summaryObject: SummaryObject.SecureN
     companion object {
         fun createAttachmentsAction(
             summaryObject: SummaryObject,
-            userFeaturesChecker: UserFeaturesChecker
+            userFeaturesChecker: UserFeaturesChecker,
+            isAccountFrozen: Boolean = false
         ): QuickActionOpenAttachment? {
-            if (summaryObject is SummaryObject.SecureNote && summaryObject.attachmentsAllowed(userFeaturesChecker)) {
+            if (summaryObject is SummaryObject.SecureNote && summaryObject.attachmentsAllowed(
+                    userFeaturesChecker,
+                    isAccountFrozen = isAccountFrozen
+                )
+            ) {
                 return QuickActionOpenAttachment(summaryObject, summaryObject.attachmentsCount())
             }
             return null

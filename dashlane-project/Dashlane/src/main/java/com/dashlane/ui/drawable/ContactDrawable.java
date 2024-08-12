@@ -12,6 +12,7 @@ import com.dashlane.util.GravatarFetcher;
 
 import java.util.Objects;
 
+@Deprecated(forRemoval = true, since = "2024-03-25")
 public class ContactDrawable extends Drawable implements RemoteAvatarDownloader.RemoteImageReady {
 
     private String mEmail;

@@ -9,7 +9,7 @@ import com.dashlane.sharing.exception.RequestBuilderException
 import com.dashlane.sharing.internal.model.GroupToInvite
 import com.dashlane.sharing.internal.model.ItemToShare
 import com.dashlane.sharing.internal.model.UserToInvite
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

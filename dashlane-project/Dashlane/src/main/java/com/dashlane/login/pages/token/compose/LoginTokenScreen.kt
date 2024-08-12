@@ -1,97 +1,103 @@
 package com.dashlane.login.pages.token.compose
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonLayout
+import com.dashlane.design.component.ButtonMediumBar
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
+import com.dashlane.design.component.TextField
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.CircularProgressIndicator
 import com.dashlane.ui.widgets.compose.DashlaneLogo
-import com.dashlane.ui.widgets.compose.OtpInput
+import com.dashlane.util.isNotSemanticallyNull
 
 @Composable
 fun LoginTokenScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginTokenViewModel,
-    login: String,
     goToNext: (RegisteredUserDevice.Remote, String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState) {
-        when (val state = uiState) {
-            is LoginTokenState.Success -> {
-                viewModel.hasNavigated()
-                goToNext(state.registeredUserDevice, state.authTicket)
+    LaunchedEffect(viewModel) {
+        viewModel.viewStarted()
+        viewModel.navigationState.collect { state ->
+            when (state) {
+                is LoginTokenNavigationState.Success -> goToNext(state.registeredUserDevice, state.authTicket)
             }
-
-            else -> Unit
         }
     }
 
-    val errorMessage: String? = when ((uiState as? LoginTokenState.Error)?.error) {
-        LoginTokenError.InvalidToken -> stringResource(id = R.string.token_failed_resend_or_try_later)
-        LoginTokenError.Network -> stringResource(id = R.string.cannot_connect_to_server)
-        LoginTokenError.Offline -> stringResource(id = R.string.offline)
-        null -> null
-    }
-
-    LoginTotpContent(
+    LoginTokenContent(
         modifier = modifier,
-        login = login,
-        otp = (uiState as? LoginTokenState.DebugToken)?.data?.token,
-        isLoading = uiState is LoginTokenState.Loading,
-        errorMessage = errorMessage,
-        isTokenError = (uiState as? LoginTokenState.Error)?.error is LoginTokenError.InvalidToken,
-        onOtpComplete = viewModel::onTokenCompleted,
-        onDialogConfirmClick = viewModel::onHelpClicked
+        email = uiState.email,
+        token = uiState.token ?: "",
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.error?.toErrorMessage(),
+        isHelpDialogDisplayed = uiState.showHelpDialog,
+        isTokenError = uiState.error is LoginTokenError.InvalidToken,
+        onTokenChange = viewModel::onTokenChange,
+        onNext = viewModel::onNext,
+        onDialogConfirmClick = viewModel::onDialogConfirmed,
+        onHelpClick = viewModel::onHelpClicked,
+        onDialogConfirmDismissed = viewModel::onDialogDismissed
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "kotlin:S107")
 @Composable
-fun LoginTotpContent(
+fun LoginTokenContent(
     modifier: Modifier = Modifier,
-    login: String,
-    otp: String? = null,
+    email: String,
+    token: String,
     isLoading: Boolean,
+    isHelpDialogDisplayed: Boolean,
     errorMessage: String?,
     isTokenError: Boolean,
-    onOtpComplete: (String) -> Unit,
+    onTokenChange: (String) -> Unit,
+    onNext: () -> Unit,
+    onHelpClick: () -> Unit,
     onDialogConfirmClick: () -> Unit,
+    onDialogConfirmDismissed: () -> Unit,
 ) {
-    var isHelpDialogDisplayed by rememberSaveable { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    var textFieldLoaded by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
-            .padding(24.dp)
+            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        DashlaneLogo()
+        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
         Text(
-            text = login,
+            text = email,
             style = DashlaneTheme.typography.bodyStandardRegular,
             color = DashlaneTheme.colors.textNeutralStandard,
             modifier = Modifier
@@ -105,38 +111,63 @@ fun LoginTotpContent(
             modifier = Modifier
                 .padding(top = 48.dp)
         )
-        OtpInput(
-            modifier = Modifier.padding(top = 16.dp),
-            onOtpComplete = onOtpComplete,
-            otp = otp,
-            isError = isTokenError,
-            error = if (isTokenError) errorMessage else null
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
+                .onGloballyPositioned {
+                    if (!textFieldLoaded) {
+                        focusRequester.requestFocus()
+                        textFieldLoaded = true
+                    }
+                }
+                .padding(top = 24.dp),
+            value = token,
+            onValueChange = { newValue: String -> onTokenChange(newValue.filter { char -> char.isDigit() }) },
+            label = stringResource(id = R.string.login_token_text_field_label),
+            isError = errorMessage != null,
+            feedbackText = errorMessage,
+            keyboardActions = KeyboardActions(
+                onDone = { onNext() }
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done,
+                autoCorrect = false
+            ),
         )
-        if (!isTokenError && errorMessage != null) {
+        if (!isTokenError) {
             Text(
-                modifier = Modifier.padding(top = 2.dp),
-                text = errorMessage,
-                color = DashlaneTheme.colors.textDangerQuiet,
+                modifier = Modifier.padding(top = 8.dp, start = 16.dp),
+                text = errorMessage ?: stringResource(id = R.string.receive_sec_code_expires),
+                color = if (errorMessage != null) DashlaneTheme.colors.textDangerQuiet else DashlaneTheme.colors.textNeutralQuiet,
                 style = DashlaneTheme.typography.bodyHelperRegular
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-    }
-
-    if (isLoading) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CircularProgressIndicator()
-        }
+        ButtonMediumBar(
+            primaryButtonLayout = if (isLoading) ButtonLayout.IndeterminateProgress else ButtonLayout.TextOnly(text = stringResource(id = R.string.login_totp_next_button)),
+            isPrimaryButtonEnabled = token.isNotSemanticallyNull() && !isLoading,
+            onPrimaryButtonClick = onNext,
+            secondaryButtonLayout = ButtonLayout.TextOnly(text = stringResource(id = R.string.login_token_where_is_cta)),
+            onSecondaryButtonClick = onHelpClick
+        )
     }
 
     if (isHelpDialogDisplayed) {
         EmailCodeHelpAlertDialog(
             confirmButtonClick = onDialogConfirmClick,
-            dismissButtonClick = { isHelpDialogDisplayed = false }
+            dismissButtonClick = onDialogConfirmDismissed
         )
+    }
+}
+
+@Composable
+fun LoginTokenError.toErrorMessage(): String {
+    return when (this) {
+        LoginTokenError.InvalidToken -> stringResource(id = R.string.token_failed_resend_or_try_later)
+        LoginTokenError.Network -> stringResource(id = R.string.cannot_connect_to_server)
+        LoginTokenError.Offline -> stringResource(id = R.string.offline)
     }
 }
 
@@ -148,7 +179,7 @@ fun EmailCodeHelpAlertDialog(
     Dialog(
         title = stringResource(id = R.string.login_token_where_is_popup_title),
         description = {
-            Text(text = stringResource(id = R.string.login_token_where_is_popup_message),)
+            Text(text = stringResource(id = R.string.login_token_where_is_popup_message))
         },
         mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_token_where_is_popup_resend)),
         mainActionClick = confirmButtonClick,
@@ -160,15 +191,20 @@ fun EmailCodeHelpAlertDialog(
 
 @Preview
 @Composable
-fun LoginTotpContentPreview() {
+fun LoginTokenContentPreview() {
     DashlanePreview {
-        LoginTotpContent(
-            login = "randomemail@provider.com",
+        LoginTokenContent(
+            email = "randomemail@provider.com",
             isLoading = true,
-            onOtpComplete = {},
+            token = "123",
+            onTokenChange = {},
+            onNext = {},
             onDialogConfirmClick = {},
-            errorMessage = "Error",
-            isTokenError = false
+            onDialogConfirmDismissed = {},
+            errorMessage = null,
+            isTokenError = false,
+            isHelpDialogDisplayed = false,
+            onHelpClick = {}
         )
     }
 }

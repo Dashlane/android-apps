@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.debug.DaDaDa
@@ -45,7 +45,6 @@ import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.endoflife.EndOfLife
-import com.dashlane.ui.screens.settings.WarningRememberMasterPasswordDialog
 import com.dashlane.ui.util.FinishingActivity
 import com.dashlane.util.Toaster
 import com.dashlane.util.coroutines.getDeferredViewModel
@@ -77,7 +76,6 @@ class LoginPresenter(
     private val endOfLife: EndOfLife,
     private val toaster: Toaster,
     private val navigator: Navigator,
-    private val warningRememberMasterPasswordDialog: WarningRememberMasterPasswordDialog,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val daDaDa: DaDaDa
 ) : BasePresenter<LoginContract.DataProvider, LoginContract.LoginViewProxy>(),
@@ -221,7 +219,7 @@ class LoginPresenter(
     ) {
         val presenter = createTokenPresenter(emailSecondFactor)
         pagesStateHelper.addedPage(presenter, emailSecondFactor, replacePage)
-        loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.EMAIL_TOKEN))
+        loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.EMAIL_TOKEN), provider.lockSetting.unlockReason)
     }
 
     private fun createTokenPresenter(emailSecondFactor: AuthenticationSecondFactor.EmailToken): LoginTokenPresenter {
@@ -237,11 +235,14 @@ class LoginPresenter(
     ) {
         val presenter = createDashlaneAuthenticatorPresenter(secondFactor)
         pagesStateHelper.addedPage(presenter, secondFactor, replacePage)
-        loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.AUTHENTICATOR_APP))
+        loginLogger.logAskAuthentication(
+            LoginMode.MasterPassword(verification = VerificationMode.AUTHENTICATOR_APP),
+            provider.lockSetting.unlockReason
+        )
     }
 
     fun showSecretTransferQRPage(email: String?, startDestination: String) {
-        view.transitionToCompose(email, startDestination)
+        view.transitionToSecretTransfer(email, startDestination)
     }
 
     private fun createDashlaneAuthenticatorPresenter(secondFactor: AuthenticationSecondFactor): LoginDashlaneAuthenticatorPresenter {
@@ -266,7 +267,7 @@ class LoginPresenter(
         } else {
             VerificationMode.OTP1
         }
-        loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = verification))
+        loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = verification), provider.lockSetting.unlockReason)
     }
 
     private fun createTotpPresenter(totpSecondFactor: AuthenticationSecondFactor.Totp): LoginTotpPresenter {
@@ -387,27 +388,23 @@ class LoginPresenter(
         )
         pagesStateHelper.addedPage(presenter, registeredUserDevice)
         if ((registeredUserDevice as? RegisteredUserDevice.Local)?.isServerKeyRequired == false) {
-            loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.NONE))
+            loginLogger.logAskAuthentication(LoginMode.MasterPassword(verification = VerificationMode.NONE), provider.lockSetting.unlockReason)
         }
     }
 
     fun showLockPage() {
-        if (provider.lockSetting.isPinSetter) {
-            showPinLockPage()
-        } else {
-            if (provider.forceMasterPasswordUnlock(provider.lockSetting.unlockReason)) {
-                showMainLock(true)
-                return
+        if (provider.forceMasterPasswordUnlock(provider.lockSetting.unlockReason)) {
+            showMainLock(true)
+            return
+        }
+        when (provider.getLockType(context!!)) {
+            LockTypeManager.LOCK_TYPE_PIN_CODE -> {
+                showPinLockPage()
             }
-            when (provider.getLockType(context!!)) {
-                LockTypeManager.LOCK_TYPE_PIN_CODE -> {
-                    showPinLockPage()
-                }
-                LockTypeManager.LOCK_TYPE_BIOMETRIC -> {
-                    showBiometricPage()
-                }
-                else -> showMainLock()
+            LockTypeManager.LOCK_TYPE_BIOMETRIC -> {
+                showBiometricPage()
             }
+            else -> showMainLock()
         }
     }
 
@@ -470,7 +467,7 @@ class LoginPresenter(
     private fun showPinLockPage() {
         val presenter = createPinLockPresenter()
         pagesStateHelper.addedPage(presenter, null)
-        loginLogger.logAskAuthentication(LoginMode.Pin)
+        loginLogger.logAskAuthentication(LoginMode.Pin, provider.lockSetting.unlockReason)
     }
 
     private fun createPinLockPresenter(): PinLockPresenter {
@@ -481,7 +478,6 @@ class LoginPresenter(
             lockManager = lockManager,
             sso = provider.currentUserInfo?.sso == true,
             toaster = toaster,
-            warningRememberMasterPasswordDialog = warningRememberMasterPasswordDialog
         ).apply {
             setProvider(dataProvider)
         }
@@ -490,7 +486,7 @@ class LoginPresenter(
     private fun showBiometricPage() {
         val presenter = createBiometricPresenter()
         pagesStateHelper.addedPage(presenter, null)
-        loginLogger.logAskAuthentication(LoginMode.Biometric)
+        loginLogger.logAskAuthentication(LoginMode.Biometric, provider.lockSetting.unlockReason)
     }
 
     private fun createBiometricPresenter(): BiometricPresenter {
@@ -512,7 +508,7 @@ class LoginPresenter(
     private fun showSsoLockPage() {
         val presenter = createSsoLockPresenter()
         pagesStateHelper.addedPage(presenter, null)
-        loginLogger.logAskAuthentication(LoginMode.Sso)
+        loginLogger.logAskAuthentication(LoginMode.Sso, provider.lockSetting.unlockReason)
     }
 
     private fun createSsoLockPresenter(): SsoLockContract.Presenter {

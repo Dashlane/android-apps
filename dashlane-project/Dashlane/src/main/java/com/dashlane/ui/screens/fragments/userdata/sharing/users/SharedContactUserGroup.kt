@@ -2,9 +2,7 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.users
 
 import android.content.Context
 import android.view.View
-import androidx.appcompat.content.res.AppCompatResources
 import com.dashlane.R
-import com.dashlane.ui.drawable.CircleDrawable
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 
@@ -28,14 +26,6 @@ class SharedContactUserGroup(
         setVisibility(R.id.action, View.GONE)
     }
 }) {
-    init {
-        icon = AppCompatResources.getDrawable(context, R.drawable.ic_sharing_user_group)!!
-            .mutate().let {
-                it.setTint(context.getColor(R.color.text_neutral_standard))
-                CircleDrawable.with(context, R.color.container_agnostic_neutral_standard, it)
-            }
-    }
-
     override fun getLine2() = if (userGroup.sharingStatusResource > 0) {
         context.getString(userGroup.sharingStatusResource)
     } else {

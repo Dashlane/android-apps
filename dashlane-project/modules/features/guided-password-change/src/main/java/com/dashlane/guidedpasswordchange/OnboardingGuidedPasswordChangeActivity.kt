@@ -8,6 +8,7 @@ import com.dashlane.guidedpasswordchange.internal.OnboardingGuidedPasswordChange
 import com.dashlane.guidedpasswordchange.internal.OnboardingGuidedPasswordChangeDataProvider
 import com.dashlane.guidedpasswordchange.internal.OnboardingGuidedPasswordChangePresenter
 import com.dashlane.guidedpasswordchange.internal.OnboardingGuidedPasswordChangeViewProxy
+import com.dashlane.navigation.Navigator
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.ToasterImpl
@@ -19,6 +20,9 @@ class OnboardingGuidedPasswordChangeActivity : DashlaneActivity() {
 
     @Inject
     lateinit var userPreferencesManager: UserPreferencesManager
+
+    @Inject
+    lateinit var navigator: Navigator
 
     private lateinit var presenter: OnboardingGuidedPasswordChangeContract.Presenter
 

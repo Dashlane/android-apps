@@ -2,6 +2,7 @@ package com.dashlane.ui.screens.settings.list.general
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.navigation.Navigator
 import com.dashlane.securearchive.BackupCoordinator
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
@@ -16,6 +17,7 @@ class SettingsGeneralBackupList(
     private val backupCoordinator: BackupCoordinator,
     private val sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
+    private val navigator: Navigator
 ) {
     private val backupHeader =
         SettingHeader(context.getString(R.string.setting_backup_category))
@@ -60,6 +62,21 @@ class SettingsGeneralBackupList(
         }
     }
 
+    private val backupCsvExportItem = object : SettingItem {
+        override val id = "backup-export-csv"
+        override val header = backupHeader
+        override val title = context.getString(R.string.setting_backup_export_csv)
+        override val description = context.getString(R.string.setting_backup_export_csv_description)
+        override fun isEnable() = backupExportItem.isEnable()
+        override fun isVisible() = backupExportItem.isVisible()
+        override fun onClick(context: Context) {
+            if (!isEnable()) {
+                return
+            }
+            navigator.goToGuidedWebCsvExport()
+        }
+    }
+
     private val backupImportItem = object : SettingItem {
         override val id = "backup-import"
         override val header = backupHeader
@@ -81,6 +98,7 @@ class SettingsGeneralBackupList(
 
     fun getAll() = listOf(
         backupExportItem,
+        backupCsvExportItem,
         backupImportItem
     )
 }

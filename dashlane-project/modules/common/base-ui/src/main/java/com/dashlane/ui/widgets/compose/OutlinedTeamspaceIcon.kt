@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -28,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.util.font.WalsheimProBold
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 fun OutlinedTeamspaceIcon(
     letter: Char,

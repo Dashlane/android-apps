@@ -1,5 +1,7 @@
 package com.dashlane.login
 
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.getDevicesLimitValue
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.login.LoginStrategy.Strategy.DEVICE_LIMIT
@@ -10,17 +12,15 @@ import com.dashlane.login.monobucket.MonobucketHelper
 import com.dashlane.login.pages.enforce2fa.HasEnforced2FaLimitUseCaseImpl
 import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.devices.ListDevicesService
-import com.dashlane.server.api.endpoints.premium.PremiumStatus.Capabilitie.Capability
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.session.Session
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.getDevicesLimitValue
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class LoginStrategy @Inject constructor(
@@ -34,6 +34,8 @@ class LoginStrategy @Inject constructor(
 
     enum class Strategy {
         NO_STRATEGY,
+
+        UNLOCK,
 
         MONOBUCKET,
 

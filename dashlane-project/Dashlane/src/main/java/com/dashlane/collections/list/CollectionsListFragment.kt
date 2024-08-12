@@ -9,26 +9,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,14 +37,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -60,22 +54,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dashlane.R
 import com.dashlane.collections.CollectionLoading
 import com.dashlane.collections.DeleteConfirmationDialog
+import com.dashlane.collections.RevokeToDeleteDialog
 import com.dashlane.collections.SearchableTopAppBarTitle
 import com.dashlane.collections.SpaceData
 import com.dashlane.collections.details.DialogBusinessMemberLimit
 import com.dashlane.design.component.ButtonLarge
 import com.dashlane.design.component.ButtonLayout
+import com.dashlane.design.component.ButtonMedium
+import com.dashlane.design.component.DropdownItem
+import com.dashlane.design.component.DropdownMenu
 import com.dashlane.design.component.Icon
+import com.dashlane.design.component.ListItem
+import com.dashlane.design.component.ListItemActions
 import com.dashlane.design.component.Text
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
-import com.dashlane.design.theme.color.TextColor
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.teamspaces.model.SpaceColor
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.widgets.compose.OutlinedTeamspaceIcon
+import com.dashlane.util.SnackbarUtils
+import com.dashlane.util.getBaseActivity
 import com.dashlane.util.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -107,6 +108,7 @@ class CollectionsListFragment : AbstractContentFragment() {
         (actionBarView.parent as? ViewGroup)?.removeView(actionBarView)
     }
 
+    @Suppress("LongMethod")
     @Composable
     private fun CollectionsListScreen(viewModel: CollectionsListViewModel = viewModel()) {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -169,7 +171,19 @@ class CollectionsListFragment : AbstractContentFragment() {
         ) {
             Box(modifier = Modifier.padding(it)) {
                 when (uiState) {
-                    is ViewState.List -> {
+                    is ViewState.List,
+                    is ViewState.RevokeAccessPrompt,
+                    is ViewState.SharedCollectionDeleteError -> {
+                        val context = LocalContext.current
+                        LaunchedEffect(key1 = uiState) {
+                            if (uiState !is ViewState.SharedCollectionDeleteError) return@LaunchedEffect
+                            context.getBaseActivity()?.let { activity ->
+                                SnackbarUtils.showSnackbar(
+                                    activity,
+                                    context.getString(R.string.collection_delete_shared_error_generic)
+                                )
+                            }
+                        }
                         CollectionsList(
                             uiState.viewData,
                             searchQuery.value
@@ -179,6 +193,17 @@ class CollectionsListFragment : AbstractContentFragment() {
                             DialogBusinessMemberLimit {
                                 displayBusinessMemberLimitDialog = false
                             }
+                        }
+                        val state = uiState
+                        if (state is ViewState.RevokeAccessPrompt) {
+                            RevokeToDeleteDialog(
+                                onDismiss = {
+                                    viewModel.dismissDialogClicked()
+                                },
+                                onConfirm = {
+                                    navigator.goToCollectionSharedAccessFromCollectionsList(collectionId = state.collectionId)
+                                }
+                            )
                         }
                     }
 
@@ -290,91 +315,73 @@ class CollectionsListFragment : AbstractContentFragment() {
         CollectionItem(
             item = item,
             expandMenu = expanded,
-            shareEnabled = item.shareEnabled,
-            shareAllowed = item.shareAllowed,
             onExpandMenuChange = { expanded = it },
             onDeleteClicked = viewModel::deleteClicked,
             onDisplayBusinessMemberLimitDialogChange = onDisplayBusinessMemberLimitDialogChange
         )
     }
 
-    @Suppress("LongMethod")
+    @Suppress("kotlin:S1066", "LongMethod")
     @Composable
     private fun CollectionItem(
         item: CollectionViewData,
         expandMenu: Boolean,
-        shareEnabled: Boolean,
-        shareAllowed: Boolean,
         onExpandMenuChange: (Boolean) -> Unit,
-        onDeleteClicked: (String) -> Unit,
+        onDeleteClicked: (String, Boolean) -> Unit,
         onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
     ) {
         var displayDeleteDialog by rememberSaveable { mutableStateOf(false) }
-        Row(
-            modifier = Modifier
-                .clickable {
-                    navigator.goToCollectionDetailsFromCollectionsList(
-                        collectionId = item.id,
-                        businessSpace = item.spaceData?.businessSpace ?: false,
-                        sharedCollection = item.shared,
-                        shareAllowed = item.shareAllowed,
-                        shareEnabled = item.shareEnabled
-                    )
-                }
-                .padding(vertical = 8.dp)
-                .padding(start = 12.dp)
-        ) {
-            Column(modifier = Modifier.weight(weight = 1f, fill = true)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        modifier = Modifier.weight(weight = 1f, fill = false),
-                        text = item.name,
-                        style = DashlaneTheme.typography.bodyStandardRegular,
-                        color = DashlaneTheme.colors.textNeutralCatchy,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
+        val showSpaceIndicator = remember(item.spaceData) {
+            item.spaceData != null
+        }
+        val showSharedIcon = remember(item.shared) {
+            item.shared
+        }
+        ListItem(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            thumbnailType = null,
+            title = item.name,
+            titleExtraContent = {
+                if (showSpaceIndicator) {
+                    
                     if (item.spaceData != null) {
-                        Spacer(modifier = Modifier.width(6.dp))
                         OutlinedTeamspaceIcon(
                             letter = item.spaceData.spaceLetter,
                             color = when (val color = item.spaceData.spaceColor) {
                                 is SpaceColor.FixColor -> colorResource(color.colorRes).toArgb()
                                 is SpaceColor.TeamColor -> color.color
                             },
-                            iconSize = 12.dp
-                        )
-                    }
-
-                    if (item.shared) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            token = IconTokens.sharedOutlined,
-                            modifier = Modifier.size(12.dp),
-                            contentDescription = context?.getString(R.string.and_accessibility_collection_list_item_shared)
+                            iconSize = 16.dp,
+                            teamspaceDescription = stringResource(id = item.spaceData.spaceContentDescriptionResId),
                         )
                     }
                 }
-                Text(
-                    text = pluralStringResource(
-                        id = R.plurals.collections_list_collection_item_count,
-                        count = item.itemCount,
-                        item.itemCount
-                    ),
-                    style = DashlaneTheme.typography.bodyReducedRegular,
-                    color = DashlaneTheme.colors.textNeutralQuiet
-                )
-            }
-
-            CollectionItemDropdownMenu(
-                onExpandMenuChange,
-                expandMenu,
-                shareEnabled,
-                shareAllowed,
-                item,
-                onDisplayBusinessMemberLimitDialogChange,
-                displayDeleteDialog
+                if (showSharedIcon) {
+                    Icon(
+                        token = IconTokens.sharedOutlined,
+                        modifier = Modifier.size(12.dp),
+                        contentDescription = context?.getString(R.string.and_accessibility_collection_list_item_shared)
+                    )
+                }
+            },
+            description = pluralStringResource(
+                id = R.plurals.collections_list_collection_item_count,
+                count = item.itemCount,
+                item.itemCount
+            ),
+            actions = buildCollectionActionsMenu(
+                onExpandMenuChange = onExpandMenuChange,
+                expandMenu = expandMenu,
+                item = item,
+                onDisplayBusinessMemberLimitDialogChange = onDisplayBusinessMemberLimitDialogChange,
+                onDisplayDeleteDialogChange = { displayDeleteDialog = it }
+            )
+        ) {
+            navigator.goToCollectionDetailsFromCollectionsList(
+                collectionId = item.id,
+                businessSpace = item.spaceData?.businessSpace ?: false,
+                sharedCollection = item.shared,
+                shareAllowed = item.shareAllowed
             )
         }
 
@@ -384,7 +391,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                     displayDeleteDialog = false
                 },
                 onConfirm = {
-                    onDeleteClicked(item.id)
+                    onDeleteClicked(item.id, item.shared)
                     displayDeleteDialog = false
                 }
             )
@@ -392,80 +399,135 @@ class CollectionsListFragment : AbstractContentFragment() {
     }
 
     @Composable
-    private fun CollectionItemDropdownMenu(
+    private fun buildCollectionActionsMenu(
         onExpandMenuChange: (Boolean) -> Unit,
         expandMenu: Boolean,
-        shareEnabled: Boolean,
-        shareAllowed: Boolean,
         item: CollectionViewData,
         onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
-        displayDeleteDialog: Boolean
-    ) {
-        var displayDeleteDialog1 = displayDeleteDialog
-        Box {
-            IconButton(onClick = { onExpandMenuChange(true) }) {
-                Icon(token = IconTokens.actionMoreOutlined, contentDescription = null)
-            }
-            MaterialTheme(
-                
-                
-                colors = MaterialTheme.colors.copy(
-                    surface = DashlaneTheme.colors.containerAgnosticNeutralSupershy
-                )
-            ) {
+        onDisplayDeleteDialogChange: (Boolean) -> Unit
+    ): ListItemActions {
+        val shareLabel = stringResource(id = R.string.collections_list_item_menu_share)
+        val sharedAccessLabel = stringResource(id = R.string.collections_list_item_menu_shared_access)
+        val editLabel = stringResource(id = R.string.collections_list_item_menu_edit)
+        val deleteLabel = stringResource(id = R.string.collections_list_item_menu_delete)
+        return object : ListItemActions {
+            @Composable
+            override fun Content() {
                 DropdownMenu(
-                    expanded = expandMenu,
-                    onDismissRequest = {
-                        onExpandMenuChange(false)
+                    anchor = {
+                        ButtonMedium(
+                            modifier = Modifier.clearAndSetSemantics { },
+                            onClick = { onExpandMenuChange(true) },
+                            intensity = Intensity.Supershy,
+                            layout = ButtonLayout.IconOnly(
+                                iconToken = IconTokens.actionMoreOutlined,
+                                
+                                contentDescription = stringResource(R.string.abc_action_menu_overflow_description),
+                            ),
+                        )
                     },
-                    offset = DpOffset(x = 12.dp, y = 0.dp)
+                    expanded = expandMenu,
+                    onDismissRequest = { onExpandMenuChange(false) },
                 ) {
-                    if (shareEnabled) {
-                        TextMenuItem(
-                            stringResource(id = R.string.collections_list_item_menu_share),
-                            enabled = shareAllowed
+                    if (item.shareEnabled) {
+                        DropdownItem(
+                            icon = null,
+                            text = shareLabel,
+                            enabled = item.shareAllowed,
                         ) {
                             onExpandMenuChange(false)
-                            if (!shareAllowed) return@TextMenuItem
-                            if (item.shareLimitedByTeam) {
-                                onDisplayBusinessMemberLimitDialogChange(true)
-                            } else {
-                                navigator.goToCollectionShareFromCollectionList(item.id)
-                            }
-                        }
-                        if (item.shared) {
-                            TextMenuItem(stringResource(id = R.string.collections_list_item_menu_shared_access)) {
-                                onExpandMenuChange(false)
-                                navigator.goToCollectionSharedAccessFromCollectionsList(item.id)
-                            }
+                            onShareClicked(item, onDisplayBusinessMemberLimitDialogChange)
                         }
                     }
-                    TextMenuItem(
-                        stringResource(id = R.string.collections_list_item_menu_edit),
-                        enabled = !item.shared
-                    ) {
-                        onExpandMenuChange(false)
-                        navigator.goToCollectionEditFromCollectionsList(item.id)
+                    if (item.shareEnabled && item.shared) {
+                        DropdownItem(
+                            icon = null,
+                            text = sharedAccessLabel,
+                        ) {
+                            onExpandMenuChange(false)
+                            onSharedAccessClicked(item)
+                        }
                     }
-                    TextMenuItem(
-                        stringResource(id = R.string.collections_list_item_menu_delete),
-                        enabled = !item.shared
+                    DropdownItem(
+                        icon = null,
+                        text = editLabel,
+                        enabled = !item.shared || item.editAllowed,
                     ) {
                         onExpandMenuChange(false)
-                        displayDeleteDialog1 = true
+                        onEditClicked(item)
+                    }
+                    DropdownItem(
+                        icon = null,
+                        text = deleteLabel,
+                        enabled = item.deleteAllowed,
+                    ) {
+                        onExpandMenuChange(false)
+                        onDisplayDeleteDialogChange(true)
                     }
                 }
+            }
+
+            override fun getCustomAccessibilityActions(): List<CustomAccessibilityAction> {
+                val customActions = mutableListOf<CustomAccessibilityAction>()
+                if (item.shareEnabled && item.shareAllowed) {
+                    val shareAction = CustomAccessibilityAction(
+                        label = shareLabel,
+                    ) {
+                        onShareClicked(item, onDisplayBusinessMemberLimitDialogChange)
+                        true
+                    }
+                    customActions.add(shareAction)
+                }
+                if (item.shareEnabled && item.shared) {
+                    val sharedAccessAction = CustomAccessibilityAction(
+                        label = sharedAccessLabel
+                    ) {
+                        onSharedAccessClicked(item)
+                        true
+                    }
+                    customActions.add(sharedAccessAction)
+                }
+                if (!item.shared || item.editAllowed) {
+                    val editAction = CustomAccessibilityAction(
+                        label = editLabel,
+                    ) {
+                        onEditClicked(item)
+                        true
+                    }
+                    customActions.add(editAction)
+                }
+                if (item.deleteAllowed) {
+                    val deleteAction = CustomAccessibilityAction(
+                        label = deleteLabel,
+                    ) {
+                        onDisplayDeleteDialogChange(true)
+                        true
+                    }
+                    customActions.add(deleteAction)
+                }
+                return customActions
             }
         }
     }
 
-    @Composable
-    private fun TextMenuItem(label: String, enabled: Boolean = true, onClick: () -> Unit) {
-        val textColor =
-            if (enabled) TextColor.Unspecified else DashlaneTheme.colors.textOddityDisabled
-        DropdownMenuItem(onClick = onClick, enabled = enabled) {
-            Text(text = label, color = textColor)
+    private fun onShareClicked(
+        item: CollectionViewData,
+        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit
+    ) {
+        if (!item.shareAllowed) return
+        if (item.shareLimitedByTeam) {
+            onDisplayBusinessMemberLimitDialogChange(true)
+        } else {
+            navigator.goToCollectionShareFromCollectionList(item.id)
         }
+    }
+
+    private fun onSharedAccessClicked(item: CollectionViewData) {
+        navigator.goToCollectionSharedAccessFromCollectionsList(item.id)
+    }
+
+    private fun onEditClicked(item: CollectionViewData) {
+        navigator.goToCollectionEditFromCollectionsList(item.id, item.shared)
     }
 
     @Preview
@@ -486,13 +548,13 @@ class CollectionsListFragment : AbstractContentFragment() {
                     shared = true,
                     shareEnabled = true,
                     shareAllowed = true,
-                    shareLimitedByTeam = true
+                    shareLimitedByTeam = true,
+                    editAllowed = true,
+                    deleteAllowed = true
                 ),
                 expandMenu = false,
-                shareAllowed = true,
-                shareEnabled = true,
                 onExpandMenuChange = {},
-                onDeleteClicked = {},
+                onDeleteClicked = { _, _ -> },
                 onDisplayBusinessMemberLimitDialogChange = {}
             )
         }
@@ -516,13 +578,13 @@ class CollectionsListFragment : AbstractContentFragment() {
                     shared = true,
                     shareEnabled = true,
                     shareAllowed = true,
-                    shareLimitedByTeam = false
+                    shareLimitedByTeam = false,
+                    editAllowed = true,
+                    deleteAllowed = true
                 ),
                 expandMenu = false,
-                shareAllowed = true,
-                shareEnabled = true,
                 onExpandMenuChange = {},
-                onDeleteClicked = {},
+                onDeleteClicked = { _, _ -> },
                 onDisplayBusinessMemberLimitDialogChange = {}
             )
         }
@@ -541,13 +603,13 @@ class CollectionsListFragment : AbstractContentFragment() {
                     shared = true,
                     shareEnabled = true,
                     shareAllowed = false,
-                    shareLimitedByTeam = false
+                    shareLimitedByTeam = false,
+                    editAllowed = false,
+                    deleteAllowed = false
                 ),
                 expandMenu = false,
-                shareAllowed = true,
-                shareEnabled = true,
                 onExpandMenuChange = {},
-                onDeleteClicked = {},
+                onDeleteClicked = { _, _ -> },
                 onDisplayBusinessMemberLimitDialogChange = {}
             )
         }

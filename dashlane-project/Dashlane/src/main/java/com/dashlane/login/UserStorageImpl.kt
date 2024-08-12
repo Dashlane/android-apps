@@ -1,12 +1,12 @@
 package com.dashlane.login
 
 import com.dashlane.account.UserAccountStorageImpl
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.UserStorage
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.util.installlogs.DataLossTrackingLogger
 import javax.inject.Inject
 

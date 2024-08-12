@@ -7,11 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferState
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferViewModel
+import com.dashlane.ui.common.compose.components.LoadingScreen
 import com.dashlane.ui.widgets.compose.GenericErrorContent
-import com.dashlane.ui.widgets.compose.LoadingScreen
 
 @Composable
 fun AuthorizeScreen(

@@ -14,6 +14,7 @@ import com.dashlane.hermes.generated.events.user.Logout
 import com.dashlane.hermes.generated.events.user.ResendToken
 import com.dashlane.hermes.generated.events.user.UseAnotherAccount
 import com.dashlane.lock.UnlockEvent
+import javax.inject.Inject
 
 interface LoginLogger {
     fun logSuccess(isFirstLogin: Boolean = false, loginMode: LoginMode)
@@ -29,7 +30,7 @@ interface LoginLogger {
 
     fun logResendToken()
 
-    fun logAskAuthentication(loginMode: LoginMode)
+    fun logAskAuthentication(loginMode: LoginMode, unlockEventReason: UnlockEvent.Reason?)
 
     fun logUseAnotherAccount()
 
@@ -42,13 +43,11 @@ interface LoginLogger {
 
 @Suppress("FunctionName")
 fun LoginLogger(
-    logRepository: LogRepository,
-    unlockEventReason: UnlockEvent.Reason? = null
-): LoginLogger = LoginLoggerImpl(logRepository, unlockEventReason)
+    logRepository: LogRepository
+): LoginLogger = LoginLoggerImpl(logRepository)
 
-class LoginLoggerImpl(
+class LoginLoggerImpl @Inject constructor(
     private val logRepository: LogRepository,
-    private val unlockEventReason: UnlockEvent.Reason?
 ) : LoginLogger {
     override fun logSuccess(isFirstLogin: Boolean, loginMode: LoginMode) {
         val mode = loginMode.toMode()
@@ -166,7 +165,7 @@ class LoginLoggerImpl(
         )
     }
 
-    override fun logAskAuthentication(loginMode: LoginMode) {
+    override fun logAskAuthentication(loginMode: LoginMode, unlockEventReason: UnlockEvent.Reason?) {
         val mode = loginMode.toMode()
 
         logEvent(

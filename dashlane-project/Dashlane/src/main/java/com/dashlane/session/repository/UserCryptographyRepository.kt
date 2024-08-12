@@ -10,7 +10,7 @@ import com.dashlane.cryptography.SaltGenerator
 import com.dashlane.cryptography.toCryptographyMarkerOrNull
 import com.dashlane.session.Session
 import com.dashlane.session.UserDataRepository
-import com.dashlane.session.VaultKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.settings.SettingsManager
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider

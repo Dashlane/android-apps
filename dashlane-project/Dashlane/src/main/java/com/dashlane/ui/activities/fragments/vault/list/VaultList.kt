@@ -1,9 +1,9 @@
 package com.dashlane.ui.activities.fragments.vault.list
 
 import android.content.Context
-import com.dashlane.ui.activities.fragments.vault.Filter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.home.vaultlist.Filter
 
 interface VaultList {
     interface ViewModel {

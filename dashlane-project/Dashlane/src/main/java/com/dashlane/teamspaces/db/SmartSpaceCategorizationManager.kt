@@ -10,7 +10,7 @@ import com.dashlane.teamspaces.manager.matchForceDomains
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
@@ -108,7 +108,7 @@ class SmartSpaceCategorizationManager @Inject constructor(
         
         if (itemIdsToForce.isEmpty()) return
 
-        val vaultItems = databaseAccessor.getAuthentifiantsVaultItems(itemIdsToForce)
+        val vaultItems = databaseAccessor.getVaultItems(itemIdsToForce)
         
         val editedVaultItems = vaultItems.mapNotNull { item ->
             if (item.syncObject.spaceId == currentBusinessTeamId) return@mapNotNull null
@@ -174,7 +174,14 @@ class SmartSpaceCategorizationManager @Inject constructor(
 
     private suspend fun moveItemsToPersonalSpace(teamItems: List<SummaryObject>) {
         
-        val vaultItems = databaseAccessor.getVaultItems(teamItems.map { it.id })
+        val ids = teamItems.filterNot {
+            it.syncState == SyncState.DELETED ||
+            it.syncState == SyncState.IN_SYNC_DELETED
+        }.map {
+            it.id
+        }
+        
+        val vaultItems = databaseAccessor.getVaultItems(ids)
             .ifEmpty { return }
 
         
@@ -253,17 +260,6 @@ class SmartSpaceCategorizationManager @Inject constructor(
         return editedVaultItems
     }
 
-    private fun getItemsForForcedCategorization(
-        domains: List<String>,
-    ): List<SummaryObject> {
-        
-        val items: List<SummaryObject> = databaseAccessor.getSummaryCandidatesForCategorization()
-
-        return items.filter { summaryObject ->
-            summaryObject.matchForceDomains(domains)
-        }
-    }
-
     private fun markNotifyServerContentDeletedIfRequire(teamspaces: List<TeamSpace.Business.Past>) {
         teamspaces.forEach { space ->
             if (space.shouldDelete) {
@@ -274,6 +270,15 @@ class SmartSpaceCategorizationManager @Inject constructor(
 
     private fun markNotifyServerSpaceDeleted(spaceToDeleted: TeamSpace.Business.Past) {
         spaceDeletedNotifier.storeSpaceToDelete(spaceToDeleted)
+    }
+
+    private fun getItemsForForcedCategorization(
+        domains: List<String>,
+    ): List<SummaryObject> {
+        
+        val items: List<SummaryObject> = databaseAccessor.getSummaryCandidatesForCategorization()
+
+        return items.matchForceDomains(domains)
     }
 
     private data class Result(

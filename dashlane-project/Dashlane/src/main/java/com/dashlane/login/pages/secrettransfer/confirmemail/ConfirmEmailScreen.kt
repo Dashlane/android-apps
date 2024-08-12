@@ -21,7 +21,7 @@ import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
-import com.dashlane.login.pages.secrettransfer.qrcode.DashlaneLogo
+import com.dashlane.ui.widgets.compose.DashlaneLogo
 import com.dashlane.ui.widgets.compose.GenericErrorContent
 
 @Composable
@@ -99,7 +99,7 @@ fun ConfirmEmailContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            DashlaneLogo()
+            DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
             Text(
                 text = (stringResource(id = R.string.login_secret_transfer_step_label, 2, 2)).uppercase(),
                 style = DashlaneTheme.typography.bodyHelperRegular,

@@ -25,15 +25,29 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="60dp"
-        android:layout_height="34dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_dwm_item_selected"
+        android:visibility="gone"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="@id/thumbnail"
+        app:layout_constraintEnd_toEndOf="@id/thumbnail"
+        app:layout_constraintBottom_toBottomOf="@id/thumbnail"
+        app:layout_constraintStart_toStartOf="@id/thumbnail"
+        />
+
+    <com.dashlane.ui.thumbnail.ThumbnailDomainIconView
+        android:id="@+id/thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:thumbnailType="vaultItemDomainIcon"
+        app:thumbnailSize="medium"
         />
 
     <TextView
@@ -68,7 +82,7 @@
         android:textColor="?colorOnBackgroundMedium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/domain"
-        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintStart_toEndOf="@+id/thumbnail"
         app:layout_constraintTop_toBottomOf="@+id/domain"
         tools:text=" > randomemail@provider.com"
         />
@@ -79,7 +93,7 @@
         android:layout_height="8dp"
         android:layout_marginStart="16dp"
         app:layout_constraintBottom_toTopOf="@+id/email"
-        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintStart_toEndOf="@+id/thumbnail"
         app:layout_constraintTop_toTopOf="@+id/domain"
         app:srcCompat="@drawable/background_circle"
         app:tint="@color/text_danger_quiet"

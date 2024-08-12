@@ -7,19 +7,19 @@ class SecureDataStore(
     private val secureDataStoreCryptography: SecureDataStoreCryptography
 ) {
     fun isDataStored(identifier: String): Boolean =
-        secureDataStorage.exists(identifier)
+        secureDataStorage.existsLegacy(identifier)
 
     fun storeData(identifier: String, data: ByteArray) {
         val encryptedData = secureDataStoreCryptography.encrypt(data)
-        secureDataStorage.write(identifier, encryptedData)
+        secureDataStorage.writeLegacy(identifier, encryptedData)
     }
 
     fun retrieveData(identifier: String): ByteArray? {
-        val encryptedData = secureDataStorage.read(identifier) ?: return null
+        val encryptedData = secureDataStorage.readLegacy(identifier) ?: return null
         return secureDataStoreCryptography.decrypt(encryptedData)
     }
 
     fun removeData(identifier: String) {
-        secureDataStorage.remove(identifier)
+        secureDataStorage.removeLegacy(identifier)
     }
 }

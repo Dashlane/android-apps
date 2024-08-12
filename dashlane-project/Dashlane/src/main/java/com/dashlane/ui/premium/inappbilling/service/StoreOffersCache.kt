@@ -50,6 +50,14 @@ class StoreOffersCache(
         return fetchProducts(user)
     }
 
+    fun flushCacheIfSubscriptionHasChanged(subscription: String?) {
+        val previousSubscription = lastOperation?.storeOffers?.currentSubscription
+
+        if (subscription != previousSubscription) {
+            flushCache()
+        }
+    }
+
     fun flushCache() {
         prefetchJob?.cancel()
         prefetchJob = null
@@ -71,7 +79,7 @@ class StoreOffersCache(
     ) {
         fun isCacheHit(newUsername: String): Boolean {
             return username == newUsername &&
-                    System.currentTimeMillis() - timestamp < CACHE_TIME_TO_LIVE
+                System.currentTimeMillis() - timestamp < CACHE_TIME_TO_LIVE
         }
     }
 

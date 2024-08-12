@@ -5,7 +5,7 @@ import android.content.Intent
 import com.dashlane.help.HelpCenterCoordinator
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.vpn.thirdparty.VpnThirdPartyContract.DataProvider.Account
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope

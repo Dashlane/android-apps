@@ -2,13 +2,13 @@ package com.dashlane.autofill.ui
 
 import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
+import com.dashlane.autofill.formdetector.AutoFillFormType
+import com.dashlane.autofill.formdetector.field.AutoFillHint
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.model.AuthentifiantItemToFill
 import com.dashlane.autofill.model.CreditCardItemToFill
 import com.dashlane.autofill.model.ItemToFill
 import com.dashlane.autofill.totp.AutofillTotpCopyService
-import com.dashlane.autofill.formdetector.AutoFillFormType
-import com.dashlane.autofill.formdetector.field.AutoFillHint
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.followupnotification.FollowUpNotificationEntryPoint
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
@@ -27,7 +27,12 @@ class AutofillPerformedCallbackImpl @Inject constructor(
 
     override fun onAutofillPerformed(itemToFill: ItemToFill, summary: AutoFillHintSummary?) {
         when (itemToFill) {
-            is AuthentifiantItemToFill -> onAuthentifiantFilled(itemToFill.syncObject)
+            is AuthentifiantItemToFill -> {
+                
+                if (summary?.formType == AutoFillFormType.CREDENTIAL) {
+                    onAuthentifiantFilled(itemToFill.syncObject)
+                }
+            }
             is CreditCardItemToFill -> onCreditCardFilled(itemToFill.syncObject, summary)
             else -> {
                 
@@ -53,11 +58,11 @@ class AutofillPerformedCallbackImpl @Inject constructor(
             .let {
                 it.contains(AutoFillHint.CREDIT_CARD_NUMBER) && it.contains(AutoFillHint.CREDIT_CARD_SECURITY_CODE) && (
                     it.contains(
-                    AutoFillHint.CREDIT_CARD_EXPIRATION_DATE
-                ) || it.contains(AutoFillHint.CREDIT_CARD_EXPIRATION_DAY) || it.contains(AutoFillHint.CREDIT_CARD_EXPIRATION_MONTH) || it.contains(
-                    AutoFillHint.CREDIT_CARD_EXPIRATION_YEAR
-                )
-                )
+                        AutoFillHint.CREDIT_CARD_EXPIRATION_DATE
+                    ) || it.contains(AutoFillHint.CREDIT_CARD_EXPIRATION_DAY) || it.contains(AutoFillHint.CREDIT_CARD_EXPIRATION_MONTH) || it.contains(
+                        AutoFillHint.CREDIT_CARD_EXPIRATION_YEAR
+                    )
+                    )
             }
     }
 }

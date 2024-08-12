@@ -3,8 +3,8 @@ package com.dashlane.autofill.changepause.presenter
 import com.dashlane.autofill.changepause.ChangePauseContract
 import com.dashlane.autofill.changepause.model.ChangePauseModel
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.util.inject.qualifiers.FragmentLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

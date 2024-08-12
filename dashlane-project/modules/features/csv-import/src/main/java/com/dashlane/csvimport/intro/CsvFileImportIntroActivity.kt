@@ -17,6 +17,7 @@ import com.dashlane.help.HelpCenterLink
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
+import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
@@ -25,9 +26,13 @@ import com.dashlane.util.ActivityResultContractCompat
 import com.dashlane.util.setCurrentPageView
 import com.skocken.presentation.presenter.BasePresenter
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CsvFileImportIntroActivity : DashlaneActivity() {
+
+    @Inject
+    lateinit var navigator: Navigator
 
     private val csvImportReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {

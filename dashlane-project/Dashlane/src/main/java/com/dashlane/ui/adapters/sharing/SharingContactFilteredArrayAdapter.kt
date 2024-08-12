@@ -27,8 +27,8 @@ class SharingContactFilteredArrayAdapter(
         return view
     }
 
-    override fun keepObject(sharingContact: SharingContact, input: String): Boolean {
-        return sharingContact.displayName.contains(input, ignoreCase = true)
+    override fun keepObject(obj: SharingContact, mask: String?): Boolean {
+        return mask?.let { obj.displayName.contains(it, ignoreCase = true) } ?: false
     }
 
     private fun newView(): View {

@@ -17,11 +17,14 @@ import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.Pr
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.SetupComplete
 import com.dashlane.authenticator.updateOtp
 import com.dashlane.ext.application.KnownLinkedDomains.getMatchingLinkedDomainSet
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.lock.LockHelper
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.url.domain.otp.HardcodedOtpDomainsRepository
 import com.dashlane.url.registry.UrlDomainRegistryFactory
@@ -33,7 +36,6 @@ import com.dashlane.vault.model.titleForListNormalized
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
@@ -45,6 +47,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class AuthenticatorSuggestionsViewModel @Inject constructor(
@@ -53,8 +56,10 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
     private val vaultDataQuery: VaultDataQuery,
     private val credentialDataQuery: CredentialDataQuery,
     private val dataSaver: DataSaver,
+    private val dataSync: DataSync,
     private val logger: AuthenticatorLogger,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val navigator: Navigator,
+    private val frozenStateManager: FrozenStateManager,
 ) : ViewModel(), AuthenticatorSuggestionsViewModelContract {
     private val repository = HardcodedOtpDomainsRepository()
     private val userCommand = Channel<UserCommand>(1)
@@ -62,8 +67,6 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
     private var otpCredentialsCount = -1
 
     override val urlDomainRegistry = urlDomainRegistryFactory.create()
-    override val isFirstVisit: Boolean
-        get() = !userPreferencesManager.isAuthenticatorGetStartedDisplayed
 
     @OptIn(FlowPreview::class)
     override val uiState = userCommand.receiveAsFlow()
@@ -89,6 +92,14 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, WhileSubscribed(5_000), Progress)
 
+    override fun launchOrShowFrozenAccountPaywall(block: () -> Unit) {
+        if (frozenStateManager.isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+        } else {
+            block()
+        }
+    }
+
     override fun onOtpSetup(itemId: String, otp: Otp) {
         userCommand.trySend(OtpSetupCommand(itemId, otp))
     }
@@ -105,13 +116,14 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
     }
 
     override fun onSetupAuthenticator(activityResultLauncher: ActivityResultLauncher<Unit?>) {
+        if (frozenStateManager.isAccountFrozen) {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+            return
+        }
+
         viewModelScope.launch(Dispatchers.Main) {
             activityResultLauncher.launch(null)
         }
-    }
-
-    override fun onOnboardingDisplayed() {
-        userPreferencesManager.isAuthenticatorGetStartedDisplayed = true
     }
 
     override fun getCredentials() = credentialDataQuery.queryAll()
@@ -141,6 +153,7 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
         command.otp,
         vaultDataQuery,
         dataSaver,
+        dataSync,
         logger,
         updateModificationDate = command.updateModificationDate
     )

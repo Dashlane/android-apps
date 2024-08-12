@@ -2,14 +2,14 @@ package com.dashlane.accountrecoverykey.enforce
 
 import android.app.Activity
 import android.os.Bundle
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
-import com.dashlane.accountrecoverykey.AccountRecoveryKeySettingsNavigation
+import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation
 import com.dashlane.navigation.Navigator
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,7 +46,7 @@ class AccountRecoveryKeyEnforcer @Inject constructor(
             withContext(mainCoroutineDispatcher) {
                 navigator.goToAccountRecoveryKey(
                     settingsId = "account-recovery",
-                    startDestination = AccountRecoveryKeySettingsNavigation.arkSetupDestination,
+                    startDestination = AccountRecoveryKeySetupNavigation.introDestination,
                     userCanExitFlow = false
                 )
             }

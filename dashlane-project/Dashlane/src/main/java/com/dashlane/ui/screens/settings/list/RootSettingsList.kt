@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import com.dashlane.R
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
 import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.accountstatus.premiumstatus.isAdvancedPlan
 import com.dashlane.accountstatus.premiumstatus.isFamilyAdmin
@@ -14,10 +14,12 @@ import com.dashlane.accountstatus.premiumstatus.isFamilyPlan
 import com.dashlane.accountstatus.premiumstatus.isPremiumPlan
 import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
 import com.dashlane.activatetotp.ActivateTotpLogger
+import com.dashlane.autofill.phishing.AutofillPhishingLogger
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.debug.DaDaDa
 import com.dashlane.followupnotification.domain.FollowUpNotificationSettings
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.events.user.Logout
@@ -37,7 +39,9 @@ import com.dashlane.security.SecurityHelper
 import com.dashlane.server.api.endpoints.invitation.GetSharingLinkService
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
+import com.dashlane.session.UserDataRepository
 import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.storage.userdata.RichIconsSettingProvider
 import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
@@ -49,12 +53,14 @@ import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
+import com.dashlane.ui.screens.settings.item.SettingSocialMediaLinks
 import com.dashlane.ui.screens.settings.list.general.RootSettingsGeneralList
 import com.dashlane.ui.screens.settings.list.help.RootSettingsHelpList
 import com.dashlane.ui.screens.settings.list.security.RootSettingsSecurityList
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.userfeatures.FeatureFlip
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.ui.common.compose.components.socialmedia.DashlaneSocialMedia
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.DarkThemeHelper
 import com.dashlane.util.IntentFactory
 import com.dashlane.util.NetworkStateProvider
@@ -63,10 +69,8 @@ import com.dashlane.util.Toaster
 import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -75,15 +79,13 @@ import javax.inject.Inject
 class RootSettingsList @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
-    private val userPreferencesManager: UserPreferencesManager,
+    userPreferencesManager: UserPreferencesManager,
     private val daDaDa: DaDaDa,
     private val navigator: Navigator,
     private val toaster: Toaster,
     private val sharingLinkService: GetSharingLinkService,
     private val subscriptionCodeRepository: SubscriptionCodeRepository,
     private val accountStatusProvider: OptionalProvider<AccountStatus>,
-    @IoCoroutineDispatcher
-    private val ioDispatcher: CoroutineDispatcher,
     userFeaturesChecker: UserFeaturesChecker,
     lockManager: LockManager,
     inAppLoginManager: InAppLoginManager,
@@ -110,10 +112,14 @@ class RootSettingsList @Inject constructor(
     activateTotpLogger: ActivateTotpLogger,
     dataSync: DataSync,
     networkStateProvider: NetworkStateProvider,
-    accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
     teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
     clipboardCopy: ClipboardCopy,
-    clock: Clock
+    clock: Clock,
+    autofillPhishingLogger: AutofillPhishingLogger,
+    accountRecoveryKeySettingStateHolder: AccountRecoveryKeySettingStateHolder,
+    userDataRepository: UserDataRepository,
+    richIconsSettingProvider: RichIconsSettingProvider,
+    frozenStateManager: FrozenStateManager,
 ) {
 
     private val paramHeader = SettingHeader(context.getString(R.string.settings_category_advanced))
@@ -132,9 +138,14 @@ class RootSettingsList @Inject constructor(
                     context.getString(R.string.plan_free_action_bar_title)
                 )
         override val description: String
-            get() = accountStatus?.let {
-                endDateFormatter.getLabel(FormattedEndDateProviderImpl(it, clock))
-            } ?: context.getString(R.string.no_date_plan_subtitle)
+            get() = when {
+                frozenStateManager.isAccountFrozen -> context.getString(R.string.frozen_state_subtitle)
+                else -> {
+                    accountStatus?.let {
+                        endDateFormatter.getLabel(FormattedEndDateProviderImpl(it, clock))
+                    } ?: context.getString(R.string.no_date_plan_subtitle)
+                }
+            }
 
         val isFamilyInvitee: Boolean
             get() = accountStatus?.premiumStatus
@@ -176,10 +187,11 @@ class RootSettingsList @Inject constructor(
         use2faSettingStateHolder = use2faSettingStateHolder,
         activateTotpLogger = activateTotpLogger,
         userFeaturesChecker = userFeaturesChecker,
-        accountRecoveryKeyRepository = accountRecoveryKeyRepository,
         teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
         subscriptionCodeRepository = subscriptionCodeRepository,
-        ioDispatcher = ioDispatcher,
+        accountRecoveryKeySettingStateHolder = accountRecoveryKeySettingStateHolder,
+        userDataRepository = userDataRepository,
+        richIconsSettingProvider = richIconsSettingProvider
     )
 
     private val settingsGeneralList = RootSettingsGeneralList(
@@ -200,6 +212,8 @@ class RootSettingsList @Inject constructor(
         dataSync = dataSync,
         dialogHelper = dialogHelper,
         teamSpaceAccessorProvider = teamSpaceAccessorProvider,
+        autofillPhishingLogger = autofillPhishingLogger,
+        frozenStateManager = frozenStateManager,
     )
 
     private val settingsHelpList = RootSettingsHelpList(
@@ -246,7 +260,6 @@ class RootSettingsList @Inject constructor(
                     toaster = toaster,
                     sharingLinkService = sharingLinkService,
                     subscriptionCodeRepository = subscriptionCodeRepository,
-                    ioDispatcher = ioDispatcher,
                     networkStateProvider = networkStateProvider,
                 )
             }
@@ -330,6 +343,15 @@ class RootSettingsList @Inject constructor(
         }
     }
 
+    private val socialMediaHeader =
+        SettingHeader(context.getString(R.string.settings_social_media_header))
+
+    private val socialMediaItem = object : SettingSocialMediaLinks {
+        override val id = "social-links"
+        override val header = socialMediaHeader
+        override val socialMediaList: List<DashlaneSocialMedia> = DashlaneSocialMedia.entries
+    }
+
     private val debugItem = object : SettingItem {
         override val id = "debug"
         override val header = miscHeader
@@ -365,7 +387,8 @@ class RootSettingsList @Inject constructor(
             dashlaneLabs,
             logoutItem,
             appVersionItem,
-            debugItem
+            debugItem,
+            socialMediaItem,
         )
     )
 

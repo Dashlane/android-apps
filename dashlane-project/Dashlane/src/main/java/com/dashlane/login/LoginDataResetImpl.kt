@@ -2,7 +2,7 @@ package com.dashlane.login
 
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.session.SessionTrasher
-import com.dashlane.session.Username
+import com.dashlane.user.Username
 import com.dashlane.util.installlogs.DataLossTrackingLogger
 import javax.inject.Inject
 

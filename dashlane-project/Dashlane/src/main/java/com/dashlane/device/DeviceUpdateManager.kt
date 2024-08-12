@@ -10,7 +10,7 @@ import com.dashlane.server.api.endpoints.devices.UpdateDeviceInfoService
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.util.JsonSerialization
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.tryOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

@@ -3,7 +3,7 @@ package com.dashlane.login.pages.secrettransfer.universal.intro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
@@ -26,7 +26,7 @@ import com.dashlane.server.api.endpoints.secrettransfer.StartReceiverKeyExchange
 import com.dashlane.server.api.endpoints.secrettransfer.StartTransferService
 import com.dashlane.server.api.endpoints.secrettransfer.TransferType
 import com.dashlane.server.api.exceptions.DashlaneApiHttp504Exception
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

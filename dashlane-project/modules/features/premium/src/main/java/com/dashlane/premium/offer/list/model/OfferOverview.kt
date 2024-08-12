@@ -1,29 +1,33 @@
 package com.dashlane.premium.offer.list.model
 
-import androidx.annotation.StringRes
 import com.dashlane.premium.offer.common.model.OfferType
 
 sealed class OfferOverview {
     abstract val type: OfferType
-    abstract val title: Int
-    abstract val description: Int
-    abstract val pricing: Pricing?
-    abstract val onGoingRes: Int?
+    abstract val title: String
+    abstract val description: String
+    abstract val billedPrice: String?
+    abstract val currentPlanLabel: String?
+    abstract val currencyCode: String
 
     data class BaseOffer(
         override val type: OfferType,
-        @StringRes override val title: Int,
-        @StringRes override val description: Int,
-        override val pricing: Pricing? = null,
-        @StringRes override val onGoingRes: Int? = null
+        override val title: String,
+        override val description: String,
+        override val billedPrice: String? = null,
+        override val currentPlanLabel: String? = null,
+        override val currencyCode: String
     ) : OfferOverview()
 
     data class IntroductoryOffer(
         override val type: OfferType,
-        @StringRes override val title: Int,
-        @StringRes override val description: Int,
-        override val pricing: Pricing? = null,
-        @StringRes override val onGoingRes: Int? = null,
-        val discountCallOut: DiscountCallOut
+        override val title: String,
+        override val description: String,
+        override val billedPrice: String? = null,
+        override val currentPlanLabel: String? = null,
+        override val currencyCode: String,
+        val barredPrice: String? = null,
+        val additionalInfo: String? = null,
+        val discountCallOut: String?,
     ) : OfferOverview()
 }

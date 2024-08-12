@@ -5,6 +5,7 @@ import com.dashlane.premium.offer.common.model.FormattedStoreOffer
 import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.premium.offer.common.model.OfferType.ADVANCED
 import com.dashlane.premium.offer.common.model.OfferType.FAMILY
+import com.dashlane.premium.offer.common.model.OfferType.FREE
 import com.dashlane.premium.offer.common.model.OfferType.PREMIUM
 import com.dashlane.premium.offer.common.model.ProductDetailsWrapper
 import com.dashlane.premium.offer.common.model.ProductPeriodicity
@@ -65,6 +66,7 @@ class StoreOffersFormatterImpl @Inject constructor(
 }
 
 fun StoreOffersService.Data.getOffer(type: OfferType) = when (type) {
+    FREE -> free.products
     ADVANCED -> essentials.products
     PREMIUM -> premium.products
     FAMILY -> family.products

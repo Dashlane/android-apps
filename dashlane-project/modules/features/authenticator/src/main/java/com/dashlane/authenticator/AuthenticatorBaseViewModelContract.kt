@@ -6,14 +6,12 @@ import com.dashlane.vault.summary.SummaryObject
 
 interface AuthenticatorBaseViewModelContract {
     val urlDomainRegistry: UrlDomainRegistry
-    val isFirstVisit: Boolean
     fun getCredentials(): List<SummaryObject.Authentifiant>
     fun onSeeAll()
     fun onSeeLess()
     fun onSetupAuthenticator(activityResultLauncher: ActivityResultLauncher<Unit?>)
     fun onOtpSetup(itemId: String, otp: Otp)
     fun onSuccessAddOtp(itemId: String?, otp: Otp)
-    fun onOnboardingDisplayed()
 
     sealed class UserCommand {
         data class OtpSetupCommand(

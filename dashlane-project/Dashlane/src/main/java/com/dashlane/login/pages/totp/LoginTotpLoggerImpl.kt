@@ -1,6 +1,6 @@
 package com.dashlane.login.pages.totp
 
-import com.dashlane.account.UserSecuritySettings
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.login.LoginLogger

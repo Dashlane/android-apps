@@ -48,7 +48,7 @@ class GeneratedPasswordQueryImpl @Inject constructor(
             .queryAll(credentialFilter)
             .map { it.id }
 
-        val forbiddenPasswords = vaultDataQuery.queryAll(vaultFilter { specificUid(forbiddenAuthentifiantId) })
+        val forbiddenPasswords = vaultDataQuery.queryAllLegacy(vaultFilter { specificUid(forbiddenAuthentifiantId) })
             .filterIsInstance<VaultItem<SyncObject.Authentifiant>>()
             .map { it.syncObject.password }
 
@@ -62,7 +62,7 @@ class GeneratedPasswordQueryImpl @Inject constructor(
             specificUid(ids)
         }
 
-        return vaultDataQuery.queryAll(vaultFilter)
+        return vaultDataQuery.queryAllLegacy(vaultFilter)
             .filterIsInstance<VaultItem<SyncObject.GeneratedPassword>>()
     }
 }

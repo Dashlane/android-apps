@@ -12,9 +12,9 @@ import com.dashlane.cryptography.SaltGenerator
 import com.dashlane.cryptography.createEncryptionEngine
 import com.dashlane.cryptography.generateFixedSalt
 import com.dashlane.cryptography.use
-import com.dashlane.session.AppKey
-import com.dashlane.session.LocalKey
-import com.dashlane.session.Username
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.cryptography.FlexibleDecryptionEngineFactory
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -58,7 +58,7 @@ class LocalKeyRepository @Inject constructor(
     }
 
     fun isLocalKeyCreated(username: Username): Boolean {
-        return getMPSecureDataStorage(username).exists(SecureDataKey.LOCAL_KEY)
+        return getMPSecureDataStorage(username).existsLegacy(SecureDataKey.LOCAL_KEY)
     }
 
     private fun storeLocalKey(

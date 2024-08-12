@@ -10,6 +10,8 @@ open class MenuAction(
     val displayFlags: Int,
     val checkable: Boolean = false,
     val checked: Boolean = false,
+    val color: Int? = null,
+    val enabled: Boolean = true,
     private val action: (Activity) -> Unit = {}
 ) : Action {
 

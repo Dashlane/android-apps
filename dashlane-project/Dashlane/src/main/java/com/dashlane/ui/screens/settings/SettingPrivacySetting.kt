@@ -6,27 +6,21 @@ import android.widget.Toast
 import com.dashlane.R
 import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
 import com.dashlane.util.Toaster
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.launchUrl
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 
 class SettingPrivacySetting(
     private val context: Context,
     private val subscriptionCodeRepository: SubscriptionCodeRepository,
-    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val toaster: Toaster
 ) {
     suspend fun open() {
-        withContext(ioDispatcher) {
-            try {
-                val subscriptionCode = subscriptionCodeRepository.get()
-                val uri =
-                    Uri.parse("https://www.dashlane.com/privacy/settings/?subCode=$subscriptionCode")
-                context.launchUrl(uri)
-            } catch (t: Throwable) {
-                toaster.show(R.string.network_error, Toast.LENGTH_SHORT)
-            }
+        try {
+            val subscriptionCode = subscriptionCodeRepository.get()
+            val uri =
+                Uri.parse("https://www.dashlane.com/privacy/settings/?subCode=$subscriptionCode")
+            context.launchUrl(uri)
+        } catch (t: Throwable) {
+            toaster.show(R.string.network_error, Toast.LENGTH_SHORT)
         }
     }
 }

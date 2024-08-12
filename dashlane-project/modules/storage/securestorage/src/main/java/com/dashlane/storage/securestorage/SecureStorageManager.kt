@@ -5,8 +5,8 @@ import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.DecryptionEngine
 import com.dashlane.cryptography.EncryptionEngine
-import com.dashlane.session.LocalKey
-import com.dashlane.session.Username
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.cryptography.SecureDataStoreCryptographyMpProtectedImpl
 import com.dashlane.storage.securestorage.cryptography.SecureDataStoreCryptographyRawKeyProtectedImpl
 import javax.inject.Inject
@@ -20,7 +20,7 @@ class SecureStorageManager @Inject constructor(
     fun isKeyDataStored(username: Username, @SecureDataKey.Key keyIdentifier: String): Boolean {
         val mpSecureDataStore = getSecureDataStorage(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED)
         val lkSecureDataStore = getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
-        return mpSecureDataStore.exists(SecureDataKey.LOCAL_KEY) && lkSecureDataStore.exists(keyIdentifier)
+        return mpSecureDataStore.existsLegacy(SecureDataKey.LOCAL_KEY) && lkSecureDataStore.existsLegacy(keyIdentifier)
     }
 
     fun getKeyData(
@@ -53,25 +53,25 @@ class SecureStorageManager @Inject constructor(
     }
 
     fun removeKeyData(secureDataStorage: SecureDataStorage, @SecureDataKey.Key keyIdentifier: String) {
-        secureDataStorage.remove(keyIdentifier)
+        secureDataStorage.removeLegacy(keyIdentifier)
     }
 
     fun wipeUserData(username: Username) {
         
-        getSecureDataStorage(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED).remove(SecureDataKey.LOCAL_KEY)
+        getSecureDataStorage(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED).removeLegacy(SecureDataKey.LOCAL_KEY)
         
         getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
             .apply {
-                remove(SecureDataKey.SECRET_KEY)
-                remove(SecureDataKey.SETTINGS)
-                remove(SecureDataKey.REMOTE_KEY)
+                removeLegacy(SecureDataKey.SECRET_KEY)
+                removeLegacy(SecureDataKey.SETTINGS)
+                removeLegacy(SecureDataKey.REMOTE_KEY)
             }
 
         
-        getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED).remove(SecureDataKey.LOCAL_KEY)
+        getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED).removeLegacy(SecureDataKey.LOCAL_KEY)
 
         
-        getSecureDataStorage(username, SecureDataStorage.Type.RECOVERY_KEY_PROTECTED).remove(SecureDataKey.LOCAL_KEY)
+        getSecureDataStorage(username, SecureDataStorage.Type.RECOVERY_KEY_PROTECTED).removeLegacy(SecureDataKey.LOCAL_KEY)
     }
 
     fun getSecureDataStorage(username: Username, secureDataStorageType: SecureDataStorage.Type): SecureDataStorage {

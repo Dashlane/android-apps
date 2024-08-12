@@ -1,6 +1,6 @@
 package com.dashlane.biometricrecovery
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.device.DeviceUpdateManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker

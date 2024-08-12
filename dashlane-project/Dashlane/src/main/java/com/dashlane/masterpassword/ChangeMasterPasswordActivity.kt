@@ -10,6 +10,7 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.login.lock.LockManager
 import com.dashlane.masterpassword.logger.ChangeMasterPasswordLogger
+import com.dashlane.navigation.Navigator
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.getParcelableExtraCompat
@@ -36,6 +37,9 @@ class ChangeMasterPasswordActivity : DashlaneActivity() {
 
     @Inject
     lateinit var logRepository: LogRepository
+
+    @Inject
+    lateinit var navigator: Navigator
 
     lateinit var presenter: ChangeMasterPasswordPresenter
 

@@ -8,7 +8,7 @@ import com.dashlane.cryptography.DecryptionEngine
 import com.dashlane.cryptography.DecryptionSource
 import com.dashlane.cryptography.EncryptionEngine
 import com.dashlane.cryptography.ObfuscatedByteArray
-import com.dashlane.session.AppKey
+import com.dashlane.crypto.keys.AppKey
 import okio.Source
 
 internal class FlexibleDecryptionEngine(

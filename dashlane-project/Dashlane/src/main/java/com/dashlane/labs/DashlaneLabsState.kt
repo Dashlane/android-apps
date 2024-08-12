@@ -8,6 +8,13 @@ sealed class DashlaneLabsState {
 }
 
 data class ViewData(
-    val features: List<String>,
+    val labFeatures: List<Lab>,
     val helpClicked: Boolean
-)
+) {
+    data class Lab(
+        val featureName: String,
+        val displayDescription: String,
+        val displayName: String,
+        val enabled: Boolean
+    )
+}

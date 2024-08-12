@@ -17,8 +17,8 @@ import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getParcelableExtraCompat
-import com.dashlane.util.inject.qualifiers.ActivityLifecycleCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainImmediateCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ActivityLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainImmediateCoroutineDispatcher
 import com.skocken.presentation.presenter.BasePresenter
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -165,7 +165,8 @@ class LoginSsoPresenter @Inject constructor(
     private fun notifySuccess(intent: Intent) {
         activity?.run {
             startActivity(intent)
-            finishWithResult(LoginSsoActivity.Result.Success)
+            
+            finishAffinity()
         }
     }
 

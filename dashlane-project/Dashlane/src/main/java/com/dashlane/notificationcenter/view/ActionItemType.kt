@@ -10,8 +10,8 @@ enum class ActionItemType(val trackingKey: String) {
     ACCOUNT_RECOVERY("account_recovery"),
     FREE_TRIAL_STARTED("free_trial_started"),
     TRIAL_UPGRADE_RECOMMENDATION("trial_upgrade_recommendation"),
-    AUTHENTICATOR_ANNOUNCEMENT("authenticator_announcement"),
     INTRODUCTORY_OFFERS("introductory_offers"),
     PASSWORD_LIMIT_WARNING("password_limit_warning"),
     PASSWORD_LIMIT_REACHED("password_limit_reached"),
+    PASSWORD_LIMIT_EXCEEDED("password_limit_exceeded"),
 }

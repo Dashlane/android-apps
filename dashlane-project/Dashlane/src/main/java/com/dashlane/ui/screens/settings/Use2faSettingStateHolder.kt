@@ -1,6 +1,6 @@
 package com.dashlane.ui.screens.settings
 
-import com.dashlane.account.UserAccountInfo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.UserStorage

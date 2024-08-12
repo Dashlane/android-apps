@@ -2,9 +2,9 @@ package com.dashlane.loaders.datalists
 
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
-import com.dashlane.util.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.IdentityNameHolderService
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
 import com.dashlane.vault.util.hasAttachments

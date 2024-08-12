@@ -3,6 +3,7 @@ package com.dashlane.core.sharing
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
+import com.dashlane.sharing.model.getMyCollectionsAcceptedOrPending
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.storage.userdata.dao.ItemContentDB
@@ -60,20 +61,7 @@ class SharingDaoMemoryDataAccessImpl : SharingDaoMemoryDataAccess {
         userId: String,
         myUserGroupsAcceptedOrPending: List<UserGroup>
     ): List<Collection> {
-        return collections.filter { collection ->
-            if (collection.getUser(userId)?.isAcceptedOrPending == true) return@filter true
-            val userGroups = collection.userGroups ?: return@filter false
-            val ids =
-                userGroups.map { it.uuid } intersect myUserGroupsAcceptedOrPending.map { it.groupId }
-                    .toSet()
-            if (userGroups.find { userGroup ->
-                    userGroup.uuid in ids && userGroup.status.isAcceptedOrPending
-                } != null
-            ) {
-                return@filter true
-            }
-            false
-        }
+        return collections.getMyCollectionsAcceptedOrPending(userId, myUserGroupsAcceptedOrPending)
     }
 
     override fun deleteItemGroups(itemGroupsUid: List<String>) {

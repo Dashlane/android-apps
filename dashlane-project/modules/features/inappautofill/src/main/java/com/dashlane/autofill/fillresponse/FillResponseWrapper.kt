@@ -65,6 +65,7 @@ internal class FillResponseWrapper(
         var createAccountDataSet: DatasetWrapperBuilder? = null
         var changePasswordDataSet: DatasetWrapperBuilder? = null
         var pinnedItemDataSet: DatasetWrapperBuilder? = null
+        var phishingDataSet: DatasetWrapperBuilder? = null
 
         fun hasItemDataSet() = itemDataSets.isNotEmpty()
 
@@ -86,6 +87,9 @@ internal class FillResponseWrapper(
 
         fun build(): FillResponseWrapper? {
             val datasets = mutableListOf<DatasetWrapper>()
+
+            
+            phishingDataSet?.build()?.let { datasets.add(it) }
 
             
             onBoardingDataSet?.build()?.let { datasets.add(it) }

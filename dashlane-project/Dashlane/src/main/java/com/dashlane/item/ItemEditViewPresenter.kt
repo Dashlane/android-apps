@@ -13,21 +13,24 @@ import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierReplacedEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
+import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.item.collection.CollectionSelectorActivity
-import com.dashlane.item.linkedwebsites.LinkedServicesActivity
+import com.dashlane.item.linkedwebsites.old.LinkedServicesActivity
+import com.dashlane.item.passwordhistory.PasswordHistoryActivity
+import com.dashlane.item.passwordhistory.PasswordHistoryActivity.Companion.FINISHED_WITH_ERROR_EXTRA
 import com.dashlane.item.subview.ItemCollectionListSubView
 import com.dashlane.item.subview.ItemCollectionListSubView.Collection
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
+import com.dashlane.item.subview.action.ItemHistoryAction
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.item.subview.action.NewShareAction
 import com.dashlane.item.subview.action.NewShareMenuAction
 import com.dashlane.item.subview.action.ShareDetailsAction
 import com.dashlane.item.subview.action.ShowAttachmentsMenuAction
 import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
-import com.dashlane.item.subview.provider.credential.ItemScreenConfigurationAuthentifiantProvider
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.userfeatures.UserFeaturesChecker
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.DeviceUtils
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.showToaster
@@ -60,6 +63,7 @@ class ItemEditViewPresenter :
     lateinit var userFeaturesChecker: UserFeaturesChecker
     lateinit var coroutineScope: CoroutineScope
     lateinit var appEvents: AppEvents
+    lateinit var frozenStateManager: FrozenStateManager
 
     private var setupJob: Job? = null
 
@@ -115,8 +119,13 @@ class ItemEditViewPresenter :
         }
     }
 
-    override fun createMenu(menu: Menu, restrictionNotificator: TeamSpaceRestrictionNotificator): Boolean {
+    override fun createMenu(
+        menu: Menu,
+        teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
+        openItemHistory: (SyncObject.Authentifiant) -> Unit,
+    ): Boolean {
         val allMenus = mutableListOf<MenuAction>()
+        val isAccountFrozen = frozenStateManager.isAccountFrozen
         
         provider.getScreenConfiguration().itemHeader?.menuActions?.let {
             allMenus.addAll(it)
@@ -125,16 +134,26 @@ class ItemEditViewPresenter :
         
         val vaultItem = provider.vaultItem
         val summaryObject = vaultItem.toSummary<SummaryObject>()
-        if (summaryObject.attachmentsAllowed(userFeaturesChecker)) {
-            allMenus.add(ShowAttachmentsMenuAction(vaultItem))
+        if (summaryObject.attachmentsAllowed(userFeaturesChecker, isAccountFrozen = isAccountFrozen)) {
+            allMenus.add(ShowAttachmentsMenuAction(summaryObject))
         }
         
         if (vaultItem.syncObject !is SyncObject.SecureNote) {
             
             val canShare = !isNewItem(vaultItem) && !provider.isEditMode &&
-                sharingPolicyDataProvider.canShareItem(vaultItem.toSummary()) && !summaryObject.hasAttachments()
+                sharingPolicyDataProvider.canShareItem(vaultItem.toSummary()) && !summaryObject.hasAttachments() && !isAccountFrozen
             if (canShare) {
-                allMenus.add(NewShareMenuAction(vaultItem, restrictionNotificator))
+                allMenus.add(NewShareMenuAction(summaryObject, teamspaceRestrictionNotificator))
+            }
+            
+            (vaultItem.syncObject as? SyncObject.Authentifiant)?.let { authentifiant ->
+                if (canReviewPasswordHistory(summaryObject, vaultItem, authentifiant, isAccountFrozen)) {
+                    allMenus.add(
+                        ItemHistoryAction {
+                            openItemHistory(authentifiant)
+                        }
+                    )
+                }
             }
             if (provider.isEditMode) {
                 allMenus.add(
@@ -150,7 +169,7 @@ class ItemEditViewPresenter :
                         }
                     }
                 )
-            } else if (sharingPolicyDataProvider.canEditItem(vaultItem.toSummary(), isNewItem(vaultItem))) {
+            } else if (sharingPolicyDataProvider.canEditItem(vaultItem.toSummary(), isNewItem(vaultItem), isAccountFrozen)) {
                 allMenus.add(
                     MenuAction(
                         R.string.edit,
@@ -177,18 +196,10 @@ class ItemEditViewPresenter :
         view.showConfirmDeleteDialog(provider.vaultItem.uid, provider.vaultItem.isShared())
     }
 
-    override fun restorePasswordClicked() {
+    override fun onPasswordRestored() {
         coroutineScope.launch(Dispatchers.Main) {
             
-            if (provider.restorePassword()) setup(context!!, currentOptions)
-        }
-    }
-
-    override fun closeRestorePasswordClicked() {
-        coroutineScope.launch(Dispatchers.Main) {
-            
-            provider.closeRestorePassword()
-            setup(context!!, currentOptions)
+            if (provider.onPasswordRestored()) setup(context!!, currentOptions)
         }
     }
 
@@ -246,8 +257,7 @@ class ItemEditViewPresenter :
             ShareDetailsAction.SHOW_SHARING_DETAILS_REQUEST_CODE -> {
                 handleSharingDetailsResult(data)
             }
-            NewShareAction.NEW_SHARE_REQUEST_CODE,
-            ItemScreenConfigurationAuthentifiantProvider.GUIDED_PASSWORD_CHANGE_REQUEST_CODE -> {
+            NewShareAction.NEW_SHARE_REQUEST_CODE -> {
                 
                 setup(context!!, currentOptions)
             }
@@ -259,6 +269,9 @@ class ItemEditViewPresenter :
             }
             CollectionSelectorActivity.SHOW_COLLECTION_SELECTOR -> {
                 handleCollectionSelectorResult(data)
+            }
+            PasswordHistoryActivity.REQUEST_CODE -> {
+                handlePasswordHistoryResult(resultCode, data)
             }
             else -> view.listener.notifyPotentialBarCodeScan(requestCode, resultCode, data)
         }
@@ -299,7 +312,6 @@ class ItemEditViewPresenter :
             data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_WEBSITES)?.toList()
         val linkedApps = data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_APPS)?.toList()
         if (linkedWebsites != null || linkedApps != null) {
-            provider.setTemporaryLinkedServices(context!!, view.listener, linkedWebsites, linkedApps)
             coroutineScope.launch(Dispatchers.Main) {
                 setupJob?.join()
                 refreshUi(toolbarCollapsed = currentOptions.toolbarCollapsed)
@@ -329,6 +341,23 @@ class ItemEditViewPresenter :
             selectedCollection?.let { addCollection(it) }
             if (!provider.isEditMode) {
                 provider.save(context!!, provider.getScreenConfiguration().itemSubViews)
+            }
+        }
+    }
+
+    private fun handlePasswordHistoryResult(resultCode: Int, data: Intent?) {
+        val isError = resultCode == Activity.RESULT_CANCELED && data?.getBooleanExtra(FINISHED_WITH_ERROR_EXTRA, false) == true
+        when {
+            isError -> activity?.showToaster(
+                R.string.generic_error_message,
+                Toast.LENGTH_SHORT
+            )
+            resultCode == Activity.RESULT_OK -> {
+                view.listener.notifyRestorePassword()
+                activity?.showToaster(
+                    R.string.feedback_password_restored,
+                    Toast.LENGTH_SHORT
+                )
             }
         }
     }
@@ -425,8 +454,6 @@ class ItemEditViewPresenter :
             activity!!.finish()
             return
         }
-        
-        context?.let { provider.setTemporaryLinkedServices(it, view.listener, null, null) }
 
         setupViewMode(item)
     }
@@ -449,5 +476,23 @@ class ItemEditViewPresenter :
                 startActivity(intent)
             }
         }
+    }
+
+    private fun canReviewPasswordHistory(
+        summaryObject: SummaryObject,
+        vaultItem: VaultItem<*>,
+        syncObject: SyncObject,
+        isAccountFrozen: Boolean,
+    ): Boolean {
+        return (
+            !provider.isEditMode &&
+                sharingPolicyDataProvider.canEditItem(summaryObject, isNewItem(vaultItem)) &&
+                (syncObject as? SyncObject.Authentifiant)?.hasDataChanges() == true &&
+                !isAccountFrozen
+            )
+    }
+
+    private fun SyncObject.Authentifiant.hasDataChanges(): Boolean {
+        return provider.hasPasswordHistory(this)
     }
 }

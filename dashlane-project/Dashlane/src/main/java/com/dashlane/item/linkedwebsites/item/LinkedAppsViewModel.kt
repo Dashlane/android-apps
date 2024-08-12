@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.dashlane.R
-import com.dashlane.item.linkedwebsites.LinkedServicesActivity
+import com.dashlane.item.linkedwebsites.LinkedServicesFragmentArgs
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.getAppIcon
@@ -16,11 +16,11 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
 @HiltViewModel
 class LinkedAppsViewModel @Inject constructor(
@@ -40,10 +40,8 @@ class LinkedAppsViewModel @Inject constructor(
     )
     private var vaultItem: VaultItem<SyncObject.Authentifiant>? = null
     private var isEditMode = false
-    private val urlDomain = savedStateHandle.get<String>(LinkedServicesActivity.PARAM_URL_DOMAIN)
-    private val temporaryLinkedWebsites =
-        savedStateHandle.get<Array<String>>(LinkedServicesActivity.PARAM_TEMPORARY_APPS)?.toList()
     private val addedByYouApps = mutableListOf<String>()
+    private val args = LinkedServicesFragmentArgs.fromSavedStateHandle(savedStateHandle)
 
     fun setupVaultItem(vaultItem: VaultItem<SyncObject.Authentifiant>) {
         this.vaultItem = vaultItem
@@ -71,11 +69,11 @@ class LinkedAppsViewModel @Inject constructor(
     }
 
     private fun buildMainWebsite(): List<DashlaneRecyclerAdapter.ViewTypeProvider> {
-        return urlDomain?.let {
+        return args.url?.let {
             listOf(
                 LinkedServicesHeaderItem(R.string.multi_domain_credentials_main_website, false),
                 LinkedWebsitesItem(
-                    defaultUrl = urlDomain,
+                    defaultUrl = it,
                     isMain = true,
                     isEditable = false,
                     isPageEditMode = isEditMode,
@@ -87,9 +85,9 @@ class LinkedAppsViewModel @Inject constructor(
 
     private fun buildLinkedByUserApps(linkedAndroidApps: List<SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps>?): List<DashlaneRecyclerAdapter.ViewTypeProvider> {
         val items = mutableListOf<DashlaneRecyclerAdapter.ViewTypeProvider>()
-        val linkedByUser =
-            linkedAndroidApps?.filter { it.linkSource == SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps.LinkSource.USER }
-                ?.filter { temporaryLinkedWebsites?.contains(it.packageName) ?: true }
+        val linkedByUser = linkedAndroidApps
+            ?.filter { it.linkSource == SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps.LinkSource.USER }
+            ?.filter { args.temporaryApps?.contains(it.packageName) ?: true }
         if (!linkedByUser.isNullOrEmpty()) {
             items.add(LinkedServicesHeaderItem(R.string.multi_domain_credentials_added_by_you, false))
         }

@@ -10,8 +10,8 @@ import com.dashlane.session.SessionManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.util.clearTask
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

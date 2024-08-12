@@ -9,8 +9,8 @@ import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.debug.DeveloperUtilities.systemIsInDebug
 import com.dashlane.logger.AdjustWrapper
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.util.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -45,15 +45,12 @@ class InstallReceiver : BroadcastReceiver() {
             withContext(defaultCoroutineDispatcher) {
                 
                 installTrackingManager.installEvent(intent)
-
                 
                 if (systemIsInDebug(context)) {
                     return@withContext
                 }
                 syncBroadcastManager.removePasswordBroadcastIntent()
-                if (!systemIsInDebug(context)) {
-                    sendAdjustEvent(context, intent)
-                }
+                sendAdjustEvent(context, intent)
             }
         }
     }

@@ -5,6 +5,7 @@ import android.content.IntentSender
 import com.dashlane.autofill.createaccount.view.AutofillCreateAccountActivity
 import com.dashlane.autofill.fillresponse.CreateAccountActionIntentProvider
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.frozenautofill.FrozenAutofillActivity
 import javax.inject.Inject
 
 class AutofillCreateAccountActivityIntentProvider @Inject constructor() : CreateAccountActionIntentProvider {
@@ -12,8 +13,13 @@ class AutofillCreateAccountActivityIntentProvider @Inject constructor() : Create
         context: Context,
         summary: AutoFillHintSummary,
         hadCredentials: Boolean,
-        forKeyboard: Boolean
+        forKeyboard: Boolean,
+        isAccountFrozen: Boolean,
     ): IntentSender {
+        if (isAccountFrozen) {
+            return FrozenAutofillActivity.getPendingIntent(context, summary)
+        }
+
         return AutofillCreateAccountActivity.getAuthIntentSenderForCreateAccount(
             context,
             summary,

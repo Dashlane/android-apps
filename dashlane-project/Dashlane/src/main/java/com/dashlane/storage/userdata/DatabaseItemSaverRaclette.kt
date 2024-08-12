@@ -90,7 +90,7 @@ class DatabaseItemSaverRaclette @Inject constructor(
             specificUid(itemUid)
             allStatusFilter()
         }
-        return vaultDataQuery.get().query(filter)
+        return vaultDataQuery.get().queryLegacy(filter)
     }
 
     suspend fun inTransaction(block: VaultObjectRepository.Transaction.() -> Unit) =

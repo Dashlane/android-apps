@@ -3,7 +3,6 @@ package com.dashlane.premium.current
 import com.dashlane.premium.current.model.CurrentPlanType
 import com.dashlane.premium.current.model.CurrentPlanType.ADVANCED
 import com.dashlane.premium.current.model.CurrentPlanType.B2B
-import com.dashlane.premium.current.model.CurrentPlanType.ESSENTIALS
 import com.dashlane.premium.current.model.CurrentPlanType.FAMILY_ADMIN
 import com.dashlane.premium.current.model.CurrentPlanType.FAMILY_INVITEE
 import com.dashlane.premium.current.model.CurrentPlanType.FAMILY_PLUS_ADMIN
@@ -19,7 +18,6 @@ import com.dashlane.premium.current.model.CurrentPlanType.UNKNOWN
 import com.dashlane.premium.current.other.CurrentBenefitsBuilder
 import com.dashlane.premium.current.other.CurrentPlanStatusProvider
 import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.AdvancedIndividual
-import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.EssentialsIndividual
 import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.Family
 import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.FamilyPlus
 import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.Free
@@ -28,8 +26,8 @@ import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.PremiumInd
 import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.PremiumPlusIndividual
 import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.Trial
 import com.dashlane.premium.offer.common.model.UserBenefitStatus.Type.Unknown
-import com.dashlane.userfeatures.UserFeaturesChecker
-import com.dashlane.userfeatures.canShowVpn
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canShowVpn
 import javax.inject.Inject
 
 internal class CurrentPlanDataRepository @Inject constructor(
@@ -50,7 +48,6 @@ internal class CurrentPlanDataRepository @Inject constructor(
             Free -> FREE
             Trial -> TRIAL
             AdvancedIndividual -> ADVANCED
-            EssentialsIndividual -> ESSENTIALS
             PremiumIndividual -> {
                 when {
                     statusProvider.hasLifeTimeEntitlement() -> PREMIUM_FREE_FOR_LIFE

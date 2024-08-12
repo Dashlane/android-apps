@@ -1,20 +1,15 @@
 package com.dashlane.ui.activities.firstpassword
 
 import android.graphics.Paint
-import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.dashlane.R
+import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.util.TextWatcherDsl
 import com.dashlane.util.addTextChangedListener
-import com.dashlane.util.computeStatusBarColor
-import com.dashlane.util.getColorOnForToolbar
-import com.dashlane.util.graphics.getDominantColorFromBorder
-import com.dashlane.util.setContentTint
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.skocken.presentation.viewproxy.BaseViewProxy
@@ -81,19 +76,15 @@ class AddFirstPasswordViewProxy(private val activity: AppCompatActivity) :
         editTextLogin.setText(email)
     }
 
-    override fun setupToolbar(drawable: Drawable) {
+    override fun setupToolbar(domain: String?) {
         val toolbar = findViewByIdEfficient<Toolbar>(R.id.toolbar)!!
-        val toolbarIcon = findViewByIdEfficient<ImageView>(R.id.toolbar_icon)!!
+        val toolbarIcon = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.toolbar_icon)!!
         activity.setSupportActionBar(toolbar)
         activity.supportActionBar?.apply {
             title = ""
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
         }
-        toolbarIcon.setImageDrawable(drawable)
-        val dominantColor = getDominantColorFromBorder(drawable)
-        toolbar.setBackgroundColor(dominantColor)
-        toolbar.setContentTint(context.getColorOnForToolbar(dominantColor))
-        activity.window.statusBarColor = computeStatusBarColor(dominantColor)
+        toolbarIcon.domainUrl = domain
     }
 }

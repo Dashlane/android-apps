@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Parcelable
 import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavDestination
+import com.dashlane.navigation.paywall.PaywallIntroType
 import java.io.Serializable
 
 interface Navigator {
@@ -28,14 +29,21 @@ interface Navigator {
     fun goToSettings(settingsId: String? = null)
     fun goToHelpCenter()
     fun goToSecretTransfer(settingsId: String? = null)
-    fun goToAccountRecoveryKey(settingsId: String? = null, startDestination: String? = null, userCanExitFlow: Boolean = true)
+    fun goToAccountRecoveryKey(
+        settingsId: String? = null,
+        startDestination: String? = null,
+        userCanExitFlow: Boolean = true
+    )
+
     fun goToPersonalPlanOrHome()
+
     fun goToOffers(offerType: String? = null)
 
     fun goToInAppLoginIntro()
     fun goToInAppLogin(onBoardingType: Serializable? = null)
     fun goToSearch(query: String? = null)
-    fun goToPaywall(type: String)
+
+    fun goToPaywall(type: PaywallIntroType)
 
     @TargetApi(Build.VERSION_CODES.P)
     fun goToGuidedPasswordChange(
@@ -48,8 +56,14 @@ interface Navigator {
 
     fun goToAuthenticator(otpUri: Uri? = null)
     fun goToAuthenticatorSuggestions(hasSetupOtpCredentials: Boolean)
-    fun goToGetStartedFromAuthenticator()
-    fun goToGetStartedFromAuthenticatorSuggestions()
+
+    fun goToAuthenticatorIntro(
+        credentialName: String,
+        credentialId: String,
+        topDomain: String,
+        packageName: String?,
+        proSpace: Boolean
+    )
 
     
     
@@ -61,6 +75,9 @@ interface Navigator {
 
     
     fun goToItem(uid: String, type: String, editMode: Boolean = false)
+
+    
+    fun goToItemHistory(uid: String)
     fun goToCreateItem(type: String)
     fun goToCreateAuthentifiant(
         url: String,
@@ -75,7 +92,8 @@ interface Navigator {
         fromViewOnly: Boolean,
         temporaryPrivateCollectionsName: List<String>,
         temporarySharedCollectionsId: List<String>,
-        spaceId: String
+        spaceId: String,
+        isLimited: Boolean
     )
 
     fun goToCredentialAddStep1(expandImportOptions: Boolean = false, successIntent: Intent? = null)
@@ -86,7 +104,6 @@ interface Navigator {
         collectionId: String,
         businessSpace: Boolean,
         sharedCollection: Boolean,
-        shareEnabled: Boolean,
         shareAllowed: Boolean
     )
 
@@ -94,16 +111,15 @@ interface Navigator {
         collectionId: String,
         businessSpace: Boolean,
         sharedCollection: Boolean,
-        shareEnabled: Boolean,
         shareAllowed: Boolean
     )
 
     fun goToCollectionSharedAccessFromCollectionsList(collectionId: String)
 
     fun goToCollectionAddFromCollectionsList()
-    fun goToCollectionEditFromCollectionsList(collectionId: String)
+    fun goToCollectionEditFromCollectionsList(collectionId: String, sharedCollection: Boolean = false)
     fun goToCollectionShareFromCollectionList(collectionId: String)
-    fun goToCollectionEditFromCollectionDetail(collectionId: String)
+    fun goToCollectionEditFromCollectionDetail(collectionId: String, sharedCollection: Boolean = false)
     fun goToCollectionShareFromCollectionDetail(collectionId: String)
     fun goToCollectionSharedAccessFromCollectionDetail(collectionId: String)
 
@@ -114,6 +130,7 @@ interface Navigator {
     fun goToManageDevicesFromSettings()
     fun goToAutofillPauseAndLinkedFromSettings()
     fun goToDashlaneLabs()
+    fun goToGuidedWebCsvExport()
 
     
     fun goToBreachAlertDetail(breachWrapper: Parcelable)
@@ -138,7 +155,7 @@ interface Navigator {
     fun goToItemsForUserFromPasswordSharing(memberEmail: String)
 
     @TargetApi(Build.VERSION_CODES.P)
-    fun goToGuidedPasswordChangeFromCredential(itemId: String, domain: String, username: String?, requestCode: Int)
+    fun goToGuidedPasswordChangeFromCredential(itemId: String, domain: String, username: String?)
 
     
     fun goToLearnMoreAboutVpnFromVpnThirdParty()
@@ -182,4 +199,6 @@ interface Navigator {
         temporaryApps: List<String>?,
         urlDomain: String?
     )
+
+    fun goToAuthenticatorSunset()
 }

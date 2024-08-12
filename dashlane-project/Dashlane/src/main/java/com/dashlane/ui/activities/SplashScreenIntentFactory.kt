@@ -70,7 +70,6 @@ class SplashScreenIntentFactory(
 
     private fun createWelcomeIntent(currentIntent: Intent): Intent {
         val loginIntent = LoginIntents.createLoginActivityIntent(activity)
-            .putExtra(NavigationConstants.STARTED_FROM_ONBOARDING, true)
             .putExtra(TrackingIdProvider.TRACKING_ID, UUID.randomUUID().toString())
 
         val createAccountIntent = Intent(activity, CreateAccountActivity::class.java).putExtra(

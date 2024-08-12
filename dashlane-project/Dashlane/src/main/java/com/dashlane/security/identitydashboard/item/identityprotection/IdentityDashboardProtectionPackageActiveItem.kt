@@ -21,9 +21,6 @@ class IdentityDashboardProtectionPackageActiveItem(
 
     class ViewHolder(val item: View) : EfficientViewHolder<IdentityDashboardProtectionPackageActiveItem>(item) {
         init {
-            findViewByIdEfficient<View>(R.id.monitoring_button)?.setOnClickListener {
-                `object`?.listener?.onActiveCreditViewClick()
-            }
             findViewByIdEfficient<View>(R.id.protection_button)?.setOnClickListener {
                 `object`?.listener?.onActiveProtectionLearnMoreClick()
             }
@@ -35,26 +32,8 @@ class IdentityDashboardProtectionPackageActiveItem(
         override fun updateView(context: Context, item: IdentityDashboardProtectionPackageActiveItem?) {
             item ?: return
             val bulletSpan = getBulletSpan(context)
-            setCreditMonitoringSection(bulletSpan)
             setCreditIdentityProtectionSection(bulletSpan)
             setIdentityRestorationSection(bulletSpan)
-        }
-
-        private fun setCreditMonitoringSection(bulletSpan: BulletSpan) {
-            
-            findViewByIdEfficient<TextView>(R.id.monitoring_description_1)?.text =
-                context.getSpannableStringBuilder(R.string.credit_monitoring_active_description_1)
-                    .toBulletPointSpannable(bulletSpan)
-
-            
-            findViewByIdEfficient<TextView>(R.id.monitoring_description_2)?.text =
-                context.getSpannableStringBuilder(R.string.credit_monitoring_active_description_2)
-                    .toBulletPointSpannable(bulletSpan)
-
-            
-            findViewByIdEfficient<TextView>(R.id.monitoring_description_3)?.text =
-                context.getSpannableStringBuilder(R.string.credit_monitoring_active_description_3)
-                    .toBulletPointSpannable(bulletSpan)
         }
 
         private fun setCreditIdentityProtectionSection(bulletSpan: BulletSpan) {
@@ -120,13 +99,12 @@ class IdentityDashboardProtectionPackageActiveItem(
     }
 
     interface ActiveProtectionPackageListener {
-        fun onActiveCreditViewClick()
         fun onActiveProtectionLearnMoreClick()
         fun onActiveRestorationLearnMoreClick()
     }
 
     companion object {
-        val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType<IdentityDashboardProtectionPackageActiveItem>(
+        val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.item_id_protection_package_active,
             ViewHolder::class.java
         )

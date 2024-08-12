@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
-import com.dashlane.util.inject.qualifiers.ActivityLifecycleCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.ActivityLifecycleCoroutineScope
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
