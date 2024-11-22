@@ -8,13 +8,11 @@ import com.dashlane.authenticator.UriParser
 import com.dashlane.events.AppEvents
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.item.subview.action.LoginOpener
-import com.dashlane.item.v3.builders.SpecializedFormBuilder
-import com.dashlane.item.v3.data.CollectionData
+import com.dashlane.item.v3.builders.CredentialBuilder
 import com.dashlane.item.v3.data.CredentialFormData
-import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.data.ItemAction
 import com.dashlane.item.v3.data.getItemLinkedServices
-import com.dashlane.item.v3.loaders.AsyncDataLoader
+import com.dashlane.item.v3.loaders.CredentialAsyncDataLoader
 import com.dashlane.item.v3.repositories.CollectionsRepository
 import com.dashlane.item.v3.repositories.ItemEditRepository
 import com.dashlane.item.v3.repositories.PasswordHealthRepository
@@ -22,17 +20,19 @@ import com.dashlane.item.v3.util.MenuActionHelper
 import com.dashlane.item.v3.util.SensitiveField
 import com.dashlane.item.v3.util.SensitiveFieldLoader
 import com.dashlane.item.v3.util.buildInfoBoxToDisplay
-import com.dashlane.item.v3.util.updateCredentialFormData
+import com.dashlane.item.v3.util.updateFormData
+import com.dashlane.mvvm.MutableViewStateFlow
 import com.dashlane.navigation.Navigator
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.isSpaceItem
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
+import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorDialog
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
-import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.createAuthentifiant
@@ -43,13 +43,12 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import java.time.Instant
-import javax.inject.Inject
 
 @HiltViewModel
 class CredentialItemEditViewModel @Inject constructor(
@@ -59,38 +58,48 @@ class CredentialItemEditViewModel @Inject constructor(
     vaultDataQuery: VaultDataQuery,
     appEvents: AppEvents,
     menuActionHelper: MenuActionHelper,
-    specializedFormBuilder: SpecializedFormBuilder,
-    asyncDataLoader: AsyncDataLoader,
+    credentialBuilder: CredentialBuilder,
+    asyncDataLoader: CredentialAsyncDataLoader,
     vaultItemCopy: VaultItemCopyService,
     private val sensitiveFieldLoader: SensitiveFieldLoader,
     private val vaultItemLogger: VaultItemLogger,
     private val itemEditRepository: ItemEditRepository,
-    private val collectionsRepository: CollectionsRepository,
+    collectionsRepository: CollectionsRepository,
     private val passwordHealthRepository: PasswordHealthRepository,
-    private val sharingPolicyDataProvider: SharingPolicyDataProvider,
+    sharingPolicyDataProvider: SharingPolicyDataProvider,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     frozenStateManager: FrozenStateManager,
     navigator: Navigator,
-) : ItemEditViewModel(
-    savedStateHandle,
-    dataSync,
-    genericDataQuery,
-    vaultDataQuery,
-    sensitiveFieldLoader,
-    vaultItemCopy,
-    itemEditRepository,
-    appEvents,
-    menuActionHelper,
-    specializedFormBuilder,
-    asyncDataLoader,
-    frozenStateManager,
-    navigator,
+) : ItemEditViewModel<CredentialFormData>(
+    savedStateHandle = savedStateHandle,
+    dataSync = dataSync,
+    genericDataQuery = genericDataQuery,
+    vaultDataQuery = vaultDataQuery,
+    sensitiveFieldLoader = sensitiveFieldLoader,
+    vaultItemCopy = vaultItemCopy,
+    itemEditRepository = itemEditRepository,
+    appEvents = appEvents,
+    menuActionHelper = menuActionHelper,
+    formDataBuilder = credentialBuilder,
+    asyncDataLoader = asyncDataLoader,
+    frozenStateManager = frozenStateManager,
+    navigator = navigator,
+    collectionsRepository = collectionsRepository,
+    sharingPolicyDataProvider = sharingPolicyDataProvider
 ) {
+    override val mutableUiState: MutableViewStateFlow<ItemEditState<CredentialFormData>, ItemEditSideEffect> =
+        MutableViewStateFlow(
+            ItemEditState(
+                itemId = navArgs.uid ?: "",
+                isNew = navArgs.uid == null,
+                isEditMode = navArgs.forceEdit
+            )
+        )
 
     private var passwordHealthJob: Job? = null
 
     fun updatePassword(password: String, generatedPasswordId: String? = null) {
-        mutableUiState.updateCredentialFormData {
+        mutableUiState.updateFormData {
             it.copy(
                 password = CredentialFormData.Password(
                     SyncObfuscatedValue(password),
@@ -104,7 +113,7 @@ class CredentialItemEditViewModel @Inject constructor(
             passwordHealthJob?.cancel()
             passwordHealthJob = viewModelScope.launch(ioDispatcher) {
                 val passwordHealth = passwordHealthRepository.getPasswordHealth(password = password)
-                mutableUiState.updateCredentialFormData {
+                mutableUiState.updateFormData {
                     it.copy(passwordHealth = passwordHealth)
                 }
                 updateMenuActions()
@@ -119,15 +128,32 @@ class CredentialItemEditViewModel @Inject constructor(
     }
 
     fun handlePasswordRestoreResult(success: Boolean) {
-        val state = mutableUiState.updateAndGet {
-            it.copy(itemAction = ItemAction.PasswordRestoreResult(success))
+        viewModelScope.launch {
+            mutableUiState.send(ItemEditSideEffect.PasswordRestoreResult(success))
         }
         if (success) {
-            val password =
-                sensitiveFieldLoader.getSensitiveField(state.formData.id, SensitiveField.PASSWORD)
-                    ?.toString()
-                    ?: return
+            val password = mutableUiState.value.itemId?.let { itemId ->
+                sensitiveFieldLoader.getSensitiveField(itemId, SensitiveField.PASSWORD)
+            }?.toString() ?: return
             updatePassword(password)
+        }
+    }
+
+    fun actionGeneratePassword() {
+        viewModelScope.launch {
+            val origin = if (mutableUiState.value.isNew) {
+                PasswordGeneratorDialog.CREATION_VIEW
+            } else {
+                PasswordGeneratorDialog.EDIT_VIEW
+            }
+            mutableUiState.value.datas?.current?.let {
+                mutableUiState.send(
+                    ItemEditSideEffect.OpenPasswordGenerator(
+                        origin = origin,
+                        domainAsking = it.formData.url ?: ""
+                    )
+                )
+            }
         }
     }
 
@@ -135,12 +161,16 @@ class CredentialItemEditViewModel @Inject constructor(
     fun refreshHotp(hotp: Hotp) {
         viewModelScope.launch {
             val newHotp = UriParser.incrementHotpCounter(hotp)
-            loadVaultItem(mutableUiState.value.formData.id)?.let { item ->
+            mutableUiState.value.itemId?.let { id ->
+                loadVaultItem(id)
+            }?.let { item ->
                 itemEditRepository.updateOtp(item as VaultItem<SyncObject.Authentifiant>, newHotp)
-                mutableUiState.updateCredentialFormData {
-                    val result = it.copy(otp = newHotp)
-                    initialFormData = result
-                    result
+                mutableUiState.update {
+                    it.copyCurrentFormData { current ->
+                        current.copy(otp = newHotp)
+                    }.copyInitialFormData { initial, current ->
+                        initial.copy(otp = current.otp)
+                    }
                 }
                 updateMenuActions()
             }
@@ -148,63 +178,14 @@ class CredentialItemEditViewModel @Inject constructor(
     }
 
     fun update2FA(otp: Otp) {
-        mutableUiState.updateCredentialFormData {
+        mutableUiState.updateFormData {
             it.copy(otp = otp)
         }
         updateMenuActions()
     }
 
-    
-    fun addCollection(collection: CollectionData) {
-        mutableUiState.updateCredentialFormData {
-            it.copy(collections = it.collections + collection)
-        }
-        updateMenuActions()
-        viewModelScope.launch {
-            mutableUiState.update {
-                
-                if (it.isEditMode) {
-                    it
-                } else {
-                    val data = it.formData as? CredentialFormData ?: return@update it
-                    val initialVault = loadVaultItem(it.formData.id) ?: return@launch
-                    collectionsRepository.saveCollections(initialVault, data)
-                    
-                    initialFormData = data
-                    it.copy(isNew = false, itemAction = ItemAction.Saved)
-                }
-            }
-        }
-    }
-
-    
-    fun removeCollection(collection: CollectionData) {
-        mutableUiState.updateCredentialFormData {
-            it.copy(collections = it.collections - collection)
-        }
-        updateMenuActions()
-    }
-
-    
-    fun handleSharingResult() {
-        viewModelScope.launch {
-            val state = mutableUiState.value
-            if (!state.isNew && loadVaultItem(state.formData.id) == null) {
-                
-                closeAfterRemoved()
-                return@launch
-            }
-            mutableUiState.updateCredentialFormData {
-                val sharingCount =
-                    FormData.SharingCount(sharingPolicyDataProvider.getSharingCount(it.id))
-                it.copy(sharingCount = sharingCount)
-            }
-            updateMenuActions()
-        }
-    }
-
     fun updateLinkedServices(linkedWebsites: List<String>?, linkedApplications: List<String>?) =
-        mutableUiState.updateCredentialFormData {
+        mutableUiState.updateFormData {
             it.copy(
                 linkedServices = it.linkedServices.copy(
                     addedByUserDomains = linkedWebsites ?: it.linkedServices.addedByUserDomains,
@@ -216,9 +197,9 @@ class CredentialItemEditViewModel @Inject constructor(
     fun reloadLinkedServices() {
         viewModelScope.launch {
             val summaryObject = loadSummaryObject(
-                mutableUiState.value.formData.id
+                mutableUiState.value.itemId
             ) as? SummaryObject.Authentifiant ?: return@launch
-            mutableUiState.updateCredentialFormData {
+            mutableUiState.updateFormData {
                 it.copy(linkedServices = summaryObject.getItemLinkedServices())
             }
             updateMenuActions()
@@ -227,87 +208,88 @@ class CredentialItemEditViewModel @Inject constructor(
 
     fun actionOpenWebsite() {
         viewModelScope.launch {
-            mutableUiState.update {
-                val goToWebsiteUrl =
-                    (loadSummaryObject(it.formData.id) as? SummaryObject.Authentifiant)?.urlForGoToWebsite
-                        ?: return@launch
-                if (it.formData !is CredentialFormData) return@update it
-                val loginListener = object : LoginOpener.Listener {
-                    override fun onShowOption() = Unit
+            val state = mutableUiState.value
+            if (state.datas == null || state.itemId == null) return@launch
+            val goToWebsiteUrl =
+                (loadSummaryObject(state.itemId) as? SummaryObject.Authentifiant)?.urlForGoToWebsite ?: return@launch
+            val loginListener = object : LoginOpener.Listener {
+                override fun onShowOption() = Unit
 
-                    override fun onLogin(packageName: String) {
-                        vaultItemLogger.logOpenExternalLink(
-                            itemId = it.formData.id,
-                            packageName = packageName,
-                            url = goToWebsiteUrl
-                        )
-                    }
-                }
-                val packageNames =
-                    it.formData.linkedServices.addedByUserApps.toSet() + it.formData.linkedServices.addedByDashlaneApps.toSet()
-                it.copy(
-                    itemAction = ItemAction.OpenWebsite(
-                        goToWebsiteUrl,
-                        packageNames,
-                        loginListener
+                override fun onLogin(packageName: String) {
+                    vaultItemLogger.logOpenExternalLink(
+                        itemId = state.itemId,
+                        packageName = packageName,
+                        url = goToWebsiteUrl
                     )
-                )
+                }
             }
+            val packageNames = state.datas.current.formData.linkedServices.addedByUserApps.toSet() +
+                state.datas.current.formData.linkedServices.addedByDashlaneApps.toSet()
+            mutableUiState.send(
+                ItemEditSideEffect.OpenWebsite(
+                    goToWebsiteUrl,
+                    packageNames,
+                    loginListener
+                )
+            )
         }
     }
 
     fun actionOpenGuidedPasswordChange() {
         viewModelScope.launch {
-            loadSummaryObject(mutableUiState.value.formData.id)?.let {
-                if (it !is SummaryObject.Authentifiant) {
+            loadSummaryObject(mutableUiState.value.itemId)?.let { summary ->
+                if (summary !is SummaryObject.Authentifiant) {
                     return@let
                 }
-                val url = it.urlForGoToWebsite ?: return@let
-                mutableUiState.update { state ->
-                    state.copy(itemAction = ItemAction.GuidedPasswordChange(url, it.loginForUi))
+                val url = summary.urlForGoToWebsite ?: return@let
+                mutableUiState.value.datas?.current?.let {
+                    mutableUiState.send(
+                        ItemEditSideEffect.GuidedPasswordChange(it.commonData.id, url, summary.loginForUi)
+                    )
                 }
             }
         }
     }
 
     fun actionOpenLinkedServices(addNew: Boolean) {
-        mutableUiState.update {
-            if (it.formData !is CredentialFormData) return@update it
-            it.copy(
-                itemAction = ItemAction.OpenLinkedServices(
-                    fromViewOnly = !mutableUiState.value.isEditMode,
-                    addNew = addNew,
-                    temporaryWebsites = it.formData.linkedServices.addedByUserDomains,
-                    temporaryApps = it.formData.linkedServices.addedByUserApps,
-                    url = it.formData.url
-                )
-            )
-        }
-    }
-
-    fun actionSetupTwoFactor() {
         viewModelScope.launch {
-            mutableUiState.update {
-                if (it.formData !is CredentialFormData) return@update it
-                val vaultItem = loadVaultItem(it.formData.id)
-                it.copy(
-                    itemAction = ItemAction.GoToSetup2FA(
-                        credentialName = it.formData.name,
-                        credentialId = it.formData.id,
-                        topDomain = it.formData.url?.toUrlDomainOrNull()?.root.toString(),
-                        packageName = (it.formData.linkedServices.addedByUserApps + it.formData.linkedServices.addedByDashlaneApps).firstOrNull(),
-                        proSpace = vaultItem != null && vaultItem.isSpaceItem() && vaultItem.syncObject.spaceId.isNotSemanticallyNull()
+            mutableUiState.value.datas?.current?.let {
+                mutableUiState.send(
+                    ItemEditSideEffect.OpenLinkedServices(
+                        id = it.commonData.id,
+                        fromViewOnly = !mutableUiState.value.isEditMode,
+                        addNew = addNew,
+                        temporaryWebsites = it.formData.linkedServices.addedByUserDomains,
+                        temporaryApps = it.formData.linkedServices.addedByUserApps,
+                        url = it.formData.url
                     )
                 )
             }
         }
     }
 
+    fun actionSetupTwoFactor() {
+        viewModelScope.launch {
+            val state = mutableUiState.value
+            if (state.datas == null) return@launch
+            val vaultItem = loadVaultItem(state.itemId)
+            mutableUiState.send(
+                ItemEditSideEffect.GoToSetup2FA(
+                    credentialName = state.datas.current.commonData.name,
+                    credentialId = state.datas.current.commonData.id,
+                    topDomain = state.datas.current.formData.url?.toUrlDomainOrNull()?.root.toString(),
+                    packageName = (state.datas.current.formData.linkedServices.addedByUserApps + state.datas.current.formData.linkedServices.addedByDashlaneApps).firstOrNull(),
+                    proSpace = vaultItem != null && vaultItem.isSpaceItem() && vaultItem.syncObject.spaceId.isNotSemanticallyNull()
+                )
+            )
+        }
+    }
+
     fun actionRemoveTwoFactorConfirmed() {
         viewModelScope.launch {
-            val vaultItem = loadVaultItem(mutableUiState.value.formData.id) ?: return@launch
+            val vaultItem = loadVaultItem(mutableUiState.value.itemId) ?: return@launch
             itemEditRepository.remove2FAToken(vaultItem, isProSpace(vaultItem))
-            mutableUiState.updateCredentialFormData { it.copy(otp = null) }
+            mutableUiState.updateFormData { it.copy(otp = null) }
             updateMenuActions()
         }
     }

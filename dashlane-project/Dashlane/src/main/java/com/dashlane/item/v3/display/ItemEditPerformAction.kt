@@ -1,10 +1,10 @@
 package com.dashlane.item.v3.display
 
+import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import com.dashlane.R
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState
@@ -12,29 +12,29 @@ import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
 import com.dashlane.item.subview.action.LoginOpener
-import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.data.ItemAction
 import com.dashlane.item.v3.viewmodels.CredentialItemEditViewModel
+import com.dashlane.item.v3.viewmodels.Data
+import com.dashlane.item.v3.viewmodels.ItemEditSideEffect
 import com.dashlane.item.v3.viewmodels.ItemEditViewModel
 import com.dashlane.navigation.Navigator
+import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorDialog
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorDialog.Companion.DIALOG_PASSWORD_GENERATOR_TAG
 import com.dashlane.util.DeviceUtils
+import com.dashlane.vault.summary.SummaryObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @SuppressWarnings("LongMethod")
 @Composable
 fun PerformAction(
-    data: FormData,
+    data: Data<out FormData>,
     itemAction: ItemAction,
-    viewModel: ItemEditViewModel,
+    viewModel: ItemEditViewModel<out FormData>,
     navigator: Navigator,
-    resultLauncherAuthenticator: ActivityResultLauncher<AuthenticatorSuggestionsUiState.HasLogins.CredentialItem>,
-    activity: AppCompatActivity,
-    snackbarState: SnackbarHostState,
-    snackScope: CoroutineScope
+    activity: AppCompatActivity
 ) {
     when (itemAction) {
         ItemAction.ConfirmSaveChanges -> {
@@ -44,109 +44,25 @@ fun PerformAction(
                 onDiscard = { viewModel.onCloseClicked(true) }
             )
         }
-        ItemAction.ConfirmDelete -> {
-            navigator.goToDeleteVaultItem(data.id, data.isShared)
-            viewModel.actionHandled()
-        }
-        is ItemAction.GoToSetup2FA -> {
-            resultLauncherAuthenticator.launch(
-                AuthenticatorSuggestionsUiState.HasLogins.CredentialItem(
-                    id = itemAction.credentialId,
-                    title = itemAction.credentialName,
-                    domain = itemAction.topDomain,
-                    username = null,
-                    packageName = itemAction.packageName,
-                    professional = itemAction.proSpace,
-                )
+        ItemAction.SaveError -> {
+            ErrorSaveDialog(
+                onActionPerformed = { viewModel.actionHandled() }
             )
-            viewModel.actionHandled()
-        }
-        is ItemAction.OpenWebsite -> {
-            LoginOpener(activity).show(itemAction.url, itemAction.packageNames, itemAction.listener)
-            viewModel.actionHandled()
         }
         ItemAction.OpenNoRights -> {
             LimitedRightDialog {
                 viewModel.actionHandled()
             }
         }
-        ItemAction.OpenShared -> {
-            navigator.goToShareUsersForItems(data.id)
-            viewModel.actionHandled()
-        }
-        ItemAction.OpenPasswordHistory -> {
-            navigator.goToItemHistory(data.id)
-            viewModel.actionHandled()
-        }
         ItemAction.ConfirmRemove2FA -> {
             ConfirmRemove2FADialog(
-                data.name,
+                data.commonData.name,
                 onPositive = {
                     (viewModel as CredentialItemEditViewModel).actionRemoveTwoFactorConfirmed()
                     viewModel.actionHandled()
                 },
                 onNegative = { viewModel.actionHandled() }
             )
-        }
-        is ItemAction.OpenLinkedServices -> {
-            navigator.goToLinkedWebsites(
-                itemId = data.id,
-                fromViewOnly = itemAction.fromViewOnly,
-                addNew = itemAction.addNew,
-                temporaryWebsites = itemAction.temporaryWebsites,
-                temporaryApps = itemAction.temporaryApps,
-                urlDomain = itemAction.url
-            )
-            viewModel.actionHandled()
-        }
-        is ItemAction.OpenCollection -> {
-            navigator.goToCollectionSelectorFromItemEdit(
-                fromViewOnly = false,
-                temporaryPrivateCollectionsName = itemAction.temporaryPrivateCollectionsName,
-                temporarySharedCollectionsId = itemAction.temporarySharedCollectionsId,
-                spaceId = itemAction.spaceId,
-                isLimited = itemAction.isLimited
-            )
-            viewModel.actionHandled()
-        }
-        is ItemAction.OpenPasswordGenerator -> {
-            if (data !is CredentialFormData) {
-                viewModel.actionHandled()
-                return
-            }
-            DeviceUtils.hideKeyboard(activity)
-            if (activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR_TAG) != null) return
-
-            
-            activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR_TAG) as? PasswordGeneratorDialog
-                ?: PasswordGeneratorDialog.newInstance(activity, itemAction.origin, data.url ?: "")
-                    .show(activity.supportFragmentManager, DIALOG_PASSWORD_GENERATOR_TAG)
-            viewModel.actionHandled()
-        }
-        is ItemAction.GuidedPasswordChange -> {
-            navigator.goToGuidedPasswordChangeFromCredential(
-                data.id,
-                itemAction.website,
-                itemAction.userName
-            )
-            viewModel.actionHandled()
-        }
-        is ItemAction.PasswordRestoreResult -> {
-            if (itemAction.success) {
-                DisplaySnackbarMessage(
-                    snackbarState,
-                    snackScope,
-                    stringResource(id = R.string.feedback_password_restored)
-                )
-            } else {
-                DisplaySnackbarMessage(snackbarState, snackScope, stringResource(id = R.string.generic_error_message))
-            }
-            viewModel.actionHandled()
-        }
-        ItemAction.Saved -> {
-            DisplaySnackbarMessage(snackbarState, snackScope, stringResource(id = R.string.vault_saved))
-            DeviceUtils.hideKeyboard(activity)
-            viewModel.actionHandled()
         }
         ItemAction.Close -> {
             DeviceUtils.hideKeyboard(activity)
@@ -155,16 +71,114 @@ fun PerformAction(
     }
 }
 
-@Composable
-private fun DisplaySnackbarMessage(
+@SuppressWarnings("LongMethod")
+fun performSideEffect(
+    context: Context,
+    sideEffect: ItemEditSideEffect,
+    navigator: Navigator,
+    resultLauncherAuthenticator: ActivityResultLauncher<AuthenticatorSuggestionsUiState.HasLogins.CredentialItem>,
+    resultLauncherAttachments: ActivityResultLauncher<SummaryObject>,
+    activity: AppCompatActivity,
+    snackbarState: SnackbarHostState,
+    snackScope: CoroutineScope
+) {
+    when (sideEffect) {
+        is ItemEditSideEffect.ConfirmDelete -> {
+            navigator.goToDeleteVaultItem(sideEffect.id, sideEffect.isShared)
+        }
+        is ItemEditSideEffect.GoToSetup2FA -> {
+            resultLauncherAuthenticator.launch(
+                AuthenticatorSuggestionsUiState.HasLogins.CredentialItem(
+                    id = sideEffect.credentialId,
+                    title = sideEffect.credentialName,
+                    domain = sideEffect.topDomain,
+                    username = null,
+                    packageName = sideEffect.packageName,
+                    professional = sideEffect.proSpace,
+                )
+            )
+        }
+        is ItemEditSideEffect.OpenWebsite -> {
+            LoginOpener(activity).show(sideEffect.url, sideEffect.packageNames, sideEffect.listener)
+        }
+        is ItemEditSideEffect.OpenShared -> {
+            navigator.goToShareUsersForItems(sideEffect.id)
+        }
+        is ItemEditSideEffect.OpenPasswordHistory -> {
+            navigator.goToItemHistory(sideEffect.id)
+        }
+        is ItemEditSideEffect.OpenLinkedServices -> {
+            navigator.goToLinkedWebsites(
+                itemId = sideEffect.id,
+                fromViewOnly = sideEffect.fromViewOnly,
+                addNew = sideEffect.addNew,
+                temporaryWebsites = sideEffect.temporaryWebsites,
+                temporaryApps = sideEffect.temporaryApps,
+                urlDomain = sideEffect.url
+            )
+        }
+        is ItemEditSideEffect.OpenCollection -> {
+            navigator.goToCollectionSelectorFromItemEdit(
+                fromViewOnly = false,
+                temporaryPrivateCollectionsName = sideEffect.temporaryPrivateCollectionsName,
+                temporarySharedCollectionsId = sideEffect.temporarySharedCollectionsId,
+                spaceId = sideEffect.spaceId,
+                isLimited = sideEffect.isLimited
+            )
+        }
+        is ItemEditSideEffect.OpenPasswordGenerator -> {
+            DeviceUtils.hideKeyboard(activity)
+            if (activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR_TAG) != null) return
+
+            
+            activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR_TAG) as? PasswordGeneratorDialog
+                ?: PasswordGeneratorDialog.newInstance(activity, sideEffect.origin, sideEffect.domainAsking)
+                    .show(activity.supportFragmentManager, DIALOG_PASSWORD_GENERATOR_TAG)
+        }
+        is ItemEditSideEffect.GuidedPasswordChange -> {
+            navigator.goToGuidedPasswordChangeFromCredential(
+                sideEffect.id,
+                sideEffect.website,
+                sideEffect.userName
+            )
+        }
+        is ItemEditSideEffect.PasswordRestoreResult -> {
+            if (sideEffect.success) {
+                displaySnackbarMessage(
+                    snackbarState,
+                    snackScope,
+                    context.getString(R.string.feedback_password_restored)
+                )
+            } else {
+                displaySnackbarMessage(snackbarState, snackScope, context.getString(R.string.generic_error_message))
+            }
+        }
+        ItemEditSideEffect.Saved -> {
+            displaySnackbarMessage(snackbarState, snackScope, context.getString(R.string.vault_saved))
+            DeviceUtils.hideKeyboard(activity)
+        }
+        ItemEditSideEffect.Close -> {
+            DeviceUtils.hideKeyboard(activity)
+            navigator.popBackStack()
+        }
+        is ItemEditSideEffect.ShowAttachments -> {
+            sideEffect.summaryObject?.let {
+                resultLauncherAttachments.launch(it)
+            }
+        }
+        ItemEditSideEffect.FrozenPaywall -> {
+            navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
+        }
+    }
+}
+
+private fun displaySnackbarMessage(
     snackbarState: SnackbarHostState,
     snackScope: CoroutineScope,
     message: String
 ) {
-    LaunchedEffect(Unit) {
-        snackScope.launch {
-            snackbarState.showSnackbar(message)
-        }
+    snackScope.launch {
+        snackbarState.showSnackbar(message)
     }
 }
 
@@ -191,6 +205,25 @@ private fun SaveConfirmationDialog(
         title = stringResource(id = R.string.save_item_),
         description = {
             Text(text = stringResource(id = R.string.would_you_like_to_save_the_item_))
+        }
+    )
+}
+
+@Composable
+private fun ErrorSaveDialog(
+    onActionPerformed: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = {
+            onActionPerformed()
+        },
+        mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.ok)),
+        mainActionClick = {
+            onActionPerformed()
+        },
+        title = stringResource(id = R.string.error),
+        description = {
+            Text(text = stringResource(id = R.string.error_cannot_add_empty_item))
         }
     )
 }

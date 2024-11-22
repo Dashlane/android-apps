@@ -13,11 +13,15 @@ import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.SecurityHelper
 import com.dashlane.help.HelpCenterLink
+import com.dashlane.lock.LockType
+import com.dashlane.lock.LockTypeManager
 import com.dashlane.pin.settings.PinSettingsActivity
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.SecurityHelper
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.intro.IntroScreenContract
 import com.dashlane.ui.activities.intro.IntroScreenViewProxy
@@ -25,7 +29,6 @@ import com.dashlane.ui.screens.activities.onboarding.hardwareauth.HardwareAuthAc
 import com.dashlane.util.clearTop
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getParcelableExtraCompat
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.launchUrl
 import com.google.android.material.button.MaterialButton
 import com.skocken.presentation.definition.Base
@@ -49,7 +52,10 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
     lateinit var securityHelper: SecurityHelper
 
     @Inject
-    lateinit var userPreferencesManager: UserPreferencesManager
+    lateinit var preferencesManager: PreferencesManager
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     private lateinit var presenter: Presenter
 
@@ -67,7 +73,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         setContentView(R.layout.activity_intro)
 
         
-        userPreferencesManager.putLong(
+        preferencesManager[sessionManager.session?.username].putLong(
             ConstantsPrefs.LOCK_POPUP_LATEST_TIMESTAMP,
             System.currentTimeMillis()
         )
@@ -77,6 +83,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
             biometricAuthModule = biometricAuthModule,
             securityHelper = securityHelper,
             biometricRecovery = biometricRecovery,
+            sessionManager = sessionManager,
             nextIntent = nextIntent,
             fromUse2fa = fromUse2fa
         )
@@ -134,6 +141,7 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
         private val biometricAuthModule: BiometricAuthModule,
         private val securityHelper: SecurityHelper,
         private val biometricRecovery: BiometricRecovery,
+        private val sessionManager: SessionManager,
         private val nextIntent: Intent,
         private val fromUse2fa: Boolean
     ) : BasePresenter<IntroScreenContract.DataProvider, ViewProxy>(),
@@ -207,16 +215,21 @@ class OnboardingApplicationLockActivity : DashlaneActivity() {
 
         private fun refreshUi() {
             
-            if (lockTypeManager.getLockType() != LockTypeManager.LOCK_TYPE_MASTER_PASSWORD) {
+            val session = sessionManager.session ?: throw IllegalStateException("session cannot be null")
+            val locks = lockTypeManager.getLocks(session.username)
+
+            if (LockType.Biometric in locks || LockType.PinCode in locks) {
                 done()
                 return
             }
 
-            if (uiConfig.canSkip && !securityHelper.isDeviceSecured()) {
+            val isDeviceSecured = securityHelper.isDeviceSecured(session.username)
+
+            if (uiConfig.canSkip && !isDeviceSecured) {
                 
                 done()
                 return
-            } else if (!securityHelper.isDeviceSecured()) {
+            } else if (!isDeviceSecured) {
                 securityHelper.showPopupPinCodeDisable(activity)
             }
 

@@ -58,16 +58,6 @@ internal sealed class CopyFieldContentMapper<S : SummaryObject, F : SyncObject>(
         { it as? SyncObject.PaymentCreditCard }
     )
 
-    class PaymentPaypal(
-        override val hasContentInSummary: (item: SummaryObject.PaymentPaypal) -> Boolean,
-        override val hasContentInFull: (item: SyncObject.PaymentPaypal) -> Boolean,
-        override val getContentInSummary: (item: SummaryObject.PaymentPaypal) -> CopyContent,
-        override val getContentInFull: (item: SyncObject.PaymentPaypal) -> CopyContent
-    ) : CopyFieldContentMapper<SummaryObject.PaymentPaypal, SyncObject.PaymentPaypal>(
-        { it as? SummaryObject.PaymentPaypal },
-        { it as? SyncObject.PaymentPaypal }
-    )
-
     class BankStatement(
         override val hasContentInSummary: (item: SummaryObject.BankStatement) -> Boolean,
         override val hasContentInFull: (item: SyncObject.BankStatement) -> Boolean,
@@ -196,5 +186,15 @@ internal sealed class CopyFieldContentMapper<S : SummaryObject, F : SyncObject>(
     ) : CopyFieldContentMapper<SummaryObject.Passkey, SyncObject.Passkey>(
         { it as? SummaryObject.Passkey },
         { it as? SyncObject.Passkey }
+    )
+
+    class Secret(
+        override val hasContentInSummary: (item: SummaryObject.Secret) -> Boolean,
+        override val hasContentInFull: (item: SyncObject.Secret) -> Boolean,
+        override val getContentInSummary: (item: SummaryObject.Secret) -> CopyContent,
+        override val getContentInFull: (item: SyncObject.Secret) -> CopyContent
+    ) : CopyFieldContentMapper<SummaryObject.Secret, SyncObject.Secret>(
+        { it as? SummaryObject.Secret },
+        { it as? SyncObject.Secret }
     )
 }

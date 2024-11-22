@@ -3,9 +3,8 @@ package com.dashlane.login.pages.email.compose
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
+import androidx.navigation.toRoute
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.AuthenticationAccountNotFoundException
 import com.dashlane.authentication.AuthenticationContactSsoAdministratorException
 import com.dashlane.authentication.AuthenticationDeactivatedUserException
@@ -28,19 +27,19 @@ import com.dashlane.common.logger.usersupportlogger.UserSupportFileUploadState
 import com.dashlane.common.logger.usersupportlogger.UserSupportFileUploader
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.login.LoginLogger
-import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation
-import com.dashlane.login.root.LoginDestination
+import com.dashlane.login.root.LoginDestination.Email
+import com.dashlane.login.root.LoginRepository
 import com.dashlane.login.sso.LoginSsoActivity
 import com.dashlane.mvvm.State
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.server.api.endpoints.account.AccountExistsService
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.util.clipboard.ClipboardCopy
-import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.Locale
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -57,6 +56,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.VisibleForTesting
+import java.util.Locale
+import javax.inject.Inject
 
 private const val DIAGNOSTIC_KEY = "diagnostic"
 private const val DEBUG_KEY = "debug"
@@ -71,12 +72,14 @@ class LoginEmailViewModel @Inject constructor(
     private val userSupportFileUploader: UserSupportFileUploader,
     private val crashReporter: CrashReporter,
     private val clipboardCopy: ClipboardCopy,
+    private val loginRepository: LoginRepository,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val email: String? = savedStateHandle[LoginDestination.LOGIN_KEY]
-    private val allowSkipEmail: Boolean = savedStateHandle[LoginDestination.ALLOW_SKIP_EMAIL_KEY] ?: false
+    private val emailRoute = savedStateHandle.toRoute<Email>()
+    private val email: String? = emailRoute.login
+    private val allowSkipEmail: Boolean = emailRoute.allowSkipEmail
 
     private val stateFlow = MutableStateFlow(LoginEmailState())
     private val navigationStateFlow = Channel<LoginEmailNavigationState>()
@@ -91,7 +94,7 @@ class LoginEmailViewModel @Inject constructor(
             val preferredEmail = email ?: globalPreferencesManager.getUserListHistory().firstOrNull()
             stateFlow.update { state -> state.copy(email = preferredEmail) }
 
-            if (!globalPreferencesManager.isUserLoggedOut && !preferredEmail.isNullOrEmpty() && allowSkipEmail) {
+            if (!preferredEmail.isNullOrEmpty() && allowSkipEmail) {
                 delay(500) 
                 checkEmail(preferredEmail)
             }
@@ -147,10 +150,7 @@ class LoginEmailViewModel @Inject constructor(
     fun qrCode() {
         viewModelScope.launch {
             navigationStateFlow.send(
-                LoginEmailNavigationState.GoToSecretTransfer(
-                    email = null,
-                    destination = LoginSecretTransferNavigation.qrCodeDestination
-                )
+                LoginEmailNavigationState.GoToSecretTransfer(email = null, showQrCode = true)
             )
         }
     }
@@ -245,31 +245,38 @@ class LoginEmailViewModel @Inject constructor(
 
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
-    fun handleUserStatus(userStatus: Result): State {
+    suspend fun handleUserStatus(userStatus: Result): State {
         return when (userStatus) {
             is RequiresDeviceRegistration -> {
                 when (userStatus) {
                     is RequiresDeviceRegistration.SecondFactor -> handleUserRequiresDeviceRegistrationSecondFactor(userStatus)
-                    is RequiresDeviceRegistration.Sso -> LoginEmailNavigationState.GoToSSO(userStatus.login, userStatus.ssoInfo)
+                    is RequiresDeviceRegistration.Sso -> {
+                        loginRepository.updateSsoInfo(userStatus.ssoInfo)
+                        LoginEmailNavigationState.GoToSSO(userStatus.login, userStatus.ssoInfo)
+                    }
                 }
             }
             is RequiresServerKey -> handleUserStatusRequiresServerKey(userStatus)
-            is RequiresPassword -> LoginEmailNavigationState.GoToPassword(userStatus.registeredUserDevice, userStatus.ssoInfo)
-            is RequiresSso -> LoginEmailNavigationState.GoToSSO(userStatus.login, userStatus.ssoInfo)
+            is RequiresPassword -> {
+                loginRepository.updateRegisteredUserDevice(registeredUserDevice = userStatus.registeredUserDevice)
+                loginRepository.updateSsoInfo(userStatus.ssoInfo)
+                LoginEmailNavigationState.GoToPassword
+            }
+            is RequiresSso -> {
+                loginRepository.updateSsoInfo(userStatus.ssoInfo)
+                LoginEmailNavigationState.GoToSSO(userStatus.login, userStatus.ssoInfo)
+            }
         }
     }
 
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
-    fun handleUserRequiresDeviceRegistrationSecondFactor(userStatus: RequiresDeviceRegistration.SecondFactor): State {
+    suspend fun handleUserRequiresDeviceRegistrationSecondFactor(userStatus: RequiresDeviceRegistration.SecondFactor): State {
         val secondFactor = userStatus.secondFactor
         val login = secondFactor.login
         return when (secondFactor) {
             is AuthenticationSecondFactor.EmailToken -> {
-                val securitySettings = UserSecuritySettings(
-                    isToken = true,
-                    isAuthenticatorEnabled = secondFactor.isAuthenticatorEnabled
-                )
+                val securitySettings = UserSecuritySettings(isToken = true)
 
                 val accountType = when (userStatus.accountType) {
                     AccountType.MASTERPASSWORD -> UserAccountInfo.AccountType.MasterPassword
@@ -279,9 +286,10 @@ class LoginEmailViewModel @Inject constructor(
                 userAccountStorage.saveAccountType(username = login, accountType = accountType)
                 userAccountStorage.saveSecuritySettings(username = login, securitySettings = securitySettings)
                 if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) {
-                    LoginEmailNavigationState.GoToSecretTransfer(email = login, destination = LoginSecretTransferNavigation.chooseTypeDestination)
+                    LoginEmailNavigationState.GoToSecretTransfer(email = login, showQrCode = false)
                 } else {
-                    LoginEmailNavigationState.GoToToken(secondFactor = secondFactor, userStatus.ssoInfo)
+                    loginRepository.updateSsoInfo(ssoInfo = userStatus.ssoInfo)
+                    LoginEmailNavigationState.GoToToken(secondFactor = secondFactor)
                 }
             }
 
@@ -290,17 +298,17 @@ class LoginEmailViewModel @Inject constructor(
                     isTotp = true,
                     isU2fEnabled = secondFactor.u2f != null,
                     isDuoEnabled = secondFactor.duoPush != null,
-                    isAuthenticatorEnabled = secondFactor.isAuthenticatorEnabled
                 )
                 userAccountStorage.saveSecuritySettings(login, securitySettings)
-                LoginEmailNavigationState.GoToOTP(secondFactor = secondFactor, userStatus.ssoInfo)
+                loginRepository.updateSsoInfo(ssoInfo = userStatus.ssoInfo)
+                LoginEmailNavigationState.GoToOTP(secondFactor = secondFactor)
             }
         }
     }
 
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
-    fun handleUserStatusRequiresServerKey(userStatus: RequiresServerKey): State {
+    suspend fun handleUserStatusRequiresServerKey(userStatus: RequiresServerKey): State {
         val secondFactor = userStatus.secondFactor
         val login = secondFactor.login
         val securitySettings = UserSecuritySettings(
@@ -310,11 +318,8 @@ class LoginEmailViewModel @Inject constructor(
             isDuoEnabled = secondFactor.duoPush != null
         )
         userAccountStorage.saveSecuritySettings(login, securitySettings)
-        return if (secondFactor.isAuthenticatorEnabled) {
-            LoginEmailNavigationState.GoToAuthenticator(secondFactor = secondFactor, userStatus.ssoInfo)
-        } else {
-            LoginEmailNavigationState.GoToOTP(secondFactor = secondFactor, userStatus.ssoInfo)
-        }
+        loginRepository.updateSsoInfo(ssoInfo = userStatus.ssoInfo)
+        return LoginEmailNavigationState.GoToOTP(secondFactor = secondFactor)
     }
 
     @VisibleForTesting

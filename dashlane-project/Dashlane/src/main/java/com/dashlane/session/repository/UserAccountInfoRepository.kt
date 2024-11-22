@@ -4,8 +4,8 @@ import com.dashlane.braze.BrazeWrapper
 import com.dashlane.hermes.LogRepository
 import com.dashlane.login.LoginInfo
 import com.dashlane.login.LoginLogger
-import com.dashlane.network.tools.authorization
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.session.authorization
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.account.AccountInfoService
 import com.dashlane.server.api.time.toInstant
 import com.dashlane.session.BySessionRepository
@@ -23,7 +23,7 @@ import javax.inject.Singleton
 class UserAccountInfoRepository @Inject constructor(
     private val sessionCoroutineScopeRepository: SessionCoroutineScopeRepository,
     private val accountInfoService: AccountInfoService,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val brazeWrapper: BrazeWrapper,
     private val logRepository: LogRepository
@@ -42,24 +42,7 @@ class UserAccountInfoRepository @Inject constructor(
             }
 
             if (refreshUserAccountInfo) {
-                runCatching {
-                    val accountInfo = accountInfoService.execute(session.authorization).data
-
-                    val prefs = userPreferencesManager.preferencesFor(session.username)
-
-                    prefs.publicUserId = accountInfo.publicUserId
-                    prefs.accountCreationDate = accountInfo.creationDate.toInstant()
-                    userSecureStorageManager.storeDeviceAnalyticsId(
-                        session.localKey,
-                        session.username,
-                        accountInfo.deviceAnalyticsId
-                    )
-                    userSecureStorageManager.storeUserAnalyticsId(
-                        session.localKey,
-                        session.username,
-                        accountInfo.userAnalyticsId
-                    )
-                }
+                refreshUserAccountInfo(session)
             }
 
             val userAccountInfo = getUserAccountInfo(session)
@@ -84,14 +67,41 @@ class UserAccountInfoRepository @Inject constructor(
         }
     }
 
+    suspend fun refreshUserAccountInfo(session: Session) {
+        runCatching {
+            val accountInfo = accountInfoService.execute(session.authorization).data
+
+            val prefs = preferencesManager[session.username]
+
+            prefs.publicUserId = accountInfo.publicUserId
+            prefs.accountCreationDate = accountInfo.creationDate.toInstant()
+            userSecureStorageManager.storeDeviceAnalyticsId(
+                session.localKey,
+                session.username,
+                accountInfo.deviceAnalyticsId
+            )
+            userSecureStorageManager.storeUserAnalyticsId(
+                session.localKey,
+                session.username,
+                accountInfo.userAnalyticsId
+            )
+            userSecureStorageManager.storeUserContactEmail(
+                session.localKey,
+                session.username,
+                accountInfo.contactEmail
+            )
+        }
+    }
+
     private fun getUserAccountInfo(session: Session): UserAccountInfo {
-        val prefs = userPreferencesManager.preferencesFor(session.username)
+        val prefs = preferencesManager[session.username]
 
         return UserAccountInfo(
             publicUserId = prefs.publicUserId,
             creationDate = prefs.accountCreationDate,
             deviceAnalyticsId = userSecureStorageManager.readDeviceAnalyticsId(session.localKey, session.username),
-            userAnalyticsId = userSecureStorageManager.readUserAnalyticsId(session.localKey, session.username)
+            userAnalyticsId = userSecureStorageManager.readUserAnalyticsId(session.localKey, session.username),
+            contactEmail = userSecureStorageManager.readUserContactEmail(session.localKey, session.username)
         )
     }
 
@@ -102,5 +112,6 @@ data class UserAccountInfo(
     val publicUserId: String?,
     val creationDate: Instant,
     val deviceAnalyticsId: String?,
-    val userAnalyticsId: String?
+    val userAnalyticsId: String?,
+    val contactEmail: String?
 )

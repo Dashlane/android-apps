@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dashlane.design.component.IndeterminateLoader
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
@@ -24,9 +25,8 @@ fun LoadingScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        CircularProgressIndicator(
-            color = DashlaneTheme.colors.textBrandQuiet.value,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+        IndeterminateLoader(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         )
         Text(
             text = title,
@@ -41,6 +41,6 @@ fun LoadingScreen(
 
 @Preview
 @Composable
-fun LoadingScreenPreview() = DashlanePreview {
+private fun LoadingScreenPreview() = DashlanePreview {
     LoadingScreen(title = "Loading")
 }

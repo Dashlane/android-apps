@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/container_agnostic_neutral_standard"
@@ -16,13 +16,14 @@
 
     <ImageView
         android:id="@+id/iconImage"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="24sp"
+        android:layout_height="24sp"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/spacing_small"
         android:importantForAccessibility="no"
-        android:src="@drawable/day_night_logo"
-        app:tint="@color/text_neutral_catchy" />
+        android:src="@drawable/vd_logo_dashlane_micro_logomark"
+        android:tint="@color/text_neutral_catchy"
+        tools:ignore="UseAppTint" />
 
     <TextView
         android:id="@+id/iconText"

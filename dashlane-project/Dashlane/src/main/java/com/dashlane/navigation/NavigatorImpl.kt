@@ -16,16 +16,17 @@ import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.dashlane.DrawerNavigationDirections
 import com.dashlane.R
+import com.dashlane.attachment.ui.AttachmentListActivity
 import com.dashlane.authenticator.AuthenticatorIntro
 import com.dashlane.authenticator.Otp
-import com.dashlane.autofill.onboarding.OnboardingType
+import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
 import com.dashlane.collections.details.CollectionDetailsFragmentDirections
 import com.dashlane.collections.list.CollectionsListFragmentDirections
 import com.dashlane.collections.sharing.share.CollectionNewShareActivity
 import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.SHARE_COLLECTION
 import com.dashlane.collections.sharing.share.CollectionNewShareActivityArgs
-import com.dashlane.events.AppEvents
-import com.dashlane.events.clearLastEvent
+import com.dashlane.featureflipping.FeatureFlip.NEW_ITEM_EDIT_SECURE_NOTES
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.featureflipping.canShowVpn
 import com.dashlane.featureflipping.canUpgradeToGetVpn
@@ -39,12 +40,14 @@ import com.dashlane.help.newIntent
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.item.delete.DeleteVaultItemFragment
 import com.dashlane.item.delete.DeleteVaultItemFragmentArgs
+import com.dashlane.item.subview.action.LoginOpener
 import com.dashlane.item.subview.action.authenticator.ActivateRemoveAuthenticatorAction
 import com.dashlane.item.v3.ItemEditFragmentDirections
-import com.dashlane.lock.LockHelper
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPrompt
+import com.dashlane.lock.LockSetting
 import com.dashlane.login.LoginActivity
-import com.dashlane.login.lock.LockSetting
 import com.dashlane.login.lock.unlockItemIfNeeded
 import com.dashlane.navigation.NavControllerUtils.TOP_LEVEL_DESTINATIONS
 import com.dashlane.navigation.NavControllerUtils.setup
@@ -62,17 +65,23 @@ import com.dashlane.security.identitydashboard.IdentityDashboardFragmentDirectio
 import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.LockRepository
-import com.dashlane.session.repository.getLockManager
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.teamspaces.ui.Feature
+import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.AbstractActivityLifecycleListener
+import com.dashlane.ui.activities.DashlaneWrapperActivity
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.activities.fragments.checklist.ChecklistHelper
+import com.dashlane.ui.activities.hideDialogs
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.toAnyPage
+import com.dashlane.ui.screens.activities.onboarding.hardwareauth.HardwareAuthActivationActivity
+import com.dashlane.ui.screens.activities.onboarding.hardwareauth.OnboardingHardwareAuthActivity
+import com.dashlane.ui.screens.fragments.account.AccountStatusFragmentDirections
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingCenterFragmentDirections
 import com.dashlane.ui.screens.fragments.userdata.sharing.itemselection.SharingItemSelectionTabFragmentDirections
 import com.dashlane.ui.screens.settings.SettingsFragmentDirections
+import com.dashlane.ui.screens.sharing.SharingNewSharePeopleFragment
 import com.dashlane.ui.screens.sharing.SharingNewSharePeopleFragmentDirections
 import com.dashlane.util.DeviceUtils
 import com.dashlane.util.clearTask
@@ -80,36 +89,40 @@ import com.dashlane.util.clearTop
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.launchUrl
 import com.dashlane.util.logPageView
+import com.dashlane.util.newTask
 import com.dashlane.util.safelyStartBrowserActivity
+import com.dashlane.util.singleTop
 import com.dashlane.util.startActivityForResult
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vpn.thirdparty.VpnThirdPartyFragmentDirections
 import com.dashlane.xml.domain.SyncObjectType.AUTHENTIFIANT
+import com.dashlane.xml.domain.SyncObjectXmlName
+import java.lang.ref.WeakReference
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.Serializable
-import java.lang.ref.WeakReference
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Suppress("LargeClass")
 @Singleton
 class NavigatorImpl @Inject constructor(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val sessionManager: SessionManager,
-    private val lockRepository: LockRepository,
+    private val lockManager: LockManager,
     private val genericDataQuery: GenericDataQuery,
     private val checklistHelper: ChecklistHelper,
-    private val appEvents: AppEvents,
-    @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ApplicationCoroutineScope
+    private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
     private val mainDispatcher: CoroutineDispatcher,
     private val frozenStateManager: FrozenStateManager,
+    private val restrictionNotificator: TeamSpaceRestrictionNotificator,
+    private val biometricRecovery: BiometricRecovery
 ) : Navigator, AbstractActivityLifecycleListener() {
 
     override val currentDestination: NavDestination?
@@ -155,7 +168,7 @@ class NavigatorImpl @Inject constructor(
     private val navDeepLinkHelper = NavDeepLinkHelper(navigator = this)
 
     override fun launchHomeActivity() {
-        activity.startActivity(Intent(activity, HomeActivity::class.java).clearTask())
+        activity.startActivity(Intent(activity, HomeActivity::class.java).newTask().clearTask())
     }
 
     override fun goToHome(filter: String?) {
@@ -389,11 +402,19 @@ class NavigatorImpl @Inject constructor(
     }
 
     override fun goToItem(uid: String, type: String, editMode: Boolean) {
-        val lockManager = lockRepository.getLockManager(sessionManager) ?: return 
         applicationCoroutineScope.launch(Dispatchers.Main.immediate) {
             
-            if (!lockManager.unlockItemIfNeeded(activity, genericDataQuery, uid, type)) return@launch
-            if (type == AUTHENTIFIANT.xmlObjectName) {
+            if (!lockManager.unlockItemIfNeeded(
+                    context = activity,
+                    dataQuery = genericDataQuery,
+                    uid = uid,
+                    type = type,
+                )
+            ) {
+                return@launch
+            }
+
+            if (isNewItemEditEnabled(type)) {
                 navigate(
                     DrawerNavigationDirections.goToNewItemEdit(
                         uid = uid,
@@ -410,7 +431,6 @@ class NavigatorImpl @Inject constructor(
                     )
                 )
             }
-            appEvents.clearLastEvent<UnlockEvent>()
         }
     }
 
@@ -426,7 +446,7 @@ class NavigatorImpl @Inject constructor(
             return
         }
 
-        if (type == AUTHENTIFIANT.xmlObjectName) {
+        if (isNewItemEditEnabled(type)) {
             navigate(DrawerNavigationDirections.goToNewItemEdit(dataType = type))
         } else {
             navigate(DrawerNavigationDirections.goToItemEdit(dataType = type))
@@ -469,7 +489,7 @@ class NavigatorImpl @Inject constructor(
         fromViewOnly: Boolean,
         temporaryPrivateCollectionsName: List<String>,
         temporarySharedCollectionsId: List<String>,
-        spaceId: String,
+        spaceId: String?,
         isLimited: Boolean
     ) {
         navigate(
@@ -593,10 +613,8 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    override fun goToInAppLogin(onBoardingType: Serializable?) {
-        val type = onBoardingType as? OnboardingType ?: OnboardingType.AUTO_FILL_API
-        val action =
-            DrawerNavigationDirections.goToInAppLogin(extraOnboardingType = type)
+    override fun goToInAppLogin() {
+        val action = DrawerNavigationDirections.goToInAppLogin()
         navigate(action)
     }
 
@@ -730,6 +748,16 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
+    override fun goToAccountStatus() {
+        val action = SettingsFragmentDirections.settingsToAccountStatus()
+        navigate(action)
+    }
+
+    override fun goToChangeContactEmail() {
+        val action = AccountStatusFragmentDirections.changeContactEmail()
+        navigate(action)
+    }
+
     override fun goToPaywall(type: PaywallIntroType) {
         if (navigationController == null) {
             val args = PaywallActivityArgs(paywallIntroType = type).toBundle()
@@ -808,19 +836,16 @@ class NavigatorImpl @Inject constructor(
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun handleDeepLink(intent: Intent) {
         intent.data ?: intent.extras ?: return
         applicationCoroutineScope.launch(Dispatchers.Main.immediate) {
-            val lockManager = lockRepository.getLockManager(sessionManager)
-            if (lockManager?.isLocked == true) {
-                val event = lockManager.showAndWaitLockActivityForReason(
-                    activity,
-                    UnlockEvent.Reason.WithCode(UNLOCK_EVENT_CODE),
-                    LockHelper.PROMPT_LOCK_REGULAR,
-                    null
+            if (lockManager.isLocked) {
+                val lockEvent = lockManager.showAndWaitLockActivityForReason(
+                    context = activity,
+                    reason = LockEvent.Unlock.Reason.WithCode(UNLOCK_EVENT_CODE),
+                    lockPrompt = LockPrompt.Regular,
                 )
-                if (event?.isSuccess() != true) return@launch
+                if (lockEvent is LockEvent.Unlock) return@launch
             }
             waitForNavControllerIfNeeded {
                 deepLinkFound = if (!navDeepLinkHelper.overrideDeepLink(intent)) {
@@ -871,11 +896,15 @@ class NavigatorImpl @Inject constructor(
         navigate(action)
     }
 
-    override fun goToAccountRecoveryKey(settingsId: String?, startDestination: String?, userCanExitFlow: Boolean) {
+    override fun goToAccountRecoveryKey(
+        settingsId: String?,
+        showIntro: Boolean,
+        userCanExitFlow: Boolean
+    ) {
         val action =
             DrawerNavigationDirections.goToAccountRecoveryKey(
                 id = settingsId,
-                startDestination = startDestination,
+                showIntro = showIntro,
                 userCanExitFlow = userCanExitFlow
             )
         navigate(action)
@@ -891,21 +920,17 @@ class NavigatorImpl @Inject constructor(
         currentActivity = WeakReference(activity)
     }
 
-    override fun logoutAndCallLoginScreen(context: Context?, allowSkipEmail: Boolean) {
+    override fun logoutAndCallLoginScreen(context: Context?) {
         val intent = if (context is Activity) {
             context.intent
         } else {
             null
         }
-        logoutAndCallLoginScreen(context ?: activity, intent, allowSkipEmail)
+        logoutAndCallLoginScreen(context ?: activity, intent)
     }
 
     override fun goToWebView(url: String) {
         activity.launchUrl(url)
-    }
-
-    override fun goToAuthenticatorSunset() {
-        navigate(DrawerNavigationDirections.goToAuthenticatorSunset())
     }
 
     @Suppress("kotlin:S6311")
@@ -915,7 +940,7 @@ class NavigatorImpl @Inject constructor(
         closeMainActivity: Boolean = false
     ) {
         val mainActivity = activity
-        (mainActivity as? FragmentActivity)?.let { NavigationUtils.hideDialogs(it) }
+        (mainActivity as? FragmentActivity)?.hideDialogs()
         waitForNavControllerIfNeeded {
             val current = currentDestination
             val controller = navigationController!!
@@ -968,7 +993,7 @@ class NavigatorImpl @Inject constructor(
         }
     }
 
-    private fun logoutAndCallLoginScreen(context: Context, originalIntent: Intent?, allowSkipEmail: Boolean) {
+    private fun logoutAndCallLoginScreen(context: Context, originalIntent: Intent?) {
         val appContext = context.applicationContext
         
         
@@ -981,7 +1006,6 @@ class NavigatorImpl @Inject constructor(
             baseContext.finish()
         }
 
-        appEvents.clearLastEvent<UnlockEvent>()
         applicationCoroutineScope.launch(mainDispatcher) {
             sessionManager.session?.let { sessionManager.destroySession(it, true) }
             val loginIntent = DashlaneIntent.newInstance(appContext, LoginActivity::class.java)
@@ -993,10 +1017,6 @@ class NavigatorImpl @Inject constructor(
                     originalIntent.getBooleanExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, false)
                 )
             }
-
-            if (allowSkipEmail) {
-                loginIntent.putExtra(LoginActivity.ALLOW_SKIP_EMAIL, true)
-            }
             context.startActivity(loginIntent)
         }
     }
@@ -1006,7 +1026,78 @@ class NavigatorImpl @Inject constructor(
         menuIconDestinationChangedListener?.topLevelDestinations = topLevelDestinations
     }
 
+    override fun showAttachments(
+        id: String,
+        xmlObjectName: String,
+        attachments: String?,
+    ) {
+        val attachmentListIntent = Intent(activity, AttachmentListActivity::class.java).apply {
+            putExtra(AttachmentListActivity.ITEM_ATTACHMENTS, attachments)
+            putExtra(AttachmentListActivity.ITEM_ID, id)
+            putExtra(AttachmentListActivity.ITEM_TYPE, xmlObjectName)
+        }
+        activity.startActivityForResult(
+            attachmentListIntent,
+            AttachmentListActivity.REQUEST_CODE_ATTACHMENT_LIST
+        )
+    }
+
+    override fun showNewSharing(
+        id: String,
+        fromAuthentifiant: Boolean,
+        fromSecureNote: Boolean
+    ) {
+        (activity.getBaseActivity() as? FragmentActivity)?.let {
+            restrictionNotificator.runOrNotifyTeamRestriction(
+                activity = it,
+                feature = Feature.SHARING_DISABLED
+            ) {
+                val uri = NavigationUriBuilder().apply {
+                    if (fromAuthentifiant) {
+                        host(NavigationHelper.Destination.MainPath.PASSWORDS)
+                        origin(SharingNewSharePeopleFragment.FROM_ITEM_VIEW)
+                    } else if (fromSecureNote) {
+                        host(NavigationHelper.Destination.MainPath.NOTES)
+                        origin(SharingNewSharePeopleFragment.FROM_ITEM_VIEW)
+                    }
+                    appendPath(id)
+                    appendPath(NavigationHelper.Destination.SecondaryPath.Items.SHARE)
+                }.build()
+                DashlaneWrapperActivity.startActivityForResult(
+                    NEW_SHARE_REQUEST_CODE,
+                    activity,
+                    uri,
+                    Bundle()
+                )
+            }
+        }
+    }
+
+    override fun openWebsite(url: String?, packageNames: Set<String>) {
+        LoginOpener(activity).show(url = url, packageNames = packageNames, listener = null)
+    }
+
+    private fun isNewItemEditEnabled(type: String): Boolean {
+        val newItemEditTypes = listOfNotNull(
+            SyncObjectXmlName.AUTHENTIFIANT,
+            SyncObjectXmlName.SECURE_NOTE.takeIf { userFeaturesChecker.has(NEW_ITEM_EDIT_SECURE_NOTES) },
+            SyncObjectXmlName.SECRET
+        )
+
+        return newItemEditTypes.contains(type)
+    }
+
+    override fun goToBiometricOnboarding(context: Context) {
+        if (biometricRecovery.isFeatureAvailable()) {
+            val successIntent = MasterPasswordResetIntroActivity.newIntent(context)
+            context.startActivity(HardwareAuthActivationActivity.newIntent(context, successIntent).singleTop())
+        } else {
+            context.startActivity(DashlaneIntent.newInstance(context, OnboardingHardwareAuthActivity::class.java))
+        }
+    }
+
     companion object {
         private const val UNLOCK_EVENT_CODE = 178
+        const val NEW_SHARE_REQUEST_CODE = 6243
     }
 }

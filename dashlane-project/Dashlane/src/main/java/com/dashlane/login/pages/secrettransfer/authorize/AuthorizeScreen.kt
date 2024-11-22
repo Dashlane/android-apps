@@ -11,7 +11,7 @@ import com.dashlane.user.UserAccountInfo
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferState
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferViewModel
 import com.dashlane.ui.common.compose.components.LoadingScreen
-import com.dashlane.ui.widgets.compose.GenericErrorContent
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 
 @Composable
 fun AuthorizeScreen(

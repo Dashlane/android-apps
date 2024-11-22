@@ -7,14 +7,15 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
+import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.util.setupToolbar
-import com.dashlane.item.v3.viewmodels.State
+import com.dashlane.item.v3.viewmodels.ItemEditState
 
 @Composable
 internal fun Toolbar(
     actionBar: ActionBar?,
     lazyListState: LazyListState,
-    uiState: State,
+    uiState: ItemEditState<out FormData>,
     actionBarView: ComposeView
 ) {
     val firstVisibleIndex by remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }

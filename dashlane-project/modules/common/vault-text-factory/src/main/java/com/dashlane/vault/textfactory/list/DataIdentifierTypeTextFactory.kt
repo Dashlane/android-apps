@@ -18,7 +18,6 @@ object DataIdentifierTypeTextFactory {
             SyncObjectType.ID_CARD -> R.string.datatype_id_card
             SyncObjectType.IDENTITY -> R.string.datatype_identity
             SyncObjectType.PASSPORT -> R.string.datatype_passport
-            SyncObjectType.PAYMENT_PAYPAL -> R.string.datatype_paymentpaypal
             SyncObjectType.PAYMENT_CREDIT_CARD -> R.string.datatype_paymentcreditcard
             SyncObjectType.PERSONAL_WEBSITE -> R.string.datatype_personal_website
             SyncObjectType.PHONE -> R.string.datatype_phone

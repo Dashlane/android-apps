@@ -1,31 +1,32 @@
 package com.dashlane.login.pages.password
 
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.limitations.DeviceLimitActivityListener
 import com.dashlane.limitations.Enforce2faLimiter
 import com.dashlane.login.LoginMode
-import com.dashlane.login.LoginNewUserInitialization
 import com.dashlane.login.LoginStrategy
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.Session
+import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionResult
-import com.dashlane.user.Username
 import com.dashlane.sync.DataSync
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.Username
 import javax.inject.Inject
 
 class LoginPasswordRepository @Inject constructor(
     private val sessionManager: SessionManager,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val deviceLimitActivityListener: DeviceLimitActivityListener,
     private val enforce2faLimiter: Enforce2faLimiter,
     private val dataSync: DataSync,
-    private val loginNewUserInitialization: LoginNewUserInitialization,
+    private val sessionInitializer: SessionInitializer,
     private val loginStrategy: LoginStrategy
 ) {
 
@@ -33,8 +34,9 @@ class LoginPasswordRepository @Inject constructor(
         registeredUserDevice: RegisteredUserDevice,
         result: AuthenticationPasswordRepository.Result.Local
     ): Session {
+        val username = Username.ofEmail(registeredUserDevice.login)
         val sessionResult = sessionManager.loadSession(
-            Username.ofEmail(registeredUserDevice.login),
+            username,
             result.password,
             result.secretKey,
             result.localKey,
@@ -47,7 +49,7 @@ class LoginPasswordRepository @Inject constructor(
                 sessionResult.cause
             )
         }
-        val shouldLaunchInitialSync = userPreferencesManager.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
+        val shouldLaunchInitialSync = preferencesManager[username].getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
         
         
         
@@ -66,8 +68,9 @@ class LoginPasswordRepository @Inject constructor(
         result: AuthenticationPasswordRepository.Result.Remote,
         accountType: UserAccountInfo.AccountType,
     ): Session {
-        val sessionResult = loginNewUserInitialization.initializeSession(
-            username = result.registeredUserDevice.login,
+        val username = result.registeredUserDevice.login
+        val sessionResult = sessionInitializer.createSession(
+            username = Username.ofEmail(username),
             appKey = result.password,
             accessKey = result.accessKey,
             secretKey = result.secretKey,
@@ -89,7 +92,7 @@ class LoginPasswordRepository @Inject constructor(
         
         
         
-        userPreferencesManager.userSettingsBackupTimeMillis = result.settingsDate.toEpochMilli()
+        preferencesManager[username].userSettingsBackupTimeMillis = result.settingsDate.toEpochMilli()
 
         if (sessionResult is SessionResult.Error) throw sessionResult.cause ?: IllegalStateException("Session can't be created")
 
@@ -102,20 +105,35 @@ class LoginPasswordRepository @Inject constructor(
     }
 
     suspend fun getLocalStrategy(session: Session): LoginStrategy.Strategy {
-        val shouldLaunchInitialSync = userPreferencesManager.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
+        val shouldLaunchInitialSync = preferencesManager[session.username].getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0) == 0
         val strategy = when {
             
             shouldLaunchInitialSync -> loginStrategy.getStrategy(session)
-            else -> LoginStrategy.Strategy.UNLOCK
+            else -> LoginStrategy.Strategy.Unlock
         }
         return strategy
     }
 
     suspend fun getRemoteStrategy(session: Session, securityFeatures: Set<SecurityFeature>): LoginStrategy.Strategy {
         val strategy = loginStrategy.getStrategy(session, securityFeatures)
-        if (strategy == LoginStrategy.Strategy.MONOBUCKET) {
-            userPreferencesManager.ukiRequiresMonobucketConfirmation = true
+        if (strategy is LoginStrategy.Strategy.Monobucket) {
+            preferencesManager[session.username].ukiRequiresMonobucketConfirmation = true
         }
         return strategy
+    }
+}
+
+fun RegisteredUserDevice.toVerification() = when (this) {
+    is RegisteredUserDevice.Local -> if (isServerKeyRequired) {
+        VerificationMode.OTP2
+    } else {
+        VerificationMode.NONE
+    }
+
+    is RegisteredUserDevice.ToRestore -> VerificationMode.EMAIL_TOKEN
+    is RegisteredUserDevice.Remote -> when {
+        SecurityFeature.TOTP in securityFeatures -> VerificationMode.OTP1
+        SecurityFeature.EMAIL_TOKEN in securityFeatures -> VerificationMode.EMAIL_TOKEN
+        else -> VerificationMode.NONE
     }
 }

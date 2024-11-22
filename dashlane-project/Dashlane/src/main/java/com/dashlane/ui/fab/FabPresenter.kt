@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.navigation.Navigator
 import com.dashlane.util.getBaseActivity
-import com.dashlane.home.vaultlist.Filter
 import com.skocken.presentation.presenter.BasePresenter
 
 class FabPresenter(navigator: Navigator) : BasePresenter<FabDef.IDataProvider?, FabDef.IView?>(), FabDef.IPresenter {

@@ -4,7 +4,8 @@ import android.app.Activity
 import android.os.Bundle
 import com.dashlane.autofill.LinkedServicesHelper
 import com.dashlane.core.helpers.AppSignature
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
@@ -48,7 +49,8 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     private val assetLinkService: UrlDomainAssetLinkService,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     private val dataSaver: DataSaver,
     private val credentialDataQuery: CredentialDataQuery,
     private val vaultDataQuery: VaultDataQuery,
@@ -96,7 +98,8 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
     }
 
     private suspend fun refreshAll() {
-        val lastRefreshTime = Instant.ofEpochMilli(userPreferencesManager.getLong(PREF_LAST_REFRESH_ALL))
+        val preferences = preferencesManager[sessionManager.session?.username]
+        val lastRefreshTime = Instant.ofEpochMilli(preferences.getLong(PREF_LAST_REFRESH_ALL))
         val instant = clock.instant()
         if (instant < lastRefreshTime + Duration.ofDays(7)) {
             return 
@@ -108,7 +111,7 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
                 getAssetLinks(domain, urls)
             }
         }
-        userPreferencesManager.putLong(PREF_LAST_REFRESH_ALL, instant.toEpochMilli())
+        preferences.putLong(PREF_LAST_REFRESH_ALL, instant.toEpochMilli())
     }
 
     private suspend fun getAssetLinks(domain: UrlDomain, urls: List<String>) {

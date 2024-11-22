@@ -26,30 +26,29 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMediumBar
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.TextField
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.DashlaneLogo
 import com.dashlane.util.isNotSemanticallyNull
 
 @Composable
 fun LoginTokenScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginTokenViewModel,
-    goToNext: (RegisteredUserDevice.Remote, String) -> Unit
+    goToNext: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.stateFlow.viewState.collectAsState()
 
     LaunchedEffect(viewModel) {
         viewModel.viewStarted()
-        viewModel.navigationState.collect { state ->
+        viewModel.stateFlow.sideEffect.collect { state ->
             when (state) {
-                is LoginTokenNavigationState.Success -> goToNext(state.registeredUserDevice, state.authTicket)
+                is LoginTokenState.SideEffect.Success -> goToNext()
             }
         }
     }
@@ -95,7 +94,7 @@ fun LoginTokenContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+        DashlaneLogoLockup(height = 40.dp)
         Text(
             text = email,
             style = DashlaneTheme.typography.bodyStandardRegular,
@@ -183,7 +182,7 @@ fun EmailCodeHelpAlertDialog(
         },
         mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_token_where_is_popup_resend)),
         mainActionClick = confirmButtonClick,
-        additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.close)),
+        additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.login_token_where_is_popup_close)),
         additionalActionClick = dismissButtonClick,
         onDismissRequest = dismissButtonClick
     )
@@ -191,7 +190,7 @@ fun EmailCodeHelpAlertDialog(
 
 @Preview
 @Composable
-fun LoginTokenContentPreview() {
+private fun LoginTokenContentPreview() {
     DashlanePreview {
         LoginTokenContent(
             email = "randomemail@provider.com",
@@ -211,7 +210,7 @@ fun LoginTokenContentPreview() {
 
 @Preview
 @Composable
-fun EmailCodeHelpAlertDialogPreview() {
+private fun EmailCodeHelpAlertDialogPreview() {
     DashlaneTheme {
         EmailCodeHelpAlertDialog(
             confirmButtonClick = { },

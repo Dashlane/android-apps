@@ -5,7 +5,6 @@ import android.os.Bundle
 import com.dashlane.login.LoginIntents.createEnforce2faLimitActivityIntent
 import com.dashlane.login.pages.enforce2fa.HasEnforced2FaLimitUseCaseImpl
 import com.dashlane.login.pages.enforce2fa.HasEnforced2faLimitUseCase
-import com.dashlane.login.pages.password.LoginPasswordDataProvider
 import com.dashlane.server.api.endpoints.authentication.Auth2faSettingsService
 import com.dashlane.session.SessionManager
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor

@@ -1,24 +1,18 @@
 package com.dashlane.pin.settings
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.dashlane.navigation.ObfuscatedByteArrayParamType
-import com.dashlane.pin.settings.PinSettingsNavigation.PIN_KEY
-import com.dashlane.pin.settings.PinSettingsNavigation.setupDestination
-import com.dashlane.pin.settings.PinSettingsNavigation.successDestination
+import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.pin.settings.PinSettingsDestination.SetupDestination
+import com.dashlane.pin.settings.PinSettingsDestination.SuccessDestination
 import com.dashlane.pin.settings.success.PinSettingsSuccessScreen
 import com.dashlane.pin.setup.PinSetupScreen
-
-object PinSettingsNavigation {
-    const val PIN_KEY = "pin"
-
-    const val setupDestination = "pin/setup"
-    const val successDestination = "pin/success"
-}
 
 @Composable
 fun PinSettingsNavHost(
@@ -27,29 +21,32 @@ fun PinSettingsNavHost(
 ) {
     val navController = rememberNavController()
 
-    NavHost(
-        startDestination = setupDestination,
-        navController = navController
-    ) {
-        composable(setupDestination) {
-            PinSetupScreen(
-                viewModel = hiltViewModel(),
-                isCancellable = true,
-                onPinChosen = { pin ->
-                    navController.navigate("$successDestination/$pin")
-                },
-                onCancel = onCancel,
-            )
-        }
-        composable(
-            "$successDestination/{$PIN_KEY}",
-            arguments = listOf(navArgument(PIN_KEY) { type = ObfuscatedByteArrayParamType() })
+    Scaffold(
+        containerColor = DashlaneTheme.colors.containerAgnosticNeutralSupershy
+    ) { contentPadding ->
+        NavHost(
+            startDestination = SetupDestination,
+            navController = navController
         ) {
-            PinSettingsSuccessScreen(
-                viewModel = hiltViewModel(),
-                onSuccess = onSuccess,
-                onCancel = onCancel,
-            )
+            composable<SetupDestination> {
+                PinSetupScreen(
+                    modifier = Modifier.padding(contentPadding),
+                    viewModel = hiltViewModel(),
+                    isCancellable = true,
+                    onPinChosen = { pin ->
+                        navController.navigate(SuccessDestination(pin))
+                    },
+                    onCancel = onCancel,
+                )
+            }
+            composable<SuccessDestination> {
+                PinSettingsSuccessScreen(
+                    modifier = Modifier.padding(contentPadding),
+                    viewModel = hiltViewModel(),
+                    onSuccess = onSuccess,
+                    onCancel = onCancel,
+                )
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.dashlane.createaccount.pages.choosepassword.validator.zxcvbn
 
 import android.content.Context
-import android.os.Build
 import android.text.Spanned
 import android.text.style.BulletSpan
 import android.view.View
@@ -84,11 +83,7 @@ class PasswordValidationResultByZxcvbnViewProxy(private val scope: CoroutineScop
     private fun createBulletSpan(tipsView: View): BulletSpan {
         val marginBullet = tipsView.resources.dpToPx(8F).roundToInt()
         val colorBullet = tipsView.context.getThemeAttrColor(R.attr.colorOnSurface)
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            BulletSpan(marginBullet, colorBullet, tipsView.resources.dpToPx(2F).roundToInt())
-        } else {
-            BulletSpan(marginBullet, colorBullet)
-        }
+        return BulletSpan(marginBullet, colorBullet, tipsView.resources.dpToPx(2F).roundToInt())
     }
 
     private fun setTextOrGone(tipsView: View, @IdRes viewId: Int, value: CharSequence) {

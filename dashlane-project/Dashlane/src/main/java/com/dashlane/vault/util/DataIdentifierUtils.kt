@@ -5,7 +5,6 @@ package com.dashlane.vault.util
 import android.content.Context
 import androidx.annotation.CheckResult
 import com.dashlane.R
-import com.dashlane.attachment.AttachmentsParser
 import com.dashlane.session.Session
 import com.dashlane.url.root
 import com.dashlane.url.toUrlOrNull
@@ -13,20 +12,14 @@ import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
 import com.dashlane.vault.model.CreditCardBank
 import com.dashlane.vault.model.CreditCardBank.Companion.US_NO_TYPE
-import com.dashlane.vault.model.PAYPAL
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.formatTitle
 import com.dashlane.vault.model.loginForUi
-import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.utils.Country
 import java.time.Instant
-
-fun SummaryObject.hasAttachments(): Boolean = attachmentsCount() > 0
-
-fun SummaryObject.attachmentsCount(): Int = AttachmentsParser().parse(attachments).size
 
 @CheckResult
 fun VaultItem<*>.copyWithDefaultValue(context: Context, session: Session?): VaultItem<*> {
@@ -61,7 +54,6 @@ fun VaultItem<*>.copyWithDefaultValue(context: Context, session: Session?): Vaul
             context
         )
         is SyncObject.PaymentCreditCard -> copyPaymentCreditCardWithDefaultValue(this as VaultItem<SyncObject.PaymentCreditCard>)
-        is SyncObject.PaymentPaypal -> copyPaymentPaypalWithDefaultValue(this as VaultItem<SyncObject.PaymentPaypal>)
         is SyncObject.PersonalWebsite -> copyPersonalWebsiteWithDefaultValue(
             this as VaultItem<SyncObject.PersonalWebsite>,
             context
@@ -112,13 +104,13 @@ private fun copyAuthentifiantWithDefaultValue(
     context: Context,
     session: Session?
 ): VaultItem<SyncObject.Authentifiant> {
-    if (!authentifiant.syncObject.title.isSemanticallyNull() && !authentifiant.syncObject.loginForUi.isSemanticallyNull()) return authentifiant
+    if (!authentifiant.syncObject.title.isSemanticallyNull() && !authentifiant.loginForUi.isSemanticallyNull()) return authentifiant
 
     var newAuthentifiant = authentifiant
     if (authentifiant.syncObject.title.isSemanticallyNull()) {
         newAuthentifiant = newAuthentifiant.copyWithUpdatedAuthentifiantTitle(context)
     }
-    if (authentifiant.syncObject.loginForUi.isSemanticallyNull() && session != null) {
+    if (authentifiant.loginForUi.isSemanticallyNull() && session != null) {
         newAuthentifiant = newAuthentifiant.copyWithDefaultLogin(session)
     }
     return newAuthentifiant
@@ -239,14 +231,6 @@ private fun copyPaymentCreditCardWithDefaultValue(creditCard: VaultItem<SyncObje
             localeFormat = newLocalFormat
             bank = mBank
         }
-}
-
-private fun copyPaymentPaypalWithDefaultValue(vaultItem: VaultItem<SyncObject.PaymentPaypal>): VaultItem<SyncObject.PaymentPaypal> {
-    return if (vaultItem.syncObject.name.isSemanticallyNull()) {
-        vaultItem.copySyncObject { name = SyncObject.PaymentPaypal.PAYPAL }
-    } else {
-        vaultItem
-    }
 }
 
 private fun copyPersonalWebsiteWithDefaultValue(

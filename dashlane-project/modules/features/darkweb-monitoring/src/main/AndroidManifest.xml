@@ -16,11 +16,11 @@
         <activity
             android:name="com.dashlane.darkweb.ui.setup.DarkWebSetupMailActivity"
             android:parentActivityName="com.dashlane.darkweb.ui.intro.DarkWebSetupIntroActivity"
-            android:theme="@style/Theme.Dashlane.Modal"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="com.dashlane.darkweb.ui.result.DarkWebSetupResultActivity"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
     </application>
 </manifest>

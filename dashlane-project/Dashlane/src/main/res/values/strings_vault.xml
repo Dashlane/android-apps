@@ -6,6 +6,8 @@
     <string name="vault_fab_add_payment">Add new</string>
     <string name="vault_fab_add_personal_info">Add new</string>
     <string name="vault_fab_add_id">Add new</string>
+    
+    <string name="vault_fab_add_secret">Add new</string>
     <string name="vault_header_suggested">Suggested</string>
     <string name="vault_header_most_recent">Most recent</string>
     <string name="vault_search_hint">Find an item, tool, or setting</string>
@@ -17,14 +19,12 @@
     <string name="vault_filter_payments">Payments</string>
     <string name="vault_filter_personal_info">Personal info</string>
     <string name="vault_filter_ids">IDs</string>
-
-    <string name="vault_offline_sync_error_message">You’re offline. We need an active internet connection to refresh and sync your vault.</string>
-    <string name="vault_unknown_sync_error_message">We had an issue refreshing your vault. Please try again later.</string>
-
+    
+    <string name="vault_filter_secrets">Secrets</string>
     
     <string name="vault_collection_title">Collections</string>
     
-    <string name="vault_add_collection">Add collection</string>
+    <string name="vault_add_collection">Add a collection</string>
     
     <string name="vault_manage_collections">Manage collections</string>
     
@@ -32,7 +32,7 @@
     
     <string name="vault_delete_login">Delete login</string>
     
-    <string name="vault_setup_2fa">Setup Two-Factor Authenticator</string>
+    <string name="vault_setup_2fa">Set up 2-factor authentication</string>
     
     <string name="vault_action_copy">Copy</string>
     
@@ -47,6 +47,12 @@
     <string name="vault_password_safety">Safety</string>
     
     <string name="vault_organisation">Organisation</string>
+    
+    <string name="vault_shared_access">Shared access</string>
+    
+    <string name="vault_preferences">Preferences</string>">
+    
+    <string name="vault_attachments">Attachments</string>
     
     <plurals name="vault_linked_services_manage">
         <item quantity="one">Manage %1$d linked service</item>
@@ -70,7 +76,7 @@
     
     <string name="compromised_password_info_action">Change now</string>
     
-    <string name="vault_linked_services_add">Add a linked website</string>
+    <string name="vault_linked_services_add">Add a linked service</string>
     
     <string name="vault_shared_with">Shared with</string>
     
@@ -80,6 +86,8 @@
     
     <string name="vault_limited_rights_infobox_content">You can only autofill the content or remove it from your vault.</string>
     
+    <string name="vault_limited_rights_secure_note_infobox_content">You can only view the content or remove it from your vault.</string>
+    
     <string name="vault_saved">Changes saved</string>
     
     <string name="vault_password_compromised">Password compromised</string>
@@ -87,4 +95,49 @@
     <string name="reused_password_info_title">This password is reused</string>
     
     <string name="reused_password_info_content">This password is compromised multiple times across your vault. Make your password unique to secure your account.</string>
+    
+    <string name="vault_note_detail_title">Note details</string>
+    
+    <string name="vault_secure_note_setting_secured_title">Lock Secure Note</string>
+    
+    <string name="vault_secure_note_setting_secured_description">Ask for your Biometrics or Master Password to unlock this note.</string>
+    
+    <string name="secure_note_attachments_restriction_infobox_title">Attachments cannot be added to shared or Secure Notes in a Collection</string>
+    
+    <string name="secure_note_sharing_and_collection_restriction_infobox_title">Secure Notes with attachments cannot be shared or added to a Collection.</string>
+    
+    <string name="vault_secure_note_attachment_restrict_collections">Secure Notes with attachments cannot be added to a Collection.</string>
+    
+    <string name="vault_toolbar_secure_note_create_title">Add a secure note</string>
+    
+    <string name="vault_delete_secure_note">Delete secure note</string>
+    
+    <string name="vault_secure_note_character_count">%1$s/%2$s characters</string>
+    
+    <string name="vault_secure_note_character_count_limit">%1$s/%2$s characters. Note has reached the max limit.</string>
+    
+    <string name="vault_secure_note_character_count_above_limit">%1$s/%2$s characters. Note has reached the max limit. Please remove text to save this note.</string>
+    
+    <string name="vault_attached_files_label">Attached files</string>
+    
+    <plurals name="vault_attached_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    
+    <string name="vault_attached_files_view_button">View all</string>
+    
+    <string name="vault_secret_detail_section_title">Secret details</string>
+    
+    <string name="secret_hint_title">Secret name</string>
+    
+    <string name="secret_hint_content">Secret value</string>
+    
+    <string name="vault_secret_setting_secured_title">Content protected</string>
+    
+    <string name="vault_secret_setting_secured_description">Ask for your Biometrics or Master Password to unlock this secret.</string>
+    
+    <string name="vault_delete_secret">Delete secret</string>
+    
+    <string name="vault_toolbar_secret_create_title">Add a secret</string>
 </resources>

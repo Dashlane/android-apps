@@ -23,6 +23,7 @@ data class ItemListContext(
         IDS_LIST("ids"),
         PAYMENT_LIST("payments"),
         PERSONAL_INFO_LIST("personalInfos"),
+        SECRETS_LIST("secrets"),
         SECURE_NOTE_LIST("secureNotes"),
         SHARING("sharing"),
         SEARCH("search"),

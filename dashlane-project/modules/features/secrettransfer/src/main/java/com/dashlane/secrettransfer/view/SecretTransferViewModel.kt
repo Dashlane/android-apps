@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.secrettransfer.GetKeyExchangeTransferInfoService
 import com.dashlane.session.SessionManager
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher

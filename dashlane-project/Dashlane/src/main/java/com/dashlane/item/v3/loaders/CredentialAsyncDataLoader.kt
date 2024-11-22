@@ -4,12 +4,13 @@ import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.otp
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.FormData
-import com.dashlane.item.v3.repositories.CollectionsRepository
+import com.dashlane.item.v3.loaders.common.CollectionLoader
 import com.dashlane.item.v3.repositories.PasswordHealthRepository
+import com.dashlane.item.v3.viewmodels.Data
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.db.SmartSpaceItemChecker
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.CoroutineScope
@@ -22,12 +23,12 @@ import javax.inject.Inject
 import kotlin.reflect.KFunction1
 
 class CredentialAsyncDataLoader @Inject constructor(
-    private val collectionsRepository: CollectionsRepository,
+    private val collectionLoader: CollectionLoader<CredentialFormData>,
     private val passwordHealthRepository: PasswordHealthRepository,
     private val vaultDataQuery: VaultDataQuery,
     private val sharingPolicyDataProvider: SharingPolicyDataProvider,
     private val smartSpaceItemChecker: SmartSpaceItemChecker
-) : AsyncDataLoader.Loader {
+) : AsyncDataLoader<CredentialFormData> {
 
     private val additionalAsyncData: MutableList<Deferred<Unit>> = mutableListOf()
 
@@ -36,7 +37,7 @@ class CredentialAsyncDataLoader @Inject constructor(
         initialSummaryObject: SummaryObject,
         isNewItem: Boolean,
         scope: CoroutineScope,
-        additionalDataLoadedFunction: KFunction1<(FormData) -> FormData, Unit>,
+        additionalDataLoadedFunction: KFunction1<(Data<CredentialFormData>) -> Data<CredentialFormData>, Unit>,
         onAllDataLoaded: suspend () -> Unit
     ) {
         
@@ -48,7 +49,9 @@ class CredentialAsyncDataLoader @Inject constructor(
                     initialSummaryObject.isShared
                 )
                 additionalDataLoadedFunction {
-                    it.updateFormData { formData -> formData.copy(canDelete = canDelete) }
+                    it.updateCommonData {
+                        it.copy(canDelete = canDelete)
+                    }
                 }
             }
         )
@@ -57,19 +60,14 @@ class CredentialAsyncDataLoader @Inject constructor(
                 val sharingCount =
                     sharingPolicyDataProvider.getSharingCount(initialSummaryObject.id)
                 additionalDataLoadedFunction {
-                    it.updateFormData { formData ->
-                        formData.copy(sharingCount = FormData.SharingCount(sharingCount))
+                    it.updateCommonData {
+                        it.copy(sharingCount = FormData.SharingCount(sharingCount))
                     }
                 }
             }
         )
         additionalAsyncData.add(
-            scope.async(start = CoroutineStart.LAZY) {
-                val collections = collectionsRepository.getCollections(initialSummaryObject)
-                additionalDataLoadedFunction {
-                    it.updateFormData { formData -> formData.copy(collections = collections) }
-                }
-            }
+            collectionLoader.loadAsync(scope, initialSummaryObject, additionalDataLoadedFunction)
         )
         additionalAsyncData.add(
             scope.async(start = CoroutineStart.LAZY) {
@@ -91,7 +89,7 @@ class CredentialAsyncDataLoader @Inject constructor(
             scope.async(start = CoroutineStart.LAZY) {
                 val isForcedSpace = smartSpaceItemChecker.checkForceSpace(itemId = initialSummaryObject.id)
                 additionalDataLoadedFunction {
-                    it.updateFormData { formData -> formData.copy(isForcedSpace = isForcedSpace) }
+                    it.updateCommonData { it.copy(isForcedSpace = isForcedSpace) }
                 }
             }
         )
@@ -102,10 +100,6 @@ class CredentialAsyncDataLoader @Inject constructor(
     }
 
     override fun cancelAll() = additionalAsyncData.forEach { it.cancel() }
-
-    private fun FormData.updateFormData(
-        block: (CredentialFormData) -> FormData
-    ) = if (this is CredentialFormData) block(this) else this
 
     private fun getOtp(itemId: String): Otp? {
         return vaultDataQuery.queryLegacy(vaultFilter { specificUid(itemId) })?.let {

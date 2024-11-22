@@ -3,9 +3,9 @@ package com.dashlane.item.subview.action
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.dashlane.R
-import com.dashlane.item.subview.Action
 import com.dashlane.teamspaces.ui.Feature
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
+import com.dashlane.ui.action.Action
 import com.dashlane.util.getBaseActivity
 import com.dashlane.vault.summary.SummaryObject
 

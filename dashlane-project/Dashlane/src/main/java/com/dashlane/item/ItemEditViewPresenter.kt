@@ -13,6 +13,8 @@ import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierReplacedEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
+import com.dashlane.featureflipping.FeatureFlip.ATTACHMENT_ALL_ITEMS
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.item.collection.CollectionSelectorActivity
 import com.dashlane.item.linkedwebsites.old.LinkedServicesActivity
@@ -27,10 +29,11 @@ import com.dashlane.item.subview.action.NewShareAction
 import com.dashlane.item.subview.action.NewShareMenuAction
 import com.dashlane.item.subview.action.ShareDetailsAction
 import com.dashlane.item.subview.action.ShowAttachmentsMenuAction
+import com.dashlane.item.subview.action.showAttachments
 import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
+import com.dashlane.securefile.extensions.hasAttachments
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.DeviceUtils
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.showToaster
@@ -40,8 +43,7 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.hasBeenSaved
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
-import com.dashlane.vault.util.attachmentsAllowed
-import com.dashlane.vault.util.hasAttachments
+import com.dashlane.vault.utils.attachmentsAllowed
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.presenter.BasePresenter
@@ -119,6 +121,7 @@ class ItemEditViewPresenter :
         }
     }
 
+    @Suppress("LongMethod")
     override fun createMenu(
         menu: Menu,
         teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
@@ -134,8 +137,21 @@ class ItemEditViewPresenter :
         
         val vaultItem = provider.vaultItem
         val summaryObject = vaultItem.toSummary<SummaryObject>()
-        if (summaryObject.attachmentsAllowed(userFeaturesChecker, isAccountFrozen = isAccountFrozen)) {
-            allMenus.add(ShowAttachmentsMenuAction(summaryObject))
+        if (summaryObject.attachmentsAllowed(
+                attachmentAllItems = userFeaturesChecker.has(ATTACHMENT_ALL_ITEMS),
+                isAccountFrozen = isAccountFrozen,
+                hasCollections = false 
+                
+                
+            )
+        ) {
+            allMenus.add(
+                ShowAttachmentsMenuAction(
+                    action = { activity ->
+                        summaryObject.showAttachments(activity)
+                    }
+                )
+            )
         }
         
         if (vaultItem.syncObject !is SyncObject.SecureNote) {
@@ -169,7 +185,12 @@ class ItemEditViewPresenter :
                         }
                     }
                 )
-            } else if (sharingPolicyDataProvider.canEditItem(vaultItem.toSummary(), isNewItem(vaultItem), isAccountFrozen)) {
+            } else if (sharingPolicyDataProvider.canEditItem(
+                    vaultItem.toSummary(),
+                    isNewItem(vaultItem),
+                    isAccountFrozen
+                )
+            ) {
                 allMenus.add(
                     MenuAction(
                         R.string.edit,
@@ -346,7 +367,8 @@ class ItemEditViewPresenter :
     }
 
     private fun handlePasswordHistoryResult(resultCode: Int, data: Intent?) {
-        val isError = resultCode == Activity.RESULT_CANCELED && data?.getBooleanExtra(FINISHED_WITH_ERROR_EXTRA, false) == true
+        val isError =
+            resultCode == Activity.RESULT_CANCELED && data?.getBooleanExtra(FINISHED_WITH_ERROR_EXTRA, false) == true
         when {
             isError -> activity?.showToaster(
                 R.string.generic_error_message,

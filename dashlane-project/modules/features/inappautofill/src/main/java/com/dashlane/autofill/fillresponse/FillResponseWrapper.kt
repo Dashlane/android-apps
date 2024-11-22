@@ -1,6 +1,5 @@
 package com.dashlane.autofill.fillresponse
 
-import android.os.Build
 import android.os.Bundle
 import android.service.autofill.FillResponse
 import android.service.autofill.SaveInfo
@@ -13,7 +12,6 @@ internal class FillResponseWrapper(
     val saveInfo: SaveInfo?,
     var clientState: Bundle?,
     val dataSets: List<DatasetWrapper>,
-    val hasViewAllAccount: Boolean,
     val scrollingRemoteViews: RemoteViews?,
     val ignoreIds: List<AutofillId>? = null
 ) {
@@ -40,9 +38,7 @@ internal class FillResponseWrapper(
     }
 
     private fun FillResponse.Builder.setScrollingRemoteView(remoteViews: RemoteViews) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            setFooter(remoteViews)
-        }
+        setFooter(remoteViews)
     }
 
     class Builder(
@@ -102,7 +98,6 @@ internal class FillResponseWrapper(
             logoutDataSet?.build()?.let { datasets.add(it) }
 
             val autofillIdsWithDatasets = itemDatasetWrapper.map { it.autofillIdsValues.keys }.flatten()
-            var hasViewAllAccount = false
 
             
             buildDatasetWrapperLimitedToAutofillIds(changePasswordDataSet?.clone(), autofillIdsWithDatasets)?.let {
@@ -112,7 +107,6 @@ internal class FillResponseWrapper(
             
             buildDatasetWrapperLimitedToAutofillIds(viewAllAccountsDataSet?.clone(), autofillIdsWithDatasets)?.let {
                 datasets.add(it)
-                hasViewAllAccount = true
             }
 
             
@@ -143,7 +137,6 @@ internal class FillResponseWrapper(
                 saveInfo = saveInfo,
                 clientState = clientState,
                 dataSets = datasets,
-                hasViewAllAccount = hasViewAllAccount,
                 scrollingRemoteViews = getScrollingRemoteView(datasets),
                 ignoreIds = ignoreAutofillIds
             )
@@ -161,9 +154,6 @@ internal class FillResponseWrapper(
         }
 
         private fun getScrollingRemoteView(datasets: List<DatasetWrapper>): RemoteViews? {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-                return null
-            }
             if (!datasets.showScrolling()) {
                 return null
             }

@@ -16,6 +16,7 @@ import com.dashlane.storage.userdata.accessor.filter.datatype.ShareableDataTypeF
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
+import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
 
 class SharingContactCreator @Inject constructor(
@@ -36,7 +37,8 @@ class SharingContactCreator @Inject constructor(
         }.mapNotNull {
             val vaultItemId = it.items?.firstOrNull()?.itemId ?: return@mapNotNull null
             val summaryObject =
-                dataProvider.getSummaryObject(vaultItemId) ?: return@mapNotNull null
+                dataProvider.getSummaryObject(vaultItemId)
+                    ?.takeUnless { it is SummaryObject.Secret } ?: return@mapNotNull null
             SharingContact.ItemInvite(
                 itemGroup = it,
                 item = summaryObject,

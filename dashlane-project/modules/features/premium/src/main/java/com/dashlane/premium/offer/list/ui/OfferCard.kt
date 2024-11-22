@@ -96,7 +96,7 @@ fun OfferCard(
 
 @Preview
 @Composable
-fun OfferCardPreview() = DashlanePreview {
+private fun OfferCardPreview() = DashlanePreview {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -130,7 +130,7 @@ fun OfferCardPreview() = DashlanePreview {
             barredPrice = "$79 /year",
             additionalInfo = "Then $79 /year",
             description = "Get unlimited logins synced across <strong>unlimited devices</strong>, plus Dark Web Monitoring and VPN " +
-                    "protection.",
+                "protection.",
             onClick = {}
         )
     }

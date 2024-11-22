@@ -37,8 +37,8 @@ import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.secrettransfer.R
 import com.dashlane.secrettransfer.view.success.SecretTransferSuccess
 import com.dashlane.ui.common.compose.components.ContentStepper
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.dashlane.ui.common.compose.components.LoadingScreen
-import com.dashlane.ui.widgets.compose.GenericErrorContent
 import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.delay
 
@@ -195,13 +195,13 @@ fun SecretTransferIntroPasswordLessContent(
 
 @Preview
 @Composable
-fun SecretTransferIntroPreview() {
+private fun SecretTransferIntroPreview() {
     DashlanePreview { SecretTransferIntroContent(onClickScan = { }) }
 }
 
 @Preview
 @Composable
-fun SecretTransferIntroPasswordlessPreview() {
+private fun SecretTransferIntroPasswordlessPreview() {
     DashlanePreview { SecretTransferIntroPasswordLessContent(onClickScan = { }, onClickRefresh = { }) }
 }
 

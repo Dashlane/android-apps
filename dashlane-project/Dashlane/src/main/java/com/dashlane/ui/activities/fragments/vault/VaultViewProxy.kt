@@ -10,18 +10,18 @@ import com.dashlane.R
 import com.dashlane.design.iconography.IconToken
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Mood
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.ui.activities.fragments.vault.list.VaultListFragment
 import com.dashlane.ui.common.compose.components.banner.VaultBanner
 import com.dashlane.util.SnackbarUtils
-import com.dashlane.home.vaultlist.Filter
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.skocken.presentation.viewproxy.BaseViewProxy
 
 class VaultViewProxy(
-    val fragment: Fragment,
-    view: View
+    view: View,
+    private val fragment: Fragment,
 ) : BaseViewProxy<Vault.Presenter>(view), Vault.View {
 
     private val searchView = findViewByIdEfficient<View>(R.id.search_view)!!
@@ -29,20 +29,30 @@ class VaultViewProxy(
     private val announcementView = findViewByIdEfficient<ViewGroup>(R.id.vault_announcement)!!
     private val fab = findViewByIdEfficient<ExtendedFloatingActionButton>(R.id.data_list_floating_button)!!
 
-    private val textToFilter = mapOf(
-        context.getString(R.string.vault_filter_all_items) to Filter.ALL_VISIBLE_VAULT_ITEM_TYPES,
-        context.getString(R.string.vault_filter_passwords) to Filter.FILTER_PASSWORD,
-        context.getString(R.string.vault_filter_secure_notes) to Filter.FILTER_SECURE_NOTE,
-        context.getString(R.string.vault_filter_payments) to Filter.FILTER_PAYMENT,
-        context.getString(R.string.vault_filter_personal_info) to Filter.FILTER_PERSONAL_INFO,
-        context.getString(R.string.vault_filter_ids) to Filter.FILTER_ID
-    )
-
-    private val filters = textToFilter.map { it.value }
-    private val titles = textToFilter.map { it.key }
+    private var tabs: Map<String, Filter> = emptyMap()
+    private val filters
+        get() = tabs.map { it.value }
 
     init {
         searchView.setOnClickListener { presenter.onSearchViewClicked() }
+    }
+
+    override fun showTabs(canUseSecrets: Boolean) {
+        tabs = buildMap {
+            put(context.getString(R.string.vault_filter_all_items), Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
+            put(context.getString(R.string.vault_filter_passwords), Filter.FILTER_PASSWORD)
+            put(context.getString(R.string.vault_filter_secure_notes), Filter.FILTER_SECURE_NOTE)
+            put(context.getString(R.string.vault_filter_payments), Filter.FILTER_PAYMENT)
+            put(context.getString(R.string.vault_filter_personal_info), Filter.FILTER_PERSONAL_INFO)
+            put(context.getString(R.string.vault_filter_ids), Filter.FILTER_ID)
+
+            if (canUseSecrets) {
+                put(context.getString(R.string.vault_filter_secrets), Filter.FILTER_SECRET)
+            }
+        }
+        val filters = tabs.map { it.value }
+        val titles = tabs.map { it.key }
+
         val viewPager = findViewByIdEfficient<ViewPager2>(R.id.vault_view_pager)!!
         viewPager.adapter = VaultListAdapter(fragment, filters)
         TabLayoutMediator(filterTabLayout, viewPager) { tab, position ->
@@ -74,6 +84,8 @@ class VaultViewProxy(
     override fun getSelectedPosition(): Int = filterTabLayout.selectedTabPosition
 
     override fun setSelectedFilterTab(filter: Filter) {
+        if (filters.isEmpty()) return
+
         val position = filters.indexOf(filter)
         filterTabLayout.selectTab(filterTabLayout.getTabAt(position))
     }
@@ -82,7 +94,13 @@ class VaultViewProxy(
         announcementView.removeAllViews()
     }
 
-    override fun showAnnouncement(iconToken: IconToken, title: String?, description: String, mood: Mood, onClick: () -> Unit) {
+    override fun showAnnouncement(
+        iconToken: IconToken,
+        title: String?,
+        description: String,
+        mood: Mood,
+        onClick: () -> Unit
+    ) {
         clearAnnouncements()
         announcementView.addView(
             ComposeView(context).apply {

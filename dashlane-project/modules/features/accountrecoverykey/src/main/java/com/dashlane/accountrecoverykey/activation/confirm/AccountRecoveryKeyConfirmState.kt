@@ -1,17 +1,22 @@
 package com.dashlane.accountrecoverykey.activation.confirm
 
-sealed class AccountRecoveryKeyConfirmState {
-    abstract val data: AccountRecoveryKeyConfirmData
+import com.dashlane.mvvm.State
 
-    data class Initial(override val data: AccountRecoveryKeyConfirmData) : AccountRecoveryKeyConfirmState()
-    data class Loading(override val data: AccountRecoveryKeyConfirmData) : AccountRecoveryKeyConfirmState()
-    data class KeyConfirmed(override val data: AccountRecoveryKeyConfirmData) : AccountRecoveryKeyConfirmState()
-    data class Back(override val data: AccountRecoveryKeyConfirmData) : AccountRecoveryKeyConfirmState()
-    data class Cancel(override val data: AccountRecoveryKeyConfirmData) : AccountRecoveryKeyConfirmState()
-    data class SyncError(override val data: AccountRecoveryKeyConfirmData) : AccountRecoveryKeyConfirmState()
-    data class KeyError(override val data: AccountRecoveryKeyConfirmData) : AccountRecoveryKeyConfirmState()
+sealed class AccountRecoveryKeyConfirmState : State {
+    data class View(
+        val accountRecoveryKey: String? = null,
+        val isLoading: Boolean = false,
+        val error: AccountRecoveryKeyConfirmError? = null,
+    ) : AccountRecoveryKeyConfirmState(), State.View
+
+    sealed class SideEffect : AccountRecoveryKeyConfirmState(), State.SideEffect {
+        data object KeyConfirmed : SideEffect()
+        data object Back : SideEffect()
+        data object Cancel : SideEffect()
+    }
 }
 
-data class AccountRecoveryKeyConfirmData(
-    val accountRecoveryKey: String? = null
-)
+sealed class AccountRecoveryKeyConfirmError {
+    data object SyncError : AccountRecoveryKeyConfirmError()
+    data object KeyError : AccountRecoveryKeyConfirmError()
+}

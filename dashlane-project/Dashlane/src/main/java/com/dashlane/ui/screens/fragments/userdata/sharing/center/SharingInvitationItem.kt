@@ -80,7 +80,7 @@ class SharingInvitationItem(
                     isVisible = true
                 }
             }
-            viewBinding.sharingPendingInviteIconRound.isVisible = false
+            viewBinding.sharingPendingInviteThumbnail.isVisible = false
             viewBinding.sharingPendingInviteDescription.text = item.displaySubtitle
             accept.setOnClickListener { item.onClickAccept() }
             refuse.setOnClickListener { item.onClickDecline() }

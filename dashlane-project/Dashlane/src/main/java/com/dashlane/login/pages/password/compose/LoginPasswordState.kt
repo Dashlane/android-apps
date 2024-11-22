@@ -3,9 +3,8 @@ package com.dashlane.login.pages.password.compose
 import androidx.compose.ui.text.input.TextFieldValue
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.SsoInfo
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.lock.LockSetting
 import com.dashlane.login.LoginStrategy
-import com.dashlane.login.lock.LockSetting
 import com.dashlane.mvvm.State
 
 sealed class LoginPasswordState : State {
@@ -14,7 +13,6 @@ sealed class LoginPasswordState : State {
         val loginHistory: List<String> = emptyList(),
         
         val password: TextFieldValue = TextFieldValue(""),
-        val unlockReason: UnlockEvent.Reason? = null,
         val isLoading: Boolean = false,
         val lockSetting: LockSetting? = null,
         val error: LoginPasswordError? = null,

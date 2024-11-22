@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="topic_margin_top">8dp</dimen>
-    <dimen name="lock_scene_top_space">40dp</dimen>
-    <dimen name="lock_scene_top_space_dialog">8dp</dimen>
-</resources>

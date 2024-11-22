@@ -6,7 +6,7 @@ import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dashlane.R
-import com.dashlane.async.BroadcastConstants
+import com.dashlane.events.BroadcastConstants
 import com.dashlane.login.controller.LoginTokensModule
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.notification.FcmMessage

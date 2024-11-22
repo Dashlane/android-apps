@@ -5,7 +5,7 @@ import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.premium.R
 import com.dashlane.premium.offer.common.ProductDetailsManager
 import com.dashlane.premium.offer.common.StoreOffersFormatter
-import com.dashlane.premium.offer.common.StoreOffersManager
+import com.dashlane.premium.StoreOffersManager
 import com.dashlane.premium.offer.common.UserBenefitStatusProvider
 import com.dashlane.premium.offer.common.YearlySavingCalculator
 import com.dashlane.premium.offer.common.getOffer

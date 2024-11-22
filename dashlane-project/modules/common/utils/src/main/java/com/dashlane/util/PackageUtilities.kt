@@ -89,22 +89,16 @@ object PackageUtilities {
     fun getSignatures(context: Context?, packageName: String?): AppSignature? =
         getSignatures(context?.packageManager, packageName)
 
-    @Suppress("DEPRECATION")
     @JvmStatic
     @SuppressLint("PackageManagerGetSignatures") 
     fun getSignatures(packageManager: PackageManager?, packageName: String?): AppSignature? {
         if (packageManager == null || packageName == null) return null
         val signatures: Array<out Signature> = try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val packageInfo =
-                    packageManager.getPackageInfoCompat(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
-                if (packageInfo.signingInfo.hasMultipleSigners()) {
-                    packageInfo.signingInfo.apkContentsSigners
-                } else {
-                    packageInfo.signingInfo.signingCertificateHistory
-                }
+            val packageInfo = packageManager.getPackageInfoCompat(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+            if (packageInfo.signingInfo?.hasMultipleSigners() == true) {
+                packageInfo.signingInfo?.apkContentsSigners
             } else {
-                packageManager.getPackageInfoCompat(packageName, PackageManager.GET_SIGNATURES).signatures
+                packageInfo.signingInfo?.signingCertificateHistory
             }
         } catch (e: PackageManager.NameNotFoundException) {
             null
@@ -144,10 +138,10 @@ object PackageUtilities {
 
     private fun isIgnoredKeyword(value: String): Boolean {
         return (value.length <= 2) || 
-                APP_KEYWORD_TO_IGNORE.any { keywordToIgnore ->
-                    value.trim()
-                        .equals(keywordToIgnore, ignoreCase = true) 
-                }
+            APP_KEYWORD_TO_IGNORE.any { keywordToIgnore ->
+                value.trim()
+                    .equals(keywordToIgnore, ignoreCase = true) 
+            }
     }
 
     private fun getSha256(signature: Signature): String? {

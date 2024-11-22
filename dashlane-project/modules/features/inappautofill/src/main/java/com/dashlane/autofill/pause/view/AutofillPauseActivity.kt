@@ -2,20 +2,18 @@ package com.dashlane.autofill.pause.view
 
 import android.content.Context
 import android.content.IntentSender
-import android.os.Build
 import android.os.Bundle
 import android.service.autofill.Dataset
 import android.service.autofill.FillResponse
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
-import android.widget.RemoteViews
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.pause.model.PauseDurations
-import com.dashlane.autofill.ui.AutoFillResponseActivity
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.pause.model.PauseDurations
+import com.dashlane.autofill.ui.AutoFillResponseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -94,14 +92,7 @@ class AutofillPauseActivity :
 
     @Suppress("DEPRECATION")
     private fun buildEmptyDatasetBuilder(): Dataset.Builder {
-        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            
-            
-            
-            Dataset.Builder(RemoteViews(packageName, R.layout.list_invisible_item))
-        } else {
-            Dataset.Builder()
-        }
+        return Dataset.Builder()
     }
 
     companion object {

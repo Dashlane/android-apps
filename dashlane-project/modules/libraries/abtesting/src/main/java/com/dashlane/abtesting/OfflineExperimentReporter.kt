@@ -1,11 +1,10 @@
 package com.dashlane.abtesting
 
-import com.dashlane.network.tools.authorization
 import com.dashlane.preference.PreferenceEntry
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.abtesting.AbTestingOfflineExperimentReportingService
 import com.dashlane.server.api.time.toInstantEpochSecond
-import com.dashlane.session.SessionManager
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import java.time.Instant
 import javax.inject.Inject
@@ -18,40 +17,33 @@ class OfflineExperimentReporter @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
     private val localAbTest: LocalAbTestManager,
-    private val sessionManager: SessionManager,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val service: AbTestingOfflineExperimentReportingService
 ) {
     @Suppress("EXPERIMENTAL_API_USAGE")
-    private val refreshActor = applicationCoroutineScope.actor<Unit>(capacity = Channel.CONFLATED) {
+    private val refreshActor = applicationCoroutineScope.actor(capacity = Channel.CONFLATED) {
         consumeEach {
-            reportIfNeeded()
+            reportIfNeeded(it)
         }
     }
 
-    fun launchReportIfNeeded() {
-        refreshActor.trySend(Unit)
+    fun launchReportIfNeeded(authorization: Authorization.User) {
+        refreshActor.trySend(authorization)
     }
 
-    suspend fun reportIfNeeded() {
-        val abTests = getAbTestInfo(LocalAbTest.values())
-        if (!isReportingNeeded() || abTests.isEmpty()) return
-        val session = sessionManager.session ?: return
+    suspend fun reportIfNeeded(authorization: Authorization.User) {
+        val preferences = preferencesManager[authorization.login]
+        val abTests = getAbTestInfo(LocalAbTest.entries.toTypedArray())
+        if (!preferences.getBoolean(PREFERENCE_LOCAL_EXPERIMENT_REPORT) || abTests.isEmpty()) return
         val request = AbTestingOfflineExperimentReportingService.Request(abTests = abTests.toList())
 
         
         try {
             
-            service.execute(session.authorization, request)
-            setReportingSuccessful()
+            service.execute(authorization, request)
+            preferences.apply(PreferenceEntry.setBoolean(PREFERENCE_LOCAL_EXPERIMENT_REPORT, true))
         } catch (t: Throwable) {
         }
-    }
-
-    private fun isReportingNeeded() = !userPreferencesManager.getBoolean(PREFERENCE_LOCAL_EXPERIMENT_REPORT)
-
-    private fun setReportingSuccessful() {
-        userPreferencesManager.apply(PreferenceEntry.setBoolean(PREFERENCE_LOCAL_EXPERIMENT_REPORT, true))
     }
 
     private fun getAbTestInfo(tests: Array<LocalAbTest>): List<AbTestingOfflineExperimentReportingService.Request.AbTest> {

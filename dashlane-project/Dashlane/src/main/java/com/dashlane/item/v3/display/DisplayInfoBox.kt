@@ -13,9 +13,11 @@ import androidx.compose.ui.unit.dp
 import com.dashlane.R
 import com.dashlane.design.component.InfoboxButton
 import com.dashlane.design.component.InfoboxLarge
+import com.dashlane.design.component.InfoboxMedium
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.item.v3.data.InfoBoxData
+import com.dashlane.item.v3.data.InfoboxStyle
 import com.dashlane.ui.model.TextResource
 import com.dashlane.ui.model.getText
 
@@ -31,20 +33,34 @@ fun LazyListScope.displayInfoBox(
         items = infoBoxes,
         key = { it.hashCode() }
     ) {
-        InfoboxLarge(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            title = it.title.getText(),
-            description = it.description.getText(),
-            mood = it.mood,
-            primaryButton = it.button?.let { button ->
-                InfoboxButton(
-                    text = button.text.getText(),
-                    onClick = { onInfoBoxActionClicked(button.action) },
+        when (it.infoboxStyle) {
+            InfoboxStyle.LARGE -> {
+                InfoboxLarge(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    title = it.title.getText(),
+                    description = it.description?.getText(),
+                    mood = it.mood,
+                    primaryButton = it.button?.let { button ->
+                        InfoboxButton(
+                            text = button.text.getText(),
+                            onClick = { onInfoBoxActionClicked(button.action) },
+                        )
+                    }
                 )
             }
-        )
+            InfoboxStyle.MEDIUM -> {
+                InfoboxMedium(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    title = it.title.getText(),
+                    description = it.description?.getText(),
+                    mood = it.mood
+                )
+            }
+        }
     }
 }
 
@@ -103,5 +119,21 @@ private fun generatePreviewInfoBoxes() = listOf(
         title = TextResource.StringText(R.string.vault_limited_rights_infobox_title),
         description = TextResource.StringText(R.string.vault_limited_rights_infobox_content),
         mood = Mood.Neutral
+    ),
+    InfoBoxData(
+        title = TextResource.StringText(R.string.vault_limited_rights_infobox_title),
+        description = TextResource.StringText(R.string.vault_limited_rights_secure_note_infobox_content),
+        mood = Mood.Neutral,
+        infoboxStyle = InfoboxStyle.MEDIUM
+    ),
+    InfoBoxData(
+        title = TextResource.StringText(R.string.secure_note_attachments_restriction_infobox_title),
+        mood = Mood.Neutral,
+        infoboxStyle = InfoboxStyle.MEDIUM
+    ),
+    InfoBoxData(
+        title = TextResource.StringText(R.string.secure_note_sharing_and_collection_restriction_infobox_title),
+        mood = Mood.Neutral,
+        infoboxStyle = InfoboxStyle.MEDIUM
     )
 )

@@ -3,7 +3,6 @@ package com.dashlane.ui.menu.view.header
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -91,7 +90,7 @@ fun MenuHeaderTeamspaceItem(
                             is TeamspaceIcon.Space -> when (val color = teamspace.icon.spaceColor) {
                                 is SpaceColor.FixColor -> colorResource(color.colorRes)
                                 is SpaceColor.TeamColor -> Color(color.color)
-                            }.copy(alpha = if (isSystemInDarkTheme()) 0.3f else 0.2f)
+                            }.copy(alpha = if (DashlaneTheme.colors.isLight) 0.2f else 0.3f)
                         },
                         shape = CircleShape
                     )

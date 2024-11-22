@@ -21,8 +21,7 @@
     <string name="frozen_account_paywall_benefit_dark_web_monitoring_and_vpn">Advanced features including Dark Web Monitoring and a VPN</string>
 
     
-    <string name="frozen_account_free_plan_detail_warning">You’re over the %1$s-password limit, so
-        your account is read-only. Remove passwords or select a different plan to regain full access to your account.</string>
+    <string name="frozen_account_free_plan_detail_warning">You’re over the %1$s-password limit, so\n        your account is read-only. Remove passwords or select a different plan to regain full access to your account.</string>
     
     <string name="frozen_account_free_plan_cta_manage_login">Manage logins</string>
     

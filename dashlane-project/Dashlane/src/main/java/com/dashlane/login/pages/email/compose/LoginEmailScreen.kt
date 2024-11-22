@@ -31,12 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
 import com.dashlane.authentication.AuthenticationSecondFactor
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.SsoInfo
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.ButtonMediumBar
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Dialog
+import com.dashlane.design.component.IndeterminateLoader
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.TextField
 import com.dashlane.design.component.tooling.TextFieldActions
@@ -45,8 +46,6 @@ import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.login.LoginIntents
 import com.dashlane.login.sso.LoginSsoActivity
-import com.dashlane.ui.common.compose.components.CircularProgressIndicator
-import com.dashlane.ui.widgets.compose.DashlaneLogo
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.isNotSemanticallyNull
 
@@ -56,11 +55,10 @@ fun LoginEmailScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginEmailViewModel,
     goToCreateAccount: (String, Boolean) -> Unit,
-    goToAuthenticator: (AuthenticationSecondFactor.Totp, SsoInfo?) -> Unit,
-    goToOTP: (AuthenticationSecondFactor.Totp, SsoInfo?) -> Unit,
-    goToPassword: (RegisteredUserDevice, SsoInfo?) -> Unit,
-    goToSecretTransfer: (String?, String) -> Unit,
-    goToToken: (AuthenticationSecondFactor.EmailToken, SsoInfo?) -> Unit,
+    goToOTP: (AuthenticationSecondFactor.Totp) -> Unit,
+    goToPassword: () -> Unit,
+    goToSecretTransfer: (String?, Boolean) -> Unit,
+    goToToken: (AuthenticationSecondFactor.EmailToken) -> Unit,
     ssoSuccess: () -> Unit,
     endOfLife: () -> Unit,
 ) {
@@ -77,13 +75,15 @@ fun LoginEmailScreen(
             when (navigationState) {
                 LoginEmailNavigationState.EndOfLife -> endOfLife()
                 LoginEmailNavigationState.SSOSuccess -> ssoSuccess()
-                is LoginEmailNavigationState.GoToAuthenticator -> goToAuthenticator(navigationState.secondFactor, navigationState.ssoInfo)
                 is LoginEmailNavigationState.GoToCreateAccount -> goToCreateAccount(navigationState.email ?: "", navigationState.skipIfPrefilled)
-                is LoginEmailNavigationState.GoToOTP -> goToOTP(navigationState.secondFactor, navigationState.ssoInfo)
-                is LoginEmailNavigationState.GoToPassword -> goToPassword(navigationState.registeredUserDevice, navigationState.ssoInfo)
+                is LoginEmailNavigationState.GoToOTP -> goToOTP(navigationState.secondFactor)
+                is LoginEmailNavigationState.GoToPassword -> goToPassword()
                 is LoginEmailNavigationState.GoToSSO -> goToSSO.launch(Pair(navigationState.email ?: "", navigationState.ssoInfo))
-                is LoginEmailNavigationState.GoToSecretTransfer -> goToSecretTransfer(navigationState.email ?: "", navigationState.destination)
-                is LoginEmailNavigationState.GoToToken -> goToToken(navigationState.secondFactor, navigationState.ssoInfo)
+                is LoginEmailNavigationState.GoToSecretTransfer -> goToSecretTransfer(
+                    navigationState.email ?: "",
+                    navigationState.showQrCode
+                )
+                is LoginEmailNavigationState.GoToToken -> goToToken(navigationState.secondFactor)
             }
         }
     }
@@ -152,10 +152,9 @@ fun LoginEmailContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 18.dp, top = 24.dp, end = 24.dp)
     ) {
-        DashlaneLogo(
-            modifier = Modifier
-                .padding(start = 24.dp),
-            color = DashlaneTheme.colors.oddityBrand
+        DashlaneLogoLockup(
+            modifier = Modifier.padding(start = 24.dp),
+            height = 40.dp,
         )
         Spacer(modifier = Modifier.weight(1f))
         TextField(
@@ -177,9 +176,9 @@ fun LoginEmailContent(
                 onDone = { onClickContinue() }
             ),
             keyboardOptions = KeyboardOptions(
+                autoCorrectEnabled = false,
                 keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Done,
-                autoCorrect = false,
+                imeAction = ImeAction.Done
             )
         )
         Text(
@@ -234,7 +233,7 @@ fun DiagnosticUploadingDialog(onCancel: () -> Unit) {
         title = stringResource(id = R.string.user_support_file_upload_description),
         description = {
             Box(modifier = Modifier.fillMaxWidth()) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                IndeterminateLoader(modifier = Modifier.align(Alignment.Center))
             }
         },
         mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.cancel)),
@@ -296,37 +295,37 @@ fun LoginEmailError.toErrorMessage(): String {
 
 @Preview
 @Composable
-fun DiagnosticConfirmationDialogPreview() {
+private fun DiagnosticConfirmationDialogPreview() {
     DashlanePreview { DiagnosticConfirmationDialog(onConfirm = { }, onCancel = { }) }
 }
 
 @Preview
 @Composable
-fun DiagnosticUploadingDialogPreview() {
+private fun DiagnosticUploadingDialogPreview() {
     DashlanePreview { DiagnosticUploadingDialog(onCancel = { }) }
 }
 
 @Preview
 @Composable
-fun DiagnosticSuccessDialogPreview() {
+private fun DiagnosticSuccessDialogPreview() {
     DashlanePreview { DiagnosticSuccessDialog(crashDeviceId = "crashDeviceId", onCopy = {}, onCancel = { }) }
 }
 
 @Preview
 @Composable
-fun DiagnosticFailedDialogPreview() {
+private fun DiagnosticFailedDialogPreview() {
     DashlanePreview { DiagnosticFailedDialog(onCancel = { }) }
 }
 
 @Preview
 @Composable
-fun ContactAdminSsoErrorDialogPreview() {
+private fun ContactAdminSsoErrorDialogPreview() {
     DashlanePreview { ContactAdminSsoErrorDialog(onCancel = { }) }
 }
 
 @Preview
 @Composable
-fun LoginEmailContentPreview() {
+private fun LoginEmailContentPreview() {
     DashlanePreview {
         LoginEmailContent(
             email = "randomemail@provider.com",

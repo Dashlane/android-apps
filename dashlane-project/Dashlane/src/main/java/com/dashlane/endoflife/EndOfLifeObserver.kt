@@ -9,7 +9,6 @@ import com.dashlane.announcements.modules.EndOfLifeModuleProvider
 import com.dashlane.login.LoginInfo
 import com.dashlane.server.api.endpoints.platforms.AppVersionStatusService
 import com.dashlane.session.Session
-import com.dashlane.ui.endoflife.EndOfLife
 import com.dashlane.ui.util.DialogHelper
 import javax.inject.Inject
 

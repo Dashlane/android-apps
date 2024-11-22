@@ -18,7 +18,7 @@
         android:layout_alignParentTop="true">
 
         <com.dashlane.design.component.compat.view.ThumbnailView
-            android:id="@+id/sharing_pending_invite_icon_round"
+            android:id="@+id/sharing_pending_invite_thumbnail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:importantForAccessibility="no"

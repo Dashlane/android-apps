@@ -25,12 +25,14 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:src="@drawable/day_night_logo"
+        android:layout_width="24sp"
+        android:layout_height="24sp"
+        android:layout_marginTop="2sp"
+        android:src="@drawable/vd_logo_dashlane_micro_logomark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        />
+        android:tint="@color/text_neutral_catchy"
+        tools:ignore="UseAppTint" />
 
     <TextView
         android:id="@+id/code_textview"

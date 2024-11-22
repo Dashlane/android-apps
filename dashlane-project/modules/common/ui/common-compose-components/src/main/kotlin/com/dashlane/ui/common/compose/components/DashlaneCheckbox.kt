@@ -33,7 +33,7 @@ fun DashlaneCheckbox(
 
 @Preview
 @Composable
-fun DashlaneCheckboxPreview() {
+private fun DashlaneCheckboxPreview() {
     DashlanePreview {
         Column {
             DashlaneCheckbox(checked = true, onCheckedChange = {})

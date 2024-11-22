@@ -52,7 +52,7 @@ class SharingInvitationCollection(
         private fun updateViewCollection(item: SharingInvitationCollection) {
             val accept = viewBinding.sharingPendingInviteBtnAccept
             val refuse = viewBinding.sharingPendingInviteBtnRefuse
-            viewBinding.sharingPendingInviteIconRound.apply {
+            viewBinding.sharingPendingInviteThumbnail.apply {
                 thumbnailType = ThumbnailViewType.ICON.value
                 iconRes = R.drawable.ic_collection_outlined
                 isVisible = true

@@ -11,6 +11,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.notification.badge.NotificationBadgeActor
 import com.dashlane.notification.badge.NotificationBadgeListener
@@ -37,6 +38,9 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
 
     @Inject
     lateinit var passwordLimiter: PasswordLimiter
+
+    @Inject
+    lateinit var featuresChecker: UserFeaturesChecker
 
     @Inject
     lateinit var teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator
@@ -70,7 +74,7 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
         val layout = inflater.inflate(R.layout.fragment_vault, container, false)
 
         presenter.also {
-            it.setView(VaultViewProxy(this, layout))
+            it.setView(VaultViewProxy(view = layout, fragment = this))
             it.onCreate(arguments, savedInstanceState)
         }
 
@@ -79,7 +83,8 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
                 rootView = layout,
                 teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
                 navigator = navigator,
-                passwordLimiter = passwordLimiter
+                passwordLimiter = passwordLimiter,
+                featuresChecker = featuresChecker
             )
             setView(fabViewProxy)
 

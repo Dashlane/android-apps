@@ -57,15 +57,6 @@ enum class CreditCardField(
     OWNER(order = 3);
 }
 
-enum class PaypalField(
-    override val order: Int,
-    override val itemType: ItemType = ItemType.PAYPAL,
-    override val fieldType: FieldType = FieldType.SECONDARY
-) : SearchField<SyncObject.PaymentPaypal> {
-    TITLE(order = 0, fieldType = FieldType.PRIMARY),
-    ITEM_TYPE_NAME(order = 1);
-}
-
 
 enum class SecureNoteField(
     override val order: Int,
@@ -75,6 +66,16 @@ enum class SecureNoteField(
     TITLE(order = 0, fieldType = FieldType.PRIMARY),
     ITEM_TYPE_NAME(order = 1),
     CONTENT(order = 2);
+}
+
+
+enum class SecretField(
+    override val order: Int,
+    override val itemType: ItemType = ItemType.SECRET,
+    override val fieldType: FieldType = FieldType.SECONDARY
+) : SearchField<SyncObject.SecureNote> {
+    TITLE(order = 0, fieldType = FieldType.PRIMARY),
+    ITEM_TYPE_NAME(order = 1),
 }
 
 

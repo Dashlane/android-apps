@@ -1,42 +1,30 @@
 package com.dashlane.login.pages.secrettransfer
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
-import com.dashlane.authentication.AuthenticationInvalidSsoException
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
+import com.dashlane.authentication.login.AuthenticationPasswordRepository
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
-import com.dashlane.core.KeyChainHelper
-import com.dashlane.cryptography.CryptographyMarker
-import com.dashlane.cryptography.decodeBase64ToByteArray
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.login.LoginMode
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockPass
-import com.dashlane.login.lock.LockTypeManager
-import com.dashlane.login.pages.secrettransfer.confirmemail.SESSION_ERROR_MESSAGE
-import com.dashlane.login.sso.LoginSsoContract
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockType
+import com.dashlane.login.root.LoginRepository
 import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
 import com.dashlane.notificationcenter.view.ActionItemType
-import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.pin.PinSetupRepository
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.secrettransfer.domain.SecretTransferAnalytics
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.secrettransfer.domain.toUserAccountInfoType
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.secrettransfer.loginPassword
+import com.dashlane.secrettransfer.loginSSO
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionResult
-import com.dashlane.user.Username
-import com.dashlane.crypto.keys.VaultKey
-import com.dashlane.session.repository.LockRepository
-import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
-import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,17 +40,17 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class LoginSecretTransferViewModel @Inject constructor(
-    private val userPreferencesManager: UserPreferencesManager,
+    private val loginRepository: LoginRepository,
+    private val preferencesManager: PreferencesManager,
     private val lockManager: LockManager,
     private val sessionInitializer: SessionInitializer,
     private val authenticationSecretTransferRepository: AuthenticationSecretTransferRepository,
     private val authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
+    private val authenticationPasswordRepository: AuthenticationPasswordRepository,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val sessionManager: SessionManager,
-    private val keyChainHelper: KeyChainHelper,
-    private val lockRepository: LockRepository,
-    private val userSecureStorageManager: UserSecureStorageManager,
     private val secretTransferAnalytics: SecretTransferAnalytics,
+    private val pinSetupRepository: PinSetupRepository,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -90,14 +78,6 @@ class LoginSecretTransferViewModel @Inject constructor(
         }
     }
 
-    fun deviceRegistered(registeredUserDevice: RegisteredUserDevice.Remote) {
-        viewModelScope.launch {
-            stateFlow.emit(
-                LoginSecretTransferState.LoadingLogin(stateFlow.value.data.copy(registeredUserDevice = registeredUserDevice))
-            )
-        }
-    }
-
     fun cancelOnError() {
         viewModelScope.launch { stateFlow.emit(LoginSecretTransferState.Cancelled(data = stateFlow.value.data)) }
     }
@@ -105,12 +85,7 @@ class LoginSecretTransferViewModel @Inject constructor(
     fun pinSetup(pin: String) {
         viewModelScope.launch {
             sessionManager.session?.let { session ->
-                keyChainHelper.initializeKeyStoreIfNeeded(session.userId)
-                lockRepository.getLockManager(session).setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
-
-                userPreferencesManager.putBoolean(ConstantsPrefs.HOME_PAGE_GETTING_STARTED_PIN_IGNORE, true)
-                userSecureStorageManager.storePin(session.localKey, session.username, pin)
-                sessionCredentialsSaver.saveCredentials(session)
+                pinSetupRepository.savePinValue(session, pin)
             }
         }
     }
@@ -121,8 +96,8 @@ class LoginSecretTransferViewModel @Inject constructor(
                 sessionCredentialsSaver.saveCredentials(session)
 
                 
-                NotificationCenterRepositoryImpl.setDismissed(userPreferencesManager, ActionItemType.BIOMETRIC.trackingKey, false)
-                lockManager.setLockType(LockTypeManager.LOCK_TYPE_BIOMETRIC)
+                NotificationCenterRepositoryImpl.setDismissed(preferencesManager[session.username], ActionItemType.BIOMETRIC.trackingKey, false)
+                lockManager.addLock(session.username, LockType.Biometric)
             }
         }
     }
@@ -131,20 +106,38 @@ class LoginSecretTransferViewModel @Inject constructor(
         flow<LoginSecretTransferState> {
             val state = stateFlow.value
             val secretTransferPayload = state.data.secretTransferPayload ?: throw IllegalStateException("SecretTransferPayload must not be empty")
-            val registeredUserDevice = state.data.registeredUserDevice ?: throw IllegalStateException("registeredUserDevice must not be empty")
+            val registeredUserDevice = loginRepository.getRegisteredUserDevice() as? RegisteredUserDevice.Remote
+                ?: throw IllegalStateException("registeredUserDevice must not be empty and should always be Remote for SecretTransfer")
+            val accountType = secretTransferPayload.vaultKey.type.toUserAccountInfoType()
 
-            when (secretTransferPayload.vaultKey.type) {
+            val (sessionResult, username, lockPass) = when (secretTransferPayload.vaultKey.type) {
                 SecretTransferPayload.Type.MASTER_PASSWORD,
-                SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD -> loginPassword(secretTransferPayload, registeredUserDevice)
-
-                SecretTransferPayload.Type.SSO -> loginSSO(secretTransferPayload, registeredUserDevice)
+                SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD -> loginPassword(
+                    sessionInitializer = sessionInitializer,
+                    authenticationPasswordRepository = authenticationPasswordRepository,
+                    secretTransferPayload = secretTransferPayload,
+                    registeredUserDevice = registeredUserDevice,
+                    accountType = accountType,
+                )
+                SecretTransferPayload.Type.SSO -> loginSSO(
+                    secretTransferPayload = secretTransferPayload,
+                    registeredUserDevice = registeredUserDevice,
+                    sessionInitializer = sessionInitializer,
+                    authenticationLocalKeyRepository = authenticationLocalKeyRepository,
+                    authenticationSecretTransferRepository = authenticationSecretTransferRepository
+                )
             }
-
-            val accountType = when (secretTransferPayload.vaultKey.type) {
-                SecretTransferPayload.Type.MASTER_PASSWORD,
-                SecretTransferPayload.Type.SSO -> UserAccountInfo.AccountType.MasterPassword
-
-                SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD -> UserAccountInfo.AccountType.InvisibleMasterPassword
+            when (sessionResult) {
+                is SessionResult.Error -> throw CannotStartSessionException(SESSION_ERROR_MESSAGE, sessionResult.cause)
+                is SessionResult.Success -> {
+                    preferencesManager[username].userSettingsBackupTimeMillis = registeredUserDevice.settingsDate.toEpochMilli()
+                    lockManager.unlock(sessionResult.session, lockPass)
+                    runCatching {
+                        lockManager.sendUnlockEvent(
+                            LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword)
+                        )
+                    }
+                }
             }
 
             
@@ -159,95 +152,9 @@ class LoginSecretTransferViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    @VisibleForTesting
-    suspend fun loginPassword(
-        secretTransferPayload: SecretTransferPayload,
-        registeredUserDevice: RegisteredUserDevice.Remote
-    ) {
-        val username = Username.ofEmail(secretTransferPayload.login)
-        val password = AppKey.Password(secretTransferPayload.vaultKey.value, registeredUserDevice.serverKey)
-        val localKey = authenticationLocalKeyRepository.createForRemote(
-            username = username,
-            appKey = password,
-            cryptographyMarker = CryptographyMarker.Flexible.Defaults.argon2d
-        )
-        val settings = authenticationSecretTransferRepository.decryptSettings(password.toVaultKey(), registeredUserDevice.encryptedSettings)
-        val sessionResult = createSession(
-            result = registeredUserDevice,
-            username = username,
-            localKey = localKey,
-            settings = settings,
-            appKey = password,
-            remoteKey = null,
-            loginMode = LoginMode.DeviceTransfer,
-            accountType = secretTransferPayload.vaultKey.type.toUserAccountInfoType()
-        )
-
-        userPreferencesManager.userSettingsBackupTimeMillis = registeredUserDevice.settingsDate.toEpochMilli()
-
-        if (sessionResult is SessionResult.Error) throw LoginSsoContract.CannotStartSessionException(SESSION_ERROR_MESSAGE, sessionResult.cause)
-
-        lockManager.unlock(LockPass.ofPassword(password))
-    }
-
-    @VisibleForTesting
-    suspend fun loginSSO(secretTransferPayload: SecretTransferPayload, registeredUserDevice: RegisteredUserDevice.Remote) {
-        val username = Username.ofEmail(secretTransferPayload.login)
-        val encryptedRemoteKey = registeredUserDevice.encryptedRemoteKey ?: throw AuthenticationInvalidSsoException()
-
-        val ssoKey = AppKey.SsoKey(secretTransferPayload.vaultKey.value.decodeBase64ToByteArray())
-        val localKey = authenticationLocalKeyRepository.createForRemote(
-            username = username,
-            appKey = ssoKey,
-            cryptographyMarker = CryptographyMarker.Flexible.Defaults.noDerivation64
-        )
-
-        val remoteKey = authenticationSecretTransferRepository.decryptRemoteKey(ssoKey, encryptedRemoteKey)
-        val settings = authenticationSecretTransferRepository.decryptSettings(remoteKey, registeredUserDevice.encryptedSettings)
-        val sessionResult = createSession(
-            result = registeredUserDevice,
-            username = username,
-            localKey = localKey,
-            settings = settings,
-            appKey = ssoKey,
-            remoteKey = remoteKey,
-            loginMode = LoginMode.DeviceTransfer,
-            accountType = UserAccountInfo.AccountType.MasterPassword
-        )
-
-        if (sessionResult is SessionResult.Error) {
-            throw LoginSsoContract.CannotStartSessionException(SESSION_ERROR_MESSAGE, sessionResult.cause)
-        }
-
-        userPreferencesManager.userSettingsBackupTimeMillis = registeredUserDevice.settingsDate.toEpochMilli()
-
-        lockManager.unlock(LockPass.ofPassword(ssoKey))
-    }
-
-    private suspend fun createSession(
-        result: RegisteredUserDevice.Remote,
-        username: Username,
-        localKey: LocalKey,
-        settings: SyncObject.Settings,
-        appKey: AppKey,
-        remoteKey: VaultKey.RemoteKey?,
-        loginMode: LoginMode,
-        accountType: UserAccountInfo.AccountType
-    ): SessionResult {
-        return sessionInitializer.createSession(
-            username = username,
-            accessKey = result.accessKey,
-            secretKey = result.secretKey,
-            localKey = localKey,
-            userSettings = settings,
-            sharingPublicKey = result.sharingKeys?.publicKey,
-            sharingPrivateKey = result.sharingKeys?.encryptedPrivateKey,
-            appKey = appKey,
-            remoteKey = remoteKey,
-            userAnalyticsId = result.userAnalyticsId,
-            deviceAnalyticsId = result.deviceAnalyticsId,
-            loginMode = loginMode,
-            accountType = accountType
-        )
+    companion object {
+        private const val SESSION_ERROR_MESSAGE = "Error on Session creation"
     }
 }
+
+class CannotStartSessionException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)

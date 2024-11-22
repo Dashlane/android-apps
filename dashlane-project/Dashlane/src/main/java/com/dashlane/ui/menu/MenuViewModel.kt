@@ -9,7 +9,7 @@ import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Space
 import com.dashlane.hermes.generated.events.user.SelectSpace
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.navigation.Navigator
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
@@ -99,7 +99,9 @@ class MenuViewModel @Inject constructor(
     }
 
     fun onLockout() {
-        lockManager.lock()
+        viewModelScope.launch {
+            lockManager.lock()
+        }
     }
 
     fun refresh() {

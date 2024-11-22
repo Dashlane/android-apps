@@ -2,7 +2,7 @@ package com.dashlane.login.pages.sso.compose
 
 import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.login.SsoInfo
-import com.dashlane.login.lock.LockSetting
+import com.dashlane.lock.LockSetting
 import com.dashlane.mvvm.State
 
 data class LoginSsoState(

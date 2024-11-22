@@ -23,17 +23,16 @@ import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.presenter.BasePresenter
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class NotificationCenterPresenter @Inject constructor(
     fragment: Fragment,
@@ -42,7 +41,6 @@ class NotificationCenterPresenter @Inject constructor(
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val breachesDataProvider: BreachDataHelper,
-    private val biometricAuthModule: BiometricAuthModule,
     private val sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     private val appEvents: AppEvents,
     private val navigator: Navigator
@@ -111,7 +109,7 @@ class NotificationCenterPresenter @Inject constructor(
     }
 
     override fun startBiometricSetup() {
-        runWhenUnlocked { context?.run { biometricAuthModule.startOnboarding(this) } }
+        runWhenUnlocked { context?.let { navigator.goToBiometricOnboarding(it) } }
     }
 
     override fun startOnboardingInAppLogin() {

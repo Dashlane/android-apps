@@ -62,10 +62,7 @@ class SecureNoteCategoryMenuAction(
         return mutableListOf<SummaryObject.SecureNoteCategory>().apply {
             add(
                 createSecureNoteCategory(
-                    dataIdentifier = CommonDataIdentifierAttrsImpl(
-                        uid = "",
-                        anonymousUID = ""
-                    ),
+                    dataIdentifier = CommonDataIdentifierAttrsImpl(uid = "",),
                     title = context.getString(R.string.unspecified_category)
                 ).toSummary()
             )

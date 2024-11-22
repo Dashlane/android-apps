@@ -8,7 +8,7 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.Scroller
 import androidx.viewpager.widget.ViewPager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.ui.endoflife.EndOfLife
+import com.dashlane.endoflife.EndOfLife
 import com.dashlane.util.clearTop
 import com.dashlane.util.getParcelableExtraCompat
 import com.google.android.material.tabs.TabLayout
@@ -24,9 +24,6 @@ class WelcomeActivity : DashlaneActivity() {
     lateinit var endOfLife: EndOfLife
 
     override var requireUserUnlock = false
-
-    @Inject
-    lateinit var hasOtpsForBackupProvider: HasOtpsForBackupProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,9 +65,7 @@ class WelcomeActivity : DashlaneActivity() {
                 )
             }
 
-            val welcomeAdapter = WelcomePagerAdapter(
-                hasOtpsForBackupProvider
-            )
+            val welcomeAdapter = WelcomePagerAdapter()
             adapter = welcomeAdapter
             addOnPageChangeListener(welcomeAdapter)
             indicator.setupWithViewPager(this)

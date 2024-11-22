@@ -2,7 +2,7 @@ package com.dashlane.createaccount.pages.confirmpassword
 
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.BiometricAuthModule
 import com.skocken.presentation.provider.BaseDataProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -1,7 +1,7 @@
 package com.dashlane.item.subview.readonly
 
 import com.dashlane.R
-import com.dashlane.item.subview.Action
+import com.dashlane.ui.action.Action
 import com.dashlane.item.subview.ItemSubViewImpl
 import com.dashlane.xml.domain.SyncObject
 

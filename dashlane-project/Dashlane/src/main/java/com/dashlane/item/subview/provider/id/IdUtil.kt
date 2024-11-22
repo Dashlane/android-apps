@@ -214,7 +214,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
             }
         ).fold(mutableMapOf()) { acc, identity ->
             val id = identity as VaultItem<SyncObject.Identity>
-            val fullName = id.syncObject.toSummary<SummaryObject.Identity>().fullName
+            val fullName = id.toSummary<SummaryObject.Identity>().fullName
             acc[fullName] = id
             acc
         }

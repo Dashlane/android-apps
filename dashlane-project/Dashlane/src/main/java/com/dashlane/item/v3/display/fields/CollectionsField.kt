@@ -23,17 +23,31 @@ import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.item.v3.data.CollectionData
+import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.CredentialFormData
+import com.dashlane.item.v3.data.FormData
+import com.dashlane.item.v3.data.SecureNoteFormData
 import com.dashlane.item.v3.display.forms.OrganisationActions
+import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.ui.widgets.view.CategoryChip
 import com.dashlane.ui.widgets.view.CategoryChipList
 
 @Composable
 fun ColumnScope.CollectionsField(
-    data: CredentialFormData,
+    data: Data<out FormData>,
     editMode: Boolean,
     organisationActions: OrganisationActions
 ) {
+    if (data.commonData.attachmentCount > 0) {
+        if (data.formData is SecureNoteFormData) {
+            Text(
+                text = stringResource(id = R.string.vault_secure_note_attachment_restrict_collections),
+                style = DashlaneTheme.typography.bodyReducedRegular,
+                color = DashlaneTheme.colors.textNeutralQuiet
+            )
+        } 
+        return
+    }
     if (editMode) {
         CollectionFieldEdit(
             data,
@@ -47,13 +61,14 @@ fun ColumnScope.CollectionsField(
 
 @Composable
 private fun ColumnScope.CollectionFieldEdit(
-    data: CredentialFormData,
+    data: Data<out FormData>,
     onCollectionOpen: () -> Unit,
     onCollectionRemove: (CollectionData) -> Unit
 ) {
-    if (data.collections.isNotEmpty()) {
+    val collections = data.commonData.collections ?: return
+    if (collections.isNotEmpty()) {
         CategoryChipList {
-            data.collections.forEach { collection ->
+            collections.forEach { collection ->
                 CategoryChip(
                     label = collection.name,
                     editMode = true,
@@ -68,7 +83,7 @@ private fun ColumnScope.CollectionFieldEdit(
     LinkButton(
         modifier = Modifier
             .align(Alignment.End),
-        text = if (data.collections.isEmpty()) {
+        text = if (collections.isEmpty()) {
             stringResource(id = R.string.vault_add_collection)
         } else {
             stringResource(id = R.string.vault_manage_collections)
@@ -82,8 +97,9 @@ private fun ColumnScope.CollectionFieldEdit(
 
 @SuppressWarnings("LongMethod")
 @Composable
-private fun CollectionsFieldDisplay(data: CredentialFormData, onCollectionOpen: () -> Unit) {
-    if (data.collections.isEmpty()) {
+private fun CollectionsFieldDisplay(data: Data<out FormData>, onCollectionOpen: () -> Unit) {
+    val collections = data.commonData.collections ?: return
+    if (collections.isEmpty()) {
         DisplayField(
             label = stringResource(id = R.string.vault_collection_title),
             placeholder = stringResource(id = R.string.vault_no_collection),
@@ -112,7 +128,7 @@ private fun CollectionsFieldDisplay(data: CredentialFormData, onCollectionOpen: 
                     overflow = TextOverflow.Ellipsis
                 )
                 CategoryChipList {
-                    data.collections.forEach { collection ->
+                    collections.forEach { collection ->
                         CategoryChip(
                             label = collection.name,
                             editMode = false,
@@ -140,10 +156,32 @@ private fun CollectionFieldPreview() {
     DashlanePreview {
         Column {
             CollectionsField(
-                data = CredentialFormData(
-                    collections = listOf(
-                        CollectionData("", "Collection 1", false),
-                        CollectionData("", "Collection 2", true)
+                data = Data(
+                    formData = CredentialFormData(),
+                    commonData = CommonData(
+                        collections = listOf(
+                            CollectionData("", "Collection 1", false),
+                            CollectionData("", "Collection 2", true)
+                        )
+                    )
+                ),
+                editMode = false,
+                organisationActions = OrganisationActions()
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun RestrictedCollectionFieldPreview() {
+    DashlanePreview {
+        Column {
+            CollectionsField(
+                data = Data(
+                    formData = SecureNoteFormData(),
+                    commonData = CommonData(
+                        attachmentCount = 2
                     )
                 ),
                 editMode = false,

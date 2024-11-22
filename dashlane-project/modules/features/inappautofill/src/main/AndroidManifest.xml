@@ -61,10 +61,12 @@
 
         <activity
             android:name="com.dashlane.autofill.actionssources.view.ActionsSourcesActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:label="@string/autofill_pause_resume_settings_title" />
 
         <activity
             android:name="com.dashlane.autofill.pausedautofillsettings.PausedAutofillActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:label="@string/autofill_revert_actions_title" />
 
         <activity

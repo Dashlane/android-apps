@@ -5,13 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingState
 import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
-import com.dashlane.core.sync.getAgnosticMessageFeedback
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.events.registerAsFlow
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.events.user.UserSettings
+import com.dashlane.session.SessionManager
+import com.dashlane.sync.getAgnosticMessageFeedback
 import com.dashlane.ui.screens.settings.list.RootSettingsList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,6 +33,7 @@ class SettingsViewModel @Inject constructor(
     private val logRepository: LogRepository,
     private val use2faSettingStateHolder: Use2faSettingStateHolder,
     private val accountRecoveryKeySettingStateHolder: AccountRecoveryKeySettingStateHolder,
+    private val sessionManager: SessionManager,
 ) : ViewModel(), SettingsViewModelContract {
     override val targetId = SettingsFragmentArgs.fromSavedStateHandle(savedStateHandle).id
 
@@ -77,7 +79,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun logUserSettingsIfChanged() {
-        val userSettings = userSettingsLogRepository.get()
+        val session = sessionManager.session ?: return
+        val userSettings = userSettingsLogRepository.get(session.username)
 
         if (currentUserSettings == userSettings) return
 

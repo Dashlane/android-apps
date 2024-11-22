@@ -14,10 +14,9 @@ import com.dashlane.cryptography.encryptUtf8ToBase64String
 import com.dashlane.cryptography.jni.JniCryptography
 import com.dashlane.cryptography.toObfuscated
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.network.tools.authorization
-import com.dashlane.secrettransfer.SecretTransferError
-import com.dashlane.secrettransfer.SecretTransferException
 import com.dashlane.secrettransfer.domain.SecretTransferAnalytics
+import com.dashlane.secrettransfer.domain.SecretTransferError
+import com.dashlane.secrettransfer.domain.SecretTransferException
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.secrettransfer.domain.SecretTransferPublicKey
 import com.dashlane.secrettransfer.domain.SecretTransferUri
@@ -31,11 +30,11 @@ import com.dashlane.server.api.endpoints.mpless.MplessCompleteTransferService
 import com.dashlane.server.api.endpoints.mpless.MplessCryptography
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +51,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 const val SALT = "AXbCCLBYulWaVNWT/YfT+SiuhBOlFqLFaPPI5/8XIio="
 

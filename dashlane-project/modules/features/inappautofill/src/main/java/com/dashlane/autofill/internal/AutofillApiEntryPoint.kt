@@ -9,6 +9,7 @@ import com.dashlane.autofill.ui.AutofillPerformedCallback
 import com.dashlane.autofill.util.AutofillNavigationService
 import com.dashlane.autofill.viewallaccounts.AutofillViewAllAccountsLogger
 import com.dashlane.crashreport.CrashReporter
+import com.dashlane.lock.LockHelper
 import com.dashlane.session.SessionManager
 import com.dashlane.util.Toaster
 import dagger.hilt.EntryPoint
@@ -27,7 +28,7 @@ interface AutofillApiEntryPoint {
     val autofillFormSourcesStrings: AutofillFormSourcesStrings
     val toaster: Toaster
     val sessionManager: SessionManager
-    val lockManager: AutofillAnalyzerDef.ILockManager
+    val lockHelper: LockHelper
     val navigationService: AutofillNavigationService
     val emptyWebsiteWarningService: AutofillEmptyWebsiteWarningService
     val rememberSecurityWarningsService: RememberSecurityWarningsService

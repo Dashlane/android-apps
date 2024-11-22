@@ -1,6 +1,6 @@
 package com.dashlane.vpn.thirdparty.activate
 
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.vpn.VpnGetCredentialsService
 import com.dashlane.session.SessionManager
 import com.dashlane.vpn.thirdparty.VpnThirdPartyAuthentifiantHelper

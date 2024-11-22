@@ -19,6 +19,9 @@ import com.dashlane.cryptography.encryptXmlTransactionToBase64String
 import com.dashlane.cryptography.use
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.cryptography.CryptographyKey
+import com.dashlane.cryptography.CryptographyMarker
+import com.dashlane.cryptography.toCryptographyMarkerOrNull
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.toObject
@@ -82,3 +85,18 @@ internal fun DecryptionEngine.decryptSharingPrivateKey(
 internal fun DecryptionEngine.decryptBackupToken(
     backupToken: EncryptedBase64String
 ): String = decryptBase64ToUtf8String(backupToken, compressed = true)
+
+val SyncObject.Settings.cryptographyMarker: CryptographyMarker?
+    get() = cryptoUserPayload?.toCryptographyMarkerOrNull()
+
+fun SyncObject.Settings.getCryptographyMarkerOrDefault(keyType: CryptographyKey.Type) =
+    cryptographyMarker?.takeIf { it.keyType == keyType } ?: getDefaultMarker(keyType)
+
+private fun getDefaultMarker(keyType: CryptographyKey.Type) = when (keyType) {
+    CryptographyKey.Type.PASSWORD ->
+        CryptographyMarker.Flexible.Defaults.argon2d
+    CryptographyKey.Type.RAW_32 ->
+        CryptographyMarker.Flexible.Defaults.noDerivation
+    CryptographyKey.Type.RAW_64 ->
+        CryptographyMarker.Flexible.Defaults.noDerivation64
+}

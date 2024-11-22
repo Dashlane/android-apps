@@ -6,12 +6,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import com.dashlane.R
-import com.dashlane.lock.LockHelper.Companion.PROMPT_LOCK_FOR_SETTINGS
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockPrompt
 import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.util.showToaster
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
-import com.dashlane.util.showToaster
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,15 +51,13 @@ class MasterPasswordResetIntroDialogActivity : DashlaneActivity() {
         findViewById<View>(R.id.positive_cta)?.setOnClickListener {
             applicationCoroutineScope.launch(mainDispatcher) {
                 lockHelper.showAndWaitLockActivityForReason(
-                    this@MasterPasswordResetIntroDialogActivity,
-                    UnlockEvent.Reason.WithCode(UNLOCK_EVENT_CODE),
-                    PROMPT_LOCK_FOR_SETTINGS,
-                    getString(R.string.please_enter_master_password_to_edit_settings)
-                )?.takeIf { unlockEvent ->
-                    val reason = unlockEvent.reason
-                    unlockEvent.isSuccess() &&
-                        reason is UnlockEvent.Reason.WithCode &&
-                        reason.requestCode == UNLOCK_EVENT_CODE
+                    context = this@MasterPasswordResetIntroDialogActivity,
+                    reason = LockEvent.Unlock.Reason.WithCode(UNLOCK_EVENT_CODE),
+                    lockPrompt = LockPrompt.ForSettings,
+                ).takeIf { lockEvent ->
+                    lockEvent is LockEvent.Unlock &&
+                        lockEvent.reason is LockEvent.Unlock.Reason.WithCode &&
+                        (lockEvent.reason as LockEvent.Unlock.Reason.WithCode).requestCode == UNLOCK_EVENT_CODE
                 }?.let {
                     biometricRecovery.setBiometricRecoveryFeatureEnabled(true)
 

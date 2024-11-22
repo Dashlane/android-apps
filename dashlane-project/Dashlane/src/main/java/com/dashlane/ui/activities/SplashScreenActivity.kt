@@ -8,10 +8,11 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.authentication.sso.GetUserSsoInfoActivity.Companion.createUserSsoInfoHandlingIntent
-import com.dashlane.authenticator.AuthenticatorAppConnection
+import com.dashlane.debug.services.DaDaDaTheme
+import com.dashlane.design.theme.color.DebugTheme
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.SplashScreenIntentFactory.Companion.create
@@ -38,7 +39,7 @@ class SplashScreenActivity : FragmentActivity() {
     lateinit var globalPreferencesManager: GlobalPreferencesManager
 
     @Inject
-    lateinit var userPreferencesManager: UserPreferencesManager
+    lateinit var preferencesManager: PreferencesManager
 
     @Inject
     lateinit var sessionManager: SessionManager
@@ -47,7 +48,7 @@ class SplashScreenActivity : FragmentActivity() {
     lateinit var sessionCredentialsSaver: SessionCredentialsSaver
 
     @Inject
-    lateinit var authenticatorAppConnection: AuthenticatorAppConnection
+    lateinit var dadadaTheme: DaDaDaTheme
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +61,8 @@ class SplashScreenActivity : FragmentActivity() {
         if (savedInstanceState == null) {
             launchLogger.logLaunched()
         }
+
+        DebugTheme.enabled = dadadaTheme.hasDebugTheme
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -87,10 +90,9 @@ class SplashScreenActivity : FragmentActivity() {
         val intentFactory = create(
             this,
             globalPreferencesManager,
-            userPreferencesManager,
+            preferencesManager,
             sessionManager,
             sessionCredentialsSaver,
-            authenticatorAppConnection
         )
         val newIntent = intentFactory.createIntent()
         newIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)

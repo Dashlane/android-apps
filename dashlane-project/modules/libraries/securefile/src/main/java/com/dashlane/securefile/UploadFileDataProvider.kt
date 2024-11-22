@@ -5,7 +5,7 @@ import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.CryptographyKeyGenerator
 import com.dashlane.cryptography.EncryptedFile
 import com.dashlane.cryptography.encryptToFile
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.network.webservices.UploadFileService
 import com.dashlane.server.api.endpoints.securefile.CommitSecureFileService
 import com.dashlane.server.api.endpoints.securefile.GetSecureFileUploadLinkService

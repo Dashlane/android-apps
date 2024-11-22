@@ -9,7 +9,7 @@ import com.dashlane.R
 import com.dashlane.darkweb.DarkWebEmailStatus
 import com.dashlane.darkweb.DarkWebEmailStatus.Companion.STATUS_PENDING
 import com.dashlane.darkweb.ui.setup.DarkWebSetupMailActivity
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.navigation.Navigator
 import com.dashlane.security.darkwebmonitoring.item.DarkWebBreachItem
 import com.dashlane.security.darkwebmonitoring.item.DarkWebEmailItem

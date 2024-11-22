@@ -3,8 +3,10 @@ package com.dashlane.login.pages.biometric.compose
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -16,7 +18,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,13 +28,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.user.UserAccountInfo
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.design.theme.color.darkColors
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.login.lock.LockSetting
-import com.dashlane.ui.widgets.compose.DashlaneLogo
+import com.dashlane.lock.LockPrompt
+import com.dashlane.lock.LockSetting
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.getBaseActivity
 
@@ -40,6 +44,7 @@ fun LoginBiometricScreen(
     viewModel: LoginBiometricViewModel,
     userAccountInfo: UserAccountInfo,
     lockSetting: LockSetting,
+    isBiometricRecovery: Boolean = false,
     onSuccess: () -> Unit,
     onCancel: () -> Unit,
     onFallback: (LoginBiometricFallback) -> Unit,
@@ -49,36 +54,43 @@ fun LoginBiometricScreen(
     val context = LocalContext.current
 
     LaunchedEffect(viewModel) {
-        viewModel.viewStarted(userAccountInfo = userAccountInfo, lockSetting = lockSetting)
-        viewModel.navigationState.collect { state ->
+        viewModel.viewStarted(userAccountInfo = userAccountInfo, lockSetting = lockSetting, isBiometricRecovery = isBiometricRecovery)
+        viewModel.stateFlow.sideEffect.collect { state ->
             when (state) {
-                LoginBiometricNavigationState.Cancel -> onCancel()
-                is LoginBiometricNavigationState.Fallback -> onFallback(state.fallback)
-                is LoginBiometricNavigationState.Lockout -> {
+                LoginBiometricState.SideEffect.Cancel -> onCancel()
+                is LoginBiometricState.SideEffect.Fallback -> onFallback(state.fallback)
+                is LoginBiometricState.SideEffect.Lockout -> {
                     state.error.toText(context)?.let { message ->
                         context.getBaseActivity()?.let { activity -> SnackbarUtils.showSnackbar(activity, message) }
                     }
                     onLockout(state.fallback)
                 }
-                is LoginBiometricNavigationState.Logout -> {
+                is LoginBiometricState.SideEffect.Logout -> {
                     state.error.toText(context)?.let { message ->
                         context.getBaseActivity()?.let { activity -> SnackbarUtils.showSnackbar(activity, message) }
                     }
                     onLogout(state.email, state.fallback)
                 }
-                is LoginBiometricNavigationState.UnlockSuccess -> onSuccess()
+                is LoginBiometricState.SideEffect.UnlockSuccess -> onSuccess()
             }
         }
     }
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.stateFlow.viewState.collectAsStateWithLifecycle()
 
     val (title, subtitle) = when {
         uiState.isRecovery -> {
             stringResource(id = R.string.account_recovery_biometric_prompt_title) to
                 stringResource(id = R.string.account_recovery_biometric_prompt_description, userAccountInfo.username)
         }
-        else -> uiState.lockSetting?.topicLock to (uiState.lockSetting?.subTopicLock ?: userAccountInfo.username)
+        uiState.lockSetting?.lockPrompt is LockPrompt.ForItem -> {
+            if ((uiState.lockSetting?.lockPrompt as? LockPrompt.ForItem)?.isSecureNote == true) {
+                stringResource(id = R.string.unlock_message_secure_note_biometrics) to userAccountInfo.username
+            } else {
+                stringResource(id = R.string.unlock_message_item_biometrics) to userAccountInfo.username
+            }
+        }
+        else -> null to userAccountInfo.username
     }
     if (lockSetting.shouldThemeAsDialog) {
         LoginBiometricInAppContent(modifier = modifier, title = title, email = userAccountInfo.username)
@@ -112,7 +124,7 @@ fun LoginBiometricContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+        DashlaneLogoLockup(height = 40.dp)
         Text(
             modifier = Modifier.padding(top = 24.dp),
             text = title ?: stringResource(id = R.string.unlock_biometrics),
@@ -145,19 +157,24 @@ fun LoginBiometricInAppContent(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
         ) {
-            DashlaneLogo(color = darkColors.textNeutralCatchy.value)
+            Image(
+                modifier = Modifier.height(40.dp),
+                painter = painterResource(com.dashlane.ui.R.drawable.vd_logo_dashlane_lockup),
+                colorFilter = ColorFilter.tint(DashlaneTheme.colors.textInverseCatchy.value),
+                contentDescription = stringResource(id = com.dashlane.ui.R.string.dashlane_main_app_name)
+            )
             Text(
                 modifier = Modifier.padding(top = 24.dp),
                 text = title ?: stringResource(id = R.string.unlock_biometrics),
                 style = DashlaneTheme.typography.titleSectionMedium,
-                color = darkColors.textNeutralCatchy,
+                color = DashlaneTheme.colors.textInverseCatchy,
             )
 
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = email,
                 style = DashlaneTheme.typography.bodyStandardRegular,
-                color = darkColors.textNeutralCatchy,
+                color = DashlaneTheme.colors.textInverseCatchy,
             )
         }
     }
@@ -225,7 +242,7 @@ private fun LoginBiometricPrompt(
 @Composable
 private fun LoginBiometricFallback.toText() = when (this) {
     is LoginBiometricFallback.Cancellable -> stringResource(id = R.string.cancel)
-    is LoginBiometricFallback.MPLess -> stringResource(id = R.string.biometric_prompt_pin_fallback)
+    is LoginBiometricFallback.Pin -> stringResource(id = R.string.biometric_prompt_pin_fallback)
     is LoginBiometricFallback.SSO -> stringResource(id = R.string.sso_lock_use_sso)
     else -> stringResource(id = R.string.fragment_lock_pin_button_use_master_password)
 }

@@ -1,6 +1,6 @@
 package com.dashlane.storage.userdata.accessor.filter.sharing
 
-import com.dashlane.util.model.UserPermission
+import com.dashlane.sharing.UserPermission
 
 class SpecificSharingFilter(
     @UserPermission override val sharingPermissions: Array<String>?

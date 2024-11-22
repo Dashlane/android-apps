@@ -1,7 +1,7 @@
 package com.dashlane.attachment.ui
 
 import com.dashlane.R
-import com.dashlane.attachment.VaultItemLogAttachmentHelper
+import com.dashlane.vault.item.VaultItemLogAttachmentHelper
 import com.dashlane.securefile.Attachment
 import com.dashlane.securefile.DownloadFileContract
 import com.dashlane.securefile.FileSecurity
@@ -36,11 +36,11 @@ class DownloadAttachmentsPresenter(
         }
     }
 
-    override fun notifyFileDownloaded(attachment: Attachment, secureFileInfoAnonymousId: String?) {
+    override fun notifyFileDownloaded(attachment: Attachment) {
         viewOrNull?.showFileDownloaded(attachment)
     }
 
-    override fun notifyFileDownloadError(attachment: Attachment, secureFileInfoAnonymousId: String?, t: Throwable) {
+    override fun notifyFileDownloadError(attachment: Attachment, t: Throwable) {
         val context = context ?: return
 
         viewOrNull?.showError(
@@ -49,7 +49,7 @@ class DownloadAttachmentsPresenter(
         )
     }
 
-    override fun notifyFileAccessError(attachment: Attachment, secureFileInfoAnonymousId: String?) {
+    override fun notifyFileAccessError(attachment: Attachment) {
         val context = context ?: return
 
         viewOrNull?.showError(
@@ -60,7 +60,6 @@ class DownloadAttachmentsPresenter(
 
     override fun notifyFileDownloadProgress(
         attachment: Attachment,
-        secureFileInfoAnonymousId: String?,
         progress: Float
     ) {
         viewOrNull?.showProgress(attachment, progress)

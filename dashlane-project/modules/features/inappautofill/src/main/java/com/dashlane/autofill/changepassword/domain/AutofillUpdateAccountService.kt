@@ -10,5 +10,5 @@ interface AutofillUpdateAccountService {
     suspend fun loadAuthentifiants(
         website: String? = null,
         packageName: String? = null
-    ): List<SyncObject.Authentifiant>
+    ): List<VaultItem<SyncObject.Authentifiant>>
 }

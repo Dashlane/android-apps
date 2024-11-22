@@ -26,7 +26,7 @@ internal fun CollectionSharingListTitle(text: String) {
 
 @Composable
 @Preview
-fun CollectionSharingListTitlePreview() {
+private fun CollectionSharingListTitlePreview() {
     DashlanePreview {
         Column {
             CollectionSharingListTitle("Groups")

@@ -2,9 +2,9 @@ package com.dashlane.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.lock.LockHelper
 import com.dashlane.permission.PermissionsManager
@@ -13,6 +13,7 @@ import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.applyScreenshotAllowedFlag
 import com.dashlane.ui.dagger.UiPartEntryPoint
 import com.dashlane.ui.disableAutoFill
+import com.dashlane.ui.fragments.BaseDialogFragment
 import com.dashlane.ui.util.ActionBarUtil
 import com.dashlane.util.CurrentPageViewLogger
 import dagger.hilt.android.EarlyEntryPoints
@@ -71,16 +72,6 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
         lifecycleListener.onActivityUserInteraction(this)
     }
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-
-        if (hasFocus) {
-            window?.applyScreenshotAllowedFlag(screenshotPolicy)
-        } else {
-            window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        }
-    }
-
     @Suppress("DEPRECATION")
     @CallSuper
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -108,6 +99,16 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
             if (!applicationLockedNow) {
                 onApplicationUnlocked()
             }
+        }
+    }
+}
+
+fun FragmentActivity.hideDialogs() {
+    
+    val fragments = supportFragmentManager.fragments
+    for (fragment in fragments) {
+        if (fragment is BaseDialogFragment && fragment.showsDialog) {
+            fragment.dismiss()
         }
     }
 }

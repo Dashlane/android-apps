@@ -98,7 +98,7 @@ fun GenericInfoContent(
 
 @Preview
 @Composable
-fun GenericInfoContentPreview() {
+private fun GenericInfoContentPreview() {
     DashlanePreview {
         GenericInfoContent(
             icon = painterResource(id = R.drawable.ic_check),
@@ -114,7 +114,7 @@ fun GenericInfoContentPreview() {
 
 @Preview
 @Composable
-fun GenericInfoContentNoIconPreview() {
+private fun GenericInfoContentNoIconPreview() {
     DashlanePreview {
         GenericInfoContent(
             icon = null,

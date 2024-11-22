@@ -178,7 +178,6 @@ class DataSaverImpl @Inject constructor(
                 SyncObjectType.PASSKEY,
                 SyncObjectType.PASSPORT,
                 SyncObjectType.PAYMENT_CREDIT_CARD,
-                SyncObjectType.PAYMENT_PAYPAL,
                 SyncObjectType.PERSONAL_WEBSITE,
                 SyncObjectType.PHONE,
                 SyncObjectType.SECURE_NOTE,

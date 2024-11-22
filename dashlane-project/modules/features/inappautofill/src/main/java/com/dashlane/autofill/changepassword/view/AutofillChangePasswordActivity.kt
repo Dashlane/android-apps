@@ -68,10 +68,10 @@ class AutofillChangePasswordActivity :
 
     override fun onFinishWithResult(
         result: VaultItem<SyncObject.Authentifiant>,
-        oldItem: SyncObject.Authentifiant
+        oldItem: VaultItem<SyncObject.Authentifiant>
     ) {
         finishWithResult(
-            itemToFill = result.toItemToFill(oldPassword = oldItem.password),
+            itemToFill = result.toItemToFill(oldPassword = oldItem.syncObject.password),
             matchType = MatchType.REGULAR
         )
     }

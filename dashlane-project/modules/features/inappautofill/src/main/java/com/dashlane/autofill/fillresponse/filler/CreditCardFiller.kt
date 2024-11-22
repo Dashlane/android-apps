@@ -36,7 +36,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         item: CreditCardItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val value = item.syncObject?.cardNumber?.takeUnless { requireLock }?.toString() ?: ""
+        val value = item.vaultItem?.syncObject?.cardNumber?.takeUnless { requireLock }?.toString() ?: ""
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.CREDIT_CARD_NUMBER)
     }
 
@@ -46,7 +46,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         item: CreditCardItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val value = item.syncObject?.securityCode?.takeUnless { requireLock }?.toString() ?: ""
+        val value = item.vaultItem?.syncObject?.securityCode?.takeUnless { requireLock }?.toString() ?: ""
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.CREDIT_CARD_SECURITY_CODE)
     }
 
@@ -56,8 +56,8 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         item: CreditCardItemToFill,
         requireLock: Boolean
     ): Boolean {
-        val month = if (requireLock) Month.JANUARY else item.syncObject?.expireMonth
-        val year = if (requireLock) Year.of(2016) else item.syncObject?.expireYear
+        val month = if (requireLock) Month.JANUARY else item.vaultItem?.syncObject?.expireMonth
+        val year = if (requireLock) Year.of(2016) else item.vaultItem?.syncObject?.expireYear
         if (month == null || year == null || year.value !in 2000..3000) {
             
             return false

@@ -26,6 +26,11 @@ interface AuthenticationPasswordRepository {
         passwordUtf8Bytes: ObfuscatedByteArray
     ): Result
 
+    suspend fun validateRemoteUser(
+        registeredUserDevice: RegisteredUserDevice.Remote,
+        password: AppKey.Password
+    ): Result.Remote
+
     sealed class Result {
         abstract val login: String
         abstract val securityFeatures: Set<SecurityFeature>

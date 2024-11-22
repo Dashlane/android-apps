@@ -10,7 +10,7 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.endoflife.EndOfLifeObserver
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.Toaster
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.launchUrl
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

@@ -3,17 +3,18 @@ package com.dashlane.login.pages.biometric.recovery
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.cryptography.ObfuscatedByteArray
-import com.dashlane.lock.UnlockEvent
-import com.dashlane.login.LoginStrategy
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockPass
-import com.dashlane.masterpassword.MasterPasswordChanger
-import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
+import com.dashlane.changemasterpassword.MasterPasswordChanger
 import com.dashlane.crypto.keys.AppKey
+import com.dashlane.cryptography.ObfuscatedByteArray
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPass
+import com.dashlane.lock.LockType
+import com.dashlane.login.LoginStrategy
+import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
+import com.dashlane.session.SessionManager
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -29,10 +30,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class BiometricRecoveryViewModel @Inject constructor(
     private val lockManager: LockManager,
+    private val sessionManager: SessionManager,
     private val masterPasswordChanger: MasterPasswordChanger,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
@@ -76,7 +79,7 @@ class BiometricRecoveryViewModel @Inject constructor(
     fun confirmReminder() {
         viewModelScope.launch {
             stateFlow.update { state -> state.copy(showReminderDialog = false) }
-            navigationStateFlow.send(BiometricRecoveryNavigationState.Success(LoginStrategy.Strategy.UNLOCK))
+            navigationStateFlow.send(BiometricRecoveryNavigationState.Success(LoginStrategy.Strategy.Unlock))
         }
     }
 
@@ -157,10 +160,16 @@ class BiometricRecoveryViewModel @Inject constructor(
 
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
-    fun unlockMP(masterPassword: ObfuscatedByteArray) {
-        lockManager.unlock(LockPass.ofPassword(AppKey.Password(masterPassword)))
+    suspend fun unlockMP(masterPassword: ObfuscatedByteArray) {
+        sessionManager.session?.let {
+            lockManager.unlock(session = it, pass = LockPass.ofPassword(AppKey.Password(masterPassword)))
+        }
         lockManager.hasEnteredMP = true
         
-        kotlin.runCatching { lockManager.sendUnLock(UnlockEvent.Reason.AppAccess(), true) }
+        runCatching {
+            lockManager.sendUnlockEvent(
+                LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword)
+            )
+        }
     }
 }

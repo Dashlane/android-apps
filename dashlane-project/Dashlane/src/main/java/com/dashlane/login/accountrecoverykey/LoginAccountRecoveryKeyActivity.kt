@@ -6,14 +6,14 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.login.LoginIntents
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.LoginSuccessIntentFactory
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.user.UserAccountInfo
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -27,7 +27,7 @@ class LoginAccountRecoveryKeyActivity : DashlaneActivity() {
     lateinit var successIntentFactory: LoginSuccessIntentFactory
 
     @Inject
-    lateinit var userPreferencesManager: UserPreferencesManager
+    lateinit var preferencesManager: PreferencesManager
 
     private val viewModel: LoginAccountRecoveryKeyViewModel by viewModels()
 
@@ -64,7 +64,7 @@ class LoginAccountRecoveryKeyActivity : DashlaneActivity() {
         }
 
         val onSuccess = { strategy: LoginStrategy.Strategy? ->
-            val intent = createStrategyIntent(strategy)
+            val intent = createStrategyIntent(registeredUserDevice.login, strategy)
             startActivity(intent)
             finishAffinity()
         }
@@ -83,13 +83,13 @@ class LoginAccountRecoveryKeyActivity : DashlaneActivity() {
         }
     }
 
-    private fun createStrategyIntent(strategy: LoginStrategy.Strategy?): Intent {
+    private fun createStrategyIntent(username: String, strategy: LoginStrategy.Strategy?): Intent {
         return when {
             strategy == null -> successIntentFactory.createApplicationHomeIntent()
-            strategy == LoginStrategy.Strategy.DEVICE_LIMIT -> successIntentFactory.createDeviceLimitIntent(loginStrategy.devices)
-            strategy == LoginStrategy.Strategy.MONOBUCKET && userPreferencesManager.ukiRequiresMonobucketConfirmation ->
-                successIntentFactory.createMonobucketIntent(loginStrategy.monobucketHelper.getMonobucketOwner()!!)
-            strategy == LoginStrategy.Strategy.ENFORCE_2FA -> successIntentFactory.createEnforce2faLimitActivityIntent()
+            strategy is LoginStrategy.Strategy.DeviceLimit -> successIntentFactory.createDeviceLimitIntent(loginStrategy.devices)
+            strategy is LoginStrategy.Strategy.Monobucket && preferencesManager[username].ukiRequiresMonobucketConfirmation ->
+                successIntentFactory.createMonobucketIntent(strategy.device)
+            strategy is LoginStrategy.Strategy.Enforce2FA -> successIntentFactory.createEnforce2faLimitActivityIntent()
             else -> LoginIntents.createHomeActivityIntent(this)
         }
     }

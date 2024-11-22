@@ -12,22 +12,22 @@
 
     <ImageView
         android:id="@+id/dashlogo"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="24sp"
+        android:layout_height="24sp"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/day_night_logo"
-        app:layout_constraintBottom_toBottomOf="@+id/title"
+        android:layout_marginTop="2sp"
+        android:src="@drawable/vd_logo_dashlane_micro_logomark"
+        android:tint="@color/text_neutral_catchy"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/title"
-        app:tint="@color/text_neutral_catchy"
-        />
+        tools:ignore="UseAppTint" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:textAppearance="?textAppearanceHeadline6"
+        android:textAppearance="@style/TextStyle.Dashlane.TitleSectionMedium"
         android:textColor="@color/text_neutral_catchy"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/dashlogo"

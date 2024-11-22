@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="account_status_login_details">Login details</string>
+    
+    <string name="account_status_login_details_email">This is the email address used to log in to Dashlane. It cannot be changed.</string>
+    
+    <string name="account_status_login_details_help">Learn more by visiting our Help Center.</string>
+    
+    <string name="account_status_login_details_email_field">Login email</string>
+    
+    <string name="account_status_account_verification">Account verification</string>
+    
+    <string name="account_status_account_verification_details">Verification codes will be sent to this email address to verify your identity.</string>
+    
+    <string name="account_status_account_verification_contact_field">Contact email</string>
+    
+    <string name="account_status_account_verification_edit_description">Edit contact email</string>
+    
+    <string name="account_status_change_contact_email">This email address will be used to verify your identity when you change your Master Password or add a new device.</string>
+    
+    <string name="account_status_change_contact_email_current">Current contact email</string>
+    
+    <string name="account_status_change_contact_email_new">New contact email</string>
+    
+    <string name="account_status_change_contact_email_confirm">Confirm changes</string>
+    
+    <string name="account_status_settings_title">Account summary</string>
+    
+    <string name="account_status_settings_description">Login and contact emails</string>
+</resources>

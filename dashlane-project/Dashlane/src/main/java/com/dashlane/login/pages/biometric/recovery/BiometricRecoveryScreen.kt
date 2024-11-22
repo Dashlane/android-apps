@@ -13,18 +13,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.design.component.ButtonLayout
-import com.dashlane.design.component.Dialog
-import com.dashlane.design.component.Text
+import com.dashlane.changemasterpassword.success.ReminderDialog
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.login.LoginStrategy
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.dashlane.ui.widgets.compose.DashlaneSyncProgress
-import com.dashlane.ui.widgets.compose.GenericErrorContent
 import kotlinx.coroutines.delay
 
 @Composable
 fun BiometricRecoveryScreen(
+    modifier: Modifier = Modifier,
     viewModel: BiometricRecoveryViewModel,
     onSuccess: (LoginStrategy.Strategy) -> Unit,
     onCancel: () -> Unit
@@ -54,6 +53,7 @@ fun BiometricRecoveryScreen(
     when {
         uiState.isError -> {
             GenericErrorContent(
+                modifier = modifier,
                 textPrimary = stringResource(id = R.string.generic_error_retry_button),
                 textSecondary = stringResource(id = R.string.generic_error_cancel_button),
                 onClickPrimary = viewModel::retry,
@@ -62,6 +62,7 @@ fun BiometricRecoveryScreen(
         }
         else -> {
             BiometricRecoveryContent(
+                modifier = modifier,
                 progress = uiState.progress,
                 hasFinishedLoading = navigationState is BiometricRecoveryNavigationState
             )
@@ -69,18 +70,19 @@ fun BiometricRecoveryScreen(
     }
 
     if (uiState.showReminderDialog) {
-        BiometricRecoveryReminderDialog(viewModel::confirmReminder)
+        ReminderDialog(viewModel::confirmReminder)
     }
 }
 
 @Composable
 @VisibleForTesting
 fun BiometricRecoveryContent(
+    modifier: Modifier = Modifier,
     progress: Int?,
     hasFinishedLoading: Boolean
 ) {
     DashlaneSyncProgress(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         color = DashlaneTheme.colors.oddityBrand,
         hasFinishedLoading = hasFinishedLoading,
         verticalArrangement = Arrangement.Center,
@@ -88,22 +90,6 @@ fun BiometricRecoveryContent(
         progress = progress,
         progressText = stringResource(id = R.string.login_account_recovery_key_enter_progress_title),
         successText = stringResource(id = R.string.login_account_recovery_key_enter_success_title)
-    )
-}
-
-@Composable
-private fun BiometricRecoveryReminderDialog(
-    confirm: () -> Unit,
-) {
-    Dialog(
-        title = stringResource(id = R.string.change_master_password_pop_success_title),
-        description = {
-            Text(text = stringResource(id = R.string.change_master_password_popup_success_message))
-        },
-        mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.ok)),
-        mainActionClick = confirm,
-        onDismissRequest = confirm,
-        isDestructive = false,
     )
 }
 
@@ -115,13 +101,5 @@ private fun RecoveryContentPreview() {
             progress = 75,
             hasFinishedLoading = false
         )
-    }
-}
-
-@Preview
-@Composable
-private fun RecoveryReminderDialogPreview() {
-    DashlanePreview {
-        BiometricRecoveryReminderDialog(confirm = { })
     }
 }

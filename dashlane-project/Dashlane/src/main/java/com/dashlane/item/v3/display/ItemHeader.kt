@@ -18,24 +18,31 @@ import com.dashlane.design.component.ThumbnailSize
 import com.dashlane.design.component.ThumbnailType
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.color.DecorativeColor
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.CreditCardFormData
 import com.dashlane.item.v3.data.FormData
-import com.dashlane.item.v3.data.LoadingFormData
+import com.dashlane.item.v3.data.SecretFormData
 import com.dashlane.item.v3.data.SecureNoteFormData
+import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.ui.thumbnail.ThumbnailDomainIcon
+import com.dashlane.vault.model.getColorId
 import com.dashlane.vault.model.getColorResource
 import com.dashlane.xml.domain.SyncObject
 
 @Composable
-internal fun ItemHeader(formData: FormData) {
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+internal fun ItemHeader(data: Data<out FormData>) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Spacer(modifier = Modifier.height(16.dp))
-        when (formData) {
+        when (data.formData) {
             is CredentialFormData -> {
                 ThumbnailDomainIcon(
-                    urlDomain = formData.url,
+                    urlDomain = data.formData.url,
                     size = ThumbnailSize.XLarge,
                 )
             }
@@ -43,17 +50,31 @@ internal fun ItemHeader(formData: FormData) {
                 Thumbnail(
                     type = ThumbnailType.VaultItem.LegacyOtherIcon(
                         token = IconTokens.itemPaymentOutlined,
-                        color = colorResource(id = formData.color.getColorResource()),
+                        color = colorResource(id = data.formData.color.getColorResource()),
                     ),
                     size = ThumbnailSize.XLarge,
                 )
             }
-            is LoadingFormData -> {
-                
+            is SecureNoteFormData -> {
+                Thumbnail(
+                    type = ThumbnailType.VaultItem.LegacyOtherIcon(
+                        token = IconTokens.itemSecureNoteOutlined,
+                        color = colorResource(id = data.formData.secureNoteType.getColorId()),
+                    ),
+                    size = ThumbnailSize.XLarge
+                )
             }
+            is SecretFormData ->
+                Thumbnail(
+                    type = ThumbnailType.VaultItem.OtherIcon(
+                        token = IconTokens.itemSecretOutlined,
+                        color = DecorativeColor.GREY,
+                    ),
+                    size = ThumbnailSize.XLarge
+                )
         }
         Text(
-            text = formData.name,
+            text = data.commonData.name,
             style = DashlaneTheme.typography.titleBlockMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -67,13 +88,14 @@ internal fun ItemHeader(formData: FormData) {
 @Composable
 private fun ItemHeaderSecureNotePreview() {
     DashlanePreview {
-        Column {
-            ItemHeader(
-                SecureNoteFormData(
+        ItemHeader(
+            Data(
+                commonData = CommonData(
                     name = "Secure Note"
-                )
+                ),
+                formData = SecureNoteFormData()
             )
-        }
+        )
     }
 }
 
@@ -81,13 +103,28 @@ private fun ItemHeaderSecureNotePreview() {
 @Composable
 private fun ItemHeaderCreditCardPreview() {
     DashlanePreview {
-        Column {
-            ItemHeader(
-                CreditCardFormData(
-                    name = "google.com",
+        ItemHeader(
+            Data(
+                commonData = CommonData(name = "google.com"),
+                formData = CreditCardFormData(
                     color = SyncObject.PaymentCreditCard.Color.RED
                 )
             )
-        }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ItemHeaderSecretPreview() {
+    DashlanePreview {
+        ItemHeader(
+            Data(
+                commonData = CommonData(
+                    name = "Secret"
+                ),
+                formData = SecretFormData()
+            )
+        )
     }
 }

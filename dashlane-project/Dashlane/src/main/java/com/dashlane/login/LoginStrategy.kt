@@ -1,19 +1,19 @@
 package com.dashlane.login
 
-import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.featureflipping.getDevicesLimitValue
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.authentication.SecurityFeature
-import com.dashlane.login.LoginStrategy.Strategy.DEVICE_LIMIT
-import com.dashlane.login.LoginStrategy.Strategy.ENFORCE_2FA
-import com.dashlane.login.LoginStrategy.Strategy.MONOBUCKET
-import com.dashlane.login.LoginStrategy.Strategy.NO_STRATEGY
-import com.dashlane.login.monobucket.MonobucketHelper
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.getDevicesLimitValue
+import com.dashlane.login.LoginStrategy.Strategy.DeviceLimit
+import com.dashlane.login.LoginStrategy.Strategy.Enforce2FA
+import com.dashlane.login.LoginStrategy.Strategy.Monobucket
+import com.dashlane.login.LoginStrategy.Strategy.NoStrategy
+import com.dashlane.login.monobucket.getMonobucketOwner
 import com.dashlane.login.pages.enforce2fa.HasEnforced2FaLimitUseCaseImpl
-import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.devices.ListDevicesService
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.session.Session
+import com.dashlane.session.authorization
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -29,19 +29,21 @@ class LoginStrategy @Inject constructor(
     private val hasEnforced2faLimitUseCase: HasEnforced2FaLimitUseCaseImpl,
     private val accountStatusRepository: AccountStatusRepository
 ) {
-    lateinit var monobucketHelper: MonobucketHelper
     lateinit var devices: MutableList<Device>
 
-    enum class Strategy {
-        NO_STRATEGY,
+    sealed class Strategy {
 
-        UNLOCK,
+        data object NoStrategy : Strategy()
 
-        MONOBUCKET,
+        data object Unlock : Strategy()
 
-        DEVICE_LIMIT,
+        data object MplessD2D : Strategy()
 
-        ENFORCE_2FA,
+        data class Monobucket(val device: Device) : Strategy()
+
+        data object DeviceLimit : Strategy()
+
+        data object Enforce2FA : Strategy()
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
@@ -52,19 +54,19 @@ class LoginStrategy @Inject constructor(
             val listDevicesResponseDeferred = getListDevicesAsync(session)
             joinAll(premiumStatusDeferred, listDevicesResponseDeferred)
             if (hasEnforced2faLimit(session = session, securityFeatureSet = securityFeatureSet)) {
-                return@withContext ENFORCE_2FA
+                return@withContext Enforce2FA
             }
-            val listDevicesResponse = listDevicesResponseDeferred.getCompleted() ?: return@withContext NO_STRATEGY
+            val listDevicesResponse = listDevicesResponseDeferred.getCompleted() ?: return@withContext NoStrategy
             val listDevicesData = listDevicesResponse.data
             if (userFeaturesChecker.has(Capability.DEVICESLIMIT)) {
                 val limit = userFeaturesChecker.getDevicesLimitValue()
-                if (limit > 1 && getDevicesCount(listDevicesData) > limit) return@withContext DEVICE_LIMIT
+                if (limit > 1 && getDevicesCount(listDevicesData) > limit) return@withContext DeviceLimit
             }
-            monobucketHelper = MonobucketHelper(userFeaturesChecker, listDevicesData)
-            if (monobucketHelper.getMonobucketOwner() != null) {
-                return@withContext MONOBUCKET
+            val monobucketOwner = getMonobucketOwner(userFeaturesChecker, listDevicesData)
+            if (monobucketOwner != null) {
+                return@withContext Monobucket(monobucketOwner)
             }
-            return@withContext NO_STRATEGY
+            return@withContext NoStrategy
         }
 
     private fun CoroutineScope.getListDevicesAsync(session: Session) =

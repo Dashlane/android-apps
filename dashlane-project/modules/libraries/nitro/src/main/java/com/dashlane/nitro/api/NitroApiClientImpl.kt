@@ -5,7 +5,10 @@ import com.dashlane.cryptography.encodeUtf8ToByteArray
 import com.dashlane.nitro.cryptography.NitroSecretStreamClient
 import com.dashlane.nitro.cryptography.SecretStreamStates
 import com.dashlane.nitro.util.encodeHex
+import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.DashlaneApiClient
+import com.dashlane.server.api.DashlaneTime
+import com.dashlane.server.api.NitroApiClient
 import com.dashlane.server.api.Response
 import com.dashlane.server.api.exceptions.DashlaneApiHttp400BusinessException
 import com.dashlane.server.api.exceptions.DashlaneApiJsonException
@@ -20,8 +23,28 @@ internal class NitroApiClientImpl(
     private val nitroSecretStreamClient: NitroSecretStreamClient,
     private val secretStreamStates: SecretStreamStates,
     private val coroutineDispatcher: CoroutineDispatcher
-) : NitroApiClient {
-    private val gson get() = apiClient.gson
+) : NitroApiClient(apiClient.gson) {
+
+    
+    
+    override suspend fun <ResponseDataT> execute(
+        path: String,
+        request: Any,
+        responseDataClass: Class<ResponseDataT>,
+        businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
+        clock: DashlaneTime.SynchronizedClock,
+        appAuthorization: Authorization.App,
+        userAuthorization: Authorization.User
+    ): Response<ResponseDataT> = execute(path, request, responseDataClass, businessExceptions)
+
+    override suspend fun <ResponseDataT> execute(
+        path: String,
+        request: Any,
+        responseDataClass: Class<ResponseDataT>,
+        businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
+        clock: DashlaneTime.SynchronizedClock,
+        appAuthorization: Authorization.App
+    ): Response<ResponseDataT> = execute(path, request, responseDataClass, businessExceptions)
 
     override suspend fun <ResponseDataT> execute(
         path: String,
@@ -29,6 +52,16 @@ internal class NitroApiClientImpl(
         responseDataClass: Class<ResponseDataT>,
         businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>
     ): Response<ResponseDataT> = withContext(coroutineDispatcher) {
+        val encryptedRequest = createRequest(request)
+        val response: Response<String> = apiClient.execute(
+            path = path,
+            request = encryptedRequest,
+            businessExceptions = businessExceptions
+        )
+        decryptResponse(response, responseDataClass)
+    }
+
+    private fun createRequest(request: Any): Request {
         val secretStreamRequestData = try {
             synchronized(secretStreamStates) {
                 nitroSecretStreamClient.encryptSecretStream(
@@ -42,19 +75,19 @@ internal class NitroApiClientImpl(
                 cause = e
             )
         }
+        return Request(secretStreamRequestData)
+    }
 
-        val secretStreamResponse: Response<String> = apiClient.execute(
-            path = path,
-            request = Request(data = secretStreamRequestData),
-            businessExceptions = businessExceptions
-        )
-
+    private fun <ResponseDataT> decryptResponse(
+        response: Response<String>,
+        responseDataClass: Class<ResponseDataT>
+    ): Response<ResponseDataT> {
         val responseData = try {
             gson.fromJson(
                 synchronized(secretStreamStates) {
                     nitroSecretStreamClient.decryptSecretStream(
                         states = secretStreamStates,
-                        encrypted = secretStreamResponse.data.decodeHex().toByteArray()
+                        encrypted = response.data.decodeHex().toByteArray()
                     )
                 }.decodeUtf8ToString(),
                 responseDataClass
@@ -66,8 +99,8 @@ internal class NitroApiClientImpl(
             )
         }
 
-        Response(
-            requestId = secretStreamResponse.requestId,
+        return Response(
+            requestId = response.requestId,
             data = responseData
         )
     }

@@ -2,7 +2,6 @@ package com.dashlane.util.log
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.dashlane.authenticator.AuthenticatorAppConnection
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.events.user.FirstLaunch
 import com.dashlane.hermes.generated.events.user.PasswordManagerLaunch
@@ -12,12 +11,12 @@ import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.Reusable
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @Reusable
 class LaunchLogger @Inject constructor(
@@ -26,7 +25,6 @@ class LaunchLogger @Inject constructor(
     @IoCoroutineDispatcher private val dispatcher: CoroutineDispatcher,
     private val logRepository: LogRepository,
     private val preferencesManager: GlobalPreferencesManager,
-    private val authenticatorAppConnection: AuthenticatorAppConnection,
     private val attributionsLogDataProvider: AttributionsLogDataProvider
 ) {
     fun logLaunched() {
@@ -53,15 +51,8 @@ class LaunchLogger @Inject constructor(
         logRepository.queueEvent(
             PasswordManagerLaunch(
                 isFirstLaunch = true, 
-                hasAuthenticatorInstalled = authenticatorAppConnection.hasAuthenticatorInstalled,
-                authenticatorOtpCodesCount = authenticatorAppConnection.run {
-                    if (hasAuthenticatorInstalled) {
-                        getOtpForBackupCountAsync().await()
-                    } else {
-                        
-                        null
-                    }
-                } ?: 0
+                hasAuthenticatorInstalled = false,
+                authenticatorOtpCodesCount = 0
             )
         )
     }

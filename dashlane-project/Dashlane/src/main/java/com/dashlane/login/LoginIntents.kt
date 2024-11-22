@@ -8,7 +8,7 @@ import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyActivity
 import com.dashlane.login.devicelimit.DeviceLimitActivity
-import com.dashlane.login.lock.LockSetting
+import com.dashlane.lock.LockSetting
 import com.dashlane.login.monobucket.MonobucketActivity
 import com.dashlane.login.pages.enforce2fa.Enforce2faLimitActivity
 import com.dashlane.login.progress.LoginSyncProgressActivity
@@ -17,7 +17,7 @@ import com.dashlane.login.sso.LoginSsoActivity
 import com.dashlane.login.sso.migration.MigrationToSsoMemberActivity
 import com.dashlane.login.sso.migration.MigrationToSsoMemberIntroActivity
 import com.dashlane.masterpassword.ChangeMasterPasswordActivity
-import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.masterpassword.warning.ChangeMPWarningDesktopActivity
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.notification.EXTRA_BREACH_NOTIFICATION_FORCE_REFRESH

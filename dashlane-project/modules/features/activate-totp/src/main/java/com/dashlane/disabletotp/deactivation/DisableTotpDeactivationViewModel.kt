@@ -4,18 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.user.UserSecuritySettings
-import com.dashlane.activatetotp.ActivateTotpAuthenticatorConnection
-import com.dashlane.activatetotp.ActivateTotpServerKeyChanger
+import com.dashlane.changemasterpassword.MasterPasswordChanger
 import com.dashlane.crypto.keys.isServerKeyNotNull
-import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.authentication.AuthTotpDeactivationService
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationTotpService
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.ui.screens.settings.Use2faSettingStateRefresher
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -24,6 +22,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 @HiltViewModel
 internal class DisableTotpDeactivationViewModel @Inject constructor(
@@ -33,8 +32,7 @@ internal class DisableTotpDeactivationViewModel @Inject constructor(
     private val authTotpDeactivationService: AuthTotpDeactivationService,
     private val userAccountStorage: UserAccountStorage,
     private val use2faSettingStateRefresher: Use2faSettingStateRefresher,
-    private val activateTotpServerKeyChanger: ActivateTotpServerKeyChanger,
-    private val activateTotpAuthenticatorConnection: ActivateTotpAuthenticatorConnection,
+    private val masterPasswordChanger: MasterPasswordChanger,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -51,7 +49,7 @@ internal class DisableTotpDeactivationViewModel @Inject constructor(
 
             if (session.appKey.isServerKeyNotNull) {
                 
-                activateTotpServerKeyChanger.updateServerKey(newServerKey = null, authTicket)
+                masterPasswordChanger.updateServerKey(newServerKey = null, authTicket)
             } else {
                 
                 authTotpDeactivationService.execute(
@@ -66,10 +64,6 @@ internal class DisableTotpDeactivationViewModel @Inject constructor(
             }
 
             use2faSettingStateRefresher.refresh()
-
-            
-            
-            runCatching { activateTotpAuthenticatorConnection.deleteDashlaneTokenAsync(session.userId).await() }
 
             emit(DisableTotpDeactivationState.Success)
         }

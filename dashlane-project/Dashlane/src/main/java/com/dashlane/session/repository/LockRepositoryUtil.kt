@@ -1,6 +1,6 @@
 package com.dashlane.session.repository
 
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.session.SessionManager
 
 fun LockRepository.getLockManager(sessionManager: SessionManager): LockManager? {

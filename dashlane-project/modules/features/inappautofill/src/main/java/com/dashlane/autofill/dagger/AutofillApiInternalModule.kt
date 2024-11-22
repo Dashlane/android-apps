@@ -7,6 +7,7 @@ import com.dashlane.autofill.api.util.AutofillValueFactoryAndroidImpl
 import com.dashlane.autofill.fillresponse.InlinePresentationProvider
 import com.dashlane.autofill.fillresponse.InlinePresentationProviderImpl
 import com.dashlane.autofill.util.AutofillNavigationService
+import com.dashlane.vault.util.BankDataProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,10 +26,15 @@ internal object AutofillApiInternalModule {
     @Provides
     fun providesInlinePresentationProvider(
         @ApplicationContext context: Context,
-        navigationService: AutofillNavigationService
+        bankDataProvider: BankDataProvider,
+        navigationService: AutofillNavigationService,
     ): InlinePresentationProvider? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            InlinePresentationProviderImpl(context, navigationService)
+            InlinePresentationProviderImpl(
+                applicationContext = context,
+                bankDataProvider = bankDataProvider,
+                navigationService = navigationService
+            )
         } else {
             null
         }

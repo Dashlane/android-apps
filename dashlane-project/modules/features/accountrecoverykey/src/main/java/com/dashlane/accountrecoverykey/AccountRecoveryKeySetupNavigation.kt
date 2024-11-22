@@ -7,21 +7,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation.confirmDestination
-import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation.generateDestination
-import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation.introDestination
-import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation.successDestination
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Confirm
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Generate
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Intro
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Success
 import com.dashlane.accountrecoverykey.activation.confirm.AccountRecoveryKeyConfirmScreen
 import com.dashlane.accountrecoverykey.activation.generate.AccountRecoveryKeyGenerateScreen
 import com.dashlane.accountrecoverykey.activation.intro.AccountRecoveryKeyActivationIntroScreen
 import com.dashlane.accountrecoverykey.activation.success.AccountRecoveryKeySuccessScreen
-
-object AccountRecoveryKeySetupNavigation {
-    const val introDestination = "ark/intro"
-    const val generateDestination = "ark/generate"
-    const val confirmDestination = "ark/confirm"
-    const val successDestination = "ark/success"
-}
 
 fun NavGraphBuilder.arkSetupGraph(
     navController: NavController,
@@ -30,33 +23,34 @@ fun NavGraphBuilder.arkSetupGraph(
     onCancel: () -> Unit,
     userCanExitFlow: Boolean
 ) {
-    composable(introDestination) {
+    composable<Intro> {
         AccountRecoveryKeyActivationIntroScreen(
             modifier = Modifier.padding(contentPadding),
             viewModel = hiltViewModel(),
+            userCanExitFlow = userCanExitFlow,
             onBackPressed = { navController.navigateUp() },
-            onGenerateKeyClicked = { navController.navigate(generateDestination) },
-            userCanExitFlow = userCanExitFlow
+            onGenerateKeyClicked = { navController.navigate(Generate) }
         )
     }
-    composable(generateDestination) {
+    composable<Generate> {
         AccountRecoveryKeyGenerateScreen(
             modifier = Modifier.padding(contentPadding),
             viewModel = hiltViewModel(),
-            goToConfirm = { navController.navigate(confirmDestination) },
-            cancel = { navController.popBackStack() }
+            userCanExitFlow = userCanExitFlow,
+            goToConfirm = { navController.navigate(Confirm) },
+            cancel = { navController.popBackStack() },
         )
     }
-    composable(confirmDestination) {
+    composable<Confirm> {
         AccountRecoveryKeyConfirmScreen(
             modifier = Modifier.padding(contentPadding),
             viewModel = hiltViewModel(),
             back = { navController.popBackStack() },
-            success = { navController.navigate(successDestination) },
+            success = { navController.navigate(Success) },
             cancel = onCancel
         )
     }
-    composable(successDestination) {
+    composable<Success> {
         AccountRecoveryKeySuccessScreen(
             modifier = Modifier.padding(contentPadding),
             done = onArkGenerated,

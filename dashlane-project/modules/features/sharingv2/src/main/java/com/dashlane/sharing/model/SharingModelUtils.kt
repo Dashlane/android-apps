@@ -326,6 +326,9 @@ val UserGroupMember.isAccepted: Boolean
 val UserGroupMember.isPending: Boolean
     get() = this.status == Status.PENDING
 
+val CollectionDownload.isPending: Boolean
+    get() = this.status == Status.PENDING
+
 fun getMaxPermission(
     userDownload: UserDownload?,
     userGroupMembers: List<UserGroupMember>,

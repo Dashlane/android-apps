@@ -3,8 +3,8 @@ package com.dashlane.session.observer
 import com.dashlane.login.LoginInfo
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
-import com.dashlane.session.repository.UserCryptographyRepository
 import com.dashlane.storage.securestorage.SecureStorageLocalKeyCryptographyMarkerMigration
+import com.dashlane.usercryptography.UserCryptographyRepository
 import javax.inject.Inject
 
 class CryptographyMigrationObserver @Inject constructor(
@@ -20,6 +20,6 @@ class CryptographyMigrationObserver @Inject constructor(
         
         val cryptographyMarker = userCryptographyRepository.getCryptographyMarker(session) ?: return
 
-        localKeyCryptographyMarkerMigration.migrateLocalKeyIfNeeded(session, cryptographyMarker)
+        localKeyCryptographyMarkerMigration.migrateLocalKeyIfNeeded(session.appKey, session.username, cryptographyMarker)
     }
 }

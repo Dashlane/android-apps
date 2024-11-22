@@ -28,7 +28,6 @@ import dagger.hilt.components.SingletonComponent
         InAppLoginModule::class,
         SharingModule::class,
         UserDataAccessorModule::class,
-        CryptographyModule::class,
         HttpModule::class,
         HttpAppModule::class,
         RetrofitModule::class,

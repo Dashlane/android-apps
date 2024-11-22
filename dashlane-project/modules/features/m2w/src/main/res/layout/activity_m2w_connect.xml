@@ -8,6 +8,7 @@
     android:layout_gravity="center_horizontal"
     android:maxWidth="@dimen/size_600dp"
     tools:context=".M2wConnectActivity"
+    android:fitsSystemWindows="true"
     >
 
     <include

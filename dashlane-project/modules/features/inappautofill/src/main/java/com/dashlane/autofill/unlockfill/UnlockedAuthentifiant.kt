@@ -13,7 +13,7 @@ data class UnlockedAuthentifiant(
     val itemToFill: AuthentifiantItemToFill
 ) {
     val packageName: String = formSource.getPackageName()
-    val authentifiantSummary: SummaryObject.Authentifiant = itemToFill.syncObject!!.toSummary()
+    val authentifiantSummary: SummaryObject.Authentifiant = itemToFill.vaultItem!!.toSummary()
     val itemId: String = authentifiantSummary.id
     val itemUrl: String = authentifiantSummary.urlForUsageLog
 

@@ -1,38 +1,12 @@
 package com.dashlane.item.v3.data
 
-import com.dashlane.item.v3.viewmodels.State
+import com.dashlane.item.v3.viewmodels.Data
+import com.dashlane.item.v3.viewmodels.ItemEditState
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.vault.summary.SummaryObject
-import java.time.Instant
 
-abstract class FormData {
-    abstract val id: String
-
-    abstract val name: String
-
-    abstract val isShared: Boolean
-
-    abstract val isEditable: Boolean
-
-    abstract val isCopyActionAllowed: Boolean
-
-    abstract val canDelete: Boolean
-
-    abstract val sharingCount: SharingCount
-
-    abstract val collections: List<CollectionData>
-
-    abstract val created: Instant?
-
-    abstract val updated: Instant?
-
-    abstract val isForcedSpace: Boolean
-
-    abstract val space: TeamSpace?
-
-    abstract val availableSpaces: List<TeamSpace>
-
-    abstract class Builder {
+interface FormData {
+    abstract class Builder<T : FormData> {
         var teamSpace: TeamSpace? = null
 
         var availableSpaces: List<TeamSpace> = emptyList()
@@ -47,8 +21,8 @@ abstract class FormData {
 
         abstract fun build(
             initialSummaryObject: SummaryObject,
-            state: State
-        ): FormData
+            state: ItemEditState<T>
+        ): Data<T>
     }
 
     data class SharingCount(val userCount: Int, val groupCount: Int) {

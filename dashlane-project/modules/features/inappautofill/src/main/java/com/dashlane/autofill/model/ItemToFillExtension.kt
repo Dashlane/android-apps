@@ -1,7 +1,7 @@
 package com.dashlane.autofill.model
 
 import com.dashlane.hermes.generated.definitions.MatchType
-import com.dashlane.util.model.UserPermission
+import com.dashlane.sharing.UserPermission
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.titleForListNormalized
@@ -28,7 +28,7 @@ fun VaultItem<SyncObject.Authentifiant>.toItemToFill(
     matchType: MatchType? = null,
     oldPassword: SyncObfuscatedValue? = null
 ) = toSummary<SummaryObject.Authentifiant>().toItemToFill(matchType, oldPassword).also {
-    it.syncObject = syncObject
+    it.vaultItem = this
     it.isSharedWithLimitedRight = sharingPermission != null && sharingPermission != UserPermission.ADMIN
 }
 
@@ -40,7 +40,7 @@ fun SummaryObject.PaymentCreditCard.toItemToFill(
     matchType = matchType,
     lastUsedDate = locallyViewedDate,
     name = name,
-    cardTypeName = creditCardTypeName,
+    bankName = bank,
     cardNumberObfuscate = cardNumberObfuscate?.let { smallerCardNumber(it) } ?: "",
     zipCode = zipCode,
     color = color
@@ -59,7 +59,7 @@ fun VaultItem<SyncObject.PaymentCreditCard>.toItemToFill(
     matchType: MatchType? = null,
     zipCode: String?
 ) = toSummary<SummaryObject.PaymentCreditCard>().toItemToFill(matchType, zipCode).also {
-    it.syncObject = this.syncObject
+    it.vaultItem = this
 }
 
 fun SummaryObject.Email.toItemToFill(

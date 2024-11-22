@@ -27,14 +27,17 @@ import com.dashlane.crashreport.CrashReporter
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
 import com.dashlane.hermes.generated.definitions.AutofillOrigin
 import com.dashlane.hermes.generated.definitions.MatchType
+import com.dashlane.lock.LockHelper
 import com.dashlane.session.SessionManager
 import com.dashlane.url.UrlDomain
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.CurrentPageViewLogger
 import com.dashlane.util.getParcelableCompat
 import com.dashlane.util.getSerializableExtraCompat
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.EarlyEntryPoints
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -51,9 +54,8 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         AutofillApiEntryPoint(this)
     }
 
-    internal val componentInternal: AutofillApiInternalEntryPoint by lazy(LazyThreadSafetyMode.NONE) {
-        AutofillApiInternalEntryPoint(this)
-    }
+    internal val componentInternal: AutofillApiInternalEntryPoint
+        get() = EarlyEntryPoints.get(applicationContext, AutofillApiInternalEntryPoint::class.java)
 
     @Inject
     lateinit var phishingWarningDataProvider: PhishingWarningDataProvider
@@ -70,8 +72,8 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
     protected val sessionManager: SessionManager
         get() = component.sessionManager
 
-    protected val lockManager: AutofillAnalyzerDef.ILockManager
-        get() = component.lockManager
+    protected val lockHelper: LockHelper
+        get() = component.lockHelper
 
     protected val isLoggedIn: Boolean
         get() = sessionManager.session != null
@@ -123,7 +125,7 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
     }
 
     internal fun performLoginAndUnlock(onUnlocked: () -> Unit) {
-        val isLocked = lockManager.isInAppLoginLocked
+        val isLocked = lockHelper.isInAppLoginLocked()
         when {
             isLoggedIn && !isLocked -> onUnlocked()
             isLoggedIn && isLocked && isFirstRun -> {
@@ -144,11 +146,11 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
     }
 
     private fun startLockActivity() {
-        lockManager.showLockActivityForAutofillApi(this)
+        lockHelper.showLockActivityForAutofillApi(this)
     }
 
     private fun startNotLoggedInActivity() {
-        lockManager.logoutAndCallLoginScreenForInAppLogin(this)
+        lockHelper.logoutAndCallLoginScreenForInAppLogin(this)
         isFirstRun = false
     }
 
@@ -215,8 +217,8 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         finishWithResultIntentResult(dataset?.build()?.toAndroidDataset())
     }
 
-    fun shouldDisplayPhishingWarning(syncObject: SyncObject.Authentifiant?): Boolean =
-        phishingWarningDataProvider.shouldDisplayPhishingWarning(phishingAttemptLevel, summary, syncObject) &&
+    fun shouldDisplayPhishingWarning(vaultItem: VaultItem<SyncObject.Authentifiant>?): Boolean =
+        phishingWarningDataProvider.shouldDisplayPhishingWarning(phishingAttemptLevel, summary, vaultItem) &&
             !phishingAttemptTrustedByUser
 
     @OptIn(DelicateCoroutinesApi::class)

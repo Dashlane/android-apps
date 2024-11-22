@@ -5,6 +5,7 @@
     android:id="@+id/view_login_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".createaccount.CreateAccountActivity">
 
     <androidx.core.widget.NestedScrollView
@@ -28,11 +29,11 @@
             <ImageView
                 android:id="@+id/logo"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_marginStart="@dimen/spacing_big"
                 android:layout_marginTop="@dimen/login_logo_margin_top"
                 android:importantForAccessibility="no"
-                android:src="@drawable/logo_lock_up"
+                android:src="@drawable/vd_logo_dashlane_lockup"
                 app:layout_constraintBottom_toTopOf="@id/view_login_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

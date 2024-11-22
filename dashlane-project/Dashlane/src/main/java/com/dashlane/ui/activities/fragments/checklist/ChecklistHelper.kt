@@ -1,13 +1,19 @@
 package com.dashlane.ui.activities.fragments.checklist
 
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.session.SessionManager
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 
 class ChecklistHelper @Inject constructor(
-    private val userPreferencesManager: UserPreferencesManager
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager
 ) {
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     fun shouldDisplayChecklist(): Boolean {
         

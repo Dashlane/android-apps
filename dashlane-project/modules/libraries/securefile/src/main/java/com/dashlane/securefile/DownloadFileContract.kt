@@ -10,10 +10,10 @@ interface DownloadFileContract {
     interface Presenter : Base.IPresenter {
         fun downloadAttachment(attachment: Attachment)
 
-        fun notifyFileDownloaded(attachment: Attachment, secureFileInfoAnonymousId: String?)
-        fun notifyFileDownloadError(attachment: Attachment, secureFileInfoAnonymousId: String?, t: Throwable)
-        fun notifyFileAccessError(attachment: Attachment, secureFileInfoAnonymousId: String?)
-        fun notifyFileDownloadProgress(attachment: Attachment, secureFileInfoAnonymousId: String?, progress: Float)
+        fun notifyFileDownloaded(attachment: Attachment)
+        fun notifyFileDownloadError(attachment: Attachment, t: Throwable)
+        fun notifyFileAccessError(attachment: Attachment)
+        fun notifyFileDownloadProgress(attachment: Attachment, progress: Float)
         fun onAttachmentOpened(attachment: Attachment)
     }
 

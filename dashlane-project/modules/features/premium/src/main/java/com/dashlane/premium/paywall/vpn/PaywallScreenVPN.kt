@@ -13,8 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Icon
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
@@ -30,6 +32,7 @@ import com.dashlane.ui.activities.intro.LinkItem
 
 @Composable
 fun PaywallScreenVPN(
+    modifier: Modifier = Modifier,
     intro: PaywallIntroState,
     navigateUp: () -> Unit,
     navigateToOffer: () -> Unit,
@@ -37,6 +40,7 @@ fun PaywallScreenVPN(
     onClickLink: (LinkItem) -> Unit
 ) {
     PaywallIntroScreen(
+        modifier = modifier,
         intro = intro,
         navigateUp = navigateUp,
         onNegativeButtonClicked = onCancelClick,
@@ -59,10 +63,7 @@ private fun IllustrationVPN() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.logo_lock_up),
-            contentDescription = null
-        )
+        DashlaneLogoLockup(height = 40.dp)
         Icon(
             modifier = Modifier
                 .padding(8.dp)
@@ -85,10 +86,7 @@ private fun IllustrationVPNLandScape() {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.logo_lock_up),
-            contentDescription = null
-        )
+        DashlaneLogoLockup(height = 40.dp)
         Icon(
             modifier = Modifier
                 .padding(16.dp)
@@ -106,6 +104,7 @@ private fun IllustrationVPNLandScape() {
 
 @Composable
 @Preview
+@Preview(device = Devices.TABLET)
 private fun PreviewPaywallScreenVPN() {
     DashlanePreview {
         PaywallScreenVPN(

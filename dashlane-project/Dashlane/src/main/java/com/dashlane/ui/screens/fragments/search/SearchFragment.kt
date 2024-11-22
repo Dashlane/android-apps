@@ -17,10 +17,12 @@ import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierDeletedEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.item.subview.quickaction.QuickActionProvider
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.search.MatchedSearchResult
+import com.dashlane.search.textfactory.SearchListTextResolver
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
@@ -29,7 +31,6 @@ import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
 import com.dashlane.ui.fab.FabDef
 import com.dashlane.ui.fab.FabPresenter
 import com.dashlane.ui.screens.fragments.search.ui.SearchListViewHelper
-import com.dashlane.search.textfactory.SearchListTextResolver
 import com.dashlane.ui.screens.settings.SearchableSettingInRecyclerView
 import com.dashlane.util.DeviceUtils.hideKeyboard
 import com.dashlane.util.animation.fadeIn
@@ -40,7 +41,6 @@ import com.dashlane.util.tryOrNull
 import com.dashlane.vault.VaultItemLogClickListener
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.util.valueOfFromDataIdentifier
-import com.dashlane.home.vaultlist.Filter
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import dagger.hilt.android.AndroidEntryPoint

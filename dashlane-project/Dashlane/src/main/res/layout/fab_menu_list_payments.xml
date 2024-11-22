@@ -38,13 +38,6 @@
             />
 
         <include
-            android:id="@+id/fab_menu_item_paypal"
-            layout="@layout/include_fab_menu_item"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-
-        <include
             android:id="@+id/fab_menu_item_bank_account"
             layout="@layout/include_fab_menu_item"
             android:layout_width="wrap_content"

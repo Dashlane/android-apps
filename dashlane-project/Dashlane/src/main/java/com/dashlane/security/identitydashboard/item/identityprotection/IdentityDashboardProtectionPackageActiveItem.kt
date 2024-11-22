@@ -1,7 +1,6 @@
 package com.dashlane.security.identitydashboard.item.identityprotection
 
 import android.content.Context
-import android.os.Build
 import android.text.style.BulletSpan
 import android.view.View
 import android.widget.TextView
@@ -81,15 +80,11 @@ class IdentityDashboardProtectionPackageActiveItem(
 
         private fun getBulletSpan(context: Context): BulletSpan {
             val marginBullet = context.resources.dpToPx(BULLET_GAP_BASE_WIDTH).roundToInt()
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                BulletSpan(
-                    marginBullet,
-                    context.getThemeAttrColor(R.attr.colorOnBackground),
-                    context.resources.dpToPx(BULLET_BASE_WIDTH).roundToInt()
-                )
-            } else {
-                BulletSpan(marginBullet)
-            }
+            return BulletSpan(
+                marginBullet,
+                context.getThemeAttrColor(R.attr.colorOnBackground),
+                context.resources.dpToPx(BULLET_BASE_WIDTH).roundToInt()
+            )
         }
 
         companion object {

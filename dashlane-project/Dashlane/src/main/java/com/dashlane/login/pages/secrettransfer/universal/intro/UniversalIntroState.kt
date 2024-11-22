@@ -1,32 +1,26 @@
 package com.dashlane.login.pages.secrettransfer.universal.intro
 
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.mvvm.State
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.ui.widgets.compose.Passphrase
 
-sealed class UniversalIntroState {
-    abstract val data: UniversalIntroData
+sealed class UniversalIntroState : State {
 
-    data class Initial(override val data: UniversalIntroData) : UniversalIntroState()
-    data class GoToHelp(override val data: UniversalIntroData) : UniversalIntroState()
-    data class LoadingPassphrase(override val data: UniversalIntroData) : UniversalIntroState()
-    data class LoadingAccount(override val data: UniversalIntroData) : UniversalIntroState()
-    data class PassphraseVerification(override val data: UniversalIntroData) : UniversalIntroState()
-    data class Cancel(override val data: UniversalIntroData) : UniversalIntroState()
-    data class Success(
-        override val data: UniversalIntroData,
-        val secretTransferPayload: SecretTransferPayload,
-        val registeredUserDevice: RegisteredUserDevice.Remote
-    ) : UniversalIntroState()
+    sealed class View : UniversalIntroState(), State.View {
 
-    data class Error(override val data: UniversalIntroData, val error: UniversalIntroError) : UniversalIntroState()
+        data object Initial : View()
+        data object LoadingPassphrase : View()
+        data object LoadingAccount : View()
+        data class PassphraseVerification(val passphrase: List<Passphrase>) : View()
+        data class Error(val error: UniversalIntroError) : View()
+    }
+
+    sealed class SideEffect : UniversalIntroState(), State.SideEffect {
+        data object GoToHelp : SideEffect()
+        data object Cancel : SideEffect()
+        data class Success(val secretTransferPayload: SecretTransferPayload) : SideEffect()
+    }
 }
-
-data class UniversalIntroData(
-    val email: String? = null,
-    val transferId: String? = null,
-    val passphrase: List<Passphrase>? = null
-)
 
 sealed class UniversalIntroError {
     data object Generic : UniversalIntroError()

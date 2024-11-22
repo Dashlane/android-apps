@@ -12,6 +12,6 @@
             android:theme="@style/Theme.Dashlane.Modal" />
         <activity
             android:name=".AuthenticatorEnterActivationKey"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
     </application>
 </manifest>

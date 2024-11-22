@@ -1,6 +1,6 @@
 package com.dashlane.secrettransfer.view.intro
 
-import com.dashlane.secrettransfer.SecretTransferError
+import com.dashlane.secrettransfer.domain.SecretTransferError
 
 sealed class SecretTransferIntroState {
 

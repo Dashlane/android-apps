@@ -30,6 +30,8 @@ fun GenericField(
     onValueChanged: (String) -> Unit,
     onValueCopy: (() -> Unit)? = null,
     onValueOpen: (() -> Unit)? = null,
+    feedbackText: String? = null,
+    isError: Boolean = false
 ) {
     if (editMode) {
         if (multiLine) {
@@ -41,7 +43,9 @@ fun GenericField(
                 readOnly = isEditable.not(),
                 onValueChange = {
                     onValueChanged(it)
-                }
+                },
+                feedbackText = feedbackText,
+                isError = isError
             )
         } else {
             TextField(
@@ -54,13 +58,16 @@ fun GenericField(
                 keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                 onValueChange = {
                     onValueChanged(it)
-                }
+                },
+                feedbackText = feedbackText,
+                isError = isError
             )
         }
     } else {
         DisplayField(
             label = label,
             value = data,
+            singleLine = !multiLine,
             actions = DisplayFieldActions.newInstance(
                 action1 = if (onValueCopy != null) {
                     FieldAction.Generic(
@@ -95,6 +102,32 @@ fun GenericField(
     }
 }
 
+@Suppress("kotlin:S1192")
+@Preview
+@Composable
+private fun GenericFieldEditPreview() {
+    DashlanePreview {
+        Column {
+            GenericField(label = "Label", data = "View Mode", editMode = false, onValueChanged = {
+                
+            })
+            GenericField(label = "Label", data = "Edit Mode", editMode = true, onValueChanged = {
+                
+            })
+            GenericField(
+                label = "Label",
+                data = "Data\non multiple lines",
+                editMode = true,
+                multiLine = true,
+                onValueChanged = {
+                    
+                }
+            )
+        }
+    }
+}
+
+@Suppress("kotlin:S1192")
 @Preview
 @Composable
 private fun GenericFieldPreview() {
@@ -109,8 +142,58 @@ private fun GenericFieldPreview() {
             GenericField(
                 label = "Label",
                 data = "Data\non multiple lines",
-                editMode = true,
+                editMode = false,
                 multiLine = true,
+                onValueChanged = {
+                    
+                }
+            )
+        }
+    }
+}
+
+@Suppress("kotlin:S1192")
+@Preview
+@Composable
+private fun GenericFieldEditSingleLinePreview() {
+    DashlanePreview {
+        Column {
+            GenericField(label = "Label", data = "View Mode", editMode = false, onValueChanged = {
+                
+            })
+            GenericField(label = "Label", data = "Edit Mode", editMode = true, onValueChanged = {
+                
+            })
+            GenericField(
+                label = "Label",
+                data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+                editMode = true,
+                multiLine = false,
+                onValueChanged = {
+                    
+                }
+            )
+        }
+    }
+}
+
+@Suppress("kotlin:S1192")
+@Preview
+@Composable
+private fun GenericFieldSingleLinePreview() {
+    DashlanePreview {
+        Column {
+            GenericField(label = "Label", data = "View Mode", editMode = false, onValueChanged = {
+                
+            })
+            GenericField(label = "Label", data = "Edit Mode", editMode = true, onValueChanged = {
+                
+            })
+            GenericField(
+                label = "Label",
+                data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+                editMode = false,
+                multiLine = false,
                 onValueChanged = {
                     
                 }

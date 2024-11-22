@@ -49,24 +49,16 @@ class OnboardingInAppLoginDone : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 DashlaneTheme {
-                    OnboardingDoneContent(viewModel.onboardingType)
+                    OnboardingDoneContent()
                 }
             }
         }
     }
 
     @Composable
-    fun OnboardingDoneContent(onboardingType: OnboardingType) {
-        val title = if (onboardingType == OnboardingType.AUTO_FILL_API) {
-            stringResource(id = R.string.onboarding_in_app_login_done_title)
-        } else {
-            stringResource(id = R.string.onboarding_accessibility_done_title)
-        }
-        val description = if (onboardingType == OnboardingType.AUTO_FILL_API) {
-            stringResource(id = R.string.onboarding_in_app_login_done_subtitle)
-        } else {
-            stringResource(id = R.string.onboarding_accessibility_done_subtitle)
-        }
+    fun OnboardingDoneContent() {
+        val title = stringResource(id = R.string.onboarding_in_app_login_done_title)
+        val description = stringResource(id = R.string.onboarding_in_app_login_done_subtitle)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -117,29 +109,17 @@ class OnboardingInAppLoginDone : Fragment() {
 
     @Preview
     @Composable
-    fun OnboardingDoneAutofillPreview() {
+    private fun OnboardingDoneAutofillPreview() {
         DashlanePreview {
-            OnboardingDoneContent(OnboardingType.AUTO_FILL_API)
-        }
-    }
-
-    @Preview
-    @Composable
-    fun OnboardingDoneAccessibilityPreview() {
-        DashlanePreview {
-            OnboardingDoneContent(OnboardingType.ACCESSIBILITY)
+            OnboardingDoneContent()
         }
     }
 
     companion object {
         const val ARGS_ONBOARDING_TYPE = "args_onboarding_type"
 
-        fun newInstance(onboardingType: OnboardingType): OnboardingInAppLoginDone {
-            val fragment = OnboardingInAppLoginDone()
-            fragment.arguments = Bundle().apply {
-                putSerializable(ARGS_ONBOARDING_TYPE, onboardingType)
-            }
-            return fragment
+        fun newInstance(): OnboardingInAppLoginDone {
+            return OnboardingInAppLoginDone()
         }
     }
 }

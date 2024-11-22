@@ -35,8 +35,8 @@ sealed class TeamSpace {
 
     data object Personal : TeamSpace() {
 
-        override val teamId: String?
-            get() = null
+        override val teamId: String
+            get() = ""
 
         override val name: SpaceName
             get() = SpaceName.FixName(R.string.teamspace_personal_title)
@@ -113,7 +113,7 @@ sealed class TeamSpace {
 
             override val domains: List<String> = space.teamInfo.teamDomains ?: listOf()
 
-            val hasPersonalSpace: Boolean = space.teamInfo?.personalSpaceEnabled == true
+            val hasPersonalSpace: Boolean = space.teamInfo.personalSpaceEnabled == true
         }
 
         data class Past(val space: PremiumStatus.B2bStatus.PastTeam) : Business() {

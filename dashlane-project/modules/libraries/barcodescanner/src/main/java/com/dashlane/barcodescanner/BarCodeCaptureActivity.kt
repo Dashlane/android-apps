@@ -21,9 +21,6 @@ import androidx.camera.view.PreviewView
 import androidx.lifecycle.ViewModelProvider
 import com.dashlane.permission.PermissionsManager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.util.computeStatusBarColor
-import com.dashlane.util.getThemeAttrColor
-import com.dashlane.util.statusBarColor
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -56,7 +53,6 @@ class BarCodeCaptureActivity : DashlaneActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_barcode_scan)
-        statusBarColor = computeStatusBarColor(getThemeAttrColor(R.attr.colorPrimary))
         setupCamera()
         (findViewById<View>(R.id.toolbar) as Toolbar).setNavigationOnClickListener { finish() }
         val prompt = intent.getStringExtra(PROMPT)

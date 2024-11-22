@@ -6,7 +6,6 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.CollectionAction
 import com.dashlane.hermes.generated.events.user.UpdateCollection
 import com.dashlane.item.v3.data.CollectionData
-import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.util.fillDefaultValue
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
@@ -64,15 +63,15 @@ class CollectionsRepositoryImpl @Inject constructor(
         return (collections + sharedCollections).sortedBy { it.name }
     }
 
-    override suspend fun saveCollections(item: VaultItem<SyncObject>, data: CredentialFormData) {
+    override suspend fun saveCollections(item: VaultItem<SyncObject>, collections: List<CollectionData>) {
         
         val itemToSave = item.fillDefaultValue(context, sessionManager.session)
         
-        val privateCollections = data.collections.filter { !it.shared }.map { it.name }
+        val privateCollections = collections.filter { !it.shared }.map { it.name }
         savePrivateCollectionsToSave(itemToSave, privateCollections)
 
         
-        val sharedCollections = data.collections.filter { it.shared }
+        val sharedCollections = collections.filter { it.shared }
         saveSharedCollections(itemToSave, sharedCollections)
     }
 
@@ -119,12 +118,14 @@ class CollectionsRepositoryImpl @Inject constructor(
         )
 
         val collectionNamesToAdd = privateCollections.filterNot { name ->
-            alreadyExistingCollections.filter { it.spaceId == item.syncObject.spaceId }
+            alreadyExistingCollections.filter { it.spaceIdOrPersonal == item.syncObject.spaceIdOrPersonal }
                 .map { it.name }.contains(name)
         }.toSet()
 
         val collectionsSummaryToRemove =
-            alreadyExistingCollections.filterNot { privateCollections.contains(it.name) && it.spaceId == item.syncObject.spaceId }
+            alreadyExistingCollections.filterNot {
+                privateCollections.contains(it.name) && it.spaceIdOrPersonal == item.syncObject.spaceIdOrPersonal
+            }
 
         val syncCollectionsToAdd = buildAddCollectionVaultItemList(item, collectionNamesToAdd)
         val syncCollectionsToRemove =
@@ -225,4 +226,10 @@ class CollectionsRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    private val SummaryObject.spaceIdOrPersonal: String
+        get() = spaceId ?: TeamSpace.Personal.teamId
+
+    private val SyncObject.spaceIdOrPersonal: String
+        get() = spaceId ?: TeamSpace.Personal.teamId
 }

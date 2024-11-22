@@ -6,12 +6,14 @@ import com.dashlane.util.ignoreEscapedCharacter
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
 import com.dashlane.vault.textfactory.list.StatusText
+import com.dashlane.vault.util.BankDataProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class SearchListTextResolver @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val dataIdentifierListTextResolver: DataIdentifierListTextResolver
+    private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
+    private val bankDataProvider: BankDataProvider,
 ) : DataIdentifierListTextResolver by dataIdentifierListTextResolver {
     fun getHighlightedLine1(
         item: SummaryObject,
@@ -52,7 +54,7 @@ class SearchListTextResolver @Inject constructor(
             is SummaryObject.Identity -> IdentitySearchListTextFactory(item)
             is SummaryObject.Passkey -> PasskeySearchListTextFactory(item)
             is SummaryObject.Passport -> PassportSearchListTextFactory(item)
-            is SummaryObject.PaymentCreditCard -> PaymentCreditCardSearchListTextFactory(item)
+            is SummaryObject.PaymentCreditCard -> PaymentCreditCardSearchListTextFactory(item, bankDataProvider)
             is SummaryObject.PersonalWebsite -> PersonalWebsiteSearchListTextFactory(item)
             is SummaryObject.SecureNote -> SecureNoteSearchListTextFactory(context, item)
             is SummaryObject.SocialSecurityStatement -> SocialSecurityStatementSearchListTextFactory(context, item)

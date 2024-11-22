@@ -1,7 +1,5 @@
 package com.dashlane.securefile.storage
 
-import android.Manifest
-import androidx.annotation.RequiresPermission
 import com.dashlane.securefile.SecureFile
 import kotlinx.coroutines.channels.SendChannel
 import java.io.File
@@ -15,7 +13,6 @@ interface SecureFileStorage {
 
     suspend fun decipherToFileProvider(secureFile: SecureFile): File
 
-    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, conditional = true)
     suspend fun decipherToPublicFolder(secureFile: SecureFile, mimeType: String, localSize: Long?)
 
     suspend fun deleteDecipheredFilesCache()

@@ -2,15 +2,15 @@ package com.dashlane.createaccount.passwordless.confirmation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.AuthenticationExpiredVersionException
 import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.createaccount.passwordless.UserData
+import com.dashlane.user.UserAccountInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class ConfirmationScreenViewModel @Inject constructor(

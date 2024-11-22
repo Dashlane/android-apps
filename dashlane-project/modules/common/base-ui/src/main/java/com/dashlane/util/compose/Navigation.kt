@@ -1,9 +1,9 @@
 package com.dashlane.util.compose
 
-import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 
-fun NavController.navigateAndPopupToStart(route: String) {
+inline fun <reified T : Any> NavHostController.navigateAndPopupToStart(route: T) {
     navigate(route) {
         popUpTo(graph.findStartDestination().id) {
             inclusive = true

@@ -8,50 +8,6 @@ import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.model.KeyPath
 import com.dashlane.activatetotp.databinding.ActivateTotpErrorBinding
 import com.dashlane.activatetotp.databinding.ActivateTotpLoadingBinding
-import com.dashlane.activatetotp.databinding.EnableTotpStepContainerBinding
-
-internal fun EnableTotpStepContainerBinding.setup(
-    stepNumber: Int,
-    titleResId: Int,
-    descriptionResId: Int? = null,
-    positiveButtonResId: Int,
-    negativeButtonResId: Int? = null,
-    onClickPositiveButton: () -> Unit,
-    onClickNegativeButton: (() -> Unit)? = null
-) {
-    val minContentHeight = root.context.resources.getDimensionPixelSize(R.dimen.size_480dp)
-
-    
-    root.addOnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ ->
-        val height = bottom - top
-        val hasEnoughHeight = height > minContentHeight
-        root.post { space.isVisible = hasEnoughHeight }
-    }
-
-    step.text = root.context.getString(R.string.enable_totp_step_number, stepNumber, 3)
-
-    title.setText(titleResId)
-
-    descriptionResId?.let { resId ->
-        description.run {
-            setText(resId)
-            isVisible = true
-        }
-    }
-
-    buttonPositive.run {
-        setText(positiveButtonResId)
-        setOnClickListener { onClickPositiveButton() }
-    }
-
-    negativeButtonResId?.let { resId ->
-        buttonNegative.run {
-            setText(resId)
-            isVisible = true
-            setOnClickListener { onClickNegativeButton?.invoke() }
-        }
-    }
-}
 
 internal fun ActivateTotpErrorBinding.setup(
     titleResId: Int,

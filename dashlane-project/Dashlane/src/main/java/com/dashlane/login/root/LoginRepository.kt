@@ -7,6 +7,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+
 @ActivityRetainedScoped
 class LoginRepository @Inject constructor() : Mutex by Mutex() {
 
@@ -16,7 +17,7 @@ class LoginRepository @Inject constructor() : Mutex by Mutex() {
 
     suspend fun getRegisteredUserDevice(): RegisteredUserDevice? = withLock { registeredUserDevice }
 
-    suspend fun updateRegisteredUserDevice(registeredUserDevice: RegisteredUserDevice?) =
+    suspend fun updateRegisteredUserDevice(registeredUserDevice: RegisteredUserDevice) =
         withLock { this.registeredUserDevice = registeredUserDevice }
 
     suspend fun getAuthTicket(): String? = withLock { authTicket }

@@ -16,7 +16,6 @@ interface IdentityDashboardContract {
         fun onViewVisible()
         fun onViewHidden()
         fun requireRefresh(forceRefresh: Boolean)
-        fun onClick(item: IdentityDashboardItem)
     }
 
     interface DataProvider : Base.IDataProvider {

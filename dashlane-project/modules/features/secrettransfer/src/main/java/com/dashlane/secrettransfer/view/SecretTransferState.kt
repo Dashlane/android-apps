@@ -17,8 +17,8 @@ sealed class SecretTransferState {
 data class SecretTransfer(
     val id: String,
     val deviceName: String,
-    val city: String,
-    val countryCode: String,
+    val city: String?,
+    val countryCode: String?,
     val hashedPublicKey: String,
     val formattedDate: String,
 )

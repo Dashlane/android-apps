@@ -11,7 +11,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
-import com.squareup.moshi.Moshi
 import java.text.Normalizer
 import java.time.Instant
 
@@ -85,8 +84,8 @@ fun SyncObject.Authentifiant.Companion.getDefaultName(value: String?): String {
     }
 }
 
-val SyncObject.Authentifiant.loginForUi
-    get() = getLoginForUi(email = email, login = login)
+val VaultItem<SyncObject.Authentifiant>.loginForUi
+    get() = toSummary<SummaryObject.Authentifiant>().loginForUi
 
 val SummaryObject.Authentifiant.loginForUi
     get() = getLoginForUi(email = email, login = login)
@@ -94,16 +93,13 @@ val SummaryObject.Authentifiant.loginForUi
 private fun getLoginForUi(email: String?, login: String?): String? =
         login.takeIf { it.isNotSemanticallyNull() } ?: email.takeIf { it.isNotSemanticallyNull() }
 
-fun SyncObject.Authentifiant.isLoginEmail() =
-    login.isSemanticallyNull() && email.isNotSemanticallyNull()
-
 val SummaryObject.Authentifiant.urlDomain: String?
     get() = urlForGoToWebsite?.toUrlOrNull()?.root
 
-val SyncObject.Authentifiant.urlDomain: String?
+val VaultItem<SyncObject.Authentifiant>.urlDomain: String?
     get() = urlForGoToWebsite?.toUrlOrNull()?.root
 
-val SyncObject.Authentifiant.urlForUsageLog: String
+val VaultItem<SyncObject.Authentifiant>.urlForUsageLog: String
     get() = toSummary<SummaryObject.Authentifiant>().urlForUsageLog
 
 val SummaryObject.Authentifiant.urlForUsageLog: String
@@ -117,7 +113,7 @@ val SummaryObject.Authentifiant.urlForUsageLog: String
         }
     }
 
-val SyncObject.Authentifiant.urlForGoToWebsite: String?
+val VaultItem<SyncObject.Authentifiant>.urlForGoToWebsite: String?
     get() = toSummary<SummaryObject.Authentifiant>().urlForGoToWebsite
 
 val SummaryObject.Authentifiant.urlForGoToWebsite: String?
@@ -142,13 +138,13 @@ fun SummaryObject.Authentifiant.urlForUI(): String? = if (useFixedUrl == true &&
     url
 }
 
-fun SyncObject.Authentifiant.urlForUI(): String? =
+fun VaultItem<SyncObject.Authentifiant>.urlForUI(): String? =
     toSummary<SummaryObject.Authentifiant>().urlForUI()
 
-val SyncObject.Authentifiant.urls: Array<String?>
-    get() = arrayOf(url, userSelectedUrl)
+val VaultItem<SyncObject.Authentifiant>.urls: Array<String?>
+    get() = arrayOf(syncObject.url, syncObject.userSelectedUrl)
 
-val SyncObject.Authentifiant.navigationUrl: String?
+val VaultItem<SyncObject.Authentifiant>.navigationUrl: String?
     get() = toSummary<SummaryObject.Authentifiant>().urlForGoToWebsite
 
 val SummaryObject.Authentifiant.navigationUrl: String?
@@ -157,7 +153,7 @@ val SummaryObject.Authentifiant.navigationUrl: String?
 val SummaryObject.Authentifiant.titleForListNormalized: String?
     get() = titleForList?.let { Normalizer.normalize(it, Normalizer.Form.NFD) }
 
-val SyncObject.Authentifiant.titleForListNormalized: String?
+val VaultItem<SyncObject.Authentifiant>.titleForListNormalized: String?
     get() = toSummary<SummaryObject.Authentifiant>().titleForListNormalized
 
 val SummaryObject.Authentifiant.titleForList: String?
@@ -168,14 +164,6 @@ fun VaultItem<SyncObject.Authentifiant>.copySyncObject(builder: SyncObject.Authe
     VaultItem<SyncObject.Authentifiant> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }
-
-fun SyncObject.Authentifiant.LinkedServices.toJson(): String? =
-    Moshi.Builder().build().adapter(SyncObject.Authentifiant.LinkedServices::class.java)
-        .toJson(this)
-
-fun SyncObject.Authentifiant.AppMetaData.toJson(): String? =
-    Moshi.Builder().build().adapter(SyncObject.Authentifiant.AppMetaData::class.java)
-        .toJson(this)
 
 fun SummaryObject.LinkedServices?.getAllLinkedPackageName(): Set<String> {
     return this?.associatedAndroidApps?.mapNotNull { it.packageName }?.toSet() ?: setOf()

@@ -110,8 +110,8 @@ class CreateFollowUpNotificationImpl @Inject constructor(
         is SummaryObject.Company -> this.name
         is SummaryObject.Email -> this.emailName
         is SummaryObject.PaymentCreditCard -> this.name
-        is SummaryObject.PaymentPaypal -> this.name
         is SummaryObject.Collection -> name
+        is SummaryObject.PaymentPaypal,
         is SummaryObject.AuthCategory,
         is SummaryObject.SecureNoteCategory,
         is SummaryObject.SecureNote,
@@ -128,6 +128,8 @@ class CreateFollowUpNotificationImpl @Inject constructor(
         is SummaryObject.GeneratedPassword,
         is SummaryObject.DataChangeHistory,
         is SummaryObject.Passkey -> null
+        
+        is SummaryObject.Secret -> null
     }.takeIf { it.isNotSemanticallyNull() }
 
     private fun List<CopyField>.filterFieldsWithLimitedPermissions(summaryObject: SummaryObject): List<CopyField> =

@@ -6,7 +6,8 @@ import com.dashlane.core.sharing.handleCollectionSharingResult
 import com.dashlane.core.sharing.toItemForEmailing
 import com.dashlane.core.sharing.toSharedVaultItemLite
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
+import com.dashlane.securefile.extensions.hasAttachments
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.AddItemGroupsToCollectionService
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
@@ -24,7 +25,6 @@ import com.dashlane.sharing.util.AuditLogHelper
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataUpdateProvider
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.hasAttachments
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
@@ -183,7 +183,7 @@ class CollectionSharingItemDataProvider @Inject constructor(
             
             
         }.onFailure {
-                "ItemGroup can't be created for ${item.anonymousId}",
+                "ItemGroup can't be created for ${item.id}",
                 throwable = it
             )
         }.getOrNull()?.data?.itemGroups?.first()
@@ -217,7 +217,7 @@ class CollectionSharingItemDataProvider @Inject constructor(
             )
             createMultipleItemGroupsService.execute(authorization, request)
         }.onFailure {
-                "ItemGroups can't be created for ${items.map { it.anonymousId }}",
+                "ItemGroups can't be created for ${items.map { it.id }}",
                 throwable = it
             )
         }.getOrNull()?.data?.itemGroups ?: emptyList()

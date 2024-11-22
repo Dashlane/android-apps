@@ -1,15 +1,9 @@
 package com.dashlane.vault.model
 
-import com.dashlane.util.toItemUuidOrNull
-import com.dashlane.util.tryOrNull
 import com.dashlane.xml.domain.SyncObject
-import java.util.UUID
 
 val VaultItem<*>.hasBeenSaved: Boolean
     get() = id != 0L || syncObject.creationDatetime != null
-
-fun VaultItem<*>.uidAsUuidOrNull(): UUID? =
-    tryOrNull { uid.toItemUuidOrNull() }
 
 fun <T : SyncObject> DataIdentifierAttrs.toVaultItem(syncObject: T): VaultItem<T> {
     return VaultItem(
@@ -26,7 +20,6 @@ fun <T : SyncObject> DataIdentifierAttrs.toVaultItem(syncObject: T): VaultItem<T
 
 fun SyncObject.Builder.setCommonDataIdentifierAttrs(dataIdentifier: CommonDataIdentifierAttrs) {
     this.id = dataIdentifier.uid
-    this.anonId = dataIdentifier.anonymousUID
     this.attachments = dataIdentifier.attachments
     this.localeFormat = dataIdentifier.formatLang
     this.spaceId = dataIdentifier.teamSpaceId

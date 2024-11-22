@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.TextViewCompat
 import com.dashlane.R
@@ -175,7 +176,9 @@ data class LinkedServicesHeaderItem(@StringRes val title: Int, val locked: Boole
             view.findViewById<TextView>(R.id.title).apply {
                 text = context.getString(item.title)
                 if (item.locked) {
-                    setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_filled, 0, 0, 0)
+                    val lockDrawable = ResourcesCompat.getDrawable(resources, R.drawable.ic_lock_filled, null)
+                    lockDrawable?.setBounds(0, 0, context.dpToPx(12), context.dpToPx(12))
+                    setCompoundDrawables(lockDrawable, null, null, null)
                     compoundDrawablePadding = context.dpToPx(8)
                     val color = ContextCompat.getColor(context, R.color.text_neutral_standard)
                     TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(color))

@@ -5,7 +5,7 @@ import androidx.preference.PreferenceGroup
 import com.dashlane.cryptography.decodeBase64ToUtf8String
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.usercryptography.UserCryptographyRepository
 import com.dashlane.util.MD5Hash
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject

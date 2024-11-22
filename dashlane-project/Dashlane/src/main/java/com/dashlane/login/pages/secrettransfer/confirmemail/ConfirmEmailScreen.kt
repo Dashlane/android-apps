@@ -15,14 +15,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonMediumBar
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
-import com.dashlane.ui.widgets.compose.DashlaneLogo
-import com.dashlane.ui.widgets.compose.GenericErrorContent
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 
 @Composable
 fun ConfirmEmailScreen(
@@ -30,28 +29,23 @@ fun ConfirmEmailScreen(
     viewModel: ConfirmEmailViewModel,
     secretTransferPayload: SecretTransferPayload,
     goToTOTP: () -> Unit,
-    goToAuthenticator: () -> Unit,
     onCancelled: () -> Unit,
-    onLoginSuccess: (RegisteredUserDevice.Remote) -> Unit
+    onLoginSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(key1 = uiState) {
-        when (val state = uiState) {
+        when (uiState) {
             is ConfirmEmailState.AskForTOTP -> {
                 viewModel.hasNavigated()
                 goToTOTP()
             }
             is ConfirmEmailState.Error,
             is ConfirmEmailState.ConfirmEmail -> Unit
-            is ConfirmEmailState.WaitForPush -> {
-                viewModel.hasNavigated()
-                goToAuthenticator()
-            }
 
             is ConfirmEmailState.RegisterSuccess -> {
                 viewModel.hasNavigated()
-                onLoginSuccess(state.registeredUserDevice)
+                onLoginSuccess()
             }
             is ConfirmEmailState.Cancelled -> {
                 viewModel.hasNavigated()
@@ -99,7 +93,7 @@ fun ConfirmEmailContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+            DashlaneLogoLockup(height = 40.dp)
             Text(
                 text = (stringResource(id = R.string.login_secret_transfer_step_label, 2, 2)).uppercase(),
                 style = DashlaneTheme.typography.bodyHelperRegular,
@@ -136,7 +130,7 @@ fun ConfirmEmailContent(
 
 @Preview
 @Composable
-fun ConfirmEmailContentPreview() {
+private fun ConfirmEmailContentPreview() {
     DashlanePreview {
         ConfirmEmailContent(
             email = "dashlane.com",

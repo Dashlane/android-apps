@@ -16,8 +16,8 @@ import com.dashlane.collections.sharing.CollectionSharingViewState.ViewData
 import com.dashlane.collections.sharing.item.CollectionSharingItemDataProvider
 import com.dashlane.core.sharing.SharingItemUpdater
 import com.dashlane.core.sharing.handleCollectionSharingResult
-import com.dashlane.network.tools.authorization
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.session.authorization
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
@@ -59,7 +59,7 @@ class CollectionsNewShareViewModel @Inject constructor(
     private val findUsersDataProvider: FindUsersDataProvider,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val sharingItemUpdater: SharingItemUpdater,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val collectionSharingItemDataProvider: CollectionSharingItemDataProvider,
     @DefaultCoroutineDispatcher
@@ -312,7 +312,7 @@ class CollectionsNewShareViewModel @Inject constructor(
             userId = login,
             alias = session.username.email,
             permission = Permission.ADMIN,
-            publicKey = userPreferencesManager.publicKey
+            publicKey = preferencesManager[sessionManager.session?.username].publicKey
         )
 
         

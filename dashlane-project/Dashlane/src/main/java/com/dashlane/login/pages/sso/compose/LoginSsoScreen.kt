@@ -24,20 +24,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.login.SsoInfo
 import com.dashlane.authentication.sso.GetSsoInfoResult
 import com.dashlane.authentication.sso.GetUserSsoInfoActivity
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.ButtonMediumBar
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.login.lock.LockSetting
+import com.dashlane.lock.LockSetting
 import com.dashlane.login.pages.password.compose.LoginPasswordSwitchAccount
-import com.dashlane.ui.widgets.compose.DashlaneLogo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.getParcelableExtraCompat
@@ -103,7 +103,7 @@ fun LoginSsoContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+        DashlaneLogoLockup(height = 40.dp)
         Text(
             modifier = Modifier.padding(top = 24.dp),
             text = stringResource(id = R.string.sso_lock_topic_default),

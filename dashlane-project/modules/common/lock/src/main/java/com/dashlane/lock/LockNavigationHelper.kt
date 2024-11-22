@@ -1,39 +1,26 @@
 package com.dashlane.lock
 
-import android.app.Activity
 import android.content.Context
-import com.dashlane.vault.summary.SummaryObject
 import java.util.concurrent.TimeUnit
 
 interface LockNavigationHelper {
     fun showLockActivityForReason(
         context: Context,
-        reason: UnlockEvent.Reason,
-        @LockHelper.LockPrompt lockPrompt: Int,
-        customMessage: String?
-    )
-
-    fun showLockForBiometricRecovery(
-        activity: Activity,
-        requestCode: Int,
-        customMessage: String?,
-        subTitle: String?
+        reason: LockEvent.Unlock.Reason,
+        lockPrompt: LockPrompt,
     )
 
     suspend fun showAndWaitLockActivityForReason(
         context: Context,
-        reason: UnlockEvent.Reason,
-        @LockHelper.LockPrompt lockPrompt: Int,
-        customMessage: String?,
+        reason: LockEvent.Unlock.Reason,
+        lockPrompt: LockPrompt,
         timeoutMs: Long = TimeUnit.MINUTES.toMillis(1)
-    ): UnlockEvent?
+    ): LockEvent
 
     fun showLockActivityForAutofillApi(context: Context)
-    suspend fun showLockActivityForFollowUpNotification(context: Context): UnlockEvent?
+    suspend fun showLockActivityForFollowUpNotification(context: Context): LockEvent
     fun showLockActivityForInAppLogin(context: Context, itemUID: String?)
     fun showLockActivity(context: Context)
 
     fun logoutAndCallLoginScreenForInAppLogin(context: Context)
-
-    suspend fun showAndWaitLockActivityForItem(context: Context, item: SummaryObject): UnlockEvent?
 }

@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal"
     android:maxWidth="@dimen/size_480dp"
+    android:fitsSystemWindows="true"
     tools:context=".darkwebmonitoring.OnboardingDarkWebMonitoringActivity"
     >
 

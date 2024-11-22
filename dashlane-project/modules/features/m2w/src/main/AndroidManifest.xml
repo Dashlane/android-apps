@@ -13,6 +13,6 @@
             android:name=".M2wConnectActivity"
             android:label="@string/m2w_connect_title"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.Dashlane" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
     </application>
 </manifest>

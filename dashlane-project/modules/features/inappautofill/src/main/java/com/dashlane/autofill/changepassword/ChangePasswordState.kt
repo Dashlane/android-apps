@@ -19,7 +19,7 @@ sealed class AutofillChangePasswordState {
     data class PasswordChanged(
         override val data: AutofillChangePasswordData,
         val authentifiant: VaultItem<SyncObject.Authentifiant>,
-        val oldAuthentifiant: SyncObject.Authentifiant,
+        val oldAuthentifiant: VaultItem<SyncObject.Authentifiant>,
     ) : AutofillChangePasswordState()
 
     data class Cancelled(

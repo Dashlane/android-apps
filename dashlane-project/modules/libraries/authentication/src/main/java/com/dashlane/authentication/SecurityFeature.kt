@@ -6,5 +6,4 @@ enum class SecurityFeature {
     DUO,
     U2F,
     SSO,
-    AUTHENTICATOR
 }

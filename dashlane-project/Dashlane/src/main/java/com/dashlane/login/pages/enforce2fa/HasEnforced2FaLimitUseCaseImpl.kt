@@ -1,6 +1,6 @@
 package com.dashlane.login.pages.enforce2fa
 
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.authentication.Auth2faSettingsService
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType.EMAIL_TOKEN
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType.SSO

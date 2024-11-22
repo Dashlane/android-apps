@@ -2,37 +2,42 @@ package com.dashlane.accountrecoverykey.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
+import com.dashlane.accountrecoverykey.AccountRecoveryKeySettingStateRefresher
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.definitions.DeleteKeyReason
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.mvvm.MutableViewStateFlow
+import com.dashlane.mvvm.ViewStateFlow
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.sync.DataSync
+import com.dashlane.user.UserAccountInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class AccountRecoveryKeyDetailSettingViewModel @Inject constructor(
-    private val userPreferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     private val accountRecoveryKeyRepository: AccountRecoveryKeyRepository,
     private val logRepository: LogRepository,
     private val dataSync: DataSync,
     private val accountRecoveryKeySettingStateRefresher: AccountRecoveryKeySettingStateRefresher
 ) : ViewModel() {
 
-    private val stateFlow =
-        MutableStateFlow<AccountRecoveryKeyDetailSettingState>(AccountRecoveryKeyDetailSettingState.Initial(AccountRecoveryKeyDetailSettingData()))
-    val uiState = stateFlow.asStateFlow()
+    private val _stateFlow = MutableViewStateFlow<AccountRecoveryKeyDetailSettingState.View, AccountRecoveryKeyDetailSettingState.SideEffect>(
+        AccountRecoveryKeyDetailSettingState.View()
+    )
+    val stateFlow: ViewStateFlow<AccountRecoveryKeyDetailSettingState.View, AccountRecoveryKeyDetailSettingState.SideEffect> = _stateFlow
 
     init {
         logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY)
@@ -40,45 +45,45 @@ class AccountRecoveryKeyDetailSettingViewModel @Inject constructor(
 
     fun viewStarted() {
         viewModelScope.launch {
-            val accountType = UserAccountInfo.AccountType.fromString(userPreferencesManager.accountType)
-            stateFlow.emit(AccountRecoveryKeyDetailSettingState.Loading(stateFlow.value.data.copy(accountType = accountType)))
+            val session = sessionManager.session ?: throw IllegalStateException("session cannot be null")
+            val accountType = preferencesManager[session.username].accountType
+                ?.let { UserAccountInfo.AccountType.fromString(it) }
+                ?: throw IllegalStateException("accountType cannot be null")
+
+            _stateFlow.update { state -> state.copy(isLoading = true, accountType = accountType) }
             val arkStatus = accountRecoveryKeyRepository.getAccountRecoveryStatusAsync()
-            stateFlow.emit(AccountRecoveryKeyDetailSettingState.DetailedSettings(stateFlow.value.data.copy(enabled = arkStatus.enabled)))
+            _stateFlow.update { state -> state.copy(isLoading = false, enabled = arkStatus.enabled) }
         }
     }
 
     fun toggleClicked(checked: Boolean) {
         viewModelScope.launch {
             if (checked) {
-                stateFlow.emit(AccountRecoveryKeyDetailSettingState.GoToIntro(stateFlow.value.data))
+                _stateFlow.send(AccountRecoveryKeyDetailSettingState.SideEffect.GoToIntro)
             } else {
                 logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.SETTINGS_SECURITY_RECOVERY_KEY_DISABLE)
-                stateFlow.emit(AccountRecoveryKeyDetailSettingState.ConfirmationDisableDialog(stateFlow.value.data.copy(isDialogDisplayed = true)))
+                _stateFlow.update { state -> state.copy(isDialogDisplayed = true) }
             }
         }
     }
 
     fun confirmDisable() {
-        flow<AccountRecoveryKeyDetailSettingState> {
+        flow<AccountRecoveryKeyDetailSettingState.View> {
             accountRecoveryKeyRepository.disableRecoveryKey(DeleteKeyReason.SETTING_DISABLED)
             dataSync.awaitSync()
             val arkStatus = accountRecoveryKeyRepository.getAccountRecoveryStatusAsync()
-            emit(AccountRecoveryKeyDetailSettingState.DetailedSettings(stateFlow.value.data.copy(enabled = arkStatus.enabled)))
+            emit(_stateFlow.value.copy(enabled = arkStatus.enabled, isLoading = false))
             accountRecoveryKeySettingStateRefresher.refresh()
         }
             .catch {
-                emit(AccountRecoveryKeyDetailSettingState.DetailedSettings(stateFlow.value.data.copy(enabled = false)))
+                emit(_stateFlow.value.copy(enabled = false, isLoading = false))
             }
-            .onStart { emit(AccountRecoveryKeyDetailSettingState.Loading(stateFlow.value.data.copy(isDialogDisplayed = false))) }
-            .onEach { stateFlow.emit(it) }
+            .onStart { emit(_stateFlow.value.copy(isLoading = true, isDialogDisplayed = false)) }
+            .onEach { state -> _stateFlow.update { state } }
             .launchIn(viewModelScope)
     }
 
     fun cancelDisable() {
-        viewModelScope.launch { stateFlow.emit(AccountRecoveryKeyDetailSettingState.Initial(stateFlow.value.data.copy(isDialogDisplayed = false))) }
-    }
-
-    fun hasNavigated() {
-        viewModelScope.launch { stateFlow.emit(AccountRecoveryKeyDetailSettingState.Initial(stateFlow.value.data)) }
+        _stateFlow.update { state -> state.copy(isDialogDisplayed = false) }
     }
 }

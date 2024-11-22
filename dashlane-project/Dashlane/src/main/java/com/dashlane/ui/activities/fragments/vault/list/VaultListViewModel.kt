@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.events.AppEvents
 import com.dashlane.events.registerAsFlow
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.navigation.Navigator
 import com.dashlane.sync.DataSync
 import com.dashlane.sync.DataSyncState
@@ -24,7 +25,6 @@ import com.dashlane.ui.widgets.view.empty.VaultAllItemsEmptyScreen
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.home.vaultlist.Filter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -68,7 +68,7 @@ class VaultListViewModel @Inject constructor(
     ).shareIn(viewModelScope, SharingStarted.WhileSubscribed(replayExpirationMillis = 0))
 
     private val isSyncRunning: Boolean
-        get() = dataSync.dataSyncState.replayCache.firstOrNull() == DataSyncState.Active
+        get() = dataSync.dataSyncState.replayCache.firstOrNull() is DataSyncState.Active
 
     override fun onRefresh() {
         provider.syncData()
@@ -142,6 +142,7 @@ class VaultListViewModel @Inject constructor(
             alignTop
         )
         Filter.FILTER_ID -> IDsEmptyScreen.newInstance(context, alignTop)
+        Filter.FILTER_SECRET -> throw IllegalStateException("Secrets are not supported on old home screen")
     }
 
     private fun getAppropriateSortMode(

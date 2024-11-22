@@ -9,7 +9,7 @@ import com.dashlane.accountstatus.premiumstatus.currentTeam
 import com.dashlane.accountstatus.premiumstatus.pastTeams
 import com.dashlane.navigation.Navigator
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.B2bStatus.CurrentTeam
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.B2bStatus.PastTeam
 import com.dashlane.session.SessionManager
@@ -24,7 +24,7 @@ class RevokedDetector @Inject constructor(
     private val navigator: Lazy<Navigator>, 
     private val userAccountStorage: UserAccountStorage,
     private val sessionManager: SessionManager,
-    private val userPreferencesManager: UserPreferencesManager
+    private val preferencesManager: PreferencesManager
 ) {
 
     fun onStatusChanged(
@@ -43,10 +43,10 @@ class RevokedDetector @Inject constructor(
 
         
         if (shouldLogoutIfRevokedFromSso(context, previousTeam, toaster)) {
-            navigator.get().logoutAndCallLoginScreen(context, false)
+            navigator.get().logoutAndCallLoginScreen(context)
             return
         }
-        userPreferencesManager.putString(
+        preferencesManager[sessionManager.session?.username].putString(
             ConstantsPrefs.NEED_POPUP_SPACE_REVOKED_FOR,
             previousTeam.teamId.toString()
         )

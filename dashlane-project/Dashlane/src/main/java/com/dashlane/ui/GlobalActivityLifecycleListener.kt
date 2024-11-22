@@ -11,7 +11,6 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.dashlane.accountrecoverykey.enforce.AccountRecoveryKeyEnforcer
 import com.dashlane.announcements.AnnouncementsActivityLifecycle
 import com.dashlane.applinkfetcher.AuthentifiantAppLinkDownloader
-import com.dashlane.authenticator.IsSettingUp2faChecker
 import com.dashlane.breach.BreachManagerActivityListener
 import com.dashlane.collections.sharing.CollectionSharingResultActivityListener
 import com.dashlane.hermes.LogFlush
@@ -59,7 +58,6 @@ class GlobalActivityLifecycleListener @Inject constructor(
     navigator: Navigator,
     enforce2faLimiter: Enforce2faLimiter,
     accountRecoveryKeyEnforcer: AccountRecoveryKeyEnforcer,
-    isSettingUp2faChecker: IsSettingUp2faChecker
 ) : ActivityLifecycleListener {
 
     private val activityLifecycleListeners = mutableListOf<ActivityLifecycleListener>()
@@ -98,7 +96,6 @@ class GlobalActivityLifecycleListener @Inject constructor(
         register(navigator as ActivityLifecycleListener)
         register(deviceLimitActivityListener)
         register(enforce2faLimiter)
-        register(isSettingUp2faChecker.activityLifecycleListener)
         register(collectionSharingResultActivityListener)
         register(accountRecoveryKeyEnforcer)
     }

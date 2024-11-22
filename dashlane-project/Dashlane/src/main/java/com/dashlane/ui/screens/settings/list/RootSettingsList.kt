@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import com.dashlane.R
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
 import com.dashlane.accountstatus.AccountStatus
@@ -13,40 +12,41 @@ import com.dashlane.accountstatus.premiumstatus.isFamilyAdmin
 import com.dashlane.accountstatus.premiumstatus.isFamilyPlan
 import com.dashlane.accountstatus.premiumstatus.isPremiumPlan
 import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
-import com.dashlane.activatetotp.ActivateTotpLogger
 import com.dashlane.autofill.phishing.AutofillPhishingLogger
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.crashreport.CrashReporter
-import com.dashlane.debug.DaDaDa
+import com.dashlane.debug.services.DaDaDaVersion
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.followupnotification.domain.FollowUpNotificationSettings
 import com.dashlane.frozenaccount.FrozenStateManager
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.SecurityHelper
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.events.user.Logout
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.invites.InviteFriendsIntentHelper
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
 import com.dashlane.navigation.Navigator
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.premium.enddate.EndDateFormatter
 import com.dashlane.premium.enddate.FormattedEndDateProviderImpl
 import com.dashlane.premium.utils.PlansUtils
 import com.dashlane.search.SearchableSettingItem
 import com.dashlane.securearchive.BackupCoordinator
-import com.dashlane.security.SecurityHelper
 import com.dashlane.server.api.endpoints.invitation.GetSharingLinkService
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.session.UserDataRepository
-import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.storage.userdata.RichIconsSettingProvider
-import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.ScreenshotPolicy
 import com.dashlane.ui.activities.debug.DebugActivity
+import com.dashlane.ui.common.compose.components.socialmedia.DashlaneSocialMedia
 import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
 import com.dashlane.ui.screens.settings.item.SearchableSettingItemImpl
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
@@ -58,16 +58,13 @@ import com.dashlane.ui.screens.settings.list.general.RootSettingsGeneralList
 import com.dashlane.ui.screens.settings.list.help.RootSettingsHelpList
 import com.dashlane.ui.screens.settings.list.security.RootSettingsSecurityList
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.ui.common.compose.components.socialmedia.DashlaneSocialMedia
-import com.dashlane.featureflipping.FeatureFlip
-import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.util.DarkThemeHelper
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.usercryptography.UserCryptographyRepository
 import com.dashlane.util.IntentFactory
 import com.dashlane.util.NetworkStateProvider
 import com.dashlane.util.PackageUtilities.getAppVersionName
 import com.dashlane.util.Toaster
 import com.dashlane.util.clipboard.ClipboardCopy
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -79,8 +76,8 @@ import javax.inject.Inject
 class RootSettingsList @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
-    userPreferencesManager: UserPreferencesManager,
-    private val daDaDa: DaDaDa,
+    preferencesManager: PreferencesManager,
+    private val dadadaVersion: DaDaDaVersion,
     private val navigator: Navigator,
     private val toaster: Toaster,
     private val sharingLinkService: GetSharingLinkService,
@@ -102,15 +99,12 @@ class RootSettingsList @Inject constructor(
     masterPasswordFeatureAccessChecker: ChangeMasterPasswordFeatureAccessChecker,
     backupCoordinator: BackupCoordinator,
     crashReporter: CrashReporter,
-    darkThemeHelper: DarkThemeHelper,
     biometricRecovery: BiometricRecovery,
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     followUpNotificationSettings: FollowUpNotificationSettings,
     endDateFormatter: EndDateFormatter,
     logRepository: LogRepository,
     use2faSettingStateHolder: Use2faSettingStateHolder,
-    activateTotpLogger: ActivateTotpLogger,
-    dataSync: DataSync,
     networkStateProvider: NetworkStateProvider,
     teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
     clipboardCopy: ClipboardCopy,
@@ -123,13 +117,14 @@ class RootSettingsList @Inject constructor(
 ) {
 
     private val paramHeader = SettingHeader(context.getString(R.string.settings_category_advanced))
+    private val accountHeader = SettingHeader(context.getString(R.string.setting_premium_category))
 
     private val accountStatus: AccountStatus?
         get() = accountStatusProvider.get()
 
     private val premiumItem = object : SettingItem {
         override val id = "premium"
-        override val header = SettingHeader(context.getString(R.string.setting_premium_category))
+        override val header = accountHeader
         override val title: String
             get() = accountStatus?.premiumStatus
                 ?.let { PlansUtils.getTitle(context, it) }
@@ -172,7 +167,7 @@ class RootSettingsList @Inject constructor(
         biometricAuthModule = biometricAuthModule,
         navigator = navigator,
         screenshotPolicy = screenshotPolicy,
-        userPreferencesManager = userPreferencesManager,
+        preferencesManager = preferencesManager,
         teamSpaceAccessorProvider = teamSpaceAccessorProvider,
         sessionManager = sessionManager,
         userAccountStorage = userAccountStorage,
@@ -185,8 +180,6 @@ class RootSettingsList @Inject constructor(
         biometricRecovery = biometricRecovery,
         toaster = toaster,
         use2faSettingStateHolder = use2faSettingStateHolder,
-        activateTotpLogger = activateTotpLogger,
-        userFeaturesChecker = userFeaturesChecker,
         teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
         subscriptionCodeRepository = subscriptionCodeRepository,
         accountRecoveryKeySettingStateHolder = accountRecoveryKeySettingStateHolder,
@@ -203,17 +196,16 @@ class RootSettingsList @Inject constructor(
         navigator = navigator,
         rootHeader = paramHeader,
         backupCoordinator = backupCoordinator,
-        darkThemeHelper = darkThemeHelper,
         logRepository = logRepository,
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
-        userPreferencesManager = userPreferencesManager,
+        preferencesManager = preferencesManager,
         globalPreferencesManager = globalPreferencesManager,
         followUpNotificationSettings = followUpNotificationSettings,
-        dataSync = dataSync,
         dialogHelper = dialogHelper,
         teamSpaceAccessorProvider = teamSpaceAccessorProvider,
         autofillPhishingLogger = autofillPhishingLogger,
         frozenStateManager = frozenStateManager,
+        sessionManager = sessionManager
     )
 
     private val settingsHelpList = RootSettingsHelpList(
@@ -292,6 +284,16 @@ class RootSettingsList @Inject constructor(
         override fun onClick(context: Context) = navigator.goToDashlaneLabs()
     }
 
+    private val accountSummary = object : SettingItem {
+        override val id = "account-summary"
+        override val header = accountHeader
+        override val title = context.getString(R.string.account_status_settings_title)
+        override val description = context.getString(R.string.account_status_settings_description)
+        override fun isEnable() = true
+        override fun isVisible() = true
+        override fun onClick(context: Context) = navigator.goToAccountStatus()
+    }
+
     private val logoutItem = object : SettingItem {
         override val id = "logout"
         override val header = miscHeader
@@ -334,7 +336,7 @@ class RootSettingsList @Inject constructor(
         override val id = "app-version"
         override val header = miscHeader
         override val title = context.getString(R.string.setting_about_version)
-        override val description = daDaDa.appVersionName ?: context.getAppVersionName()
+        override val description = dadadaVersion.appVersionName ?: context.getAppVersionName()
 
         override fun isEnable() = true
         override fun isVisible() = true
@@ -359,7 +361,7 @@ class RootSettingsList @Inject constructor(
         override val description = ""
 
         override fun isEnable() = true
-        override fun isVisible() = daDaDa.isEnabled
+        override fun isVisible() = dadadaVersion.isEnabled
         override fun onClick(context: Context) = context.startActivity(Intent(context, DebugActivity::class.java))
     }
 
@@ -378,6 +380,7 @@ class RootSettingsList @Inject constructor(
         },
         subItems = listOf(
             premiumItem,
+            accountSummary,
             settingsSecurityList.root,
             settingsGeneralList.root,
             settingsHelpList.root,

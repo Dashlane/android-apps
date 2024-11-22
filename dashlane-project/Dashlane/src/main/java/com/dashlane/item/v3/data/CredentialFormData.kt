@@ -2,27 +2,15 @@ package com.dashlane.item.v3.data
 
 import com.dashlane.authenticator.Otp
 import com.dashlane.ext.application.KnownLinkedDomains
+import com.dashlane.item.v3.viewmodels.Data
+import com.dashlane.securefile.extensions.attachmentsCount
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObfuscatedValue
-import java.time.Instant
 
 data class CredentialFormData(
-    override val id: String = "",
-    override val name: String = "",
-    override val isShared: Boolean = false,
-    override val isEditable: Boolean = false,
-    override val isCopyActionAllowed: Boolean = true,
-    override val canDelete: Boolean = false,
-    override val sharingCount: SharingCount = SharingCount(),
-    override val collections: List<CollectionData> = emptyList(),
-    override val created: Instant? = null,
-    override val updated: Instant? = null,
-    override val space: TeamSpace? = null,
-    override val availableSpaces: List<TeamSpace> = emptyList(),
-    override val isForcedSpace: Boolean = false,
     val email: String? = null,
     val login: String? = null,
     val secondaryLogin: String? = null,
@@ -33,8 +21,7 @@ data class CredentialFormData(
     val otp: Otp? = null,
     
     val password: Password? = null,
-    val isSharedWithLimitedRight: Boolean = false
-) : FormData() {
+) : FormData {
     data class Password(
         val value: SyncObfuscatedValue?,
         val idFromPasswordGenerator: String? = null
@@ -57,25 +44,30 @@ internal fun SummaryObject.Authentifiant.toCredentialFormData(
     sharingCount: FormData.SharingCount?,
     teamSpace: TeamSpace?,
     isSharedWithLimitedRight: Boolean
-) = CredentialFormData(
-    id = this.id,
-    name = this.title ?: "",
-    isShared = this.isShared,
-    isEditable = isEditable ?: false,
-    isCopyActionAllowed = isCopyActionAllowed,
-    canDelete = canDelete ?: false,
-    sharingCount = sharingCount ?: FormData.SharingCount(),
-    created = this.creationDatetime,
-    updated = this.userModificationDatetime,
-    email = this.email,
-    login = this.login,
-    secondaryLogin = this.secondaryLogin,
-    url = this.urlForUI(),
-    note = this.note,
-    space = teamSpace,
-    availableSpaces = availableSpaces,
-    linkedServices = this.getItemLinkedServices(),
-    isSharedWithLimitedRight = isSharedWithLimitedRight
+) = Data(
+    commonData = CommonData(
+        id = this.id,
+        name = this.title ?: "",
+        isShared = this.isShared,
+        isEditable = isEditable ?: false,
+        isCopyActionAllowed = isCopyActionAllowed,
+        canDelete = canDelete ?: false,
+        sharingCount = sharingCount ?: FormData.SharingCount(),
+        space = teamSpace,
+        availableSpaces = availableSpaces, 
+        created = this.creationDatetime,
+        updated = this.userModificationDatetime,
+        isSharedWithLimitedRight = isSharedWithLimitedRight,
+        attachmentCount = attachmentsCount()
+    ),
+    formData = CredentialFormData(
+        email = this.email,
+        login = this.login,
+        secondaryLogin = this.secondaryLogin,
+        url = this.urlForUI(),
+        note = this.note,
+        linkedServices = this.getItemLinkedServices()
+    )
 )
 
 fun SummaryObject.Authentifiant.getItemLinkedServices() =

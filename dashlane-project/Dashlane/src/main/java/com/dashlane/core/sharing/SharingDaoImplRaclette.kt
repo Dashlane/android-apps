@@ -22,14 +22,13 @@ import com.dashlane.storage.userdata.DataSyncDaoRaclette
 import com.dashlane.storage.userdata.DatabaseItemSaverRaclette
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
-import com.dashlane.storage.userdata.accessor.VaultDataQueryImplRaclette
+import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.dao.SharingDataType
 import com.dashlane.sync.DataIdentifierExtraDataWrapper
 import com.dashlane.sync.VaultItemBackupWrapper
 import com.dashlane.sync.toDataIdentifierExtraDataWrapper
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.manager.getSuggestedTeamspace
-import com.dashlane.useractivity.RacletteLogger
 import com.dashlane.vault.model.copyWithLock
 import com.dashlane.vault.model.copyWithSpaceId
 import com.dashlane.xml.domain.SyncObject
@@ -38,11 +37,11 @@ import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
 import com.dashlane.xml.serializer.XmlDeserializer
 import com.dashlane.xml.serializer.XmlSerializer
 import dagger.Lazy
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class SharingDaoImplRaclette @Inject constructor(
@@ -51,11 +50,10 @@ class SharingDaoImplRaclette @Inject constructor(
     private val databaseItemSaver: DatabaseItemSaverRaclette,
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val xmlConverterLazy: Lazy<DataIdentifierSharingXmlConverter>,
-    override val vaultDataQuery: VaultDataQueryImplRaclette,
+    override val vaultDataQuery: VaultDataQuery,
     override val dataSaver: Lazy<DataSaver>,
     override val collectionDataQuery: Lazy<CollectionDataQuery>,
-    private val dataSyncDaoRaclette: DataSyncDaoRaclette,
-    private val racletteLogger: RacletteLogger
+    private val dataSyncDaoRaclette: DataSyncDaoRaclette
 ) : SharingDao {
 
     private val database: Database?
@@ -136,18 +134,16 @@ class SharingDaoImplRaclette @Inject constructor(
         val vaultObjectRepository = vaultObjectRepository ?: return
 
         val ids = getDirtyItemIds() ?: return
-        runCatching {
-            val updated = ids.mapNotNull {
-                val id = Id.of(it)
-                val vaultItem = vaultObjectRepository.get(id) ?: return@mapNotNull null
-                vaultItem.copy(
-                    hasDirtySharedField = false
-                )
-            }
-            vaultObjectRepository.transaction {
-                updated.forEach { update(it) }
-            }
-        }.onFailure { racletteLogger.exception(it) }.getOrThrow()
+        val updated = ids.mapNotNull {
+            val id = Id.of(it)
+            val vaultItem = vaultObjectRepository.get(id) ?: return@mapNotNull null
+            vaultItem.copy(
+                hasDirtySharedField = false
+            )
+        }
+        vaultObjectRepository.transaction {
+            updated.forEach { update(it) }
+        }
     }
 
     override fun loadItemGroupLegacy(itemGroupUid: String): ItemGroup? = runBlocking { loadItemGroup(itemGroupUid) }

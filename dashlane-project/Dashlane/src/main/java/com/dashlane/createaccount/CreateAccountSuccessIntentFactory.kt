@@ -3,7 +3,7 @@ package com.dashlane.createaccount
 import android.app.Activity
 import android.content.Intent
 import android.os.Parcelable
-import com.dashlane.debug.DaDaDa
+import com.dashlane.debug.services.DaDaDaLogin
 import com.dashlane.guidedonboarding.OnboardingQuestionnaireActivity
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.security.DashlaneIntent
@@ -14,10 +14,10 @@ import javax.inject.Inject
 class CreateAccountSuccessIntentFactory @Inject constructor(
     private val activity: Activity,
     private val coordinator: PostAccountCreationCoordinator,
-    private val daDaDa: DaDaDa
+    private val dadadaLogin: DaDaDaLogin
 ) {
     fun createIntent(): Intent {
-        val intent = if (daDaDa.isSkipOnboardingPostAccountCreation) {
+        val intent = if (dadadaLogin.isSkipOnboardingPostAccountCreation) {
             coordinator.newHomeIntent()
         } else {
             DashlaneIntent.newInstance().apply {

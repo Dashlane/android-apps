@@ -11,9 +11,11 @@ import com.dashlane.cryptography.decryptBase64ToUtf8String
 import com.dashlane.cryptography.encryptUtf8ToBase64String
 import com.dashlane.server.api.endpoints.sync.SyncDownloadService
 import com.dashlane.sharing.SharingKeysHelper
+import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.domain.SyncCryptographyException
 import com.dashlane.sync.repositories.strategies.toUserAuthorization
 import com.dashlane.sync.sharing.SharingSync
+import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 import com.dashlane.cryptography.SharingKeys as CryptographySharingKeys
 import com.dashlane.server.api.endpoints.account.SharingKeys as ApiSharingKeys
@@ -31,7 +33,7 @@ open class SharingSyncHelper @Inject constructor(
         sharingKeys: ApiSharingKeys?,
         sharingSummary: SyncDownloadService.Data.SharingSummary,
         cryptographyEngineFactory: CryptographyEngineFactory,
-        syncProgressChannel: SyncProgressChannel?
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
     ) {
         val encryptedPrivateKey = sharingKeys?.privateKey
         val publicKey = sharingKeys?.publicKey
@@ -45,7 +47,7 @@ open class SharingSyncHelper @Inject constructor(
             }
         }
 
-        syncProgressChannel?.trySend(SyncProgress.SharingSync)
+        dataSyncState?.emit(DataSyncState.Active(SyncProgress.SharingSync))
         sharingSync.syncSharing(serverCredentials.toUserAuthorization(), sharingSummary)
     }
 

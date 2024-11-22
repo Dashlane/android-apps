@@ -38,10 +38,4 @@ public class GsonJsonSerialization implements JsonSerialization {
     public String toJson(Object object) {
         return mGson.toJson(object);
     }
-
-    public <K, V> Map<K, V> convertJsonKeyValuePairToMap(String object) {
-        Type mapType = new TypeToken<HashMap<K, V>>() {
-        }.getType();
-        return mGson.fromJson(object, mapType);
-    }
 }

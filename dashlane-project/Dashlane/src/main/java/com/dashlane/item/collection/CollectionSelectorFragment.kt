@@ -224,7 +224,7 @@ class CollectionSelectorFragment : Fragment() {
 
     @Composable
     @Preview
-    fun CollectionSelectorPreview() {
+    private fun CollectionSelectorPreview() {
         DashlaneTheme {
             CollectionSelector(
                 collections = listOf(

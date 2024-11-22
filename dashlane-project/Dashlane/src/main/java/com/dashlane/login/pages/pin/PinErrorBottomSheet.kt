@@ -14,7 +14,7 @@ import com.dashlane.R
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.ui.BottomSheetHeightConfig
 import com.dashlane.ui.configureBottomSheet
-import com.dashlane.ui.widgets.compose.GenericErrorContent
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 

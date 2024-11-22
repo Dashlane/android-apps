@@ -4,7 +4,6 @@ import com.dashlane.authentication.DeviceRegistrationInfo
 import com.dashlane.server.api.Response
 import com.dashlane.server.api.endpoints.authentication.AuthLoginAuthTicketService
 import com.dashlane.server.api.endpoints.authentication.AuthRegistrationAuthTicketService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationDashlaneAuthenticatorService
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationDuoPushService
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationEmailTokenService
 import com.dashlane.server.api.endpoints.authentication.AuthVerificationResult
@@ -19,7 +18,6 @@ class AuthenticationAuthTicketHelperImpl(
     private val verificationU2fService: AuthVerificationU2fService,
     private val verificationDuoPushService: AuthVerificationDuoPushService,
     private val verificationSsoService: AuthVerificationSsoService,
-    private val verificationAuthenticatorService: AuthVerificationDashlaneAuthenticatorService,
     private val registrationAuthTicketService: AuthRegistrationAuthTicketService,
     private val loginAuthTicketService: AuthLoginAuthTicketService
 ) : AuthenticationAuthTicketHelper {
@@ -82,18 +80,6 @@ class AuthenticationAuthTicketHelperImpl(
             request = AuthVerificationSsoService.Request(
                 login = login,
                 ssoToken = ssoToken
-            )
-        )
-    )
-
-    override suspend fun verifyDashlaneAuthenticator(
-        login: String
-    ): AuthenticationAuthTicketHelper.VerificationResult = VerificationResult(
-        login = login,
-        verificationResponse = verificationAuthenticatorService.execute(
-            request = AuthVerificationDashlaneAuthenticatorService.Request(
-                login = login,
-                deviceName = deviceRegistrationInfo.deviceName
             )
         )
     )

@@ -3,7 +3,7 @@ package com.dashlane.item.subview.action
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.R
 import com.dashlane.item.ItemEditViewContract
-import com.dashlane.item.subview.Action
+import com.dashlane.ui.action.Action
 
 class OpenLinkedWebsitesAction(
     private val listener: ItemEditViewContract.View.UiUpdateListener,

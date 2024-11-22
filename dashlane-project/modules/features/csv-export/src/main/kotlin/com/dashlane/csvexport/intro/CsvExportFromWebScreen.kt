@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +24,7 @@ import com.dashlane.design.component.HtmlText
 import com.dashlane.design.component.LinkButton
 import com.dashlane.design.component.LinkButtonDestinationType
 import com.dashlane.design.component.Text
+import com.dashlane.design.component.VerticalDivider
 import com.dashlane.design.iconography.IconToken
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
@@ -97,7 +97,7 @@ internal fun Stepper(stepDataList: List<StepData>) {
                         .padding(vertical = 4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    VerticalDivider(color = DashlaneTheme.colors.borderNeutralQuietIdle, thickness = 1.dp)
+                    VerticalDivider()
                 }
             }
             StepItem(step)

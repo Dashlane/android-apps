@@ -30,9 +30,6 @@ fun VaultItem<*>.getSuggestedTeamspace(teamspaceAccessor: TeamSpaceAccessor?): T
         is SyncObject.PersonalWebsite -> {
             teamSpaces.firstOrNullMatchingDefinedDomain(arrayOf(item.website))
         }
-        is SyncObject.PaymentPaypal -> {
-            teamSpaces.firstOrNullMatchingDefinedDomain(arrayOf(item.login))
-        }
         else -> null
     }
 }

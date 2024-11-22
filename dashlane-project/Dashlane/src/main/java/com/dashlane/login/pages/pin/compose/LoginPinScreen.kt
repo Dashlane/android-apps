@@ -2,19 +2,14 @@ package com.dashlane.login.pages.pin.compose
 
 import android.content.res.Configuration
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -27,22 +22,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.login.lock.LockSetting
+import com.dashlane.lock.LockSetting
 import com.dashlane.login.pages.password.compose.HelpBottomSheetContent
+import com.dashlane.login.pages.password.compose.LoginBottomSheet
 import com.dashlane.pin.setup.SystemLockSetupDialog
 import com.dashlane.ui.common.compose.components.pincode.PinKeyboard
 import com.dashlane.ui.common.compose.components.pincode.PinTextField
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.animation.shake
 import com.dashlane.util.getBaseActivity
@@ -56,7 +51,7 @@ fun LoginPinScreen(
     lockSetting: LockSetting,
     onSuccess: () -> Unit,
     onCancel: (LoginPinFallback) -> Unit,
-    onLogout: (String?) -> Unit,
+    onLogout: (String, Boolean) -> Unit,
     goToRecovery: (String) -> Unit,
     goToSecretTransfer: (String) -> Unit,
 ) {
@@ -74,7 +69,7 @@ fun LoginPinScreen(
                     context.getBaseActivity()?.let { activity ->
                         SnackbarUtils.showSnackbar(activity, context.getString(R.string.lock_pincode_force_logout_pin_missed_too_much))
                     }
-                    onLogout(state.email)
+                    onLogout(state.email, state.isMPLess)
                 }
                 LoginPinNavigationState.UnlockSuccess -> onSuccess()
             }
@@ -85,8 +80,9 @@ fun LoginPinScreen(
 
     LoginPinContent(
         modifier = modifier,
-        email = userAccountInfo.username,
+        email = uiState.email,
         pinCode = uiState.pinCode ?: "",
+        pinLength = uiState.pinLength,
         attempt = (uiState.error as? LoginPinError.WrongPin)?.attempt,
         fallback = uiState.fallback.toText(),
         isError = uiState.error != null,
@@ -106,7 +102,7 @@ fun LoginPinScreen(
             }
         )
 
-        LoginPinBottomSheet(
+        LoginBottomSheet(
             title = stringResource(id = R.string.passwordless_pin_error_title),
             firstButtonText = stringResource(id = R.string.passwordless_pin_forgot_use_another_device),
             secondButtonText = stringResource(id = R.string.passwordless_pin_forgot_use_recovery_method),
@@ -125,6 +121,7 @@ fun LoginPinContent(
     modifier: Modifier = Modifier.fillMaxSize(),
     email: String,
     pinCode: String,
+    pinLength: Int?,
     attempt: Int?,
     fallback: String,
     isError: Boolean,
@@ -148,17 +145,20 @@ fun LoginPinContent(
             style = DashlaneTheme.typography.bodyStandardRegular,
             color = DashlaneTheme.colors.textNeutralQuiet,
         )
-        PinTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 32.dp, bottom = 16.dp)
-                .shake(isError),
-            value = pinCode,
-            onValueChange = onPinCodeChange,
-            isError = isError,
-            errorMessage = null
-        )
+        pinLength?.let {
+            PinTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 32.dp, bottom = 16.dp)
+                    .shake(isError),
+                value = pinCode,
+                length = pinLength,
+                onValueChange = onPinCodeChange,
+                isError = isError,
+                errorMessage = null
+            )
+        }
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             PinKeyboard(
                 modifier = Modifier
@@ -180,39 +180,6 @@ fun LoginPinContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LoginPinBottomSheet(
-    title: String,
-    firstButtonText: String,
-    secondButtonText: String,
-    sheetState: SheetState,
-    onClickFirstButton: () -> Unit,
-    onClickSecondButton: () -> Unit,
-    bottomSheetDismissed: () -> Unit
-) {
-    val configuration = LocalConfiguration.current
-    BoxWithConstraints {
-        ModalBottomSheet(
-            modifier = Modifier
-                .width(maxWidth),
-            onDismissRequest = bottomSheetDismissed,
-            sheetMaxWidth = maxWidth,
-            sheetState = sheetState,
-            
-            windowInsets = WindowInsets(right = Dp(configuration.screenWidthDp - maxWidth.value))
-        ) {
-            HelpBottomSheetContent(
-                title = title,
-                firstButtonText = firstButtonText,
-                secondButtonText = secondButtonText,
-                onClickFirstButton = onClickFirstButton,
-                onClickSecondButton = onClickSecondButton
-            )
-        }
-    }
-}
-
 @Composable
 fun LoginPinFallback.toText() = when (this) {
     is LoginPinFallback.Cancellable -> stringResource(id = R.string.cancel)
@@ -228,11 +195,26 @@ private fun PinScreenPreview() {
         LoginPinContent(
             email = "randomemail@provider.com",
             pinCode = "000",
+            pinLength = 6,
             attempt = 2,
             fallback = stringResource(id = R.string.cancel),
             isError = false,
             onPinCodeChange = {},
             onClickForgot = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PinBottomSheetPreview() {
+    DashlanePreview {
+        HelpBottomSheetContent(
+            title = stringResource(id = R.string.passwordless_pin_error_title),
+            firstButtonText = stringResource(id = R.string.passwordless_pin_forgot_use_another_device),
+            secondButtonText = stringResource(id = R.string.passwordless_pin_forgot_use_recovery_method),
+            onClickFirstButton = { },
+            onClickSecondButton = { },
         )
     }
 }

@@ -4,7 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import com.dashlane.login.LoginIntents.createDeviceLimitConfirmation
 import com.dashlane.login.LoginStrategy
-import com.dashlane.login.LoginStrategy.Strategy.DEVICE_LIMIT
+import com.dashlane.login.LoginStrategy.Strategy.DeviceLimit
 import com.dashlane.login.devicelimit.UnlinkDevicesActivity
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
@@ -12,11 +12,11 @@ import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.util.clearTask
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class DeviceLimitActivityListener @Inject constructor(
@@ -49,7 +49,7 @@ class DeviceLimitActivityListener @Inject constructor(
     }
 
     private fun mayShowPaywall(activity: Activity) {
-        if (DEVICE_LIMIT != strategy || activity !is HomeActivity) return
+        if (strategy !is DeviceLimit || activity !is HomeActivity) return
         
         val intent = createDeviceSyncLimit(activity)
         

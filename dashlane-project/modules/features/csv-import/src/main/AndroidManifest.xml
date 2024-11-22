@@ -3,11 +3,11 @@
     <application>
         <activity
             android:name=".intro.CsvFileImportIntroActivity"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         <activity
             android:name=".csvimport.view.CsvImportActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             />
 
         <activity
@@ -25,7 +25,7 @@
 
         <activity
             android:name=".matchcsvfields.MatchCsvFieldsActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             />
     </application>
 </manifest>

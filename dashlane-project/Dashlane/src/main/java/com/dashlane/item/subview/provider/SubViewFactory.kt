@@ -6,9 +6,9 @@ import com.dashlane.R
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.readonly.ItemClickActionSubView
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.vault.model.VaultItem
 
 interface SubViewFactory {

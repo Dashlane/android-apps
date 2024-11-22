@@ -42,4 +42,8 @@
     <string name="feedback_copy_company_name">Company name copied</string>
     <string name="feedback_copy_company_title">Company title copied</string>
     <string name="feedback_copy_tax_online_number">Tax online number copied</string>
+    
+    <string name="feedback_copy_secret_value">Secret copied</string>
+    
+    <string name="feedback_copy_secret_id">Secret ID copied</string>
 </resources>

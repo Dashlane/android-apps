@@ -1,6 +1,7 @@
 package com.dashlane.notification.badge
 
 import com.dashlane.core.sharing.SharingDao
+import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.loaders.datalists.SharingUserDataUtils
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
@@ -9,6 +10,7 @@ import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isPending
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -21,6 +23,7 @@ class SharingInvitationRepositoryImpl @Inject constructor(
     @DefaultCoroutineDispatcher
     private val defaultDispatcher: CoroutineDispatcher,
     private val sharingUserDataUtils: SharingUserDataUtils,
+    private val xmlConverter: DataIdentifierSharingXmlConverter,
 ) : SharingInvitationRepository {
 
     private val predicateItemGroup: (ItemGroup) -> Boolean = { itemGroup ->
@@ -48,7 +51,18 @@ class SharingInvitationRepositoryImpl @Inject constructor(
 
     suspend fun loadAllInvitations() = coroutineScope {
         val itemGroupList = async {
-            loadItemGroups().filter(predicateItemGroup)
+            loadItemGroups()
+                .filter(predicateItemGroup)
+                .map { itemGroup ->
+                    itemGroup.copy(
+                        items = itemGroup.items?.filter { item ->
+                            val xml = sharingDao.loadItemContentExtraData(item.itemId)
+                            val syncObjectType = xmlConverter.fromXml(item.itemId, xml)?.vaultItem?.syncObjectType
+                            syncObjectType != SyncObjectType.SECRET
+                        }
+                    )
+                }
+                .filter { it.items?.isNotEmpty() == true }
         }
 
         val userGroupList = async {

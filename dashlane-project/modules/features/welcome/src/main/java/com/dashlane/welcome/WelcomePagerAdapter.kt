@@ -11,12 +11,8 @@ import androidx.viewpager.widget.ViewPager
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 
-internal class WelcomePagerAdapter(
-    hasOtpsForBackupProvider: HasOtpsForBackupProvider
-) : PagerAdapter(), ViewPager.OnPageChangeListener {
-    private val items = getItems(
-        hasOtpsForBackupProvider
-    )
+internal class WelcomePagerAdapter : PagerAdapter(), ViewPager.OnPageChangeListener {
+    private val items = getItems()
 
     private val positionProgressListeners = (0 until count).map { mutableListOf<(progress: Float) -> Unit>() }
 
@@ -112,16 +108,7 @@ internal class WelcomePagerAdapter(
 
     companion object {
         @Suppress("SpreadOperator")
-        private fun getItems(
-            hasOtpsForBackupProvider: HasOtpsForBackupProvider
-        ) = listOfNotNull(
-            Item(
-                title = R.string.welcome_backup_title,
-                description = R.string.welcome_backup_description,
-                mainAnimation = AnimationDesc.Progress(
-                    res = R.raw.lottie_welcome_encryption
-                )
-            ).takeIf { hasOtpsForBackupProvider.hasAuthenticatorInstalled },
+        private fun getItems() = listOfNotNull(
             Item(
                 title = R.string.welcome_trust_title,
                 description = R.string.welcome_trust_description,

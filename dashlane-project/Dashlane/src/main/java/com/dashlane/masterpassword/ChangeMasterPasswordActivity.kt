@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.masterpassword.logger.ChangeMasterPasswordLogger
 import com.dashlane.navigation.Navigator
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.setCurrentPageView
@@ -40,6 +42,9 @@ class ChangeMasterPasswordActivity : DashlaneActivity() {
 
     @Inject
     lateinit var navigator: Navigator
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     lateinit var presenter: ChangeMasterPasswordPresenter
 
@@ -79,13 +84,15 @@ class ChangeMasterPasswordActivity : DashlaneActivity() {
         val viewProxy = ChangeMasterPasswordViewProxy(this, lockManager)
         val logger = ChangeMasterPasswordLogger(logRepository)
         presenter = ChangeMasterPasswordPresenter(
-            passwordStrengthEvaluator,
-            logger,
-            origin,
-            warningDesktopShown,
-            changeMasterPasswordLogoutHelper,
-            navigator,
-            lifecycleScope
+            passwordStrengthEvaluator = passwordStrengthEvaluator,
+            logger = logger,
+            origin = origin,
+            warningDesktopShown = warningDesktopShown,
+            changeMasterPasswordLogoutHelper = changeMasterPasswordLogoutHelper,
+            navigator = navigator,
+            lockManager = lockManager,
+            sessionManager = sessionManager,
+            coroutineScope = lifecycleScope
         )
         presenter.setProvider(dataProvider)
         presenter.setView(viewProxy)

@@ -6,6 +6,11 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.ViewGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.crashreport.CrashReporterManager
@@ -16,16 +21,16 @@ import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.item.nfc.NfcHelper
 import com.dashlane.item.subview.ViewFactory
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.SchemeUtils.getDataType
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.util.Toaster
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
@@ -34,8 +39,8 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.util.PresenterOwner
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 
 @AndroidEntryPoint
 class ItemEditViewActivity :
@@ -102,6 +107,18 @@ class ItemEditViewActivity :
         onCreateDelegate(savedInstanceState)
         setupPresenter(savedInstanceState)
         nfcHelper = NfcHelper(this)
+
+        val coordinatorLayout = findViewById<CoordinatorLayout>(R.id.view_coordinator_layout)
+        ViewCompat.setOnApplyWindowInsetsListener(coordinatorLayout) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                leftMargin = insets.left
+                bottomMargin = insets.bottom
+                rightMargin = insets.right
+            }
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     override fun onStart() {
@@ -320,7 +337,6 @@ class ItemEditViewActivity :
                 SyncObjectType.AUTHENTIFIANT -> AnyPage.ITEM_CREDENTIAL_DETAILS
                 SyncObjectType.SECURE_NOTE -> AnyPage.ITEM_SECURE_NOTE_DETAILS
                 SyncObjectType.PAYMENT_CREDIT_CARD -> AnyPage.ITEM_CREDIT_CARD_DETAILS
-                SyncObjectType.PAYMENT_PAYPAL -> AnyPage.ITEM_PAYPAL_DETAILS
                 SyncObjectType.BANK_STATEMENT -> AnyPage.ITEM_BANK_STATEMENT_DETAILS
                 SyncObjectType.ID_CARD -> AnyPage.ITEM_ID_CARD_DETAILS
                 SyncObjectType.PASSPORT -> AnyPage.ITEM_PASSPORT_DETAILS
@@ -342,7 +358,6 @@ class ItemEditViewActivity :
                 SyncObjectType.AUTHENTIFIANT -> AnyPage.ITEM_CREDENTIAL_CREATE
                 SyncObjectType.SECURE_NOTE -> AnyPage.ITEM_SECURE_NOTE_CREATE
                 SyncObjectType.PAYMENT_CREDIT_CARD -> AnyPage.ITEM_CREDIT_CARD_CREATE
-                SyncObjectType.PAYMENT_PAYPAL -> AnyPage.ITEM_PAYPAL_CREATE
                 SyncObjectType.BANK_STATEMENT -> AnyPage.ITEM_BANK_STATEMENT_CREATE
                 SyncObjectType.ID_CARD -> AnyPage.ITEM_ID_CARD_CREATE
                 SyncObjectType.PASSPORT -> AnyPage.ITEM_PASSPORT_CREATE

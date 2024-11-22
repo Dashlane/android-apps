@@ -1,32 +1,28 @@
 package com.dashlane.teamspaces.manager
 
 import androidx.annotation.VisibleForTesting
-import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
-import com.dashlane.network.tools.authorization
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.teams.SpaceDeletedService
 import com.dashlane.session.Session
+import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.teamspaces.model.TeamSpace.Business.Past
 import javax.inject.Inject
 
 class SpaceDeletedNotifier @Inject constructor(
-    private val preferencesManager: UserPreferencesManager,
-    private val spaceDeletedService: SpaceDeletedService,
-    private val developerInfoLogger: DeveloperInfoLogger,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
+    private val spaceDeletedService: SpaceDeletedService
 ) {
     suspend fun sendIfNeeded(session: Session) {
-        val spaceIds = preferencesManager.getStringSet(PREF_SPACE_IDS)
+        val spaceIds = preferencesManager[session.username].getStringSet(PREF_SPACE_IDS)
         if (spaceIds.isNullOrEmpty()) {
             return
         }
         for (spaceId in spaceIds) {
             val spaceIdAsLong = spaceId.toLongOrNull()
             if (spaceIdAsLong == null) {
-                developerInfoLogger.log(
-                    action = "notify_space_deleted",
-                    message = "cannot cast spaceId to Long"
-                )
                 continue
             }
             notifyDeleted(spaceIdAsLong, session.authorization)
@@ -34,15 +30,16 @@ class SpaceDeletedNotifier @Inject constructor(
     }
 
     fun storeSpaceToDelete(spaceToDeleted: Past) {
+        val preferences = preferencesManager[sessionManager.session?.username]
         val spaceId = spaceToDeleted.teamId
-        var spaceIds: HashSet<String>? = preferencesManager.getStringSet(PREF_SPACE_IDS)?.toHashSet()
+        var spaceIds: HashSet<String>? = preferences.getStringSet(PREF_SPACE_IDS)?.toHashSet()
         if (spaceIds == null) {
             spaceIds = HashSet()
         } else if (spaceIds.contains(spaceId)) {
             return 
         }
         spaceIds.add(spaceId)
-        preferencesManager.putStringSet(PREF_SPACE_IDS, spaceIds)
+        preferences.putStringSet(PREF_SPACE_IDS, spaceIds)
     }
 
     @VisibleForTesting
@@ -73,12 +70,13 @@ class SpaceDeletedNotifier @Inject constructor(
 
     @VisibleForTesting
     fun onSpaceDeleted(spaceId: String?) {
-        val spaceIds: HashSet<String>? = preferencesManager.getStringSet(PREF_SPACE_IDS)?.toHashSet()
+        val preferences = preferencesManager[sessionManager.session?.username]
+        val spaceIds: HashSet<String>? = preferences.getStringSet(PREF_SPACE_IDS)?.toHashSet()
         if (spaceId == null || spaceIds == null || !spaceIds.contains(spaceId)) {
             return 
         }
         spaceIds.remove(spaceId)
-        preferencesManager.putStringSet(PREF_SPACE_IDS, spaceIds)
+        preferences.putStringSet(PREF_SPACE_IDS, spaceIds)
     }
 
     companion object {

@@ -82,7 +82,7 @@ fun BiometricsSetupContent(
         )
         Spacer(modifier = Modifier.weight(1f))
         ButtonMediumBar(
-            modifier = modifier
+            modifier = Modifier
                 .align(Alignment.End),
             primaryText = stringResource(id = R.string.passwordless_biometrics_positive_button),
             secondaryText = stringResource(id = R.string.passwordless_biometrics_neutral_button),
@@ -94,7 +94,7 @@ fun BiometricsSetupContent(
 
 @Preview
 @Composable
-fun BiometricPlaceHolderScreenPreview() {
+private fun BiometricPlaceHolderScreenPreview() {
     DashlanePreview {
         BiometricsSetupContent(
             modifier = Modifier,

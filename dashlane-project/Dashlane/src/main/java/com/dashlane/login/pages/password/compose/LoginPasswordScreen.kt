@@ -45,13 +45,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.SsoInfo
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.ButtonMediumBar
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.DropdownField
 import com.dashlane.design.component.DropdownItem
 import com.dashlane.design.component.DropdownItemContent
@@ -65,10 +65,11 @@ import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.help.newIntent
+import com.dashlane.lock.LockPrompt
+import com.dashlane.lock.LockSetting
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyActivity
-import com.dashlane.login.lock.LockSetting
-import com.dashlane.ui.widgets.compose.DashlaneLogo
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.util.compose.passwordFieldActions
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.safelyStartBrowserActivity
@@ -124,7 +125,15 @@ fun LoginPasswordScreen(
 
     val title = when {
         lockSetting.isShowMPForRemember -> stringResource(id = R.string.login_enter_mp_remember_title)
-        lockSetting.isLoggedIn -> lockSetting.topicLock ?: stringResource(id = R.string.enter_masterpassword)
+        lockSetting.lockPrompt is LockPrompt.ForSettings -> stringResource(id = R.string.please_enter_master_password_to_edit_settings)
+        lockSetting.lockPrompt is LockPrompt.ForItem -> {
+            if ((lockSetting.lockPrompt as LockPrompt.ForItem).isSecureNote) {
+                stringResource(id = R.string.unlock_message_secure_note_master_password)
+            } else {
+                stringResource(id = R.string.unlock_message_item_master_password)
+            }
+        }
+        lockSetting.isLoggedIn -> stringResource(id = R.string.enter_masterpassword)
         else -> null
     }
 
@@ -152,7 +161,7 @@ fun LoginPasswordScreen(
             true
         }
         when {
-            uiState.recoveryDialogShown -> LoginPasswordBottomSheet(
+            uiState.recoveryDialogShown -> LoginBottomSheet(
                 title = stringResource(id = R.string.login_password_dialog_trouble_login_title),
                 firstButtonText = stringResource(id = R.string.login_password_dialog_trouble_biometric_button),
                 secondButtonText = stringResource(id = R.string.login_password_dialog_trouble_recovery_key_button),
@@ -161,7 +170,7 @@ fun LoginPasswordScreen(
                 onClickSecondButton = viewModel::ark,
                 bottomSheetDismissed = viewModel::bottomSheetDismissed
             )
-            uiState.helpDialogShown -> LoginPasswordBottomSheet(
+            uiState.helpDialogShown -> LoginBottomSheet(
                 title = stringResource(id = R.string.trouble_logging_in),
                 firstButtonText = stringResource(id = R.string.login_cannot_login),
                 secondButtonText = stringResource(id = R.string.login_forgot_password),
@@ -218,7 +227,7 @@ fun LoginPasswordContent(
                 color = DashlaneTheme.colors.textNeutralCatchy,
             )
         } else {
-            DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+            DashlaneLogoLockup(height = 40.dp)
         }
         if (loginHistory.isNotEmpty()) {
             LoginPasswordSwitchAccount(email = email, loginHistory = loginHistory, changeAccount)
@@ -307,7 +316,7 @@ fun LoginPasswordSwitchAccount(email: String, loginHistory: List<String>, change
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPasswordBottomSheet(
+fun LoginBottomSheet(
     title: String,
     firstButtonText: String,
     secondButtonText: String,
@@ -324,6 +333,7 @@ fun LoginPasswordBottomSheet(
             onDismissRequest = bottomSheetDismissed,
             sheetMaxWidth = maxWidth,
             sheetState = sheetState,
+            containerColor = DashlaneTheme.colors.backgroundDefault,
             
             windowInsets = WindowInsets(right = Dp(configuration.screenWidthDp - maxWidth.value))
         ) {
@@ -347,7 +357,7 @@ fun HelpBottomSheetContent(
     onClickSecondButton: () -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(bottom = 64.dp)
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 64.dp)
     ) {
         Text(
             text = title,
@@ -382,9 +392,9 @@ fun HelpBottomSheetContent(
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun LoginPasswordContentPreview() {
+private fun LoginPasswordContentPreview() {
     DashlanePreview {
         LoginPasswordContent(
             email = "randomemail@provider.com",
@@ -405,9 +415,9 @@ fun LoginPasswordContentPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun HelpBottomSheetContentPreview() {
+private fun HelpBottomSheetContentPreview() {
     DashlanePreview {
         HelpBottomSheetContent(
             title = stringResource(id = R.string.trouble_logging_in),

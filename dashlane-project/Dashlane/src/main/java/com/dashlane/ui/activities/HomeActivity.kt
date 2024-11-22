@@ -22,15 +22,19 @@ import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.modules.KeyboardAutofillAnnouncementModule
 import com.dashlane.braze.BrazeWrapper
 import com.dashlane.databinding.ActivityHomeActivityLayoutBinding
-import com.dashlane.debug.DaDaDa
+import com.dashlane.debug.services.DaDaDaLogin
 import com.dashlane.device.DeviceUpdateManager
 import com.dashlane.events.AppEvents
 import com.dashlane.featureflipping.FeatureFlipManager
+import com.dashlane.hardwaresecurity.SecurityHelper
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockType
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.navigation.Navigator
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.SecurityHelper
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.premium.StoreOffersCache
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.sync.DataSync
 import com.dashlane.ui.activities.fragments.vault.HiddenImpala
 import com.dashlane.ui.dialogs.fragment.TeamRevokedDialogDisplayer
@@ -38,7 +42,6 @@ import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 import com.dashlane.ui.menu.MenuViewModel
 import com.dashlane.ui.menu.menuScreen
 import com.dashlane.ui.premium.inappbilling.BillingVerification
-import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
 import com.dashlane.ui.util.ActionBarUtil.DrawerLayoutProvider
 import com.dashlane.ui.util.setup
 import com.dashlane.ui.widgets.view.MainDrawerToggle
@@ -46,9 +49,9 @@ import com.dashlane.util.AppShortcutsUtil
 import com.dashlane.util.DeviceUtils.hideKeyboard
 import com.dashlane.util.getParcelableExtraCompat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
@@ -89,13 +92,16 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
     lateinit var sessionManager: SessionManager
 
     @Inject
-    lateinit var dadada: DaDaDa
+    lateinit var lockManager: LockManager
+
+    @Inject
+    lateinit var dadadaLogin: DaDaDaLogin
 
     @Inject
     lateinit var deviceUpdateManager: DeviceUpdateManager
 
     @Inject
-    lateinit var userPreferenceManager: UserPreferencesManager
+    lateinit var preferencesManager: PreferencesManager
 
     @Inject
     lateinit var teamSpaceRevokedDialogDisplayer: TeamRevokedDialogDisplayer
@@ -118,7 +124,7 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
         val session = sessionManager.session
         if (session == null) {
             
-            navigator.logoutAndCallLoginScreen(this, false)
+            navigator.logoutAndCallLoginScreen(this)
             return
         }
         val homeViewBinding = ActivityHomeActivityLayoutBinding.inflate(layoutInflater)
@@ -222,14 +228,16 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
 
     override fun onStart() {
         super.onStart()
-        featureFlipManager.launchRefreshIfNeeded()
-        remoteAbTestManager.launchRefreshIfNeeded()
+        sessionManager.session?.authorization?.let { authorization ->
+            featureFlipManager.launchRefreshIfNeeded(authorization)
+            remoteAbTestManager.launchRefreshIfNeeded(authorization)
+            offlineExperimentReporter.launchReportIfNeeded(authorization)
+        }
 
         
-        offlineExperimentReporter.launchReportIfNeeded()
         billingVerification.verifyAndConsumePurchaseIfNeeded()
-        if (dadada.isEnabled && dadada.hasDeepLink()) {
-            val link = dadada.deepLink
+        if (dadadaLogin.isEnabled && dadadaLogin.hasDeepLink()) {
+            val link = dadadaLogin.deepLink
             val builder = NotificationDialogFragment.Builder()
             builder.setNegativeButtonText("Cancel")
                 .setPositiveButtonDeepLink(link)
@@ -237,9 +245,21 @@ class HomeActivity : DashlaneActivity(), DrawerLayoutProvider, MenuContainer {
                 .setMessage("Go to \$link")
             builder.build().show(supportFragmentManager, link)
         }
-        securityHelper.showPopupPinCodeDisableIfWasEnable(this)
+
+        
+        val username = sessionManager.session?.username
+        if (username != null && !securityHelper.isDeviceSecured(username)) {
+            val locks = lockManager.getLocks(username)
+
+            if (LockType.PinCode in locks || LockType.Biometric in locks) {
+                lockManager.removeLock(username, LockType.PinCode)
+                lockManager.removeLock(username, LockType.Biometric)
+                securityHelper.showPopupPinCodeDisable(this)
+            }
+        }
+
         deviceUpdateManager.updateIfNeeded()
-        KeyboardAutofillAnnouncementModule.setRequireDisplayIfNeeded(userPreferenceManager, intent)
+        KeyboardAutofillAnnouncementModule.setRequireDisplayIfNeeded(preferencesManager[username], intent)
         announcementCenter.start(this)
     }
 

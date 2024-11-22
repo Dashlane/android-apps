@@ -16,10 +16,10 @@ class ChangePasswordContract {
 
     interface DataProvider {
 
-        suspend fun loadAuthentifiants(website: String?, packageName: String?): List<SyncObject.Authentifiant>
+        suspend fun loadAuthentifiants(website: String?, packageName: String?): List<VaultItem<SyncObject.Authentifiant>>
 
         suspend fun updateCredentialToVault(credential: CredentialUpdateInfo): VaultItem<SyncObject.Authentifiant>?
 
-        fun getCredential(login: String): SyncObject.Authentifiant
+        fun getCredential(login: String): VaultItem<SyncObject.Authentifiant>
     }
 }

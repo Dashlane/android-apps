@@ -111,7 +111,7 @@ abstract class BaseUiUpdateListener(private val activity: AppCompatActivity, pri
         fromViewOnly: Boolean,
         temporaryPrivateCollectionsName: List<String>,
         temporarySharedCollectionsId: List<String>,
-        spaceId: String
+        spaceId: String?
     ) {
         navigator.goToCollectionSelectorFromItemEdit(
             fromViewOnly,

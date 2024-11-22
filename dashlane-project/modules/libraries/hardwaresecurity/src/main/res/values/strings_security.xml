@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="settings_use_pincode_need_screen_lock_title">Add a Screen Lock for PIN</string>
+    <string name="settings_use_pincode_need_screen_lock_description">For your security, you must have a screen lock for your device to use a PIN for Dashlane.</string>
+    <string name="settings_use_pincode_need_screen_lock_action_settings">Add Screen Lock</string>
+    <string name="settings_use_pincode_need_screen_lock_action_dontuse">Don\'t use PIN</string>
+
+    <string name="biometric_prompt_registration_required_title">Set up biometrics</string>
+    <string name="biometric_prompt_registration_required_message">To use this feature, first set up biometric authentication in your device settings.</string>
+    <string name="biometric_prompt_registration_required_button_cancel">Cancel</string>
+    <string name="biometric_prompt_registration_required_button_continue">Open settings</string>
+
+    <string name="biometric_prompt_strong_registration_required_title">More secure biometrics required </string>
+    <string name="biometric_prompt_strong_registration_required_message">To use this feature, switch to the strongest method of biometrics in your device settings. You can check Android’s support articles to confirm the strongest method for your device.</string>
+    <string name="biometric_prompt_strong_registration_required_button_cancel">Cancel</string>
+    <string name="biometric_prompt_strong_registration_required_button_continue">Open settings</string>
+
+</resources>

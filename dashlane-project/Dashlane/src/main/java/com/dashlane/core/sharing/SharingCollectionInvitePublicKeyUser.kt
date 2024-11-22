@@ -1,6 +1,6 @@
 package com.dashlane.core.sharing
 
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.GetUsersPublicKeyService
 import com.dashlane.server.api.endpoints.sharinguserdevice.InviteCollectionMembersService

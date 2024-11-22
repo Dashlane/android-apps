@@ -1,10 +1,10 @@
 package com.dashlane.sync.cryptochanger
 
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.session.Session
 import com.dashlane.sync.vault.SyncVault
 import com.dashlane.xml.domain.SyncObject
 
@@ -12,8 +12,10 @@ interface SyncCryptoChanger {
 
     suspend fun updateCryptography(
         authorization: Authorization.User,
-        userKeys: Session.UserKeys,
-        newUserKeys: Session.UserKeys,
+        appKey: AppKey,
+        newAppKey: AppKey,
+        vaultKey: VaultKey,
+        newVaultKey: VaultKey,
         cryptographyMarker: CryptographyMarker? = null,
         authTicket: String? = null,
         ssoServerKey: ByteArray? = null,
@@ -24,19 +26,20 @@ interface SyncCryptoChanger {
 
     suspend fun updateCryptography(
         authorization: Authorization.User,
-        userKeys: Session.UserKeys,
+        appKey: AppKey,
+        vaultKey: VaultKey,
         cryptographyMarker: CryptographyMarker
     ): SyncObject.Settings
 
     suspend fun reAuthorizeDevice(authorization: Authorization.User)
 
     sealed class Progress {
-        object Downloading : Progress()
+        data object Downloading : Progress()
 
         data class Ciphering(val index: Int, val total: Int) : Progress()
 
-        object Uploading : Progress()
+        data object Uploading : Progress()
 
-        object Completed : Progress()
+        data object Completed : Progress()
     }
 }

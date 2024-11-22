@@ -5,9 +5,10 @@ import com.dashlane.password.generator.PasswordGeneratorCriteria
 import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
 import com.dashlane.passwordgenerator.criteria
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.booleanPreference
 import com.dashlane.preference.intPreference
+import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.ui.util.PasswordGeneratorCreator.provideGeneratedPassword
 import com.dashlane.vault.model.VaultItem
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 class PasswordGeneratorWrapperImpl @Inject constructor(
     private val strength: PasswordGeneratorAndStrength,
-    preferencesManager: UserPreferencesManager,
+    sessionManager: SessionManager,
+    preferencesManager: PreferencesManager,
     private val dataSaver: DataSaver
 ) : PasswordGeneratorWrapper {
 
@@ -26,22 +28,22 @@ class PasswordGeneratorWrapperImpl @Inject constructor(
     }
 
     override var passwordLength: Int
-            by preferencesManager.intPreference(
+            by preferencesManager[sessionManager.session?.username].intPreference(
                 ConstantsPrefs.PASSWORD_GENERATOR_LENGTH,
                 PasswordGenerator.DEFAULT_PASSWORD_LENGTH
             )
 
     override var isUsingAmbiguousChar: Boolean
-            by preferencesManager.booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_AMBIGUOUS, false)
+            by preferencesManager[sessionManager.session?.username].booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_AMBIGUOUS, false)
 
     override var isUsingSymbols: Boolean
-            by preferencesManager.booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_SYMBOLS, true)
+            by preferencesManager[sessionManager.session?.username].booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_SYMBOLS, true)
 
     override var isUsingLetters: Boolean
-            by preferencesManager.booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_LETTERS, true)
+            by preferencesManager[sessionManager.session?.username].booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_LETTERS, true)
 
     override var isUsingDigits: Boolean
-            by preferencesManager.booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_DIGITS, true)
+            by preferencesManager[sessionManager.session?.username].booleanPreference(ConstantsPrefs.PASSWORD_GENERATOR_DIGITS, true)
 
     override suspend fun saveToPasswordHistory(
         password: String,

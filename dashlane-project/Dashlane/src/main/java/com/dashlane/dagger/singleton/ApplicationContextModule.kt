@@ -14,9 +14,7 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.hardware.usb.UsbManager
-import android.net.ConnectivityManager
 import android.os.PowerManager
-import android.telephony.TelephonyManager
 import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.InputMethodManager
 import androidx.biometric.BiometricManager
@@ -88,10 +86,6 @@ object ApplicationContextModule {
         BiometricManager.from(context)
 
     @Provides
-    fun provideTelephonyManager(@ApplicationContext context: Context): TelephonyManager? =
-        context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
-
-    @Provides
     fun providePowerManager(@ApplicationContext context: Context): PowerManager? =
         context.getSystemService(AccessibilityService.POWER_SERVICE) as PowerManager?
 
@@ -104,12 +98,8 @@ object ApplicationContextModule {
         context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
 
     @Provides
-    fun provideConnectivityManager(@ApplicationContext context: Context): ConnectivityManager? =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
-
-    @Provides
-    fun provideKeyguardManager(@ApplicationContext context: Context): KeyguardManager? =
-        context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager?
+    fun provideKeyguardManager(@ApplicationContext context: Context): KeyguardManager =
+        context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
     @Provides
     fun provideUsbManager(@ApplicationContext context: Context): UsbManager? =

@@ -1,6 +1,6 @@
 package com.dashlane.item.subview.provider.payment
 
-import com.dashlane.util.BankDataProvider
+import com.dashlane.vault.util.BankDataProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.utils.Country
 

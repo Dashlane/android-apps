@@ -8,8 +8,6 @@ class SecureDataKey {
 
         const val SECRET_KEY = "uki"
 
-        @Deprecated("Anonymous user id is no longer stored in a dedicated file, it can be found in the settings")
-        const val ANONYMOUS_USER_ID = "anonid"
         const val SETTINGS = "settings"
 
         
@@ -26,6 +24,8 @@ class SecureDataKey {
 
         const val USER_ANALYTICS_ID = "userAnalyticsId"
 
+        const val USER_CONTACT_EMAIL = "userContactEmail"
+
         const val USER_ACTIVITY = "userActivity"
 
         const val CURRENT_SPACE_ID_FILTER = "currentSpaceIdFilter"
@@ -41,12 +41,12 @@ class SecureDataKey {
         USER_FEATURE_FLIPS,
         LEGACY_PREMIUM_SERVER_RESPONSE,
         ACCOUNT_STATUS_CACHE,
-        ANONYMOUS_USER_ID,
         SETTINGS,
         MASTER_PASSWORD,
         REMOTE_KEY,
         DEVICE_ANALYTICS_ID,
         USER_ANALYTICS_ID,
+        USER_CONTACT_EMAIL,
         SERVER_KEY,
         USER_ACTIVITY,
         CURRENT_SPACE_ID_FILTER

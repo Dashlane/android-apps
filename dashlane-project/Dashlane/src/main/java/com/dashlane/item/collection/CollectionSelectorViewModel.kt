@@ -80,7 +80,7 @@ class CollectionSelectorViewModel @Inject constructor(
                 val name = it.name ?: return@mapNotNull null
                 Collection(it.id, name, false)
             }
-        val sharedCollections = if (navArgs.spaceId == TeamSpace.Personal.teamId) {
+        val sharedCollections = if ((navArgs.spaceId ?: TeamSpace.Personal.teamId) == TeamSpace.Personal.teamId) {
             emptyList()
         } else {
             sharingDataProvider.getAcceptedCollections(needsAdminRights = false).map {

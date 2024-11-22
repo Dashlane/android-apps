@@ -4,20 +4,21 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.UnauthenticatedUser
 import com.dashlane.authentication.login.AuthenticationEmailRepository
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
-import com.dashlane.login.pages.secrettransfer.LoginSecretTransferNavigation.EMAIL_KEY
+import com.dashlane.login.pages.secrettransfer.LoginSecretTransferDestination.ConfirmEmail
+import com.dashlane.login.root.LoginRepository
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,11 +28,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-
-internal const val SESSION_ERROR_MESSAGE = "Error on Session creation"
+import javax.inject.Inject
 
 @HiltViewModel
 class ConfirmEmailViewModel @Inject constructor(
+    private val loginRepository: LoginRepository,
     private val userAccountStorage: UserAccountStorage,
     private val authenticationSecretTransferRepository: AuthenticationSecretTransferRepository,
     private val authenticationEmailRepository: AuthenticationEmailRepository,
@@ -39,7 +40,7 @@ class ConfirmEmailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val login = savedStateHandle.get<String>(EMAIL_KEY) ?: throw IllegalStateException("Email is empty")
+    private val login = savedStateHandle.toRoute<ConfirmEmail>().email
     private val stateFlow = MutableStateFlow<ConfirmEmailState>(ConfirmEmailState.ConfirmEmail(ConfirmEmailData(login)))
 
     val uiState = stateFlow.asStateFlow()
@@ -71,21 +72,18 @@ class ConfirmEmailViewModel @Inject constructor(
                 SecretTransferPayload.Type.MASTER_PASSWORD -> {
                     when (val secondFactor = getAuthenticationSecondFactor(secretTransferPayload.login)) {
                         is AuthenticationSecondFactor.EmailToken -> {
-                            val result = registrationWithAuthTicket(
+                            val registeredUserDevice = registrationWithAuthTicket(
                                 login = secretTransferPayload.login,
                                 token = secretTransferPayload.token ?: throw IllegalStateException(),
                                 securityFeatures = secondFactor.securityFeatures,
                                 remoteKeyType = RemoteKey.Type.MASTER_PASSWORD
                             )
-                            emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data, result))
+                            loginRepository.updateRegisteredUserDevice(registeredUserDevice)
+                            emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data))
                         }
 
                         is AuthenticationSecondFactor.Totp -> {
-                            if (secondFactor.isAuthenticatorEnabled) {
-                                emit(ConfirmEmailState.WaitForPush(stateFlow.value.data))
-                            } else {
-                                emit(ConfirmEmailState.AskForTOTP(stateFlow.value.data))
-                            }
+                            emit(ConfirmEmailState.AskForTOTP(stateFlow.value.data))
                         }
 
                         else -> throw IllegalStateException("Invalid second factor")
@@ -93,23 +91,25 @@ class ConfirmEmailViewModel @Inject constructor(
                 }
 
                 SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD -> {
-                    val result = registrationWithAuthTicket(
+                    val registeredUserDevice = registrationWithAuthTicket(
                         login = secretTransferPayload.login,
                         token = secretTransferPayload.token ?: throw IllegalStateException(),
                         securityFeatures = emptySet(),
                         remoteKeyType = RemoteKey.Type.MASTER_PASSWORD
                     )
-                    emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data, result))
+                    loginRepository.updateRegisteredUserDevice(registeredUserDevice)
+                    emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data))
                 }
 
                 SecretTransferPayload.Type.SSO -> {
-                    val result = registrationWithAuthTicket(
+                    val registeredUserDevice = registrationWithAuthTicket(
                         login = secretTransferPayload.login,
                         token = secretTransferPayload.token ?: throw IllegalStateException(),
                         securityFeatures = setOf(SecurityFeature.SSO),
                         remoteKeyType = RemoteKey.Type.SSO
                     )
-                    emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data, result))
+                    loginRepository.updateRegisteredUserDevice(registeredUserDevice)
+                    emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data))
                 }
             }
         }

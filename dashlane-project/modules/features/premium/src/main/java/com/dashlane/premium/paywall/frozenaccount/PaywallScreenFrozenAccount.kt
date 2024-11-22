@@ -21,6 +21,7 @@ import com.dashlane.ui.activities.intro.LinkItem
 
 @Composable
 fun PaywallScreenFrozenAccount(
+    modifier: Modifier = Modifier,
     intro: PaywallIntroState,
     navigateUp: () -> Unit,
     onClickLink: (LinkItem) -> Unit,
@@ -28,6 +29,7 @@ fun PaywallScreenFrozenAccount(
     onAllOfferClick: () -> Unit,
 ) {
     PaywallIntroScreen(
+        modifier = modifier,
         intro = intro,
         navigateUp = navigateUp,
         onNegativeButtonClicked = onCloseClick,
@@ -48,7 +50,7 @@ fun PaywallScreenFrozenAccount(
 
 @Composable
 @Preview
-fun TrialEndedAnnouncementScreenPreview() {
+private fun TrialEndedAnnouncementScreenPreview() {
     DashlanePreview {
         PaywallScreenFrozenAccount(
             intro = PaywallIntroState(

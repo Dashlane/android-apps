@@ -74,7 +74,7 @@ class CreateAccountViewProxy(rootView: View) :
                     connect(
                         R.id.view_login_content,
                         ConstraintSet.TOP,
-                        R.id.view_login_email_header,
+                        ConstraintSet.PARENT_ID,
                         ConstraintSet.BOTTOM
                     )
                     applyTo(root)

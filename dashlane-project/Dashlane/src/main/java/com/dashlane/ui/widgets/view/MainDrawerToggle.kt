@@ -23,7 +23,7 @@ class MainDrawerToggle(
         drawerLayout,
         toolbar,
         R.string.and_accessibility_open_drawer_description,
-        R.string.close
+        R.string.and_accessibility_navigation_drawer_close
     ) {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

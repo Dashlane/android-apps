@@ -23,7 +23,7 @@ interface CredentialPasswordManager {
         callingAppInfo: CallingAppInfo
     ): CreatePasswordResponse
 
-    fun providePasswordLogin(passwordSyncObject: VaultItem<SyncObject.Authentifiant>): PasswordCredential
+    fun providePasswordLogin(authentifiantVaultItem: VaultItem<SyncObject.Authentifiant>): PasswordCredential
 }
 
 @RequiresApi(34)
@@ -66,16 +66,16 @@ class CredentialPasswordManagerImpl @Inject constructor(
         return null
     }
 
-    override fun providePasswordLogin(passwordSyncObject: VaultItem<SyncObject.Authentifiant>): PasswordCredential {
-        if (passwordSyncObject.syncObject.loginForUi == null) {
+    override fun providePasswordLogin(authentifiantVaultItem: VaultItem<SyncObject.Authentifiant>): PasswordCredential {
+        if (authentifiantVaultItem.loginForUi == null) {
             throw MissingFieldException("Login cannot be null")
         }
-        if (passwordSyncObject.syncObject.password == null) {
+        if (authentifiantVaultItem.syncObject.password == null) {
             throw MissingFieldException("Password cannot be null")
         }
         return PasswordCredential(
-            passwordSyncObject.syncObject.loginForUi!!,
-            passwordSyncObject.syncObject.password.toString(),
+            authentifiantVaultItem.loginForUi!!,
+            authentifiantVaultItem.syncObject.password.toString(),
         )
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -21,13 +22,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dashlane.R
-import com.dashlane.accountrecoverykey.AccountRecoveryKeySetupNavigation
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Confirm
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Confirm.toAccountRecoveryKeyNavigation
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Intro
+import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Success
 import com.dashlane.accountrecoverykey.arkSetupGraph
-import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.biometricsSetupDestination
-import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.confirmationDestination
-import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.infoDestination
-import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.pinSetupDestination
-import com.dashlane.createaccount.passwordless.MplessAccountCreationNavigation.termsAndConditionsDestination
+import com.dashlane.createaccount.passwordless.MplessDestination.BiometricsSetup
+import com.dashlane.createaccount.passwordless.MplessDestination.BiometricsSetup.toMpLessDestination
+import com.dashlane.createaccount.passwordless.MplessDestination.Confirmation
+import com.dashlane.createaccount.passwordless.MplessDestination.Info
+import com.dashlane.createaccount.passwordless.MplessDestination.PinSetup
+import com.dashlane.createaccount.passwordless.MplessDestination.TermsAndConditions
 import com.dashlane.createaccount.passwordless.biometrics.BiometricsSetupScreen
 import com.dashlane.createaccount.passwordless.confirmation.ConfirmationScreen
 import com.dashlane.createaccount.passwordless.info.InfoScreen
@@ -37,17 +42,9 @@ import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.help.HelpCenterLink
 import com.dashlane.pin.setup.PinSetupScreen
-import com.dashlane.ui.common.compose.components.components.DashlaneTopAppBar
 import com.dashlane.ui.common.compose.components.TopBarState
+import com.dashlane.ui.common.compose.components.components.DashlaneTopAppBar
 import com.dashlane.util.compose.navigateAndPopupToStart
-
-object MplessAccountCreationNavigation {
-    const val infoDestination = "infoScreen"
-    const val pinSetupDestination = "pinSetupScreen"
-    const val biometricsSetupDestination = "biometricsSetupScreen"
-    const val termsAndConditionsDestination = "termsAndConditionsScreen"
-    const val confirmationDestination = "confirmationScreen"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
@@ -66,25 +63,23 @@ fun MplessAccountCreationNavigation(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
-        val topBarStateValue = when (navBackStackEntry?.destination?.route) {
-            infoDestination -> TopBarState(title = context.getString(R.string.passwordless_info_screen_app_bar_title))
-            pinSetupDestination -> TopBarState()
-            biometricsSetupDestination -> TopBarState(title = context.getString(R.string.passwordless_biometrics_setup_app_bar_title))
-            termsAndConditionsDestination -> TopBarState(title = context.getString(R.string.passwordless_terms_and_conditions_app_bar_title))
-            confirmationDestination -> TopBarState(visible = false)
-            AccountRecoveryKeySetupNavigation.introDestination -> TopBarState(visible = false)
-            AccountRecoveryKeySetupNavigation.generateDestination -> TopBarState(
-                visible = true,
-                title = context.getString(R.string.account_recovery_key_setting_title)
-            )
-            AccountRecoveryKeySetupNavigation.confirmDestination -> TopBarState(title = context.getString(R.string.account_recovery_key_setting_title))
-            AccountRecoveryKeySetupNavigation.successDestination -> TopBarState(visible = false)
-            else -> TopBarState()
+        val topBarStateValue = when (navBackStackEntry?.toMpLessDestination()) {
+            Info -> TopBarState(title = context.getString(R.string.passwordless_info_screen_app_bar_title))
+            PinSetup -> TopBarState()
+            BiometricsSetup -> TopBarState(title = context.getString(R.string.passwordless_biometrics_setup_app_bar_title))
+            TermsAndConditions -> TopBarState(title = context.getString(R.string.passwordless_terms_and_conditions_app_bar_title))
+            Confirmation -> TopBarState(visible = false)
+            else -> when (navBackStackEntry?.toAccountRecoveryKeyNavigation()) {
+                Confirm -> TopBarState(title = context.getString(R.string.account_recovery_key_setting_title))
+                Success -> TopBarState(visible = false)
+                else -> TopBarState()
+            }
         }
         topBarState.value = topBarStateValue
     }
 
     Scaffold(
+        modifier = Modifier.safeDrawingPadding(),
         containerColor = DashlaneTheme.colors.backgroundAlternate,
         topBar = {
             AnimatedVisibility(
@@ -111,61 +106,61 @@ fun MplessAccountCreationNavigation(
         }
     ) { contentPadding ->
         NavHost(
-            startDestination = infoDestination,
+            startDestination = Info,
             navController = navController
         ) {
-            composable(infoDestination) {
+            composable<Info> {
                 InfoScreen(
                     modifier = Modifier.padding(contentPadding),
                     onLearnMoreClick = { onOpenHelpCenterPage(HelpCenterLink.ARTICLE_MASTER_PASSWORDLESS_ACCOUNT_INFO.androidUri) },
-                    onNextClick = { navController.navigate(pinSetupDestination) }
+                    onNextClick = { navController.navigate(PinSetup) }
                 )
             }
-            composable(pinSetupDestination) {
+            composable<PinSetup> {
                 PinSetupScreen(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     isCancellable = false,
                     onPinChosen = { newPin ->
                         viewModel.onNewPin(newPin)
-                        navController.navigate(biometricsSetupDestination)
+                        navController.navigate(BiometricsSetup)
                     }
                 )
             }
-            composable(biometricsSetupDestination) {
+            composable<BiometricsSetup> {
                 BiometricsSetupScreen(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     onSkip = {
                         viewModel.onEnableBiometrics(false)
-                        navController.navigate(termsAndConditionsDestination)
+                        navController.navigate(TermsAndConditions)
                     },
                     onBiometricsDisabled = {
                         viewModel.onEnableBiometrics(false)
-                        navController.navigate(termsAndConditionsDestination) {
-                            popUpTo(pinSetupDestination)
+                        navController.navigate(TermsAndConditions) {
+                            popUpTo(PinSetup)
                         }
                     },
                     onBiometricsEnabled = {
                         viewModel.onEnableBiometrics(true)
-                        navController.navigate(termsAndConditionsDestination)
+                        navController.navigate(TermsAndConditions)
                     }
                 )
             }
-            composable(termsAndConditionsDestination) {
+            composable<TermsAndConditions> {
                 TermsAndConditionsScreen(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = viewModel,
-                    onCreateAccount = { navController.navigate(confirmationDestination) },
+                    onCreateAccount = { navController.navigate(Confirmation) },
                     onOpenHelpCenterPage = onOpenHelpCenterPage
                 )
             }
-            composable(confirmationDestination) {
+            composable<Confirmation> {
                 ConfirmationScreen(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     mpLessViewModel = viewModel,
-                    onAccountCreated = { navController.navigateAndPopupToStart(AccountRecoveryKeySetupNavigation.introDestination) },
+                    onAccountCreated = { navController.navigateAndPopupToStart(Intro) },
                     onErrorMessageToDisplay = { errorRes ->
                         displayErrorMessage(errorRes)
                         navController.popBackStack()

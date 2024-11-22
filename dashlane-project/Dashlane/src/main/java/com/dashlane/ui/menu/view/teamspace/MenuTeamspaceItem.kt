@@ -59,7 +59,7 @@ fun MenuTeamspaceItem(item: MenuItemModel.TeamspaceItem) {
 
 @Preview
 @Composable
-fun MenuTeamspaceItemPreview() {
+private fun MenuTeamspaceItemPreview() {
     DashlanePreview {
         MenuTeamspaceItem(
             item = MenuItemModel.TeamspaceItem(

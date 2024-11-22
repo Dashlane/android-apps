@@ -11,8 +11,6 @@ fun CopyField.getFeedback() = when (this) {
     CopyField.PaymentsNumber -> R.string.feedback_copy_payments_number
     CopyField.PaymentsSecurityCode -> R.string.feedback_copy_payments_security_code
     CopyField.PaymentsExpirationDate -> R.string.feedback_copy_payments_expiration_date
-    CopyField.PayPalLogin -> R.string.feedback_copy_paypal_login
-    CopyField.PayPalPassword -> R.string.feedback_copy_paypal_password
     CopyField.BankAccountBank -> R.string.feedback_copy_bankaccount_bank
     CopyField.BankAccountBicSwift -> R.string.feedback_copy_bankaccount_bic_swift
     CopyField.BankAccountRoutingNumber -> R.string.feedback_copy_bankaccount_routing_number
@@ -50,4 +48,6 @@ fun CopyField.getFeedback() = when (this) {
     CopyField.CompanyName -> R.string.feedback_copy_company_name
     CopyField.CompanyTitle -> R.string.feedback_copy_company_title
     CopyField.TaxOnlineNumber -> R.string.feedback_copy_tax_online_number
+    CopyField.SecretValue -> R.string.feedback_copy_secret_value
+    CopyField.SecretId -> R.string.feedback_copy_secret_id
 }

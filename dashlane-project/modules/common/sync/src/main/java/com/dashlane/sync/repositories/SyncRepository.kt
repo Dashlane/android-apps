@@ -1,9 +1,11 @@
 package com.dashlane.sync.repositories
 
 import com.dashlane.cryptography.CryptographyEngineFactory
+import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.vault.SyncVault
 import java.time.Duration
 import java.time.Instant
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 interface SyncRepository {
 
@@ -12,7 +14,7 @@ interface SyncRepository {
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
         vault: SyncVault,
-        syncProgressChannel: SyncProgressChannel? = null
+        dataSyncState: MutableSharedFlow<DataSyncState>? = null,
     ): Result
 
     @Throws(SyncException::class)

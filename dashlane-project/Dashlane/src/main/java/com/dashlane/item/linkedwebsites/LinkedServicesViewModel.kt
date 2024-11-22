@@ -3,18 +3,18 @@ package com.dashlane.item.linkedwebsites
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class LinkedServicesViewModel @Inject constructor(

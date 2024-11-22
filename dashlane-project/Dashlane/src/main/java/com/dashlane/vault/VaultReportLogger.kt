@@ -6,14 +6,17 @@ import com.dashlane.autofill.pause.services.PausedFormSourcesProvider
 import com.dashlane.events.AppEvents
 import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.ext.application.KnownApplicationProvider
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.ItemTypeCounts
 import com.dashlane.hermes.generated.definitions.Scope
 import com.dashlane.hermes.generated.events.user.VaultReport
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
 import com.dashlane.security.identitydashboard.password.GroupOfAuthentifiant
+import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.counterFilter
@@ -22,23 +25,22 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.obfuscated.isNullOrEmpty
-import com.dashlane.home.vaultlist.Filter
 import com.dashlane.xml.domain.SyncObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class VaultReportLogger @Inject constructor(
-    @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
+    private val sessionCoroutineScopeProvider: OptionalProvider<CoroutineScope>,
+    private val sessionManager: SessionManager,
     private val appEvents: AppEvents,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val logRepository: LogRepository,
     private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
     private val vaultDataQuery: VaultDataQuery,
@@ -49,6 +51,13 @@ class VaultReportLogger @Inject constructor(
     private val knownApplicationProvider: KnownApplicationProvider,
     private val collectionsReportProvider: CollectionsReportProvider
 ) {
+
+    private val sessionCoroutineScope: CoroutineScope?
+        get() = sessionCoroutineScopeProvider.get()
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
+
     fun start() {
         appEvents.register(this, SyncFinishedEvent::class.java, false) {
             if (it.state != SyncFinishedEvent.State.SUCCESS) return@register
@@ -70,8 +79,8 @@ class VaultReportLogger @Inject constructor(
     }
 
     private fun logVaultReports() {
-        coroutineScope.launch {
-            Scope.values().mapNotNull { buildVaultReport(it) }
+        sessionCoroutineScope?.launch {
+            Scope.entries.mapNotNull { buildVaultReport(it) }
                 .forEach { logRepository.queueEvent(it) }
         }
     }

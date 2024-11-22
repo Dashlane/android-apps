@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -40,6 +39,7 @@ import com.dashlane.collections.sharing.CollectionSharingViewState.UserGroup
 import com.dashlane.collections.sharing.CollectionSharingViewState.ViewData
 import com.dashlane.design.component.ButtonLarge
 import com.dashlane.design.component.ButtonLayout
+import com.dashlane.design.component.HorizontalDivider
 import com.dashlane.design.component.InfoboxMedium
 import com.dashlane.design.component.ListItem
 import com.dashlane.design.component.Text
@@ -217,7 +217,7 @@ private fun InfoboxPermission() {
 
 @Composable
 private fun ColumnScope.ShareButton(userInteractionListener: UserInteractionListener) {
-    Divider(color = DashlaneTheme.colors.borderNeutralQuietIdle, thickness = 1.dp)
+    HorizontalDivider()
     ButtonLarge(
         onClick = { userInteractionListener.onShareClicked() },
         modifier = Modifier.Companion
@@ -282,7 +282,7 @@ private fun IndividualItem(
 
 @Preview
 @Composable
-fun PreviewShareBusinessCollection() {
+private fun PreviewShareBusinessCollection() {
     DashlanePreview {
         AvailableRecipientsList(
             viewData = ViewData(

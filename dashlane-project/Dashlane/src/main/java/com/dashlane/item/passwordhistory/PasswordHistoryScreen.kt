@@ -13,10 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.component.IndeterminateLoader
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.item.passwordhistory.PasswordHistoryViewModel.PasswordHistoryState
-import com.dashlane.ui.widgets.view.CircularProgressIndicator
 
 @Composable
 fun PasswordHistoryScreen(
@@ -31,11 +30,10 @@ fun PasswordHistoryScreen(
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            CircularProgressIndicator(
-                color = DashlaneTheme.colors.textBrandQuiet.value,
+            IndeterminateLoader(
                 modifier = Modifier
                     .padding(100.dp)
-                    .align(Alignment.Center)
+                    .align(Alignment.Center),
             )
         }
     } else {

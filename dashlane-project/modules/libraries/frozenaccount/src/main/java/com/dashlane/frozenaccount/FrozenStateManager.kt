@@ -1,6 +1,5 @@
 package com.dashlane.frozenaccount
 
-import com.dashlane.featureflipping.FeatureFlip
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability.PASSWORDSLIMIT
@@ -24,7 +23,6 @@ class FrozenStateManagerImpl @Inject constructor(
 
     private fun isUserFrozenOnLimitBreached(): Boolean {
         return userFeaturesChecker.has(PASSWORDSLIMIT) &&
-                userFeaturesChecker.getCapabilityInfo(PASSWORDSLIMIT)?.action == ENFORCE_FREEZE &&
-                userFeaturesChecker.has(FeatureFlip.FROZEN_STATE_STATE)
+                userFeaturesChecker.getCapabilityInfo(PASSWORDSLIMIT)?.action == ENFORCE_FREEZE
     }
 }

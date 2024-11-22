@@ -30,6 +30,7 @@ import com.dashlane.design.theme.tooling.DashlanePreview
 @Composable
 fun PinTextField(
     modifier: Modifier = Modifier,
+    length: Int,
     value: String,
     isError: Boolean,
     errorMessage: String?,
@@ -57,7 +58,7 @@ fun PinTextField(
             ),
             decorationBox = {
                 Row {
-                    repeat(4) { i ->
+                    repeat(length) { i ->
                         val hasChar = i < value.length
                         PinTextFieldCharacter(
                             modifier = Modifier
@@ -104,9 +105,10 @@ fun PinTextField(
 
 @Preview
 @Composable
-fun PinTextFieldPreview() {
+private fun PinTextFieldPreview() {
     DashlanePreview {
         PinTextField(
+            length = 6,
             value = "00",
             isError = true,
             errorMessage = "Error",

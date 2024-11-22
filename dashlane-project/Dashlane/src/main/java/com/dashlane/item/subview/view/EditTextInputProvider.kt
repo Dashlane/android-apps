@@ -8,7 +8,7 @@ import android.widget.EditText
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.listeners.edittext.NoLockEditTextWatcher
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 
 @SuppressLint("InflateParams")
 object EditTextInputProvider {

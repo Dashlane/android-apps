@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +52,7 @@ fun DashlaneSyncProgress(
         )
     )
 
-    val currentProgress: Int by remember(progress) { mutableStateOf(progress ?: 0) }
+    val currentProgress: Int by remember(progress) { mutableIntStateOf(progress ?: 0) }
     val animatedProgress by animateIntAsState(
         targetValue = currentProgress,
         animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
@@ -66,14 +64,6 @@ fun DashlaneSyncProgress(
         verticalArrangement = verticalArrangement,
         horizontalAlignment = horizontalAlignment
     ) {
-        var isTextVisible by remember { mutableStateOf(false) }
-
-        LaunchedEffect(hasFinishedLoading) {
-            if (hasFinishedLoading) {
-                isTextVisible = true
-            }
-        }
-
         LottieAnimation(
             modifier = Modifier.size(96.dp),
             iterations = LottieConstants.IterateForever,
@@ -97,14 +87,13 @@ fun DashlaneSyncProgress(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(top = 40.dp)
-                .padding(bottom = 32.dp)
         )
     }
 }
 
 @Preview
 @Composable
-fun DashlaneSyncProgressPreview() {
+private fun DashlaneSyncProgressPreview() {
     DashlanePreview {
         DashlaneSyncProgress(
             modifier = Modifier,

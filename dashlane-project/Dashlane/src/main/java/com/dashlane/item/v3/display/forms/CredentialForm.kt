@@ -3,33 +3,39 @@ package com.dashlane.item.v3.display.forms
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.dashlane.R
 import com.dashlane.authenticator.Hotp
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.item.v3.data.CollectionData
+import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.PasswordHealthData
-import com.dashlane.item.v3.display.fields.DeleteLoginField
+import com.dashlane.item.v3.display.fields.DeleteItemField
+import com.dashlane.item.v3.display.sections.AttachmentsSection
 import com.dashlane.item.v3.display.sections.HealthDetailSection
 import com.dashlane.item.v3.display.sections.LoginDetailSection
 import com.dashlane.item.v3.display.sections.OrganisationSection
+import com.dashlane.item.v3.display.sharedAccessSectionItem
 import com.dashlane.item.v3.util.SensitiveField
 import com.dashlane.item.v3.viewmodels.CredentialItemEditViewModel
-import com.dashlane.item.v3.viewmodels.State
+import com.dashlane.item.v3.viewmodels.Data
+import com.dashlane.item.v3.viewmodels.Datas
+import com.dashlane.item.v3.viewmodels.FormState
 import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
+import com.dashlane.xml.domain.SyncObject
 
 @Suppress("LongMethod")
 fun LazyListScope.credentialForm(
     viewModel: CredentialItemEditViewModel,
-    uiState: State,
-    data: CredentialFormData
+    uiState: FormState<CredentialFormData>
 ) {
     credentialFormContent(
         uiState = uiState,
-        data = data,
         passwordActions = PasswordActions(
             onPasswordUpdate = {
                 viewModel.updatePassword(it)
@@ -52,7 +58,7 @@ fun LazyListScope.credentialForm(
         ),
         loginActions = LoginActions(
             onValueChanged = { value ->
-                viewModel.updateFormDataFromView(value)
+                viewModel.updateCurrentDataFromView(value)
             },
             onValueCopy = {
                 viewModel.copyToClipboard(it)
@@ -75,35 +81,37 @@ fun LazyListScope.credentialForm(
         ),
         organisationActions = OrganisationActions(
             onValueChanged = { value ->
-                viewModel.updateFormDataFromView(value)
+                viewModel.updateCommonDataFromView(value)
             },
             onCollectionOpen = {
-                viewModel.actionOpenCollection(data.collections, data.space?.teamId, data.isSharedWithLimitedRight)
+                viewModel.actionOpenCollection()
             },
             onCollectionRemove = {
                 viewModel.removeCollection(it)
-            },
-            onSharedClick = {
-                viewModel.actionOpenShared()
             }
         ),
+        onSharedClick = {
+            viewModel.actionOpenShared()
+        },
         onDeleteAction = {
             viewModel.actionDelete()
-        }
+        },
+        onViewAttachments = viewModel::onViewAttachments
     )
 }
 
 private fun LazyListScope.credentialFormContent(
-    uiState: State,
-    data: CredentialFormData,
+    uiState: FormState<CredentialFormData>,
     passwordActions: PasswordActions,
     loginActions: LoginActions,
     organisationActions: OrganisationActions,
-    onDeleteAction: () -> Unit
+    onSharedClick: () -> Unit,
+    onDeleteAction: () -> Unit,
+    onViewAttachments: () -> Unit
 ) {
-    item {
+    item(key = "LoginDetailSection") {
         LoginDetailSection(
-            data = data,
+            data = uiState.datas.current,
             isNewItem = uiState.isNew,
             revealedFields = uiState.revealedFields,
             editMode = uiState.isEditMode,
@@ -111,16 +119,29 @@ private fun LazyListScope.credentialFormContent(
             loginActions = loginActions
         )
     }
-    item {
-        HealthDetailSection(data = data, editMode = uiState.isEditMode)
+    item(key = "HealthDetailSection") {
+        HealthDetailSection(data = uiState.datas.current, editMode = uiState.isEditMode)
     }
-    item {
-        OrganisationSection(data = data, editMode = uiState.isEditMode, organisationActions = organisationActions)
-    }
-    item {
-        DeleteLoginField(
-            canDelete = uiState.formData.canDelete,
+    item(key = "OrganisationSection") {
+        OrganisationSection(
+            data = uiState.datas.current,
             editMode = uiState.isEditMode,
+            organisationActions = organisationActions
+        )
+    }
+    item(key = "AttachmentsSection") {
+        AttachmentsSection(
+            data = uiState.datas.current,
+            editMode = uiState.isEditMode,
+            onViewAttachments = onViewAttachments
+        )
+    }
+    sharedAccessSectionItem(uiState, onSharedClick)
+    item(key = "DeleteLoginField") {
+        DeleteItemField(
+            canDelete = uiState.datas.current.commonData.canDelete,
+            editMode = uiState.isEditMode,
+            label = stringResource(id = R.string.vault_delete_login),
             onDeleteAction = onDeleteAction
         )
     }
@@ -132,13 +153,20 @@ private fun CredentialFormContentPreview() {
     DashlanePreview {
         LazyColumn(
             content = {
+                val formData = credentialFormDemoData()
                 credentialFormContent(
-                    uiState = State.emptyState("", false),
-                    data = credentialFormDemoData(),
+                    uiState = FormState(
+                        "",
+                        datas = Datas(current = formData, initial = formData),
+                        isNew = false,
+                        isEditMode = false
+                    ),
                     passwordActions = PasswordActions(),
                     loginActions = LoginActions(),
                     organisationActions = OrganisationActions(),
-                    onDeleteAction = {}
+                    onDeleteAction = {},
+                    onViewAttachments = {},
+                    onSharedClick = {}
                 )
             }
         )
@@ -152,40 +180,53 @@ private fun CredentialFormContentPreviewEdit() {
         LazyColumn(
             content = {
                 credentialFormContent(
-                    uiState = State.emptyState("", true),
-                    data = CredentialFormData(),
+                    uiState = FormState(
+                        itemId = "",
+                        datas = Datas(
+                            current = Data(formData = CredentialFormData(), commonData = CommonData()),
+                            initial = Data(formData = CredentialFormData(), commonData = CommonData())
+                        ),
+                        isEditMode = true,
+                        isNew = false
+                    ),
                     passwordActions = PasswordActions(),
                     loginActions = LoginActions(),
                     organisationActions = OrganisationActions(),
-                    onDeleteAction = {}
+                    onDeleteAction = {},
+                    onViewAttachments = {},
+                    onSharedClick = {}
                 )
             }
         )
     }
 }
 
-private fun credentialFormDemoData() = CredentialFormData(
-    email = "randomemail@provider.com",
-    secondaryLogin = "secondaryLogin",
-    url = "https://www.dashlane.com",
-    space = TeamSpace.Personal,
-    passwordHealth = PasswordHealthData(
-        passwordStrength = PasswordStrength(PasswordStrengthScore.SAFELY_UNGUESSABLE, null, listOf()),
-        isCompromised = false,
-        reusedCount = 0,
-        isPasswordEmpty = false
+private fun credentialFormDemoData() = Data(
+    formData = CredentialFormData(
+        email = "randomemail@provider.com",
+        secondaryLogin = "secondaryLogin",
+        url = "https://www.dashlane.com",
+        passwordHealth = PasswordHealthData(
+            passwordStrength = PasswordStrength(PasswordStrengthScore.SAFELY_UNGUESSABLE, null, listOf()),
+            isCompromised = false,
+            reusedCount = 0,
+            isPasswordEmpty = false
+        ),
     ),
+    commonData = CommonData(
+        space = TeamSpace.Personal
+    )
 )
 
 data class OrganisationActions(
-    val onValueChanged: (CredentialFormData) -> Unit = {},
+    val onValueChanged: (CommonData) -> Unit = {},
     val onCollectionOpen: () -> Unit = {},
     val onCollectionRemove: (CollectionData) -> Unit = {},
-    val onSharedClick: () -> Unit = {}
+    val onSecureNoteTypeChanged: (SyncObject.SecureNoteType) -> Unit = {}
 )
 
 data class LoginActions(
-    val onValueChanged: (CredentialFormData) -> Unit = {},
+    val onValueChanged: (Data<CredentialFormData>) -> Unit = {},
     val onValueCopy: (CopyField) -> Unit = {},
     val onLinkedServicesOpen: () -> Unit = {},
     val onWebsiteOpen: () -> Unit = {},

@@ -1,11 +1,11 @@
 package com.dashlane.ui.quickactions
 
 import android.content.Context
-import com.dashlane.item.subview.Action
-import com.dashlane.item.subview.quickaction.QuickActionProvider
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.ui.VaultItemImageHelper
+import com.dashlane.ui.action.Action
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
@@ -25,7 +25,7 @@ class QuickActionsDataProvider @Inject constructor(
 
     override fun getActions(itemId: String, itemListContext: ItemListContext): List<Action> {
         return getVaultItem(itemId)?.let {
-            quickActionProvider.getQuickActions(it, itemListContext)
+            quickActionProvider.getQuickActions(it)
         } ?: emptyList()
     }
 

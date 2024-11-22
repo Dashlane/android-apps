@@ -1,7 +1,7 @@
 package com.dashlane.ui.quickactions
 
 import android.content.Context
-import com.dashlane.item.subview.Action
+import com.dashlane.ui.action.Action
 import com.dashlane.ui.VaultItemImageHelper
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.vault.summary.SummaryObject

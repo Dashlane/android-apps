@@ -42,6 +42,7 @@ object VaultItemImageHelper {
         this == SyncObjectType.PERSONAL_WEBSITE -> R.drawable.ic_web_outlined
         this == SyncObjectType.PHONE -> R.drawable.ic_item_phone_mobile_outlined
         this == SyncObjectType.SOCIAL_SECURITY_STATEMENT -> R.drawable.ic_item_social_security_outlined
+        this == SyncObjectType.SECRET -> R.drawable.ic_item_secret_outlined
         else -> null
     }
 

@@ -1,10 +1,7 @@
 package com.dashlane.login.pages.enforce2fa
 
 import com.dashlane.R
-import com.dashlane.events.AppEvents
-import com.dashlane.events.clearLastEvent
 import com.dashlane.limitations.Enforce2faLimiter
-import com.dashlane.lock.UnlockEvent
 import com.dashlane.login.LoginActivity
 import com.dashlane.login.LoginIntents
 import com.dashlane.security.DashlaneIntent
@@ -25,7 +22,6 @@ class Enforce2faLimitPresenter @Inject constructor(
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
     private val hasEnforced2faLimitUseCase: HasEnforced2faLimitUseCase,
-    private val appEvents: AppEvents,
     private val enforce2faLimiter: Enforce2faLimiter
 ) : BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
     IntroScreenContract.Presenter {
@@ -69,7 +65,6 @@ class Enforce2faLimitPresenter @Inject constructor(
     override fun onClickPositiveButton() {
         activityLifecycleCoroutineScope.launch(mainCoroutineDispatcher) {
             sessionManager.session?.let {
-                appEvents.clearLastEvent<UnlockEvent>()
                 sessionManager.destroySession(it, false)
             }
         }

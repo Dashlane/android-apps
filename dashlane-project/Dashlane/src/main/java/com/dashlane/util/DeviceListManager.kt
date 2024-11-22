@@ -1,7 +1,7 @@
 package com.dashlane.util
 
 import androidx.annotation.MainThread
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.endpoints.devices.DeactivateDevicesService
 import com.dashlane.server.api.endpoints.devices.ListDevicesService.Data.Device

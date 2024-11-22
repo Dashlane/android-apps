@@ -8,6 +8,7 @@
     android:layout_gravity="center_horizontal"
     android:maxWidth="@dimen/size_480dp"
     tools:context=".darkwebmonitoring.OnboardingDarkWebMonitoringActivity"
+    android:fitsSystemWindows="true"
     >
 
     <ScrollView

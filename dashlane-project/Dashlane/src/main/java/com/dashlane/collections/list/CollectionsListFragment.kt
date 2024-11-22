@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -44,6 +44,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,11 +68,13 @@ import com.dashlane.design.component.Icon
 import com.dashlane.design.component.ListItem
 import com.dashlane.design.component.ListItemActions
 import com.dashlane.design.component.Text
+import com.dashlane.design.component.cardBackground
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.design.theme.typography.withSearchHighlight
 import com.dashlane.teamspaces.model.SpaceColor
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.widgets.compose.OutlinedTeamspaceIcon
@@ -251,6 +254,13 @@ class CollectionsListFragment : AbstractContentFragment() {
         searchQuery: String,
         onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit
     ) {
+        val filteredCollections = remember(searchQuery, viewData.collections) {
+            if (searchQuery.isEmpty()) {
+                viewData.collections
+            } else {
+                viewData.collections.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            }
+        }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -258,13 +268,17 @@ class CollectionsListFragment : AbstractContentFragment() {
                 bottom = 16.dp + fabSize
             ) 
         ) {
-            val filteredCollections = if (searchQuery.isEmpty()) {
-                viewData.collections
-            } else {
-                viewData.collections.filter { it.name.contains(searchQuery, ignoreCase = true) }
-            }
-            items(filteredCollections) { collection ->
-                CollectionItem(collection, onDisplayBusinessMemberLimitDialogChange)
+            itemsIndexed(
+                items = filteredCollections,
+                key = { _, item -> item.id }
+            ) { index, collection ->
+                CollectionItem(
+                    item = collection,
+                    onDisplayBusinessMemberLimitDialogChange = onDisplayBusinessMemberLimitDialogChange,
+                    isFirst = index == 0,
+                    isLast = index == filteredCollections.size - 1,
+                    searchQuery = searchQuery,
+                )
             }
         }
     }
@@ -309,11 +323,17 @@ class CollectionsListFragment : AbstractContentFragment() {
     private fun CollectionItem(
         item: CollectionViewData,
         onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
+        isFirst: Boolean,
+        isLast: Boolean,
+        searchQuery: String,
         viewModel: CollectionsListViewModel = viewModel()
     ) {
         var expanded by remember { mutableStateOf(false) }
         CollectionItem(
             item = item,
+            isFirst = isFirst,
+            isLast = isLast,
+            searchQuery = searchQuery,
             expandMenu = expanded,
             onExpandMenuChange = { expanded = it },
             onDeleteClicked = viewModel::deleteClicked,
@@ -325,6 +345,9 @@ class CollectionsListFragment : AbstractContentFragment() {
     @Composable
     private fun CollectionItem(
         item: CollectionViewData,
+        isFirst: Boolean,
+        isLast: Boolean,
+        searchQuery: String,
         expandMenu: Boolean,
         onExpandMenuChange: (Boolean) -> Unit,
         onDeleteClicked: (String, Boolean) -> Unit,
@@ -338,9 +361,17 @@ class CollectionsListFragment : AbstractContentFragment() {
             item.shared
         }
         ListItem(
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .cardBackground(isTop = isFirst, isBottom = isLast)
+                .padding(
+                    top = if (isFirst) 8.dp else 0.dp,
+                    bottom = if (isLast) 8.dp else 0.dp,
+                    start = 8.dp,
+                    end = 8.dp,
+                ),
             thumbnailType = null,
-            title = item.name,
+            title = item.name.withSearchHighlight(match = searchQuery, ignoreCase = true),
             titleExtraContent = {
                 if (showSpaceIndicator) {
                     
@@ -364,10 +395,12 @@ class CollectionsListFragment : AbstractContentFragment() {
                     )
                 }
             },
-            description = pluralStringResource(
-                id = R.plurals.collections_list_collection_item_count,
-                count = item.itemCount,
-                item.itemCount
+            description = AnnotatedString(
+                pluralStringResource(
+                    id = R.plurals.collections_list_collection_item_count,
+                    count = item.itemCount,
+                    item.itemCount
+                )
             ),
             actions = buildCollectionActionsMenu(
                 onExpandMenuChange = onExpandMenuChange,
@@ -532,7 +565,7 @@ class CollectionsListFragment : AbstractContentFragment() {
 
     @Preview
     @Composable
-    fun PreviewBusinessCollectionItem() {
+    private fun PreviewBusinessCollectionItem() {
         DashlanePreview {
             CollectionItem(
                 CollectionViewData(
@@ -552,6 +585,9 @@ class CollectionsListFragment : AbstractContentFragment() {
                     editAllowed = true,
                     deleteAllowed = true
                 ),
+                isFirst = false,
+                isLast = false,
+                searchQuery = "Ent",
                 expandMenu = false,
                 onExpandMenuChange = {},
                 onDeleteClicked = { _, _ -> },
@@ -562,7 +598,7 @@ class CollectionsListFragment : AbstractContentFragment() {
 
     @Preview
     @Composable
-    fun PreviewBusinessCollectionItemWithLongName() {
+    private fun PreviewBusinessCollectionItemWithLongName() {
         DashlanePreview {
             CollectionItem(
                 CollectionViewData(
@@ -582,6 +618,9 @@ class CollectionsListFragment : AbstractContentFragment() {
                     editAllowed = true,
                     deleteAllowed = true
                 ),
+                isFirst = false,
+                isLast = false,
+                searchQuery = "name",
                 expandMenu = false,
                 onExpandMenuChange = {},
                 onDeleteClicked = { _, _ -> },
@@ -592,7 +631,7 @@ class CollectionsListFragment : AbstractContentFragment() {
 
     @Preview
     @Composable
-    fun PreviewNoSpaceCollectionItem() {
+    private fun PreviewNoSpaceCollectionItem() {
         DashlanePreview {
             CollectionItem(
                 item = CollectionViewData(
@@ -607,6 +646,9 @@ class CollectionsListFragment : AbstractContentFragment() {
                     editAllowed = false,
                     deleteAllowed = false
                 ),
+                isFirst = false,
+                isLast = false,
+                searchQuery = "Ent",
                 expandMenu = false,
                 onExpandMenuChange = {},
                 onDeleteClicked = { _, _ -> },
@@ -617,7 +659,7 @@ class CollectionsListFragment : AbstractContentFragment() {
 
     @Preview
     @Composable
-    fun PreviewEmptyState() {
+    private fun PreviewEmptyState() {
         DashlanePreview {
             EmptyState()
         }

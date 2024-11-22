@@ -34,7 +34,7 @@ fun AccountRecoveryKeyActivationIntroScreen(
 
     AccountRecoveryKeyActivationIntroContent(
         modifier = modifier,
-        accountType = uiState.data.accountType,
+        accountType = uiState.accountType,
         onPrimaryButtonClicked = onGenerateKeyClicked
     )
 }
@@ -79,7 +79,7 @@ fun SkipAlertDialog(
 
 @Preview
 @Composable
-fun AccountRecoveryKeyActivationIntroContentPreview() {
+private fun AccountRecoveryKeyActivationIntroContentPreview() {
     DashlanePreview {
         AccountRecoveryKeyActivationIntroContent(
             accountType = UserAccountInfo.AccountType.MasterPassword,
@@ -90,7 +90,7 @@ fun AccountRecoveryKeyActivationIntroContentPreview() {
 
 @Preview
 @Composable
-fun SkipAlertDialogPreview() {
+private fun SkipAlertDialogPreview() {
     DashlanePreview {
         SkipAlertDialog(
             onDismissRequest = {},

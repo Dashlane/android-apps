@@ -10,7 +10,7 @@ import com.dashlane.storage.userdata.accessor.markedAsSearchedAsync
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.util.toHighlight
 import com.dashlane.util.clipboard.ClipboardCopy
-import com.dashlane.util.model.UserPermission
+import com.dashlane.sharing.UserPermission
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject

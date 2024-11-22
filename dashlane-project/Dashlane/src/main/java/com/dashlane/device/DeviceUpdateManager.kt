@@ -4,14 +4,15 @@ import android.content.Context
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.inapplogin.InAppLoginManager
-import com.dashlane.network.tools.authorization
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.devices.UpdateDeviceInfoService
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
+import com.dashlane.user.Username
 import com.dashlane.util.JsonSerialization
-import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.tryOrNull
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,7 +24,7 @@ class DeviceUpdateManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val service: UpdateDeviceInfoService,
     private val jsonSerialization: JsonSerialization,
-    private val preferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val sessionManager: SessionManager,
     private val crashReporter: CrashReporter,
     private val biometricRecovery: BiometricRecovery,
@@ -45,7 +46,7 @@ class DeviceUpdateManager @Inject constructor(
     private fun updateIfNeeded(session: Session, deviceInfo: DeviceInformation) {
         val deviceInfoStr = jsonSerialization.toJson(deviceInfo)
         val deviceInformationLocal =
-            tryOrNull { jsonSerialization.fromJson(readJsonFromCache(), DeviceInformation::class.java) }
+            tryOrNull { jsonSerialization.fromJson(readJsonFromCache(session.username), DeviceInformation::class.java) }
 
         
         if (deviceInfo != deviceInformationLocal) {
@@ -53,7 +54,7 @@ class DeviceUpdateManager @Inject constructor(
                 try {
                     val request = UpdateDeviceInfoService.Request(deviceInfoStr)
                     service.execute(session.authorization, request)
-                    storeJsonInCache(jsonSerialization.toJson(deviceInfo))
+                    storeJsonInCache(session.username, jsonSerialization.toJson(deviceInfo))
                 } catch (t: Throwable) {
                         message = "DeviceUpdateManager could not update Device Info",
                         throwable = t
@@ -70,9 +71,9 @@ class DeviceUpdateManager @Inject constructor(
         inAppLoginManager
     ).generate()
 
-    private fun readJsonFromCache() =
-        preferencesManager.getString(PREF_DEVICE_INFORMATION)
+    private fun readJsonFromCache(username: Username) =
+        preferencesManager[username].getString(PREF_DEVICE_INFORMATION)
 
-    private fun storeJsonInCache(data: String) =
-        preferencesManager.putString(PREF_DEVICE_INFORMATION, data)
+    private fun storeJsonInCache(username: Username, data: String) =
+        preferencesManager[username].putString(PREF_DEVICE_INFORMATION, data)
 }

@@ -5,23 +5,32 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.lock.LockWatcher
-import com.dashlane.ui.ScreenOverLockProtectionView
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
 import com.dashlane.login.LoginActivity
-import com.dashlane.login.lock.LockManager
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.ui.AbstractActivityLifecycleListener
+import com.dashlane.ui.ScreenOverLockProtectionView
+import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val CHECK_INTERVAL_MS = 500L
+
 class LockManagerActivityListener @Inject constructor(
+    @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
     private val lockManager: LockManager
 ) :
-    AbstractActivityLifecycleListener(), LockWatcher.Listener {
+    AbstractActivityLifecycleListener() {
 
-    private val inactivityCheck = InactivityCheck(lockManager)
-
+    private var inactivityCheckJob: Job? = null
     private var lastActivityResumed: Activity? = null
 
     private val lastResumeActivityRequireUnlock: Boolean
@@ -31,12 +40,31 @@ class LockManagerActivityListener @Inject constructor(
     private var openLockScreenPendingRunnable: Runnable? = null
 
     init {
-        lockManager.register(this)
+        applicationCoroutineScope.launch {
+            lockManager.lockEventFlow.collect { lockEvent ->
+                when (lockEvent) {
+                    is LockEvent.Lock -> {
+                        if (lastResumeActivityRequireUnlock) {
+                            lockManager.showLockActivity(lastActivityResumed!!)
+                        }
+                    }
+                    else -> Unit
+                }
+            }
+        }
     }
 
     override fun onFirstActivityStarted() {
         super.onFirstActivityStarted()
-        inactivityCheck.start()
+        inactivityCheckJob = flow {
+            delay(CHECK_INTERVAL_MS)
+            while (true) {
+                emit(Unit)
+                delay(CHECK_INTERVAL_MS)
+            }
+        }
+            .map { lockManager.checkForInactivityLock() }
+            .launchIn(applicationCoroutineScope)
     }
 
     override fun onActivityResumed(activity: Activity) {
@@ -71,7 +99,7 @@ class LockManagerActivityListener @Inject constructor(
         
         val sessionRestored =
             extras.getBoolean(NavigationConstants.FORCED_LOCK_SESSION_RESTORED, false) ||
-                    extras.getBoolean(NavigationConstants.SESSION_RESTORED_FROM_BOOT, false)
+                extras.getBoolean(NavigationConstants.SESSION_RESTORED_FROM_BOOT, false)
         if (!sessionRestored) return
         
         lockManager.lockWithoutEvents()
@@ -79,8 +107,8 @@ class LockManagerActivityListener @Inject constructor(
 
     private fun activityUnlockFailed(activity: Activity): Boolean =
         (activity as? DashlaneActivity)?.requireUserUnlock == true &&
-                activity.localClassName != lastActivityResumed?.localClassName &&
-                lockManager.isLocked && lastActivityResumed is LoginActivity && lastActivityResumed!!.isFinishing
+            activity.localClassName != lastActivityResumed?.localClassName &&
+            lockManager.isLocked && lastActivityResumed is LoginActivity && lastActivityResumed!!.isFinishing
 
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
@@ -101,17 +129,7 @@ class LockManagerActivityListener @Inject constructor(
     override fun onLastActivityStopped() {
         lastActivityResumed = null
         lockManager.onAppInBackground()
-        inactivityCheck.stop()
-    }
-
-    override fun onLock() {
-        if (lastResumeActivityRequireUnlock) {
-            lockManager.showLockActivity(lastActivityResumed!!)
-        }
-    }
-
-    override fun onUnlockEvent(unlockEvent: UnlockEvent) {
-        
+        inactivityCheckJob?.cancel()
     }
 
     private fun scheduleOpenLockActivity(activity: Activity) {
@@ -131,38 +149,6 @@ class LockManagerActivityListener @Inject constructor(
             
             openLockScreenHandler.removeCallbacks(it)
             openLockScreenPendingRunnable = null
-        }
-    }
-
-    private class InactivityCheck(private val lockManager: LockManager) : Runnable {
-
-        private val handler = Handler(Looper.myLooper()!!)
-        private var running = false
-
-        override fun run() {
-            if (!running) {
-                return
-            }
-            lockManager.checkForInactivityLock()
-            handler.postDelayed(this, CHECK_INTERVAL_MS)
-        }
-
-        fun start() {
-            if (running) {
-                return
-            }
-            running = true
-            run()
-        }
-
-        fun stop() {
-            running = false
-            handler.removeCallbacksAndMessages(this)
-        }
-
-        companion object {
-
-            private const val CHECK_INTERVAL_MS = 500L
         }
     }
 }

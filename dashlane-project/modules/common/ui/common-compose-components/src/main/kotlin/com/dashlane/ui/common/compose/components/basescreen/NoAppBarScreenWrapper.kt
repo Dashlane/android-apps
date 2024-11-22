@@ -59,7 +59,7 @@ fun NoAppBarScreenWrapper(
 
 @Preview
 @Composable
-fun NoAppBarScreenWrapperPreview() {
+private fun NoAppBarScreenWrapperPreview() {
     DashlanePreview {
         NoAppBarScreenWrapper(
             navigationIconToken = IconTokens.arrowLeftOutlined,

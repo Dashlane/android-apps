@@ -8,8 +8,9 @@ import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceDeactiv
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceNotFoundException
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.exceptions.DashlaneApiHttpException
+import javax.inject.Inject
 
-class AuthenticationDeviceRepositoryImpl(
+class AuthenticationDeviceRepositoryImpl @Inject constructor(
     private val userStorage: UserStorage,
     private val loginService: AuthLoginService
 ) : AuthenticationDeviceRepository {

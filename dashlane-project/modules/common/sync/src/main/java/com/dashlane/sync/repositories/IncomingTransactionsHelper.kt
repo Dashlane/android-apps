@@ -3,12 +3,14 @@ package com.dashlane.sync.repositories
 import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.server.api.endpoints.sync.SyncDownloadService
 import com.dashlane.server.api.endpoints.sync.SyncDownloadTransaction
+import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.domain.IncomingTransaction
 import com.dashlane.sync.domain.TransactionCipher
 import com.dashlane.sync.util.SyncLogs
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 class IncomingTransactionsHelper @Inject constructor(
@@ -18,7 +20,7 @@ class IncomingTransactionsHelper @Inject constructor(
     suspend fun readTransactions(
         downloadData: SyncDownloadService.Data,
         cryptographyEngineFactory: CryptographyEngineFactory,
-        syncProgressChannel: SyncProgressChannel?,
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
         sharedIds: Set<String>
     ): Result {
         syncLogs.onDecipherTransactionsStart()
@@ -29,11 +31,11 @@ class IncomingTransactionsHelper @Inject constructor(
         val transactionErrors = mutableListOf<Throwable>()
         val incomingTransactions =
             decipherTransactions(
-                downloadData.transactions,
-                cryptographyEngineFactory,
-                syncProgressChannel,
-                transactionErrors,
-                sharedIds
+                transactions = downloadData.transactions,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                dataSyncState = dataSyncState,
+                ignoredErrors = transactionErrors,
+                sharedIds = sharedIds
             )
 
         ignoredErrors.addAll(transactionErrors)
@@ -54,7 +56,7 @@ class IncomingTransactionsHelper @Inject constructor(
     private suspend fun decipherTransactions(
         transactions: List<SyncDownloadTransaction>,
         cryptographyEngineFactory: CryptographyEngineFactory,
-        syncProgressChannel: SyncProgressChannel?,
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
         ignoredErrors: MutableList<Throwable>,
         sharedIds: Set<String>
     ): List<IncomingTransaction> = coroutineScope {
@@ -64,7 +66,7 @@ class IncomingTransactionsHelper @Inject constructor(
             var index = 0
             consumeEach {
                 index++
-                syncProgressChannel?.trySend(SyncProgress.DecipherRemote(index, transactionCount))
+                dataSyncState?.emit(DataSyncState.Active(SyncProgress.DecipherRemote(index, transactionCount)))
             }
         }
 

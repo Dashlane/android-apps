@@ -4,15 +4,15 @@
 
         <activity
             android:name=".OnboardingQuestionnaireActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar">
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars">
         </activity>
 
         <activity
             android:name=".TrustFAQActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         <activity
             android:name=".darkwebmonitoring.OnboardingDarkWebMonitoringActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
     </application>
 </manifest>

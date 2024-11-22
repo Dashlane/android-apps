@@ -3,13 +3,11 @@ package com.dashlane.ui.screens.settings
 import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.hermes.generated.events.user.UserSettings
 import com.dashlane.inapplogin.InAppLoginManager
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockTypeManager.Companion.LOCK_TYPE_BIOMETRIC
-import com.dashlane.login.lock.LockTypeManager.Companion.LOCK_TYPE_MASTER_PASSWORD
-import com.dashlane.login.lock.LockTypeManager.Companion.LOCK_TYPE_PIN_CODE
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockType
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.util.tryOrNull
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.user.Username
 import dagger.Reusable
 import javax.inject.Inject
 
@@ -18,19 +16,20 @@ class UserSettingsLogRepository @Inject constructor(
     private val lockManager: LockManager,
     private val inAppLoginManager: InAppLoginManager,
     private val biometricRecovery: BiometricRecovery,
-    private val userPreferencesManager: UserPreferencesManager
+    private val preferencesManager: PreferencesManager
 ) {
-    fun get(): UserSettings {
-        val lockType = tryOrNull { lockManager.getLockType() } ?: LOCK_TYPE_MASTER_PASSWORD
+    fun get(username: Username): UserSettings {
+        val locks = lockManager.getLocks(username)
+        val userPreferencesManager = preferencesManager[username]
 
-        val hasBiometrics = lockType == LOCK_TYPE_BIOMETRIC
+        val hasBiometrics = LockType.Biometric in locks
 
         return UserSettings(
-            hasAuthenticationWithPin = lockType == LOCK_TYPE_PIN_CODE,
+            hasAuthenticationWithPin = LockType.PinCode in locks,
             hasAuthenticationWithBiometrics = hasBiometrics,
             hasAutofillActivated = inAppLoginManager.isEnableForApp(),
             hasMasterPasswordBiometricReset = hasBiometrics && biometricRecovery.isFeatureEnabled,
-            hasUnlockItemWithBiometric = hasBiometrics && lockManager.isItemUnlockableByPinOrFingerprint(),
+            hasUnlockItemWithBiometric = hasBiometrics,
             hasLockOnExit = lockManager.isLockOnExit(),
             lockAutoTimeout = lockManager.lockTimeout?.seconds?.toInt(),
             hasClearClipboard = userPreferencesManager.getBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT),

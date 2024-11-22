@@ -3,38 +3,36 @@ package com.dashlane.login.accountrecoverykey.recovery
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
-import com.dashlane.core.KeyChainHelper
+import com.dashlane.changemasterpassword.MasterPasswordChanger
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPass
+import com.dashlane.lock.LockType
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockPass
-import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.login.pages.password.LoginPasswordRepository
-import com.dashlane.masterpassword.MasterPasswordChanger
-import com.dashlane.network.tools.authorization
+import com.dashlane.login.root.LoginRepository
 import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
 import com.dashlane.notificationcenter.view.ActionItemType
+import com.dashlane.pin.PinSetupRepository
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
-import com.dashlane.crypto.keys.AppKey
 import com.dashlane.session.Session
-import com.dashlane.session.SessionCredentialsSaver
-import com.dashlane.storage.securestorage.UserSecureStorageManager
+import com.dashlane.session.authorization
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -48,19 +46,19 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import javax.inject.Inject
 
 @HiltViewModel
 class RecoveryViewModel @Inject constructor(
+    private val loginRepository: LoginRepository,
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
     private val authenticationPasswordRepository: AuthenticationPasswordRepository,
     private val loginPasswordRepository: LoginPasswordRepository,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val lockManager: LockManager,
     private val masterPasswordChanger: MasterPasswordChanger,
-    private val keyChainHelper: KeyChainHelper,
-    private val userSecureStorageManager: UserSecureStorageManager,
-    private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val logRepository: LogRepository,
+    private val pinSetupRepository: PinSetupRepository,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -105,9 +103,10 @@ class RecoveryViewModel @Inject constructor(
     @VisibleForTesting
     fun recoverMasterPasswordAccount(accountType: UserAccountInfo.AccountType): Flow<RecoveryState> {
         return flow {
-            val data = loginAccountRecoveryKeyRepository.state.value
+            val registeredUserDevice =
+                loginRepository.getRegisteredUserDevice() ?: throw IllegalStateException("registeredUserDevice was null at recoverAccount")
 
-            val registeredUserDevice = data.registeredUserDevice ?: throw IllegalStateException("registeredUserDevice was null at recoverAccount")
+            val data = loginAccountRecoveryKeyRepository.state.value
             val obfuscatedVaultKey = data.obfuscatedVaultKey ?: throw IllegalStateException("obfuscatedVaultKey was null at recoverAccount")
             val newMasterPassword = data.newMasterPassword ?: throw IllegalStateException("newMasterPassword was null at recoverAccount")
 
@@ -124,7 +123,7 @@ class RecoveryViewModel @Inject constructor(
                 return@flow
             }
 
-            unlockMP(masterPassword = newMasterPassword)
+            unlockMP(session = session, masterPassword = newMasterPassword)
             disableARK(accountType = accountType, authorization = session.authorization)
 
             logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.COMPLETE))
@@ -137,9 +136,10 @@ class RecoveryViewModel @Inject constructor(
     @VisibleForTesting
     fun recoverInvisibleMasterPasswordAccount(accountType: UserAccountInfo.AccountType): Flow<RecoveryState> {
         return flow {
-            val data = loginAccountRecoveryKeyRepository.state.value
+            val registeredUserDevice =
+                loginRepository.getRegisteredUserDevice() ?: throw IllegalStateException("registeredUserDevice was null at recoverAccount")
 
-            val registeredUserDevice = data.registeredUserDevice ?: throw IllegalStateException("registeredUserDevice was null at recoverAccount")
+            val data = loginAccountRecoveryKeyRepository.state.value
             val obfuscatedVaultKey = data.obfuscatedVaultKey ?: throw IllegalStateException("obfuscatedVaultKey was null at recoverAccount")
             val pin = data.pin ?: throw IllegalStateException("Pin cannot be null for MPLess accounts")
             val biometricEnabled = data.biometricEnabled
@@ -218,30 +218,31 @@ class RecoveryViewModel @Inject constructor(
 
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
-    fun setupPinAndBiometric(session: Session, pin: String, biometricEnabled: Boolean) {
-        keyChainHelper.initializeKeyStoreIfNeeded(session.userId)
-        lockManager.setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
-
-        userPreferencesManager.putBoolean(ConstantsPrefs.HOME_PAGE_GETTING_STARTED_PIN_IGNORE, true)
-        userSecureStorageManager.storePin(session.localKey, session.username, pin)
-        sessionCredentialsSaver.saveCredentials(session)
-
-        lockManager.unlock(LockPass.ofPin(pin))
+    suspend fun setupPinAndBiometric(session: Session, pin: String, biometricEnabled: Boolean) {
+        pinSetupRepository.savePinValue(session, pin)
+        lockManager.unlock(session = session, pass = LockPass.ofPin(pin))
+        runCatching {
+            lockManager.sendUnlockEvent(LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.PinCode))
+        }
 
         if (biometricEnabled) {
             
-            NotificationCenterRepositoryImpl.setDismissed(userPreferencesManager, ActionItemType.BIOMETRIC.trackingKey, false)
-            lockManager.setLockType(LockTypeManager.LOCK_TYPE_BIOMETRIC)
+            NotificationCenterRepositoryImpl.setDismissed(preferencesManager[session.username], ActionItemType.BIOMETRIC.trackingKey, false)
+            lockManager.addLock(session.username, LockType.Biometric)
         }
     }
 
     @VisibleForTesting
     @Suppress("kotlin:S6313") 
-    fun unlockMP(masterPassword: ObfuscatedByteArray) {
-        lockManager.unlock(LockPass.ofPassword(AppKey.Password(masterPassword)))
+    suspend fun unlockMP(session: Session, masterPassword: ObfuscatedByteArray) {
+        lockManager.unlock(session = session, pass = LockPass.ofPassword(AppKey.Password(masterPassword)))
         lockManager.hasEnteredMP = true
         
-        kotlin.runCatching { lockManager.sendUnLock(UnlockEvent.Reason.AppAccess(), true) }
+        runCatching {
+            lockManager.sendUnlockEvent(
+                LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword)
+            )
+        }
     }
 
     @VisibleForTesting
@@ -250,6 +251,6 @@ class RecoveryViewModel @Inject constructor(
         loginAccountRecoveryKeyRepository.disableRecoveryKeyAfterUse(accountType, authorization)
         loginAccountRecoveryKeyRepository.clearData()
 
-        userPreferencesManager.putBoolean(ConstantsPrefs.DISABLED_ACCOUNT_RECOVERY_KEY, true)
+        preferencesManager[authorization.login].putBoolean(ConstantsPrefs.DISABLED_ACCOUNT_RECOVERY_KEY, true)
     }
 }

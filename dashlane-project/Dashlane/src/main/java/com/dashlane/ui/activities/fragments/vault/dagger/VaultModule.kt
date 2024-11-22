@@ -2,7 +2,7 @@ package com.dashlane.ui.activities.fragments.vault.dagger
 
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.feature.home.data.VaultItemsRepository
 import com.dashlane.ui.activities.fragments.vault.Vault
 import com.dashlane.ui.activities.fragments.vault.VaultDataProvider
 import com.dashlane.ui.activities.fragments.vault.VaultPresenter
@@ -26,7 +26,7 @@ interface VaultModule {
     companion object {
 
         @Provides
-        fun provideVaultViewModel(fragment: Fragment, genericDataQuery: GenericDataQuery): VaultViewModel =
-            ViewModelProvider(fragment, VaultViewModelFactory(genericDataQuery))[VaultViewModel::class.java]
+        fun provideVaultViewModel(fragment: Fragment, vaultItemsRepository: VaultItemsRepository): VaultViewModel =
+            ViewModelProvider(fragment, VaultViewModelFactory(vaultItemsRepository))[VaultViewModel::class.java]
     }
 }

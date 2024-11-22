@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.collections.businessSpaceData
 import com.dashlane.collections.sharing.item.CollectionSharingItemDataProvider
 import com.dashlane.collections.spaceData
+import com.dashlane.securefile.extensions.hasAttachments
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
@@ -21,7 +22,6 @@ import com.dashlane.vault.model.titleForListNormalized
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
-import com.dashlane.vault.util.hasAttachments
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher

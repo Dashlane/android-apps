@@ -3,6 +3,7 @@ package com.dashlane.premium.paywall.common
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.material3.Scaffold
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.setCurrentPageView
@@ -17,28 +18,31 @@ class PaywallActivity : DashlaneActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DashlaneTheme {
-                PaywallScreen(
-                    viewModel = viewModel,
-                    navigateUp = {
-                        viewModel.onNavigateUp()
-                        finish()
-                    },
-                    navigateToOffer = {
-                        viewModel.onClickUpgrade()
-                        finish()
-                    },
-                    onCloseClick = {
-                        viewModel.onClickClose()
-                        finish()
-                    },
-                    onCancelClick = {
-                        viewModel.onClickCancel()
-                        finish()
-                    },
-                    onAllOffersClick = {
-                        viewModel.onClickAllOffers()
-                    }
-                )
+                Scaffold { contentPadding ->
+                    PaywallScreen(
+                        viewModel = viewModel,
+                        contentPadding = contentPadding,
+                        navigateUp = {
+                            viewModel.onNavigateUp()
+                            finish()
+                        },
+                        navigateToOffer = {
+                            viewModel.onClickUpgrade()
+                            finish()
+                        },
+                        onCloseClick = {
+                            viewModel.onClickClose()
+                            finish()
+                        },
+                        onCancelClick = {
+                            viewModel.onClickCancel()
+                            finish()
+                        },
+                        onAllOffersClick = {
+                            viewModel.onClickAllOffers()
+                        }
+                    )
+                }
             }
         }
         if (savedInstanceState == null) {

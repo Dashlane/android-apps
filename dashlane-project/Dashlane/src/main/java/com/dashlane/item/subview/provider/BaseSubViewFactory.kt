@@ -2,20 +2,21 @@ package com.dashlane.item.subview.provider
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.featureflipping.FeatureFlip.ATTACHMENT_ALL_ITEMS
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.action.AttachmentDetailsAction
 import com.dashlane.item.subview.action.ShareDetailsAction
+import com.dashlane.securefile.extensions.attachmentsCount
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
-import com.dashlane.vault.util.attachmentsAllowed
-import com.dashlane.vault.util.attachmentsCount
+import com.dashlane.vault.utils.attachmentsAllowed
 
 abstract class BaseSubViewFactory(
     private val userFeaturesChecker: UserFeaturesChecker,
@@ -69,7 +70,7 @@ abstract class BaseSubViewFactory(
         vaultItem: VaultItem<*>
     ): ItemSubView<String>? {
         val summary: SummaryObject = vaultItem.toSummary()
-        if (!summary.attachmentsAllowed(userFeaturesChecker)) {
+        if (!summary.attachmentsAllowed(attachmentAllItems = userFeaturesChecker.has(ATTACHMENT_ALL_ITEMS))) {
             
             return null
         }

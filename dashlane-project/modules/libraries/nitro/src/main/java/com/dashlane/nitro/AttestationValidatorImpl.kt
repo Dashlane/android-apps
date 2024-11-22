@@ -14,19 +14,25 @@ import java.security.cert.CertificateFactory
 import java.security.cert.PKIXParameters
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
+import java.util.Optional
 import javax.inject.Inject
+import kotlin.jvm.optionals.getOrNull
 
 internal class AttestationValidatorImpl @Inject constructor(
-    private val nitroUrlOverride: NitroUrlOverride
+    private val optionalNitroUrlOverride: Optional<NitroUrlOverride>
 ) : AttestationValidator {
+
+    private val isNitroStagingEnabled: Boolean
+        get() = optionalNitroUrlOverride.getOrNull()?.nitroStagingEnabled == true
+
     private val pcr3: String
-        get() = if (nitroUrlOverride.nitroStagingEnabled) {
+        get() = if (isNitroStagingEnabled) {
             "90528150e0f0537fa9e96b067137f6494d525f2fcfd15b478ce28ab2cfaf38dd4e24ad73f9d9d6f238a7f39f2d1956b7"
         } else {
             "dfb6428f132530b8c021bea8cbdba2c87c96308ba7e81c7aff0655ec71228122a9297fd31fe5db7927a7322e396e4c16"
         }
     private val pcr8: String
-        get() = if (nitroUrlOverride.nitroStagingEnabled) {
+        get() = if (isNitroStagingEnabled) {
             
             ""
         } else {

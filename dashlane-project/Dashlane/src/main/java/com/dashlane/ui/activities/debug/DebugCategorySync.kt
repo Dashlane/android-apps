@@ -1,13 +1,9 @@
 package com.dashlane.ui.activities.debug
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.preference.PreferenceGroup
-import com.dashlane.permission.PermissionsManager
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
@@ -16,15 +12,14 @@ import com.dashlane.util.showToaster
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.qualifiers.ActivityContext
-import javax.inject.Inject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 internal class DebugCategorySync @Inject constructor(
     @ActivityContext override val context: Context,
-    val permissionsManager: PermissionsManager,
     private val vaultDataQuery: VaultDataQuery,
     private val fileUtils: FileUtils
 ) : AbstractDebugCategory() {
@@ -41,10 +36,6 @@ internal class DebugCategorySync @Inject constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun showDataChangeHistory() {
-        if (filePermissionsMissing()) {
-            return
-        }
-
         val list = vaultDataQuery
             .queryAllLegacy(VaultFilter(dataTypeFilter = SpecificDataTypeFilter(SyncObjectType.DATA_CHANGE_HISTORY)))
             .mapNotNull { it.syncObject as? SyncObject.DataChangeHistory }
@@ -69,16 +60,6 @@ internal class DebugCategorySync @Inject constructor(
                     )
                 }
         }
-    }
-
-    @SuppressLint("NewApi")
-    private fun filePermissionsMissing(): Boolean {
-        context as Activity
-        val denied = !permissionsManager.isAllowedToWriteToPublicFolder()
-        if (denied) {
-            context.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
-        }
-        return denied
     }
 
     private fun SyncObject.DataChangeHistory.html(): String =

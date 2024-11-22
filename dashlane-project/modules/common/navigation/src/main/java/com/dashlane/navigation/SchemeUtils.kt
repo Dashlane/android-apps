@@ -1,5 +1,6 @@
 package com.dashlane.navigation
 
+import androidx.navigation.NavBackStackEntry
 import com.dashlane.xml.domain.SyncObjectType
 
 object SchemeUtils {
@@ -39,4 +40,9 @@ object SchemeUtils {
     fun isHomeFilter(host: String): Boolean {
         return host in HOME_FILTER
     }
+
+    fun NavBackStackEntry?.destinationRouteClassSimpleName() = this?.destination?.route
+        ?.substringBefore("?")
+        ?.substringBefore("/")
+        ?.substringAfterLast(".")
 }

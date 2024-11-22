@@ -11,6 +11,7 @@
     <string name="title_none_of_these">None of these</string>
     <string name="securenote">Secure Note</string>
     <string name="securenote_name">Untitled note</string>
+    <string name="secret">Secret</string>
     <string name="secure_note_is_locked">Note is locked!</string>
     <string name="no_color">No color</string>
     <string name="blue">Blue</string>

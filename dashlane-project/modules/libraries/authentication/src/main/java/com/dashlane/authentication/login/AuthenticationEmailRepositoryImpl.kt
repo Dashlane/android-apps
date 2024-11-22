@@ -150,7 +150,6 @@ class AuthenticationEmailRepositoryImpl(
                 AuthMethod.TOTP,
                 AuthMethod.DUO_PUSH,
                 AuthMethod.U2F,
-                AuthMethod.DASHLANE_AUTHENTICATOR
             )
         )
         val response = try {
@@ -172,10 +171,7 @@ class AuthenticationEmailRepositoryImpl(
         val ssoInfo = verification[AuthVerification.Type.SSO]?.ssoInfo?.toAuthenticationSsoInfo(login)
 
         val secondFactor = when {
-            AuthVerification.Type.EMAIL_TOKEN in verification -> AuthenticationSecondFactorEmailToken(
-                login,
-                verification = verification
-            ).also {
+            AuthVerification.Type.EMAIL_TOKEN in verification -> AuthenticationSecondFactorEmailToken(login).also {
                 try {
                     if (responseData.accountType == AccountType.MASTERPASSWORD) {
                         
@@ -185,14 +181,7 @@ class AuthenticationEmailRepositoryImpl(
                     throw e.toAuthenticationException()
                 }
             }
-            AuthVerification.Type.TOTP in verification -> AuthenticationSecondFactorTotp(
-                login,
-                verification = verification
-            )
-            AuthVerification.Type.DASHLANE_AUTHENTICATOR in verification -> AuthenticationSecondFactorEmailToken(
-                login,
-                verification = verification
-            )
+            AuthVerification.Type.TOTP in verification -> AuthenticationSecondFactorTotp(login, verification = verification)
             AuthVerification.Type.SSO in verification -> return RequiresDeviceRegistration.Sso(
                 login,
                 ssoInfo ?: throw AuthenticationUnknownException(message = "Missing ssoInfo")
@@ -232,7 +221,7 @@ class AuthenticationEmailRepositoryImpl(
                 when (responseData.accountType) {
                     AccountType.MASTERPASSWORD -> userDevice.toRequiresPassword(ssoInfo)
                     AccountType.INVISIBLEMASTERPASSWORD -> RequiresDeviceRegistration.SecondFactor(
-                        secondFactor = AuthenticationSecondFactorEmailToken(login = userDevice.login, verification = verification),
+                        secondFactor = AuthenticationSecondFactorEmailToken(login = userDevice.login),
                         accountType = responseData.accountType,
                         ssoInfo = null
                     )
@@ -293,7 +282,6 @@ private fun UserStorage.UserDevice.toLoginServiceRequest() = AuthLoginService.Re
         AuthMethod.TOTP,
         AuthMethod.DUO_PUSH,
         AuthMethod.U2F,
-        AuthMethod.DASHLANE_AUTHENTICATOR
     )
 )
 
@@ -306,13 +294,11 @@ private fun AuthenticationSecondFactorTotp(
     val u2f = verification[AuthVerification.Type.U2F]
     val isU2fEnabled = u2f != null
     val u2fChallenges = u2f?.u2fChallenges
-    val isAuthenticatorEnabled = verification[AuthVerification.Type.DASHLANE_AUTHENTICATOR] != null
 
     val securityFeatures = sequence {
         yield(SecurityFeature.TOTP)
         if (isDuoPushEnabled) yield(SecurityFeature.DUO)
         if (isU2fEnabled) yield(SecurityFeature.U2F)
-        if (isAuthenticatorEnabled) yield(SecurityFeature.AUTHENTICATOR)
     }.toSet()
 
     return AuthenticationSecondFactor.Totp(
@@ -337,36 +323,10 @@ private fun AuthenticationSecondFactorTotp(
         } else {
             null
         },
-        authenticator = if (isAuthenticatorEnabled) {
-            AuthenticationSecondFactor.Authenticator(
-                login = login,
-                securityFeatures = securityFeatures
-            )
-        } else {
-            null
-        }
     )
 }
 
 @Suppress("FunctionName")
-private fun AuthenticationSecondFactorEmailToken(
-    login: String,
-    verification: Map<AuthVerification.Type, AuthVerification>
-): AuthenticationSecondFactor.EmailToken {
-    val isAuthenticatorEnabled = verification[AuthVerification.Type.DASHLANE_AUTHENTICATOR] != null
-
-    return AuthenticationSecondFactor.EmailToken(
-        login = login,
-        authenticator = if (isAuthenticatorEnabled) {
-            AuthenticationSecondFactor.Authenticator(
-                login = login,
-                securityFeatures = setOf(
-                    SecurityFeature.EMAIL_TOKEN,
-                    SecurityFeature.AUTHENTICATOR
-                )
-            )
-        } else {
-            null
-        }
-    )
+private fun AuthenticationSecondFactorEmailToken(login: String): AuthenticationSecondFactor.EmailToken {
+    return AuthenticationSecondFactor.EmailToken(login = login)
 }

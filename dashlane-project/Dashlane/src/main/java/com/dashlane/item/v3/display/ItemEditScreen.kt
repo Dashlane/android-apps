@@ -8,6 +8,7 @@ import android.view.MenuItem
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -24,45 +24,52 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.LifecycleOwner
 import com.dashlane.R
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.HasLogins
+import com.dashlane.design.component.DashlaneSnackbarWrapper
 import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.item.subview.Action
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.CreditCardFormData
 import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.data.InfoBoxData.Button.Action.LAUNCH_GUIDED_CHANGE
-import com.dashlane.item.v3.data.LoadingFormData
+import com.dashlane.item.v3.data.SecretFormData
 import com.dashlane.item.v3.data.SecureNoteFormData
 import com.dashlane.item.v3.display.forms.credentialForm
+import com.dashlane.item.v3.display.forms.secretForm
+import com.dashlane.item.v3.display.forms.secureNoteForm
 import com.dashlane.item.v3.display.sections.ItemDateSection
 import com.dashlane.item.v3.viewmodels.CredentialItemEditViewModel
+import com.dashlane.item.v3.viewmodels.Data
+import com.dashlane.item.v3.viewmodels.ItemEditState
 import com.dashlane.item.v3.viewmodels.ItemEditViewModel
-import com.dashlane.item.v3.viewmodels.State
+import com.dashlane.item.v3.viewmodels.SecretItemEditViewModel
+import com.dashlane.item.v3.viewmodels.SecureNoteItemEditViewModel
 import com.dashlane.navigation.Navigator
-import com.dashlane.util.getColorOn
+import com.dashlane.ui.action.Action
+import com.dashlane.vault.summary.SummaryObject
 import java.time.Clock
 
 @Suppress("LongMethod")
 @Composable
 internal fun ItemEditScreen(
     activity: AppCompatActivity,
-    viewModel: ItemEditViewModel,
-    uiState: State,
+    viewModel: ItemEditViewModel<out FormData>,
+    uiState: ItemEditState<out FormData>,
     lazyListState: LazyListState,
     navigator: Navigator,
     viewLifecycleOwner: LifecycleOwner,
     clock: Clock,
     resultLauncherAuthenticator: ActivityResultLauncher<HasLogins.CredentialItem>,
+    resultLauncherAttachments: ActivityResultLauncher<SummaryObject>,
     actionsMenu: MutableMap<Action, MenuItem>,
 ) {
-    val data = uiState.formData
+    val data = uiState.datas?.current
     val snackbarState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
 
@@ -71,8 +78,7 @@ internal fun ItemEditScreen(
         activity,
         viewModel,
         actionsMenu,
-        uiState.menuActions,
-        uiState.formData
+        uiState.menuActions
     )
 
     LaunchedEffect(key1 = menuProvider) {
@@ -83,13 +89,16 @@ internal fun ItemEditScreen(
     }
     LazyColumn(
         modifier = Modifier
+            .background(DashlaneTheme.colors.backgroundAlternate)
             .fillMaxWidth(),
         contentPadding = PaddingValues(bottom = 40.dp),
         state = lazyListState
     ) {
         if (!uiState.isEditMode) {
-            item {
-                ItemHeader(formData = data)
+            data?.let {
+                item {
+                    ItemHeader(data = data)
+                }
             }
         }
         displayInfoBox(uiState.infoBoxes, uiState.isEditMode) { infoBoxAction ->
@@ -97,67 +106,85 @@ internal fun ItemEditScreen(
                 LAUNCH_GUIDED_CHANGE -> (viewModel as? CredentialItemEditViewModel)?.actionOpenGuidedPasswordChange()
             }
         }
-        displayFormData(data, viewModel, uiState)
-        item {
-            ItemDateSection(
-                clock = clock,
-                data = data,
-                editMode = uiState.isEditMode
+        data?.let {
+            displayFormData(data, viewModel, uiState)
+            item {
+                ItemDateSection(
+                    clock = clock,
+                    data = data,
+                    editMode = uiState.isEditMode
+                )
+            }
+        }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(key1 = viewModel) {
+        viewModel.uiState.sideEffect.collect { sideEffect ->
+            performSideEffect(
+                context,
+                sideEffect,
+                navigator,
+                resultLauncherAuthenticator,
+                resultLauncherAttachments,
+                activity,
+                snackbarState,
+                snackbarScope
             )
         }
     }
     uiState.itemAction?.let { action ->
-        PerformAction(
-            data,
-            action,
-            viewModel,
-            navigator,
-            resultLauncherAuthenticator,
-            activity,
-            snackbarState,
-            snackbarScope
-        )
+        data?.let {
+            PerformAction(
+                data,
+                action,
+                viewModel,
+                navigator,
+                activity
+            )
+        }
     }
     Box(modifier = Modifier.fillMaxWidth()) {
-        SnackbarHost(
-            hostState = snackbarState,
-            Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 8.dp)
-        ) {
-            Snackbar(
-                containerColor = DashlaneTheme.colors.containerExpressiveBrandQuietIdle
-                    .compositeOver(DashlaneTheme.colors.containerAgnosticNeutralSupershy),
-                contentColor = DashlaneTheme.colors.textBrandStandard.value,
-                snackbarData = it
+        DashlaneSnackbarWrapper {
+            SnackbarHost(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp),
+                hostState = snackbarState,
             )
         }
     }
 }
 
 private fun LazyListScope.displayFormData(
-    data: FormData,
-    viewModel: ItemEditViewModel,
-    uiState: State
+    data: Data<out FormData>,
+    viewModel: ItemEditViewModel<out FormData>,
+    uiState: ItemEditState<out FormData>
 ) {
-    when (data) {
+    @Suppress("UNCHECKED_CAST")
+    when (data.formData) {
         is CredentialFormData -> credentialForm(
             viewModel = viewModel as CredentialItemEditViewModel,
-            uiState = uiState,
-            data = data
+            uiState = (uiState as ItemEditState<CredentialFormData>).toNonNullableState()
         )
-        is LoadingFormData -> Unit
+        is SecureNoteFormData -> secureNoteForm(
+            viewModel = viewModel as SecureNoteItemEditViewModel,
+            uiState = (uiState as ItemEditState<SecureNoteFormData>).toNonNullableState()
+        )
+        is SecretFormData -> secretForm(
+            viewModel = viewModel as SecretItemEditViewModel,
+            uiState = (uiState as ItemEditState<SecretFormData>).toNonNullableState()
+        )
         is CreditCardFormData -> Unit
     }
 }
 
 fun getMenuProvider(
     activity: AppCompatActivity,
-    viewModel: ItemEditViewModel,
+    viewModel: ItemEditViewModel<out FormData>,
     currentMenuActions: MutableMap<Action, MenuItem>,
-    menuActions: List<MenuAction>,
-    data: FormData
+    menuActions: List<MenuAction>
 ) = object : MenuProvider {
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         currentMenuActions.clear()
@@ -171,9 +198,7 @@ fun getMenuProvider(
                 setShowAsAction(it.displayFlags)
                 isCheckable = it.checkable
                 setIcon(it.icon)
-                val buttonColor = if (data is SecureNoteFormData) {
-                    activity.getColorOn(activity.getColor(R.color.container_agnostic_neutral_standard))
-                } else if (!it.enabled) {
+                val buttonColor = if (!it.enabled) {
                     activity.getColor(R.color.text_oddity_disabled)
                 } else {
                     activity.getColor(R.color.text_neutral_standard)
@@ -195,7 +220,7 @@ fun getMenuProvider(
 private fun selectMenuItem(
     activity: AppCompatActivity,
     item: MenuItem,
-    viewModel: ItemEditViewModel,
+    viewModel: ItemEditViewModel<out FormData>,
     currentMenuActions: MutableMap<Action, MenuItem>
 ): Boolean {
     if (item.itemId == android.R.id.home) {

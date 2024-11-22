@@ -1,7 +1,5 @@
 package com.dashlane.storage.userdata.accessor.filter
 
-import android.content.Context
-import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.storage.userdata.accessor.filter.sharing.SharingFilter
 import com.dashlane.storage.userdata.accessor.filter.space.SpaceFilter
 import com.dashlane.storage.userdata.accessor.filter.uid.UidFilter
@@ -9,20 +7,19 @@ import com.dashlane.teamspaces.manager.DataIdentifierSpaceCategorization
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.model.UserPermission
+import com.dashlane.sharing.UserPermission
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
-import com.dashlane.vault.util.matchPackageName
+import com.dashlane.vault.util.AuthentifiantPackageNameMatcher
 import com.dashlane.xml.domain.SyncObject
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class FilterToPredicate @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
-    private val packageNameSignatureHelper: PackageNameSignatureHelper
+    private val authentifiantPackageNameMatcher: AuthentifiantPackageNameMatcher
 ) {
 
     fun toPredicate(filter: BaseFilter): (VaultItem<*>) -> Boolean {
@@ -34,7 +31,7 @@ class FilterToPredicate @Inject constructor(
             hasCorrectUid(filter, vaultItem) &&
             hasCorrectSpace(filter, vaultItem) &&
             hasCorrectSharing(filter, vaultItem) &&
-            ((filter !is CredentialFilter) || acceptCredentialFilter(filter, vaultItem.syncObject)) &&
+            ((filter !is CredentialFilter) || acceptCredentialFilter(filter, vaultItem)) &&
             ((filter !is CollectionFilter) || acceptCollectionFilter(filter, vaultItem))
     }
 
@@ -67,14 +64,16 @@ class FilterToPredicate @Inject constructor(
         }
     }
 
-    private fun acceptCredentialFilter(filter: CredentialFilter, syncObject: SyncObject): Boolean {
-        return syncObject is SyncObject.Authentifiant &&
-            filter.email?.equals(syncObject.email, ignoreCase = true) ?: true && 
-            hasCorrectDomain(filter, syncObject) &&
-            hasCorrectPackageName(filter, syncObject)
+    private fun acceptCredentialFilter(filter: CredentialFilter, vaultItem: VaultItem<*>): Boolean {
+        return vaultItem.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
+        ?.toSummary<SummaryObject.Authentifiant>()?.let {
+                filter.email?.equals(it.email, ignoreCase = true) ?: true && 
+                    hasCorrectDomain(filter, it) &&
+                    hasCorrectPackageName(filter, it)
+            } ?: false
     }
 
-    private fun hasCorrectDomain(filter: CredentialFilter, authentifiant: SyncObject.Authentifiant): Boolean =
+    private fun hasCorrectDomain(filter: CredentialFilter, authentifiant: SummaryObject.Authentifiant): Boolean =
         hasCorrectDomain(
             filter,
             authentifiant.url,
@@ -83,9 +82,10 @@ class FilterToPredicate @Inject constructor(
             authentifiant.linkedServices?.associatedDomains?.map { it.domain }
         )
 
-    private fun hasCorrectPackageName(filter: CredentialFilter, authentifiant: SyncObject.Authentifiant) =
-        filter.packageName?.let { authentifiant.matchPackageName(packageNameSignatureHelper, context, it) }
-            ?: true 
+    private fun hasCorrectPackageName(filter: CredentialFilter, authentifiant: SummaryObject.Authentifiant) =
+        filter.packageName?.let {
+            authentifiantPackageNameMatcher.matchPackageName(authentifiant, it)
+        } ?: true 
 
     private fun acceptCollectionFilter(filter: CollectionFilter, vaultItem: VaultItem<*>): Boolean {
         val syncObject = vaultItem.syncObject

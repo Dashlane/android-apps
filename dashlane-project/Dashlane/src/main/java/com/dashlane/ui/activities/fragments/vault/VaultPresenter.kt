@@ -6,14 +6,14 @@ import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.AnnouncementTags
-import com.dashlane.authenticator.AuthenticatorSunsetChecker
-import com.dashlane.authenticator.PasswordManagerServiceStubImpl
-import com.dashlane.core.sync.getAgnosticMessageFeedback
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierDeletedEvent
 import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.feature.home.data.Filter
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseSecrets
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.frozenaccount.tracking.FrozenStateLogger
 import com.dashlane.hermes.generated.definitions.AnyPage
@@ -21,22 +21,24 @@ import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.limitations.PasswordLimitationLogger
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.limitations.PasswordLimiter.Companion.PASSWORD_LIMIT_LOOMING
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.session.SessionManager
+import com.dashlane.sync.getAgnosticMessageFeedback
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.setCurrentPageView
-import com.dashlane.home.vaultlist.Filter
-import com.dashlane.util.toIdentityFormat
 import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,7 +60,7 @@ class VaultPresenter @Inject constructor(
     private val sessionManager: SessionManager,
     private val accountStatusRepository: AccountStatusRepository,
     private val frozenStateManager: FrozenStateManager,
-    private val authenticatorSunsetChecker: AuthenticatorSunsetChecker
+    private val userFeaturesChecker: UserFeaturesChecker,
 ) : BasePresenter<Vault.DataProvider, Vault.View>(),
     Vault.Presenter {
 
@@ -85,19 +87,16 @@ class VaultPresenter @Inject constructor(
     }
 
     override fun onCreate(arguments: Bundle?, savedInstanceState: Bundle?) {
-        val filter = if (savedInstanceState == null && arguments != null) {
-            VaultFragmentArgs.fromBundle(arguments).filter?.let { getFilterFromPath(it) }
-        } else if (savedInstanceState != null) {
-            savedInstanceState.getString(EXTRA_CURRENT_FILTER)?.let { Filter.valueOf(it) }
-        } else {
-            null
-        }
-        if (filter == null) {
-            
-            setCurrentPageView(AnyPage.ITEM_ALL_LIST)
-        } else {
-            this.filter.value = filter
-            view.setSelectedFilterTab(filter)
+        
+        fragmentLifecycleCoroutineScope.launch {
+            accountStatusRepository.accountStatusState
+                .map { accountStatuses -> accountStatuses[sessionManager.session] }
+                .filterNotNull()
+                .take(1)
+                .collect {
+                    view.showTabs(canUseSecrets = userFeaturesChecker.canUseSecrets())
+                    selectTab(arguments = arguments, savedInstanceState = savedInstanceState)
+                }
         }
     }
 
@@ -149,6 +148,23 @@ class VaultPresenter @Inject constructor(
         }
     }
 
+    private fun selectTab(savedInstanceState: Bundle?, arguments: Bundle?) {
+        val filter = if (savedInstanceState == null && arguments != null) {
+            VaultFragmentArgs.fromBundle(arguments).filter?.let { getFilterFromPath(it) }
+        } else if (savedInstanceState != null) {
+            savedInstanceState.getString(EXTRA_CURRENT_FILTER)?.let { Filter.valueOf(it) }
+        } else {
+            null
+        }
+        if (filter == null) {
+            
+            setCurrentPageView(AnyPage.ITEM_ALL_LIST)
+        } else {
+            this.filter.value = filter
+            view.setSelectedFilterTab(filter)
+        }
+    }
+
     private fun refreshItemList() {
         vaultViewModel.refresh()
     }
@@ -184,11 +200,6 @@ class VaultPresenter @Inject constructor(
         navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
     }
 
-    private fun onAuthenticatorSunsetAnnouncementClicked() {
-        authenticatorSunsetChecker.markDisplayed()
-        navigator.goToAuthenticatorSunset()
-    }
-
     private fun onSyncFinished(syncFinishedEvent: SyncFinishedEvent) {
         if (activity == null) {
             return
@@ -220,18 +231,6 @@ class VaultPresenter @Inject constructor(
                     ),
                     mood = Mood.Danger,
                     onClick = this::onAccountFrozenAnnouncementClicked
-                )
-            }
-            authenticatorSunsetChecker.shouldDisplaySunsetBanner -> {
-                view.showAnnouncement(
-                    iconToken = IconTokens.feedbackInfoOutlined,
-                    title = requireContext.getString(
-                        R.string.sunset_announcement_title,
-                        PasswordManagerServiceStubImpl.discontinuationDate.toIdentityFormat(requireContext.resources)
-                    ),
-                    description = requireContext.getString(R.string.sunset_announcement_description),
-                    mood = Mood.Brand,
-                    onClick = this::onAuthenticatorSunsetAnnouncementClicked
                 )
             }
             passwordLimiter.isPasswordLimitReached() -> {
@@ -279,4 +278,5 @@ private fun Filter.toPage(): AnyPage = when (this) {
     Filter.FILTER_PAYMENT -> AnyPage.ITEM_PAYMENT_LIST
     Filter.FILTER_PERSONAL_INFO -> AnyPage.ITEM_PERSONAL_INFO_LIST
     Filter.FILTER_ID -> AnyPage.ITEM_ID_LIST
+    Filter.FILTER_SECRET -> AnyPage.ITEM_SECRET_LIST
 }

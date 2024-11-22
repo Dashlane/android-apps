@@ -68,16 +68,6 @@ interface AuthenticationSecondFactoryRepository {
     )
     suspend fun resendToken(emailToken: AuthenticationSecondFactor.EmailToken)
 
-    @Throws(
-        AuthenticationSecondFactorFailedException::class,
-        AuthenticationTimeoutException::class,
-        AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
-    )
-    suspend fun validate(
-        dashlaneAuthenticator: AuthenticationSecondFactor.Authenticator
-    ): ValidationResult
-
     data class ValidationResult(
         val registeredUserDevice: RegisteredUserDevice,
         val authTicket: String?

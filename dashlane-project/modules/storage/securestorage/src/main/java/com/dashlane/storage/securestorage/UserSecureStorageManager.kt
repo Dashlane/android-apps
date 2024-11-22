@@ -4,8 +4,9 @@ import com.dashlane.cryptography.decodeUtf8ToString
 import com.dashlane.cryptography.encodeUtf8ToByteArray
 import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.user.Username
+import javax.inject.Inject
 
-class UserSecureStorageManager(
+class UserSecureStorageManager @Inject constructor(
     val secureStorageManager: SecureStorageManager
 ) {
     fun isSecretKeyStored(username: Username): Boolean =
@@ -89,7 +90,7 @@ class UserSecureStorageManager(
                 ?.decodeUtf8ToString()
         }
 
-    fun wipeUserData(username: Username) {
+    suspend fun wipeUserData(username: Username) {
         secureStorageManager.wipeUserData(username)
     }
 
@@ -180,6 +181,29 @@ class UserSecureStorageManager(
             keyIdentifier = SecureDataKey.USER_ACTIVITY,
             username = username,
             localKey = localKey
+        )?.decodeUtf8ToString()
+    }
+
+    fun storeUserContactEmail(localKey: LocalKey, username: Username, id: String?) {
+        if (id == null) {
+            val secureDataStorage =
+                secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
+            secureStorageManager.removeKeyData(secureDataStorage, SecureDataKey.USER_CONTACT_EMAIL)
+        } else {
+            secureStorageManager.storeKeyData(
+                keyData = id.encodeUtf8ToByteArray(),
+                keyIdentifier = SecureDataKey.USER_CONTACT_EMAIL,
+                username = username,
+                localKey = localKey
+            )
+        }
+    }
+
+    fun readUserContactEmail(localKey: LocalKey, username: Username): String? {
+        return secureStorageManager.getKeyData(
+            SecureDataKey.USER_CONTACT_EMAIL,
+            username,
+            localKey
         )?.decodeUtf8ToString()
     }
 

@@ -12,6 +12,7 @@ import com.dashlane.search.Query
 import com.dashlane.url.UrlDomain
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.matchDomain
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
@@ -26,7 +27,7 @@ internal interface ItemLoader {
         username: String? = null
     ): List<ItemToFill>?
 
-    fun loadSyncObject(itemId: String): SyncObject?
+    fun loadSyncObject(itemId: String): VaultItem<SyncObject>?
 }
 
 internal class ItemLoaderImpl @Inject constructor(private val databaseAccess: AutofillAnalyzerDef.DatabaseAccess) :
@@ -59,8 +60,8 @@ internal class ItemLoaderImpl @Inject constructor(private val databaseAccess: Au
         }?.sort()?.take(10)
     }
 
-    override fun loadSyncObject(itemId: String): SyncObject? {
-        return databaseAccess.loadSyncObject<SyncObject>(itemId)?.syncObject
+    override fun loadSyncObject(itemId: String): VaultItem<SyncObject>? {
+        return databaseAccess.loadSyncObject(itemId)
     }
 
     private fun List<ItemToFill>.sort(): List<ItemToFill> {

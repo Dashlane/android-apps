@@ -5,18 +5,17 @@ import com.dashlane.R
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateHolder
 import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
-import com.dashlane.activatetotp.ActivateTotpLogger
 import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.SecurityHelper
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
 import com.dashlane.navigation.Navigator
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.SecurityHelper
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
-import com.dashlane.session.UserDataRepository
-import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.storage.userdata.RichIconsSettingProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
@@ -27,9 +26,8 @@ import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.screens.settings.item.SettingScreenItem
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.usercryptography.UserCryptographyRepository
 import com.dashlane.util.Toaster
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
 import kotlinx.coroutines.CoroutineScope
 
@@ -42,7 +40,7 @@ class RootSettingsSecurityList(
     biometricAuthModule: BiometricAuthModule,
     navigator: Navigator,
     screenshotPolicy: ScreenshotPolicy,
-    userPreferencesManager: UserPreferencesManager,
+    preferencesManager: PreferencesManager,
     teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     sessionManager: SessionManager,
     userAccountStorage: UserAccountStorage,
@@ -55,8 +53,6 @@ class RootSettingsSecurityList(
     biometricRecovery: BiometricRecovery,
     toaster: Toaster,
     use2faSettingStateHolder: Use2faSettingStateHolder,
-    activateTotpLogger: ActivateTotpLogger,
-    userFeaturesChecker: UserFeaturesChecker,
     teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
     subscriptionCodeRepository: SubscriptionCodeRepository,
     accountRecoveryKeySettingStateHolder: AccountRecoveryKeySettingStateHolder,
@@ -76,7 +72,6 @@ class RootSettingsSecurityList(
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
         biometricRecovery = biometricRecovery,
         use2faSettingStateHolder = use2faSettingStateHolder,
-        activateTotpLogger = activateTotpLogger,
         sessionCredentialsSaver = sessionCredentialsSaver,
         navigator = navigator,
         teamspaceNotificator = teamspaceRestrictionNotificator,
@@ -88,7 +83,7 @@ class RootSettingsSecurityList(
         coroutineScope = coroutineScope,
         navigator = navigator,
         screenshotPolicy = screenshotPolicy,
-        userPreferencesManager = userPreferencesManager,
+        preferencesManager = preferencesManager,
         teamSpaceAccessorProvider = teamSpaceAccessorProvider,
         sessionManager = sessionManager,
         dialogHelper = dialogHelper,
@@ -96,7 +91,6 @@ class RootSettingsSecurityList(
         sensibleSettingsClickHelper = sensibleSettingsClickHelper,
         masterPasswordFeatureAccessChecker = masterPasswordFeatureAccessChecker,
         toaster = toaster,
-        userFeaturesChecker = userFeaturesChecker,
         userAccountStorage = userAccountStorage,
         subscriptionCodeRepository = subscriptionCodeRepository,
         userDataRepository = userDataRepository,

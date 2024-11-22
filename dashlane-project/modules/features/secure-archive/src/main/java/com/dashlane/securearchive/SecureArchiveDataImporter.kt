@@ -35,7 +35,6 @@ class SecureArchiveDataImporter @Inject constructor(
                 syncObject.id?.let { oldToNewIds[it] = newId }
                 syncObject.toVaultItem(
                     overrideUid = newId,
-                    overrideAnonymousUid = generateUniqueIdentifier(),
                     syncState = SyncState.MODIFIED
                 )
             }
@@ -52,7 +51,6 @@ class SecureArchiveDataImporter @Inject constructor(
                 ?.takeIf { it == SyncObjectType.COLLECTION }?.let { type ->
                     val collection = transactionXml.toObject(type).toVaultItem(
                         overrideUid = generateUniqueIdentifier(),
-                        overrideAnonymousUid = generateUniqueIdentifier(),
                         syncState = SyncState.MODIFIED
                     ) as VaultItem<SyncObject.Collection>
                     collection.copySyncObject {

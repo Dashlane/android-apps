@@ -6,18 +6,18 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.item.linkedwebsites.LinkedServicesContract
 import com.dashlane.item.linkedwebsites.LinkedServicesDataProvider
 import com.dashlane.item.linkedwebsites.LinkedServicesUIState
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @Deprecated("This version of linked services is deprecated, please check with the team before any modification.")
 @HiltViewModel

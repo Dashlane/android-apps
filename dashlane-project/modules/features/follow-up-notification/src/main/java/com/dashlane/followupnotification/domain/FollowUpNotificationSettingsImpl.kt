@@ -11,8 +11,6 @@ class FollowUpNotificationSettingsImpl @Inject constructor(
     private val followUpNotificationPersistedSettingsService: FollowUpNotificationSettingsService
 ) : FollowUpNotificationSettings {
 
-    override fun isSupported(): Boolean = followUpNotificationFlags.haveMinimumRequiredAndroidVersion()
-
     override fun isAvailable(): Boolean = followUpNotificationFlags.canUseFollowUpNotification()
 
     override fun isActive(): Boolean = isChecked() && isAvailable()

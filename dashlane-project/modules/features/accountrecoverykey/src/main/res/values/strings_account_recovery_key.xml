@@ -9,7 +9,7 @@
     
     <string name="account_recovery_key_detailed_setting_title">Recovery key</string>
     
-    <string name="account_recovery_key_detailed_setting_description">Your recovery key lets you access your vault if you forget your Master Password.</string>
+    <string name="account_recovery_key_detailed_setting_description">Your recovery key gives you access to your vault if you happen to lose access to it.</string>
     
     <string name="account_recovery_key_detailed_setting_mpless_description">Your recovery key lets you access your vault if you have lost access to all other logged in devices.</string>
     
@@ -45,7 +45,7 @@
     
     <string name="account_recovery_key_generate_title">Store this somewhere safe</string>
     
-    <string name="account_recovery_key_generate_description_1">Your recovery key is one of the few ways you can access your Dashlane vault if you forget your Master Password.</string>
+    <string name="account_recovery_key_generate_description_1">Your recovery key is one of the few ways you can access your Dashlane vault if you lose access to it.</string>
     
     <string name="account_recovery_key_generate_mpless_description_1">For your security, you should write it down and store it offline with other important documents.</string>
     

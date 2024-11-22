@@ -1,6 +1,6 @@
 package com.dashlane.vault.util
 
-import com.dashlane.util.model.UserPermission
+import com.dashlane.sharing.UserPermission
 import com.dashlane.vault.summary.SummaryObject
 
 object SharingStateChecker {

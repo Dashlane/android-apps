@@ -15,6 +15,7 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.ItemId
 import com.dashlane.hermes.generated.events.user.ReceiveSecurityAlert
 import com.dashlane.notificationcenter.alerts.BreachDataHelper
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.getAlertTypeForLogs
 import com.dashlane.security.getItemTypesForLogs
@@ -25,7 +26,7 @@ import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
-import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
@@ -47,13 +48,12 @@ import javax.inject.Singleton
 
 @Singleton
 class BreachManager @Inject constructor(
-    @ApplicationCoroutineScope
-    private val applicationCoroutineScope: CoroutineScope,
+    private val sessionCoroutineScopeProvider: OptionalProvider<CoroutineScope>,
     @MainCoroutineDispatcher
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val sessionManager: SessionManager,
     private val darkWebMonitoringManager: DarkWebMonitoringManager,
     private val appEvents: AppEvents,
@@ -71,6 +71,12 @@ class BreachManager @Inject constructor(
     private var refreshInProgress = false
     private var lastSession: String? = null
 
+    private val sessionCoroutineScope: CoroutineScope?
+        get() = sessionCoroutineScopeProvider.get()
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
+
     init {
         appEvents.register<DarkWebSetupCompleteEvent>(this) {
             darkWebMonitoringManager.invalidateCache()
@@ -83,7 +89,7 @@ class BreachManager @Inject constructor(
     }
 
     private fun markBreachSolved() {
-        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
+        sessionCoroutineScope?.launch(mainCoroutineDispatcher) {
             breachLoader.getBreachesWrapper()
                 .filter { !it.localBreach.solved && it.linkedAuthentifiant.isEmpty() && !it.publicBreach.hasCreditCardLeaked() }
                 .forEach {
@@ -106,7 +112,7 @@ class BreachManager @Inject constructor(
         val lastFetchedPublicRevision = lastFetchedPublicBreachRevision()
         val lastFetchedDarkWebDate = lastFetchedDarkWebDate()
 
-        applicationCoroutineScope.launch(mainCoroutineDispatcher) {
+        sessionCoroutineScope?.launch(mainCoroutineDispatcher) {
             val publicBreachResult = try {
                 breachService.getBreaches(
                     fromRevision = lastFetchedPublicRevision,

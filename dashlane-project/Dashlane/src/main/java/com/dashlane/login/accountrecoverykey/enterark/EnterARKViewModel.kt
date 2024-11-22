@@ -3,18 +3,19 @@ package com.dashlane.login.accountrecoverykey.enterark
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
+import androidx.navigation.toRoute
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.definitions.UseKeyErrorName
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
+import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryDestination.EnterArk
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
-import com.dashlane.login.root.LoginDestination.LOGIN_KEY
+import com.dashlane.login.root.LoginRepository
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,16 +28,18 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.VisibleForTesting
+import javax.inject.Inject
 
 @HiltViewModel
 class EnterARKViewModel @Inject constructor(
+    private val loginRepository: LoginRepository,
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
     private val logRepository: LogRepository,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val login = savedStateHandle.get<String>(LOGIN_KEY) ?: throw IllegalStateException("Email is empty")
+    private val login = savedStateHandle.toRoute<EnterArk>().login
 
     private val stateFlow: MutableStateFlow<EnterARKState>
     val uiState: StateFlow<EnterARKState>
@@ -51,7 +54,7 @@ class EnterARKViewModel @Inject constructor(
     fun onNextClicked(accountRecoveryKey: String) {
         flow {
             val formattedAccountRecoveryKey = accountRecoveryKey.replace("-", "")
-            val authTicket = loginAccountRecoveryKeyRepository.state.value.authTicket
+            val authTicket = loginRepository.getAuthTicket()
             if (authTicket == null || !checkAccountRecoveryKeyFormat(formattedAccountRecoveryKey)) {
                 logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.ERROR, useKeyErrorName = UseKeyErrorName.WRONG_KEY_ENTERED))
                 emit(EnterARKState.Error(stateFlow.value.data.copy(accountRecoveryKey = accountRecoveryKey)))

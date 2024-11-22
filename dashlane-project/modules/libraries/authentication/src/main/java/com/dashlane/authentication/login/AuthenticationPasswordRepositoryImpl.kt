@@ -182,10 +182,10 @@ class AuthenticationPasswordRepositoryImpl(
         return DeviceValidity.VALID
     }
 
-    private suspend fun validateRemoteUser(
+    override suspend fun validateRemoteUser(
         registeredUserDevice: RegisteredUserDevice.Remote,
         password: AppKey.Password
-    ): AuthenticationPasswordRepository.Result {
+    ): AuthenticationPasswordRepository.Result.Remote {
         val encryptedRemoteKey = registeredUserDevice.encryptedRemoteKey
         val vaultKey = if (encryptedRemoteKey == null) {
             password.toVaultKey()
@@ -217,17 +217,17 @@ class AuthenticationPasswordRepositoryImpl(
             }
             val username = Username.ofEmail(registeredUserDevice.login)
             val localKey = authenticationLocalKeyRepository.createForRemote(
-                username,
-                password,
-                CryptographyMarker.Flexible.Defaults.argon2d
+                username = username,
+                appKey = password,
+                cryptographyMarker = CryptographyMarker.Flexible.Defaults.argon2d
             )
             registeredUserDevice.toSuccess(
-                password,
-                userSettings,
-                registeredUserDevice.settingsDate,
-                sharingKeys,
-                localKey,
-                vaultKey as? VaultKey.RemoteKey
+                password = password,
+                settings = userSettings,
+                settingsDate = registeredUserDevice.settingsDate,
+                sharingKeys = sharingKeys,
+                localKey = localKey,
+                remoteKey = vaultKey as? VaultKey.RemoteKey
             )
         }
     }

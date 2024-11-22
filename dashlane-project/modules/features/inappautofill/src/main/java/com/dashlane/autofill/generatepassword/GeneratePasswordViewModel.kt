@@ -94,7 +94,7 @@ class GeneratePasswordViewModel @Inject constructor(
             val authentifiant = result.syncObject
             val password = authentifiant.password.toString()
             if (authentifiant.password?.equalsString(uiState.value.data.lastGeneratedPassword) == true) {
-                authentifiant.urlForGoToWebsite?.toUrlOrNull()?.root?.let { domain ->
+                result.urlForGoToWebsite?.toUrlOrNull()?.root?.let { domain ->
                     service.saveToPasswordHistory(password, domain, result.uid)
                 }
             }

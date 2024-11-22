@@ -9,6 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dashlane.R
@@ -49,6 +53,18 @@ class GeneratedPasswordHistoryActivity : DashlaneActivity() {
         setContentView(R.layout.activity_generated_password_history)
 
         setCurrentPageView(AnyPage.TOOLS_PASSWORD_GENERATOR_HISTORY)
+
+        val coordinatorLayout = findViewById<CoordinatorLayout>(R.id.view_coordinator_layout)
+        ViewCompat.setOnApplyWindowInsetsListener(coordinatorLayout) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+                leftMargin = insets.left
+                bottomMargin = insets.bottom
+                rightMargin = insets.right
+            }
+            WindowInsetsCompat.CONSUMED
+        }
 
         actionBarUtil.setup()
         supportActionBar?.apply {

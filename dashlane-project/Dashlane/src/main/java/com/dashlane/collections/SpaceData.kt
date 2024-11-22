@@ -21,12 +21,12 @@ internal fun SyncObject.Collection.spaceData(teamSpaceAccessorProvider: TeamSpac
 private fun TeamSpace.spaceData() = SpaceData(
     spaceLetter = displayLetter,
     spaceColor = color,
-    spaceContentDescriptionResId = if (teamId == TeamSpace.Personal.teamId) {
+    spaceContentDescriptionResId = if (teamId == null || teamId == TeamSpace.Personal.teamId) {
         R.string.and_accessibility_collection_list_item_personal_teamspace
     } else {
         R.string.and_accessibility_collection_list_item_business_teamspace
     },
-    businessSpace = teamId != TeamSpace.Personal.teamId
+    businessSpace = teamId != null && teamId != TeamSpace.Personal.teamId
 )
 
 private fun spaceData(spaceId: String?, teamSpaceAccessorProvider: TeamSpaceAccessorProvider): SpaceData? {

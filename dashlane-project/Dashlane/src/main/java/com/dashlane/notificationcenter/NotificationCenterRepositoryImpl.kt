@@ -10,10 +10,12 @@ import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.frozenaccount.FrozenStateManager
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.SecurityHelper
 import com.dashlane.inapplogin.InAppLoginManager
 import com.dashlane.limitations.PasswordLimiter
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockTypeManager
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockType
 import com.dashlane.notification.badge.SharingInvitationRepositoryImpl
 import com.dashlane.notificationcenter.promotions.IntroOfferActionItem
 import com.dashlane.notificationcenter.view.ActionItem
@@ -24,22 +26,21 @@ import com.dashlane.notificationcenter.view.NotificationItem
 import com.dashlane.notificationcenter.view.SharingActionItemCollection
 import com.dashlane.notificationcenter.view.SharingActionItemItemGroup
 import com.dashlane.notificationcenter.view.SharingActionItemUserGroup
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.premium.StoreOffersManager
 import com.dashlane.premium.offer.common.StoreOffersFormatter
-import com.dashlane.premium.offer.common.StoreOffersManager
 import com.dashlane.premium.offer.common.model.FormattedStoreOffer
 import com.dashlane.premium.offer.common.model.ProductDetailsWrapper
 import com.dashlane.premium.offer.common.model.toPromotionType
-import com.dashlane.security.SecurityHelper
 import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.tryOrNull
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
@@ -53,7 +54,7 @@ import javax.inject.Inject
 @Suppress("LargeClass")
 class NotificationCenterRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val lockManager: LockManager,
     private val inAppLoginManager: InAppLoginManager,
     private val breachLoader: BreachLoader,
@@ -74,6 +75,9 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private val frozenStateManager: FrozenStateManager,
 ) : NotificationCenterRepository {
 
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
+
     private val hasBiometric
         get() = biometricAuthModule.isHardwareSupported()
 
@@ -83,7 +87,8 @@ class NotificationCenterRepositoryImpl @Inject constructor(
     private val premiumStatus: PremiumStatus?
         get() = accountStatusProvider.get()?.premiumStatus
 
-    private val lockType get() = lockManager.getLockType()
+    private val locks
+        get() = sessionManager.session?.username?.let { lockManager.getLocks(it) } ?: emptyList()
 
     private val actionItemTypes: Map<ActionItemSection, Set<ActionItemType>> by lazy { createActionItemTypes() }
 
@@ -195,23 +200,23 @@ class NotificationCenterRepositoryImpl @Inject constructor(
 
     private fun createBiometricRecoveryItem(): ActionItem? = if (meetConditionBiometricRecovery()) {
         ActionItem.BiometricRecoveryActionItem(
-            this,
-            lockType == LockTypeManager.LOCK_TYPE_BIOMETRIC
+            actionItemsRepository = this,
+            hasBiometricLockType = LockType.Biometric in locks
         )
     } else {
         null
     }
 
     private fun createSecureLockItem(type: ActionItemType): ActionItem? {
-        val isDeviceSecured = securityHelper.isDeviceSecured()
+        val isDeviceSecured = securityHelper.isDeviceSecured(sessionManager.session?.username)
         return when {
             
             
             hasStrongBiometricMethod &&
-                meetConditionBiometric(type, hasBiometric, isDeviceSecured, lockType) ->
+                meetConditionBiometric(type, hasBiometric, isDeviceSecured, locks) ->
                 ActionItem.BiometricActionItem(this)
             
-            meetConditionPinCode(type, hasBiometric, isDeviceSecured, lockType) ->
+            meetConditionPinCode(type, hasBiometric, isDeviceSecured, locks) ->
                 ActionItem.PinCodeActionItem(this)
             else -> null
         }
@@ -272,22 +277,22 @@ class NotificationCenterRepositoryImpl @Inject constructor(
         type: ActionItemType,
         hasBiometric: Boolean,
         isDeviceSecured: Boolean,
-        lockType: Int
+        locks: List<LockType>
     ): Boolean =
-        type == ActionItemType.BIOMETRIC && hasBiometric && isDeviceSecured && lockType != LockTypeManager.LOCK_TYPE_BIOMETRIC
+        type == ActionItemType.BIOMETRIC && hasBiometric && isDeviceSecured && LockType.Biometric !in locks
 
     private fun meetConditionPinCode(
         type: ActionItemType,
         hasBiometric: Boolean,
         isDeviceSecured: Boolean,
-        lockType: Int
+        locks: List<LockType>
     ): Boolean =
-        type == ActionItemType.PIN_CODE && !hasBiometric && isDeviceSecured && lockType != LockTypeManager.LOCK_TYPE_PIN_CODE
+        type == ActionItemType.PIN_CODE && !hasBiometric && isDeviceSecured && LockType.PinCode !in locks
 
     private fun meetConditionAutoFill(): Boolean =
         !inAppLoginManager.isEnableForApp() && !DeveloperUtilities.isManaged(context)
 
-    private fun meetConditionBiometricRecovery(): Boolean = securityHelper.isDeviceSecured() &&
+    private fun meetConditionBiometricRecovery(): Boolean = securityHelper.isDeviceSecured(sessionManager.session?.username) &&
         hasBiometric &&
         biometricRecovery.isFeatureAvailable() &&
         !biometricRecovery.isFeatureEnabled

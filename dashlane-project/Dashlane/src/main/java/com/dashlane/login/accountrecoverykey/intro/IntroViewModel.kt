@@ -8,6 +8,7 @@ import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.definitions.UseKeyErrorName
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
+import com.dashlane.login.root.LoginRepository
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class IntroViewModel @Inject constructor(
+    private val loginRepository: LoginRepository,
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
     private val logRepository: LogRepository,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
@@ -44,7 +46,8 @@ class IntroViewModel @Inject constructor(
             logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.START))
 
             if (authTicket != null) {
-                loginAccountRecoveryKeyRepository.updateRegisteredDevice(registeredUserDevice, authTicket)
+                loginRepository.updateRegisteredUserDevice(registeredUserDevice)
+                loginRepository.updateAuthTicket(authTicket)
                 stateFlow.emit(IntroState.GoToARK(authTicket = authTicket))
             } else {
                 checkUserDeviceStatus(registeredUserDevice)

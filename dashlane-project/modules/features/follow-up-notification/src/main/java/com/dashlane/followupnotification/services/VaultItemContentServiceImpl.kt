@@ -18,7 +18,6 @@ class VaultItemContentServiceImpl @Inject constructor(
             CopyField.Password -> hiddenContentString(8, summaryObject, copyField)?.asObfuscatedContent()
             CopyField.PaymentsNumber -> (summaryObject as? SummaryObject.PaymentCreditCard)?.cardNumberObfuscate?.asObfuscatedContent()
             CopyField.PaymentsSecurityCode -> hiddenContentString(3, summaryObject, copyField)?.asObfuscatedContent()
-            CopyField.PayPalPassword -> hiddenContentString(11, summaryObject, copyField)?.asObfuscatedContent()
             CopyField.BankAccountBicSwift,
             CopyField.BankAccountRoutingNumber,
             CopyField.BankAccountSortCode -> hiddenContentString(3, summaryObject, copyField)?.asObfuscatedContent()

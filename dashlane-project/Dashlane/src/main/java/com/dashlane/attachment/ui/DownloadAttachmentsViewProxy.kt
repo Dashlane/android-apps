@@ -48,7 +48,7 @@ class DownloadAttachmentsViewProxy(activity: Activity) :
         progress: Int
     ) {
         val adapter = recyclerView.adapter as EfficientAdapter<*>
-        val index = adapter.objects.indexOfFirst { it is AttachmentItem && it.downloadKey == attachment.downloadKey }
+        val index = adapter.objects.indexOfFirst { it is AttachmentItem && it.attachment.downloadKey == attachment.downloadKey }
         if (index == -1) {
             return
         }

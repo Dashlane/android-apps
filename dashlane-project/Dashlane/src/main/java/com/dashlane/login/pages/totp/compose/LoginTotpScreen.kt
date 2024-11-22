@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -29,18 +28,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonLayout
-import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.ButtonMediumBar
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.TextField
 import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.hermes.generated.definitions.VerificationMode
-import com.dashlane.ui.widgets.compose.DashlaneLogo
+import com.dashlane.lock.LockType
 import com.dashlane.util.isNotSemanticallyNull
 
 @Composable
@@ -49,17 +46,15 @@ fun LoginTotpScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginTotpViewModel,
     verificationMode: VerificationMode,
-    goToNext: (RegisteredUserDevice, String) -> Unit,
-    goToPush: (String) -> Unit,
+    goToNext: (List<LockType>) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.stateFlow.viewState.collectAsState()
 
     LaunchedEffect(viewModel) {
         viewModel.viewStarted(verificationMode = verificationMode)
-        viewModel.navigationState.collect { state ->
+        viewModel.stateFlow.sideEffect.collect { state ->
             when (state) {
-                is LoginTotpNavigationState.GoToPush -> goToPush(state.email)
-                is LoginTotpNavigationState.Success -> goToNext(state.registeredUserDevice, state.authTicket)
+                is LoginTotpState.SideEffect.Success -> goToNext(state.locks)
             }
         }
     }
@@ -68,11 +63,9 @@ fun LoginTotpScreen(
         modifier = modifier,
         email = uiState.email,
         otp = uiState.otp ?: "",
-        isAuthenticatorEnabled = uiState.isAuthenticatorEnabled,
         isLoading = uiState.isLoading,
         errorMessage = uiState.error?.toErrorMessage(),
         onNext = viewModel::onNext,
-        onPush = viewModel::pushClicked,
         onHelp = viewModel::helpClicked,
         onOtpChange = viewModel::onOTPChange,
     )
@@ -118,11 +111,9 @@ fun LoginTotpContent(
     modifier: Modifier = Modifier,
     email: String,
     otp: String,
-    isAuthenticatorEnabled: Boolean,
     isLoading: Boolean,
     errorMessage: String?,
     onNext: () -> Unit,
-    onPush: () -> Unit,
     onHelp: () -> Unit,
     onOtpChange: (String) -> Unit,
 ) {
@@ -135,7 +126,7 @@ fun LoginTotpContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+        DashlaneLogoLockup(height = 40.dp)
         Text(
             text = email,
             style = DashlaneTheme.typography.bodyStandardRegular,
@@ -173,16 +164,6 @@ fun LoginTotpContent(
                 imeAction = ImeAction.Next
             ),
         )
-        if (isAuthenticatorEnabled) {
-            ButtonMedium(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(bottom = 32.dp),
-                onClick = onPush,
-                intensity = Intensity.Supershy,
-                layout = ButtonLayout.TextOnly(text = stringResource(id = R.string.login_totp_use_dashlane_authenticator))
-            )
-        }
         Spacer(modifier = Modifier.weight(1f))
         ButtonMediumBar(
             primaryButtonLayout = if (isLoading) ButtonLayout.IndeterminateProgress else ButtonLayout.TextOnly(text = stringResource(id = R.string.login_totp_next_button)),
@@ -276,17 +257,15 @@ fun LoginTotpError.toErrorMessage(): String {
 
 @Preview
 @Composable
-fun LoginTotpContentPreview() {
+private fun LoginTotpContentPreview() {
     DashlanePreview {
         LoginTotpContent(
             email = "randomemail@provider.com",
             otp = "123",
             onOtpChange = {},
-            isAuthenticatorEnabled = true,
             isLoading = true,
             errorMessage = "Error",
             onNext = {},
-            onPush = {},
             onHelp = {},
         )
     }
@@ -294,7 +273,7 @@ fun LoginTotpContentPreview() {
 
 @Preview
 @Composable
-fun HelpDialogPreview() {
+private fun HelpDialogPreview() {
     DashlanePreview {
         HelpDialog(
             onUseTextMessage = {},
@@ -306,7 +285,7 @@ fun HelpDialogPreview() {
 
 @Preview
 @Composable
-fun RecoveryCodeDialogPreview() {
+private fun RecoveryCodeDialogPreview() {
     DashlanePreview {
         RecoveryCodeDialog(
             message = "Message",
@@ -320,7 +299,7 @@ fun RecoveryCodeDialogPreview() {
 
 @Preview
 @Composable
-fun SendTextMessageDialogPreview() {
+private fun SendTextMessageDialogPreview() {
     DashlanePreview {
         SendTextMessageDialog(
             onSendTextMessage = {},

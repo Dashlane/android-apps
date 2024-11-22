@@ -2,6 +2,8 @@ package com.dashlane.masterpassword
 
 import android.os.Bundle
 import android.text.Editable
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
+import com.dashlane.changemasterpassword.MasterPasswordChanger
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.passwordstrength.PasswordStrength
 import com.skocken.presentation.definition.Base

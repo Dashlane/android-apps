@@ -20,24 +20,23 @@ import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.JsonSerialization
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.inject.qualifiers.Cache
-import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.util.time.TimeMeasurement
 import com.dashlane.util.tryOrNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
+import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.vault.model.leakedPasswordsSet
-import com.dashlane.vault.model.toVaultItem
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class AuthentifiantSecurityEvaluator @Inject constructor(
     @IoCoroutineDispatcher
     private val ioDispatcher: CoroutineDispatcher,
-    private val similarPassword: SimilarPassword,
     @Cache
     private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
     private val jsonSerialization: JsonSerialization,
@@ -72,12 +71,13 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         teamspace: TeamSpace
     ): Result {
         val timeMeasurement = TimeMeasurement("SecurityEvaluator")
+        val similarPassword = SimilarPassword()
         val passwordsAllSpaces = getPasswordsForAllSpaces(itemsAllSpaces)
         val spaceCategorization =
             teamSpaceAccessorProvider.get()
                 ?.let { DataIdentifierSpaceCategorization(it, currentTeamSpaceUiFilter, teamspace) }
         val items =
-            itemsAllSpaces.filter { spaceCategorization?.canBeDisplay(it.item.toVaultItem()) == true }
+            itemsAllSpaces.filter { spaceCategorization?.canBeDisplay(it.item) == true }
         val allDomainsUrls = items.mapNotNull { it.navigationUrl }
         timeMeasurement.tick("filter1")
         val groupOfPasswordsAllSpaces =
@@ -89,12 +89,13 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
         val toCheckAuthentifiantsAllSpaces = itemsAllSpaces.filter { !it.checked }
         val passwordsToMeasureStrength = toCheckAuthentifiants.map { it.password }
         timeMeasurement.tick("filter2")
-        val strengthByPasswords =
-            runCatching {
-                passwordStrengthEvaluator.associatePasswordsWithPasswordStrengthScore(
-                    passwordsToMeasureStrength
-                )
-            }.getOrDefault(emptyMap())
+        val strengthByPasswords = runCatching {
+            passwordStrengthEvaluator.associatePasswordsWithPasswordStrengthScore(
+                passwordsToMeasureStrength
+            )
+        }.getOrElse { e ->
+            emptyMap()
+        }
         timeMeasurement.tick("measureStrength")
         toCheckAuthentifiants.forEach { item ->
             item.password
@@ -116,7 +117,7 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
             toCheckAuthentifiants
         )
         val authentifiantsBySecurityBreach =
-            getAuthentifiantsBySecurityBreach(securityBreaches, toCheckAuthentifiants)
+            getAuthentifiantsBySecurityBreach(securityBreaches, toCheckAuthentifiants, similarPassword)
         timeMeasurement.tick("mapping")
         
         val authentifiantCorrupted: Set<AnalyzedAuthentifiant>
@@ -177,7 +178,8 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
 
     private fun getAuthentifiantsBySecurityBreach(
         securityBreaches: List<SyncObject.SecurityBreach>,
-        toCheckAuthentifiants: List<AnalyzedAuthentifiant>
+        toCheckAuthentifiants: List<AnalyzedAuthentifiant>,
+        similarPassword: SimilarPassword
     ) = securityBreaches.mapNotNull { securityBreach ->
         val leakedPasswordsSet = securityBreach.leakedPasswordsSet
         toCheckAuthentifiants
@@ -248,10 +250,10 @@ class AuthentifiantSecurityEvaluator @Inject constructor(
                     specificDataType(SyncObjectType.AUTHENTIFIANT)
                 }
             ).mapNotNull {
-                val syncObject = it.syncObject as SyncObject.Authentifiant
-
-                if (!syncObject.password.isNullOrEmpty()) {
-                    syncObject
+                val authentifiant = it.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
+                    ?: return@mapNotNull null
+                if (!authentifiant.syncObject.password.isNullOrEmpty()) {
+                    authentifiant
                 } else {
                     null
                 }

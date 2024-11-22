@@ -6,6 +6,7 @@ import com.dashlane.login.LoginMode
 import com.dashlane.user.Username
 
 interface SessionManager {
+
     val session: Session?
 
     suspend fun loadSession(

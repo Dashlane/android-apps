@@ -80,8 +80,6 @@ fun CopyField.toFieldItemType() = when (this) {
     CopyField.JustEmail -> Field.EMAIL to ItemType.EMAIL
     CopyField.PhoneNumber -> Field.NUMBER to ItemType.PHONE
     CopyField.PersonalWebsite -> Field.WEBSITE to ItemType.WEBSITE
-    CopyField.PayPalPassword -> Field.PASSWORD to ItemType.PAYPAL
-    CopyField.PayPalLogin -> Field.LOGIN to ItemType.PAYPAL
     CopyField.FullName -> Field.FULLNAME to ItemType.IDENTITY
     CopyField.FirstName -> Field.FIRST_NAME to ItemType.IDENTITY
     CopyField.LastName -> Field.LAST_NAME to ItemType.IDENTITY
@@ -90,4 +88,6 @@ fun CopyField.toFieldItemType() = when (this) {
     CopyField.CompanyName -> Field.NAME to ItemType.COMPANY
     CopyField.CompanyTitle -> Field.JOB_TITLE to ItemType.COMPANY
     CopyField.PasskeyDisplayName -> Field.NAME to ItemType.PASSKEY 
+    CopyField.SecretValue -> Field.SECRET to ItemType.SECRET
+    CopyField.SecretId -> Field.SECRET_ID to ItemType.SECRET
 }

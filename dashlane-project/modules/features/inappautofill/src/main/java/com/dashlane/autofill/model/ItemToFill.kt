@@ -2,6 +2,7 @@ package com.dashlane.autofill.model
 
 import android.os.Parcelable
 import com.dashlane.hermes.generated.definitions.MatchType
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import java.time.Instant
@@ -17,7 +18,7 @@ sealed class ItemToFill : Parcelable {
 @Parcelize
 sealed class ToUnlockItemToFill<T : SyncObject> : ItemToFill(), Parcelable {
     @IgnoredOnParcel
-    var syncObject: T? = null
+    var vaultItem: VaultItem<T>? = null
 
     @IgnoredOnParcel
     var isSharedWithLimitedRight: Boolean = false
@@ -40,7 +41,7 @@ data class CreditCardItemToFill(
     override val matchType: MatchType?,
     override val lastUsedDate: Instant?,
     val name: String?,
-    val cardTypeName: String?,
+    val bankName: String?,
     val cardNumberObfuscate: String,
     val zipCode: String?,
     val color: SyncObject.PaymentCreditCard.Color?,

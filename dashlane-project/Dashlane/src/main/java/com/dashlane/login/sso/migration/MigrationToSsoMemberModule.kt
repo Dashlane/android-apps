@@ -1,7 +1,7 @@
 package com.dashlane.login.sso.migration
 
 import com.dashlane.login.dagger.AuthBindingModule
-import com.dashlane.login.dagger.LoginAuthModule
+import com.dashlane.authentication.hilt.LoginAuthModule
 import com.dashlane.login.sso.LoginSsoLoggerModule
 import com.dashlane.server.api.dagger.DashlaneApiEndpointsModule
 import dagger.Binds

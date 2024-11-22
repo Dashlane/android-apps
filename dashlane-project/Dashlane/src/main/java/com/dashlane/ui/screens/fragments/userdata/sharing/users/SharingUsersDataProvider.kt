@@ -3,6 +3,7 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.users
 import com.dashlane.core.sharing.SharingDao
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
+import com.dashlane.sharing.model.getCollectionDownload
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isPending
@@ -36,22 +37,18 @@ class SharingUsersDataProvider @Inject constructor(
             ) ?: return@withContext emptyList<SharingModels>()
 
             val collectionGroups = loadCollectionsGroups(collections, itemGroup, summaryObject)
-            val groups = loadGroups(itemGroup, collectionGroups, summaryObject)
+            val groups = loadGroups(itemGroup, summaryObject)
             val collectionUsers = loadCollectionsUsers(collections, itemGroup, summaryObject)
-            val users = loadUsers(itemGroup, collectionUsers, summaryObject)
-            (collectionGroups + groups).distinctBy { it.groupId } +
-                (collectionUsers + users).distinctBy { it.userId }
+            val users = loadUsers(itemGroup, summaryObject)
+            (collectionGroups + groups).sortedByDescending { it.isMemberAdmin }.distinctBy { it.groupId } +
+                (collectionUsers + users).sortedByDescending { it.isMemberAdmin }.distinctBy { it.userId }
         }
     }
 
     private fun loadUsers(
         itemGroup: ItemGroup,
-        collectionUsers: List<SharingModels.ItemUser>,
         summaryObject: SummaryObject
-    ) = itemGroup.users?.mapNotNull {
-        if (collectionUsers.any { user -> user.userId == it.userId }) {
-            return@mapNotNull null
-        }
+    ) = itemGroup.users?.map {
         SharingModels.ItemUser(
             userId = it.userId,
             isAccepted = it.isAccepted,
@@ -74,8 +71,9 @@ class SharingUsersDataProvider @Inject constructor(
                 userId = userCollection.login,
                 isAccepted = userCollection.isAccepted,
                 isPending = userCollection.isPending,
-                isMemberAdmin = userCollection.isAdmin,
-                sharingStatusResource = userCollection.getSharingStatusResource(),
+                isMemberAdmin = itemGroup.getCollectionDownload(it.uuid)?.isAdmin == true,
+                sharingStatusResource = itemGroup.getCollectionDownload(it.uuid)
+                    ?.getSharingStatusResource() ?: 0,
                 itemGroup = itemGroup,
                 item = summaryObject,
                 isItemInCollection = true
@@ -85,12 +83,8 @@ class SharingUsersDataProvider @Inject constructor(
 
     private fun loadGroups(
         itemGroup: ItemGroup,
-        collectionGroups: List<SharingModels.ItemUserGroup>,
         summaryObject: SummaryObject
-    ) = itemGroup.groups?.mapNotNull {
-        if (collectionGroups.any { group -> group.groupId == it.groupId }) {
-            return@mapNotNull null
-        }
+    ) = itemGroup.groups?.map {
         SharingModels.ItemUserGroup(
             groupId = it.groupId,
             name = it.name,
@@ -115,8 +109,9 @@ class SharingUsersDataProvider @Inject constructor(
                 name = userCollectionGroup.name,
                 isAccepted = userCollectionGroup.isAccepted,
                 isPending = userCollectionGroup.isPending,
-                isMemberAdmin = userCollectionGroup.isAdmin,
-                sharingStatusResource = userCollectionGroup.getSharingStatusResource(),
+                isMemberAdmin = itemGroup.getCollectionDownload(it.uuid)?.isAdmin == true,
+                sharingStatusResource = itemGroup.getCollectionDownload(it.uuid)
+                    ?.getSharingStatusResource() ?: 0,
                 itemGroup = itemGroup,
                 item = summaryObject,
                 isItemInCollection = true

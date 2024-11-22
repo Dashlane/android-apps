@@ -7,10 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.core.sharing.SharingItemUpdater
 import com.dashlane.core.sharing.SharingItemUpdaterRequest
-import com.dashlane.network.tools.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.RenameCollectionService
 import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.filter.collectionFilter
@@ -28,13 +28,13 @@ import com.dashlane.vault.model.createCollection
 import com.dashlane.vault.model.toSanitizedCollectionName
 import com.dashlane.vault.summary.toSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class CollectionsEditViewModel @Inject constructor(
@@ -92,11 +92,11 @@ class CollectionsEditViewModel @Inject constructor(
                 if (teamSpaceAccessor.canChangeTeamspace) {
                     teamSpaceAccessor.currentBusinessTeam.takeIf { it?.teamId == spaceId }
                 } else {
-                    null
+                    TeamSpace.Personal
                 }
             }
         } else {
-            null
+            TeamSpace.Personal
         }
 
         _uiState.update { viewState ->
@@ -174,7 +174,7 @@ class CollectionsEditViewModel @Inject constructor(
 
     fun saveClicked() {
         val name = _uiState.value.viewData.collectionName.text.toSanitizedCollectionName()
-        val space = _uiState.value.viewData.space
+        val space = _uiState.value.viewData.space ?: TeamSpace.Personal
 
         
         if (name.isEmpty()) {
@@ -238,11 +238,11 @@ class CollectionsEditViewModel @Inject constructor(
 
     private suspend fun savePrivateCollection(
         name: String,
-        space: TeamSpace?,
+        space: TeamSpace,
         collectionId: String?
     ) {
         val existingCollection =
-            collectionDataQuery.queryByName(name, collectionFilter { space?.let { specificSpace(space) } })
+            collectionDataQuery.queryByName(name, collectionFilter { specificSpace(space) })
         if (existingCollection != null && existingCollection.uid != collectionId) {
             _uiState.update {
                 ViewState.Error(viewData = it.viewData, fieldError = FieldError.COLLECTION_ALREADY_EXISTS)
@@ -252,7 +252,7 @@ class CollectionsEditViewModel @Inject constructor(
             val collection = if (collectionId == null) {
                 createCollection(
                     dataIdentifier = CommonDataIdentifierAttrsImpl(
-                        teamSpaceId = space?.teamId ?: TeamSpace.Personal.teamId
+                        teamSpaceId = space.teamId
                     ),
                     name = name,
                     vaultItems = emptyList()

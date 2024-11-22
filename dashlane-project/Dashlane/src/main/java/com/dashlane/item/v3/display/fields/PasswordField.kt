@@ -27,18 +27,20 @@ import com.dashlane.design.component.tooling.FieldAction
 import com.dashlane.design.component.tooling.TextFieldActions
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.PasswordHealthData
 import com.dashlane.item.v3.display.forms.PasswordActions
 import com.dashlane.item.v3.util.SensitiveField
 import com.dashlane.item.v3.util.SensitiveField.PASSWORD
+import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.xml.domain.SyncObfuscatedValue
 
 @Composable
 internal fun PasswordField(
-    data: CredentialFormData,
+    data: Data<CredentialFormData>,
     revealedFields: Set<SensitiveField>,
     editMode: Boolean,
     passwordActions: PasswordActions
@@ -52,17 +54,17 @@ internal fun PasswordField(
 
 @Composable
 private fun PasswordFieldEdit(
-    data: CredentialFormData,
+    data: Data<CredentialFormData>,
     passwordActions: PasswordActions
 ) {
     var obfuscated by rememberSaveable { mutableStateOf(true) }
-    val passwordFeedback = data.passwordHealth?.passwordStrength?.let {
+    val passwordFeedback = data.formData.passwordHealth?.passwordStrength?.let {
         PasswordFieldFeedback.Strength(value = it.toPasswordStrengthIndicator())
     }
-    if (data.isEditable) {
+    if (data.commonData.isEditable) {
         PasswordField(
             modifier = Modifier.fillMaxWidth(),
-            value = data.password?.value?.toString() ?: "",
+            value = data.formData.password?.value?.toString() ?: "",
             onValueChange = passwordActions.onPasswordUpdate,
             label = stringResource(id = R.string.authentifiant_hint_password),
             feedback = passwordFeedback,
@@ -101,17 +103,17 @@ private fun PasswordFieldEdit(
 
 @Composable
 private fun PasswordFieldDisplay(
-    data: CredentialFormData,
+    data: Data<CredentialFormData>,
     revealedFields: Set<SensitiveField>,
     passwordActions: PasswordActions
 ) {
     val isPasswordRevealed = revealedFields.contains(PASSWORD)
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        if (!data.isSharedWithLimitedRight) {
+        if (!data.commonData.isSharedWithLimitedRight) {
             PasswordDisplayField(
                 label = stringResource(id = R.string.authentifiant_hint_password),
-                revealedValue = data.password?.value?.toString(),
-                isEmpty = data.passwordHealth?.isPasswordEmpty ?: false,
+                revealedValue = data.formData.password?.value?.toString(),
+                isEmpty = data.formData.passwordHealth?.isPasswordEmpty ?: false,
                 obfuscated = !isPasswordRevealed,
                 action1 = FieldAction.HideReveal(
                     contentDescriptionToHide = stringResource(id = R.string.and_accessibility_text_edit_hide),
@@ -134,7 +136,7 @@ private fun PasswordFieldDisplay(
                         passwordActions.onCopyPassword()
                         return@Generic true
                     }
-                ).takeIf { data.isCopyActionAllowed }
+                ).takeIf { data.commonData.isCopyActionAllowed }
             )
         } else {
             ObfuscatedDisplayField(
@@ -171,8 +173,11 @@ private fun PasswordStrength.toPasswordStrengthIndicator(): PasswordStrengthIndi
 @Composable
 @Suppress("LongMethod")
 private fun PasswordFieldPreview() {
-    val credentialFormData = CredentialFormData(
-        password = CredentialFormData.Password(SyncObfuscatedValue("ThisIsStrong12"))
+    val credentialFormData = Data<CredentialFormData>(
+        formData = CredentialFormData(
+            password = CredentialFormData.Password(SyncObfuscatedValue("ThisIsStrong12"))
+        ),
+        commonData = CommonData()
     )
     DashlanePreview {
         Column {
@@ -183,7 +188,7 @@ private fun PasswordFieldPreview() {
                 passwordActions = PasswordActions()
             )
             PasswordField(
-                data = credentialFormData.copy(isEditable = true),
+                data = credentialFormData.copyCommonData { it.copy(isEditable = true) },
                 revealedFields = setOf(),
                 editMode = true,
                 passwordActions = PasswordActions()
@@ -195,40 +200,42 @@ private fun PasswordFieldPreview() {
                 passwordActions = PasswordActions()
             )
             PasswordField(
-                data = credentialFormData.copy(isEditable = true),
+                data = credentialFormData.copyCommonData { it.copy(isEditable = true) },
                 revealedFields = setOf(),
                 editMode = false,
                 passwordActions = PasswordActions()
             )
             
             PasswordField(
-                data = credentialFormData.copy(isSharedWithLimitedRight = true),
+                data = credentialFormData.copyCommonData { it.copy(isSharedWithLimitedRight = true) },
                 revealedFields = setOf(PASSWORD),
                 editMode = false,
                 passwordActions = PasswordActions()
             )
             
             PasswordField(
-                data = credentialFormData.copy(isEditable = false, isCopyActionAllowed = false),
+                data = credentialFormData.copyCommonData { it.copy(isEditable = false, isCopyActionAllowed = false) },
                 revealedFields = setOf(PASSWORD),
                 editMode = false,
                 passwordActions = PasswordActions()
             )
             PasswordField(
-                data = credentialFormData.copy(
-                    passwordHealth =
-                    PasswordHealthData(
-                        passwordStrength = PasswordStrength(
-                            PasswordStrengthScore.SAFELY_UNGUESSABLE,
-                            warning = null,
-                            suggestions = listOf()
-                        ),
-                        isCompromised = false,
-                        reusedCount = 0,
-                        isPasswordEmpty = false
-                    ),
-                    isEditable = true
-                ),
+                data = credentialFormData.copyFormData {
+                    it.copy(
+                        passwordHealth = PasswordHealthData(
+                            passwordStrength = PasswordStrength(
+                                PasswordStrengthScore.SAFELY_UNGUESSABLE,
+                                warning = null,
+                                suggestions = listOf()
+                            ),
+                            isCompromised = false,
+                            reusedCount = 0,
+                            isPasswordEmpty = false
+                        )
+                    )
+                }.copyCommonData {
+                    it.copy(isEditable = true)
+                },
                 revealedFields = setOf(),
                 editMode = true,
                 passwordActions = PasswordActions()

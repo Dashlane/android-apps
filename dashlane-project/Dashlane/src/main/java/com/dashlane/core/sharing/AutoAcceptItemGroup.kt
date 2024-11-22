@@ -1,7 +1,7 @@
 package com.dashlane.core.sharing
 
 import com.dashlane.exception.NotLoggedInException
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup

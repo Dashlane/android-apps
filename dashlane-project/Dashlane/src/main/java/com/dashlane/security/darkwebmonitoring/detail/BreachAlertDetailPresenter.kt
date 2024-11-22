@@ -1,7 +1,6 @@
 package com.dashlane.security.darkwebmonitoring.detail
 
 import android.graphics.Typeface
-import android.os.Build
 import android.text.style.StyleSpan
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.dashlane.R
@@ -221,7 +220,7 @@ class BreachAlertDetailPresenter @Inject constructor(
     }
 
     private fun changeSinglePassword(itemId: String, email: String?, domain: String?) =
-        if (domain != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (domain != null) {
             navigator.goToGuidedPasswordChange(
                 itemId,
                 domain,

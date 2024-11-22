@@ -3,8 +3,8 @@ package com.dashlane.login.controller
 import android.app.Activity
 import android.content.IntentFilter
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.dashlane.async.BroadcastConstants
 import com.dashlane.async.SyncBroadcastManager
+import com.dashlane.events.BroadcastConstants
 import com.dashlane.navigation.Navigator
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionTrasher

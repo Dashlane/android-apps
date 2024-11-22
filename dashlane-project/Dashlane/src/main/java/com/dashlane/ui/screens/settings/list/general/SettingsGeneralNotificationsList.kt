@@ -37,7 +37,7 @@ class SettingsGeneralNotificationsList(
         override val title = getFollowUpSetting().title
         override val description = getFollowUpSetting().description
         override fun isEnable() = followUpNotificationSettings.isAvailable()
-        override fun isVisible() = followUpNotificationSettings.isSupported()
+        override fun isVisible() = true
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
 
         override fun isChecked(context: Context): Boolean {
@@ -55,10 +55,6 @@ class SettingsGeneralNotificationsList(
     }
 
     fun getAll(): List<SettingItem> {
-        val supportedInDeviceFollowUpNotificationItem =
-            if (isFollowUpNotificationFeatureAvailable()) followUpNotificationItem else null
-        return listOfNotNull(generalNotificationsItem, supportedInDeviceFollowUpNotificationItem)
+        return listOfNotNull(generalNotificationsItem, followUpNotificationItem)
     }
-
-    private fun isFollowUpNotificationFeatureAvailable() = followUpNotificationSettings.isSupported()
 }

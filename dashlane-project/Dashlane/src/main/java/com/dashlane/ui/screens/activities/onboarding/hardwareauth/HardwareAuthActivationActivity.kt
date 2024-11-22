@@ -3,7 +3,6 @@ package com.dashlane.ui.screens.activities.onboarding.hardwareauth
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -11,17 +10,18 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.biometric.BiometricPrompt
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
-import com.dashlane.core.KeyChainHelper
+import com.dashlane.hardwaresecurity.BiometricActivationStatus
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.SecurityHelper
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Mode
 import com.dashlane.hermes.generated.definitions.Reason
 import com.dashlane.hermes.generated.events.user.AskAuthentication
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockTypeManager
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockType
 import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
 import com.dashlane.notificationcenter.view.ActionItemType
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.SecurityHelper
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
@@ -29,12 +29,11 @@ import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.Toaster
 import com.dashlane.util.getParcelableExtraCompat
-import com.dashlane.util.hardwaresecurity.BiometricActivationStatus
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.util.keychain.KeyChainHelper
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HardwareAuthActivationActivity : DashlaneActivity() {
@@ -63,7 +62,7 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
     lateinit var logRepository: LogRepository
 
     @Inject
-    lateinit var userPreferencesManager: UserPreferencesManager
+    lateinit var preferencesManager: PreferencesManager
 
     @Inject
     lateinit var lockManager: LockManager
@@ -113,15 +112,16 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
         when (result) {
             is BiometricAuthModule.Result.StrongBiometricSuccess,
             is BiometricAuthModule.Result.WeakBiometricSuccess -> {
+                val session = sessionManager.session ?: return
                 
-                runCatching { sessionManager.session?.let(sessionCredentialsSaver::saveCredentials) }
+                runCatching { sessionCredentialsSaver.saveCredentials(session) }
 
                 
-                lockManager.setLockType(LockTypeManager.LOCK_TYPE_BIOMETRIC)
+                lockManager.addLock(session.username, LockType.Biometric)
 
                 
                 NotificationCenterRepositoryImpl.setDismissed(
-                    userPreferencesManager,
+                    preferencesManager[session.username],
                     ActionItemType.BIOMETRIC.trackingKey,
                     false
                 )
@@ -132,7 +132,7 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
             is BiometricAuthModule.Result.Canceled -> finish()
             is BiometricAuthModule.Result.Error -> {
                 toaster.show(
-                    biometricAuthModule.getMessageForErrorCode(this, result.error.code, result.error.message),
+                    biometricAuthModule.getMessageForErrorCode(result.error.code, result.error.message),
                     Toast.LENGTH_SHORT
                 )
                 setResultOkAndFinish(isSuccessful = false)
@@ -154,11 +154,7 @@ class HardwareAuthActivationActivity : DashlaneActivity() {
     }
 
     private fun showRegisterDialog(errorMessageId: String) {
-        val messageResId = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            R.string.onboarding_dialog_hardware_registeration_module_google_fp_title_fingeronly
-        } else {
-            R.string.onboarding_dialog_hardware_registeration_module_google_fp_title
-        }
+        val messageResId = R.string.onboarding_dialog_hardware_registeration_module_google_fp_title
         val message = getString(messageResId) + "\n" + errorMessageId
         DialogHelper()
             .builder(this)

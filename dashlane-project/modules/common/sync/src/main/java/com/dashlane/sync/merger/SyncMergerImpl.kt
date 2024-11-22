@@ -132,15 +132,12 @@ class SyncMergerImpl @Inject constructor(
         val syncObject = outgoingUpdate.syncObject
         val transactionXml = syncObject.toTransaction()
         val identifier = generateUniqueIdentifier()
-        val anonymousId = generateUniqueIdentifier()
         val transactionCopy = outgoingUpdate.transaction.copy(
             identifier = identifier
         )
         val transactionXmlCopy = transactionXml.copy(
             node = transactionXml.node.copy(
-                data = transactionXml.node.data +
-                        (SyncObjectXml.ID to XmlData.ItemNode(identifier)) +
-                        (SyncObjectXml.ANON_ID to XmlData.ItemNode(anonymousId))
+                data = transactionXml.node.data + (SyncObjectXml.ID to XmlData.ItemNode(identifier))
             )
         )
         val syncObjectCopy = transactionXmlCopy.toObject(SyncObjectType.forObject(syncObject))

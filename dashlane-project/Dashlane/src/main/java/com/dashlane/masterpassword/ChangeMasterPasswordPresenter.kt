@@ -6,10 +6,15 @@ import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.dashlane.R
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
+import com.dashlane.changemasterpassword.MasterPasswordChanger
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.exception.NotLoggedInException
 import com.dashlane.hermes.generated.definitions.ChangeMasterPasswordError
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPass
 import com.dashlane.masterpassword.logger.ChangeMasterPasswordLogger
 import com.dashlane.masterpassword.tips.MasterPasswordTipsActivity
 import com.dashlane.navigation.Navigator
@@ -17,6 +22,7 @@ import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.passwordstrength.getShortTitle
 import com.dashlane.security.DashlaneIntent
+import com.dashlane.session.SessionManager
 import com.dashlane.sync.cryptochanger.SyncCryptoChangerCryptographyException
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.HomeActivity
@@ -38,6 +44,8 @@ class ChangeMasterPasswordPresenter(
     private val warningDesktopShown: Boolean,
     private val changeMasterPasswordLogoutHelper: ChangeMasterPasswordLogoutHelper,
     private val navigator: Navigator,
+    private val lockManager: LockManager,
+    private val sessionManager: SessionManager,
     coroutineScope: CoroutineScope
 ) : BasePresenter<ChangeMasterPasswordContract.DataProvider, ChangeMasterPasswordContract.View>(),
     ChangeMasterPasswordContract.Presenter {
@@ -305,6 +313,7 @@ class ChangeMasterPasswordPresenter(
             }
             Step.SUCCESS_SCREEN -> {
                 closeKeyboard()
+                sessionManager.session?.let { lockManager.unlock(session = it, pass = LockPass.ofPassword(AppKey.Password(expectedPassword))) }
                 dashlaneActivity.supportActionBar?.hide()
                 viewModelScope.launch(Dispatchers.Main.immediate) {
                     view.displaySuccess(!hasPlayedSuccessAnimation)

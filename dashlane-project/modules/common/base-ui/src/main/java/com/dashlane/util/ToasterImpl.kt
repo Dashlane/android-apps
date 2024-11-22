@@ -1,7 +1,6 @@
 package com.dashlane.util
 
 import android.annotation.SuppressLint
-import android.app.backup.BackupManager
 import android.content.Context
 import android.os.Build
 import android.view.Gravity
@@ -9,7 +8,6 @@ import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
-import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.ui.R
 import com.dashlane.util.Toaster.Duration
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,10 +15,6 @@ import javax.inject.Inject
 
 @SuppressLint("ToastUsage")
 class ToasterImpl @Inject constructor(@ApplicationContext private val context: Context) : Toaster {
-
-    private val darkThemeHelper: DarkThemeHelper by lazy {
-        DarkThemeHelper(GlobalPreferencesManager(context, BackupManager(context)))
-    }
 
     override fun show(@StringRes resId: Int, @Duration duration: Int) =
         show(context.resources?.getText(resId), duration, Toaster.Position.BOTTOM)
@@ -88,13 +82,8 @@ class ToasterImpl @Inject constructor(@ApplicationContext private val context: C
     }
 
     private fun getThemedColors(): Pair<Int, Int> {
-        return if (darkThemeHelper.isDarkTheme(context)) {
-            context.getColor(R.color.toast_font_color_dark) to
-                    context.getColor(R.color.toast_background_color_dark)
-        } else {
-            context.getColor(R.color.toast_font_color) to
-                    context.getColor(R.color.toast_background_color)
-        }
+        return context.getColor(R.color.toast_font_color) to
+            context.getColor(R.color.toast_background_color)
     }
 }
 

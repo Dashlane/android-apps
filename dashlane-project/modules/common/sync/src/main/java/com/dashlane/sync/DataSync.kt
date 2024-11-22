@@ -1,6 +1,7 @@
 package com.dashlane.sync
 
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.sync.repositories.SyncProgress
 import kotlinx.coroutines.flow.SharedFlow
 
 sealed class DataSyncState {
@@ -10,7 +11,7 @@ sealed class DataSyncState {
         data object Success : Idle()
     }
 
-    data object Active : DataSyncState()
+    data class Active(val progress: SyncProgress) : DataSyncState()
 }
 
 interface DataSync {

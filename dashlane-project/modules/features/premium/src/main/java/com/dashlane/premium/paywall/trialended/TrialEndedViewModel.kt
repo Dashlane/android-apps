@@ -6,8 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.help.HelpCenterLink
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.premium.R
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.intro.DescriptionItem
 import com.dashlane.ui.activities.intro.LinkItem
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
@@ -26,7 +27,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TrialEndedViewModel @Inject constructor(
     private val frozenStateManager: FrozenStateManager,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val clock: Clock
 ) : ViewModel() {
@@ -86,7 +88,7 @@ class TrialEndedViewModel @Inject constructor(
     )
 
     private fun onLoaded() {
-        userPreferencesManager.trialEndedAnnouncementTimestamp = Instant.now(clock).toEpochMilli()
+        preferencesManager[sessionManager.session?.username].trialEndedAnnouncementTimestamp = Instant.now(clock).toEpochMilli()
     }
 }
 

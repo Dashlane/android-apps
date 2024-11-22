@@ -21,6 +21,7 @@ class ConstantsPrefs {
         internal const val RSA_PUBLIC_KEY = "pref_rsa_public_key"
         internal const val PINCODE_ON = "pincodeOn"
         internal const val PINCODE_TRY_COUNT = "pincodeTryCount"
+        internal const val PINCODE_LENGTH = "pincodeLength"
         internal const val USER_SETTINGS_BACKUP_TIME = "userSettingsBackupTime"
         internal const val MULTIPLE_ACCOUNT_LOADED_ON_THIS_DEVICE = "moreThanOneUserOnThisDevice"
         internal const val REGISTRATION_ID = "gid"
@@ -28,12 +29,9 @@ class ConstantsPrefs {
         internal const val SETTINGS_ON_LOGIN_PAYWALL = "userOnLoginPaywall"
         internal const val ACCOUNT_CREATION_DATE = "accountCreationDate"
         internal const val ALLOW_SEND_LOGS = "allowSendLogs"
-        internal const val REGISTERED_AUTHENTICATOR_PUSH_ID = "registeredAuthenticatorPushId"
         internal const val USER_ACTIVITY_UPDATE_DATE = "userActivityUpdateDate"
         internal const val USER_SUBSCRIPTION_CODE = "userSubscriptionCode"
         internal const val MPLESS_ARK_ENABLED = "mplessARKEnabled"
-        internal const val AUTHENTICATOR_INVALIDATED_BIOMETRIC = "authenticatorInvalidatedBiometric"
-        internal const val AUTHENTICATOR_ENROLLED_BIOMETRIC = "authenticatorEnrolledBiometric"
 
         internal const val CREDENTIALS_TIMESTAMP = "credentials_timestamp"
 
@@ -46,7 +44,6 @@ class ConstantsPrefs {
 
         const val TIME_OUT_LOCK = "lockTimeOut"
         const val LOCK_ON_EXIT = "lockOnExit"
-        const val UNLOCK_ITEMS_WITH_PIN_OR_FP = "unlockItemsWithPincode"
 
         const val USE_GOOGLE_FINGERPRINT = "useGoogleFingerprint"
         const val INVALIDATED_BIOMETRIC = "invalidatedBiometric"

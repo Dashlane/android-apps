@@ -65,7 +65,7 @@ import com.dashlane.ui.thumbnail.ThumbnailDomainIcon
 import com.dashlane.ui.widgets.compose.OutlinedTeamspaceIcon
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.getBaseActivity
-import com.dashlane.util.model.UserPermission
+import com.dashlane.sharing.UserPermission
 import com.dashlane.vault.model.getColorId
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectXmlName
@@ -303,7 +303,7 @@ private fun Header(title: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 0.dp)
-            .cardBackground(isTop = true)
+            .cardBackground(isBottom = false)
             .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 8.dp),
     ) {
         Text(
@@ -320,7 +320,7 @@ private fun BottomBackground() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 0.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
-            .cardBackground(isBottom = true)
+            .cardBackground(isTop = false)
             .height(16.dp),
     )
 }

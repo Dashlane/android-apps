@@ -26,11 +26,9 @@ import com.dashlane.server.api.endpoints.authentication.RemoteKey
 import com.dashlane.server.api.endpoints.authentication.exceptions.AccountBlockedContactSupportException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceDeactivatedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceNotFoundException
-import com.dashlane.server.api.endpoints.authentication.exceptions.FailedToContactAuthenticatorDeviceException
 import com.dashlane.server.api.endpoints.authentication.exceptions.InvalidOtpAlreadyUsedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.InvalidOtpBlockedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.TwofaEmailTokenNotEnabledException
-import com.dashlane.server.api.endpoints.authentication.exceptions.UserHasNoActiveAuthenticatorException
 import com.dashlane.server.api.endpoints.authentication.exceptions.UserNotFoundException
 import com.dashlane.server.api.endpoints.authentication.exceptions.VerificationFailedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.VerificationMethodDisabledException
@@ -141,16 +139,6 @@ class AuthenticationSecondFactoryRepositoryImpl(
                 Unit
             )
         }
-
-    override suspend fun validate(
-        dashlaneAuthenticator: AuthenticationSecondFactor.Authenticator
-    ): AuthenticationSecondFactoryRepository.ValidationResult = withContext(Dispatchers.Default) {
-        DashlaneAuthenticatorStrategy().validate(
-            dashlaneAuthenticator.login,
-            dashlaneAuthenticator.securityFeatures,
-            Unit
-        )
-    }
 
     override suspend fun resendToken(emailToken: AuthenticationSecondFactor.EmailToken) =
         withContext(Dispatchers.Default) { resendTokenImpl(emailToken) }
@@ -280,23 +268,6 @@ class AuthenticationSecondFactoryRepositoryImpl(
             login: String,
             verification: Unit
         ) = authTicketHelper.verifyDuoPush(login)
-    }
-
-    private inner class DashlaneAuthenticatorStrategy : SecondFactorStrategy<Unit>() {
-
-        override fun DashlaneApiHttp400BusinessException.toError() = when (this) {
-            is FailedToContactAuthenticatorDeviceException,
-            is UserHasNoActiveAuthenticatorException,
-            is VerificationFailedException -> AuthenticationSecondFactorFailedException(cause = this)
-
-            is VerificationTimeoutException -> AuthenticationTimeoutException(cause = this)
-            else -> AuthenticationUnknownException(cause = this)
-        }
-
-        override suspend fun verify(
-            login: String,
-            verification: Unit
-        ) = authTicketHelper.verifyDashlaneAuthenticator(login)
     }
 }
 

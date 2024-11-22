@@ -25,13 +25,13 @@ class VaultFabMenuItemNavigator(
         setupClickListener(rootView, R.id.fab_menu_item_company)
         setupClickListener(rootView, R.id.fab_menu_item_website)
         setupClickListener(rootView, R.id.fab_menu_item_credit_card)
-        setupClickListener(rootView, R.id.fab_menu_item_paypal)
         setupClickListener(rootView, R.id.fab_menu_item_bank_account)
         setupClickListener(rootView, R.id.fab_menu_item_id_card)
         setupClickListener(rootView, R.id.fab_menu_item_passport)
         setupClickListener(rootView, R.id.fab_menu_item_driver_license)
         setupClickListener(rootView, R.id.fab_menu_item_social_security)
         setupClickListener(rootView, R.id.fab_menu_item_tax_number)
+        setupClickListener(rootView, R.id.fab_menu_item_secret)
     }
 
     override fun onClick(v: View) {
@@ -45,13 +45,13 @@ class VaultFabMenuItemNavigator(
             R.id.fab_menu_item_company -> addNewCompany()
             R.id.fab_menu_item_website -> addNewWebsite()
             R.id.fab_menu_item_credit_card -> createNewCreditCard()
-            R.id.fab_menu_item_paypal -> createNewPaypal()
             R.id.fab_menu_item_bank_account -> createNewBankAccount()
             R.id.fab_menu_item_id_card -> addNewIDCard()
             R.id.fab_menu_item_passport -> addNewPassport()
             R.id.fab_menu_item_driver_license -> addNewDriverLicence()
             R.id.fab_menu_item_social_security -> addNewSocialSecurity()
             R.id.fab_menu_item_tax_number -> addNewTaxStatement()
+            R.id.fab_menu_item_secret -> addSecret()
             else -> Unit
         }
     }
@@ -67,6 +67,10 @@ class VaultFabMenuItemNavigator(
         ) {
             addNewItem(SyncObjectType.SECURE_NOTE)
         }
+    }
+
+    fun addSecret() {
+        addNewItem(SyncObjectType.SECRET)
     }
 
     private fun addNewIdentity() {
@@ -95,10 +99,6 @@ class VaultFabMenuItemNavigator(
 
     fun createNewCreditCard() {
         addNewItem(SyncObjectType.PAYMENT_CREDIT_CARD)
-    }
-
-    private fun createNewPaypal() {
-        addNewItem(SyncObjectType.PAYMENT_PAYPAL)
     }
 
     private fun createNewBankAccount() {

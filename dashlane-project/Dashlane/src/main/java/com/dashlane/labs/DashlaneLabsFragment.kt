@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dashlane.R
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.Dialog
+import com.dashlane.design.component.IndeterminateLoader
 import com.dashlane.design.component.InfoboxButton
 import com.dashlane.design.component.InfoboxLarge
 import com.dashlane.design.component.Text
@@ -46,7 +47,6 @@ import com.dashlane.design.component.cardBackground
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.common.compose.components.CircularProgressIndicator
 import com.dashlane.util.launchUrl
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -123,7 +123,7 @@ class DashlaneLabsFragment : Fragment() {
                     }
                     is DashlaneLabsState.Loading -> {
                         item {
-                            CircularProgressIndicator()
+                            IndeterminateLoader()
                         }
                     }
                 }
@@ -169,7 +169,7 @@ class DashlaneLabsFragment : Fragment() {
 
     @Composable
     @Preview
-    fun FeatureItemPreview() {
+    private fun FeatureItemPreview() {
         DashlanePreview {
             FeatureItem(
                 toggleClicked = {},

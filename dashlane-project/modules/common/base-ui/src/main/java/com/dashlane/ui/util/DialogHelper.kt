@@ -5,8 +5,11 @@ import android.view.Gravity
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class DialogHelper {
+@Singleton
+class DialogHelper @Inject constructor() {
     fun builder(context: Context): AlertDialog.Builder {
         return MaterialAlertDialogBuilder(context)
     }

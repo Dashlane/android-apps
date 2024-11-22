@@ -5,6 +5,7 @@
     android:id="@+id/attachment_list_coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     >
 
     <com.google.android.material.appbar.AppBarLayout

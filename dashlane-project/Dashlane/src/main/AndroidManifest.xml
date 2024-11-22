@@ -8,9 +8,6 @@
     
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
     
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -50,9 +47,6 @@
     <permission
         android:name="com.dashlane.notification.followupnotification.FOLLOW_UP_NOTIFICATION"
         android:protectionLevel="signature" />
-    <permission
-        android:name="com.dashlane.authenticator.PACKAGE_REMOVED"
-        android:protectionLevel="signature" />
 
     <uses-permission android:name="com.dashlane.notification.autofill.NOT_NOW" />
     <uses-permission android:name="com.dashlane.notification.autofillapi.TOTP_NOTIFICATION" />
@@ -85,7 +79,6 @@
         android:required="false" />
 
     <application
-        android:usesCleartextTraffic="true"
         android:name="com.dashlane.DashlaneApplication"
         android:allowBackup="true"
         android:backupAgent="com.dashlane.backup.DashlaneBackupAgent"
@@ -97,6 +90,7 @@
         android:supportsRtl="false"
         android:taskAffinity=""
         android:theme="@style/Theme.Dashlane.NoActionBar.DrawsStatusBarBackground"
+        android:usesCleartextTraffic="true"
         tools:replace="android:supportsRtl, android:allowBackup">
         
         <meta-data
@@ -220,7 +214,7 @@
 
         <activity
             android:name="com.dashlane.autofill.onboarding.OnboardingInAppLoginActivity"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         
         <activity
@@ -234,7 +228,12 @@
 
         <activity
             android:name=".masterpassword.ChangeMasterPasswordActivity"
-            android:theme="@style/Theme.Dashlane"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".masterpassword.ChangeMasterPasswordComposeActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
@@ -245,13 +244,13 @@
 
         <activity
             android:name=".masterpassword.tips.MasterPasswordTipsActivity"
-            android:theme="@style/Theme.Dashlane" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         
         <activity
             android:name=".item.ItemEditViewActivity"
             android:exported="false"
-            android:theme="@style/Theme.Dashlane.DialogWhenTablet"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
         
         <activity
@@ -268,7 +267,7 @@
         <activity
             android:name="com.dashlane.ui.activities.debug.DebugActivity"
             android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
         
 
         <activity
@@ -278,17 +277,17 @@
 
         <activity
             android:name=".ui.activities.firstpassword.AddFirstPasswordActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.activities.firstpassword.autofilldemo.AutofillDemoActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ui.activities.firstpassword.faq.FAQFirstPasswordActivity"
-            android:theme="@style/Theme.Dashlane.NoActionBar"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
@@ -312,7 +311,8 @@
         
         <activity
             android:name=".attachment.ui.AttachmentListActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" />
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.dashlane.fileprovider"
@@ -386,19 +386,6 @@
             android:permission="com.dashlane.notification.autofill.NOT_NOW" />
 
         
-        <receiver
-            android:name="com.dashlane.authenticator.AuthenticatorUninstalledReceiver"
-            android:exported="true"
-            android:permission="com.dashlane.authenticator.PACKAGE_REMOVED">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
-                <data
-                    android:scheme="package"
-                    android:sspPrefix="com.dashlane.authenticator" />
-            </intent-filter>
-        </receiver>
-
-        
 
         
         <service
@@ -413,58 +400,28 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        
-        <service
-            android:name="com.dashlane.autofill.accessibility.DashlaneAccessibilityService"
-            android:enabled="@bool/is_accessibility_supported"
-            android:exported="false"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_meta" />
-        </service>
-        <service
-            android:name="com.dashlane.autofill.accessibility.NoOpDashlaneAccessibilityService"
-            android:enabled="@bool/is_no_op_accessibility_supported"
-            android:exported="false"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/no_op_accessibility_service_meta" />
-        </service>
-        <service android:name="com.dashlane.ui.DashlaneBubble" />
-        <service android:name="com.dashlane.ui.InAppLoginWindow" />
-        <service android:name="com.dashlane.ui.DashlaneInAppLoggedOut" />
-
         <activity
             android:name=".ui.screens.settings.LicensesActivity"
             android:label="@string/activity_title_licenses"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:parentActivityName=".ui.activities.HomeActivity" />
 
         <activity
             android:name=".ui.screens.activities.GeneratedPasswordHistoryActivity"
             android:label="@string/action_bar_password_generated"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:parentActivityName=".ui.activities.HomeActivity" />
 
         
         <activity
             android:name=".plans.ui.view.PurchaseCheckingActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:theme="@style/Theme.Dashlane.Modal" />
-
-        
-        <activity android:name=".ui.activities.DisclaimerActivity" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         
         <activity
             android:name=".ui.activities.onboarding.InAppLoginIntroActivity"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         
         <activity
@@ -473,7 +430,7 @@
 
         <activity
             android:name=".biometricrecovery.MasterPasswordResetIntroActivity"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         <activity
             android:name=".biometricrecovery.MasterPasswordResetIntroDialogActivity"
@@ -483,6 +440,7 @@
         
         <activity
             android:name=".login.accountrecoverykey.LoginAccountRecoveryKeyActivity"
+            android:theme="@style/Theme.Dashlane.Login.TranslucentWindow"
             android:windowSoftInputMode="adjustResize" />
 
         
@@ -504,26 +462,12 @@
 
         <activity
             android:name=".pin.settings.PinSettingsActivity"
-            android:theme="@style/Theme.Dashlane.Modal"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".authenticator.AuthenticatorSunsetActivity"
-            android:theme="@style/Theme.Dashlane.Modal" />
 
         <activity
             android:name=".accountrecoverykey.AccountRecoveryKeyActivity"
             android:windowSoftInputMode="adjustResize" />
-
-        
-        <service
-            android:name=".authenticator.AuthenticatorPasswordManagerService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="com.dashlane.PasswordManagerService" />
-            </intent-filter>
-        </service>
 
         
         

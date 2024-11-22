@@ -29,6 +29,7 @@ import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.pin.setup.PinSetupViewModel.Companion.PIN_LENGTH
 import com.dashlane.ui.common.compose.components.pincode.PinKeyboard
 import com.dashlane.ui.common.compose.components.pincode.PinTextField
 import com.dashlane.util.animation.shake
@@ -114,6 +115,7 @@ fun PinContent(
             modifier = Modifier
                 .padding(top = 32.dp, bottom = 16.dp)
                 .shake(isError),
+            length = PIN_LENGTH,
             value = pinCode,
             onValueChange = onPinUpdated,
             isError = isError,
@@ -158,7 +160,7 @@ fun SystemLockSetupDialog(
 
 @Preview
 @Composable
-fun PinScreenPreview() {
+private fun PinScreenPreview() {
     DashlanePreview {
         PinContent(
             title = stringResource(R.string.pin_dialog_set_topic),
@@ -173,7 +175,7 @@ fun PinScreenPreview() {
 
 @Preview
 @Composable
-fun SystemLockSetupDialogPreview() {
+private fun SystemLockSetupDialogPreview() {
     DashlanePreview {
         SystemLockSetupDialog(
             onConfirm = {}

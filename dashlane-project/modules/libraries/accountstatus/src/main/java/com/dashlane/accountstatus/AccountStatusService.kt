@@ -1,7 +1,7 @@
 package com.dashlane.accountstatus
 
 import android.util.Log
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.server.api.endpoints.premium.SubscriptionInfo

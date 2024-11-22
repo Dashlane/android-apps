@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="fragment_lock_pincode_forwarder" type="layout">@layout/fragment_lock_pincode_centered</item>
-</resources>
