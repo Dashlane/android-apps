@@ -1,4 +1,4 @@
-# Android apps
+# Android App
 
 This repository contains the source code for our Android password manager application. It is publicly available for everyone to audit our code and learn more about how our Android applications work.
 
@@ -12,7 +12,7 @@ The Android project was started back in 2010 and was written in Java with some u
 
 ### Codebase organization
 
-The app used to be monolithic in a single repository and was progressively modularized. Some modules are directly put in our repository while others are built separately and published on a private maven repository to be used by our apps. Overall modularization helped us with our build processes, while also allowing us to reuse modules in our more recently released Authenticator app.
+The app used to be monolithic in a single repository and was progressively modularized. Some modules are directly put in our repository while others are built separately and published on a private maven repository to be used by our app. Overall modularization helped us with our build processes, while also allowing us to reuse modules.
 
 ### UI architecture pattern
 
@@ -52,9 +52,9 @@ If you find a vulnerability or a security issue, please report it on our [Hacker
 
 If there is an improvement for the codebase you would like to share with us, we would be happy to hear your thoughts! Feel free to open an issue on this repository or reach us at dev-relationship@dashlane.com.
 
-## Get our apps
+## Get our app
 
-|  Dashlane Apps |  Download link | 
+|  Dashlane App |  Download link | 
 |---|---|
 | Dashlane Password Manager   |  <a href="https://play.google.com/store/apps/details?id=com.dashlane"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height=100px /></a>  |
-|  Dashlane Authenticator   |  <a href="https://play.google.com/store/apps/details?id=com.dashlane.authenticator"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height=100px /> |
+
