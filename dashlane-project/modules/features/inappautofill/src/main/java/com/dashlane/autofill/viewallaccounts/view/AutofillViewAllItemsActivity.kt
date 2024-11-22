@@ -169,14 +169,14 @@ class AutofillViewAllItemsActivity :
                 origin = getAutofillApiOrigin(forKeyboardAutofill),
                 packageName = summaryPackageName,
                 webappDomain = summaryWebDomain,
-                itemUrl = authentifiant.syncObject.urlForUsageLog,
+                itemUrl = authentifiant.urlForUsageLog,
                 itemId = authentifiant.syncObject.id,
                 itemListContext = itemListContext
             )
-            if (shouldDisplayPhishingWarning(authentifiant.syncObject)) {
+            if (shouldDisplayPhishingWarning(authentifiant)) {
                 AutofillPhishingWarningFragment.create(
                     summary,
-                    authentifiant.syncObject.urlForUI(),
+                    authentifiant.urlForUI(),
                     authentifiant.uid,
                     phishingAttemptLevel
                 ).show(supportFragmentManager, SECURITY_WARNING_DIALOG_TAG)

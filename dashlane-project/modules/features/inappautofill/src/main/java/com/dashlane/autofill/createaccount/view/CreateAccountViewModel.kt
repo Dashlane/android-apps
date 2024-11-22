@@ -15,17 +15,17 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.url.toUrlDomainOrNull
-import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @HiltViewModel
 class CreateAccountViewModel @Inject constructor(
@@ -82,7 +82,8 @@ class CreateAccountViewModel @Inject constructor(
                     login = login!!,
                     password = password!!,
                     packageName = packageName,
-                    spaceId = (stateFlow.value.data.teamSpace?.getOrNull(spaceSelectedIndex) as? TeamSpace.Business)?.teamId
+                    spaceId = stateFlow.value.data.teamSpace?.getOrNull(spaceSelectedIndex)?.teamId
+                        ?: TeamSpace.Personal.teamId
                 )
                 provider.saveCredentialToVault(info)
             }

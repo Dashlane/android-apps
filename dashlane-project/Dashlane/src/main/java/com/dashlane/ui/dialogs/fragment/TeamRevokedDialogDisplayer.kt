@@ -8,8 +8,10 @@ import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.accountstatus.premiumstatus.endDate
 import com.dashlane.preference.ConstantsPrefs
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.HomeActivity
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 import com.dashlane.util.inject.OptionalProvider
@@ -23,7 +25,8 @@ import javax.inject.Inject
 
 class TeamRevokedDialogDisplayer @Inject constructor(
     private val accountStatusProvider: OptionalProvider<AccountStatus>,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope
 ) {
 
@@ -31,6 +34,9 @@ class TeamRevokedDialogDisplayer @Inject constructor(
         const val ARG_SPACE_REVOKED_ID = "ARG_SPACE_REVOKED_ID"
         private const val REVOKED_DETECTOR_DELAY_MILLIS = 500L
     }
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     private val premiumStatus: PremiumStatus?
         get() = accountStatusProvider.get()?.premiumStatus

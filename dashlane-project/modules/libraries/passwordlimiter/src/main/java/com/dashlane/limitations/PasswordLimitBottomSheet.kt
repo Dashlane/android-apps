@@ -107,7 +107,7 @@ class PasswordLimitBottomSheet : BottomSheetDialogFragment() {
 
     @Preview
     @Composable
-    fun PasswordLimitContentPreview() {
+    private fun PasswordLimitContentPreview() {
         DashlanePreview { PasswordLimitContent() }
     }
 

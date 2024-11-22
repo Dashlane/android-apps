@@ -3,7 +3,7 @@
     <application>
         <activity
             android:name="com.dashlane.vpn.thirdparty.activate.VpnThirdPartyActivateAccountActivity"
-            android:theme="@style/Theme.Dashlane.Modal"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
             android:windowSoftInputMode="adjustResize" />
 
         

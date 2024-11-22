@@ -1,12 +1,12 @@
 package com.dashlane.logger.utils
 
-import com.dashlane.debug.DaDaDa
+import com.dashlane.debug.services.DaDaDaHermes
 import com.dashlane.hermes.ConfigurationUtil
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.util.BuildConfig
 
 class HermesDebugUtil(
-    private val daDaDa: DaDaDa,
+    private val dadadaHermes: DaDaDaHermes,
     private val preferencesManager: GlobalPreferencesManager
 ) : ConfigurationUtil {
     override val allowSendLogs: Boolean
@@ -16,16 +16,16 @@ class HermesDebugUtil(
         get() {
             
             return if (BuildConfig.DEBUG) {
-                if (!daDaDa.isEnabled) {
+                if (!dadadaHermes.isEnabled) {
                     true
                 } else {
-                    daDaDa.hasHermesAutoFlushEnabled()
+                    dadadaHermes.hasHermesAutoFlushEnabled()
                 }
             } else {
-                daDaDa.isEnabled && daDaDa.hasHermesAutoFlushEnabled()
+                dadadaHermes.isEnabled && dadadaHermes.hasHermesAutoFlushEnabled()
             }
         }
 
     override val isVerboseEnabled
-        get() = daDaDa.isEnabled && daDaDa.hasHermesVerboseEnabled()
+        get() = dadadaHermes.isEnabled && dadadaHermes.hasHermesVerboseEnabled()
 }

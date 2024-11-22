@@ -94,26 +94,6 @@ enum class CopyField(
         )
     ),
 
-    PayPalLogin(
-        SyncObjectType.PAYMENT_PAYPAL,
-        CopyFieldContentMapper.PaymentPaypal(
-            hasContentInSummary = { it.login.isNotSemanticallyNull() },
-            hasContentInFull = { it.login.isNotSemanticallyNull() },
-            getContentInSummary = { CopyContent.Ready.StringValue(it.login) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.login) }
-        )
-    ),
-    PayPalPassword(
-        SyncObjectType.PAYMENT_PAYPAL,
-        CopyFieldContentMapper.PaymentPaypal(
-            hasContentInSummary = { it.isPasswordEmpty.not() },
-            hasContentInFull = { it.password?.toString().isNotSemanticallyNull() },
-            getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.password) }
-        ),
-        isSensitiveData = true
-    ),
-
     BankAccountBank(
         SyncObjectType.BANK_STATEMENT,
         CopyFieldContentMapper.BankStatement(
@@ -442,7 +422,27 @@ enum class CopyField(
             getContentInSummary = { CopyContent.Ready.StringValue(it.userDisplayName) },
             getContentInFull = { CopyContent.Ready.StringValue(it.userDisplayName) }
         )
-    );
+    ),
+    SecretValue(
+        SyncObjectType.SECRET,
+        CopyFieldContentMapper.Secret(
+            hasContentInSummary = { it.content.isNotSemanticallyNull() },
+            hasContentInFull = { it.content.isNotSemanticallyNull() },
+            getContentInSummary = { CopyContent.Ready.StringValue(it.content) },
+            getContentInFull = { CopyContent.Ready.StringValue(it.content) }
+        ),
+        isSharingProtected = true,
+        isSensitiveData = true
+    ),
+    SecretId(
+        SyncObjectType.SECRET,
+        CopyFieldContentMapper.Secret(
+            hasContentInSummary = { it.id.isNotSemanticallyNull() },
+            hasContentInFull = { it.id.isNotSemanticallyNull() },
+            getContentInSummary = { CopyContent.Ready.StringValue(it.id.removeSurrounding("{", "}")) },
+            getContentInFull = { CopyContent.Ready.StringValue(it.id?.removeSurrounding("{", "}")) }
+        )
+    ),
 }
 
 private fun SyncObject.getLinkedIdentityContent(): CopyContent {

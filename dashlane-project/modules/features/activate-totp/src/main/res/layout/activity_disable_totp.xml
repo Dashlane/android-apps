@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal"
-    android:maxWidth="@dimen/size_480dp">
+    android:maxWidth="@dimen/size_480dp"
+    android:fitsSystemWindows="true">
 
     <fragment
         android:id="@+id/nav_host_fragment"

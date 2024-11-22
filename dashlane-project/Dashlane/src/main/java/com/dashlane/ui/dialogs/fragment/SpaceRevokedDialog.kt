@@ -1,7 +1,7 @@
 package com.dashlane.ui.dialogs.fragment
 
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.dialogs.fragment.TeamRevokedDialogDisplayer.Companion.ARG_SPACE_REVOKED_ID
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
@@ -21,7 +21,7 @@ class SpaceRevokedDialog : NotificationDialogFragment() {
     lateinit var sessionManager: SessionManager
 
     @Inject
-    lateinit var userPreferencesManager: UserPreferencesManager
+    lateinit var preferencesManager: PreferencesManager
 
     private var startShown: Instant = Instant.EPOCH
 
@@ -40,10 +40,11 @@ class SpaceRevokedDialog : NotificationDialogFragment() {
             
             return
         }
-        val spaceId = userPreferencesManager.getString(ConstantsPrefs.NEED_POPUP_SPACE_REVOKED_FOR) ?: return
+        val preferences = preferencesManager[sessionManager.session?.username]
+        val spaceId = preferences.getString(ConstantsPrefs.NEED_POPUP_SPACE_REVOKED_FOR) ?: return
         if (spaceId == requireArguments().getString(ARG_SPACE_REVOKED_ID)) {
             
-            userPreferencesManager.remove(ConstantsPrefs.NEED_POPUP_SPACE_REVOKED_FOR)
+            preferences.remove(ConstantsPrefs.NEED_POPUP_SPACE_REVOKED_FOR)
         }
     }
 }

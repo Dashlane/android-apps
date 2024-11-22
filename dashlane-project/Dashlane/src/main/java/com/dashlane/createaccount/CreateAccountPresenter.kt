@@ -27,7 +27,7 @@ import com.dashlane.createaccount.passwordless.MplessAccountCreationActivity
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory
-import com.dashlane.ui.endoflife.EndOfLife
+import com.dashlane.endoflife.EndOfLife
 import com.dashlane.util.coroutines.DeferredViewModel
 import com.dashlane.util.coroutines.getDeferredViewModel
 import com.dashlane.util.setCurrentPageView

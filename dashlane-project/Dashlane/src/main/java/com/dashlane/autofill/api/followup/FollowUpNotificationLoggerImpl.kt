@@ -116,7 +116,6 @@ class FollowUpNotificationLoggerImpl @Inject constructor(
             FollowUpNotificationsTypes.ID_CARD -> ItemType.ID_CARD
             FollowUpNotificationsTypes.PASSPORT -> ItemType.PASSPORT
             FollowUpNotificationsTypes.PAYMENTS_CARD -> ItemType.CREDIT_CARD
-            FollowUpNotificationsTypes.PAYPAL -> ItemType.PAYPAL
         }
     }
 }

@@ -30,10 +30,6 @@ interface AuthenticationAuthTicketHelper {
         ssoToken: String
     ): VerificationResult
 
-    suspend fun verifyDashlaneAuthenticator(
-        login: String
-    ): VerificationResult
-
     interface VerificationResult {
         val authTicket: String
 

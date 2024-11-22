@@ -32,7 +32,6 @@ import com.dashlane.autofill.phishing.PhishingWarningDataProviderImpl
 import com.dashlane.autofill.ui.AutofillPerformedCallback
 import com.dashlane.autofill.ui.AutofillPerformedCallbackImpl
 import com.dashlane.autofill.viewallaccounts.AutofillViewAllItemsActivityIntentProvider
-import com.dashlane.login.lock.LockManager
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -42,9 +41,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface AutofillApiComponentBindModule {
-
-    @Binds
-    fun bindAutofillLockManager(lockManager: LockManager): AutofillAnalyzerDef.ILockManager
 
     @Singleton
     @Binds

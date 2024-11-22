@@ -9,9 +9,9 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.dashlane.databinding.FragmentVaultListBinding
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.featureflipping.FeatureFlip
 import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.home.vaultlist.Filter
 import com.dashlane.home.vaultlist.setVaultListContent
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.fragments.vault.VaultViewModel
@@ -31,13 +31,16 @@ class VaultListFragment : Fragment() {
     @Inject
     lateinit var userFeaturesChecker: UserFeaturesChecker
 
+    private val isNewVaultListEnabled: Boolean
+        get() = userFeaturesChecker.has(FeatureFlip.NEW_VAULT_LIST)
+
     private val vaultListViewModel by viewModels<VaultListViewModel>()
     private val vaultViewModel: VaultViewModel by viewModels(ownerProducer = { requireParentFragment() })
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        return if (userFeaturesChecker.has(FeatureFlip.NEW_VAULT_LIST)) {
+        return if (isNewVaultListEnabled) {
             ComposeView(requireContext()).apply {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setVaultListContent()

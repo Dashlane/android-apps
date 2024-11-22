@@ -1,99 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/view_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center_horizontal"
-    android:maxWidth="@dimen/size_480dp"
-    android:paddingLeft="@dimen/spacing_big"
-    android:paddingTop="@dimen/spacing_normal"
-    android:paddingRight="@dimen/spacing_big"
-    android:paddingBottom="@dimen/spacing_normal"
-    tools:context="com.dashlane.darkweb.ui.setup.DarkWebSetupMailActivity"
-    >
+    android:fitsSystemWindows="true"
+    tools:context="com.dashlane.darkweb.ui.setup.DarkWebSetupMailActivity">
 
-    <TextView
-        android:id="@+id/view_darkweb_mail_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/darkweb_setup_mail_title"
-        android:textAlignment="textStart"
-        android:textAppearance="?textAppearanceHeadline1"
-        android:textColor="@color/text_neutral_catchy"
-        app:layout_constraintBottom_toTopOf="@+id/view_darkweb_mail_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="spread"
-        />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/view_darkweb_mail_layout"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:hint="@string/darkweb_setup_mail_hint"
-        app:errorEnabled="true"
-        app:layout_constraintBottom_toTopOf="@+id/view_darkweb_mail_progress_bar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view_darkweb_mail_title"
-        app:layout_constraintVertical_chainStyle="packed"
-        >
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:maxWidth="@dimen/size_480dp"
+        android:paddingStart="@dimen/spacing_big"
+        android:paddingTop="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_big"
+        android:paddingBottom="@dimen/spacing_normal">
 
-        <com.dashlane.util.TextInputAutoCompleteTextView
-            android:id="@+id/view_darkweb_mail_input"
+        <TextView
+            android:id="@+id/view_darkweb_mail_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/darkweb_setup_mail_title"
+            android:textAlignment="textStart"
+            android:textAppearance="?textAppearanceHeadline1"
+            android:textColor="@color/text_neutral_catchy"
+            app:layout_constraintBottom_toTopOf="@+id/view_darkweb_mail_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="spread" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/view_darkweb_mail_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
-            android:inputType="textEmailAddress"
-            android:lines="1"
-            android:minHeight="@dimen/minimum_clickable_area_size"
-            android:textSize="16sp"
-            tools:ignore="MissingRegistered"
-            />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:hint="@string/darkweb_setup_mail_hint"
+            app:errorEnabled="true"
+            app:layout_constraintBottom_toTopOf="@+id/view_darkweb_mail_progress_bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_darkweb_mail_title"
+            app:layout_constraintVertical_chainStyle="packed">
+
+            <com.dashlane.util.TextInputAutoCompleteTextView
+                android:id="@+id/view_darkweb_mail_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress"
+                android:lines="1"
+                android:minHeight="@dimen/minimum_clickable_area_size"
+                android:textSize="16sp"
+                tools:ignore="MissingRegistered" />
+        </com.google.android.material.textfield.TextInputLayout>
 
 
-    <Button
-        android:id="@+id/view_darkweb_mail_cancel"
-        style="?borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/spacing_small"
-        android:text="@string/darkweb_setup_button_cancel"
-        app:layout_constraintBottom_toBottomOf="@+id/view_darkweb_mail_next"
-        app:layout_constraintEnd_toStartOf="@+id/view_darkweb_mail_next"
-        app:layout_constraintTop_toTopOf="@+id/view_darkweb_mail_next"
-        />
+        <Button
+            android:id="@+id/view_darkweb_mail_cancel"
+            style="?borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:text="@string/darkweb_setup_button_cancel"
+            app:layout_constraintBottom_toBottomOf="@+id/view_darkweb_mail_next"
+            app:layout_constraintEnd_toStartOf="@+id/view_darkweb_mail_next"
+            app:layout_constraintTop_toTopOf="@+id/view_darkweb_mail_next" />
 
-    <Button
-        android:id="@+id/view_darkweb_mail_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/darkweb_setup_button_next"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        <Button
+            android:id="@+id/view_darkweb_mail_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/darkweb_setup_button_next"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <ProgressBar
-        android:id="@+id/view_darkweb_mail_progress_bar"
-        style="?indeterminateProgressStyle"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:padding="@dimen/spacing_small"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/view_darkweb_mail_next"
-        app:layout_constraintEnd_toEndOf="@+id/view_darkweb_mail_next"
-        app:layout_constraintStart_toStartOf="@+id/view_darkweb_mail_next"
-        app:layout_constraintTop_toTopOf="@+id/view_darkweb_mail_next"
-        />
+        <ProgressBar
+            android:id="@+id/view_darkweb_mail_progress_bar"
+            style="?indeterminateProgressStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:padding="@dimen/spacing_small"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/view_darkweb_mail_next"
+            app:layout_constraintEnd_toEndOf="@+id/view_darkweb_mail_next"
+            app:layout_constraintStart_toStartOf="@+id/view_darkweb_mail_next"
+            app:layout_constraintTop_toTopOf="@+id/view_darkweb_mail_next" />
 
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

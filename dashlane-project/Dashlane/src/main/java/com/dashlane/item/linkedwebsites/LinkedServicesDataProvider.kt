@@ -78,7 +78,7 @@ class LinkedServicesDataProvider @Inject constructor(
             vaultItem.uid,
             ItemType.CREDENTIAL,
             space = vaultItem.getTeamSpaceLog(),
-            url = (vaultItem.syncObject as? SyncObject.Authentifiant)?.urlForGoToWebsite,
+            url = vaultItem.urlForGoToWebsite,
             addedWebsites = updatedLinkedWebsites?.first,
             removedWebsites = updatedLinkedWebsites?.second,
             removedApps = removedApps
@@ -122,7 +122,7 @@ class LinkedServicesDataProvider @Inject constructor(
         checkOtherCredentialsDuplicate(addedWebsites, vaultItem?.syncObject)?.let {
             return it
         }
-        return checkSelfDuplicate(addedWebsites, vaultItem?.syncObject)
+        return checkSelfDuplicate(addedWebsites, vaultItem)
     }
 
     private fun checkOtherCredentialsDuplicate(
@@ -148,17 +148,17 @@ class LinkedServicesDataProvider @Inject constructor(
 
     private fun checkSelfDuplicate(
         addedWebsites: List<String>,
-        syncObject: SyncObject.Authentifiant?
+        vaultItem: VaultItem<SyncObject.Authentifiant>?
     ): Pair<String, String>? {
         addedWebsites.forEach { website ->
             val isAutomaticallyAddedWebsitesDuplicate =
-                KnownLinkedDomains.getMatchingLinkedDomainSet(syncObject?.urlDomain)
+                KnownLinkedDomains.getMatchingLinkedDomainSet(vaultItem?.urlDomain)
                     ?.any { linkedDomain -> linkedDomain.value.matchDomain(website) } == true
             if (isAutomaticallyAddedWebsitesDuplicate || 
-                syncObject?.urlForUI()?.matchDomain(website) == true || 
+                vaultItem?.urlForUI()?.matchDomain(website) == true || 
                 addedWebsites.count { it == website } > 1 
             ) {
-                return Pair(syncObject?.title ?: "", website)
+                return Pair(vaultItem?.syncObject?.title ?: "", website)
             }
         }
         return null

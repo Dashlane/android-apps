@@ -3,7 +3,7 @@ package com.dashlane.item.subview.view
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.R
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.util.getThemeAttrDrawable
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout

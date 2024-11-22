@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import com.dashlane.BuildConfig
 import com.dashlane.crashreport.reporter.SentryCrashReporter
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.featureflipping.UserFeaturesChecker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -22,7 +21,6 @@ class CrashReporterManager @Inject constructor(
     private val crashReporterLogger: CrashReporterLogger,
     private val globalPreferencesManager: GlobalPreferencesManager,
     @ApplicationContext private val mContext: Context,
-    private val userFeaturesChecker: UserFeaturesChecker
 ) : CrashReporter {
 
     private val crashReporters: MutableList<Client> = ArrayList()
@@ -65,7 +63,7 @@ class CrashReporterManager @Inject constructor(
         if (crashReporters.any { it is SentryCrashReporter }) {
             return 
         }
-        crashReporters.add(SentryCrashReporter(mContext, crashReporterId, userFeaturesChecker))
+        crashReporters.add(SentryCrashReporter(mContext, crashReporterId))
     }
 
     private fun emailCrashReport(application: Application, deviceId: String, throwable: Throwable) {

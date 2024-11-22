@@ -1,18 +1,16 @@
 package com.dashlane.securefile.storage
 
-import android.Manifest
 import android.content.Context
-import androidx.annotation.RequiresPermission
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.cryptography.decryptFile
-import com.dashlane.network.tools.authorization
 import com.dashlane.network.webservices.DownloadFileService
 import com.dashlane.securefile.SecureFile
 import com.dashlane.server.api.endpoints.securefile.GetSecureFileDownloadLinkService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.util.FileUtils
 import com.dashlane.util.isSemanticallyNull
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -94,7 +92,6 @@ class SecureFileStorageImpl @Inject constructor(
         return secureFile.fileProviderFile
     }
 
-    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, conditional = true)
     override suspend fun decipherToPublicFolder(secureFile: SecureFile, mimeType: String, localSize: Long?) {
         withContext(Dispatchers.IO) {
             

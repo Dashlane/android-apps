@@ -3,10 +3,12 @@ package com.dashlane.sync.repositories
 import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.server.api.endpoints.account.SharingKeys
 import com.dashlane.server.api.endpoints.sync.SyncDownloadService
+import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.treat.SyncSummaryItem
 import com.dashlane.sync.treat.TreatProblemManager
 import com.dashlane.sync.util.SyncLogs
 import com.dashlane.sync.vault.SyncVault
+import kotlinx.coroutines.flow.MutableSharedFlow
 import java.time.Instant
 import javax.inject.Inject
 
@@ -22,16 +24,16 @@ class SyncRepositoryImpl @Inject constructor(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
         vault: SyncVault,
-        syncProgressChannel: SyncProgressChannel?
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
     ): SyncRepository.Result {
         syncLogs.onSyncBegin()
 
         try {
             return syncVault(
-                serverCredentials,
-                cryptographyEngineFactory,
-                vault,
-                syncProgressChannel
+                serverCredentials = serverCredentials,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                vault = vault,
+                dataSyncState = dataSyncState
             )
         } catch (t: Throwable) {
             
@@ -68,7 +70,7 @@ class SyncRepositoryImpl @Inject constructor(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
         vault: SyncVault,
-        syncProgressChannel: SyncProgressChannel?
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
     ): SyncRepository.Result {
         val syncStart = Instant.now()
         var chronologicalSyncEnd: Instant? = null
@@ -85,32 +87,32 @@ class SyncRepositoryImpl @Inject constructor(
         try {
             
             val chronologicalSyncResult = runChronologicalSync(
-                serverCredentials,
-                cryptographyEngineFactory,
-                vault,
-                syncProgressChannel
+                serverCredentials = serverCredentials,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                vault = vault,
+                dataSyncState = dataSyncState
             )
 
             chronologicalSyncEnd = Instant.now()
 
             
             val treatProblemResult = runTreatProblem(
-                serverCredentials,
-                cryptographyEngineFactory,
-                vault,
-                syncProgressChannel,
-                chronologicalSyncResult.summary
+                serverCredentials = serverCredentials,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                vault = vault,
+                dataSyncState = dataSyncState,
+                summary = chronologicalSyncResult.summary
             )
 
             treatProblemEnd = Instant.now()
 
             
             runSharingSync(
-                serverCredentials,
-                cryptographyEngineFactory,
-                syncProgressChannel,
-                chronologicalSyncResult.downloadedSharingKeys,
-                chronologicalSyncResult.sharingSummary
+                serverCredentials = serverCredentials,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                dataSyncState = dataSyncState,
+                sharingKeys = chronologicalSyncResult.downloadedSharingKeys,
+                sharingSummary = chronologicalSyncResult.sharingSummary
             )
 
             sharingSyncEnd = Instant.now()
@@ -135,14 +137,14 @@ class SyncRepositoryImpl @Inject constructor(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
         vault: SyncVault,
-        syncProgressChannel: SyncProgressChannel?
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
     ): ChronologicalSync.Result =
         runSyncStep(SyncRepository.SyncException.Step.CHRONOLOGICAL) {
             chronologicalSync.sync(
-                serverCredentials,
-                vault,
-                cryptographyEngineFactory,
-                syncProgressChannel
+                serverCredentials = serverCredentials,
+                vault = vault,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                dataSyncState = dataSyncState
             )
         }
 
@@ -150,34 +152,34 @@ class SyncRepositoryImpl @Inject constructor(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
         vault: SyncVault,
-        syncProgressChannel: SyncProgressChannel?,
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
         summary: List<SyncSummaryItem>
     ): TreatProblemManager.Result =
         runSyncStep(SyncRepository.SyncException.Step.TREAT) {
             syncLogs.onTreatProblemStart()
-            syncProgressChannel?.trySend(SyncProgress.TreatProblem)
+            dataSyncState?.emit(DataSyncState.Active(SyncProgress.TreatProblem))
             treatProblemManager.execute(
-                serverCredentials,
-                summary,
-                vault,
-                cryptographyEngineFactory
+                serverCredentials = serverCredentials,
+                serverSummary = summary,
+                syncVault = vault,
+                cryptographyEngineFactory = cryptographyEngineFactory
             )
         }
 
     private suspend fun runSharingSync(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
-        syncProgressChannel: SyncProgressChannel?,
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
         sharingKeys: SharingKeys?,
         sharingSummary: SyncDownloadService.Data.SharingSummary
     ): Unit =
         runSyncStep(SyncRepository.SyncException.Step.SHARING) {
             sharingSyncHelper.syncSharing(
-                serverCredentials,
-                sharingKeys,
-                sharingSummary,
-                cryptographyEngineFactory,
-                syncProgressChannel
+                serverCredentials = serverCredentials,
+                sharingKeys = sharingKeys,
+                sharingSummary = sharingSummary,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                dataSyncState = dataSyncState
             )
         }
 

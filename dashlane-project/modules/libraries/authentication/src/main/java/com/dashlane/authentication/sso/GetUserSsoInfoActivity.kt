@@ -8,14 +8,20 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.authentication.R
+import com.dashlane.authentication.sso.confidential.NitroSsoInfoViewModel
+import com.dashlane.authentication.sso.confidential.webview.NitroSsoWebView
 import com.dashlane.authentication.sso.utils.toIdpUrl
-import com.dashlane.authentication.sso.webview.NitroSsoWebView
 import com.dashlane.network.NitroUrlOverride
 import com.dashlane.url.toUrlDomain
+import com.dashlane.url.toUrlDomainOrNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.Optional
 import javax.inject.Inject
+import kotlin.jvm.optionals.getOrNull
 
 @AndroidEntryPoint
 class GetUserSsoInfoActivity : AppCompatActivity() {
@@ -27,7 +33,11 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
     private val nitroViewModel by viewModels<NitroSsoInfoViewModel>()
 
     @Inject
-    lateinit var nitroUrlOverride: NitroUrlOverride
+    lateinit var nitroUrlOverride: Optional<NitroUrlOverride>
+
+    @Inject
+    @IoCoroutineDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +70,7 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
     }
@@ -86,9 +96,10 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
                     is NitroSsoInfoViewModel.NitroState.Init -> {
                         setContentView(
                             NitroSsoWebView(
-                                context = this@GetUserSsoInfoActivity,
+                                activity = this@GetUserSsoInfoActivity,
                                 trustedDomain = state.data.idpAuthorizeUrl.toUrlDomain(),
                                 redirectionUrl = state.data.spCallbackUrl,
+                                validatedDomains = state.data.validatedDomains.mapNotNull { it.toUrlDomainOrNull() },
                                 onSamlResponse = { samlResponse ->
                                     nitroViewModel.confirmLogin(
                                         teamUuid = state.data.teamUuid,
@@ -97,8 +108,12 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
                                         domainName = domainName
                                     )
                                 },
-                                onError = { error -> finishWithResult(error) },
-                                nitroUrlOverride = nitroUrlOverride
+                                onError = { error ->
+                                    finishWithResult(error)
+                                },
+                                nitroUrlOverride = nitroUrlOverride.getOrNull(),
+                                ioDispatcher = ioDispatcher,
+                                coroutineScope = lifecycleScope
                             ).apply {
                                 id = R.id.nitro_sso_webview
                                 loadUrl(state.data.idpAuthorizeUrl.toIdpUrl(login).toString())

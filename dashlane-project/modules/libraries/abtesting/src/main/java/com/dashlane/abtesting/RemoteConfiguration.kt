@@ -1,21 +1,23 @@
 package com.dashlane.abtesting
 
+import com.dashlane.server.api.Authorization
+
 interface RemoteConfiguration {
 
-    suspend fun initAndRefresh() {
-        val loadResult = load()
+    suspend fun initAndRefresh(authorization: Authorization.User) {
+        val loadResult = load(authorization.login)
         if (loadResult == LoadResult.Success) {
-            launchRefreshIfNeeded()
+            launchRefreshIfNeeded(authorization)
         } else {
-            refreshIfNeeded()
+            refreshIfNeeded(authorization)
         }
     }
 
-    fun load(): LoadResult
+    fun load(username: String): LoadResult
 
-    fun launchRefreshIfNeeded()
+    fun launchRefreshIfNeeded(authorization: Authorization.User)
 
-    suspend fun refreshIfNeeded()
+    suspend fun refreshIfNeeded(authorization: Authorization.User)
 
     enum class LoadResult {
         Success,

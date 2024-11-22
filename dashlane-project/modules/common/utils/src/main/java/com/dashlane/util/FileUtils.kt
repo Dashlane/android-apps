@@ -1,16 +1,10 @@
 package com.dashlane.util
 
-import android.annotation.SuppressLint
-import android.annotation.TargetApi
-import android.app.DownloadManager
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
-import androidx.annotation.RequiresApi
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -38,11 +32,7 @@ class FileUtils @Inject constructor(
         size: Long? = null,
         callback: suspend (OutputStream) -> Unit
     ): Uri {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            writeToMediaStore(context, name, type, size, callback)
-        } else {
-            writeToPublicFolder(context, name, type, callback)
-        }
+        return writeToMediaStore(context, name, type, size, callback)
     }
 
     suspend fun writeFileToCacheFolder(
@@ -62,60 +52,6 @@ class FileUtils @Inject constructor(
         return newFile
     }
 
-    @SuppressWarnings("kotlin:S5324") 
-    @SuppressLint("ExternalStorageUsage")
-    @Suppress("DEPRECATION")
-    private suspend fun writeToPublicFolder(
-        context: Context,
-        name: String,
-        type: String,
-        callback: suspend (OutputStream) -> Unit
-    ) = withContext(ioDispatcher) {
-        val externalPublicDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)!!
-        externalPublicDir.mkdirs()
-        val externalDownloadFile = createUniqueFile(externalPublicDir, name)
-        try {
-            externalDownloadFile.outputStream().use {
-                callback.invoke(it)
-            }
-        } catch (e: Exception) {
-            
-            externalDownloadFile.delete()
-            throw e
-        }
-
-        
-        
-        val downloadManager =
-            (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager)
-        val id = downloadManager.run {
-            addCompletedDownload(
-                name,
-                context.getString(R.string.dashlane_main_app_name),
-                true,
-                type,
-                externalDownloadFile.path,
-                externalDownloadFile.length(),
-                true
-            )
-        }
-        downloadManager.getUriForDownloadedFile(id)
-    }
-
-    private fun createUniqueFile(directory: File, name: String) =
-        generateSequence(0L, Long::inc)
-            .map {
-                val filename = when (it) {
-                    0L -> name
-                    else -> "$name ($it)"
-                }
-
-                File(directory, filename)
-            }
-            .first { !it.exists() }
-
-    @TargetApi(Build.VERSION_CODES.Q)
     private suspend fun writeToMediaStore(
         context: Context,
         name: String,
@@ -139,7 +75,6 @@ class FileUtils @Inject constructor(
         uri
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun createMediaStoreFilePending(
         name: String,
         type: String,
@@ -175,7 +110,6 @@ class FileUtils @Inject constructor(
         return uri
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun updateMediaStoreFileNotPending(resolver: ContentResolver, uri: Uri) {
         val values = ContentValues().apply {
             put(MediaStore.Downloads.IS_PENDING, 0)

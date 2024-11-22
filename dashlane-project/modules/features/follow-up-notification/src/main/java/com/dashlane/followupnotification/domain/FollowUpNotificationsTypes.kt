@@ -87,12 +87,6 @@ enum class FollowUpNotificationsTypes(
         CopyField.PaymentsNumber,
         CopyField.PaymentsSecurityCode,
         CopyField.PaymentsExpirationDate
-    ),
-    PAYPAL(
-        SyncObjectType.PAYMENT_PAYPAL,
-        R.drawable.ic_item_login_outlined,
-        CopyField.PayPalLogin,
-        CopyField.PayPalPassword
     )
 }
 

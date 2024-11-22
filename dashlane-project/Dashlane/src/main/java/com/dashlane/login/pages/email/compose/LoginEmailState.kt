@@ -1,7 +1,6 @@
 package com.dashlane.login.pages.email.compose
 
 import com.dashlane.authentication.AuthenticationSecondFactor
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.SsoInfo
 import com.dashlane.mvvm.State
 
@@ -19,13 +18,13 @@ data class LoginEmailState(
 
 sealed class LoginEmailNavigationState : State {
     data class GoToCreateAccount(val email: String?, val skipIfPrefilled: Boolean) : LoginEmailNavigationState()
-    data class GoToSecretTransfer(val email: String?, val destination: String) : LoginEmailNavigationState()
-    data class GoToAuthenticator(val secondFactor: AuthenticationSecondFactor.Totp, val ssoInfo: SsoInfo?) : LoginEmailNavigationState()
-    data class GoToToken(val secondFactor: AuthenticationSecondFactor.EmailToken, val ssoInfo: SsoInfo?) : LoginEmailNavigationState()
-    data class GoToOTP(val secondFactor: AuthenticationSecondFactor.Totp, val ssoInfo: SsoInfo?) : LoginEmailNavigationState()
+    data class GoToSecretTransfer(val email: String?, val showQrCode: Boolean) :
+        LoginEmailNavigationState()
+    data class GoToToken(val secondFactor: AuthenticationSecondFactor.EmailToken) : LoginEmailNavigationState()
+    data class GoToOTP(val secondFactor: AuthenticationSecondFactor.Totp) : LoginEmailNavigationState()
     data class GoToSSO(val email: String?, val ssoInfo: SsoInfo) : LoginEmailNavigationState()
     data object SSOSuccess : LoginEmailNavigationState()
-    data class GoToPassword(val registeredUserDevice: RegisteredUserDevice, val ssoInfo: SsoInfo?) : LoginEmailNavigationState()
+    data object GoToPassword : LoginEmailNavigationState()
     data object EndOfLife : LoginEmailNavigationState()
 }
 

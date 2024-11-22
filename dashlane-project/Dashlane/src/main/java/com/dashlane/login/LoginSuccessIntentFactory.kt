@@ -2,23 +2,19 @@ package com.dashlane.login
 
 import android.app.Activity
 import android.content.Intent
-import com.dashlane.user.UserAccountInfo
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.login.devicelimit.UnlinkDevicesActivity
 import com.dashlane.login.monobucket.MonobucketActivity
-import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.session.SessionCredentialsSaver
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionManager
 import javax.inject.Inject
 
 class LoginSuccessIntentFactory @Inject constructor(
     private val activity: Activity,
     private val sessionManager: SessionManager,
-    private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val userPreferencesManager: UserPreferencesManager
+    private val preferencesManager: PreferencesManager
 ) {
-    private val devicesCount get() = userPreferencesManager.devicesCount
+    private val devicesCount get() = preferencesManager[sessionManager.session?.username].devicesCount
 
     fun createLoginBiometricSetupIntent() =
         LoginIntents.createSettingsActivityIntent(activity)
@@ -37,25 +33,7 @@ class LoginSuccessIntentFactory @Inject constructor(
         }
 
     fun createApplicationHomeIntent(): Intent {
-        sessionManager.session?.let(sessionCredentialsSaver::saveCredentialsIfNecessary)
         return LoginIntents.createHomeActivityIntent(activity)
-    }
-
-    fun createBiometricRecoveryIntent(): Intent {
-        sessionManager.session?.let(sessionCredentialsSaver::saveCredentialsIfNecessary)
-        return LoginIntents.createChangeMasterPasswordIntent(
-            activity,
-            ChangeMasterPasswordOrigin.Recovery,
-            devicesCount
-        )
-    }
-
-    fun createAccountRecoveryKeyIntent(
-        registeredUserDevice: RegisteredUserDevice,
-        accountType: UserAccountInfo.AccountType,
-        authTicket: String?
-    ): Intent {
-        return LoginIntents.createAccountRecoveryKeyIntent(activity, registeredUserDevice, accountType, authTicket)
     }
 
     fun createLoginSsoIntent(
@@ -75,7 +53,6 @@ class LoginSuccessIntentFactory @Inject constructor(
         authTicket: String,
         successIntent: Intent
     ): Intent {
-        sessionManager.session?.let(sessionCredentialsSaver::saveCredentialsIfNecessary)
         return LoginIntents.createChangeMasterPasswordIntent(
             activity,
             ChangeMasterPasswordOrigin.Migration(authTicket, successIntent),
@@ -89,7 +66,6 @@ class LoginSuccessIntentFactory @Inject constructor(
         isNitroProvider: Boolean,
         totpAuthTicket: String?
     ): Intent {
-        sessionManager.session?.let(sessionCredentialsSaver::saveCredentialsIfNecessary)
         return LoginIntents.createMigrationToSsoMemberIntent(
             activity,
             login = login,
@@ -100,7 +76,6 @@ class LoginSuccessIntentFactory @Inject constructor(
     }
 
     fun createEnforce2faLimitActivityIntent(): Intent {
-        sessionManager.session?.let(sessionCredentialsSaver::saveCredentialsIfNecessary)
         return LoginIntents.createEnforce2faLimitActivityIntent(activity = activity)
     }
 }

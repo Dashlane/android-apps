@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="and_accessibility_domain_item_logo">%1$s logo</string>
+    <string name="and_accessibility_password_generator_refresh">Refresh password</string>
+    <string name="and_accessibility_share_password_button">Share login</string>
+    <string name="and_accessibility_add_button">Add</string>
+    <string name="and_accessibility_add_attachment_button">Add attachment</string>
+    <string name="and_accessibility_action_expand">Expand</string>
+    <string name="and_accessibility_close">Close</string>
+    <string name="and_accessibility_info">More information</string>
+    <string name="and_accessibility_user_profile_icon">Profile icon</string>
+    <string name="and_accessibility_checked">Checked</string>
+    <string name="and_accessibility_action_menu">Menu</string>
+    <string name="and_accessibility_copy_password">Copy password</string>
+    <string name="and_accessibility_vault_item_menu">Item menu</string>
+    <string name="and_accessibility_notification">You have new suggested actions.</string>
+    <string name="and_accessibility_navigation_drawer_close">Navigation drawer closed</string>
+    <string name="and_accessibility_navigation_drawer_open">Navigation drawer opened</string>
+    <string name="and_accessibility_deleted_monitored_email">Delete this monitored email.</string>
+    <plurals name="and_accessibility_search_result">
+        <item quantity="one">%1$d result in the list</item>
+        <item quantity="other">%1$d results in the list</item>
+    </plurals>
+    <string name="and_accessibility_close_item_menu">Close items menu</string>
+    <string name="and_accessibility_open_item_menu">Add new items</string>
+    <string name="and_accessibility_add_password">Add logins</string>
+    <string name="and_accessibility_add_secure_note">Add secure notes</string>
+    <string name="and_accessibility_add_contact">Add personal info</string>
+    <string name="and_accessibility_add_ids">Add IDs</string>
+    <string name="and_accessibility_add_secret">Add Secret</string>
+    <string name="and_accessibility_add_payments">Add payment</string>
+    <string name="and_accessibility_add_credit_card">Add credit or debit card</string>
+    <string name="and_accessibility_add_paypal">Add PayPal</string>
+    <string name="and_accessibility_add_bank">Add bank account</string>
+    <string name="and_accessibility_add_name">Add name</string>
+    <string name="and_accessibility_add_email">Add email</string>
+    <string name="and_accessibility_add_phone_number">Add phone number</string>
+    <string name="and_accessibility_add_website">Add website</string>
+    <string name="and_accessibility_add_address">Add address</string>
+    <string name="and_accessibility_add_company">Add company</string>
+    <string name="and_accessibility_add_id_card">Add ID card</string>
+    <string name="and_accessibility_add_passport">Add passport</string>
+    <string name="and_accessibility_add_driver_license">Add driver\'s license</string>
+    <string name="and_accessibility_add_social_security">Add social security</string>
+    <string name="and_accessibility_add_fiscal_statement">Add tax number</string>
+    <string name="and_accessibility_quick_action">Open quick action menu</string>
+    <string name="and_accessibility_open_drawer_description">Open navigation drawer</string>
+    <string name="and_accessibility_delete_website_url">Remove this website url</string>
+    
+    <string name="and_accessibility_delete_linked_app">Unlink application</string>
+    
+    <string name="and_accessibility_open_linked_app">Open application</string>
+    
+    <string name="and_accessibility_open_linked_website">Open website</string>
+    
+    <string name="and_accessibility_secret_transfer_qrcode">Scan QR Code</string>
+
+    
+    <string name="and_accessibility_action_text_clear">Clear</string>
+    
+    <string name="and_accessibility_content_desc_fingerprint_logo">Fingerprint</string>
+</resources>

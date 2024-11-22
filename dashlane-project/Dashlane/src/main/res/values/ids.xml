@@ -11,4 +11,5 @@
     <item name="password_safety_compromised_textview" type="id" />
 
     <item name="quick_actions_open_menu" type="id" />
+    <item name="fab_menu_item_secret" type="id" />
 </resources>

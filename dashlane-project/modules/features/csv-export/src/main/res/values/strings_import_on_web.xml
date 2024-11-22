@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="csv_export_on_web_app_bar_title">Export data to .CSV</string>
     <string name="csv_export_on_web_title">On your computer, go to the address above</string>
     <string name="csv_export_on_web_description">You can easily export your data on your browser.</string>
     <string name="csv_export_on_web_step_login_on_web">Log in to &lt;b&gt;web&lt;/b&gt;</string>
     <string name="csv_export_on_web_step_open_vault">Open your &lt;b&gt;Vault&lt;/b&gt;</string>
-    <string name="csv_export_on_web_step_export_data">Go to &lt;b&gt;My account > Settings > Export data&lt;/b&gt;</string>
+    <string name="csv_export_on_web_step_export_data">Go to &lt;b&gt;My account &amp;gt; Settings &amp;gt; Export data&lt;/b&gt;</string>
     <string name="csv_export_on_web_button_export_help_center">Learn how to export on web</string>
 </resources>

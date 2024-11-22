@@ -53,6 +53,7 @@ sealed class LinkItem {
 @Composable
 @Suppress("LongMethod")
 fun IntroScreen(
+    modifier: Modifier = Modifier,
     @StringRes titleResId: Int = 0,
     @StringRes titleHeader: Int? = null,
     descriptionItems: List<DescriptionItem> = emptyList(),
@@ -74,7 +75,7 @@ fun IntroScreen(
         onNavigationClick = onNavigationClick
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),

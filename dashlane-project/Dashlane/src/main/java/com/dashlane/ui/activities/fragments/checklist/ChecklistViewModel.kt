@@ -2,22 +2,24 @@ package com.dashlane.ui.activities.fragments.checklist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.navigation.Navigator
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.fragments.checklist.ChecklistData.ItemState
+import com.dashlane.user.UserAccountInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.shareIn
-import javax.inject.Inject
 
 @HiltViewModel
 class ChecklistViewModel @Inject constructor(
     private val provider: ChecklistDataProvider,
     private val checklistHelper: ChecklistHelper,
     private val navigator: Navigator,
-    private val userPreferencesManager: UserPreferencesManager
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel(), ChecklistViewModelContract {
 
     override val checkListDataFlow =
@@ -85,7 +87,9 @@ class ChecklistViewModel @Inject constructor(
     }
 
     private fun getM2dChecklistItem(): ChecklistItem? {
-        if (UserAccountInfo.AccountType.fromString(userPreferencesManager.accountType) == UserAccountInfo.AccountType.InvisibleMasterPassword) {
+        val accountType = preferencesManager[sessionManager.session?.username].accountType?.let { UserAccountInfo.AccountType.fromString(it) }
+
+        if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) {
             return null
         }
 

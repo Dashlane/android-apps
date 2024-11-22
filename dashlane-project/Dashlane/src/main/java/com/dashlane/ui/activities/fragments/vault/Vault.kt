@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.annotation.StringRes
 import com.dashlane.design.iconography.IconToken
 import com.dashlane.design.theme.color.Mood
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.home.vaultlist.Filter
 import com.skocken.presentation.definition.Base
 import kotlinx.coroutines.flow.StateFlow
 
@@ -26,6 +26,7 @@ interface Vault {
     }
 
     interface View : Base.IView {
+        fun showTabs(canUseSecrets: Boolean)
         fun setSelectedFilterTab(filter: Filter)
         fun getSelectedPosition(): Int
         fun showAnnouncement(iconToken: IconToken, title: String? = null, description: String, mood: Mood, onClick: () -> Unit = {})

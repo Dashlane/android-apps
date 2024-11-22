@@ -2,7 +2,7 @@ package com.dashlane.item.subview.action
 
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.R
-import com.dashlane.item.subview.Action
+import com.dashlane.ui.action.Action
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.vault.model.getAllLinkedPackageName
 import com.dashlane.vault.summary.SummaryObject

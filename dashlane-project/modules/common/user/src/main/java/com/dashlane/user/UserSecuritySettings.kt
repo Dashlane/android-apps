@@ -9,7 +9,6 @@ data class UserSecuritySettings(
     val isDuoEnabled: Boolean = false,
     val isU2fEnabled: Boolean = false,
     val isSso: Boolean = false,
-    val isAuthenticatorEnabled: Boolean = false
 ) {
     constructor(@UserSecurityFlags flags: Int) : this(
         flags == SECURITY_TOKEN,
@@ -18,7 +17,6 @@ data class UserSecuritySettings(
         (flags and SECURITY_FLAG_DUO) != 0,
         (flags and SECURITY_FLAG_U2F) != 0,
         (flags and SECURITY_FLAG_SSO) != 0,
-        (flags and SECURITY_FLAG_AUTHENTICATOR) != 0
         )
 
     
@@ -30,7 +28,6 @@ data class UserSecuritySettings(
             isDuoEnabled to SECURITY_FLAG_DUO,
             isU2fEnabled to SECURITY_FLAG_U2F,
             isSso to SECURITY_FLAG_SSO,
-            isAuthenticatorEnabled to SECURITY_FLAG_AUTHENTICATOR
         )
         return features
             .filter(Pair<Boolean, Int>::first)
@@ -61,7 +58,6 @@ data class UserSecuritySettings(
             SECURITY_FLAG_DUO,
             SECURITY_FLAG_U2F,
             SECURITY_FLAG_SSO,
-            SECURITY_FLAG_AUTHENTICATOR
         ],
         flag = true
     )
@@ -76,6 +72,5 @@ data class UserSecuritySettings(
         
         const val SECURITY_FLAG_U2F = 1 shl 5
         const val SECURITY_FLAG_SSO = 1 shl 6
-        const val SECURITY_FLAG_AUTHENTICATOR = 1 shl 7
     }
 }

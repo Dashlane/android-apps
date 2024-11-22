@@ -427,7 +427,7 @@ private fun RevokeConfirmDialog(
 
 @Preview
 @Composable
-fun PreviewSharedUsersAndGroups() {
+private fun PreviewSharedUsersAndGroups() {
     DashlanePreview {
         SharedGroupsAndUsersList(
             viewData = ViewData(

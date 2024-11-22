@@ -5,7 +5,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.dashlane.R
 import com.dashlane.async.SyncBroadcastManager
-import com.dashlane.debug.DaDaDa
+import com.dashlane.debug.services.DaDaDaBase
 import com.dashlane.util.notification.DashlaneNotificationBuilder
 import com.dashlane.util.notification.NotificationHelper
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -14,11 +14,11 @@ import javax.inject.Inject
 class DataSyncNotification @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val daDaDa: DaDaDa,
+    private val dadada: DaDaDaBase,
     private val syncBroadcastManager: SyncBroadcastManager
 ) {
     private val systemIsInDebug: Boolean
-        get() = daDaDa.isEnabled
+        get() = dadada.isEnabled
     private val notificationManager: NotificationManagerCompat
         get() = NotificationManagerCompat.from(context)
 

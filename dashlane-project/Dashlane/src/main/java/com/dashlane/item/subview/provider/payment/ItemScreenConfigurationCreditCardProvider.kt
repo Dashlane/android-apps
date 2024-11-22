@@ -29,7 +29,6 @@ import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.util.BankDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
@@ -50,6 +49,7 @@ import com.dashlane.vault.model.identityPartialOrFullNameNoLogin
 import com.dashlane.vault.model.issueDate
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
+import com.dashlane.vault.util.BankDataProvider
 import com.dashlane.vault.util.getFullAddress
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
@@ -66,7 +66,8 @@ class ItemScreenConfigurationCreditCardProvider(
     private val genericDataQuery: GenericDataQuery,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
+    private val bankDataProvider: BankDataProvider,
 ) : ItemScreenConfigurationProvider() {
 
     private var selectedColor: SyncObject.PaymentCreditCard.Color? = null
@@ -236,7 +237,6 @@ class ItemScreenConfigurationCreditCardProvider(
         listener: ItemEditViewContract.View.UiUpdateListener
     ): List<ItemSubView<*>> {
         
-        val bankDataProvider = BankDataProvider.instance
         val otherLabel = context.getString(R.string.other)
         val bankView = createBankSpinnerField(context, item, bankDataProvider, otherLabel, editMode)
         

@@ -5,16 +5,16 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
+import androidx.lifecycle.lifecycleScope
+import com.dashlane.lock.LockEvent
 import com.dashlane.lock.LockWatcher
-import com.dashlane.lock.UnlockEvent
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.getThemeAttrColor
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 
 @SuppressLint("ViewConstructor")
-class ScreenOverLockProtectionView(
-    activity: DashlaneActivity,
-    private val lockWatcher: LockWatcher
-) : View(activity) {
+class ScreenOverLockProtectionView(activity: DashlaneActivity) : View(activity) {
 
     companion object {
         fun showOrHide(activity: DashlaneActivity, lockWatcher: LockWatcher) {
@@ -28,18 +28,16 @@ class ScreenOverLockProtectionView(
                 overlay?.removeFromParent()
             } else if (overlay == null) {
                 
-                val screenOverLockProtectionView = ScreenOverLockProtectionView(activity, lockWatcher)
-                lockWatcher.register(object : LockWatcher.Listener {
-                    override fun onLock() {
-                        
-                    }
+                val screenOverLockProtectionView = ScreenOverLockProtectionView(activity)
 
-                    override fun onUnlockEvent(unlockEvent: UnlockEvent) {
-                        
-                        screenOverLockProtectionView.removeFromParent()
-                        lockWatcher.unregister(this)
+                activity.lifecycleScope.launch {
+                    lockWatcher.lockEventFlow.take(1).collect { lockEvent ->
+                        when (lockEvent) {
+                            is LockEvent.Unlock -> screenOverLockProtectionView.removeFromParent()
+                            else -> Unit
+                        }
                     }
-                })
+                }
                 decorView.addView(screenOverLockProtectionView)
             }
         }
@@ -47,7 +45,7 @@ class ScreenOverLockProtectionView(
 
     init {
         setBackgroundColor(
-            ContextThemeWrapper(context, R.style.Theme_Dashlane_Modal)
+            ContextThemeWrapper(context, R.style.Theme_Dashlane_Transparent)
                 .getThemeAttrColor(android.R.attr.colorBackground)
         )
         isClickable = true

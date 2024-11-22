@@ -3,7 +3,7 @@ package com.dashlane.item.subview.action
 import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import com.dashlane.R
-import com.dashlane.item.subview.Action
+import com.dashlane.ui.action.Action
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService

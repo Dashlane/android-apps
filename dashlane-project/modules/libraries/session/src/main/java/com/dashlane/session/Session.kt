@@ -1,11 +1,11 @@
 package com.dashlane.session
 
-import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.user.Username
-import java.io.Closeable
+import com.dashlane.user.isSmokeTestAccount
 import java.time.Clock
 import kotlin.math.absoluteValue
 
@@ -38,8 +38,6 @@ class Session(
     private val _appKey: AppKey = appKey.clone()
     val appKey: AppKey
         get() = _appKey.clone()
-    val userKeys
-        get() = UserKeys(appKey, vaultKey)
 
     val appKeyType: CryptographyKey.Type
         get() = _appKey.cryptographyKeyType
@@ -91,14 +89,6 @@ class Session(
         result = 31 * result + sessionId.hashCode()
         return result
     }
-
-    data class UserKeys(
-        val app: AppKey,
-        val vault: VaultKey
-    ) : Closeable {
-        override fun close() {
-            app.close()
-            vault.close()
-        }
-    }
 }
+
+fun Session.isSmokeTestAccount() = this.username.isSmokeTestAccount()

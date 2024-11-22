@@ -1,8 +1,7 @@
 package com.dashlane.dagger.singleton
 
 import android.content.Context
-import com.dashlane.inapplogin.InAppLoginByAccessibilityManager
-import com.dashlane.inapplogin.InAppLoginByAutoFillApiManager.Companion.createIfPossible
+import com.dashlane.inapplogin.AutoFillApiManager.Companion.createIfPossible
 import com.dashlane.inapplogin.InAppLoginManager
 import dagger.Module
 import dagger.Provides
@@ -17,7 +16,6 @@ object InAppLoginModule {
     @Provides
     @Singleton
     fun provideInAppLoginManager(@ApplicationContext context: Context) = InAppLoginManager(
-        inAppLoginByAccessibilityManager = InAppLoginByAccessibilityManager(context),
-        inAppLoginByAutoFillApiManager = createIfPossible(context)
+        autoFillApiManager = createIfPossible(context)
     )
 }

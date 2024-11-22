@@ -8,8 +8,7 @@ import android.content.IntentFilter
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dashlane.R
-import com.dashlane.async.BroadcastConstants
-import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
+import com.dashlane.events.BroadcastConstants
 import com.dashlane.navigation.NavigationConstants
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
@@ -24,8 +23,7 @@ class TokenReceiverActivityListener @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockRepository: LockRepository,
     private val toaster: Toaster,
-    private val loginTokensModule: LoginTokensModule,
-    private val developerInfoLogger: DeveloperInfoLogger
+    private val loginTokensModule: LoginTokensModule
 ) : AbstractActivityLifecycleListener() {
 
     private var receiver: NewTokenReceiver? = null
@@ -78,8 +76,7 @@ class TokenReceiverActivityListener @Inject constructor(
 
         if (tokenGcmShouldNotify) {
             TokenChecker(
-                loginTokensModule,
-                developerInfoLogger
+                loginTokensModule
             ).checkAndDisplayTokenIfNeeded(
                 activity,
                 username

@@ -2,6 +2,7 @@ package com.dashlane.autofill.changepassword
 
 import com.dashlane.autofill.changepassword.domain.AutofillUpdateAccountService
 import com.dashlane.autofill.changepassword.domain.CredentialUpdateInfo
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
@@ -10,7 +11,7 @@ class ChangePasswordDataProvider @Inject constructor(
     private val autoFillchangePasswordConfiguration: AutoFillChangePasswordConfiguration
 ) : ChangePasswordContract.DataProvider {
 
-    private lateinit var existingAuthentifiants: List<SyncObject.Authentifiant>
+    private lateinit var existingAuthentifiants: List<VaultItem<SyncObject.Authentifiant>>
 
     override suspend fun loadAuthentifiants(website: String?, packageName: String?) =
         service.loadAuthentifiants(website, packageName).also {
@@ -23,5 +24,8 @@ class ChangePasswordDataProvider @Inject constructor(
         autoFillchangePasswordConfiguration.onItemUpdated.invoke()
     }
 
-    override fun getCredential(login: String) = existingAuthentifiants.first { it.login == login || it.email == login }
+    override fun getCredential(login: String) = existingAuthentifiants.first {
+        val syncObject = it.syncObject
+        syncObject.login == login || syncObject.email == login
+    }
 }

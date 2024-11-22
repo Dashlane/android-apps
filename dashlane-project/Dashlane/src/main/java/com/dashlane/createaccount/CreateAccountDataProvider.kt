@@ -13,7 +13,6 @@ import com.dashlane.createaccount.pages.confirmpassword.CreateAccountConfirmPass
 import com.dashlane.createaccount.pages.email.CreateAccountEmailContract
 import com.dashlane.createaccount.pages.email.CreateAccountEmailDataProvider
 import com.dashlane.cryptography.ObfuscatedByteArray
-import com.dashlane.login.root.LoginContract
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.util.log.AttributionsLogDataProvider
 import com.skocken.presentation.provider.BaseDataProvider
@@ -37,7 +36,7 @@ class CreateAccountDataProvider @Inject constructor(
     private val accountCreator: AccountCreator,
     private val createAccountSuccessIntentFactory: CreateAccountSuccessIntentFactory,
     private val attributionsLogDataProvider: AttributionsLogDataProvider
-) : BaseDataProvider<LoginContract.Presenter>(), CreateAccountContract.DataProvider {
+) : BaseDataProvider<CreateAccountContract.Presenter>(), CreateAccountContract.DataProvider {
 
     override fun isExplicitOptinRequired(inEuropeanUnion: Boolean): Boolean {
         return inEuropeanUnion

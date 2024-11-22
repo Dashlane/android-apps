@@ -86,7 +86,7 @@ fun IndeterminateLoading(
 
 @Preview
 @Composable
-fun DashlaneLoadingPreview() {
+private fun DashlaneLoadingPreview() {
     DashlanePreview {
         DashlaneLoading(
             modifier = Modifier,

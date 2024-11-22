@@ -9,7 +9,7 @@ import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.decryptBase64ToByteArray
 import com.dashlane.cryptography.toObfuscated
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.accountrecovery.AccountRecoveryDeactivateService
 import com.dashlane.server.api.endpoints.accountrecovery.AccountRecoveryGetEncryptedVaultKeyService
@@ -22,8 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class LoginAccountRecoveryKeyData(
-    val authTicket: String? = null,
-    val registeredUserDevice: RegisteredUserDevice? = null,
     val accountType: UserAccountInfo.AccountType? = null,
     val obfuscatedVaultKey: ObfuscatedByteArray? = null,
     val newMasterPassword: ObfuscatedByteArray? = null,
@@ -38,7 +36,7 @@ class LoginAccountRecoveryKeyRepository @Inject constructor(
     private val accountRecoveryDeactivateService: AccountRecoveryDeactivateService,
     private val auth2faUnauthenticatedSettingsService: Auth2faUnauthenticatedSettingsService,
     private val cryptography: Cryptography,
-    private val userPreferencesManager: UserPreferencesManager
+    private val preferencesManager: PreferencesManager
 ) {
 
     private val stateFlow = MutableStateFlow(LoginAccountRecoveryKeyData())
@@ -46,10 +44,6 @@ class LoginAccountRecoveryKeyRepository @Inject constructor(
 
     suspend fun updateAccountType(accountType: UserAccountInfo.AccountType) {
         stateFlow.emit(stateFlow.value.copy(accountType = accountType))
-    }
-
-    suspend fun updateRegisteredDevice(registeredUserDevice: RegisteredUserDevice?, authTicket: String?) {
-        stateFlow.emit(stateFlow.value.copy(registeredUserDevice = registeredUserDevice, authTicket = authTicket))
     }
 
     suspend fun updateObfuscatedVaultKey(obfuscatedVaultKey: ObfuscatedByteArray?) {
@@ -115,7 +109,7 @@ class LoginAccountRecoveryKeyRepository @Inject constructor(
             val request = AccountRecoveryDeactivateService.Request(AccountRecoveryDeactivateService.Request.Reason.KEY_USED)
             accountRecoveryDeactivateService.execute(authorization, request)
 
-            if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) userPreferencesManager.mplessARKEnabled = false
+            if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) preferencesManager[authorization.login].mplessARKEnabled = false
         }.onFailure {
         }
     }

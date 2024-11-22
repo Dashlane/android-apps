@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
@@ -18,9 +17,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class VpnThirdPartyFragment : AbstractContentFragment() {
-
-    @Inject
-    lateinit var userPreferencesManager: UserPreferencesManager
 
     @Inject
     lateinit var preferences: GlobalPreferencesManager

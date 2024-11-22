@@ -83,7 +83,7 @@ class PasswordAnalysisPresenter(
     override fun requireRefresh(forceUpdate: Boolean) {
         coroutineScope.launchWhenResumed {
             showAsRefreshing()
-            val result = provider.getAuthentifiantsSecurityInfo()
+            val result = provider.getAuthentifiantsSecurityInfo(forceUpdate)
             if (result != null && provider.shouldDisplayProcessDuration()) {
                 toaster.show(result.timeMeasurement.toString(), Toast.LENGTH_LONG)
             }
@@ -151,7 +151,7 @@ class PasswordAnalysisPresenter(
                 val listFilteredAndSorted = getFilteredSortedListByMode(mode)
                 val items = ArrayList<Any>()
 
-                val cachedItemWrapper = mutableMapOf<SyncObject.Authentifiant, PasswordAnalysisItemWrapper>()
+                val cachedItemWrapper = mutableMapOf<VaultItem<SyncObject.Authentifiant>, PasswordAnalysisItemWrapper>()
                 listFilteredAndSorted.forEach { groupOfAuthentifiant ->
 
                     if (mode == modeToSelect) {
@@ -179,7 +179,7 @@ class PasswordAnalysisPresenter(
 
     private fun ArrayList<Any>.addItems(
         groupOfAuthentifiant: GroupOfAuthentifiant<*>,
-        cachedItemWrapper: MutableMap<SyncObject.Authentifiant, PasswordAnalysisItemWrapper>,
+        cachedItemWrapper: MutableMap<VaultItem<SyncObject.Authentifiant>, PasswordAnalysisItemWrapper>,
         mode: PasswordAnalysisContract.Mode,
         sensitiveDomains: Map<UrlDomain, UrlDomainCategory?>?,
         listener: PasswordAnalysisItemWrapper.ActionListener

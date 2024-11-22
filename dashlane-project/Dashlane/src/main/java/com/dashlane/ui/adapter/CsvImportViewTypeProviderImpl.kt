@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.CheckBox
 import com.dashlane.R
 import com.dashlane.csvimport.csvimport.CsvImportViewTypeProvider
-import com.dashlane.item.subview.quickaction.QuickActionProvider
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter

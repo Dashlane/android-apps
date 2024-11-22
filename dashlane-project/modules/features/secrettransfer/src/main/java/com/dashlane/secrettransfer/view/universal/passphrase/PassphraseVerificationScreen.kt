@@ -63,7 +63,7 @@ fun PassphraseVerificationScreen(
 
 @Preview
 @Composable
-fun PassphraseVerificationScreenPreview() {
+private fun PassphraseVerificationScreenPreview() {
     DashlanePreview {
         PassphraseVerificationScreen(
             deviceName = "Device Name",

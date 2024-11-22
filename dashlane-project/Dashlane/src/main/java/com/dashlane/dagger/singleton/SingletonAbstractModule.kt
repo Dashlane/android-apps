@@ -30,6 +30,8 @@ import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsRepo
 import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsService
 import com.dashlane.autofill.util.AutofillNavigationService
 import com.dashlane.autofill.viewallaccounts.AutofillViewAllAccountsLogger
+import com.dashlane.changemasterpassword.MasterPasswordChanger
+import com.dashlane.changemasterpassword.MasterPasswordChangerImpl
 import com.dashlane.core.domain.AccountStorageImpl
 import com.dashlane.core.legacypremium.ConflictingBillingPlatformProviderImpl
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
@@ -42,10 +44,6 @@ import com.dashlane.credentialmanager.CredentialManagerLocker
 import com.dashlane.credentialmanager.CredentialManagerLockerImpl
 import com.dashlane.csvimport.csvimport.CsvImportViewTypeProvider
 import com.dashlane.csvimport.csvimport.ImportAuthentifiantHelper
-import com.dashlane.device.DeviceInfoRepository
-import com.dashlane.device.DeviceInfoRepositoryImpl
-import com.dashlane.masterpassword.MasterPasswordChanger
-import com.dashlane.masterpassword.MasterPasswordChangerImpl
 import com.dashlane.notification.badge.SharingInvitationRepository
 import com.dashlane.notification.badge.SharingInvitationRepositoryImpl
 import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
@@ -53,29 +51,27 @@ import com.dashlane.plans.ui.view.PurchaseCheckingCoordinatorImpl
 import com.dashlane.premium.current.other.CurrentPlanStatusProvider
 import com.dashlane.premium.current.other.CurrentPlanStatusProviderImpl
 import com.dashlane.premium.offer.common.PurchaseCheckingCoordinator
-import com.dashlane.premium.offer.common.StoreOffersManager
+import com.dashlane.premium.StoreOffersManager
 import com.dashlane.premium.offer.common.UserBenefitStatusProvider
 import com.dashlane.premium.offer.common.UserBenefitStatusProviderImpl
 import com.dashlane.premium.offer.details.ConflictingBillingPlatformProvider
 import com.dashlane.securearchive.BackupCoordinator
 import com.dashlane.securearchive.BackupCoordinatorImpl
-import com.dashlane.session.UserDataRepository
+import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.session.repository.UserDataRepositoryImpl
 import com.dashlane.session.repository.UserDatabaseRepository
 import com.dashlane.session.repository.UserDatabaseRepositoryImpl
 import com.dashlane.sharing.SharingSyncCommunicator
 import com.dashlane.sharing.SharingSyncCommunicatorImpl
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.RichIconsSettingProvider
 import com.dashlane.storage.userdata.RichIconsSettingProviderImpl
 import com.dashlane.ui.M2xIntentFactory
 import com.dashlane.ui.M2xIntentFactoryImpl
 import com.dashlane.ui.adapter.CsvImportViewTypeProviderImpl
-import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
+import com.dashlane.premium.StoreOffersCache
+import com.dashlane.ui.screens.fragments.SharingPolicyDataProviderImpl
 import com.dashlane.ui.util.PasswordGeneratorWrapperImpl
-import com.dashlane.useractivity.RacletteLogger
-import com.dashlane.useractivity.RacletteLoggerImpl
-import com.dashlane.useractivity.SharingDeveloperLogger
-import com.dashlane.useractivity.SharingDeveloperLoggerImpl
 import com.dashlane.vpn.thirdparty.VpnThirdPartyAuthentifiantHelper
 import dagger.Binds
 import dagger.Module
@@ -86,9 +82,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface SingletonAbstractModule {
-    @Binds
-    fun bindDeviceIdRepository(impl: DeviceInfoRepositoryImpl): DeviceInfoRepository
-
     @Binds
     fun bindDataIdentifierXmlConverter(impl: DataIdentifierSharingXmlConverterImpl): DataIdentifierSharingXmlConverter
 
@@ -187,12 +180,6 @@ interface SingletonAbstractModule {
     fun bindConflictingBillingPlatformProvider(impl: ConflictingBillingPlatformProviderImpl): ConflictingBillingPlatformProvider
 
     @Binds
-    fun bindRacletteLogger(impl: RacletteLoggerImpl): RacletteLogger
-
-    @Binds
-    fun bindSharingDeveloperLogger(impl: SharingDeveloperLoggerImpl): SharingDeveloperLogger
-
-    @Binds
     fun bindAutofillLinkServiceLogger(impl: AutofillLinkServiceLoggerImpl): AutofillLinkServiceLogger
 
     @Binds
@@ -206,4 +193,7 @@ interface SingletonAbstractModule {
 
     @Binds
     fun bindsRichIconsSettingProvider(richIconsSettingProvider: RichIconsSettingProviderImpl): RichIconsSettingProvider
+
+    @Binds
+    fun bindsSharingPolicyDataProvider(sharingPolicyDataProvider: SharingPolicyDataProviderImpl): SharingPolicyDataProvider
 }

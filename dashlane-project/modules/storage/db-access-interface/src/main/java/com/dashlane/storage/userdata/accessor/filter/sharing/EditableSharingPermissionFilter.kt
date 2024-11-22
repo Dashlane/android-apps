@@ -1,7 +1,7 @@
 package com.dashlane.storage.userdata.accessor.filter.sharing
 
 import android.annotation.SuppressLint
-import com.dashlane.util.model.UserPermission
+import com.dashlane.sharing.UserPermission
 
 interface EditableSharingPermissionFilter : SharingFilter {
 

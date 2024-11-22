@@ -1,13 +1,12 @@
 package com.dashlane.attachment
 
-import android.Manifest
-import androidx.annotation.RequiresPermission
 import com.dashlane.attachment.ui.AttachmentItem
-import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.securefile.AttachmentsParser
 import com.dashlane.securefile.extensions.toSecureFile
 import com.dashlane.securefile.storage.SecureFileStorage
 import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.sync.DataSync
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.google.gson.Gson
@@ -24,30 +23,32 @@ class AttachmentListDataProvider(
 ) : BaseDataProvider<AttachmentListContract.Presenter>(),
     AttachmentListContract.DataProvider {
 
-    override val attachments = AttachmentsParser().parse(jsonAttachments).toMutableList()
+    override val attachments = AttachmentsParser().parse(jsonAttachments)
+        .map { AttachmentItem(attachment = it) }
+        .toMutableList()
 
     override suspend fun setup() {
         secureFileStorage.init()
         attachments.onEach {
-            it.downloadState = if (secureFileStorage.isDownloaded(it.toSecureFile(), it.remoteSize)) {
-                AttachmentItem.DownloadState.DOWNLOADED
-            } else {
-                AttachmentItem.DownloadState.NOT_DOWNLOADED
-            }
+            it.downloadState =
+                if (secureFileStorage.isDownloaded(it.attachment.toSecureFile(), it.attachment.remoteSize)) {
+                    AttachmentItem.DownloadState.DOWNLOADED
+                } else {
+                    AttachmentItem.DownloadState.NOT_DOWNLOADED
+                }
         }
         presenter.onListLoaded(attachments)
     }
 
     override suspend fun getDecipheredFile(attachmentItem: AttachmentItem): File {
-        return secureFileStorage.decipherToFileProvider(attachmentItem.toSecureFile())
+        return secureFileStorage.decipherToFileProvider(attachmentItem.attachment.toSecureFile())
     }
 
-    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, conditional = true)
     override suspend fun writeDecipheredFileToPublicFolder(attachmentItem: AttachmentItem) {
         secureFileStorage.decipherToPublicFolder(
-            attachmentItem.toSecureFile(),
-            attachmentItem.type!!,
-            attachmentItem.localSize
+            attachmentItem.attachment.toSecureFile(),
+            attachmentItem.attachment.type!!,
+            attachmentItem.attachment.localSize
         )
     }
 
@@ -65,7 +66,7 @@ class AttachmentListDataProvider(
 
     private suspend fun updateDataIdentifier() {
         val updated = vaultItem.copyWithAttrs {
-            attachments = Gson().toJson(this@AttachmentListDataProvider.attachments)
+            attachments = Gson().toJson(this@AttachmentListDataProvider.attachments.map { it.attachment })
             syncState = SyncState.MODIFIED
             userModificationDate = Instant.now()
         }

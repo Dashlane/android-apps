@@ -84,6 +84,6 @@ fun AccountRecoveryKeySuccessScreen(
 
 @Preview
 @Composable
-fun AccountRecoveryKeySuccessContentPreview() {
+private fun AccountRecoveryKeySuccessContentPreview() {
     DashlanePreview { AccountRecoveryKeySuccessScreen(done = {}) }
 }

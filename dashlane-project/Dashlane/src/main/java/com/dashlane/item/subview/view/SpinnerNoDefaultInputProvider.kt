@@ -11,7 +11,7 @@ import android.widget.Spinner
 import android.widget.SpinnerAdapter
 import android.widget.TextView
 import com.dashlane.R
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.teamspaces.adapter.SpinnerUtil
 import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
 import com.dashlane.util.addTextChangedListener

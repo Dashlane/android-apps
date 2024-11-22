@@ -60,7 +60,7 @@ fun AppBarScreenWrapper(
 
 @Preview
 @Composable
-fun AppBarScreenWrapperPreview() {
+private fun AppBarScreenWrapperPreview() {
     DashlanePreview {
         AppBarScreenWrapper(
             titleText = "App bar Text",

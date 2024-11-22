@@ -2,8 +2,8 @@ package com.dashlane.ui.activities.fragments.list.action
 
 import android.view.View
 import com.dashlane.R
-import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.vault.summary.SummaryObject
 
@@ -22,8 +22,7 @@ class QuickActionsItemAction(
 
     override val visibility: Int
         get() {
-            val hasQuickActions = quickActionProvider.getQuickActions(item, itemListContext).isNotEmpty()
-            return if (hasQuickActions) {
+            return if (quickActionProvider.hasQuickActions(item)) {
                 View.VISIBLE
             } else {
                 View.INVISIBLE

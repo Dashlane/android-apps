@@ -9,10 +9,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.dashlane.R
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.data.SecureNoteFormData
 import com.dashlane.item.v3.display.fields.GenericField
 import com.dashlane.item.v3.display.fields.SectionContent
+import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.util.isSemanticallyNull
 import java.time.Clock
 import java.time.Duration
@@ -21,25 +23,25 @@ import java.time.Instant
 @Composable
 fun ItemDateSection(
     clock: Clock,
-    data: FormData,
+    data: Data<out FormData>,
     editMode: Boolean
 ) {
     if (editMode) return
     SectionContent(editMode = false) {
         GenericField(
             label = stringResource(id = R.string.creation_date_header),
-            data = data.created?.toRelativeDateTimeFormat(LocalContext.current, clock),
+            data = data.commonData.created?.toRelativeDateTimeFormat(LocalContext.current, clock),
             editMode = false,
             onValueChanged = {}
         )
-        if (data.updated != null) {
+        if (data.commonData.updated != null) {
             GenericField(
-                label = if (data.isShared) {
+                label = if (data.commonData.isShared) {
                     stringResource(id = R.string.latest_update_header_for_shared_item)
                 } else {
                     stringResource(id = R.string.latest_update_header)
                 },
-                data = data.updated?.toRelativeDateTimeFormat(LocalContext.current, clock),
+                data = data.commonData.updated.toRelativeDateTimeFormat(LocalContext.current, clock),
                 editMode = false,
                 onValueChanged = {}
             )
@@ -67,26 +69,33 @@ private fun Instant.isInNowRange(clock: Clock) =
 @Preview
 @Composable
 private fun ItemDateSectionPreview() {
-    val formData = SecureNoteFormData(
-        created = Instant.ofEpochSecond(200_000),
-        updated = Instant.now()
+    val data = Data(
+        commonData = CommonData(
+            created = Instant.ofEpochSecond(200_000),
+            updated = Instant.now()
+        ),
+        formData = SecureNoteFormData()
     )
     val clock = Clock.systemUTC()
     DashlanePreview {
         Column {
             ItemDateSection(
                 clock = clock,
-                data = formData,
+                data = data,
                 editMode = false
             )
             ItemDateSection(
                 clock = clock,
-                data = formData.copy(isShared = true),
+                data = data.copyCommonData {
+                    it.copy(isShared = true)
+                },
                 editMode = false
             )
             ItemDateSection(
                 clock = clock,
-                data = formData.copy(updated = null, created = null),
+                data = data.copyCommonData {
+                    it.copy(updated = null, created = null)
+                },
                 editMode = false
             )
         }

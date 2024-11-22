@@ -1,7 +1,5 @@
 package com.dashlane.ui.activities.debug
 
-import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -11,7 +9,6 @@ import com.dashlane.cryptography.DecryptionEngine
 import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.cryptography.decryptFileToUtf8String
 import com.dashlane.database.DatabaseProvider
-import com.dashlane.permission.PermissionsManager
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.RacletteDatabase
@@ -22,19 +19,19 @@ import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.groupBySyncObjectType
 import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.encodeUtf8
 import org.json.JSONObject
 import java.io.File
 import javax.inject.Inject
 import kotlin.math.round
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 
 internal class RacletteDebugCategory @Inject constructor(
     @ActivityContext override val context: Context,
@@ -44,7 +41,6 @@ internal class RacletteDebugCategory @Inject constructor(
     val cryptography: Cryptography,
     val databaseProvider: DatabaseProvider,
     val sessionManager: SessionManager,
-    val permissionsManager: PermissionsManager,
     private val fileUtils: FileUtils
 ) : AbstractDebugCategory() {
 
@@ -173,9 +169,6 @@ internal class RacletteDebugCategory @Inject constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun showFile(file: File): Boolean {
-        if (filePermissionsMissing()) {
-            return false
-        }
         GlobalScope.launch(Dispatchers.Main) {
             val decrypted = decryptionEngine.decryptFileToUtf8String(
                 file.asEncryptedFile(),
@@ -201,16 +194,6 @@ internal class RacletteDebugCategory @Inject constructor(
                 }
         }
         return true
-    }
-
-    private fun filePermissionsMissing(): Boolean {
-        context as Activity
-        val denied =
-            !permissionsManager.isAllowedToWriteToPublicFolder()
-        if (denied) {
-            context.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
-        }
-        return denied
     }
 
     private fun Long.toSize() = (round(this / 1024.0 * 100) / 100).let {

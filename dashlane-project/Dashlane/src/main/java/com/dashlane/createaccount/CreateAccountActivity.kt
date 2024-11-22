@@ -10,7 +10,7 @@ import com.dashlane.login.dagger.TrackingId
 import com.dashlane.login.sso.ContactSsoAdministratorDialogFactory
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.disableAutoFill
-import com.dashlane.ui.endoflife.EndOfLife
+import com.dashlane.endoflife.EndOfLife
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

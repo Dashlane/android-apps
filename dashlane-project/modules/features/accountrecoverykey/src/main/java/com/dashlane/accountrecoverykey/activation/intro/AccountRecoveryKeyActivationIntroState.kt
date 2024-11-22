@@ -1,14 +1,9 @@
 package com.dashlane.accountrecoverykey.activation.intro
 
+import com.dashlane.mvvm.State
 import com.dashlane.user.UserAccountInfo
 
-sealed class AccountRecoveryKeyActivationIntroState {
-    abstract val data: AccountRecoveryKeyActivationIntroData
-
-    data class Default(override val data: AccountRecoveryKeyActivationIntroData) : AccountRecoveryKeyActivationIntroState()
-    data class SkipAlertDialogVisible(override val data: AccountRecoveryKeyActivationIntroData) : AccountRecoveryKeyActivationIntroState()
-}
-
-data class AccountRecoveryKeyActivationIntroData(
-    val accountType: UserAccountInfo.AccountType = UserAccountInfo.AccountType.MasterPassword
-)
+data class AccountRecoveryKeyActivationIntroState(
+    val accountType: UserAccountInfo.AccountType = UserAccountInfo.AccountType.MasterPassword,
+    val showSkipAlertDialog: Boolean = false,
+) : State.View

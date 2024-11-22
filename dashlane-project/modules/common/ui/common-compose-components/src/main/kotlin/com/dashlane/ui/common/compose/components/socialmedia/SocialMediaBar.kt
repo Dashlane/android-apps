@@ -44,7 +44,7 @@ fun SocialMediaBar(
 
 @Composable
 @Preview
-fun SettingSocialMediaLinkPreview() {
+private fun SettingSocialMediaLinkPreview() {
     DashlanePreview {
         SocialMediaBar(
             onClick = {},

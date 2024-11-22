@@ -1,54 +1,39 @@
 package com.dashlane.ui.activities.fragments.vault
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.filter.genericFilter
+import com.dashlane.feature.home.data.VaultItemsRepository
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.home.vaultlist.Filter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.withContext
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class VaultViewModel(
-    private val genericDataQuery: GenericDataQuery
+@HiltViewModel
+class VaultViewModel @Inject constructor(
+    private val vaultItemsRepository: VaultItemsRepository,
 ) : ViewModel() {
 
-    private val liveData: MutableLiveData<List<SummaryObject>> = MutableLiveData()
-
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    val actor = viewModelScope.actor<Unit>(Dispatchers.Main, capacity = Channel.CONFLATED) {
-        consumeEach {
-            liveData.value = queryData()
-        }
-    }
-
     fun refresh() {
-        actor.trySend(Unit)
-    }
-
-    fun observer(lifecycleOwner: LifecycleOwner, onChanged: Observer<List<SummaryObject>>) {
-        liveData.observe(lifecycleOwner, onChanged)
-    }
-
-    private suspend fun queryData() = withContext(Dispatchers.Default) {
-        val genericFilter = genericFilter {
-            specificDataType(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
-            forCurrentSpace()
+        viewModelScope.launch {
+            vaultItemsRepository.loadVault()
         }
-        genericDataQuery.queryAll(genericFilter)
+    }
+
+    fun observer(onChanged: Observer<List<SummaryObject>>) {
+        viewModelScope.launch {
+            vaultItemsRepository.vaultItems
+                .collect(onChanged::onChanged)
+        }
     }
 }
 
 @Suppress("UNCHECKED_CAST")
-class VaultViewModelFactory(val genericDataQuery: GenericDataQuery) : ViewModelProvider.Factory {
+class VaultViewModelFactory(
+    private val vaultItemsRepository: VaultItemsRepository,
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return VaultViewModel(genericDataQuery) as T
+        return VaultViewModel(vaultItemsRepository) as T
     }
 }

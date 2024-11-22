@@ -3,79 +3,89 @@ package com.dashlane.notification
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.server.api.Authorization
 import com.dashlane.ui.ApplicationForegroundChecker
-import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.user.Username
 import com.dashlane.util.isValueNull
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Singleton
 class FcmHelper @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
     private val globalPreferencesManager: GlobalPreferencesManager,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val register: PushNotificationRegister,
     private val applicationForegroundChecker: ApplicationForegroundChecker,
 ) {
+
     companion object {
         
         private const val SERVER_REGISTERED = "dservNot"
     }
 
-    private var serverRegistered: Boolean
-        get() = userPreferencesManager.getBoolean(SERVER_REGISTERED)
-        set(value) {
-            userPreferencesManager.putBoolean(SERVER_REGISTERED, value)
-        }
-
     val isAppForeground: Boolean
         get() = applicationForegroundChecker.isAppForeground
 
-    fun register() {
+    fun register(authorization: Authorization.User) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) return@addOnCompleteListener
 
             task.result?.let { token ->
-                register(token)
+                register(token = token, authorization = authorization)
             }
         }
     }
 
-    fun register(token: String) {
+    fun register(token: String, authorization: Authorization.User) {
         if (token.isValueNull()) return
 
         val isSameToken = globalPreferencesManager.fcmRegistrationId == token
+        val preferences = preferencesManager[authorization.login]
 
         
         
         
-        if (isSameToken && serverRegistered) {
+        if (isSameToken && preferences.getBoolean(SERVER_REGISTERED)) {
             return
         }
 
         
         globalPreferencesManager.fcmRegistrationId = token
-        serverRegistered = false
+        preferences.putBoolean(SERVER_REGISTERED, false)
 
         
         applicationCoroutineScope.launch {
             
-            val success = register.register(token)
+            val success = register.register(registeredId = token, authorization = authorization)
             if (success) {
                 
-                serverRegistered = true
+                preferences.putBoolean(SERVER_REGISTERED, true)
             }
         }
     }
 
-    fun clearRegistration() {
+    fun unregister(authorization: Authorization.User) {
+        val registeredId = globalPreferencesManager.fcmRegistrationId ?: return
+        
+        applicationCoroutineScope.launch {
+            val success = register.unregister(registeredId = registeredId, authorization = authorization)
+            if (success) {
+                
+                preferencesManager[authorization.login].putBoolean(SERVER_REGISTERED, false)
+            }
+        }
+    }
+
+    fun clearRegistration(username: Username) {
         globalPreferencesManager.fcmRegistrationId = ""
-        serverRegistered = false
+        preferencesManager[username].putBoolean(SERVER_REGISTERED, false)
     }
 
     fun clearAllNotification(context: Context) {

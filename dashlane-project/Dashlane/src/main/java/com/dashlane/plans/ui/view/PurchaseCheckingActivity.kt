@@ -30,7 +30,7 @@ import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.premium.inappbilling.BillingVerification
-import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
+import com.dashlane.premium.StoreOffersCache
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch

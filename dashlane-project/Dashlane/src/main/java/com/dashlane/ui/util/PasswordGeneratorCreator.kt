@@ -14,7 +14,6 @@ object PasswordGeneratorCreator {
         createGeneratedPassword(
             dataIdentifier = CommonDataIdentifierAttrsImpl(
                 uid = generateUniqueIdentifier(),
-                anonymousUID = generateUniqueIdentifier(),
                 id = 0,
                 formatLang = Country.UnitedStates,
                 syncState = SyncState.MODIFIED

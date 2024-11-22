@@ -10,7 +10,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.listeners.edittext.NoLockEditTextWatcher
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.PasswordStrengthHorizontalIndicatorView
 import com.dashlane.passwordstrength.textColorRes

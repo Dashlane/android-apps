@@ -1,10 +1,8 @@
 package com.dashlane.permission
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.SparseArray
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
@@ -40,11 +38,6 @@ class PermissionsManagerImpl @Inject constructor(
         val handler = handlers[code]
         handlers.remove(code)
         return handler
-    }
-
-    override fun isAllowedToWriteToPublicFolder(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ||
-                isAllowed(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 
     override fun isAllowed(permission: String): Boolean {

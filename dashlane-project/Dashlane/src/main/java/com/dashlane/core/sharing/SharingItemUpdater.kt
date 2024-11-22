@@ -6,7 +6,7 @@ import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierReplacedEvent
 import com.dashlane.exception.NotLoggedInException
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.DeleteItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemContent

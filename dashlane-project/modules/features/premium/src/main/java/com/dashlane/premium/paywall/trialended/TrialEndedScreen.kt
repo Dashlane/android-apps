@@ -58,7 +58,7 @@ fun TrialEndedScreen(
 
 @Composable
 @Preview
-fun TrialEndedScreenPreview(@PreviewParameter(BooleanProvider::class) isUserFrozen: Boolean) {
+private fun TrialEndedScreenPreview(@PreviewParameter(BooleanProvider::class) isUserFrozen: Boolean) {
     DashlanePreview {
         TrialEndedScreen(
             trialEndedState = FreeTrialScreenState.Loaded(

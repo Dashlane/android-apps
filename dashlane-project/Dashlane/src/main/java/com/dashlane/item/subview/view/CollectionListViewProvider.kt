@@ -110,7 +110,7 @@ object CollectionListViewProvider {
                         .map { it.name },
                     temporarySharedCollectionsId = collections.filter { it.shared }
                         .mapNotNull { it.id },
-                    spaceId = item.teamspaceView?.value?.teamId ?: TeamSpace.Personal.teamId ?: ""
+                    spaceId = item.teamspaceView?.value?.teamId
                 )
             },
             layout = if (item.editMode) {

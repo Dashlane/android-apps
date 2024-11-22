@@ -42,7 +42,7 @@ interface TeamSpaceAccessor {
 
     fun getOrDefault(teamId: String?): TeamSpace
 
-    fun get(teamId: String?): TeamSpace?
+    fun get(teamId: String?): TeamSpace.Business?
 }
 
 class TeamSpaceAccessorImpl(
@@ -119,7 +119,7 @@ class TeamSpaceAccessorImpl(
         return get(teamId) ?: TeamSpace.Combined
     }
 
-    override fun get(teamId: String?): TeamSpace? {
+    override fun get(teamId: String?): TeamSpace.Business? {
         return allBusinessSpaces.firstOrNull {
             it.teamId == teamId
         }

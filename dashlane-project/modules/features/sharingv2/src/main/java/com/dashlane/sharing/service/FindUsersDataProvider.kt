@@ -1,6 +1,6 @@
 package com.dashlane.sharing.service
 
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.GetUsersPublicKeyService
 import com.dashlane.session.Session
 import javax.inject.Inject

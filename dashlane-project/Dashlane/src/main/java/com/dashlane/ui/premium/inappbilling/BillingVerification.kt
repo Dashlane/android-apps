@@ -4,7 +4,7 @@ import com.android.billingclient.api.Purchase
 import com.dashlane.inappbilling.BillingManager
 import com.dashlane.inappbilling.ServiceResult
 import com.dashlane.inappbilling.withServiceConnection
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.payments.VerifyPlaystoreReceiptService

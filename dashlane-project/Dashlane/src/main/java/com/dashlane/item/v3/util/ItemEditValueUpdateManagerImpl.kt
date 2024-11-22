@@ -5,12 +5,17 @@ import com.dashlane.autofill.LinkedServicesHelper
 import com.dashlane.hermes.generated.definitions.Field
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.FormData
+import com.dashlane.item.v3.data.SecretFormData
+import com.dashlane.item.v3.data.SecureNoteFormData
+import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.isValidEmail
 import com.dashlane.util.obfuscated.matchesNullAsEmpty
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.urlForUI
+import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.summary.toSummaryOrNull
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
@@ -20,27 +25,47 @@ class ItemEditValueUpdateManagerImpl @Inject constructor(
 ) : ItemEditValueUpdateManager {
     override val editedFields: MutableSet<Field> = mutableSetOf()
     override fun updateWithData(
-        formData: FormData,
+        data: Data<out FormData>,
         initialVaultItem: VaultItem<SyncObject>
     ): VaultItem<SyncObject>? {
         
         editedFields.clear()
-        return when (formData) {
+        return when (data.formData) {
             is CredentialFormData -> initialVaultItem.copy(
                 syncObject = (initialVaultItem.syncObject as SyncObject.Authentifiant)
-                    .copyForUpdateEmailAndLogin(formData.login, formData.email)
-                    .copyForUpdatedSecondaryLogin(formData.secondaryLogin)
-                    .copyForUpdatedPassword(formData.password?.value?.toString())
-                    .copyForUpdateOtp(formData.otp)
-                    .copyForUpdatedName(formData.name)
-                    .copyForUpdatedNote(formData.note)
-                    .copyForUpdatedTeamspace(formData.space ?: TeamSpace.Personal)
-                    .copyForUpdatedWebsite(formData.url)
-                    .copyForLinkedWebsites(formData.linkedServices)
+                    .copyForUpdateEmailAndLogin(data.formData.login, data.formData.email)
+                    .copyForUpdatedSecondaryLogin(data.formData.secondaryLogin)
+                    .copyForUpdatedPassword(data.formData.password?.value?.toString())
+                    .copyForUpdateOtp(data.formData.otp)
+                    .copyForUpdatedName(data.commonData.name)
+                    .copyForUpdatedNote(data.formData.note)
+                    .copyForUpdatedTeamspace(data.commonData.space ?: TeamSpace.Personal)
+                    .copyForUpdatedWebsite(
+                        data.formData.url,
+                        initialVaultItem.toSummaryOrNull<SummaryObject.Authentifiant>()?.urlForUI()
+                    )
+                    .copyForLinkedWebsites(data.formData.linkedServices)
+            )
+            is SecureNoteFormData -> initialVaultItem.copy(
+                syncObject = (initialVaultItem.syncObject as SyncObject.SecureNote)
+                    .copyForUpdatedName(data.commonData.name)
+                    .copyForUpdatedContent(data.formData.content)
+                    .copyForUpdatedSecured(data.formData.secured)
+                    .copyForUpdatedType(data.formData.secureNoteType)
+                    .copyForUpdatedTeamspace(data.commonData.space ?: TeamSpace.Personal)
+            )
+            is SecretFormData -> initialVaultItem.copy(
+                syncObject = (initialVaultItem.syncObject as SyncObject.Secret)
+                    .copyForUpdatedTitle(data.commonData.name)
+                    .copyForUpdatedContent(data.formData.content)
+                    .copyForUpdatedSecured(data.formData.secured)
+                    .copyForUpdatedTeamspace(data.commonData.space ?: TeamSpace.Personal)
             )
             else -> null
         }
     }
+
+    
 
     private fun SyncObject.Authentifiant.copyForUpdateEmailAndLogin(
         login: String?,
@@ -164,8 +189,11 @@ class ItemEditValueUpdateManagerImpl @Inject constructor(
         }
     }
 
-    private fun SyncObject.Authentifiant.copyForUpdatedWebsite(value: String?): SyncObject.Authentifiant {
-        return if (value == this.urlForUI().orEmpty()) {
+    private fun SyncObject.Authentifiant.copyForUpdatedWebsite(
+        value: String?,
+        originalValue: String?
+    ): SyncObject.Authentifiant {
+        return if (value == originalValue.orEmpty()) {
             this
         } else {
             editedFields += Field.URL
@@ -199,4 +227,91 @@ class ItemEditValueUpdateManagerImpl @Inject constructor(
             }
         }
     }
+
+    
+
+    
+
+    private fun SyncObject.SecureNote.copyForUpdatedName(value: String): SyncObject.SecureNote {
+        return if (value == this.title.orEmpty()) {
+            this
+        } else {
+            editedFields += Field.TITLE
+            this.copy { title = value }
+        }
+    }
+
+    private fun SyncObject.SecureNote.copyForUpdatedContent(value: String?): SyncObject.SecureNote {
+        return if (value == this.content.orEmpty()) {
+            this
+        } else {
+            editedFields += Field.CONTENT
+            this.copy { content = value }
+        }
+    }
+
+    private fun SyncObject.SecureNote.copyForUpdatedSecured(value: Boolean): SyncObject.SecureNote {
+        return if (value == this.secured) {
+            this
+        } else {
+            this.copy { secured = value }
+        }
+    }
+
+    private fun SyncObject.SecureNote.copyForUpdatedType(value: SyncObject.SecureNoteType): SyncObject.SecureNote {
+        return if (value == this.type) {
+            this
+        } else { 
+            this.copy { type = value }
+        }
+    }
+
+    private fun SyncObject.SecureNote.copyForUpdatedTeamspace(value: TeamSpace): SyncObject.SecureNote {
+        val spaceId = this.spaceId ?: TeamSpace.Personal.teamId
+        return if (value.teamId == spaceId) {
+            this
+        } else {
+            this.copy { this.spaceId = value.teamId }
+        }
+    }
+
+    
+
+    
+
+    private fun SyncObject.Secret.copyForUpdatedTitle(value: String): SyncObject.Secret {
+        return if (value == this.title.orEmpty()) {
+            this
+        } else {
+            editedFields += Field.TITLE
+            this.copy { title = value }
+        }
+    }
+
+    private fun SyncObject.Secret.copyForUpdatedContent(value: String?): SyncObject.Secret {
+        return if (value == this.content.orEmpty()) {
+            this
+        } else {
+            editedFields += Field.CONTENT
+            this.copy { content = value }
+        }
+    }
+
+    private fun SyncObject.Secret.copyForUpdatedSecured(value: Boolean): SyncObject.Secret {
+        return if (value == this.secured) {
+            this
+        } else {
+            this.copy { secured = value }
+        }
+    }
+
+    private fun SyncObject.Secret.copyForUpdatedTeamspace(value: TeamSpace): SyncObject.Secret {
+        val spaceId = this.spaceId ?: TeamSpace.Personal.teamId
+        return if (value.teamId == spaceId) {
+            this
+        } else {
+            this.copy { this.spaceId = value.teamId }
+        }
+    }
+    
 }

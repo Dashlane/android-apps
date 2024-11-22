@@ -16,7 +16,6 @@ import androidx.credentials.provider.ProviderGetCredentialRequest
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.credentialmanager.CredentialLoader
 import com.dashlane.credentialmanager.CredentialManagerHandlerImpl
 import com.dashlane.credentialmanager.CredentialManagerLocker
@@ -29,16 +28,15 @@ import com.dashlane.credentialmanager.model.PasskeyRequestOptions
 import com.dashlane.credentialmanager.model.PasswordLimitReachedException
 import com.dashlane.credentialmanager.model.UnsupportedCredentialTypeException
 import com.dashlane.limitations.PasswordLimiter
-import com.dashlane.util.stackTraceToSafeString
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.xml.domain.SyncObject
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @RequiresApi(34)
 @HiltViewModel
@@ -48,7 +46,6 @@ class CredentialManagerViewModel @Inject constructor(
     private val credentialPasskeyManager: CredentialPasskeyManager,
     private val credentialPasswordManager: CredentialPasswordManager,
     private val savedStateHandle: SavedStateHandle,
-    private val developerInfoLogger: DeveloperInfoLogger,
     private val passwordLimiter: PasswordLimiter
 ) : ViewModel() {
     private val stateFlow = MutableStateFlow<CredentialManagerState>(CredentialManagerState.Unlocking)
@@ -118,11 +115,6 @@ class CredentialManagerViewModel @Inject constructor(
                 }
             } catch (e: DashlaneCredentialManagerException) {
                 stateFlow.emit(CredentialManagerState.Error(e))
-                developerInfoLogger.log(
-                    "credential_manager_create",
-                    "Error while creating credential",
-                    e.stackTraceToSafeString()
-                )
             }
         }
     }
@@ -149,11 +141,6 @@ class CredentialManagerViewModel @Inject constructor(
                 }
             } catch (e: DashlaneCredentialManagerException) {
                 stateFlow.emit(CredentialManagerState.Error(e))
-                developerInfoLogger.log(
-                    "credential_manager_get",
-                    "Error while providing credential",
-                    e.stackTraceToSafeString()
-                )
             }
         }
     }

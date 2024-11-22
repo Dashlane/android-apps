@@ -1,7 +1,7 @@
 package com.dashlane.ui.activities.fragments.list.wrapper
 
-import com.dashlane.item.subview.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.adapter.ItemListContext
@@ -29,7 +29,6 @@ class ItemWrapperProvider @Inject constructor(
             is SummaryObject.Company,
             is SummaryObject.FiscalStatement,
             is SummaryObject.Email,
-            is SummaryObject.PaymentPaypal,
             is SummaryObject.PersonalWebsite,
             is SummaryObject.Phone,
             is SummaryObject.Identity,
@@ -40,6 +39,7 @@ class ItemWrapperProvider @Inject constructor(
             is SummaryObject.IdCard,
             is SummaryObject.Passkey,
             is SummaryObject.SecureNote,
+            is SummaryObject.Secret,
             is SummaryObject.Passport -> DefaultVaultItemWrapper(
                 vaultItemCopyService = vaultItemCopyService,
                 quickActionProvider = quickActionProvider,

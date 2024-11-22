@@ -1,6 +1,7 @@
 package com.dashlane.ui.screens.fragments.search
 
 import android.view.View
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.navigation.Navigator
 import com.dashlane.session.SessionManager
@@ -39,7 +40,8 @@ class SearchServiceImpl @Inject constructor(
     private val vaultItemLogger: VaultItemLogger,
     private val navigator: Navigator,
     private val teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
-    private val passwordLimiter: PasswordLimiter
+    private val passwordLimiter: PasswordLimiter,
+    private val featuresChecker: UserFeaturesChecker,
 ) : SearchService {
 
     override fun getDefaultSearchRequest() = SearchRequest.DefaultRequest.FromRecent
@@ -76,6 +78,7 @@ class SearchServiceImpl @Inject constructor(
         rootView = layout,
         teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
         navigator = navigator,
-        passwordLimiter = passwordLimiter
+        passwordLimiter = passwordLimiter,
+        featuresChecker = featuresChecker
     )
 }

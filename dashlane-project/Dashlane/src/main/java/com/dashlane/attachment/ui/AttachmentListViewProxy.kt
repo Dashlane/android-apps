@@ -43,9 +43,9 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
         adapter.addAll(attachments)
     }
 
-    override fun updateActionBar(barColor: Int, attachments: List<AttachmentItem>) {
+    override fun updateActionBar(attachments: List<AttachmentItem>) {
         if (selectedAttachments == 0) {
-            setupActionBar(barColor, attachments)
+            setupActionBar(attachments)
         } else {
             setupAttachmentSelectedActionBar(selectedAttachments)
         }
@@ -53,7 +53,7 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
 
     override fun showFileDeleted(secureFileInfoId: String) {
         val adapter = recyclerView.adapter as EfficientAdapter<*>
-        val index = adapter.objects.indexOfFirst { it is AttachmentItem && it.id == secureFileInfoId }
+        val index = adapter.objects.indexOfFirst { it is AttachmentItem && it.attachment.id == secureFileInfoId }
         if (index == -1) {
             return
         }
@@ -63,7 +63,7 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
     override fun showFileDeleteError(secureFileInfoId: String) {
         val adapter = recyclerView.adapter as EfficientAdapter<*>
         val filename =
-            (adapter.objects.first { it is AttachmentItem && it.id == secureFileInfoId } as AttachmentItem).filename
+            (adapter.objects.first { it is AttachmentItem && it.attachment.id == secureFileInfoId } as AttachmentItem).attachment.filename
         DialogHelper()
             .builder(context)
             .setMessage(context.getString(R.string.delete_file_error, filename))
@@ -95,15 +95,12 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
         }
     }
 
-    private fun setupActionBar(barColor: Int, attachments: List<AttachmentItem>) {
+    private fun setupActionBar(attachments: List<AttachmentItem>) {
         resetAttachmentSelection(attachments)
         activity.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             title = activity.getString(R.string.attachments_activity_title)
-            if (barColor != -1) {
-                activity.actionBarUtil.setActionBarColor(barColor)
-            }
         }
     }
 

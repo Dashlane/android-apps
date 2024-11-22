@@ -1,11 +1,12 @@
 package com.dashlane.sync.repositories
 
 import androidx.annotation.FloatRange
-import kotlinx.coroutines.channels.SendChannel
 
 sealed class SyncProgress {
 
-    object RemoteSync : SyncProgress()
+    data object Start : SyncProgress()
+
+    data object RemoteSync : SyncProgress()
 
     data class DecipherRemote(val currentIndex: Int, val count: Int) : SyncProgress() {
 
@@ -14,7 +15,7 @@ sealed class SyncProgress {
             get() = currentIndex.toFloat() / count
     }
 
-    object Upload : SyncProgress()
+    data object Upload : SyncProgress()
 
     data class LocalSync(val currentIndex: Int, val count: Int) : SyncProgress() {
 
@@ -23,9 +24,7 @@ sealed class SyncProgress {
             get() = currentIndex.toFloat() / count
     }
 
-    object SharingSync : SyncProgress()
+    data object SharingSync : SyncProgress()
 
-    object TreatProblem : SyncProgress()
+    data object TreatProblem : SyncProgress()
 }
-
-typealias SyncProgressChannel = SendChannel<SyncProgress>

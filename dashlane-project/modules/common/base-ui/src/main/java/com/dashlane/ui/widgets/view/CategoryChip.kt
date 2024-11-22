@@ -94,7 +94,7 @@ fun CategoryChipList(modifier: Modifier = Modifier, content: @Composable (() -> 
 
 @Composable
 @Preview
-fun PreviewCategoryChip() {
+private fun PreviewCategoryChip() {
     DashlanePreview {
         CategoryChip("Finance")
     }
@@ -102,7 +102,7 @@ fun PreviewCategoryChip() {
 
 @Composable
 @Preview
-fun TextTooLongPreview() {
+private fun TextTooLongPreview() {
     DashlanePreview {
         CategoryChip(
             label = """This item is way too long to be displayed on 1 line. 
@@ -114,7 +114,7 @@ Unfortunately when it spans over multiple lines the trailing icon is not visible
 
 @Composable
 @Preview
-fun PreviewCategoryGroup(@PreviewParameter(BooleanProvider::class) editMode: Boolean) {
+private fun PreviewCategoryGroup(@PreviewParameter(BooleanProvider::class) editMode: Boolean) {
     val categories = listOf(
         "Finance",
         "Business",
@@ -136,7 +136,7 @@ fun PreviewCategoryGroup(@PreviewParameter(BooleanProvider::class) editMode: Boo
 
 @Composable
 @Preview
-fun PreviewCategoryGroupShared(@PreviewParameter(BooleanProvider::class) editMode: Boolean) {
+private fun PreviewCategoryGroupShared(@PreviewParameter(BooleanProvider::class) editMode: Boolean) {
     val categories = listOf(
         "Finance",
         "Business",

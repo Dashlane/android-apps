@@ -1,6 +1,16 @@
 package com.dashlane.user
 
 import com.dashlane.util.isValidEmail
+import java.util.regex.Pattern
+
+@Suppress("InternalTestExpressions")
+const val TEST_PREFIX = "kw_test_"
+
+private val automationAccountRegex =
+    Pattern.compile("randomemail@provider.com){1}$")
+
+private val automationSsoAccountRegex =
+    Pattern.compile("^$TEST_PREFIX.*@.*sso\\.kwtest\\.io\$")
 
 class Username private constructor(val email: String) {
     override fun equals(other: Any?): Boolean {
@@ -33,3 +43,8 @@ class Username private constructor(val email: String) {
             email.trim().lowercase()
     }
 }
+
+fun Username.isTestingAccount() = email.startsWith(TEST_PREFIX)
+
+fun Username.isSmokeTestAccount() =
+    automationAccountRegex.matcher(email).matches() || automationSsoAccountRegex.matcher(email).matches()

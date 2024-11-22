@@ -4,48 +4,53 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.AccountRecoveryState
 import com.dashlane.authentication.AuthenticationDeviceCredentialsInvalidException
 import com.dashlane.authentication.AuthenticationEmptyPasswordException
 import com.dashlane.authentication.AuthenticationInvalidPasswordException
+import com.dashlane.authentication.DataLossTrackingLogger
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
 import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
-import com.dashlane.debug.DaDaDa
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.debug.services.DaDaDaLogin
+import com.dashlane.hardwaresecurity.CryptoObjectHelper
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPass
+import com.dashlane.lock.LockSetting
+import com.dashlane.lock.LockType
 import com.dashlane.login.LoginLogger
 import com.dashlane.login.LoginMode
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockPass
-import com.dashlane.login.lock.LockSetting
 import com.dashlane.login.pages.password.LoginPasswordRepository
 import com.dashlane.login.pages.password.toVerification
 import com.dashlane.login.root.LoginRepository
 import com.dashlane.mvvm.MutableViewStateFlow
 import com.dashlane.mvvm.ViewStateFlow
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.crypto.keys.AppKey
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
 import com.dashlane.session.SessionTrasher
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.user.Username
-import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
-import com.dashlane.util.installlogs.DataLossTrackingLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.VisibleForTesting
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class LoginPasswordViewModel @Inject constructor(
     private val globalPreferencesManager: GlobalPreferencesManager,
@@ -58,10 +63,10 @@ class LoginPasswordViewModel @Inject constructor(
     private val cryptoObjectHelper: CryptoObjectHelper,
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
     private val lockManager: LockManager,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val loginRepository: LoginRepository,
     private val loginLogger: LoginLogger,
-    private val daDaDa: DaDaDa
+    private val dadadaLogin: DaDaDaLogin
 ) : ViewModel() {
 
     private val _stateFlow = MutableViewStateFlow<LoginPasswordState.View, LoginPasswordState.SideEffect>(LoginPasswordState.View())
@@ -69,11 +74,18 @@ class LoginPasswordViewModel @Inject constructor(
 
     fun viewStarted(lockSetting: LockSetting) {
         viewModelScope.launch {
-            val registeredUserDevice = loginRepository.getRegisteredUserDevice() ?: throw IllegalStateException("registeredUserDevice cannot be null")
+            if (_stateFlow.value.password.text.isNotEmpty()) return@launch
+
+            val registeredUserDevice = loginRepository.getRegisteredUserDevice() ?: run {
+                globalPreferencesManager.isUserLoggedOut = true
+                _stateFlow.send(LoginPasswordState.SideEffect.Logout(null, null))
+                return@launch
+            }
+
             val email = registeredUserDevice.login
 
             val canSwitch = lockSetting.unlockReason.let {
-                it == null || it is UnlockEvent.Reason.AppAccess || it is UnlockEvent.Reason.AccessFromExternalComponent
+                it == null || it is LockEvent.Unlock.Reason.AppAccess || it is LockEvent.Unlock.Reason.AccessFromExternalComponent
             }
 
             val loginHistory = if (canSwitch) {
@@ -83,7 +95,7 @@ class LoginPasswordViewModel @Inject constructor(
             }
 
             
-            val prefillPassword = if (daDaDa.isEnabled) daDaDa.defaultPassword ?: "" else ""
+            val prefillPassword = if (dadadaLogin.isEnabled) dadadaLogin.defaultPassword ?: "" else ""
 
             _stateFlow.update { state ->
                 state.copy(
@@ -119,8 +131,11 @@ class LoginPasswordViewModel @Inject constructor(
         viewModelScope.launch {
             val lockSetting = _stateFlow.value.lockSetting ?: return@launch
             when {
+                lockSetting.isShowMPForRemember -> {
+                    preferencesManager[_stateFlow.value.email].credentialsSaveDate = Instant.now()
+                    _stateFlow.send(LoginPasswordState.SideEffect.Fallback)
+                }
                 lockSetting.isLockCancelable -> _stateFlow.send(LoginPasswordState.SideEffect.Cancel)
-                lockSetting.isShowMPForRemember -> _stateFlow.send(LoginPasswordState.SideEffect.Fallback)
             }
         }
     }
@@ -134,6 +149,7 @@ class LoginPasswordViewModel @Inject constructor(
         }
     }
 
+    @Suppress("LongMethod")
     fun login() {
         flow<LoginPasswordState> {
             val registeredUserDevice = loginRepository.getRegisteredUserDevice() ?: return@flow
@@ -144,13 +160,12 @@ class LoginPasswordViewModel @Inject constructor(
                 ?.takeIf { it.userId == registeredUserDevice.login }
                 ?.let {
                     val appKey = AppKey.Password(password, registeredUserDevice.serverKey)
-                    if (lockManager.unlock(LockPass.ofPassword(appKey))) {
-                        lockManager.hasEnteredMP = true
-                        _stateFlow.value.lockSetting?.unlockReason?.let { reason -> runCatching { lockManager.sendUnLock(reason, true) } }
+                    if (lockManager.unlock(session = it, pass = LockPass.ofPassword(appKey))) {
+                        sendUnlockMP(_stateFlow.value.lockSetting?.unlockReason)
 
                         emit(
                             LoginPasswordState.SideEffect.LoginSuccess(
-                                strategy = LoginStrategy.Strategy.UNLOCK,
+                                strategy = LoginStrategy.Strategy.Unlock,
                                 ssoInfo = loginRepository.getSsoInfo()
                             )
                         )
@@ -163,25 +178,26 @@ class LoginPasswordViewModel @Inject constructor(
 
             val result = passwordRepository.validate(registeredUserDevice, password.encodeUtf8ToObfuscated())
 
-            val strategy = when (result) {
+            val (session, strategy) = when (result) {
                 is AuthenticationPasswordRepository.Result.Local -> {
                     val session = loginPasswordRepository.createSessionForLocalPassword(registeredUserDevice = registeredUserDevice, result = result)
-                    loginPasswordRepository.getLocalStrategy(session = session)
+                    val strategy = loginPasswordRepository.getLocalStrategy(session = session)
+                    session to strategy
                 }
                 is AuthenticationPasswordRepository.Result.Remote -> {
                     val session = loginPasswordRepository.createSessionForRemotePassword(
                         result = result,
                         accountType = UserAccountInfo.AccountType.MasterPassword
                     )
-                    loginPasswordRepository.getRemoteStrategy(session = session, securityFeatures = result.securityFeatures)
+                    val strategy = loginPasswordRepository.getRemoteStrategy(session = session, securityFeatures = result.securityFeatures)
+                    session to strategy
                 }
             }
 
-            val unlocked = lockManager.unlock(LockPass.ofPassword(appKey = result.password))
+            val unlocked = lockManager.unlock(session = session, pass = LockPass.ofPassword(appKey = result.password))
             if (!unlocked) throw AuthenticationInvalidPasswordException()
 
-            lockManager.hasEnteredMP = true
-            _stateFlow.value.lockSetting?.unlockReason?.let { reason -> runCatching { lockManager.sendUnLock(reason, true) } }
+            sendUnlockMP(_stateFlow.value.lockSetting?.unlockReason)
 
             emit(LoginPasswordState.SideEffect.LoginSuccess(strategy, loginRepository.getSsoInfo()))
         }
@@ -219,7 +235,7 @@ class LoginPasswordViewModel @Inject constructor(
 
     fun bottomSheetDismissed() {
         viewModelScope.launch {
-            _stateFlow.update { state -> state.copy(helpDialogShown = false) }
+            _stateFlow.update { state -> state.copy(helpDialogShown = false, recoveryDialogShown = false) }
         }
     }
 
@@ -231,7 +247,7 @@ class LoginPasswordViewModel @Inject constructor(
                 registeredUserDevice.serverKey,
                 acceptLoggedOut = true
             )
-            userPreferencesManager.isMpResetRecoveryStarted = true
+            preferencesManager[registeredUserDevice.login].isMpResetRecoveryStarted = true
             _stateFlow.send(LoginPasswordState.SideEffect.GoToBiometricRecovery)
             _stateFlow.update { state -> state.copy(recoveryDialogShown = false, helpDialogShown = false) }
         }
@@ -312,7 +328,7 @@ class LoginPasswordViewModel @Inject constructor(
                     else -> DataLossTrackingLogger.Reason.PASSWORD_CHANGED
                 }
                 val username = Username.ofEmail(registeredUserDevice.login)
-                sessionTrasher.trash(username)
+                sessionTrasher.trash(username = username, deletePreferences = true)
                 globalPreferencesManager.setLastLoggedInUser("")
                 LoginPasswordState.SideEffect.Logout(email = registeredUserDevice.login, error = LoginPasswordError.InvalidCredentials)
             }
@@ -320,6 +336,21 @@ class LoginPasswordViewModel @Inject constructor(
                 loginLogger.logErrorUnknown(loginMode = LoginMode.MasterPassword(registeredUserDevice.toVerification()))
                 state.copy(isLoading = false, error = LoginPasswordError.Generic)
             }
+        }
+    }
+
+    @androidx.annotation.VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    suspend fun sendUnlockMP(reason: LockEvent.Unlock.Reason?) {
+        lockManager.hasEnteredMP = true
+        
+        runCatching {
+            lockManager.sendUnlockEvent(
+                LockEvent.Unlock(
+                    reason = reason ?: LockEvent.Unlock.Reason.AppAccess,
+                    lockType = LockType.MasterPassword
+                )
+            )
         }
     }
 }

@@ -17,12 +17,12 @@ class AutofillUpdateAccountServiceImpl @Inject constructor(
     override suspend fun loadAuthentifiants(
         website: String?,
         packageName: String?
-    ): List<SyncObject.Authentifiant> {
+    ): List<VaultItem<SyncObject.Authentifiant>> {
         val authByPackageName =
             if (packageName != null) {
                 autoFillDataBaseAccess.loadAuthentifiantsByPackageName(packageName)
                     ?.mapNotNull {
-                        autoFillDataBaseAccess.loadSyncObject<SyncObject.Authentifiant>(it.id)?.syncObject
+                        autoFillDataBaseAccess.loadSyncObject<SyncObject.Authentifiant>(it.id)
                     } ?: emptyList()
             } else {
                 emptyList()
@@ -30,7 +30,7 @@ class AutofillUpdateAccountServiceImpl @Inject constructor(
         val authByUrl = if (website != null) {
             autoFillDataBaseAccess.loadAuthentifiantsByUrl(website)
                 ?.mapNotNull {
-                    autoFillDataBaseAccess.loadSyncObject<SyncObject.Authentifiant>(it.id)?.syncObject
+                    autoFillDataBaseAccess.loadSyncObject<SyncObject.Authentifiant>(it.id)
                 } ?: emptyList()
         } else {
             emptyList()

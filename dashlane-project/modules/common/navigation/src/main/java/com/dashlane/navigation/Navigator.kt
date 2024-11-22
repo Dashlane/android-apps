@@ -1,15 +1,12 @@
 package com.dashlane.navigation
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Parcelable
 import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.NavDestination
 import com.dashlane.navigation.paywall.PaywallIntroType
-import java.io.Serializable
 
 interface Navigator {
     val currentDestination: NavDestination?
@@ -31,7 +28,7 @@ interface Navigator {
     fun goToSecretTransfer(settingsId: String? = null)
     fun goToAccountRecoveryKey(
         settingsId: String? = null,
-        startDestination: String? = null,
+        showIntro: Boolean = false,
         userCanExitFlow: Boolean = true
     )
 
@@ -40,12 +37,11 @@ interface Navigator {
     fun goToOffers(offerType: String? = null)
 
     fun goToInAppLoginIntro()
-    fun goToInAppLogin(onBoardingType: Serializable? = null)
+    fun goToInAppLogin()
     fun goToSearch(query: String? = null)
 
     fun goToPaywall(type: PaywallIntroType)
 
-    @TargetApi(Build.VERSION_CODES.P)
     fun goToGuidedPasswordChange(
         itemId: String,
         domain: String,
@@ -92,7 +88,7 @@ interface Navigator {
         fromViewOnly: Boolean,
         temporaryPrivateCollectionsName: List<String>,
         temporarySharedCollectionsId: List<String>,
-        spaceId: String,
+        spaceId: String?,
         isLimited: Boolean
     )
 
@@ -131,6 +127,8 @@ interface Navigator {
     fun goToAutofillPauseAndLinkedFromSettings()
     fun goToDashlaneLabs()
     fun goToGuidedWebCsvExport()
+    fun goToAccountStatus()
+    fun goToChangeContactEmail()
 
     
     fun goToBreachAlertDetail(breachWrapper: Parcelable)
@@ -154,7 +152,6 @@ interface Navigator {
     fun goToUserGroupFromPasswordSharing(groupId: String, groupName: String)
     fun goToItemsForUserFromPasswordSharing(memberEmail: String)
 
-    @TargetApi(Build.VERSION_CODES.P)
     fun goToGuidedPasswordChangeFromCredential(itemId: String, domain: String, username: String?)
 
     
@@ -185,7 +182,7 @@ interface Navigator {
     fun goToManageDashlaneNotificationsSystem()
 
     
-    fun logoutAndCallLoginScreen(context: Context? = null, allowSkipEmail: Boolean = false)
+    fun logoutAndCallLoginScreen(context: Context? = null)
 
     
     fun goToWebView(url: String)
@@ -199,6 +196,18 @@ interface Navigator {
         temporaryApps: List<String>?,
         urlDomain: String?
     )
+    fun showAttachments(
+        id: String,
+        xmlObjectName: String,
+        attachments: String?,
+    )
+    fun showNewSharing(
+        id: String,
+        fromAuthentifiant: Boolean,
+        fromSecureNote: Boolean
+    )
 
-    fun goToAuthenticatorSunset()
+    fun openWebsite(url: String?, packageNames: Set<String>)
+
+    fun goToBiometricOnboarding(context: Context)
 }

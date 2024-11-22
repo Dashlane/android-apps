@@ -7,7 +7,7 @@ import com.dashlane.core.sharing.handleServerResponse
 import com.dashlane.core.sharing.toItemForEmailing
 import com.dashlane.core.sharing.toSharedVaultItemLite
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.Response
 import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptCollectionService
 import com.dashlane.server.api.endpoints.sharinguserdevice.AcceptItemGroupService
@@ -48,10 +48,10 @@ import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.GenericFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
-import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.tryOrNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.summary.toSummary
+import com.dashlane.vault.summary.toSummaryOrNull
 import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharedFlow
@@ -237,7 +237,7 @@ class SharingDataProviderImpl @Inject constructor(
 
     override fun getSummaryObject(itemId: String) =
         sharingXmlConverter.fromXml(identifier = itemId, xml = sharingDao.loadItemContentExtraDataLegacy(itemId))
-            ?.vaultItem?.toSummary<SummaryObject>()
+            ?.vaultItem?.toSummaryOrNull<SummaryObject>()
 
     override suspend fun acceptItemGroupInvite(
         itemGroup: ItemGroup,

@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.dashlane.R
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 import java.time.Instant
@@ -22,6 +23,7 @@ class AttachmentViewHolder(val v: View) : EfficientViewHolder<AttachmentItem>(v)
 
     private val selectedIcon = findViewByIdEfficient<View>(R.id.attachment_item_selected)!!
     private val icon = findViewByIdEfficient<View>(R.id.attachment_item_thumbnail)!!
+    private val downloadedIcon = findViewByIdEfficient<View>(R.id.attachment_item_downloaded_icon)!!
     private val name = findViewByIdEfficient<TextView>(R.id.attachment_item_name)!!
     private val description = findViewByIdEfficient<TextView>(R.id.attachment_item_description)!!
     private val progressBar = findViewByIdEfficient<ProgressBar>(R.id.attachment_item_progress)!!
@@ -29,7 +31,7 @@ class AttachmentViewHolder(val v: View) : EfficientViewHolder<AttachmentItem>(v)
     override fun updateView(context: Context, item: AttachmentItem?) {
         item ?: return
 
-        name.text = item.filename
+        name.text = item.attachment.filename
         if (item.downloadState == AttachmentItem.DownloadState.DOWNLOADING) {
             progressBar.visibility = View.VISIBLE
             progressBar.progress = item.downloadProgress
@@ -37,17 +39,17 @@ class AttachmentViewHolder(val v: View) : EfficientViewHolder<AttachmentItem>(v)
         } else {
             progressBar.visibility = View.GONE
 
-            val userModificationDatetime = item.userModificationDatetime
+            val userModificationDatetime = item.attachment.userModificationDatetime
             if (userModificationDatetime != null) {
                 description.text = context.getString(
                     R.string.attachment_item_description_date_size,
                     DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
                         .format(Instant.ofEpochSecond(userModificationDatetime).atZone(ZoneId.systemDefault())),
-                    Formatter.formatShortFileSize(context, item.localSize!!)
+                    Formatter.formatShortFileSize(context, item.attachment.localSize!!)
                 )
             }
         }
-
+        downloadedIcon.isVisible = item.downloadState == AttachmentItem.DownloadState.DOWNLOADED
         if (item.selected) {
             v.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.item_highlighted_background_tint))
             icon.visibility = View.INVISIBLE

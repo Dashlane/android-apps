@@ -3,7 +3,6 @@ package com.dashlane.login.pages.secrettransfer.universal.intro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.user.UserSecuritySettings
 import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
@@ -13,6 +12,13 @@ import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.encodeUtf8ToByteArray
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.Initial
+import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.LoadingAccount
+import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.LoadingPassphrase
+import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.PassphraseVerification
+import com.dashlane.login.root.LoginRepository
+import com.dashlane.mvvm.MutableViewStateFlow
+import com.dashlane.mvvm.ViewStateFlow
 import com.dashlane.nitro.cryptography.sodium.SodiumCryptography
 import com.dashlane.nitro.cryptography.sodium.keys.ClientKeyPair
 import com.dashlane.passphrase.generator.PassphraseGenerator
@@ -26,25 +32,26 @@ import com.dashlane.server.api.endpoints.secrettransfer.StartReceiverKeyExchange
 import com.dashlane.server.api.endpoints.secrettransfer.StartTransferService
 import com.dashlane.server.api.endpoints.secrettransfer.TransferType
 import com.dashlane.server.api.exceptions.DashlaneApiHttp504Exception
+import com.dashlane.user.UserSecuritySettings
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.jetbrains.annotations.VisibleForTesting
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.annotations.VisibleForTesting
 
 @HiltViewModel
 class UniversalIntroViewModel @Inject constructor(
+    private val loginRepository: LoginRepository,
     private val requestTransferService: RequestTransferService,
     private val startReceiverKeyExchangeService: StartReceiverKeyExchangeService,
     private val completeKeyExchangeService: CompleteKeyExchangeService,
@@ -59,24 +66,23 @@ class UniversalIntroViewModel @Inject constructor(
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val stateFlow = MutableStateFlow<UniversalIntroState>(UniversalIntroState.Initial(UniversalIntroData()))
+    private val _stateFlow =
+        MutableViewStateFlow<UniversalIntroState.View, UniversalIntroState.SideEffect>(Initial)
 
-    val uiState = stateFlow.asStateFlow()
+    val stateFlow: ViewStateFlow<UniversalIntroState.View, UniversalIntroState.SideEffect> = _stateFlow
 
     fun viewStarted(email: String?) {
-        if (stateFlow.value !is UniversalIntroState.Success && email != null) secretTransfer(email)
-    }
-
-    fun viewNavigated() {
-        viewModelScope.launch { stateFlow.emit(UniversalIntroState.Initial(stateFlow.value.data)) }
+        if (email != null) {
+            secretTransfer(email)
+        }
     }
 
     fun helpClicked() {
-        viewModelScope.launch { stateFlow.emit(UniversalIntroState.GoToHelp(stateFlow.value.data)) }
+        viewModelScope.launch { _stateFlow.send(UniversalIntroState.SideEffect.GoToHelp) }
     }
 
     fun onBackPressed() {
-        viewModelScope.launch { stateFlow.emit(UniversalIntroState.Cancel(stateFlow.value.data)) }
+        viewModelScope.launch { _stateFlow.send(UniversalIntroState.SideEffect.Cancel) }
     }
 
     @VisibleForTesting
@@ -89,7 +95,7 @@ class UniversalIntroViewModel @Inject constructor(
             val senderPublicKey = startReceiverKeyExchange(publicKey = keyPair.publicKey, transferId = transferId)
 
             
-            emit(UniversalIntroState.LoadingPassphrase(stateFlow.value.data))
+            emit(LoadingPassphrase)
 
             
             coroutineScope {
@@ -113,13 +119,13 @@ class UniversalIntroViewModel @Inject constructor(
             )
 
             secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER_SECURITY_CHALLENGE)
-            emit(UniversalIntroState.PassphraseVerification(stateFlow.value.data.copy(passphrase = passphrase)))
+            emit(PassphraseVerification(passphrase = passphrase))
 
             
             val startTransferData = startTransfer(transferId)
 
             
-            emit(UniversalIntroState.LoadingAccount(stateFlow.value.data))
+            emit(LoadingAccount)
 
             val secretTransferPayload = decryptPayload(
                 email = email,
@@ -135,7 +141,9 @@ class UniversalIntroViewModel @Inject constructor(
                 securityFeatures = emptySet(),
                 remoteKeyType = RemoteKey.Type.MASTER_PASSWORD
             )
-            emit(UniversalIntroState.Success(stateFlow.value.data.copy(email = email), secretTransferPayload, registeredUserDevice))
+            loginRepository.updateRegisteredUserDevice(registeredUserDevice = registeredUserDevice)
+            _stateFlow.send(UniversalIntroState.SideEffect.Success(secretTransferPayload = secretTransferPayload))
+            emit(LoadingAccount)
         }
             .flowOn(ioDispatcher)
             .catch {
@@ -143,9 +151,11 @@ class UniversalIntroViewModel @Inject constructor(
                     is DashlaneApiHttp504Exception -> UniversalIntroError.Timeout
                     else -> UniversalIntroError.Generic
                 }
-                emit(UniversalIntroState.Error(stateFlow.value.data.copy(email = email), error = error))
+                emit(UniversalIntroState.View.Error(error = error))
             }
-            .onEach { state -> stateFlow.emit(state) }
+            .onEach { state ->
+                _stateFlow.update { state }
+            }
             .launchIn(viewModelScope)
     }
 

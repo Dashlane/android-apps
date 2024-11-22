@@ -83,7 +83,7 @@ sealed class Passphrase {
 
 @Preview
 @Composable
-fun PassphraseLayoutReceiverPreview() {
+private fun PassphraseLayoutReceiverPreview() {
     DashlanePreview {
         PassphraseLayout(
             passphrase = listOf(
@@ -101,7 +101,7 @@ fun PassphraseLayoutReceiverPreview() {
 
 @Preview
 @Composable
-fun PassphraseLayoutSenderPreview() {
+private fun PassphraseLayoutSenderPreview() {
     DashlanePreview {
         PassphraseLayout(
             passphrase = listOf(

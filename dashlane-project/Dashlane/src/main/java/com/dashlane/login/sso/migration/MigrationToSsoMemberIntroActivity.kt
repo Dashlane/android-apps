@@ -50,7 +50,6 @@ class MigrationToSsoMemberIntroActivity : DashlaneActivity() {
         presenter = Presenter(
             logoutHelper = changeMasterPasswordLogoutHelper,
             migrationToSsoMemberIntent = migrationToSsoMemberIntent,
-            sessionRestorer = sessionRestorer
         ).apply { setView(viewProxy) }
     }
 
@@ -63,13 +62,8 @@ class MigrationToSsoMemberIntroActivity : DashlaneActivity() {
     private class Presenter(
         private val logoutHelper: ChangeMasterPasswordLogoutHelper,
         private val migrationToSsoMemberIntent: Intent,
-        sessionRestorer: SessionRestorer
     ) : BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
         IntroScreenContract.Presenter {
-
-        init {
-            sessionRestorer.restoredSessionMigrationToSsoMemberInfo = null
-        }
 
         override fun onViewChanged() {
             view.run {

@@ -28,6 +28,18 @@
             app:uri="dashlane:///personal-plan" />
     </fragment>
     <fragment
+        android:id="@+id/nav_account_status"
+        android:name="com.dashlane.ui.screens.fragments.account.AccountStatusFragment"
+        android:label="@string/account_status_settings_title">
+        <action
+            android:id="@+id/change_contact_email"
+            app:destination="@id/nav_change_contact_email" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_change_contact_email"
+        android:name="com.dashlane.ui.screens.fragments.account.ChangeContactEmailFragment"
+        android:label="@string/account_status_account_verification" />
+    <fragment
         android:id="@+id/nav_notif_center"
         android:name="com.dashlane.notificationcenter.NotificationCenterFragment"
         android:label="@string/talk_to_me_toolbar_title"
@@ -70,7 +82,7 @@
         android:id="@+id/nav_action_center_section_details"
         android:name="com.dashlane.notificationcenter.details.NotificationCenterSectionDetailsFragment"
         android:label="@string/talk_to_me_toolbar_title"
-        tools:layout="@layout/activity_notification_center_details">
+        tools:layout="@layout/fragment_notification_center_details">
         <argument
             android:name="extra_section"
             app:argType="string" />
@@ -171,7 +183,7 @@
         <argument
             android:name="spaceId"
             app:argType="string"
-            app:nullable="false" />
+            app:nullable="true" />
         <argument
             android:name="isLimited"
             app:argType="boolean"
@@ -204,10 +216,6 @@
         android:id="@+id/nav_in_app_login"
         android:name="com.dashlane.autofill.onboarding.OnboardingInAppLoginActivity"
         tools:layout="@layout/activity_onboarding_in_app_login">
-        <argument
-            android:name="extra_onboarding_type"
-            android:defaultValue="AUTO_FILL_API"
-            app:argType="com.dashlane.autofill.onboarding.OnboardingType" />
         <deepLink
             android:id="@+id/deeplink_in_app_login"
             app:uri="dashlane:///in-app-login" />
@@ -380,16 +388,11 @@
             app:destination="@id/nav_dashlane_labs" />
         <action
             android:id="@+id/settings_to_guided_web_csv_export"
-            app:destination="@id/guided_web_csv_export" />
+            app:destination="@id/nav_guided_web_csv_export" />
+        <action
+            android:id="@+id/settings_to_account_status"
+            app:destination="@id/nav_account_status" />
     </fragment>
-    <activity
-        android:id="@+id/nav_download_authenticator_app"
-        android:name="com.dashlane.activatetotp.DownloadAuthenticatorAppIntroActivity"
-        tools:layout="@layout/activity_intro">
-        <deepLink
-            android:id="@+id/deeplink_download_authenticator"
-            app:uri="dashlane:///download_authenticator" />
-    </activity>
     <fragment
         android:id="@+id/nav_vpn_third_party"
         android:name="com.dashlane.vpn.thirdparty.VpnThirdPartyFragment"
@@ -580,9 +583,6 @@
             app:argType="com.dashlane.navigation.paywall.PaywallIntroType" />
     </activity>
     <activity
-        android:id="@+id/nav_authenticator_sunset"
-        android:name="com.dashlane.authenticator.AuthenticatorSunsetActivity"/>
-    <activity
         android:id="@+id/nav_guided_password_change"
         android:name="com.dashlane.guidedpasswordchange.OnboardingGuidedPasswordChangeActivity">
         <argument
@@ -626,10 +626,9 @@
             app:argType="string"
             app:nullable="true" />
         <argument
-            android:name="startDestination"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
+            android:name="showIntro"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <argument
             android:name="userCanExitFlow"
             android:defaultValue="true"
@@ -648,7 +647,7 @@
             app:argType="string" />
     </activity>
     <activity
-        android:id="@+id/guided_web_csv_export"
+        android:id="@+id/nav_guided_web_csv_export"
         android:name="com.dashlane.csvexport.intro.CsvExportFromWebActivity"
         android:label="@string/csv_export_on_web_app_bar_title" />
     <dialog
@@ -1009,13 +1008,6 @@
         app:popEnterAnim="@anim/fadein_activity"
         app:popExitAnim="@anim/fadeout_activity" />
     <action
-        android:id="@+id/go_to_authenticator_sunset"
-        app:destination="@id/nav_authenticator_sunset"
-        app:enterAnim="@anim/fadein_activity"
-        app:exitAnim="@anim/fadeout_activity"
-        app:popEnterAnim="@anim/fadein_activity"
-        app:popExitAnim="@anim/fadeout_activity" />
-    <action
         android:id="@+id/go_to_breach_alert_detail"
         app:destination="@id/nav_breach_alert_detail"
         app:enterAnim="@anim/nav_default_enter_anim"
@@ -1030,7 +1022,7 @@
         app:popEnterAnim="@anim/fadein_activity"
         app:popExitAnim="@anim/fadeout_activity" />
     <action
-        android:id="@+id/nav_item_edit_view_to_follow_up_notification_discovery_screen"
+        android:id="@+id/go_item_edit_view_to_follow_up_notification_discovery_screen"
         app:destination="@id/nav_follow_up_notification_discovery_screen"
         app:enterAnim="@anim/fadein_activity"
         app:exitAnim="@anim/fadeout_activity"
@@ -1075,7 +1067,7 @@
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim" />
     <action
-        android:id="@+id/item_edit_view_to_collection_selector"
+        android:id="@+id/go_item_edit_view_to_collection_selector"
         app:destination="@id/nav_collection_selector"
         app:enterAnim="@anim/fadein_activity"
         app:exitAnim="@anim/fadeout_activity"

@@ -3,8 +3,6 @@ package com.dashlane.crashreport.reporter
 import android.content.Context
 import com.dashlane.BuildConfig
 import com.dashlane.crashreport.CrashReporterManager
-import com.dashlane.featureflipping.FeatureFlip
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.PackageUtilities.getInstallerOrigin
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
@@ -13,11 +11,7 @@ import io.sentry.protocol.User
 class SentryCrashReporter(
     context: Context,
     crashDeviceId: String,
-    private val userFeaturesChecker: UserFeaturesChecker
 ) : CrashReporterManager.Client {
-
-    private val isNonFatalEnabled: Boolean
-        get() = userFeaturesChecker.has(FeatureFlip.SENTRY_NON_FATAL)
 
     init {
         SentryAndroid.init(context) { options ->
@@ -36,11 +30,7 @@ class SentryCrashReporter(
         Sentry.setUser(user)
     }
 
-    override fun logException(throwable: Throwable) {
-        if (isNonFatalEnabled) {
-            Sentry.captureException(throwable)
-        }
-    }
+    override fun logException(throwable: Throwable) = Unit
 
     override fun log(traceWithDate: String, rawTrace: String) {
         Sentry.addBreadcrumb(rawTrace)

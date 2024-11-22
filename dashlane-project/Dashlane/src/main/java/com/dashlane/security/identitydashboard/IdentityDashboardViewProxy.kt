@@ -20,10 +20,6 @@ class IdentityDashboardViewProxy(view: View) :
         linearLayoutManager.findFirstCompletelyVisibleItemPosition()
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.adapter = adapter
-
-        adapter.setOnItemClickListener { _, _, item, _ ->
-            item?.let { presenter.onClick(item) }
-        }
     }
 
     override fun setItems(items: List<IdentityDashboardItem>) {

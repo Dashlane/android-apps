@@ -11,7 +11,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SharedVaultItemLite(
     val uid: String,
-    val anonymousId: String,
     val xmlObjectName: String,
     val website: String?,
     val title: String,
@@ -19,7 +18,6 @@ data class SharedVaultItemLite(
 ) : Parcelable {
     constructor(summaryObject: SummaryObject) : this(
         summaryObject.id,
-        summaryObject.anonymousId ?: "",
         summaryObject.syncObjectType.xmlObjectName,
         summaryObject.let {
             if (it is SummaryObject.Authentifiant) {

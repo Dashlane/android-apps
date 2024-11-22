@@ -1,5 +1,6 @@
 package com.dashlane.login.dagger
 
+import com.dashlane.authentication.hilt.LoginAuthModule
 import com.dashlane.createaccount.CreateAccountAuthModule
 import dagger.Module
 import dagger.hilt.InstallIn

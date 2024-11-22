@@ -1,36 +1,29 @@
 package com.dashlane.securearchive
 
-import android.Manifest
 import android.app.Activity
 import android.app.DownloadManager
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.hermes.LogRepository
 import com.dashlane.navigation.Navigator
-import com.dashlane.permission.PermissionsManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.SnackbarUtils
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import java.time.Duration
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @Singleton
 class BackupCoordinatorImpl @Inject constructor(
     private val secureArchiveManager: SecureArchiveManager,
     private val logRepository: LogRepository,
     private val navigator: Navigator,
-    private val permissionsManager: PermissionsManager
 ) : BackupCoordinator {
     val activityLifecycleListener = object : AbstractActivityLifecycleListener() {
         override fun onActivityResumed(activity: Activity) {
             lastActivityResumed = activity as? DashlaneActivity
             lastActivityResumed?.let {
-                if (isStoragePermissionDeniedShown) showStoragePermissionDenied(it)
                 withActivityBlock?.invoke(it)
                 withActivityBlock = null
             }
@@ -52,15 +45,10 @@ class BackupCoordinatorImpl @Inject constructor(
     private var lastActivityResumed: DashlaneActivity? = null
     private var withActivityBlock: ((DashlaneActivity) -> Unit)? = null
 
-    
-    private var isStoragePermissionDeniedShown = false
-
     @Suppress("DEPRECATION")
     override fun startExport() {
         withActivity { activity ->
             activity.lifecycleScope.launch {
-                if (!requestStoragePermissionIfNeeded(activity)) return@launch
-
                 activity.startActivityForResult(
                     BackupActivityIntents.newExportIntent(activity),
                     REQUEST_CODE_EXPORT
@@ -199,44 +187,6 @@ class BackupCoordinatorImpl @Inject constructor(
                     activity.startActivityForResult(statedWith, requestCode)
                 }
             }
-        }
-    }
-
-    private suspend fun requestStoragePermissionIfNeeded(activity: DashlaneActivity): Boolean =
-        suspendCoroutine { cont ->
-            if (permissionsManager.isAllowedToWriteToPublicFolder()) {
-                cont.resume(true)
-                return@suspendCoroutine
-            }
-
-            fun onDenied() {
-                isStoragePermissionDeniedShown = true
-                showStoragePermissionDenied(activity)
-                cont.resume(false)
-            }
-
-            permissionsManager.requestPermission(
-                activity,
-                PermissionsManager.PERMISSION_SDCARD,
-                object : PermissionsManager.OnPermissionResponseHandler {
-                    override fun onApproval() = cont.resume(true)
-
-                    override fun onAlwaysDisapproved() = onDenied()
-
-                    override fun onDisapproval() = onDenied()
-                },
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-        }
-
-    @Suppress("WrongConstant")
-    private fun showStoragePermissionDenied(activity: DashlaneActivity) {
-        SnackbarUtils.showPermissionSnackbar(
-            activity,
-            SnackbarUtils.getStoragePermissionText(activity),
-            Snackbar.LENGTH_INDEFINITE
-        ) {
-            isStoragePermissionDeniedShown = false
         }
     }
 

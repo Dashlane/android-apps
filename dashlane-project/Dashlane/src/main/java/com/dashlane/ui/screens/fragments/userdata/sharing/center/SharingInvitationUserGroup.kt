@@ -57,7 +57,7 @@ class SharingInvitationUserGroup(
 
             val pendingInvite = item.groupInvite
             val userGroup = pendingInvite.userGroup
-            viewBinding.sharingPendingInviteIconRound.apply {
+            viewBinding.sharingPendingInviteThumbnail.apply {
                 thumbnailType = ThumbnailViewType.ICON.value
                 iconRes = R.drawable.ic_group_outlined
                 isVisible = true

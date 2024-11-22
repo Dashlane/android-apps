@@ -18,7 +18,6 @@ import com.dashlane.preference.ConstantsPrefs.Companion.FOLLOW_UP_NOTIFICATION_S
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_AUTOMATIC_2FA_TOKEN_COPY
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_FINISHED_M2D
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_SEEN_KEYBOARD_ON_BOARDING_SUGGESTION
-import com.dashlane.preference.ConstantsPrefs.Companion.TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.IN_APP_REVIEW_NEXT_SCHEDULE_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.IN_APP_REVIEW_PREVIOUS_VERSION_CODE
 import com.dashlane.preference.ConstantsPrefs.Companion.IS_ANTI_PHISHING_ENABLED
@@ -31,16 +30,17 @@ import com.dashlane.preference.ConstantsPrefs.Companion.MP_RESET_RECOVERY_STARTE
 import com.dashlane.preference.ConstantsPrefs.Companion.PASSWORD_RESTORE_INFO_BOX_CLOSED
 import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_MODEL_LAST_CHECK_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_WARNING_IGNORED_WEBSITES
+import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_LENGTH
 import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_ON
 import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_TRY_COUNT
 import com.dashlane.preference.ConstantsPrefs.Companion.PUBLIC_USER_ID
-import com.dashlane.preference.ConstantsPrefs.Companion.REGISTERED_AUTHENTICATOR_PUSH_ID
 import com.dashlane.preference.ConstantsPrefs.Companion.REQUEST_DISPLAY_KEYBOARD_ANNOUNCEMENT
 import com.dashlane.preference.ConstantsPrefs.Companion.RSA_PUBLIC_KEY
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_2FA_DISABLED
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_ON_LOGIN_PAYWALL
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_SHOULD_SYNC
 import com.dashlane.preference.ConstantsPrefs.Companion.SUNSET_BANNER_DISPLAYED
+import com.dashlane.preference.ConstantsPrefs.Companion.TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.UKI_TEMPORARY_MONOBUCKET
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_ACTIVITY_UPDATE_DATE
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_NUMBER_DEVICES
@@ -50,21 +50,36 @@ import com.dashlane.preference.ConstantsPrefs.Companion.USE_INLINE_AUTOFILL_SETT
 import com.dashlane.preference.ConstantsPrefs.Companion.VAULT_REPORT_LATEST_TRIGGER_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.VPN_THIRD_PARTY_GET_STARTED_DISPLAYED
 import com.dashlane.preference.ConstantsPrefs.Companion.VPN_THIRD_PARTY_INFOBOX_DISMISSED
-import com.dashlane.session.SessionManager
 import com.dashlane.user.Username
 import com.dashlane.util.MD5Hash
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
+import javax.inject.Inject
 
-abstract class UserPreferencesManager(
-    private val context: Context,
-    val sessionManager: SessionManager? = null
-) : DashlanePreferencesManager() {
+class PreferencesManager @Inject constructor(@ApplicationContext private val context: Context) {
+
+    private val userPreferencesManagers: MutableMap<String, UserPreferencesManager> = mutableMapOf()
+
+    operator fun get(username: Username?): UserPreferencesManager = get(username?.email)
+    operator fun get(username: String?): UserPreferencesManager {
+        return username?.let {
+            userPreferencesManagers.getOrElse(username) {
+                UserPreferencesManager.CustomUser(context, username).also { userPreferencesManagers[username] = it }
+            }
+        } ?: run {
+            UserPreferencesManager.CustomUser(context, null)
+        }
+    }
+}
+
+abstract class UserPreferencesManager : DashlanePreferencesManager() {
 
     var accessKey: String? by stringPreference(ACCESS_KEY)
     var accountType: String? by stringPreference(ACCOUNT_TYPE)
     var publicKey: String? by stringPreference(RSA_PUBLIC_KEY)
     var isPinCodeOn by booleanPreference(PINCODE_ON)
     var pinCodeTryCount by intPreference(PINCODE_TRY_COUNT)
+    var pinCodeLength by intPreference(PINCODE_LENGTH, defaultValue = 4)
 
     var ukiRequiresMonobucketConfirmation by booleanPreference(UKI_TEMPORARY_MONOBUCKET)
     var userSettingsShouldSync by booleanPreference(SETTINGS_SHOULD_SYNC)
@@ -101,12 +116,6 @@ abstract class UserPreferencesManager(
     var hasAutomatic2faTokenCopy by booleanPreference(HAS_AUTOMATIC_2FA_TOKEN_COPY, true)
 
     var isAntiPhishingEnable by booleanPreference(IS_ANTI_PHISHING_ENABLED, true)
-
-    
-    var registeredAuthenticatorPushId by stringPreference(REGISTERED_AUTHENTICATOR_PUSH_ID)
-
-    var authenticatorInvalidatedBiometric by booleanPreference(ConstantsPrefs.AUTHENTICATOR_INVALIDATED_BIOMETRIC)
-    var authenticatorEnrolledBiometric by booleanPreference(ConstantsPrefs.AUTHENTICATOR_ENROLLED_BIOMETRIC)
 
     var lastShownAvailableUpdateDate: Instant
         get() = Instant.ofEpochSecond(getLong(LAST_SHOWN_AVAILABLE_UPDATE_DATE, 0))
@@ -246,32 +255,8 @@ abstract class UserPreferencesManager(
         return getList(PHISHING_WARNING_IGNORED_WEBSITES) ?: emptyList()
     }
 
-    fun preferencesFor(username: Username): UserPreferencesManager =
-        preferencesFor(username.email)
-
-    fun preferencesFor(username: String): UserPreferencesManager =
-        CustomUser(context, username)
-
-    fun preferencesForCurrentUser(): UserPreferencesManager? =
-        sessionManager?.session?.let { preferencesFor(it.username) }
-
-    class UserLoggedIn(
-        private val context: Context,
-        private val manager: SessionManager
-    ) : UserPreferencesManager(context, manager) {
-
-        override val sharedPreferences: SharedPreferences?
-            get() = manager.session?.let { getSharedPreferences(context, it.username.email) }
-    }
-
-    private class CustomUser(context: Context, username: String) : UserPreferencesManager(context) {
-
-        override val sharedPreferences: SharedPreferences = getSharedPreferences(context, username)
-    }
-
-    companion object {
-        const val PAIR_SEPARATOR = "$1$" 
-        private fun getSharedPreferences(context: Context, username: String): SharedPreferences =
-            context.getSharedPreferences(MD5Hash.hash(username), Context.MODE_PRIVATE)
+    class CustomUser(context: Context, username: String?) : UserPreferencesManager() {
+        override val sharedPreferences: SharedPreferences? =
+            username?.let { context.getSharedPreferences(MD5Hash.hash(username), Context.MODE_PRIVATE) }
     }
 }

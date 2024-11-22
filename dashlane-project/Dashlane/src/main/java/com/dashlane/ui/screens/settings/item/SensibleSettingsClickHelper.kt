@@ -1,16 +1,15 @@
 package com.dashlane.ui.screens.settings.item
 
 import android.content.Context
-import com.dashlane.R
-import com.dashlane.lock.LockHelper
-import com.dashlane.lock.UnlockEvent
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPrompt
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class SensibleSettingsClickHelper @Inject constructor(
     @ApplicationCoroutineScope
@@ -19,12 +18,9 @@ class SensibleSettingsClickHelper @Inject constructor(
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val lockManager: LockManager
 ) {
-
-    private var requireMasterPassword = true
-
     fun perform(
         context: Context,
-        origin: UnlockEvent.Reason.WithCode.Origin = UnlockEvent.Reason.WithCode.Origin.EDIT_SETTINGS,
+        origin: LockEvent.Unlock.Reason.WithCode.Origin = LockEvent.Unlock.Reason.WithCode.Origin.EDIT_SETTINGS,
         masterPasswordRecommended: Boolean = true,
         forceMasterPassword: Boolean = false,
         onUnlock: () -> Unit
@@ -37,24 +33,23 @@ class SensibleSettingsClickHelper @Inject constructor(
     }
 
     private fun isMasterPasswordNecessary(masterPasswordRecommended: Boolean) =
-        (masterPasswordRecommended && requireMasterPassword && !lockManager.hasEnteredMP)
+        (masterPasswordRecommended && !lockManager.hasEnteredMP)
 
     private fun performActionAfterUnlock(
         context: Context,
-        origin: UnlockEvent.Reason.WithCode.Origin,
+        origin: LockEvent.Unlock.Reason.WithCode.Origin,
         onUnlock: () -> Unit
     ) {
         applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             lockManager.showAndWaitLockActivityForReason(
-                context,
-                UnlockEvent.Reason.WithCode(UNLOCK_EVENT_CODE, origin),
-                LockHelper.PROMPT_LOCK_FOR_SETTINGS,
-                context.getString(R.string.please_enter_master_password_to_edit_settings)
-            )?.takeIf {
-                val reason = it.reason
-                it.isSuccess() && reason is UnlockEvent.Reason.WithCode && reason.requestCode == UNLOCK_EVENT_CODE
+                context = context,
+                reason = LockEvent.Unlock.Reason.WithCode(UNLOCK_EVENT_CODE, origin),
+                lockPrompt = LockPrompt.ForSettings,
+            ).takeIf { lockEvent ->
+                lockEvent is LockEvent.Unlock &&
+                    lockEvent.reason is LockEvent.Unlock.Reason.WithCode &&
+                    (lockEvent.reason as LockEvent.Unlock.Reason.WithCode).requestCode == UNLOCK_EVENT_CODE
             }?.let {
-                requireMasterPassword = false
                 onUnlock.invoke()
             }
         }

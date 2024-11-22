@@ -4,6 +4,6 @@
         <activity
             android:name="com.dashlane.guidedpasswordchange.OnboardingGuidedPasswordChangeActivity"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
     </application>
 </manifest>

@@ -1,7 +1,6 @@
 package com.dashlane.autofill.ui
 
 import android.content.Context
-import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.formdetector.AutoFillFormType
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
@@ -10,6 +9,9 @@ import com.dashlane.autofill.model.CreditCardItemToFill
 import com.dashlane.autofill.model.ItemToFill
 import com.dashlane.autofill.totp.AutofillTotpCopyService
 import com.dashlane.followupnotification.FollowUpNotificationEntryPoint
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,7 +23,8 @@ interface AutofillPerformedCallback {
 
 class AutofillPerformedCallbackImpl @Inject constructor(
     @ApplicationContext val context: Context,
-    private val userPreferencesAccess: AutofillAnalyzerDef.IUserPreferencesAccess,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     private val totpRepository: AutofillTotpCopyService
 ) : AutofillPerformedCallback {
 
@@ -30,26 +33,29 @@ class AutofillPerformedCallbackImpl @Inject constructor(
             is AuthentifiantItemToFill -> {
                 
                 if (summary?.formType == AutoFillFormType.CREDENTIAL) {
-                    onAuthentifiantFilled(itemToFill.syncObject)
+                    onAuthentifiantFilled(itemToFill.vaultItem)
                 }
             }
-            is CreditCardItemToFill -> onCreditCardFilled(itemToFill.syncObject, summary)
+            is CreditCardItemToFill -> onCreditCardFilled(itemToFill.vaultItem, summary)
             else -> {
                 
             }
         }
     }
 
-    private fun onAuthentifiantFilled(authentifiant: SyncObject.Authentifiant?) {
-        if (authentifiant == null || !userPreferencesAccess.hasAutomatic2faTokenCopy()) return
+    private fun onAuthentifiantFilled(authentifiant: VaultItem<SyncObject.Authentifiant>?) {
+        if (authentifiant == null || !preferencesManager[sessionManager.session?.username].hasAutomatic2faTokenCopy) return
 
         totpRepository.copyTotpToClipboard(authentifiant)
     }
 
-    private fun onCreditCardFilled(creditCardSyncObject: SyncObject.PaymentCreditCard?, summary: AutoFillHintSummary?) {
-        if (creditCardSyncObject != null && summary != null && isCreditCardWithMissingField(summary)) {
+    private fun onCreditCardFilled(
+        creditCardVaultItem: VaultItem<SyncObject.PaymentCreditCard>?,
+        summary: AutoFillHintSummary?
+    ) {
+        if (creditCardVaultItem != null && summary != null && isCreditCardWithMissingField(summary)) {
             FollowUpNotificationEntryPoint(context).followUpNotificationApiProvider.getFollowUpNotificationApi()
-                .startFollowUpNotification(creditCardSyncObject.toSummary(), null)
+                .startFollowUpNotification(creditCardVaultItem.toSummary(), null)
         }
     }
 

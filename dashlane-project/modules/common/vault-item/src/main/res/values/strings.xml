@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="and_accessibility_vault_item_list_passkey">passkey item</string>
+    
+    <string name="and_accessibility_vault_item_list_locked">locked item</string>
+    
+    <string name="and_accessibility_vault_item_list_shared">shared item</string>
+    
+    <string name="and_accessibility_vault_item_list_has_attachment">attachment</string>
+    <string name="and_accessibility_copy_password">Copy password</string>
+    <string name="and_accessibility_quick_action">Open quick action menu</string>
+</resources>

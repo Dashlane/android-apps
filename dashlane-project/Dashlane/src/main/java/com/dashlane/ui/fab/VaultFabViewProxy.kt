@@ -2,19 +2,23 @@ package com.dashlane.ui.fab
 
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import com.dashlane.R
+import com.dashlane.feature.home.data.Filter
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseSecrets
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.navigation.Navigator
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.fab.FabViewUtil.LastMenuItemHiddenCallBack
 import com.dashlane.ui.fab.FabViewUtil.hideFabMenuItems
-import com.dashlane.home.vaultlist.Filter
 
 class VaultFabViewProxy(
     rootView: View,
     teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
     navigator: Navigator,
     private val passwordLimiter: PasswordLimiter,
+    private val featuresChecker: UserFeaturesChecker
 ) :
     FabViewProxy(rootView) {
     private val fabMenuItemNavigator: VaultFabMenuItemNavigator =
@@ -36,6 +40,7 @@ class VaultFabViewProxy(
             Filter.FILTER_PAYMENT -> R.string.vault_fab_add_payment
             Filter.FILTER_PERSONAL_INFO -> R.string.vault_fab_add_personal_info
             Filter.FILTER_ID -> R.string.vault_fab_add_id
+            Filter.FILTER_SECRET -> R.string.vault_fab_add_secret
         }
 
         
@@ -60,13 +65,16 @@ class VaultFabViewProxy(
             Filter.FILTER_PAYMENT -> toggleFABMenu { showMenuPayment() }
             Filter.FILTER_PERSONAL_INFO -> toggleFABMenu { showMenuPersonalInfo() }
             Filter.FILTER_ID -> toggleFABMenu { showMenuIds() }
+            Filter.FILTER_SECRET -> fabMenuItemNavigator.addSecret()
         }
     }
 
+    @Suppress("LongMethod")
     private fun configureView() {
         fabMenuHolder.removeAllViews()
         val fabMenu = LayoutInflater.from(context)
             .inflate(R.layout.fab_menu_list_recent_item, fabMenuHolder, false)
+        val fabMenuItemsHolder = fabMenu.findViewById<ViewGroup>(R.id.fab_menu_items_holder)
         fabMenuHolder.addView(fabMenu)
         val rootView = getRootView<View>()
         val buttonL1AddPassword =
@@ -81,7 +89,7 @@ class VaultFabViewProxy(
         buttonL1AddPersonalInfo?.setOnClickListener { transitionMenuPersonalInfo() }
         val buttonL1AddIDs = rootView.findViewById<View>(R.id.fab_menu_item_ids)
         buttonL1AddIDs?.setOnClickListener { transitionMenuIDs() }
-        fabMenuItemNavigator.init()
+
         buttonL1AddPassword.configureAsFab(
             titleRes = R.string.menu_v2_password_button,
             titleDescription = R.string.and_accessibility_add_password,
@@ -108,6 +116,24 @@ class VaultFabViewProxy(
             R.string.and_accessibility_add_ids,
             R.drawable.ic_fab_menu_id
         )
+
+        if (featuresChecker.canUseSecrets()) {
+            val buttonSecret = LayoutInflater.from(context)
+                .inflate(
+                    R.layout.include_fab_menu_item,
+                    fabMenuItemsHolder,
+                    false
+                )
+            buttonSecret.id = R.id.fab_menu_item_secret
+            buttonSecret.configureAsFab(
+                R.string.menu_v2_secret_button,
+                R.string.and_accessibility_add_secret,
+                R.drawable.ic_item_secret_outlined
+            )
+
+            fabMenuItemsHolder.addView(buttonSecret)
+        }
+        fabMenuItemNavigator.init()
     }
 
     private fun showMenuPayment() {
@@ -176,7 +202,6 @@ class VaultFabViewProxy(
         val rootView = getRootView<View>()
         val buttonAddCreditCardView =
             rootView.findViewById<View>(R.id.fab_menu_item_credit_card)
-        val buttonAddPaypalView = rootView.findViewById<View>(R.id.fab_menu_item_paypal)
         val buttonAddBankAccountView =
             rootView.findViewById<View>(R.id.fab_menu_item_bank_account)
         fabMenuItemNavigator.init()
@@ -184,11 +209,6 @@ class VaultFabViewProxy(
             R.string.creditcard,
             R.string.and_accessibility_add_credit_card,
             R.drawable.ic_fab_menu_payments
-        )
-        buttonAddPaypalView.configureAsFab(
-            R.string.paypal,
-            R.string.and_accessibility_add_paypal,
-            R.drawable.ic_fab_menu_paypal
         )
         buttonAddBankAccountView.configureAsFab(
             R.string.bankstatement,

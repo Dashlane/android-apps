@@ -14,11 +14,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
 import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.ui.widgets.compose.GenericErrorContent
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.dashlane.ui.widgets.compose.IndeterminateLoading
 
 @Composable
 fun IntroScreen(
+    modifier: Modifier = Modifier,
     viewModel: IntroViewModel,
     registeredUserDevice: RegisteredUserDevice,
     authTicket: String?,
@@ -55,6 +56,7 @@ fun IntroScreen(
     when (uiState) {
         IntroState.Error -> {
             GenericErrorContent(
+                modifier = modifier,
                 textPrimary = stringResource(id = R.string.generic_error_retry_button),
                 textSecondary = stringResource(id = R.string.generic_error_cancel_button),
                 onClickPrimary = { viewModel.retry(registeredUserDevice) },
@@ -63,7 +65,7 @@ fun IntroScreen(
         }
         IntroState.Loading -> {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

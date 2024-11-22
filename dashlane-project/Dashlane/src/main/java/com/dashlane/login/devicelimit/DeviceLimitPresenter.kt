@@ -5,12 +5,13 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.CallToAction
 import com.dashlane.login.LoginIntents
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.premium.offer.list.view.OffersActivity
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.session.SessionManager
-import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
+import com.dashlane.premium.StoreOffersCache
 import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.util.setCurrentPageView
@@ -29,10 +30,13 @@ class DeviceLimitPresenter @Inject constructor(
     private val activity: Activity,
     private val sessionManager: SessionManager,
     private val userFeaturesChecker: UserFeaturesChecker,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val logRepository: LogRepository,
     storeOffersCache: StoreOffersCache
 ) : DeviceLimitContract.Presenter {
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     init {
         

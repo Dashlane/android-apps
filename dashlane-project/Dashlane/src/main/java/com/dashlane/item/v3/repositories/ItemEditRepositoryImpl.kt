@@ -13,6 +13,7 @@ import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.util.ItemEditValueUpdateManager
 import com.dashlane.item.v3.util.fillDefaultValue
+import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.similarpassword.SimilarPassword
@@ -36,11 +37,13 @@ import com.dashlane.vault.history.DataChangeHistoryField
 import com.dashlane.vault.history.password
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.vault.model.getAllLinkedPackageName
 import com.dashlane.vault.model.hasBeenSaved
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
+import com.dashlane.vault.summary.toSummaryOrNull
 import com.dashlane.vault.toItemType
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
@@ -74,7 +77,7 @@ class ItemEditRepositoryImpl @Inject constructor(
     private val similarPassword = SimilarPassword()
 
     @Suppress("LongMethod")
-    override suspend fun save(initialVault: VaultItem<SyncObject>, data: FormData): FormData {
+    override suspend fun save(initialVault: VaultItem<SyncObject>, data: Data<out FormData>): String {
         val isNewItem = !initialVault.hasBeenSaved
 
         
@@ -106,27 +109,22 @@ class ItemEditRepositoryImpl @Inject constructor(
             addedWebsites = updatedLinkedWebsites?.first,
             removedWebsites = updatedLinkedWebsites?.second,
             removedApps = removedLinkedApps,
-            collectionCount = data.collections.size,
+            collectionCount = data.commonData.collections?.size,
             editedFields = itemEditValueUpdateManager.editedFields.toList()
         )
 
         
-        if (data is CredentialFormData) {
-            collectionsRepository.saveCollections(itemToSave, data)
-            generatedPasswordRepository.updateGeneratedPassword(data, itemToSave)
+        if (data.commonData.collections != null) {
+            collectionsRepository.saveCollections(itemToSave, data.commonData.collections)
+        }
+
+        if (data.formData is CredentialFormData) {
+            generatedPasswordRepository.updateGeneratedPassword(data.formData, itemToSave)
         }
 
         
         dataSync.sync(Trigger.SAVE)
-        return when (data) {
-            is CredentialFormData -> data.copy(
-                id = itemToSave.uid,
-                created = data.created ?: Instant.now(),
-                updated = Instant.now(),
-                canDelete = if (isNewItem) true else data.canDelete
-            )
-            else -> data
-        }
+        return itemToSave.uid
     }
 
     override suspend fun updateOtp(vaultItem: VaultItem<SyncObject.Authentifiant>, hotp: Hotp) {
@@ -182,7 +180,7 @@ class ItemEditRepositoryImpl @Inject constructor(
 
     override fun remove2FAToken(vaultItem: VaultItem<*>, isProSpace: Boolean) {
         val syncObject = vaultItem.syncObject as? SyncObject.Authentifiant ?: return
-        val packageName = syncObject.toSummary<SummaryObject.Authentifiant>()
+        val packageName = vaultItem.toSummary<SummaryObject.Authentifiant>()
             .linkedServices.getAllLinkedPackageName()
             .firstOrNull()
         val topDomain = syncObject.url?.toUrlDomainOrNull()?.root.toString()
@@ -215,7 +213,8 @@ class ItemEditRepositoryImpl @Inject constructor(
             itemId = item.uid,
             itemType = item.syncObjectType.toItemType(),
             space = item.getTeamSpaceLog(),
-            url = (item.syncObject as? SyncObject.Authentifiant)?.urlForGoToWebsite,
+            url = item.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
+                ?.toSummaryOrNull<SummaryObject.Authentifiant>()?.urlForGoToWebsite,
             addedWebsites = addedWebsites,
             removedWebsites = removedWebsites,
             removedApps = removedApps,

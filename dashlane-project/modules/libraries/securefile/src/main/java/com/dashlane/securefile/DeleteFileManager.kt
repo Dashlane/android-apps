@@ -1,6 +1,6 @@
 package com.dashlane.securefile
 
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.securefile.extensions.getSecureFileInfo
 import com.dashlane.securefile.storage.SecureFileStorage
 import com.dashlane.server.api.endpoints.securefile.DeleteSecureFileService

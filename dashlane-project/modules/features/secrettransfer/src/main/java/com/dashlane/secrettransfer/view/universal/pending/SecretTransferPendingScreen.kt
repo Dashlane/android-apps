@@ -2,37 +2,48 @@ package com.dashlane.secrettransfer.view.universal.pending
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dashlane.design.component.BaseButtonBar
+import com.dashlane.design.component.ButtonLarge
 import com.dashlane.design.component.ButtonLayout
-import com.dashlane.design.component.ButtonMediumBar
 import com.dashlane.design.component.Dialog
+import com.dashlane.design.component.Icon
 import com.dashlane.design.component.InfoboxMedium
 import com.dashlane.design.component.Text
+import com.dashlane.design.component.cardBackground
+import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.secrettransfer.R
 import com.dashlane.secrettransfer.view.SecretTransfer
 import com.dashlane.secrettransfer.view.success.SecretTransferSuccess
 import com.dashlane.secrettransfer.view.universal.passphrase.PassphraseVerificationScreen
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.dashlane.ui.common.compose.components.LoadingScreen
-import com.dashlane.ui.widgets.compose.GenericErrorContent
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.getBaseActivity
 import kotlinx.coroutines.delay
@@ -129,44 +140,71 @@ fun SecretTransferPendingContent(
             text = stringResource(id = R.string.secret_transfer_universal_pending_screen_title),
             style = DashlaneTheme.typography.titleSectionLarge,
             color = DashlaneTheme.colors.textNeutralCatchy,
-            modifier = Modifier
-                .padding(top = 40.dp, bottom = 16.dp)
         )
         Text(
             text = stringResource(id = R.string.secret_transfer_universal_pending_screen_description),
             style = DashlaneTheme.typography.bodyStandardRegular,
             color = DashlaneTheme.colors.textNeutralCatchy,
-            modifier = Modifier
-                .padding(bottom = 16.dp)
+            modifier = Modifier.padding(top = 4.dp),
         )
         Column(
             modifier = modifier
-                .background(
-                    color = DashlaneTheme.colors.containerAgnosticNeutralSupershy,
-                    shape = RoundedCornerShape(10.dp)
-                )
                 .fillMaxWidth()
-                .padding(24.dp)
+                .padding(top = 24.dp)
+                .cardBackground()
+                .padding(16.dp)
         ) {
             Text(
-                text = secretTransfer.deviceName,
-                style = DashlaneTheme.typography.titleBlockMedium,
-                color = DashlaneTheme.colors.textNeutralCatchy,
+                text = stringResource(id = R.string.secret_transfer_universal_pending_screen_request_made_from_header),
+                style = DashlaneTheme.typography.titleSupportingSmall,
+                color = DashlaneTheme.colors.textNeutralQuiet,
+                enforceAllCaps = true,
+            )
+            Column(
                 modifier = Modifier
-                    .padding(bottom = 12.dp)
-            )
-            Text(
-                text = secretTransfer.city + " " + secretTransfer.countryCode,
-                style = DashlaneTheme.typography.titleBlockMedium,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-                modifier = Modifier
-                    .padding(bottom = 12.dp)
-            )
-            Text(
-                text = secretTransfer.formattedDate,
-                style = DashlaneTheme.typography.titleBlockMedium,
-                color = DashlaneTheme.colors.textNeutralCatchy,
-            )
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+                    .background(
+                        color = DashlaneTheme.colors.containerAgnosticNeutralStandard,
+                        shape = RoundedCornerShape(size = 8.dp),
+                    )
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(space = 8.dp),
+            ) {
+                Text(
+                    text = secretTransfer.deviceName,
+                    style = DashlaneTheme.typography.titleBlockMedium,
+                    color = DashlaneTheme.colors.textNeutralCatchy,
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(with(LocalDensity.current) { 16.sp.toDp() })
+                            .padding(end = 4.dp),
+                        token = IconTokens.geolocationOutlined,
+                        contentDescription = null,
+                    )
+                    Text(
+                        text = secretTransfer.city + " " + secretTransfer.countryCode,
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(with(LocalDensity.current) { 16.sp.toDp() })
+                            .padding(end = 4.dp),
+                        token = IconTokens.timeOutlined,
+                        contentDescription = null,
+                    )
+                    Text(
+                        text = secretTransfer.formattedDate,
+                    )
+                }
+            }
         }
 
         InfoboxMedium(
@@ -177,13 +215,24 @@ fun SecretTransferPendingContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        ButtonMediumBar(
+        BaseButtonBar(
             modifier = Modifier.padding(top = 18.dp),
-            primaryText = stringResource(id = R.string.secret_transfer_universal_pending_screen_confirm_button),
-            onPrimaryButtonClick = { onConfirm(secretTransfer) },
-            secondaryText = stringResource(id = R.string.secret_transfer_universal_pending_screen_reject_button),
-            onSecondaryButtonClick = onCancel
-        )
+            horizontalGapInDp = 8.dp,
+            verticalGapInDp = 8.dp,
+        ) {
+            ButtonLarge(
+                onClick = { onConfirm(secretTransfer) },
+                layout = ButtonLayout.TextOnly(stringResource(id = R.string.secret_transfer_universal_pending_screen_confirm_button)),
+                intensity = Intensity.Quiet,
+                mood = Mood.Brand,
+            )
+            ButtonLarge(
+                onClick = onCancel,
+                layout = ButtonLayout.TextOnly(stringResource(id = R.string.secret_transfer_universal_pending_screen_reject_button)),
+                intensity = Intensity.Quiet,
+                mood = Mood.Danger,
+            )
+        }
     }
 }
 
@@ -239,7 +288,7 @@ fun CancelPassphraseDialog(
 
 @Preview
 @Composable
-fun SecretTransferPendingScreenPreview() {
+private fun SecretTransferPendingScreenPreview() {
     DashlanePreview {
         SecretTransferPendingContent(
             secretTransfer = SecretTransfer(
@@ -258,7 +307,7 @@ fun SecretTransferPendingScreenPreview() {
 
 @Preview
 @Composable
-fun SecretTransferPendingErrorScreenPreview() {
+private fun SecretTransferPendingErrorScreenPreview() {
     DashlanePreview {
         SecretTransferPendingErrorContent(
             error = SecretTransferPendingError.Timeout,
@@ -269,7 +318,7 @@ fun SecretTransferPendingErrorScreenPreview() {
 
 @Preview
 @Composable
-fun CancelPassphraseDialogPreview() {
+private fun CancelPassphraseDialogPreview() {
     DashlanePreview {
         CancelPassphraseDialog(
             onConfirm = {},

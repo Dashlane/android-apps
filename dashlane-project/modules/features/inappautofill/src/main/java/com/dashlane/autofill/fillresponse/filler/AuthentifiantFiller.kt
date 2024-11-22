@@ -18,7 +18,7 @@ internal open class AuthentifiantFiller(private val autofillValueFactory: Autofi
     ): Boolean {
         val authentifiantItem = item as AuthentifiantItemToFill
         val loginFieldFound = setLogin(dataSetBuilder, summary, authentifiantItem)
-        val password = authentifiantItem.syncObject?.password.takeUnless { requireLock }?.toString() ?: ""
+        val password = authentifiantItem.vaultItem?.syncObject?.password.takeUnless { requireLock }?.toString() ?: ""
         val oldPassword = item.oldPassword?.toString()
         val passwordFieldFound = setPassword(dataSetBuilder, summary, password, oldPassword)
         return loginFieldFound || passwordFieldFound

@@ -8,20 +8,22 @@ import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.DataChangeHistoryFilter
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
 import com.dashlane.util.date.RelativeDateFormatter
+import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.history.DataChangeHistoryField
 import com.dashlane.vault.history.password
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
+import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
-import javax.inject.Inject
-import kotlin.math.max
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import javax.inject.Inject
+import kotlin.math.max
 
 @HiltViewModel
 class PasswordHistoryViewModel @Inject constructor(
@@ -29,6 +31,7 @@ class PasswordHistoryViewModel @Inject constructor(
     private val dataChangeHistoryQuery: DataChangeHistoryQuery,
     private val relativeDateFormatter: RelativeDateFormatter,
     private val dataSaver: DataSaver,
+    private val vaultItemLogger: VaultItemLogger,
 ) : ViewModel() {
     private val _historyState = MutableStateFlow<PasswordHistoryState>(PasswordHistoryState.Init)
     val historyState = _historyState.asStateFlow()
@@ -56,14 +59,14 @@ class PasswordHistoryViewModel @Inject constructor(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "kotlin:S6531")
     private suspend fun getLoginForUid(uid: String): VaultItem<SyncObject.Authentifiant>? =
         vaultDataQuery.query(
             VaultFilter(
                 dataType = SyncObjectType.AUTHENTIFIANT,
                 uid = uid
             )
-        ) as? VaultItem<SyncObject.Authentifiant>
+        ) as VaultItem<SyncObject.Authentifiant>?
 
     private fun SyncObject.DataChangeHistory.extractPasswordHistory(): List<PasswordHistoryEntry>? {
         val passwordChangeSets = changeSets
@@ -96,6 +99,7 @@ class PasswordHistoryViewModel @Inject constructor(
             }
 
             dataSaver.save(item.copySyncObject { password = SyncObfuscatedValue(selectedPasswordHistory.password) })
+            vaultItemLogger.logPasswordRestored(itemId = item.uid, url = item.urlForGoToWebsite)
 
             _historyState.emit(PasswordHistoryState.Success)
         }

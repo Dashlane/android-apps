@@ -2,7 +2,6 @@ package com.dashlane.autofill.phishing
 
 import android.content.Context
 import com.dashlane.autofill.phishing.model.PhishingDomainList
-import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.SharingCryptography
@@ -13,16 +12,21 @@ import com.dashlane.cryptography.decryptFile
 import com.dashlane.cryptography.decryptRsaPkcs1OaepPaddingBase64OrNull
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.featureflipping.canUseAntiPhishing
-import com.dashlane.network.tools.authorization
 import com.dashlane.network.webservices.DownloadFileService
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.file.GetFileMetaService
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.sharing.SharingKeysHelper
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import java.io.OutputStream
+import java.time.Duration
+import java.time.Instant
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -30,25 +34,19 @@ import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import okio.buffer
 import okio.sink
-import java.io.File
-import java.io.OutputStream
-import java.time.Duration
-import java.time.Instant
-import javax.inject.Inject
 
 class AntiPhishingFilesDownloader @Inject constructor(
     private val sessionManager: SessionManager,
     private val downloadService: DownloadFileService,
     private val getFileService: GetFileMetaService,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val cryptography: Cryptography,
     private val sharingKeysHelper: SharingKeysHelper,
     private val sharingCryptography: SharingCryptography,
     @ApplicationCoroutineScope private val appCoroutineScope: CoroutineScope,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
-    @ApplicationContext private val context: Context,
-    private val developerInfoLogger: DeveloperInfoLogger,
+    @ApplicationContext private val context: Context
 ) {
     
     private var localModelVersion: Double? = null
@@ -78,7 +76,7 @@ class AntiPhishingFilesDownloader @Inject constructor(
 
     suspend fun downloadFilePhishingFiles() {
         runIfPhishdroidEnabled {
-            if (userPreferencesManager.latestCheckPhishingModelVersion.plus(Duration.ofDays(7))
+            if (preferencesManager[sessionManager.session?.username].latestCheckPhishingModelVersion.plus(Duration.ofDays(1))
                     .isAfter(Instant.now())
             ) {
                 return
@@ -99,7 +97,7 @@ class AntiPhishingFilesDownloader @Inject constructor(
                             )
                         )
                     )
-                    userPreferencesManager.latestCheckPhishingModelVersion = Instant.now()
+                    preferencesManager[sessionManager.session?.username].latestCheckPhishingModelVersion = Instant.now()
                     data.data.fileInfos.entries
                         .filter { it.value.status == GetFileMetaService.Data.FileInfo.Status.UPDATE_AVAILABLE }
                         .forEach {
@@ -215,10 +213,6 @@ class AntiPhishingFilesDownloader @Inject constructor(
             if (it.exists()) {
                 it.listFiles()?.forEach { file ->
                     if (!usedFileNames.contains(file.name) && !file.delete()) {
-                        developerInfoLogger.log(
-                            action = "phishdroid",
-                            message = "Can't delete old file",
-                        )
                     }
                 }
             }
@@ -245,7 +239,7 @@ class AntiPhishingFilesDownloader @Inject constructor(
         }.getOrNull()
 
     private inline fun <T> runIfPhishdroidEnabled(block: () -> T?): T? {
-        if (!userFeaturesChecker.canUseAntiPhishing() || !userPreferencesManager.isAntiPhishingEnable) {
+        if (!userFeaturesChecker.canUseAntiPhishing() || !preferencesManager[sessionManager.session?.username].isAntiPhishingEnable) {
             return null
         }
         return block()

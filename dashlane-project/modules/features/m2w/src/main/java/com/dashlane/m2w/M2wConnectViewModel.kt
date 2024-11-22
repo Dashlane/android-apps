@@ -1,7 +1,8 @@
 package com.dashlane.m2w
 
 import androidx.lifecycle.ViewModel
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +10,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class M2wConnectViewModel @Inject constructor(
-    val userPreferencesManager: UserPreferencesManager
+    private val sessionManager: SessionManager,
+    val preferencesManager: PreferencesManager,
 ) : ViewModel(), M2wConnectViewModelContract {
 
     override val showConfirmPopupFlow = MutableStateFlow(false)
@@ -32,7 +34,7 @@ internal class M2wConnectViewModel @Inject constructor(
 
     fun finishM2w(result: M2WResult) {
         if (result == M2WResult.COMPLETED || result == M2WResult.SKIPPED) {
-            userPreferencesManager.hasFinishedM2D = true
+            preferencesManager[sessionManager.session?.username].hasFinishedM2D = true
         }
         finishM2W.tryEmit(result)
     }

@@ -1,7 +1,7 @@
 package com.dashlane.credentialmanager
 
 import android.content.Context
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.session.SessionManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration

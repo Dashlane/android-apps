@@ -4,7 +4,7 @@ import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.UserStorage
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.authentication.Auth2faSettingsService
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
 import com.dashlane.server.api.exceptions.DashlaneApiException

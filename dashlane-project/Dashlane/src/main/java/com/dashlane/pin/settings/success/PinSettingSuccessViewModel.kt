@@ -3,13 +3,12 @@ package com.dashlane.pin.settings.success
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.cryptography.ObfuscatedByteArray
+import androidx.navigation.toRoute
 import com.dashlane.pin.PinSetupRepository
-import com.dashlane.pin.settings.PinSettingsNavigation
+import com.dashlane.pin.settings.PinSettingsDestination.SuccessDestination
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class PinSettingSuccessViewModel @Inject constructor(
@@ -27,10 +27,9 @@ class PinSettingSuccessViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val obfuscatedPin = checkNotNull(savedStateHandle.get<ObfuscatedByteArray>(PinSettingsNavigation.PIN_KEY))
-
     private val stateFlow: MutableStateFlow<PinSettingsSuccessState> = MutableStateFlow(PinSettingsSuccessState())
     private val navigationFlow: Channel<PinSettingsSuccessNavigationState> = Channel()
+    private val pin = savedStateHandle.toRoute<SuccessDestination>().pin
 
     val uiState: StateFlow<PinSettingsSuccessState> = stateFlow.asStateFlow()
     val navigationState: Flow<PinSettingsSuccessNavigationState> = navigationFlow.receiveAsFlow()
@@ -62,8 +61,8 @@ class PinSettingSuccessViewModel @Inject constructor(
     }
 
     private suspend fun savePin() {
-        val pin = obfuscatedPin.decodeUtf8ToString()
-        pinSetupRepository.savePinValue(pin)
+        val session = sessionManager.session ?: return
+        pinSetupRepository.savePinValue(session, pin)
         navigationFlow.send(PinSettingsSuccessNavigationState.Success)
         stateFlow.update { state -> state.copy(isMPStoreDialogShown = false) }
     }

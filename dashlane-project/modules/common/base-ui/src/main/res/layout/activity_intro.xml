@@ -7,7 +7,8 @@
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal"
     android:maxWidth="@dimen/size_480dp"
-    tools:theme="@style/Theme.Dashlane.Modal">
+    tools:theme="@style/Theme.Dashlane.Modal"
+    android:fitsSystemWindows="true">
 
     <ScrollView
         android:id="@+id/scroll_view"

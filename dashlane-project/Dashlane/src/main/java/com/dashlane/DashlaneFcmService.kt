@@ -8,6 +8,7 @@ import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DarkWebSetupCompleteEvent
 import com.dashlane.login.controller.LoginTokensModule
+import com.dashlane.session.authorization
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
 import com.dashlane.notification.FcmMessage
@@ -16,7 +17,7 @@ import com.dashlane.notification.model.PublicBreachAlertNotificationHandler
 import com.dashlane.notification.model.SyncNotificationHandler
 import com.dashlane.notification.model.TokenNotificationHandler
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.session.SessionManager
 import com.dashlane.sync.DataSync
@@ -40,7 +41,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
         val sessionManager: SessionManager
         val breachManager: BreachManager
         val breachLoader: BreachLoader
-        val preferencesManager: UserPreferencesManager
+        val preferencesManager: PreferencesManager
         val globalPreferencesManager: GlobalPreferencesManager
         val clock: Clock
         val loginTokensModule: LoginTokensModule
@@ -52,9 +53,11 @@ class DashlaneFcmService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         
         runCatching {
-            entryPoint.fcmHelper.apply {
-                clearRegistration()
-                register(token)
+            entryPoint.sessionManager.session?.let {
+                entryPoint.fcmHelper.apply {
+                    clearRegistration(it.username)
+                    register(token = token, authorization = it.authorization)
+                }
             }
         }
     }

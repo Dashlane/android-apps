@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".login.sso.migration.MigrationToSsoMemberActivity"
+    android:fitsSystemWindows="true"
     >
 
     <include layout="@layout/include_login_sync_progress" />

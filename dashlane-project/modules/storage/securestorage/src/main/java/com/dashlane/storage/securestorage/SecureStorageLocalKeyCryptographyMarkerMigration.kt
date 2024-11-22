@@ -1,5 +1,6 @@
 package com.dashlane.storage.securestorage
 
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyChanger
 import com.dashlane.cryptography.CryptographyMarker
@@ -9,9 +10,8 @@ import com.dashlane.cryptography.changeCryptographyForBase64
 import com.dashlane.cryptography.createEncryptionEngine
 import com.dashlane.cryptography.generateFixedSalt
 import com.dashlane.cryptography.getCryptographyMarker
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.session.Session
 import com.dashlane.storage.securestorage.cryptography.FlexibleDecryptionEngineFactory
+import com.dashlane.user.Username
 import javax.inject.Inject
 
 class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
@@ -20,11 +20,12 @@ class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
     private val saltGenerator: SaltGenerator
 ) {
     fun migrateLocalKeyIfNeeded(
-        session: Session,
+        appKey: AppKey,
+        username: Username,
         cryptographyMarker: CryptographyMarker
     ) {
         val secureDataStorage =
-            secureDataStorageFactory.create(session.username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED)
+            secureDataStorageFactory.create(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED)
         val cipheredLocalKey = secureDataStorage.readLegacy(SecureDataKey.LOCAL_KEY) ?: return
 
         val currentMarker = cipheredLocalKey.getCryptographyMarker()
@@ -32,7 +33,7 @@ class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
         
         if (currentMarker == cryptographyMarker) return
 
-        val cipheredLocalKeyUpdatedMarker = session.appKey.use { key ->
+        val cipheredLocalKeyUpdatedMarker = appKey.use { key ->
             createEncryptionEngine(key, cryptographyMarker).use { encryptionEngine ->
                 CryptographyChanger(createDecryptionEngine(key), encryptionEngine).use { cryptographyChanger ->
                     cryptographyChanger.changeCryptographyForBase64(cipheredLocalKey)

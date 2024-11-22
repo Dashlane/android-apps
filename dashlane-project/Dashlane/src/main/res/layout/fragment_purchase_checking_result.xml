@@ -8,6 +8,7 @@
     android:layout_gravity="center_horizontal"
     android:maxWidth="@dimen/size_480dp"
     tools:context=".plans.ui.view.PurchaseCheckingActivity"
+    android:fitsSystemWindows="true"
     >
 
     <ScrollView
@@ -67,7 +68,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/spacing_normal"
         android:layout_marginBottom="@dimen/spacing_normal"
-        android:text="@string/close"
+        android:text="@string/plan_bought_thanks_close"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />

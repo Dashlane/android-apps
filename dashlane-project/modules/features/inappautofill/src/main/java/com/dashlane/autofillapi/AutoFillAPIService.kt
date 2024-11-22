@@ -21,15 +21,16 @@ import com.dashlane.autofill.accessibility.AccessibilityApiServiceDetector
 import com.dashlane.autofill.accessibility.AccessibilityApiServiceDetectorImpl
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.util.AutofillValueFactoryAndroidImpl
+import com.dashlane.autofill.dagger.AutofillApiInternalEntryPoint
 import com.dashlane.autofill.formdetector.AutoFillHintsExtractor
 import com.dashlane.autofill.formdetector.AutofillPackageNameAcceptor
 import com.dashlane.autofill.formdetector.BrowserDetectionHelper
 import com.dashlane.autofill.internal.AutofillLimiter
 import com.dashlane.autofill.request.save.SaveRequestActivity
-import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
-import com.dashlane.util.stackTraceToSafeString
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import dagger.hilt.android.EarlyEntryPoints
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -38,20 +39,23 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class AutoFillAPIService : AutofillService(), CoroutineScope {
 
-    @Inject
-    lateinit var databaseAccess: AutofillAnalyzerDef.DatabaseAccess
+    private val componentInternal: AutofillApiInternalEntryPoint
+        get() = EarlyEntryPoints.get(applicationContext, AutofillApiInternalEntryPoint::class.java)
 
-    @Inject
-    lateinit var userPreferencesAccess: AutofillAnalyzerDef.IUserPreferencesAccess
+    private val databaseAccess: AutofillAnalyzerDef.DatabaseAccess
+        get() = componentInternal.databaseAccess
 
-    @Inject
-    lateinit var fillRequestHandler: FillRequestHandler
+    private val preferencesManager: PreferencesManager
+        get() = componentInternal.preferencesManager
 
-    @Inject
-    lateinit var autofillLimiter: AutofillLimiter
+    private val fillRequestHandler: FillRequestHandler
+        get() = componentInternal.fillRequestHandler
 
-    @Inject
-    lateinit var developerInfoLogger: DeveloperInfoLogger
+    private val autofillLimiter: AutofillLimiter
+        get() = componentInternal.autofillLimiter
+
+    private val sessionManager: SessionManager
+        get() = componentInternal.sessionManager
 
     private val job = Job()
 
@@ -73,15 +77,11 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
     }
 
     private fun FillRequest.getFocusAutofillId(): AutofillId? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            this.fillContexts.filter {
-                it.requestId == this.id
-            }.map {
-                it.focusedId
-            }.lastOrNull()
-        } else {
-            null
-        }
+        return this.fillContexts.filter {
+            it.requestId == this.id
+        }.map {
+            it.focusedId
+        }.lastOrNull()
     }
 
     override fun onFillRequest(
@@ -110,11 +110,6 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
                     request.getFocusAutofillId()
                 )
             } catch (e: Exception) {
-                developerInfoLogger.log(
-                    action = "autofill_error",
-                    message = e.message,
-                    exceptionType = e.stackTraceToSafeString()
-                )
                 respondSuccess(callback)
             }
         }
@@ -130,7 +125,7 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
     }
 
     private fun hasInlineAutofillEnabled() =
-        userPreferencesAccess.hasKeyboardAutofillEnabled()
+        preferencesManager[sessionManager.session?.username].hasInlineAutofill
 
     private fun respondSuccess(
         callback: FillCallback,
@@ -157,13 +152,6 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
         ) {
             callback.onSuccess(null)
             return
-        }
-
-        if (summary?.isRequestTimedOut == true) {
-            developerInfoLogger.log(
-                action = "autofill_timeout",
-                message = "Autofill request timed out internally"
-            )
         }
 
         val fillResponse = summary?.let {
@@ -197,15 +185,7 @@ class AutoFillAPIService : AutofillService(), CoroutineScope {
                 return@launch
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                callback.onSuccess(
-                    SaveRequestActivity.getSaveRequestPendingIntent(this@AutoFillAPIService, summary, request)
-                )
-            } else {
-                SaveRequestActivity.getSaveRequestIntent(this@AutoFillAPIService, summary, request)
-                
-                callback.onSuccess()
-            }
+            callback.onSuccess(SaveRequestActivity.getSaveRequestPendingIntent(this@AutoFillAPIService, summary, request))
         }
     }
 

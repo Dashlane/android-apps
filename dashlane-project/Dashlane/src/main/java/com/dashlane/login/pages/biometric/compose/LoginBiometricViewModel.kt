@@ -4,65 +4,65 @@ import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.CryptoObject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPass
+import com.dashlane.lock.LockSetting
+import com.dashlane.lock.LockType
 import com.dashlane.login.LoginLogger
 import com.dashlane.login.LoginMode
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockPass
-import com.dashlane.login.lock.LockSetting
-import com.dashlane.login.lock.LockTypeManager
+import com.dashlane.mvvm.MutableViewStateFlow
+import com.dashlane.mvvm.ViewStateFlow
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
+import com.dashlane.session.SessionManager
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.user.Username
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.VisibleForTesting
+import javax.inject.Inject
 
 @HiltViewModel
 class LoginBiometricViewModel @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
+    private val sessionManager: SessionManager,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val lockManager: LockManager,
     private val loginLogger: LoginLogger,
 ) : ViewModel() {
 
-    private val stateFlow = MutableStateFlow(LoginBiometricState())
-    private val navigationStateFlow = MutableSharedFlow<LoginBiometricNavigationState>()
+    private val _stateFlow = MutableViewStateFlow<LoginBiometricState.View, LoginBiometricState.SideEffect>(LoginBiometricState.View())
+    val stateFlow: ViewStateFlow<LoginBiometricState.View, LoginBiometricState.SideEffect> = _stateFlow
 
-    val uiState = stateFlow.asStateFlow()
-    val navigationState = navigationStateFlow.asSharedFlow()
-
-    fun viewStarted(userAccountInfo: UserAccountInfo, lockSetting: LockSetting) {
+    fun viewStarted(userAccountInfo: UserAccountInfo, lockSetting: LockSetting, isBiometricRecovery: Boolean) {
         viewModelScope.launch {
+            if (_stateFlow.value.isBiometricPromptDisplayed) return@launch
+
             val email = userAccountInfo.username
             val biometricActivationStatus = biometricAuthModule.getBiometricActivationStatus()
             val allowedAuthenticator = biometricAuthModule.getPromptAuthenticator(biometricActivationStatus)
             val biometricStatus = biometricAuthModule.checkBiometricStatus(email, biometricActivationStatus)
+            val locks = lockManager.getLocks(Username.ofEmail(email))
             val fallback = when {
-                lockSetting.isLockCancelable -> LoginBiometricFallback.Cancellable
+                isBiometricRecovery -> LoginBiometricFallback.Cancellable
                 userAccountInfo.sso -> LoginBiometricFallback.SSO
-                userAccountInfo.accountType is UserAccountInfo.AccountType.InvisibleMasterPassword -> LoginBiometricFallback.MPLess
-                else -> LoginBiometricFallback.MP
+                LockType.PinCode in locks -> LoginBiometricFallback.Pin
+                else -> LoginBiometricFallback.Password
             }
 
             when (biometricStatus) {
                 is BiometricAuthModule.Result.BiometricEnrolled -> {
-                    stateFlow.update { state ->
+                    _stateFlow.update { state ->
                         state.copy(
                             isBiometricPromptDisplayed = true,
                             allowedAuthenticator = allowedAuthenticator,
                             fallback = fallback,
-                            cryptoObject = biometricStatus.cipher?.let { CryptoObject(biometricStatus.cipher) },
+                            cryptoObject = biometricStatus.cipher?.let { cipher -> CryptoObject(cipher) },
                             email = email,
                             lockSetting = lockSetting
                         )
@@ -70,28 +70,26 @@ class LoginBiometricViewModel @Inject constructor(
                 }
                 is BiometricAuthModule.Result.SecurityHasChanged -> {
                     securityHasChanged()
-                    navigationStateFlow.emit(LoginBiometricNavigationState.Logout(stateFlow.value.email, fallback))
+                    _stateFlow.send(LoginBiometricState.SideEffect.Logout(_stateFlow.value.email, fallback))
                 }
-                else -> stateFlow.update { state -> state.copy(error = LoginBiometricError.Generic()) }
+                else -> _stateFlow.update { state -> state.copy(error = LoginBiometricError.Generic()) }
             }
         }
     }
 
     fun authenticationError(errorCode: Int, errorMessage: String) {
         viewModelScope.launch {
-            val fallback = stateFlow.value.fallback
+            val fallback = _stateFlow.value.fallback
             val navigationState = when (errorCode) {
-                BiometricPrompt.ERROR_NEGATIVE_BUTTON -> {
-                    if (stateFlow.value.lockSetting?.isLockCancelable == true) {
-                        LoginBiometricNavigationState.Cancel
-                    } else {
-                        LoginBiometricNavigationState.Fallback(fallback)
-                    }
-                }
+                BiometricPrompt.ERROR_NEGATIVE_BUTTON -> LoginBiometricState.SideEffect.Fallback(fallback)
                 BiometricPrompt.ERROR_USER_CANCELED,
-                BiometricPrompt.ERROR_TIMEOUT -> LoginBiometricNavigationState.Cancel
-                BiometricPrompt.ERROR_LOCKOUT -> LoginBiometricNavigationState.Lockout(fallback)
-                BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> LoginBiometricNavigationState.Logout(stateFlow.value.email, fallback)
+                BiometricPrompt.ERROR_TIMEOUT -> LoginBiometricState.SideEffect.Cancel
+                BiometricPrompt.ERROR_LOCKOUT -> LoginBiometricState.SideEffect.Lockout(fallback, error = LoginBiometricError.Generic(errorMessage))
+                BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> LoginBiometricState.SideEffect.Logout(
+                    email = _stateFlow.value.email,
+                    fallback = fallback,
+                    error = LoginBiometricError.Generic(errorMessage)
+                )
                 BiometricPrompt.ERROR_CANCELED -> {
                     
                     return@launch
@@ -100,35 +98,37 @@ class LoginBiometricViewModel @Inject constructor(
                 BiometricPrompt.ERROR_NO_BIOMETRICS -> {
                     
                     securityHasChanged()
-                    LoginBiometricNavigationState.Logout(stateFlow.value.email, fallback, error = LoginBiometricError.Generic(errorMessage))
+                    LoginBiometricState.SideEffect.Logout(_stateFlow.value.email, fallback, error = LoginBiometricError.Generic(errorMessage))
                 }
-                else -> LoginBiometricNavigationState.Lockout(fallback, error = LoginBiometricError.Generic(errorMessage))
+                else -> LoginBiometricState.SideEffect.Lockout(fallback, error = LoginBiometricError.Generic(errorMessage))
             }
             loginLogger.logErrorUnknown(loginMode = LoginMode.Biometric)
-            stateFlow.update { state -> state.copy(isBiometricPromptDisplayed = false) }
-            navigationStateFlow.emit(navigationState)
+            _stateFlow.update { state -> state.copy(isBiometricPromptDisplayed = false) }
+            _stateFlow.send(navigationState)
         }
     }
 
     fun authenticationSuccess(cryptoObject: CryptoObject?) {
         viewModelScope.launch {
+            val session = sessionManager.session ?: run {
+                _stateFlow.send(LoginBiometricState.SideEffect.Logout(email = null, _stateFlow.value.fallback, error = null))
+                return@launch
+            }
             val unlock = when {
-                stateFlow.value.cryptoObject != null && cryptoObject != null -> lockManager.unlock(LockPass.ofBiometric(cryptoObject))
-                stateFlow.value.cryptoObject == null && cryptoObject == null -> lockManager.unlock(LockPass.ofWeakBiometric())
+                _stateFlow.value.cryptoObject != null && cryptoObject != null -> lockManager.unlock(session, LockPass.ofBiometric(cryptoObject))
+                _stateFlow.value.cryptoObject == null && cryptoObject == null -> lockManager.unlock(session, LockPass.ofWeakBiometric())
                 else -> false
             }
 
             when (unlock) {
                 true -> {
                     loginLogger.logSuccess(loginMode = LoginMode.Biometric)
-                    stateFlow.value.lockSetting?.unlockReason?.let { reason ->
-                        if (reason is UnlockEvent.Reason.WithCode && reason.origin == UnlockEvent.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD) {
-                            return@let
-                        }
-                        runCatching { lockManager.sendUnLock(reason, true) }
+                    val reason = _stateFlow.value.lockSetting?.unlockReason ?: LockEvent.Unlock.Reason.AppAccess
+                    if (reason !is LockEvent.Unlock.Reason.WithCode || reason.origin != LockEvent.Unlock.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD) {
+                        runCatching { lockManager.sendUnlockEvent(LockEvent.Unlock(reason = reason, lockType = LockType.Biometric)) }
                     }
-                    stateFlow.update { state -> state.copy(isBiometricPromptDisplayed = false) }
-                    navigationStateFlow.emit(LoginBiometricNavigationState.UnlockSuccess)
+                    _stateFlow.update { state -> state.copy(isBiometricPromptDisplayed = false) }
+                    _stateFlow.send(LoginBiometricState.SideEffect.UnlockSuccess)
                 }
                 false -> authenticationFailed()
             }
@@ -143,21 +143,21 @@ class LoginBiometricViewModel @Inject constructor(
                 
                 return@launch
             }
-            stateFlow.update { state -> state.copy(isBiometricPromptDisplayed = false) }
-            when (stateFlow.value.fallback) {
-                is LoginBiometricFallback.MPLess -> {
-                    navigationStateFlow.emit(
-                        LoginBiometricNavigationState.Lockout(
-                            fallback = stateFlow.value.fallback,
+            _stateFlow.update { state -> state.copy(isBiometricPromptDisplayed = false) }
+            when (_stateFlow.value.fallback) {
+                is LoginBiometricFallback.Pin -> {
+                    _stateFlow.send(
+                        LoginBiometricState.SideEffect.Lockout(
+                            fallback = _stateFlow.value.fallback,
                             error = LoginBiometricError.TooManyAttempt
                         )
                     )
                 }
                 else -> {
-                    navigationStateFlow.emit(
-                        LoginBiometricNavigationState.Logout(
-                            email = stateFlow.value.email,
-                            fallback = stateFlow.value.fallback,
+                    _stateFlow.send(
+                        LoginBiometricState.SideEffect.Logout(
+                            email = _stateFlow.value.email,
+                            fallback = _stateFlow.value.fallback,
                             error = LoginBiometricError.TooManyAttempt
                         )
                     )
@@ -168,13 +168,13 @@ class LoginBiometricViewModel @Inject constructor(
 
     @VisibleForTesting
     fun securityHasChanged() {
-        when (stateFlow.value.fallback) {
-            is LoginBiometricFallback.MPLess -> lockManager.setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
-            else -> {
-                lockManager.setLockType(LockTypeManager.LOCK_TYPE_MASTER_PASSWORD)
-                stateFlow.value.email?.let { sessionCredentialsSaver.deleteSavedCredentials(Username.ofEmail(it)) }
+        _stateFlow.value.email?.let { email ->
+            val username = Username.ofEmail(email)
+            lockManager.removeLock(username, LockType.Biometric)
+            if (_stateFlow.value.fallback !is LoginBiometricFallback.Pin) {
+                sessionCredentialsSaver.deleteSavedCredentials(username)
             }
+            preferencesManager[username].putBoolean(ConstantsPrefs.INVALIDATED_BIOMETRIC, true)
         }
-        userPreferencesManager.putBoolean(ConstantsPrefs.INVALIDATED_BIOMETRIC, true)
     }
 }

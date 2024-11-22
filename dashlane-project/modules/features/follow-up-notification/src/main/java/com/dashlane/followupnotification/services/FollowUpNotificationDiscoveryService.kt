@@ -2,7 +2,8 @@ package com.dashlane.followupnotification.services
 
 import com.dashlane.followupnotification.data.FollowUpNotificationRepository
 import com.dashlane.followupnotification.domain.FollowUpNotificationsTypes
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
@@ -16,7 +17,8 @@ interface FollowUpNotificationDiscoveryService {
 
 class FollowUpNotificationDiscoveryServiceImpl @Inject constructor(
     private val followUpNotificationFlags: FollowUpNotificationFlags,
-    private val preferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     private val followUpNotificationRepository: FollowUpNotificationRepository
 ) : FollowUpNotificationDiscoveryService {
 
@@ -24,14 +26,14 @@ class FollowUpNotificationDiscoveryServiceImpl @Inject constructor(
 
     override fun canDisplayDiscoveryScreen(syncObjectType: SyncObjectType): Boolean {
         val canUseFeature = followUpNotificationFlags.canUseFollowUpNotification()
-        val hasNotSeenDiscoveryScreen = !preferencesManager.hasSeenFollowUpNotificationDiscoveryScreen
+        val hasNotSeenDiscoveryScreen = !preferencesManager[sessionManager.session?.username].hasSeenFollowUpNotificationDiscoveryScreen
         val isVaultItemEligible = syncObjectType in supportedTypes
 
         return canUseFeature && hasNotSeenDiscoveryScreen && isVaultItemEligible
     }
 
     override fun setHasSeenIntroductionScreen() {
-        preferencesManager.hasSeenFollowUpNotificationDiscoveryScreen = true
+        preferencesManager[sessionManager.session?.username].hasSeenFollowUpNotificationDiscoveryScreen = true
     }
 
     override fun canDisplayReminderScreen(itemId: String?): Boolean {
@@ -39,11 +41,11 @@ class FollowUpNotificationDiscoveryServiceImpl @Inject constructor(
         if (!followUpNotificationFlags.canUseFollowUpNotification()) {
             return false
         }
-        if (preferencesManager.hasAcknowledgedFollowUpNotificationReminderScreen) {
+        if (preferencesManager[sessionManager.session?.username].hasAcknowledgedFollowUpNotificationReminderScreen) {
             return false
         }
         
-        val (lastItemId, lastNotificationId, hasInteracted) = preferencesManager.lastFollowUpNotificationItem
+        val (lastItemId, lastNotificationId, hasInteracted) = preferencesManager[sessionManager.session?.username].lastFollowUpNotificationItem
         if (itemId != lastItemId || followUpNotificationRepository.get(lastNotificationId) == null) {
             return false
         }
@@ -56,10 +58,10 @@ class FollowUpNotificationDiscoveryServiceImpl @Inject constructor(
     }
 
     override fun setHasAcknowledgedReminderScreen() {
-        preferencesManager.hasAcknowledgedFollowUpNotificationReminderScreen = true
+        preferencesManager[sessionManager.session?.username].hasAcknowledgedFollowUpNotificationReminderScreen = true
     }
 
     override fun updateLastNotificationItem(itemId: String, notificationId: String, hasInteracted: Boolean) {
-        preferencesManager.lastFollowUpNotificationItem = Triple(itemId, notificationId, hasInteracted)
+        preferencesManager[sessionManager.session?.username].lastFollowUpNotificationItem = Triple(itemId, notificationId, hasInteracted)
     }
 }

@@ -4,20 +4,21 @@ import com.dashlane.authenticator.Totp
 import com.dashlane.authenticator.otp
 import com.dashlane.autofill.api.R
 import com.dashlane.util.clipboard.ClipboardCopy
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import java.time.Clock
 import javax.inject.Inject
 
 interface AutofillTotpCopyService {
-    fun copyTotpToClipboard(credential: SyncObject.Authentifiant)
+    fun copyTotpToClipboard(credential: VaultItem<SyncObject.Authentifiant>)
 }
 
 class AutofillTotpCopyServiceImpl @Inject constructor(
     private val clipboardCopy: ClipboardCopy,
     private val clock: Clock
 ) : AutofillTotpCopyService {
-    override fun copyTotpToClipboard(credential: SyncObject.Authentifiant) {
-        val totpResult = credential.otp()?.let { it as? Totp }?.toTotpResult() ?: return
+    override fun copyTotpToClipboard(credential: VaultItem<SyncObject.Authentifiant>) {
+        val totpResult = credential.syncObject.otp()?.let { it as? Totp }?.toTotpResult() ?: return
 
         clipboardCopy.copyToClipboard(
             data = totpResult.code,

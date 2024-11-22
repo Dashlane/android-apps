@@ -5,7 +5,6 @@ package com.dashlane.util
 import android.app.Activity
 import android.graphics.Color
 import androidx.annotation.ColorInt
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.drawerlayout.widget.DrawerLayout
 
 @get:ColorInt
@@ -31,8 +30,4 @@ fun computeStatusBarColor(@ColorInt color: Int): Int {
     Color.colorToHSV(color, hsv)
     hsv[2] = hsv[2] - hsv[2] * alphaPercent
     return Color.HSVToColor(Color.alpha(color), hsv)
-}
-
-fun Activity.setLightStatusBar(light: Boolean) {
-    WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = light
 }

@@ -76,7 +76,7 @@ interface ItemEditViewContract {
                 fromViewOnly: Boolean,
                 temporaryPrivateCollectionsName: List<String>,
                 temporarySharedCollectionsId: List<String>,
-                spaceId: String
+                spaceId: String?
             )
 
             fun notifyOtpRefreshed(otp: Otp)

@@ -14,7 +14,7 @@ import com.dashlane.collections.sharing.CollectionSharingViewState.ViewData
 import com.dashlane.core.sharing.SharingItemUpdater
 import com.dashlane.core.sharing.handleCollectionSharingResult
 import com.dashlane.hermes.generated.definitions.Trigger
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission

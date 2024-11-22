@@ -173,7 +173,7 @@ fun OtpInput(
 
 @Preview
 @Composable
-fun OtpInputPreview() {
+private fun OtpInputPreview() {
     DashlanePreview {
         OtpInput(onOtpComplete = { }, isError = true, error = "Error")
     }

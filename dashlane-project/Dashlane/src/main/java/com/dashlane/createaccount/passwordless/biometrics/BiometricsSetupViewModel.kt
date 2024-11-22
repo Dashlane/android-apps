@@ -2,7 +2,7 @@ package com.dashlane.createaccount.passwordless.biometrics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.BiometricAuthModule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -43,13 +43,14 @@ class IdentityDashboardPasswordHealthItem(
         init {
             
             v.findViewById<View>(R.id.password_health_security_score)
-                .setOnClickListener { v.performClick() }
-            v.findViewById<View>(R.id.explore_button).setOnClickListener { v.performClick() }
+                .setOnClickListener { `object`?.listener?.onClickExplore() }
+            v.findViewById<View>(R.id.explore_button)
+                .setOnClickListener { `object`?.listener?.onClickExplore() }
             safeCount.init(
                 R.string.security_dashboard_list_safe,
                 R.color.text_positive_quiet
             ) {
-                v.performClick()
+                `object`?.listener?.onClickExplore()
             }
             
             compromisedCount.init(
@@ -153,6 +154,7 @@ class IdentityDashboardPasswordHealthItem(
     }
 
     interface PasswordHeathClickListener {
+        fun onClickExplore()
         fun onClickCompromised()
         fun onClickReused()
         fun onClickWeak()

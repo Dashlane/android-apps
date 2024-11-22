@@ -19,12 +19,12 @@ class DataIdentifierListTextResolverImpl @Inject constructor(
     private val passkeyFactory: PasskeyListTextFactory,
     private val passportFactory: PassportListTextFactory,
     private val paymentCreditCardFactory: PaymentCreditCardListTextFactory,
-    private val paymentPaypalFactory: PaymentPaypalListTextFactory,
     private val personalWebsiteFactory: PersonalWebsiteListTextFactory,
     private val phoneFactory: PhoneListTextFactory,
+    private val secretFactory: SecretListTextFactory,
     private val secureNoteFactory: SecureNoteListTextFactory,
     private val socialSecurityStatementFactory: SocialSecurityStatementListTextFactory,
-    private val defaultFactory: DefaultListTextFactory,
+    private val emptyFactory: EmptyListTextFactory,
 ) : DataIdentifierListTextResolver {
 
     override fun getLine1(item: SummaryObject): StatusText =
@@ -41,18 +41,19 @@ class DataIdentifierListTextResolverImpl @Inject constructor(
             is SummaryObject.Passkey -> passkeyFactory.getTitle(item)
             is SummaryObject.Passport -> passportFactory.getTitle(item)
             is SummaryObject.PaymentCreditCard -> paymentCreditCardFactory.getTitle(item)
-            is SummaryObject.PaymentPaypal -> paymentPaypalFactory.getTitle(item)
             is SummaryObject.PersonalWebsite -> personalWebsiteFactory.getTitle(item)
             is SummaryObject.Phone -> phoneFactory.getTitle(item)
+            is SummaryObject.Secret -> secretFactory.getTitle(item)
             is SummaryObject.SecureNote -> secureNoteFactory.getTitle(item)
             is SummaryObject.SocialSecurityStatement -> socialSecurityStatementFactory.getTitle(item)
+            is SummaryObject.PaymentPaypal,
             is SummaryObject.AuthCategory,
             is SummaryObject.Collection,
             is SummaryObject.DataChangeHistory,
             is SummaryObject.GeneratedPassword,
             is SummaryObject.SecureFileInfo,
             is SummaryObject.SecureNoteCategory,
-            is SummaryObject.SecurityBreach -> defaultFactory.getTitle(item)
+            is SummaryObject.SecurityBreach -> emptyFactory.getTitle(item)
         }
 
     override fun getLine2(item: SummaryObject): StatusText {
@@ -71,18 +72,19 @@ class DataIdentifierListTextResolverImpl @Inject constructor(
             is SummaryObject.Passkey -> passkeyFactory.getDescription(item, default)
             is SummaryObject.Passport -> passportFactory.getDescription(item, default)
             is SummaryObject.PaymentCreditCard -> paymentCreditCardFactory.getDescription(item, default)
-            is SummaryObject.PaymentPaypal -> paymentPaypalFactory.getDescription(item, default)
             is SummaryObject.PersonalWebsite -> personalWebsiteFactory.getDescription(item, default)
             is SummaryObject.Phone -> phoneFactory.getDescription(item, default)
+            is SummaryObject.Secret -> secretFactory.getDescription(item, default)
             is SummaryObject.SecureNote -> secureNoteFactory.getDescription(item, default)
             is SummaryObject.SocialSecurityStatement -> socialSecurityStatementFactory.getDescription(item, default)
+            is SummaryObject.PaymentPaypal,
             is SummaryObject.AuthCategory,
             is SummaryObject.Collection,
             is SummaryObject.DataChangeHistory,
             is SummaryObject.GeneratedPassword,
             is SummaryObject.SecureFileInfo,
             is SummaryObject.SecureNoteCategory,
-            is SummaryObject.SecurityBreach -> defaultFactory.getDescription(item, default)
+            is SummaryObject.SecurityBreach -> emptyFactory.getDescription(item, default)
         }
     }
 }

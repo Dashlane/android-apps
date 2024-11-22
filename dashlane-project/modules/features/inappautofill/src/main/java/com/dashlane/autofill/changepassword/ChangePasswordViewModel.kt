@@ -8,6 +8,7 @@ import com.dashlane.autofill.changepassword.domain.CredentialUpdateInfo
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +36,7 @@ class ChangePasswordViewModel @Inject constructor(
     private val website: String? = navArgs.argsWebpage
 
     private var defaultCredentialId: String = ""
-    private var websiteCredentials = emptyList<SyncObject.Authentifiant>()
+    private var websiteCredentials = emptyList<VaultItem<SyncObject.Authentifiant>>()
 
     init {
         logger.packageName = packageName
@@ -51,7 +52,7 @@ class ChangePasswordViewModel @Inject constructor(
             stateFlow.emit(AutofillChangePasswordState.Initial(stateFlow.value.data.copy(canUse = false)))
             val item = provider.getCredential(login)
             val result = withContext(ioCoroutineDispatcher) {
-                val info = CredentialUpdateInfo(item.id!!, password!!)
+                val info = CredentialUpdateInfo(item.uid, password!!)
                 provider.updateCredentialToVault(info)
             }
             stateFlow.emit(AutofillChangePasswordState.Initial(stateFlow.value.data.copy(canUse = true)))
@@ -84,8 +85,9 @@ class ChangePasswordViewModel @Inject constructor(
 
     fun setDefaultCredential(filledLogin: String?) {
         defaultCredentialId = websiteCredentials.first {
-            it.login == filledLogin || it.email == filledLogin
-        }.id ?: ""
+            val syncObject = it.syncObject
+            syncObject.login == filledLogin || syncObject.email == filledLogin
+        }.uid
         logger.logOnClickUpdateAccount(defaultCredentialId)
     }
 

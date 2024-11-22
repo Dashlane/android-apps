@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
@@ -16,6 +17,7 @@ import com.dashlane.R
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.navigation.Navigator
 import com.dashlane.util.Toaster
+import com.dashlane.vault.item.delete.DeleteVaultItemLogger
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -43,17 +45,16 @@ class DeleteVaultItemFragment : DialogFragment() {
             setContent {
                 DashlaneTheme {
                     LaunchedEffect(key1 = viewModel) {
-                        viewModel.navigationState.collect { state ->
+                        viewModel.stateFlow.sideEffect.collect { state ->
                             when (state) {
                                 DeleteVaultItemViewModel.NavigationState.Failure -> deleteError()
-                                DeleteVaultItemViewModel.NavigationState.Success -> itemDeleted()
+                                is DeleteVaultItemViewModel.NavigationState.Success -> itemDeleted(state.itemId)
                             }
                         }
                     }
-
-                    val state = viewModel.uiState.collectAsStateWithLifecycle()
+                    val state by viewModel.stateFlow.viewState.collectAsStateWithLifecycle()
                     DeleteVaultItemScreen(
-                        state = state.value,
+                        state = state,
                         onConfirmed = { viewModel.deleteItem() },
                         onCancelled = { closeDialog() }
                     )
@@ -67,11 +68,11 @@ class DeleteVaultItemFragment : DialogFragment() {
         dismiss()
     }
 
-    private fun itemDeleted() {
+    private fun itemDeleted(itemId: String) {
         toaster.show(R.string.item_deleted, Toast.LENGTH_SHORT)
         parentFragmentManager.setFragmentResult(
             DELETE_VAULT_ITEM_RESULT,
-            bundleOf(DELETE_VAULT_ITEM_SUCCESS to true)
+            bundleOf(DELETE_VAULT_ITEM_SUCCESS to true, DELETE_VAULT_ITEM_ID to itemId)
         )
         closeDialog()
     }
@@ -88,6 +89,7 @@ class DeleteVaultItemFragment : DialogFragment() {
     companion object {
         const val DELETE_VAULT_ITEM_RESULT = "DELETE_VAULT_ITEM_RESULT"
         const val DELETE_VAULT_ITEM_SUCCESS = "DELETE_VAULT_ITEM_SUCCESS"
+        const val DELETE_VAULT_ITEM_ID = "DELETE_VAULT_ITEM_ID"
         const val DELETE_DIALOG_TAG = "delete_confirm_dialog"
     }
 }

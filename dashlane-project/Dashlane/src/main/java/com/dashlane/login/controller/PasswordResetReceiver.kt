@@ -3,8 +3,8 @@ package com.dashlane.login.controller
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.dashlane.async.BroadcastConstants
 import com.dashlane.async.SyncBroadcastManager
+import com.dashlane.events.BroadcastConstants
 import com.dashlane.navigation.Navigator
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionTrasher
@@ -24,7 +24,7 @@ class PasswordResetReceiver(
             !intent.getBooleanExtra(BroadcastConstants.SUCCESS_EXTRA, false)
         ) {
             sessionManager.session?.let {
-                runBlocking { sessionTrasher.trash(it.username, true) }
+                runBlocking { sessionTrasher.trash(username = it.username, deletePreferences = true) }
             }
             navigator.logoutAndCallLoginScreen(activity)
         }

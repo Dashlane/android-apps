@@ -10,26 +10,21 @@ import com.dashlane.teamspaces.manager.matchForceDomains
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Suppress("LargeClass")
+@OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class SmartSpaceCategorizationManager @Inject constructor(
-    @ApplicationCoroutineScope
-    coroutineScope: CoroutineScope,
     private val databaseAccessor: SmartSpaceCategorizationDatabaseAccessor,
     private val sharingDataProvider: SharingDataProvider,
     private val spaceDeletedNotifier: SpaceDeletedNotifier,
@@ -37,22 +32,12 @@ class SmartSpaceCategorizationManager @Inject constructor(
     private val teamspaceForceDeletionSharingWorker: TeamspaceForceDeletionSharingWorker,
     private val activityLogger: VaultActivityLogger
 ) {
-
-    
-    @OptIn(ObsoleteCoroutinesApi::class)
-    private val actor =
-        coroutineScope.actor<Unit>(context = Dispatchers.IO, capacity = Channel.CONFLATED) {
-            consumeEach {
-                executeInternal()
-            }
-        }
+    private val mutex = Mutex()
 
     suspend fun executeSync() {
-        actor.send(Unit)
-    }
-
-    fun executeAsync() {
-        actor.trySend(Unit)
+        mutex.withLock {
+            executeInternal()
+        }
     }
 
     @WorkerThread
@@ -75,7 +60,10 @@ class SmartSpaceCategorizationManager @Inject constructor(
         markNotifyServerContentDeletedIfRequire(pastTeams)
     }
 
-    private suspend fun moveVaultItems(currentBusinessSpace: TeamSpace.Business.Current?, pastTeams: List<TeamSpace.Business.Past>): Result {
+    private suspend fun moveVaultItems(
+        currentBusinessSpace: TeamSpace.Business.Current?,
+        pastTeams: List<TeamSpace.Business.Past>
+    ): Result {
         val forceCategorizedItems: MutableList<VaultItem<SyncObject>> = mutableListOf()
         val deletedItems: MutableList<VaultItem<SyncObject>> = mutableListOf()
         val sharedItemIdsToRevoke: MutableList<String> = mutableListOf()
@@ -176,7 +164,7 @@ class SmartSpaceCategorizationManager @Inject constructor(
         
         val ids = teamItems.filterNot {
             it.syncState == SyncState.DELETED ||
-            it.syncState == SyncState.IN_SYNC_DELETED
+                it.syncState == SyncState.IN_SYNC_DELETED
         }.map {
             it.id
         }
@@ -223,11 +211,12 @@ class SmartSpaceCategorizationManager @Inject constructor(
 
     private suspend fun deleteGeneratedPasswords(authentifiants: List<VaultItem<SyncObject.Authentifiant>>) {
         
-        val matchingGeneratedPasswords = databaseAccessor.getGeneratedPasswords().filter { generatedPassword ->
-            authentifiants.firstOrNull { authentifiant ->
-                authentifiant.syncObject.password == generatedPassword.syncObject.password
-            } != null
-        }
+        val matchingGeneratedPasswords =
+            databaseAccessor.getGeneratedPasswords().filter { generatedPassword ->
+                authentifiants.firstOrNull { authentifiant ->
+                    authentifiant.syncObject.password == generatedPassword.syncObject.password
+                } != null
+            }
         
         val deletedGeneratedPasswords = matchingGeneratedPasswords.map { vault ->
             vault.copyWithAttrs { syncState = SyncState.DELETED }

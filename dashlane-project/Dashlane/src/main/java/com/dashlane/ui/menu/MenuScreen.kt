@@ -1,5 +1,6 @@
 package com.dashlane.ui.menu
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -87,8 +88,9 @@ fun menuScreen(
     }
 }
 
+@VisibleForTesting
 @Composable
-private fun MenuContent(
+fun MenuContent(
     innerPadding: PaddingValues,
     uiState: MenuState,
     onUpgradeClick: (() -> Unit)?,

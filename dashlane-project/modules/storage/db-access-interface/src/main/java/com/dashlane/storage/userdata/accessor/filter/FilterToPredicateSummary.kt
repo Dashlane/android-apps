@@ -1,22 +1,18 @@
 package com.dashlane.storage.userdata.accessor.filter
 
-import android.content.Context
-import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.storage.userdata.accessor.filter.space.SpaceFilter
 import com.dashlane.teamspaces.manager.DataIdentifierSpaceCategorization
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.matchPackageName
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.dashlane.vault.util.AuthentifiantPackageNameMatcher
 import javax.inject.Inject
 
 class FilterToPredicateSummary @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
-    private val packageNameSignatureHelper: PackageNameSignatureHelper
+    private val authentifiantPackageNameMatcher: AuthentifiantPackageNameMatcher
 ) {
 
     fun toPredicate(filter: BaseFilter): (SummaryObject) -> Boolean {
@@ -37,21 +33,36 @@ class FilterToPredicateSummary @Inject constructor(
         val spaces = spaceFilter.getSpacesRestrictions(currentTeamSpaceUiFilter)
             ?: return true 
         return spaces.any {
-            DataIdentifierSpaceCategorization(teamspaceAccessor, currentTeamSpaceUiFilter, it).canBeDisplay(vaultItem)
+            DataIdentifierSpaceCategorization(
+                teamspaceAccessor,
+                currentTeamSpaceUiFilter,
+                it
+            ).canBeDisplay(vaultItem)
         }
     }
 
-    private fun acceptCredentialFilter(filter: CredentialFilter, syncObject: SummaryObject): Boolean {
+    private fun acceptCredentialFilter(
+        filter: CredentialFilter,
+        syncObject: SummaryObject
+    ): Boolean {
         return syncObject is SummaryObject.Authentifiant &&
-            filter.email?.equals(syncObject.email, ignoreCase = true) ?: true && 
+            filter.email?.equals(
+                syncObject.email,
+                ignoreCase = true
+            ) ?: true && 
             hasCorrectDomain(filter, syncObject) &&
             hasCorrectPackageName(filter, syncObject)
     }
 
-    private fun acceptCollectionFilter(filter: CollectionFilter, summaryObject: SummaryObject): Boolean {
+    private fun acceptCollectionFilter(
+        filter: CollectionFilter,
+        summaryObject: SummaryObject
+    ): Boolean {
         return summaryObject is SummaryObject.Collection &&
             filter.withVaultItem?.let { it in (summaryObject.vaultItems ?: emptyList()) } ?: true &&
-            filter.withoutVaultItem?.let { it !in (summaryObject.vaultItems ?: emptyList()) } ?: true &&
+            filter.withoutVaultItem?.let {
+                it !in (summaryObject.vaultItems ?: emptyList())
+            } ?: true &&
             filter.withVaultItemId?.let { filterItemId ->
                 filterItemId in (summaryObject.vaultItems?.map { it.id } ?: emptyList())
             } ?: true &&
@@ -61,7 +72,10 @@ class FilterToPredicateSummary @Inject constructor(
             filter.name?.equals(summaryObject.name) ?: true
     }
 
-    private fun hasCorrectDomain(filter: CredentialFilter, authentifiant: SummaryObject.Authentifiant): Boolean =
+    private fun hasCorrectDomain(
+        filter: CredentialFilter,
+        authentifiant: SummaryObject.Authentifiant
+    ): Boolean =
         hasCorrectDomain(
             filter,
             authentifiant.url,
@@ -70,7 +84,12 @@ class FilterToPredicateSummary @Inject constructor(
             authentifiant.linkedServices?.associatedDomains?.map { it.domain }
         )
 
-    private fun hasCorrectPackageName(filter: CredentialFilter, authentifiant: SummaryObject.Authentifiant) =
-        filter.packageName?.let { authentifiant.matchPackageName(packageNameSignatureHelper, context, it) }
+    private fun hasCorrectPackageName(
+        filter: CredentialFilter,
+        authentifiant: SummaryObject.Authentifiant
+    ) =
+        filter.packageName?.let {
+            authentifiantPackageNameMatcher.matchPackageName(authentifiant, it)
+        }
             ?: true 
 }

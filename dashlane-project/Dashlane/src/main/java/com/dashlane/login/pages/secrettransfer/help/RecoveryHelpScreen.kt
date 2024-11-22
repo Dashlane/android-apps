@@ -3,6 +3,7 @@ package com.dashlane.login.pages.secrettransfer.help
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
@@ -11,6 +12,7 @@ import com.dashlane.ui.widgets.compose.GenericInfoContent
 
 @Composable
 fun RecoveryHelpScreen(
+    modifier: Modifier = Modifier,
     viewModel: RecoveryHelpViewModel,
     email: String?,
     onStartRecoveryClicked: (RegisteredUserDevice) -> Unit,
@@ -37,6 +39,7 @@ fun RecoveryHelpScreen(
     }
 
     GenericInfoContent(
+        modifier = modifier,
         icon = null,
         title = stringResource(id = R.string.login_universal_d2d_recovery_help_title),
         description = stringResource(id = R.string.login_universal_d2d_recovery_help_description),

@@ -93,7 +93,7 @@ private val upshiftTeamForPreview = BusinessSpaceUtil.createCurrentSpace(
 
 @Preview
 @Composable
-fun SpacePickerPreview() {
+private fun SpacePickerPreview() {
     DashlanePreview {
         SpacePicker(
             modifier = Modifier.fillMaxWidth(),
@@ -109,7 +109,7 @@ fun SpacePickerPreview() {
 
 @Preview
 @Composable
-fun ReadOnlySpacePickerPreview() {
+private fun ReadOnlySpacePickerPreview() {
     DashlanePreview {
         SpacePicker(
             modifier = Modifier.fillMaxWidth(),

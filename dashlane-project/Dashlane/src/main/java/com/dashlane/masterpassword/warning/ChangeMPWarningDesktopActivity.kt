@@ -7,26 +7,26 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.core.view.get
 import com.dashlane.R
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.databinding.ActivityWarningBinding
-import com.dashlane.lock.LockHelper
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockPrompt
 import com.dashlane.masterpassword.ChangeMasterPasswordActivity
 import com.dashlane.masterpassword.ChangeMasterPasswordLogoutHelper
-import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.findContentParent
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class ChangeMPWarningDesktopActivity : DashlaneActivity() {
@@ -137,18 +137,16 @@ class ChangeMPWarningDesktopActivity : DashlaneActivity() {
                 lockRepository
                     .getLockManager(sessionManager.session!!)
                     .showAndWaitLockActivityForReason(
-                        this@ChangeMPWarningDesktopActivity,
-                        UnlockEvent.Reason.WithCode(
+                        context = this@ChangeMPWarningDesktopActivity,
+                        reason = LockEvent.Unlock.Reason.WithCode(
                             UNLOCK_EVENT_CODE,
-                            UnlockEvent.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD
+                            LockEvent.Unlock.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD
                         ),
-                        LockHelper.PROMPT_LOCK_FOR_SETTINGS,
-                        getString(R.string.please_enter_master_password_to_edit_settings)
-                    )?.takeIf { unlockEvent ->
-                        val reason = unlockEvent.reason
-                        unlockEvent.isSuccess() &&
-                            reason is UnlockEvent.Reason.WithCode &&
-                            reason.requestCode == UNLOCK_EVENT_CODE
+                        lockPrompt = LockPrompt.ForSettings,
+                    ).takeIf { lockEvent ->
+                        lockEvent is LockEvent.Unlock &&
+                            lockEvent.reason is LockEvent.Unlock.Reason.WithCode &&
+                            (lockEvent.reason as LockEvent.Unlock.Reason.WithCode).requestCode == UNLOCK_EVENT_CODE
                     }?.let { startActivity(changeMasterPasswordActivityIntent) }
             }
         }

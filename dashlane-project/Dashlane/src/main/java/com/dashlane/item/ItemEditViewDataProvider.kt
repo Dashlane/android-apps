@@ -7,6 +7,7 @@ import com.dashlane.R
 import com.dashlane.applinkfetcher.AuthentifiantAppLinkDownloader
 import com.dashlane.authenticator.Otp
 import com.dashlane.collections.sharing.item.CollectionSharingItemDataProvider
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Action
@@ -34,16 +35,16 @@ import com.dashlane.item.subview.provider.id.ItemScreenConfigurationPassportProv
 import com.dashlane.item.subview.provider.id.ItemScreenConfigurationSocialSecurityProvider
 import com.dashlane.item.subview.provider.payment.ItemScreenConfigurationBankAccountProvider
 import com.dashlane.item.subview.provider.payment.ItemScreenConfigurationCreditCardProvider
-import com.dashlane.item.subview.provider.payment.ItemScreenConfigurationPaypalProvider
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationAddressProvider
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationCompanyProvider
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationEmailProvider
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationIdentityProvider
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationPhoneProvider
 import com.dashlane.item.subview.provider.personalinfo.ItemScreenConfigurationWebsiteProvider
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.EmailSuggestionProvider
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataChangeHistoryQuery
@@ -59,9 +60,7 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.date.RelativeDateFormatter
 import com.dashlane.util.date.RelativeDateFormatterImpl
@@ -76,6 +75,7 @@ import com.dashlane.vault.history.password
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.vault.model.createAddress
 import com.dashlane.vault.model.createAuthentifiant
@@ -89,7 +89,6 @@ import com.dashlane.vault.model.createIdCard
 import com.dashlane.vault.model.createIdentity
 import com.dashlane.vault.model.createPassport
 import com.dashlane.vault.model.createPaymentCreditCard
-import com.dashlane.vault.model.createPaymentPaypal
 import com.dashlane.vault.model.createPersonalWebsite
 import com.dashlane.vault.model.createPhone
 import com.dashlane.vault.model.createSecureNote
@@ -103,10 +102,11 @@ import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.vault.summary.CollectionVaultItems
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
+import com.dashlane.vault.summary.toSummaryOrNull
 import com.dashlane.vault.toItemType
+import com.dashlane.vault.util.BankDataProvider
 import com.dashlane.vault.util.SecureNoteCategoryUtils
 import com.dashlane.vault.util.copyWithDefaultValue
-import com.dashlane.vault.util.toAuthentifiant
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.provider.BaseDataProvider
@@ -141,6 +141,7 @@ class ItemEditViewDataProvider @Inject constructor(
     private val collectionSharingItemDataProvider: CollectionSharingItemDataProvider,
     private val teamspaceRestrictionNotificator: TeamSpaceRestrictionNotificator,
     private val frozenStateManager: FrozenStateManager,
+    private val bankDataProvider: BankDataProvider,
     clock: Clock
 ) : BaseDataProvider<ItemEditViewContract.Presenter>(), ItemEditViewContract.DataProvider {
 
@@ -216,7 +217,6 @@ class ItemEditViewDataProvider @Inject constructor(
                     phoneName = context.getString(R.string.phone)
                 )
 
-                SyncObjectType.PAYMENT_PAYPAL -> item = createPaymentPaypal()
                 SyncObjectType.PAYMENT_CREDIT_CARD -> item = createPaymentCreditCard()
                 SyncObjectType.BANK_STATEMENT -> item = createBankStatement()
                 SyncObjectType.ID_CARD -> item = createIdCard()
@@ -304,22 +304,14 @@ class ItemEditViewDataProvider @Inject constructor(
                     vaultItemCopy = vaultItemCopy
                 )
 
-            SyncObjectType.PAYMENT_PAYPAL ->
-                provider = ItemScreenConfigurationPaypalProvider(
-                    teamSpaceAccessor = teamSpaceAccessor,
-                    emailSuggestionProvider = emailSuggestionProvider,
-                    vaultItemLogger = vaultItemLogger,
-                    dateTimeFieldFactory = dateTimeFieldFactory,
-                    vaultItemCopy = vaultItemCopy
-                )
-
             SyncObjectType.PAYMENT_CREDIT_CARD ->
                 provider = ItemScreenConfigurationCreditCardProvider(
                     genericDataQuery = genericDataQuery,
                     teamSpaceAccessor = teamSpaceAccessor,
                     vaultItemLogger = vaultItemLogger,
                     dateTimeFieldFactory = dateTimeFieldFactory,
-                    vaultItemCopy = vaultItemCopy
+                    vaultItemCopy = vaultItemCopy,
+                    bankDataProvider = bankDataProvider,
                 )
 
             SyncObjectType.BANK_STATEMENT ->
@@ -328,7 +320,8 @@ class ItemEditViewDataProvider @Inject constructor(
                     genericDataQuery = genericDataQuery,
                     vaultItemLogger = vaultItemLogger,
                     dateTimeFieldFactory = dateTimeFieldFactory,
-                    vaultItemCopy = vaultItemCopy
+                    vaultItemCopy = vaultItemCopy,
+                    bankDataProvider = bankDataProvider,
                 )
 
             SyncObjectType.ID_CARD ->
@@ -462,8 +455,8 @@ class ItemEditViewDataProvider @Inject constructor(
         return changeSets.filterIndexed { index, item ->
             
             (index == 0 && item.password != authentifiant.password.toString() && item.password != null && item.modificationDate != null) ||
-                
-                (index != 0 && item.password != null && changeSets[index - 1].modificationDate != null)
+                    
+                    (index != 0 && item.password != null && changeSets[index - 1].modificationDate != null)
         }.isNotEmpty()
     }
 
@@ -553,14 +546,6 @@ class ItemEditViewDataProvider @Inject constructor(
                         itemToSave as VaultItem<SyncObject.Authentifiant>
                         appLinkDownloader.fetch(itemToSave.toSummary())
                     }
-
-                    is SyncObject.PaymentPaypal -> {
-                        itemToSave as VaultItem<SyncObject.PaymentPaypal>
-                        
-                        val credential = itemToSave.toAuthentifiant()
-                        saveItem(credential)
-                    }
-
                     else -> {
                         
                     }
@@ -811,7 +796,7 @@ class ItemEditViewDataProvider @Inject constructor(
             state.screenConfiguration.itemSubViews,
             state.screenConfiguration.itemHeader
         ) || collectionSubView != null &&
-            state.collections.sortedBy { it.name } != state.itemScreenConfigurationProvider
+                state.collections.sortedBy { it.name } != state.itemScreenConfigurationProvider
             .gatherCollectionsFromUi(collectionSubView).sortedBy { it.name }
     }
 
@@ -897,7 +882,8 @@ class ItemEditViewDataProvider @Inject constructor(
             itemId = item.uid,
             itemType = item.syncObjectType.toItemType(),
             space = item.getTeamSpaceLog(),
-            url = (item.syncObject as? SyncObject.Authentifiant)?.urlForGoToWebsite,
+            url = item.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
+                ?.toSummaryOrNull<SummaryObject.Authentifiant>()?.urlForGoToWebsite,
             addedWebsites = addedWebsites,
             removedWebsites = removedWebsites,
             removedApps = removedApps,

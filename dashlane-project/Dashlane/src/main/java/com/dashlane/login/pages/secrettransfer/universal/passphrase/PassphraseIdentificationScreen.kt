@@ -11,10 +11,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.DashlaneLogo
 import com.dashlane.ui.widgets.compose.Passphrase
 import com.dashlane.ui.widgets.compose.PassphraseLayout
 
@@ -29,7 +29,7 @@ fun PassphraseIdentificationScreen(
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
-        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+        DashlaneLogoLockup(height = 40.dp)
         Text(
             text = stringResource(id = R.string.login_universal_d2d_passphrase_identification_title),
             style = DashlaneTheme.typography.titleSectionLarge,
@@ -52,7 +52,7 @@ fun PassphraseIdentificationScreen(
 
 @Preview
 @Composable
-fun PassphraseVerificationScreenPreview() {
+private fun PassphraseVerificationScreenPreview() {
     DashlanePreview {
         PassphraseIdentificationScreen(
             passphrase = listOf(

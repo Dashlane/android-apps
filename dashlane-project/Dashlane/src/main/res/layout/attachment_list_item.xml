@@ -12,34 +12,6 @@
     android:paddingStart="@dimen/spacing_big"
     android:paddingTop="@dimen/spacing_small">
 
-    <TextView
-        android:id="@+id/attachment_item_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_normal"
-        android:layout_marginTop="4dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAppearance="?textAppearanceBody2"
-        android:textColor="?colorOnBackgroundMedium"
-        app:layout_constraintStart_toEndOf="@+id/attachment_item_thumbnail"
-        app:layout_constraintTop_toBottomOf="@+id/attachment_item_name"
-        tools:text="Jan 9, 2014 - 13.5mb" />
-
-    <TextView
-        android:id="@+id/attachment_item_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_normal"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAppearance="?textAppearanceSubtitle1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/attachment_item_thumbnail"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="My_first_upload.pdf" />
-
     <com.dashlane.design.component.compat.view.ThumbnailView
         android:id="@+id/attachment_item_thumbnail"
         android:layout_width="wrap_content"
@@ -55,8 +27,8 @@
         android:id="@+id/attachment_item_selected"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="gone"
         android:importantForAccessibility="no"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/attachment_item_thumbnail"
         app:layout_constraintEnd_toEndOf="@id/attachment_item_thumbnail"
         app:layout_constraintStart_toStartOf="@id/attachment_item_thumbnail"
@@ -71,12 +43,58 @@
         android:indeterminate="false"
         android:indeterminateOnly="false"
         android:max="100"
-        android:visibility="gone"
         android:progressDrawable="@drawable/progress_circular"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/attachment_item_thumbnail"
         app:layout_constraintEnd_toEndOf="@id/attachment_item_thumbnail"
         app:layout_constraintStart_toStartOf="@id/attachment_item_thumbnail"
         app:layout_constraintTop_toTopOf="@id/attachment_item_thumbnail"
         tools:progress="50" />
+
+    <TextView
+        android:id="@+id/attachment_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:layout_marginTop="@dimen/spacing_normal"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceSubtitle1"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@id/attachment_item_downloaded_icon"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toEndOf="@id/attachment_item_thumbnail"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="My_first_upload.pdf" />
+
+    <ImageView
+        android:id="@+id/attachment_item_downloaded_icon"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_feedback_success_outlined"
+        android:tint="@color/text_positive_quiet"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/attachment_item_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/attachment_item_name"
+        app:layout_constraintTop_toTopOf="@id/attachment_item_name"
+        tools:ignore="UseAppTint"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/attachment_item_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_normal"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?textAppearanceBody2"
+        android:textColor="?colorOnBackgroundMedium"
+        app:layout_constraintStart_toEndOf="@+id/attachment_item_thumbnail"
+        app:layout_constraintTop_toBottomOf="@+id/attachment_item_name"
+        tools:text="Jan 9, 2014 - 13.5mb" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,26 +1,19 @@
 package com.dashlane.lock
 
-import android.app.Activity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 
 interface LockWatcher {
 
-    interface Listener : UnlockListener {
-        fun onLock()
-    }
+    val lockEventSharedFlow: SharedFlow<LockEvent>
 
-    interface UnlockListener {
-        fun onUnlockEvent(unlockEvent: UnlockEvent)
-    }
+    val lockEventFlow: Flow<LockEvent>
 
-    fun sendLockEvent()
+    suspend fun sendLockEvent()
 
-    fun sendUnlockEvent(unlockEvent: UnlockEvent)
+    suspend fun sendUnlockEvent(unlockEvent: LockEvent.Unlock)
 
-    fun register(listener: Listener)
-
-    fun unregister(listener: Listener)
+    suspend fun sendLockCancelled()
 
     suspend fun waitUnlock()
-
-    fun waitUnlock(activity: Activity?, unlockListener: UnlockListener)
 }

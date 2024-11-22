@@ -13,7 +13,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.util.Toaster
 import com.dashlane.util.isSemanticallyNull
 import java.util.concurrent.TimeUnit
@@ -22,7 +23,8 @@ import javax.inject.Provider
 import kotlinx.coroutines.delay
 
 class ClipboardCopyImpl @Inject constructor(
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
+    private val sessionManager: SessionManager,
     private val toaster: Toaster,
     private val workManagerProvider: Provider<WorkManager>,
     private val clipboardManagerProvider: Provider<ClipboardManager>
@@ -62,7 +64,7 @@ class ClipboardCopyImpl @Inject constructor(
             return
         }
         try {
-            if (userPreferencesManager.getBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT)) {
+            if (preferencesManager[sessionManager.session?.username].getBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT)) {
                 val request = OneTimeWorkRequestBuilder<ClearClipboardWorker>()
                     .setInitialDelay(30, TimeUnit.SECONDS) 
                     .addTag(REQUEST_TAG_CLEAR_CLIPBOARD)
@@ -96,10 +98,8 @@ class ClipboardCopyImpl @Inject constructor(
                 
                 clipboard.setPrimaryClip(ClipData.newPlainText("credential", " "))
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    
-                    clipboard.clearPrimaryClip()
-                }
+                
+                clipboard.clearPrimaryClip()
             } catch (e: Exception) {
             }
 

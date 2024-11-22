@@ -24,7 +24,7 @@ class NotificationCenterSectionDetailsFragment : Fragment() {
     lateinit var presenter: NotificationCenterPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.activity_notification_center_details, null)
+        val view = inflater.inflate(R.layout.fragment_notification_center_details, null)
         val section =
             ActionItemSection.valueOf(NotificationCenterSectionDetailsFragmentArgs.fromBundle(requireArguments()).extraSection)
         section.toPage()?.let { setCurrentPageView(it) }

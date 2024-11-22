@@ -23,7 +23,6 @@ import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.util.BankDataProvider
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.isNotSemanticallyNull
@@ -37,6 +36,7 @@ import com.dashlane.vault.model.forLabelOrDefault
 import com.dashlane.vault.model.identityPartialOrFullNameNoLogin
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
+import com.dashlane.vault.util.BankDataProvider
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.utils.Country
@@ -47,7 +47,8 @@ class ItemScreenConfigurationBankAccountProvider(
     private val genericDataQuery: GenericDataQuery,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
+    private val bankDataProvider: BankDataProvider,
 ) : ItemScreenConfigurationProvider() {
 
     @Suppress("UNCHECKED_CAST")
@@ -70,7 +71,7 @@ class ItemScreenConfigurationBankAccountProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         itemToSave as VaultItem<SyncObject.BankStatement>
         return itemToSave.syncObject.bankAccountBIC?.toString()?.trim().isNotSemanticallyNull() ||
-            itemToSave.syncObject.bankAccountIBAN?.toString()?.trim().isNotSemanticallyNull()
+                itemToSave.syncObject.bankAccountIBAN?.toString()?.trim().isNotSemanticallyNull()
     }
 
     private fun createHeader(
@@ -98,7 +99,6 @@ class ItemScreenConfigurationBankAccountProvider(
         canDelete: Boolean,
         listener: ItemEditViewContract.View.UiUpdateListener
     ): List<ItemSubView<*>> {
-        val bankDataProvider = BankDataProvider.instance
         val otherLabel = context.getString(R.string.other)
         val bankView = createBankSpinnerField(context, item, editMode, bankDataProvider, otherLabel)
         val bicView = createBicField(subViewFactory, context, item, editMode)
@@ -179,7 +179,7 @@ class ItemScreenConfigurationBankAccountProvider(
                 ItemSubViewWithActionWrapper(
                     it,
                     CopyAction(
-                        summaryObject = item.syncObject.toSummary(),
+                        summaryObject = item.toSummary(),
                         copyField = ibanCopyField(item.syncObject.localeFormat ?: Country.UnitedStates),
                         action = {},
                         vaultItemCopy = vaultItemCopy
@@ -210,7 +210,7 @@ class ItemScreenConfigurationBankAccountProvider(
                 ItemSubViewWithActionWrapper(
                     it,
                     CopyAction(
-                        summaryObject = item.syncObject.toSummary(),
+                        summaryObject = item.toSummary(),
                         copyField = bicCopyField(
                             item.syncObject.localeFormat ?: Country.UnitedStates
                         ),

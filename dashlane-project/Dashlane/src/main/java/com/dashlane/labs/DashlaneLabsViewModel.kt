@@ -3,9 +3,11 @@ package com.dashlane.labs
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.featureflipping.FeatureFlipManager
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.features.ListAvailableLabsService
 import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,8 +18,12 @@ import javax.inject.Inject
 class DashlaneLabsViewModel @Inject constructor(
     private val listAvailableLabsService: ListAvailableLabsService,
     private val featureFlipManager: FeatureFlipManager,
-    private val userPreferencesManager: UserPreferencesManager
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
 ) : ViewModel() {
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     private val _uiState = MutableStateFlow<DashlaneLabsState>(
         DashlaneLabsState.Loading(

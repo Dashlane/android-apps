@@ -6,7 +6,7 @@ import android.text.format.Formatter
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.launch
 import com.dashlane.R
-import com.dashlane.attachment.VaultItemLogAttachmentHelper
+import com.dashlane.vault.item.VaultItemLogAttachmentHelper
 import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.lock.LockHelper

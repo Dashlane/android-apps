@@ -24,7 +24,8 @@ import com.dashlane.autofill.util.SaveInfoWrapper
 import com.dashlane.autofill.util.copyPlusEntries
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.featureflipping.canUseAntiPhishing
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.LinkedList
 import javax.inject.Inject
@@ -51,7 +52,8 @@ internal class FillResponseCreatorImpl @Inject constructor(
     private val keyboardAutofillService: KeyboardAutofillService,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val urlPhishingClassificationHelper: UrlPhishingClassificationHelper,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     private val phishingWarningDataProvider: PhishingWarningDataProvider
 ) : FillResponseCreator {
 
@@ -112,7 +114,7 @@ internal class FillResponseCreatorImpl @Inject constructor(
 
         val phishingAttemptLevel =
             if (userFeaturesChecker.canUseAntiPhishing() &&
-                userPreferencesManager.isAntiPhishingEnable &&
+                preferencesManager[sessionManager.session?.username].isAntiPhishingEnable &&
                 !phishingWarningDataProvider.isWebsiteIgnored(summary.webDomain)
             ) {
                 getPhishingLevel(summary.webDomain)

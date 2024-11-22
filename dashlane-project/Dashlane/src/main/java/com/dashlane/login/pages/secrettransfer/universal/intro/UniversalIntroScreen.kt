@@ -18,21 +18,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.InfoboxMedium
 import com.dashlane.design.component.Text
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.SideEffect.Cancel
+import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.SideEffect.GoToHelp
+import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.SideEffect.Success
 import com.dashlane.login.pages.secrettransfer.universal.passphrase.PassphraseIdentificationScreen
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.ui.common.compose.components.ContentStepper
 import com.dashlane.ui.common.compose.components.LoadingScreen
-import com.dashlane.ui.widgets.compose.DashlaneLogo
-import com.dashlane.ui.widgets.compose.GenericErrorContent
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.dashlane.util.launchUrl
 
 @Composable
@@ -41,10 +43,9 @@ fun UniversalIntroScreen(
     viewModel: UniversalIntroViewModel,
     email: String?,
     onCancel: () -> Unit,
-    onSuccess: (SecretTransferPayload, RegisteredUserDevice.Remote) -> Unit,
+    onSuccess: (SecretTransferPayload) -> Unit,
     onGoToHelp: (String?) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val onContactSupport = { context.launchUrl("https://support.dashlane.com/hc/requests/new") }
 
@@ -52,44 +53,34 @@ fun UniversalIntroScreen(
         viewModel.onBackPressed()
     }
 
-    LaunchedEffect(key1 = uiState) {
-        when (val state = uiState) {
-            is UniversalIntroState.Error,
-            is UniversalIntroState.LoadingPassphrase,
-            is UniversalIntroState.LoadingAccount,
-            is UniversalIntroState.PassphraseVerification,
-            is UniversalIntroState.Initial -> Unit
-            is UniversalIntroState.GoToHelp -> {
-                viewModel.viewNavigated()
-                onGoToHelp(email)
-            }
-            is UniversalIntroState.Cancel -> {
-                onCancel()
-            }
-            is UniversalIntroState.Success -> {
-                viewModel.viewNavigated()
-                onSuccess(state.secretTransferPayload, state.registeredUserDevice)
-            }
-        }
-    }
-
     LaunchedEffect(viewModel) {
         viewModel.viewStarted(email)
+        viewModel.stateFlow.sideEffect.collect { sideEffect ->
+            when (sideEffect) {
+                GoToHelp -> {
+                    onGoToHelp(email)
+                }
+                is Cancel -> {
+                    onCancel()
+                }
+                is Success -> {
+                    onSuccess(sideEffect.secretTransferPayload)
+                }
+            }
+        }
     }
 
+    val uiState by viewModel.stateFlow.viewState.collectAsStateWithLifecycle()
     when (val state = uiState) {
-        is UniversalIntroState.GoToHelp,
-        is UniversalIntroState.Initial -> UniversalIntroContent(modifier = modifier, onRecoveryClicked = viewModel::helpClicked)
-        is UniversalIntroState.LoadingPassphrase -> LoadingScreen(title = stringResource(id = R.string.login_universal_d2d_loading_challenge))
-        is UniversalIntroState.Success,
-        is UniversalIntroState.LoadingAccount -> LoadingScreen(title = stringResource(id = R.string.login_universal_d2d_loading_account))
-        is UniversalIntroState.PassphraseVerification -> {
+        is UniversalIntroState.View.Initial -> UniversalIntroContent(modifier = modifier, onRecoveryClicked = viewModel::helpClicked)
+        is UniversalIntroState.View.LoadingPassphrase -> LoadingScreen(title = stringResource(id = R.string.login_universal_d2d_loading_challenge))
+        is UniversalIntroState.View.LoadingAccount -> LoadingScreen(title = stringResource(id = R.string.login_universal_d2d_loading_account))
+        is UniversalIntroState.View.PassphraseVerification -> {
             PassphraseIdentificationScreen(
-                passphrase = state.data.passphrase ?: emptyList()
+                passphrase = state.passphrase
             )
         }
-        is UniversalIntroState.Error -> UniversalIntroErrorContent(error = state.error, onCancel = onCancel, onContactSupport = onContactSupport)
-        is UniversalIntroState.Cancel -> Unit
+        is UniversalIntroState.View.Error -> UniversalIntroErrorContent(error = state.error, onCancel = onCancel, onContactSupport = onContactSupport)
     }
 }
 
@@ -104,7 +95,7 @@ fun UniversalIntroContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+        DashlaneLogoLockup(height = 40.dp)
         Text(
             text = stringResource(id = R.string.login_universal_d2d_intro_title),
             style = DashlaneTheme.typography.titleSectionLarge,
@@ -173,6 +164,6 @@ fun UniversalIntroErrorContent(
 
 @Preview
 @Composable
-fun UniversalIntroContentPreview() {
+private fun UniversalIntroContentPreview() {
     DashlanePreview { UniversalIntroContent(onRecoveryClicked = {}) }
 }

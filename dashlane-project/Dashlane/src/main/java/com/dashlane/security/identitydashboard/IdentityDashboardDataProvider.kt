@@ -5,10 +5,10 @@ import com.dashlane.events.BreachStatusChangedEvent
 import com.dashlane.events.clearLastEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.skocken.presentation.provider.BaseDataProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -39,12 +39,14 @@ class IdentityDashboardDataProvider @Inject constructor(
 
     override fun getAuthentifiantsSecurityInfoAsync(forceRefresh: Boolean): Deferred<AuthentifiantSecurityEvaluator.Result?> {
         if (forceRefresh) {
+            latestSecurityScoreEvaluatorResult?.cancel()
             latestSecurityScoreEvaluatorResult = null
         }
         return latestSecurityScoreEvaluatorResult
             ?: coroutineScope.async(Dispatchers.Default) {
                 getAuthentifiantSecurityInfoAsync()
             }.apply {
+                latestSecurityScoreEvaluatorResult?.cancel()
                 latestSecurityScoreEvaluatorResult = this
             }
     }
@@ -61,10 +63,6 @@ class IdentityDashboardDataProvider @Inject constructor(
         appEventListener.unlisten()
     }
 
-    private fun refreshUI() {
-        presenter.requireRefresh(forceRefresh = false)
-    }
-
     class AppEventsListener(
         private val appEvents: AppEvents,
         dataProvider: IdentityDashboardDataProvider
@@ -75,7 +73,7 @@ class IdentityDashboardDataProvider @Inject constructor(
             appEvents.register<BreachStatusChangedEvent>(this, true) {
                 dataProviderRef.get()?.apply {
                     appEvents.clearLastEvent<BreachStatusChangedEvent>()
-                    refreshUI()
+                    presenter.requireRefresh(forceRefresh = true)
                 } ?: appEvents.unregister<BreachStatusChangedEvent>(this)
             }
         }

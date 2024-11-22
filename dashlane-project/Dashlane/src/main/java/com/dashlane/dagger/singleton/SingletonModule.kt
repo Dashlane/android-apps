@@ -8,36 +8,28 @@ import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.DashlaneAnnouncementCenter
 import com.dashlane.announcements.modules.BrazeInAppPopupModule
 import com.dashlane.authentication.UserStorage
-import com.dashlane.authentication.accountsmanager.AccountsManager
 import com.dashlane.authentication.login.AuthenticationDeviceRepository
 import com.dashlane.authentication.login.AuthenticationDeviceRepositoryImpl
-import com.dashlane.autofill.AutofillAnalyzerDef.IUserPreferencesAccess
 import com.dashlane.braze.BrazeInAppMessageSubscriber
 import com.dashlane.braze.BrazeWrapper
 import com.dashlane.debug.DashlaneBuildConfig
-import com.dashlane.events.AppEvents
-import com.dashlane.login.lock.LockManager
+import com.dashlane.hardwaresecurity.CryptoObjectHelper
+import com.dashlane.lock.LockManager
 import com.dashlane.network.inject.RetrofitModule
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.preference.UserPreferencesManager.UserLoggedIn
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.premium.StoreOffersCache
 import com.dashlane.server.api.endpoints.authentication.AuthLoginService
 import com.dashlane.server.api.endpoints.payments.StoreOffersService
 import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionManagerImpl
-import com.dashlane.settings.AutofillUserPreferencesAccess
-import com.dashlane.storage.securestorage.SecureStorageManager
-import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.storage.userdata.EmailSuggestionProvider
 import com.dashlane.storage.userdata.EmailSuggestionProviderImpl
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.dagger.UserDataAccessorModule
 import com.dashlane.ui.PostAccountCreationCoordinator
 import com.dashlane.ui.activities.onboarding.HomeActivityIntentCoordinator
-import com.dashlane.ui.premium.inappbilling.service.StoreOffersCache
-import com.dashlane.ui.util.DialogHelper
 import com.dashlane.url.assetlinks.UrlDomainAssetLinkService
-import com.dashlane.util.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.google.gson.Gson
 import dagger.Module
@@ -63,29 +55,8 @@ open class SingletonModule {
     }
 
     @Provides
-    @Singleton
-    open fun provideDialogHelper(): DialogHelper {
-        return DialogHelper()
-    }
-
-    @Provides
-    @Singleton
-    fun provideAccountsManager(@ApplicationContext context: Context): AccountsManager {
-        return AccountsManager(context)
-    }
-
-    @Provides
     fun provideUrlDomainAssetLinkService(callFactory: Call.Factory): UrlDomainAssetLinkService {
         return UrlDomainAssetLinkService(callFactory)
-    }
-
-    @Singleton
-    @Provides
-    open fun provideUserPreferencesManager(
-        @ApplicationContext context: Context,
-        sessionManager: SessionManager
-    ): UserPreferencesManager {
-        return UserLoggedIn(context, sessionManager)
     }
 
     @Provides
@@ -118,14 +89,6 @@ open class SingletonModule {
 
     @Provides
     @Singleton
-    fun provideUserSecureDataStorageManager(
-        secureDataStoreManager: SecureStorageManager
-    ): UserSecureStorageManager {
-        return UserSecureStorageManager(secureDataStoreManager)
-    }
-
-    @Provides
-    @Singleton
     fun provideAccessibleOffersCache(
         service: StoreOffersService,
         sessionManager: SessionManager
@@ -135,8 +98,8 @@ open class SingletonModule {
 
     @Provides
     @Singleton
-    fun provideCryptoObjectHelper(userPreferencesManager: UserPreferencesManager): CryptoObjectHelper {
-        return CryptoObjectHelper(userPreferencesManager)
+    fun provideCryptoObjectHelper(preferencesManager: PreferencesManager): CryptoObjectHelper {
+        return CryptoObjectHelper(preferencesManager)
     }
 
     @Provides
@@ -158,9 +121,8 @@ open class SingletonModule {
     @Provides
     fun providePostAccountCreationCoordinator(
         @ApplicationContext context: Context,
-        appEvents: AppEvents
     ): PostAccountCreationCoordinator {
-        return HomeActivityIntentCoordinator(context, appEvents)
+        return HomeActivityIntentCoordinator(context)
     }
 
     @Provides
@@ -172,13 +134,6 @@ open class SingletonModule {
             userStorage,
             authLoginService
         )
-    }
-
-    @Provides
-    fun provideAutofillUserPreferencesAccess(
-        mUserPreferencesManager: UserPreferencesManager
-    ): IUserPreferencesAccess {
-        return AutofillUserPreferencesAccess(mUserPreferencesManager)
     }
 
     @Provides

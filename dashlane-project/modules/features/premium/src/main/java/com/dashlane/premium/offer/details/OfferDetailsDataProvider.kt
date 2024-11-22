@@ -2,11 +2,12 @@ package com.dashlane.premium.offer.details
 
 import android.content.Context
 import androidx.annotation.StringRes
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.premium.R
+import com.dashlane.premium.StoreOffersManager
 import com.dashlane.premium.offer.common.ProductDetailsManager
 import com.dashlane.premium.offer.common.StoreOffersFormatter
-import com.dashlane.premium.offer.common.StoreOffersManager
 import com.dashlane.premium.offer.common.model.FormattedStoreOffer
 import com.dashlane.premium.offer.common.model.OfferDetails
 import com.dashlane.premium.offer.common.model.OfferType
@@ -21,7 +22,6 @@ import com.dashlane.premium.offer.common.model.ProductPeriodicity.MONTHLY
 import com.dashlane.premium.offer.common.model.ProductPeriodicity.YEARLY
 import com.dashlane.server.api.endpoints.payments.StoreOffersService
 import com.dashlane.server.api.exceptions.DashlaneApiException
-import com.dashlane.featureflipping.UserFeaturesChecker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

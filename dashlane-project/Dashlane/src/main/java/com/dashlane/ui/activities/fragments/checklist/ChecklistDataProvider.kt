@@ -5,7 +5,9 @@ import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.KEY_G
 import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.KEY_GUIDED_PASSWORD_ONBOARDING_Q2_ANSWER
 import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.fromId
 import com.dashlane.inapplogin.InAppLoginManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import com.dashlane.storage.userdata.accessor.filter.CredentialFilter
@@ -19,11 +21,15 @@ import java.time.Instant
 import javax.inject.Inject
 
 class ChecklistDataProvider @Inject constructor(
-    private val userPreferencesManager: UserPreferencesManager,
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager,
     private val inAppLoginManager: InAppLoginManager,
     private val dataCounter: DataCounter,
     private val checklistHelper: ChecklistHelper
 ) : ChecklistDataProviderContract {
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     override fun hasDarkWebMonitoring() =
         userPreferencesManager.getBoolean(KEY_GUIDED_ONBOARDING_DWM_OPT_IN, false)

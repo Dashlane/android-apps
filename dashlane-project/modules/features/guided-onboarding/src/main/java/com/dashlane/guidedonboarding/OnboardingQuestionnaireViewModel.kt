@@ -26,7 +26,7 @@ import com.dashlane.hermes.generated.definitions.FormName
 import com.dashlane.hermes.generated.definitions.PossibleFormAnswers
 import com.dashlane.hermes.generated.events.user.SubmitInProductFormAnswer
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.ui.PostAccountCreationCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 internal class OnboardingQuestionnaireViewModel @Inject constructor(
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val darkWebMonitoringManager: DarkWebMonitoringManager,
     private val savedStateHandle: SavedStateHandle,
     private val postAccountCreationCoordinator: PostAccountCreationCoordinator,
@@ -82,7 +82,7 @@ internal class OnboardingQuestionnaireViewModel @Inject constructor(
             }
             QUESTION_3 -> {
                 currentViewData.answers[QUESTION_2]?.apply {
-                    userPreferencesManager.putInt(
+                    preferencesManager[currentViewData.email].putInt(
                         QuestionnaireAnswer.KEY_GUIDED_PASSWORD_ONBOARDING_Q2_ANSWER,
                         this.id
                     )
@@ -243,7 +243,7 @@ internal class OnboardingQuestionnaireViewModel @Inject constructor(
             val email = currentData.email ?: return@launch
             when (darkWebMonitoringManager.optIn(email)) {
                 RESULT_OK, RESULT_ALREADY_ACTIVATED -> {
-                    userPreferencesManager.putBoolean(
+                    preferencesManager[email].putBoolean(
                         QuestionnaireAnswer.KEY_GUIDED_ONBOARDING_DWM_OPT_IN,
                         true
                     )

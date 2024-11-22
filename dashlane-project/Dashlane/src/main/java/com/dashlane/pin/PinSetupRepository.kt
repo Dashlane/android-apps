@@ -1,39 +1,31 @@
 package com.dashlane.pin
 
-import com.dashlane.user.UserAccountInfo
-import com.dashlane.account.UserAccountStorage
-import com.dashlane.core.KeyChainHelper
-import com.dashlane.login.lock.LockTypeManager
+import com.dashlane.lock.LockType
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
-import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.storage.securestorage.UserSecureStorageManager
+import com.dashlane.util.keychain.KeyChainHelper
 import javax.inject.Inject
 
 class PinSetupRepository @Inject constructor(
-    private val sessionManager: SessionManager,
     private val lockRepository: LockRepository,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val keyChainHelper: KeyChainHelper,
-    private val userAccountStorage: UserAccountStorage,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
 ) {
 
-    fun savePinValue(pin: String) {
-        val session = sessionManager.session ?: return
+    fun savePinValue(session: Session, pin: String) {
         keyChainHelper.initializeKeyStoreIfNeeded(session.userId)
-        if (canUseMasterPassword(session.userId)) {
-            lockRepository.getLockManager(session).setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
+        lockRepository.getLockManager(session).addLock(session.username, LockType.PinCode)
+        preferencesManager[session.username].apply {
+            putBoolean(ConstantsPrefs.HOME_PAGE_GETTING_STARTED_PIN_IGNORE, true)
+            pinCodeLength = pin.length
         }
-        userPreferencesManager.putBoolean(ConstantsPrefs.HOME_PAGE_GETTING_STARTED_PIN_IGNORE, true)
         userSecureStorageManager.storePin(session.localKey, session.username, pin)
         sessionCredentialsSaver.saveCredentials(session)
-    }
-
-    fun canUseMasterPassword(email: String): Boolean {
-        return userAccountStorage[email]?.accountType is UserAccountInfo.AccountType.MasterPassword
     }
 }

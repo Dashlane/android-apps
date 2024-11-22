@@ -2,7 +2,7 @@ package com.dashlane.login.sso
 
 import com.dashlane.createaccount.CreateAccountAuthModule
 import com.dashlane.login.dagger.AuthBindingModule
-import com.dashlane.login.dagger.LoginAuthModule
+import com.dashlane.authentication.hilt.LoginAuthModule
 import com.dashlane.network.inject.DashlaneServicesModule
 import dagger.Binds
 import dagger.Module

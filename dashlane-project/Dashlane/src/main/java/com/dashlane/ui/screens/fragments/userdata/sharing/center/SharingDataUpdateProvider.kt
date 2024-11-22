@@ -1,6 +1,6 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.SharingGetService

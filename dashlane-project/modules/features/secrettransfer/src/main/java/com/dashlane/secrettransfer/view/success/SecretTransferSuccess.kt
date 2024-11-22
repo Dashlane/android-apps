@@ -52,6 +52,6 @@ fun SecretTransferSuccess(
 
 @Preview
 @Composable
-fun SecretTransferSuccessPreview() {
+private fun SecretTransferSuccessPreview() {
     DashlanePreview { SecretTransferSuccess() }
 }

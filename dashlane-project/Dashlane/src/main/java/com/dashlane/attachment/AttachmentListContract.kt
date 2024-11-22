@@ -1,11 +1,9 @@
 package com.dashlane.attachment
 
-import android.Manifest
 import android.net.Uri
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.annotation.RequiresPermission
 import com.dashlane.attachment.ui.AttachmentItem
 import com.skocken.presentation.definition.Base
 import java.io.File
@@ -15,7 +13,7 @@ interface AttachmentListContract {
     interface ViewProxy : Base.IView {
         var selectedAttachments: Int
         val itemSize: Int
-        fun updateActionBar(barColor: Int, attachments: List<AttachmentItem>)
+        fun updateActionBar(attachments: List<AttachmentItem>)
         fun showAttachmentsList(attachments: List<AttachmentItem>)
         fun showFileDeleted(secureFileInfoId: String)
         fun showFileDeleteError(secureFileInfoId: String)
@@ -33,7 +31,6 @@ interface AttachmentListContract {
 
         suspend fun getDecipheredFile(attachmentItem: AttachmentItem): File
 
-        @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, conditional = true)
         suspend fun writeDecipheredFileToPublicFolder(attachmentItem: AttachmentItem)
 
         suspend fun deleteDecipheredFileCache()

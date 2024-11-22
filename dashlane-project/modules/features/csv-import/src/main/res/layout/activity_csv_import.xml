@@ -8,6 +8,7 @@
     android:layout_gravity="center_horizontal"
     tools:theme="@style/Theme.Dashlane.NoActionBar"
     tools:ignore="ButtonStyle"
+    android:fitsSystemWindows="true"
     >
 
     <TextView

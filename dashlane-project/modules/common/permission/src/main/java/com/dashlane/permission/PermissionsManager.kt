@@ -11,8 +11,6 @@ interface PermissionsManager {
         permission: String
     )
 
-    fun isAllowedToWriteToPublicFolder(): Boolean
-
     fun isAllowed(permission: String): Boolean
 
     fun onRequestPermissionResult(

@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="request_duo_challenge_button">Use Duo app instead</string>
-    <string name="request_duo_challenge_prompt">You have just been sent a push notification by Duo. Use your Duo app to verify your identity.\nYour notification expires in 30 seconds.</string>
-    <string name="request_duo_challenge_declined">The Duo notification was denied. Please try again.</string>
-
-    <string name="request_u2f_verification_fail">Looks like this key isn\'t registered with your account. Please register it in your account settings and try again.</string>
-    <string name="u2f_login_popup_title">Authenticate using a U2F Key</string>
-    <string name="u2f_login_popup_message">You can use USB or NFC keys to authenticate. If your U2F key has NFC capability, make sure your NFC is enabled and then tap the key to the back of your device to authenticate.</string>
-    <string name="u2f_login_confirm_presence_popup_title">U2F Key detected!</string>
-    <string name="u2f_login_confirm_presence_popup_message">Please press the button on your key to authenticate</string>
-
     <string name="login_monobucket_log_out">Log out</string>
     <string name="login_monobucket_unlink_previous_device">Unlink previous device</string>
     <string name="login_monobucket_see_premium_plan">Upgrade to Premium</string>
@@ -85,21 +75,7 @@
     <string name="user_support_file_copy">Copy</string>
     
     <string name="user_support_file_fail_title">We encountered an unexpected error. Please try again.</string>
-    
-    <string name="user_support_file_copied">Copied</string>
 
-    
-    <string name="login_secret_transfer_step_label">%1$d of %2$d</string>
-    
-    <string name="login_secret_transfer_qr_code_title">Scan the QR code using the camera on your logged-in mobile device</string>
-    
-    <string name="login_secret_transfer_qr_code_help_button">Log in with another method</string>
-    
-    <string name="login_secret_transfer_qr_code_help_sheet_title">How do you want to log in?</string>
-    
-    <string name="login_secret_transfer_qr_code_help_sheet_primary_button">Take security challenge</string>
-    
-    <string name="login_secret_transfer_qr_code_help_sheet_secondary_button">Use recovery key</string>
     
     <string name="login_secret_transfer_confirm_email_title">Confirm your email address</string>
     
@@ -109,22 +85,7 @@
     
     <string name="login_secret_transfer_confirm_email_button_confirm">Confirm</string>
     
-    <string name="login_secret_transfer_totp_push_2fa_code_button">Use 2FA token instead</string>
-    
     <string name="login_secret_transfer_loading_login_title">Logging you in...</string>
-    
-    <string name="login_secret_transfer_data_error_title">We couldn’t load your account information</string>
-    
-    <string name="login_secret_transfer_data_error_message">There was an issue loading your Dashlane account information. Please try again.</string>
-    
-    <string name="login_secret_transfer_login_error_title">We couldn’t log you in to your account</string>
-    
-    <string name="login_secret_transfer_login_error_message">There was an issue logging you in to your Dashlane account. Please try again.</string>
-    
-    <string name="login_secret_transfer_error_button_retry">Retry</string>
-    
-    <string name="login_secret_transfer_error_button_cancel">Cancel</string>
-
     
     <string name="login_secret_transfer_choose_type_title">Use a logged in device to access Dashlane</string>
     
@@ -194,7 +155,7 @@
     <string name="login_team_error">An error has occurred. Please reach out to your plan admin for more info.</string>
 
     
-    <string name="login_totp_text_field_label">2FA Token</string>
+    <string name="login_totp_text_field_label">2FA token</string>
     
     <string name="login_totp_next_button">Next</string>
     
@@ -235,4 +196,8 @@
     <string name="login_password_switch_account_label">Account</string>
     
     <string name="login_password_forgot_password_button">Forgot your password?</string>
+
+    
+    <string name="login_settings_title">Customize your settings for this device</string>
+
 </resources>

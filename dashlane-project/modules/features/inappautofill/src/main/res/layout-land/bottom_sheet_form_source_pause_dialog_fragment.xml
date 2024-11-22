@@ -25,17 +25,16 @@
 
     <ImageView
         android:id="@+id/dashlogo"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="24sp"
+        android:layout_height="24sp"
         android:layout_marginStart="@dimen/spacing_small"
-        android:layout_marginTop="14dp"
         android:layout_marginEnd="@dimen/spacing_normal"
-        android:scaleType="centerInside"
-        android:src="@drawable/day_night_logo"
+        android:layout_marginTop="2sp"
+        android:src="@drawable/vd_logo_dashlane_micro_logomark"
+        android:tint="@color/text_neutral_catchy"
         dashlane:layout_constraintStart_toStartOf="parent"
-        dashlane:layout_constraintTop_toBottomOf="@id/handle"
-        dashlane:tint="@color/text_neutral_catchy"
-        />
+        dashlane:layout_constraintTop_toTopOf="@id/title"
+        tools:ignore="UseAppTint" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/title"
@@ -45,7 +44,7 @@
         android:layout_marginTop="14dp"
         android:paddingBottom="14dp"
         android:text="@string/autofill_view_all_accounts_search_sheet_title"
-        android:textAppearance="?textAppearanceHeadline6"
+        android:textAppearance="@style/TextStyle.Dashlane.TitleSectionMedium"
         android:textColor="@color/text_neutral_catchy"
         dashlane:layout_constraintEnd_toEndOf="parent"
         dashlane:layout_constraintStart_toEndOf="@+id/dashlogo"

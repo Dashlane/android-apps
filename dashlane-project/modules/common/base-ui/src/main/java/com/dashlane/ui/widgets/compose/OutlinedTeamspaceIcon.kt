@@ -115,7 +115,7 @@ private fun buildOutlinedPath(width: Float, height: Float): Path = Path().apply 
 
 @Preview
 @Composable
-fun TeamspaceIconPreview() {
+private fun TeamspaceIconPreview() {
     DashlanePreview {
         OutlinedTeamspaceIcon(
             letter = 'E',
@@ -127,7 +127,7 @@ fun TeamspaceIconPreview() {
 
 @Preview
 @Composable
-fun TeamspaceIconLargePreview() {
+private fun TeamspaceIconLargePreview() {
     DashlanePreview {
         OutlinedTeamspaceIcon(
             letter = 'E',

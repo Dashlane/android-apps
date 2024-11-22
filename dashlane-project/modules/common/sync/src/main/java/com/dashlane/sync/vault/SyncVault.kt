@@ -11,7 +11,7 @@ interface SyncVault {
 
     var lastSyncTime: Instant?
 
-    suspend fun inTransaction(block: TransactionScope.() -> Unit)
+    suspend fun inTransaction(block: suspend TransactionScope.() -> Unit)
 
     suspend fun prepareOutgoingOperations(types: List<SyncObjectType>)
 

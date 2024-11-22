@@ -1,8 +1,9 @@
 package com.dashlane.ui.activities.fragments.list.wrapper
 
 import android.content.Context
-import com.dashlane.item.subview.quickaction.QuickActionProvider
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
+import com.dashlane.securefile.extensions.hasAttachments
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.list.action.CopyItemFieldListItemAction
@@ -15,7 +16,6 @@ import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
 import com.dashlane.vault.textfactory.list.StatusText
-import com.dashlane.vault.util.hasAttachments
 import com.dashlane.vault.util.valueOfFromDataIdentifier
 import com.dashlane.xml.domain.SyncObjectType
 

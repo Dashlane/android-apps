@@ -6,7 +6,7 @@ import com.dashlane.authenticator.AuthenticatorIntro
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.util.showAuthenticatorRemoveConfirmDialog
 import com.dashlane.item.ItemEditViewContract.View.UiUpdateListener
-import com.dashlane.item.subview.Action
+import com.dashlane.ui.action.Action
 import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.util.DialogHelper

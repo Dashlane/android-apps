@@ -20,6 +20,8 @@
     <string name="plan_activating_features">Activating your new features...</string>
     <string name="plan_bought_thanks_title">Thanks for signing up for %1$s!</string>
     <string name="plan_bought_thanks_message">Your new features are ready to use on all of your devices.</string>
+    
+    <string name="plan_bought_thanks_close">Close</string>
     <string name="family_plan_bought_thanks_message">Check your inbox for a welcome email on getting started and inviting members to your family plan.</string>
     <string name="plan_check_purchase_error_title">Your upgrade is being processed</string>
     <string name="plan_check_purchase_error_message">It\'s taking a little while to process your upgrade, but your new features will be available soon.</string>

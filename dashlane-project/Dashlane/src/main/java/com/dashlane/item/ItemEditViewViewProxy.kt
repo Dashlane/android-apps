@@ -36,7 +36,7 @@ import com.dashlane.item.BaseUiUpdateListener.Companion.NFC_DIALOG_SUCCESS_TAG
 import com.dashlane.item.BaseUiUpdateListener.Companion.NFC_DIALOG_TAG
 import com.dashlane.item.delete.DeleteVaultItemFragment
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.item.subview.Action
+import com.dashlane.ui.action.Action
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.ViewFactory

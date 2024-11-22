@@ -1,50 +1,45 @@
 package com.dashlane.createaccount
 
 import android.widget.EditText
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.authentication.TermsOfService
 import com.dashlane.authentication.create.AccountCreationRepository
 import com.dashlane.authentication.create.AccountCreator
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.biometricrecovery.BiometricRecovery
-import com.dashlane.core.KeyChainHelper
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.SharingKeys
-import com.dashlane.debug.DaDaDa
 import com.dashlane.debug.DeveloperUtilities
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.lock.LockEvent
+import com.dashlane.debug.services.DaDaDaSecurity
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPass
+import com.dashlane.lock.LockType
 import com.dashlane.login.LoginMode
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockPass
-import com.dashlane.login.lock.LockTypeManager
 import com.dashlane.notification.LocalNotificationCreator
+import com.dashlane.pin.PinSetupRepository
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.AccountType
-import com.dashlane.crypto.keys.AppKey
 import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionResult
 import com.dashlane.session.SessionTrasher
-import com.dashlane.user.Username
-import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.session.repository.LockRepository
-import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
-import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.Username
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 class AccountCreatorImpl @Inject constructor(
-    @ApplicationCoroutineScope
-    private val applicationCoroutineScope: CoroutineScope,
     @DefaultCoroutineDispatcher
     private val defaultCoroutineDispatcher: CoroutineDispatcher,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
@@ -52,17 +47,16 @@ class AccountCreatorImpl @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
     private val accountCreationRepository: AccountCreationRepository,
     private val sessionInitializer: SessionInitializer,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val accountCreationSetup: AccountCreationSetup,
     private val sessionTrasher: SessionTrasher,
     private val localNotificationCreator: LocalNotificationCreator,
     private val lockManager: LockManager,
     private val authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
     private val biometricRecovery: BiometricRecovery,
-    private val daDaDa: DaDaDa,
-    private val keyChainHelper: KeyChainHelper,
-    private val userSecureStorageManager: UserSecureStorageManager,
-    private val accountStatusRepository: AccountStatusRepository
+    private val dadadaSecurity: DaDaDaSecurity,
+    private val accountStatusRepository: AccountStatusRepository,
+    private val pinSetupRepository: PinSetupRepository,
 ) : AccountCreator {
 
     override suspend fun createAccount(
@@ -88,8 +82,8 @@ class AccountCreatorImpl @Inject constructor(
                 conditions = termsState?.conditions,
                 offers = termsState?.offers
             ),
-            withRemoteKey = daDaDa.isCreateAccountWithRemoteKeyEnabled,
-            withLegacyCrypto = daDaDa.isCreateAccountWithLegacyCryptoEnabled,
+            withRemoteKey = dadadaSecurity.isCreateAccountWithRemoteKeyEnabled,
+            withLegacyCrypto = dadadaSecurity.isCreateAccountWithLegacyCryptoEnabled,
             country = country
         )
 
@@ -189,7 +183,7 @@ class AccountCreatorImpl @Inject constructor(
     ) {
         val username = Username.ofEmail(email)
         if (accountReset) {
-            sessionTrasher.trash(username)
+            sessionTrasher.trash(username = username, deletePreferences = true)
         }
         val localKeyResult =
             authenticationLocalKeyRepository.createForRemote(username, appKey, cryptographyMarker)
@@ -212,17 +206,15 @@ class AccountCreatorImpl @Inject constructor(
             is SessionResult.Success -> {
                 val session = sessionResult.session
 
-                userPreferencesManager
-                    .preferencesFor(session.username)
-                    .putBoolean(ConstantsPrefs.MIGRATION_15, true)
+                preferencesManager[session.username].putBoolean(ConstantsPrefs.MIGRATION_15, true)
 
                 finishAccountCreation(
-                    session,
-                    origin,
-                    biometricEnabled,
-                    resetMpEnabled,
-                    appKey,
-                    pinCode
+                    session = session,
+                    origin = origin,
+                    biometricEnabled = biometricEnabled,
+                    biometricRecoveryEnabled = resetMpEnabled,
+                    appKey = appKey,
+                    pinCode = pinCode
                 )
             }
 
@@ -236,7 +228,7 @@ class AccountCreatorImpl @Inject constructor(
         session: Session,
         origin: String?,
         biometricEnabled: Boolean,
-        resetMpEnabled: Boolean,
+        biometricRecoveryEnabled: Boolean,
         appKey: AppKey,
         pinCode: String?
     ) {
@@ -249,50 +241,42 @@ class AccountCreatorImpl @Inject constructor(
 
         localNotificationCreator.registerAccountCreation()
 
-        lockManager.unlock(LockPass.ofPassword(appKey))
+        lockManager.unlock(session = session, pass = LockPass.ofPassword(appKey))
+        runCatching {
+            lockManager.sendUnlockEvent(
+                LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword)
+            )
+        }
         if (pinCode != null) {
             enablePinUnlock(session, pinCode)
         }
         if (biometricEnabled) {
-            applicationCoroutineScope.launch(defaultCoroutineDispatcher) {
-                enableBiometric(session)
-                if (resetMpEnabled) {
-                    enableResetMp()
-                }
+            enableBiometric(session)
+            if (biometricRecoveryEnabled) {
+                enableBiometricRecovery()
             }
         }
     }
 
     private suspend fun enableBiometric(session: Session) =
         withContext(defaultCoroutineDispatcher) {
-            
             runCatching {
-                sessionCredentialsSaver.saveCredentials(session)
                 
                 val result =
                     biometricAuthModule.createEncryptionKeyForBiometrics(username = session.userId)
                 if (!result) return@withContext
             }
             
-            lockRepository.getLockManager(session).setLockType(LockTypeManager.LOCK_TYPE_BIOMETRIC)
+            sessionCredentialsSaver.saveCredentials(session)
+            lockRepository.getLockManager(session).addLock(session.username, LockType.Biometric)
         }
 
     private suspend fun enablePinUnlock(session: Session, pinCode: String) =
         withContext(defaultCoroutineDispatcher) {
-            
-            keyChainHelper.initializeKeyStoreIfNeeded(session.userId)
-            lockRepository.getLockManager(session).setLockType(LockTypeManager.LOCK_TYPE_PIN_CODE)
-
-            userPreferencesManager.putBoolean(
-                ConstantsPrefs.HOME_PAGE_GETTING_STARTED_PIN_IGNORE,
-                true
-            )
-
-            userSecureStorageManager.storePin(session.localKey, session.username, pinCode)
-            sessionCredentialsSaver.saveCredentials(session)
+            pinSetupRepository.savePinValue(session = session, pin = pinCode)
         }
 
-    private fun enableResetMp() {
+    private fun enableBiometricRecovery() {
         
         biometricRecovery.isFeatureKnown = true
         biometricRecovery.setBiometricRecoveryFeatureEnabled(true)

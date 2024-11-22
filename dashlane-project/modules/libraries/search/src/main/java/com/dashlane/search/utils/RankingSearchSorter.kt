@@ -74,7 +74,6 @@ class RankingSearchSorter @Inject constructor(
         SyncObjectType.SECURE_NOTE -> ItemType.SECURE_NOTE
         SyncObjectType.BANK_STATEMENT -> ItemType.BANK_STATEMENT
         SyncObjectType.PAYMENT_CREDIT_CARD -> ItemType.CREDIT_CARD
-        SyncObjectType.PAYMENT_PAYPAL -> ItemType.PAYPAL
         SyncObjectType.DRIVER_LICENCE -> ItemType.DRIVER_LICENCE
         SyncObjectType.FISCAL_STATEMENT -> ItemType.FISCAL_STATEMENT
         SyncObjectType.ID_CARD -> ItemType.ID_CARD
@@ -87,8 +86,7 @@ class RankingSearchSorter @Inject constructor(
         SyncObjectType.PERSONAL_WEBSITE -> ItemType.PERSONAL_WEBSITE
         SyncObjectType.PHONE -> ItemType.PHONE_NUMBER
         SyncObjectType.PASSKEY -> ItemType.PASSKEY
-        else -> {
-            ItemType.UNSUPPORTED
-        }
+        SyncObjectType.SECRET -> ItemType.SECRET
+        else -> ItemType.UNSUPPORTED
     }
 }

@@ -10,7 +10,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
 import com.dashlane.R
 import com.dashlane.authenticator.AuthenticatorDashboardFragment
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.fragments.vault.VaultFragment
 import com.dashlane.ui.fragments.BaseUiFragment

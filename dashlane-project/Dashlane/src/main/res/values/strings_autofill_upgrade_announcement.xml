@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="autofill_upgrade_announcement_popup_title">Switch to the improved Autofill</string>
-    <string name="autofill_upgrade_announcement_popup_body">Autofill\'s now better than ever. Just select Dashlane and be on your way</string>
-    <string name="autofill_upgrade_announcement_popup_title_negative_button">Maybe later</string>
-    <string name="autofill_upgrade_announcement_popup_title_positive_button">Switch</string>
-</resources>

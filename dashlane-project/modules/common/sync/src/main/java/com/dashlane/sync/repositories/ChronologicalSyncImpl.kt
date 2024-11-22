@@ -7,6 +7,7 @@ import com.dashlane.server.api.endpoints.sync.SyncUploadService
 import com.dashlane.server.api.time.InstantEpochMilli
 import com.dashlane.server.api.time.toInstant
 import com.dashlane.server.api.time.toInstantEpochMilli
+import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.domain.IncomingTransaction
 import com.dashlane.sync.domain.OutgoingTransaction
 import com.dashlane.sync.domain.TransactionCipher
@@ -18,6 +19,7 @@ import com.dashlane.sync.vault.SyncVault
 import com.dashlane.xml.domain.SyncObjectType
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class ChronologicalSyncImpl @Inject constructor(
     private val syncServices: SyncServices,
@@ -32,7 +34,7 @@ class ChronologicalSyncImpl @Inject constructor(
         serverCredentials: ServerCredentials,
         vault: SyncVault,
         cryptographyEngineFactory: CryptographyEngineFactory,
-        syncProgressChannel: SyncProgressChannel?
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
     ): ChronologicalSync.Result {
         val lastLocalSyncDate = vault.lastSyncTime
 
@@ -50,7 +52,7 @@ class ChronologicalSyncImpl @Inject constructor(
             outgoingTransactions.count { it is OutgoingTransaction.Delete }
         )
 
-        syncProgressChannel?.trySend(SyncProgress.RemoteSync)
+        dataSyncState?.emit(DataSyncState.Active(SyncProgress.RemoteSync))
         val (vaultOperations, backupDate, summary, sharingSummary, sharingKeys) =
             syncRemote(
                 serverCredentials,
@@ -59,11 +61,11 @@ class ChronologicalSyncImpl @Inject constructor(
                 cryptographyEngineFactory,
                 vault,
                 outgoingTransactions,
-                syncProgressChannel
+                dataSyncState
             )
 
         
-        syncLocal(vault, vaultOperations.transactions, syncProgressChannel, syncObjectTypes)
+        syncLocal(vault, vaultOperations.transactions, dataSyncState, syncObjectTypes)
 
         
         vault.lastSyncTime = backupDate
@@ -92,7 +94,7 @@ class ChronologicalSyncImpl @Inject constructor(
         cryptographyEngineFactory: CryptographyEngineFactory,
         vault: SyncVault,
         pendingOperations: List<OutgoingTransaction>,
-        syncProgressChannel: SyncProgressChannel?
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
     ): RemoteSyncResult {
         val downloadRequest = SyncDownloadService.Request(
             teamAdminGroups = false,
@@ -103,10 +105,10 @@ class ChronologicalSyncImpl @Inject constructor(
         val downloadData = syncServices.download(serverCredentials, downloadRequest)
 
         val incomingTransactions = incomingTransactionsHelper.readTransactions(
-            downloadData,
-            cryptographyEngineFactory,
-            syncProgressChannel,
-            downloadData.sharing.toSharedIds()
+            downloadData = downloadData,
+            cryptographyEngineFactory = cryptographyEngineFactory,
+            dataSyncState = dataSyncState,
+            sharedIds = downloadData.sharing.toSharedIds()
         )
 
         val isSharingKeyGenerationNeeded = downloadRequest.needsKeys && downloadData.sharingKeys == null
@@ -114,14 +116,14 @@ class ChronologicalSyncImpl @Inject constructor(
         val sharingSummary = downloadData.sharing
         return if (isUploadNeeded) {
             upload(
-                syncProgressChannel,
-                incomingTransactions,
-                pendingOperations,
-                cryptographyEngineFactory,
-                isSharingKeyGenerationNeeded,
-                downloadData,
-                serverCredentials,
-                vault
+                dataSyncState = dataSyncState,
+                incomingTransactions = incomingTransactions,
+                pendingOperations = pendingOperations,
+                cryptographyEngineFactory = cryptographyEngineFactory,
+                isSharingKeyGenerationNeeded = isSharingKeyGenerationNeeded,
+                downloadData = downloadData,
+                serverCredentials = serverCredentials,
+                vault = vault
             )
         } else {
             RemoteSyncResult(
@@ -135,7 +137,7 @@ class ChronologicalSyncImpl @Inject constructor(
     }
 
     private suspend fun upload(
-        syncProgressChannel: SyncProgressChannel?,
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
         incomingTransactions: IncomingTransactionsHelper.Result,
         pendingOperations: List<OutgoingTransaction>,
         cryptographyEngineFactory: CryptographyEngineFactory,
@@ -144,7 +146,7 @@ class ChronologicalSyncImpl @Inject constructor(
         serverCredentials: ServerCredentials,
         vault: SyncVault
     ): RemoteSyncResult {
-        syncProgressChannel?.trySend(SyncProgress.Upload)
+        dataSyncState?.emit(DataSyncState.Active(SyncProgress.Upload))
 
         
         val (mergedOutgoingTransactions, mergedIncomingTransactions) = syncMerger.mergeRemoteAndLocalData(
@@ -209,25 +211,25 @@ class ChronologicalSyncImpl @Inject constructor(
     private suspend fun syncLocal(
         vault: SyncVault,
         vaultOperations: List<IncomingTransaction>,
-        syncProgressChannel: SyncProgressChannel?,
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
         syncObjectTypes: List<SyncObjectType>
     ) {
         
         vault.inTransaction {
-            syncLocal(vaultOperations, syncProgressChannel)
+            syncLocal(vaultOperations, dataSyncState)
         }
 
         
         vault.clearOutgoingOperations(syncObjectTypes)
     }
 
-    private fun SyncVault.TransactionScope.syncLocal(
+    private suspend fun SyncVault.TransactionScope.syncLocal(
         incomingTransactions: List<IncomingTransaction>,
-        syncProgressChannel: SyncProgressChannel?
+        dataSyncState: MutableSharedFlow<DataSyncState>?,
     ) {
         val operationCount = incomingTransactions.size
         incomingTransactions.forEachIndexed { index, it ->
-            syncProgressChannel?.trySend(SyncProgress.LocalSync(index, operationCount))
+            dataSyncState?.emit(DataSyncState.Active(SyncProgress.LocalSync(index, operationCount)))
             when (it) {
                 is IncomingTransaction.Update -> insertOrUpdateForSync(
                     it.identifier,

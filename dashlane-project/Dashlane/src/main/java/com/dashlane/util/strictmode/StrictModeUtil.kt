@@ -1,13 +1,11 @@
 package com.dashlane.util.strictmode
 
-import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.os.strictmode.DiskReadViolation
 import android.os.strictmode.DiskWriteViolation
 import android.os.strictmode.UntaggedSocketViolation
 import android.os.strictmode.Violation
-import androidx.annotation.RequiresApi
 import com.dashlane.BuildConfig
 import java.util.concurrent.Executors
 
@@ -38,10 +36,9 @@ object StrictModeUtil {
         StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder().apply {
                 detectAll()
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    penaltyListener(
-                        executor,
-                        StrictMode.OnThreadViolationListener { violation ->
+                penaltyListener(
+                    executor,
+                    StrictMode.OnThreadViolationListener { violation ->
                         when (violation) {
                             is DiskWriteViolation,
                             is DiskReadViolation -> {
@@ -53,8 +50,7 @@ object StrictModeUtil {
                         }
                         handleViolation(level, violation)
                     }
-                    )
-                }
+                )
             }.build()
         )
 
@@ -63,10 +59,9 @@ object StrictModeUtil {
             VmPolicy.Builder()
                 .apply {
                     detectAll()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        penaltyListener(
-                            executor,
-                            StrictMode.OnVmViolationListener { violation ->
+                    penaltyListener(
+                        executor,
+                        StrictMode.OnVmViolationListener { violation ->
                             when (violation) {
                                 is UntaggedSocketViolation -> {
                                     
@@ -75,8 +70,7 @@ object StrictModeUtil {
                             }
                             handleViolation(level, violation)
                         }
-                        )
-                    }
+                    )
                 }.build()
         )
     }
@@ -93,7 +87,6 @@ object StrictModeUtil {
         return false
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
     private fun handleViolation(level: String, violation: Violation) {
         val header = "StrictMode policy violation; ${violation::class.java.simpleName}:"
         when (level) {

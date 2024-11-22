@@ -17,6 +17,7 @@ import com.dashlane.autofill.securitywarnings.view.SecurityWarningsViewProxy
 import com.dashlane.autofill.ui.AutoFillResponseActivity
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.util.getParcelableExtraCompat
+import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,24 +77,25 @@ open class AutofillAuthActivity : AutoFillResponseActivity() {
     private fun onUserLoggedIn() {
         val item = itemToFill
         if (item is ToUnlockItemToFill<*>) {
-            val syncObject = componentInternal.itemLoader.loadSyncObject(item.itemId)
+            val vaultItem = componentInternal.itemLoader.loadSyncObject(item.itemId)
+            val syncObject = vaultItem?.syncObject
             when (item) {
                 is AuthentifiantItemToFill -> {
                     if (syncObject !is SyncObject.Authentifiant) {
                         finish()
                         return
                     }
-                    item.syncObject = syncObject
+                    item.vaultItem = vaultItem.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
 
                     val unlockedAuthentifiant = UnlockedAuthentifiant(summary!!.formSource, item)
                     
                     
                     if (isGuidedChangePassword) {
                         changePasswordShowDialog(unlockedAuthentifiant)
-                    } else if (shouldDisplayPhishingWarning(syncObject)) {
+                    } else if (shouldDisplayPhishingWarning(item.vaultItem)) {
                         AutofillPhishingWarningFragment.create(
                             summary,
-                            item.syncObject?.urlForUI(),
+                            item.vaultItem?.urlForUI(),
                             item.itemId,
                             phishingAttemptLevel
                         ).show(supportFragmentManager, SECURITY_WARNING_DIALOG_TAG)
@@ -108,7 +110,7 @@ open class AutofillAuthActivity : AutoFillResponseActivity() {
                         finish()
                         return
                     }
-                    item.syncObject = syncObject
+                    item.vaultItem = vaultItem.asVaultItemOfClassOrNull(SyncObject.PaymentCreditCard::class.java)
                 }
 
                 is OtpItemToFill -> {

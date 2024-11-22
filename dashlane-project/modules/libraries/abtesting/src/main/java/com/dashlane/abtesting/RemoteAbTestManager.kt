@@ -1,100 +1,85 @@
 package com.dashlane.abtesting
 
 import androidx.annotation.VisibleForTesting
-import com.dashlane.network.tools.authorization
 import com.dashlane.preference.PreferenceEntry
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.abtesting.AbTestingUserExperimentsService
-import com.dashlane.session.SessionManager
 import com.dashlane.user.Username
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 @Singleton
 class RemoteAbTestManager @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
-    private val sessionManager: SessionManager,
-    private val userPreferences: UserPreferencesManager,
-    private val service: AbTestingUserExperimentsService
+    private val preferencesManager: PreferencesManager,
+    private val service: AbTestingUserExperimentsService,
+    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : RemoteConfiguration {
     private val refreshMutex = Mutex()
 
-    private var lastSuccessfulRefreshTime: Long
-        get() = userPreferences.getLong(AB_TEST_LAST_REFRESH, 0)
-        set(value) {
-            userPreferences.putLong(AB_TEST_LAST_REFRESH, value)
+    private fun getLastSuccessfulRefreshTime(username: String): Long = preferencesManager[username].getLong(AB_TEST_LAST_REFRESH, 0)
+
+    private fun setLastSuccessfulRefreshTime(username: String, value: Long) {
+        preferencesManager[username].putLong(AB_TEST_LAST_REFRESH, value)
+    }
+
+    private fun hasRefreshed(username: String): Boolean {
+        return getLastSuccessfulRefreshTime(username) > 0L
+    }
+
+    private fun shouldSkipRefresh(username: String): Boolean {
+        val lastSuccessfulRefreshTime = getLastSuccessfulRefreshTime(username)
+        return lastSuccessfulRefreshTime > 0L && (System.currentTimeMillis() - lastSuccessfulRefreshTime) < REFRESH_DELAY_MILLIS
+    }
+
+    override fun launchRefreshIfNeeded(authorization: Authorization.User) {
+        applicationCoroutineScope.launch {
+            refreshIfNeeded(authorization)
         }
-
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    private val refreshActor = applicationCoroutineScope.actor<Unit>(capacity = Channel.CONFLATED) {
-        consumeEach {
-            refreshIfNeeded()
-        }
     }
 
-    private fun hasRefreshed(): Boolean {
-        return lastSuccessfulRefreshTime > 0L
-    }
-
-    private fun shouldSkipRefresh(): Boolean {
-        return hasRefreshed() && hasRefreshedRecently()
-    }
-
-    private fun hasRefreshedRecently() = (System.currentTimeMillis() - lastSuccessfulRefreshTime) < REFRESH_DELAY_MILLIS
-
-    override fun launchRefreshIfNeeded() {
-        refreshActor.trySend(Unit)
-    }
-
-    override suspend fun refreshIfNeeded() {
+    override suspend fun refreshIfNeeded(authorization: Authorization.User) {
         refreshMutex.withLock {
-            if (shouldSkipRefresh()) return
+            if (shouldSkipRefresh(authorization.login)) return
 
             runCatching {
-                refresh()
+                refresh(authorization)
             }
         }
     }
 
-    override fun load(): RemoteConfiguration.LoadResult {
-        return if (hasRefreshed()) RemoteConfiguration.LoadResult.Success else RemoteConfiguration.LoadResult.Failure
+    override fun load(username: String): RemoteConfiguration.LoadResult {
+        return if (hasRefreshed(username)) RemoteConfiguration.LoadResult.Success else RemoteConfiguration.LoadResult.Failure
     }
 
-    private suspend fun refresh() = withContext(Dispatchers.Default) {
-        
-        val session = sessionManager.session ?: return@withContext
-
+    private suspend fun refresh(authorization: Authorization.User) = withContext(defaultDispatcher) {
         
         if (ALL_TESTS.isEmpty()) {
-            lastSuccessfulRefreshTime = System.currentTimeMillis()
+            setLastSuccessfulRefreshTime(authorization.login, System.currentTimeMillis())
             return@withContext
         }
         val request = AbTestingUserExperimentsService.Request(ALL_TESTS.map { it.name })
 
         
-        val response = service.execute(session.authorization, request)
-
-        
-        if (session != sessionManager.session) return@withContext
-
+        val response = service.execute(authorization, request)
         val content = response.data.abTests
 
         
         val abTestStatus = prepareUpdateList(content, ALL_TESTS)
-        updateAbPreferences(abTestStatus)
+        updateAbPreferences(authorization.login, abTestStatus)
 
-        lastSuccessfulRefreshTime = System.currentTimeMillis()
+        setLastSuccessfulRefreshTime(authorization.login, System.currentTimeMillis())
     }
 
     @VisibleForTesting
@@ -136,7 +121,7 @@ class RemoteAbTestManager @Inject constructor(
     }
 
     @VisibleForTesting
-    internal fun updateAbPreferences(updatedValues: List<AbTestStatus>): Boolean {
+    internal fun updateAbPreferences(username: String, updatedValues: List<AbTestStatus>): Boolean {
         val preferencesEntryList = arrayListOf<PreferenceEntry>()
         updatedValues.onEach {
             val variantKey = it.name.asVariantPreferenceName()
@@ -153,37 +138,37 @@ class RemoteAbTestManager @Inject constructor(
             }
         }
         
-        return userPreferences.apply(preferencesEntryList)
+        return preferencesManager[username].apply(preferencesEntryList)
     }
 
-    private fun getVersion(test: Test): Int? {
+    private fun getVersion(username: String, test: Test): Int? {
         val versionPreference = test.name.asVersionPreferenceName()
-        return userPreferences.getString(versionPreference, null)?.toIntOrNull()
+        return preferencesManager[username].getString(versionPreference, null)?.toIntOrNull()
     }
 
-    fun getVariant(test: Test): Variant? {
+    fun getVariant(username: String, test: Test): Variant? {
         val variantPreference = test.name.asVariantPreferenceName()
-        return userPreferences.getString(variantPreference, null)?.let { variantName ->
+        return preferencesManager[username].getString(variantPreference, null)?.let { variantName ->
             test.variants.firstOrNull { it.name == variantName }
         }
     }
 
     fun getVariantForUser(test: Test, username: Username): Variant? {
         val variantPreference = test.name.asVariantPreferenceName()
-        return userPreferences.preferencesFor(username).getString(variantPreference, null)?.let { variantName ->
+        return preferencesManager[username].getString(variantPreference, null)?.let { variantName ->
             test.variants.firstOrNull { it.name == variantName }
         }
     }
 
-    fun getAbTestStatus(test: Test): AbTestStatus {
-        val variant = getVariant(test)
-        val version = getVersion(test)
+    fun getAbTestStatus(username: String, test: Test): AbTestStatus {
+        val variant = getVariant(username, test)
+        val version = getVersion(username, test)
         return AbTestStatus(test.name, variant?.name, version)
     }
 
-    fun getAbTestStatus(tests: List<Test>): List<AbTestStatus> {
+    fun getAbTestStatus(username: String, tests: List<Test>): List<AbTestStatus> {
         return tests.map { test ->
-            getAbTestStatus(test)
+            getAbTestStatus(username, test)
         }
     }
 

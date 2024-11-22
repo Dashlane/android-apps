@@ -20,9 +20,9 @@ import com.dashlane.search.fields.IdCardField
 import com.dashlane.search.fields.IdentityField
 import com.dashlane.search.fields.PasskeyField
 import com.dashlane.search.fields.PassportField
-import com.dashlane.search.fields.PaypalField
 import com.dashlane.search.fields.PersonalWebsiteField
 import com.dashlane.search.fields.PhoneField
+import com.dashlane.search.fields.SecretField
 import com.dashlane.search.fields.SecureNoteField
 import com.dashlane.search.fields.SettingSearchField
 import com.dashlane.search.fields.SocialSecurityStatementField
@@ -31,12 +31,14 @@ import com.dashlane.util.tryOrNull
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
+import com.dashlane.vault.util.BankDataProvider
 import javax.inject.Inject
 
 @Suppress("LargeClass")
 class SearchImprovementsUtils @Inject constructor(
     private val textResolver: DataIdentifierListTextResolver,
-    private val identityNameHolderService: IdentityNameHolderService
+    private val identityNameHolderService: IdentityNameHolderService,
+    private val bankDataProvider: BankDataProvider
 ) {
 
     @Suppress("LongMethod")
@@ -149,16 +151,13 @@ class SearchImprovementsUtils @Inject constructor(
                 context.getString(R.string.creditcard)
                     .toMatchOrNull(query, CreditCardField.ITEM_TYPE_NAME)
             },
-            { item, query -> item.asCreditCard()?.bank?.toMatchOrNull(query, CreditCardField.BANK) },
+            { item, query ->
+                val bankName = item.asCreditCard()?.let {
+                    bankDataProvider.getBankConfiguration(it.bank).displayName
+                }
+                bankName?.toMatchOrNull(query, CreditCardField.BANK)
+            },
             { item, query -> item.asCreditCard()?.ownerName?.toMatchOrNull(query, CreditCardField.OWNER) }
-        ),
-
-        ItemType.PAYPAL to listOf(
-            { item, query -> item.asPaypal()?.name?.toMatchOrNull(query, PaypalField.TITLE) },
-            { _, query ->
-                context.getString(R.string.paypal)
-                    .toMatchOrNull(query, PaypalField.ITEM_TYPE_NAME)
-            }
         ),
 
         
@@ -325,7 +324,19 @@ class SearchImprovementsUtils @Inject constructor(
                     .toMatchOrNull(query, PhoneField.ITEM_TYPE_NAME)
             },
         ),
-
+        
+        ItemType.SECRET to listOf(
+            { item, query ->
+                textResolver.getLine1(item as SummaryObject.Secret).text.toMatchOrNull(
+                    query,
+                    SecretField.TITLE
+                )
+            },
+            { _, query ->
+                context.getString(R.string.secret)
+                    .toMatchOrNull(query, SecretField.ITEM_TYPE_NAME)
+            },
+        ),
         
         ItemType.SETTING to listOf { item, query ->
             item.asSetting()?.getSettingTitle()?.toMatchOrNull(query, SettingSearchField.TITLE)
@@ -339,9 +350,11 @@ class SearchImprovementsUtils @Inject constructor(
             index == 0 -> {
                 Match(MatchPosition.START, searchField)
             }
+
             index > 0 -> {
                 Match(MatchPosition.ANYWHERE, searchField)
             }
+
             else -> {
                 null
             }
@@ -352,7 +365,6 @@ class SearchImprovementsUtils @Inject constructor(
     private fun Any.asPasskey(): SummaryObject.Passkey? = this as? SummaryObject.Passkey
     private fun Any.asBankStatement(): SummaryObject.BankStatement? = this as? SummaryObject.BankStatement
     private fun Any.asCreditCard(): SummaryObject.PaymentCreditCard? = this as? SummaryObject.PaymentCreditCard
-    private fun Any.asPaypal(): SummaryObject.PaymentPaypal? = this as? SummaryObject.PaymentPaypal
     private fun Any.asSecureNote(): SummaryObject.SecureNote? = this as? SummaryObject.SecureNote
     private fun Any.asDriverLicence(): SummaryObject.DriverLicence? = this as? SummaryObject.DriverLicence
     private fun Any.asIdCard(): SummaryObject.IdCard? = this as? SummaryObject.IdCard

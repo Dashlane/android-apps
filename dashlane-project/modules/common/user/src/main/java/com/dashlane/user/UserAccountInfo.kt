@@ -18,7 +18,7 @@ data class UserAccountInfo(
         object InvisibleMasterPassword : AccountType()
 
         companion object {
-            fun fromString(string: String?): AccountType {
+            fun fromString(string: String): AccountType {
                 return when (string) {
                     MASTER_PASSWORD -> MasterPassword
                     INVISIBLE_MASTER_PASSWORD -> InvisibleMasterPassword

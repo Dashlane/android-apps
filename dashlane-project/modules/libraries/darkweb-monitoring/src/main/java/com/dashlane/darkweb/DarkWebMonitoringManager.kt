@@ -2,7 +2,7 @@ package com.dashlane.darkweb
 
 import com.dashlane.breach.Breach
 import com.dashlane.breach.BreachWithOriginalJson
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.darkwebmonitoring.DarkWebMonitoringDeregisterEmailService
 import com.dashlane.server.api.endpoints.darkwebmonitoring.DarkWebMonitoringListLeaksService
 import com.dashlane.server.api.endpoints.darkwebmonitoring.DarkWebMonitoringListRegistrationsService

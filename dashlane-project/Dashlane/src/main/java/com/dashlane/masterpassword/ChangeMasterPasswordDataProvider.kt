@@ -1,7 +1,9 @@
 package com.dashlane.masterpassword
 
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyRepository
-import com.dashlane.accountrecoverykey.setting.AccountRecoveryKeySettingStateRefresher
+import com.dashlane.accountrecoverykey.AccountRecoveryKeySettingStateRefresher
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
+import com.dashlane.changemasterpassword.MasterPasswordChanger
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.hermes.generated.definitions.DeleteKeyReason
 import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService

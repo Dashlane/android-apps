@@ -23,6 +23,7 @@ import com.dashlane.ui.activities.intro.LinkItem
 
 @Composable
 fun PaywallScreenDWM(
+    modifier: Modifier = Modifier,
     intro: PaywallIntroState,
     navigateUp: () -> Unit,
     navigateToOffer: () -> Unit,
@@ -30,6 +31,7 @@ fun PaywallScreenDWM(
     onClickLink: (LinkItem) -> Unit
 ) {
     PaywallIntroScreen(
+        modifier = modifier,
         intro = intro,
         navigateUp = navigateUp,
         onNegativeButtonClicked = onCancelClick,
@@ -49,7 +51,7 @@ fun PaywallScreenDWM(
 
 @Preview
 @Composable
-fun PaywallScreenDWMPreview() {
+private fun PaywallScreenDWMPreview() {
     DashlanePreview {
         PaywallScreenDWM(
             intro = PaywallIntroState(

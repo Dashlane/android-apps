@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.dashlane.R
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseSecureNotes
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.ScreenConfiguration
@@ -18,13 +20,12 @@ import com.dashlane.item.subview.action.note.SecureNoteColorMenuAction
 import com.dashlane.item.subview.action.note.SecureNoteLockMenuAction
 import com.dashlane.item.subview.edit.ItemEditValueRawSubView
 import com.dashlane.item.subview.readonly.ItemReadValueRawSubView
+import com.dashlane.securefile.extensions.hasAttachments
+import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
-import com.dashlane.ui.screens.fragments.SharingPolicyDataProvider
-import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.featureflipping.canUseSecureNotes
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
@@ -32,7 +33,6 @@ import com.dashlane.vault.model.getColorId
 import com.dashlane.vault.model.hasBeenSaved
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
-import com.dashlane.vault.util.hasAttachments
 import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationSecureNoteProvider(

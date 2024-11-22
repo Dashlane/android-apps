@@ -49,7 +49,7 @@ import com.dashlane.item.subview.view.SpinnerInputProvider
 import com.dashlane.item.subview.view.SpinnerNoDefaultInputProvider
 import com.dashlane.item.subview.view.SwitchInputProvider
 import com.dashlane.item.subview.view.TextInputLayoutProvider
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.util.Toaster
 import com.dashlane.util.addOnFieldVisibilityToggleListener
 import com.dashlane.util.addTextChangedListener

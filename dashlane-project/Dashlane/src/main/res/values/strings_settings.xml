@@ -16,8 +16,6 @@
     <string name="setting_in_app_login_enabled_description">Fill forms using your data stored in Dashlane</string>
     
     <string name="setting_in_app_login_frozen_state_description">Your account is read-only. Autofill is unavailable.</string>
-    <string name="setting_in_app_login_browser_enabled_title">Additional Autofill permissions</string>
-    <string name="setting_in_app_login_browser_enabled_description">Enhance Autofill and allow Dashlane to detect form fields and autofill details on all web pages</string>
     
     <string name="settings_general_backup_export_business_data_restriction_title">Export only your personal data</string>
     
@@ -35,7 +33,7 @@
     <string name="setting_manage_devices_title">Manage activity</string>
     <string name="setting_manage_devices_description">Manage devices connected to your Dashlane account</string>
     
-    <string name="setting_show_rich_icons_title">Show Rich Icons for Logins</string>
+    <string name="setting_show_rich_icons_title">Show rich icons for logins</string>
     
     <string name="setting_show_rich_icons_description">Dashlane will download and display rich icons on your logins</string>
     

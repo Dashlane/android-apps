@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
 import com.dashlane.databinding.FragmentVaultListBinding
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.fragments.vault.VaultItemViewTypeProvider
 import com.dashlane.ui.activities.fragments.vault.VaultViewModel
@@ -16,7 +17,6 @@ import com.dashlane.ui.widgets.view.empty.EmptyScreenViewProvider
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.vault.VaultItemLogClickListener
 import com.dashlane.vault.VaultItemLogger
-import com.dashlane.home.vaultlist.Filter
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import kotlinx.coroutines.launch
 
@@ -42,9 +42,7 @@ class VaultListViewProxy(
         binding.dashboardView.adapter?.onItemClickListener = vaultItemLogClickListener
         binding.dashboardView.adapter?.onItemLongClickListener = this
 
-        vaultViewModel.observer(lifecycleOwner) {
-            vaultListViewModel.refreshItemList(it)
-        }
+        vaultViewModel.observer(vaultListViewModel::refreshItemList)
 
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {

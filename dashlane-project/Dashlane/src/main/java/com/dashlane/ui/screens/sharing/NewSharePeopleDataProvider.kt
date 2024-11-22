@@ -6,7 +6,7 @@ import com.dashlane.core.sharing.handleServerResponse
 import com.dashlane.core.sharing.toItemForEmailing
 import com.dashlane.core.sharing.toSharedVaultItemLite
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.CreateItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.InviteItemGroupMembersService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemForEmailing

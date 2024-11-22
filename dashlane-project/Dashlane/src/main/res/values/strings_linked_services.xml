@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="multi_domain_credentials_add_website">Link a website</string>
-    <string name="multi_domain_credentials_title">Websites</string>
+    <string name="multi_domain_credentials_title">Linked Services</string>
     <string name="multi_domain_credentials_added_by_you">Added by you</string>
     <string name="multi_domain_credentials_hint">Web address</string>
     <string name="multi_domain_credentials_automatically_added">Added by Dashlane</string>

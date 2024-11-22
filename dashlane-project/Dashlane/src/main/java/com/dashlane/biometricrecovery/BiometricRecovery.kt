@@ -4,9 +4,10 @@ import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.device.DeviceUpdateManager
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.BiometricAuthModule
 import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,11 +18,14 @@ import kotlin.reflect.KProperty
 class BiometricRecovery @Inject constructor(
     private val masterPasswordFeatureAccessChecker: ChangeMasterPasswordFeatureAccessChecker,
     private val userAccountStorage: UserAccountStorage,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val sessionManager: SessionManager,
     private val biometricAuthModule: BiometricAuthModule,
     private val deviceUpdateManager: Lazy<DeviceUpdateManager>,
 ) {
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
+
     fun isFeatureAvailable(): Boolean {
         sessionManager.session?.username
             ?.let { username -> userAccountStorage[username]?.accountType }
@@ -42,7 +46,7 @@ class BiometricRecovery @Inject constructor(
 
     var isFeatureKnown by booleanPref(PREF_KNOWN)
 
-    fun isSetUpForUser(username: String) = userPreferencesManager.preferencesFor(username).getBoolean(PREF_ENABLED) &&
+    fun isSetUpForUser(username: String) = preferencesManager[username].getBoolean(PREF_ENABLED) &&
         biometricAuthModule.isFeatureEnabled(username)
 
     private fun booleanPref(name: String) = object : ReadWriteProperty<Any, Boolean> {

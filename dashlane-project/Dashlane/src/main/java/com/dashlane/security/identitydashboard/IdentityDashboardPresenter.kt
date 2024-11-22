@@ -3,16 +3,16 @@ package com.dashlane.security.identitydashboard
 import android.content.Context
 import android.net.Uri
 import com.dashlane.help.HelpCenterLink
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.Navigator
 import com.dashlane.security.identitydashboard.item.IdentityDashboardItem
 import com.dashlane.security.identitydashboard.item.IdentityDashboardPasswordHealthItem
 import com.dashlane.security.identitydashboard.item.IdentityDashboardSeparatorItem
 import com.dashlane.security.identitydashboard.item.identityprotection.IdentityDashboardProtectionPackageActiveItem
+import com.dashlane.util.launchUrl
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
-import com.dashlane.util.launchUrl
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -53,11 +53,8 @@ class IdentityDashboardPresenter @Inject constructor(
         coroutineScope.launch(mainCoroutineDispatcher) { refreshList(forceRefresh = forceRefresh) }
     }
 
-    override fun onClick(item: IdentityDashboardItem) {
-        when (item) {
-            is IdentityDashboardPasswordHealthItem ->
-                navigateToPasswordHealth()
-        }
+    override fun onClickExplore() {
+        navigateToPasswordHealth()
     }
 
     override fun onClickCompromised() {

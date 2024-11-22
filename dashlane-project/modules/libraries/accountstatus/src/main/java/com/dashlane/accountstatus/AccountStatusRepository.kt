@@ -100,7 +100,7 @@ class AccountStatusRepositoryImpl @Inject constructor(
 
     private suspend fun updateAccountStatusForSession(session: Session, accountStatus: AccountStatus) {
         val savedStatus = _accountStatusState.value[session]
-        accountStatusListener.onUpdate(newStatus = accountStatus, oldStatus = savedStatus)
+        accountStatusListener.onUpdate(session.username, newStatus = accountStatus, oldStatus = savedStatus)
         _accountStatusState.emit(
             _accountStatusState.value.toMutableMap().also {
                 it[session] = accountStatus

@@ -130,7 +130,7 @@ fun TermAndConditionsContent(
         )
         Spacer(modifier = Modifier.weight(1f))
         ButtonMedium(
-            modifier = modifier
+            modifier = Modifier
                 .align(Alignment.End),
             enabled = tosCheck,
             onClick = onCreateAccountClick,
@@ -143,9 +143,9 @@ fun TermAndConditionsContent(
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun TermsAndConditionsScreenPreview() {
+private fun TermsAndConditionsScreenPreview() {
     DashlanePreview {
         TermAndConditionsContent(
             modifier = Modifier,

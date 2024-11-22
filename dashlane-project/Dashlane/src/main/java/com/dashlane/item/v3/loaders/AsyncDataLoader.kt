@@ -1,31 +1,26 @@
 package com.dashlane.item.v3.loaders
 
+import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.FormData
-import com.dashlane.item.v3.loaders.AsyncDataLoader.Loader
+import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.vault.summary.SummaryObject
 import kotlinx.coroutines.CoroutineScope
-import javax.inject.Inject
-import javax.inject.Provider
-import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
-class AsyncDataLoader @Inject constructor(
-    private val credentialAsyncDataLoader: Provider<CredentialAsyncDataLoader>
-) {
-    fun get(clazz: KClass<out SummaryObject>): Loader? = when (clazz) {
-        SummaryObject.Authentifiant::class -> credentialAsyncDataLoader.get()
-        else -> null
-    }
+interface AsyncDataLoader<T : FormData> {
+    fun loadAsync(
+        initialSummaryObject: SummaryObject,
+        isNewItem: Boolean,
+        scope: CoroutineScope,
+        additionalDataLoadedFunction: KFunction1<(Data<T>) -> Data<T>, Unit>,
+        onAllDataLoaded: suspend () -> Unit
+    )
 
-    interface Loader {
-        fun loadAsync(
-            initialSummaryObject: SummaryObject,
-            isNewItem: Boolean,
-            scope: CoroutineScope,
-            additionalDataLoadedFunction: KFunction1<(FormData) -> FormData, Unit>,
-            onAllDataLoaded: suspend () -> Unit
-        )
+    fun cancelAll()
 
-        fun cancelAll()
-    }
+    fun Data<T>.updateFormData(block: (T) -> T) =
+        this.copy(formData = block(this.formData))
+
+    fun Data<T>.updateCommonData(block: (CommonData) -> CommonData) =
+        this.copy(commonData = block(this.commonData))
 }

@@ -16,6 +16,7 @@ import com.dashlane.autofill.generatepassword.GeneratePasswordViewModel
 import com.dashlane.autofill.navigation.AutofillBottomSheetNavigator
 import com.dashlane.util.Toaster
 import com.dashlane.util.colorpassword.ColorTextWatcher
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.launch
 
@@ -33,7 +34,7 @@ class ChangePasswordViewProxy(
     private val context: Context
         get() = binding.root.context
 
-    private var oldAuthentifiant: SyncObject.Authentifiant? = null
+    private var oldAuthentifiant: VaultItem<SyncObject.Authentifiant>? = null
     private val passwordTextWatcher = object : ColorTextWatcher(context) {
         override fun onTextChanged(charSequence: CharSequence, start: Int, before: Int, count: Int) {
             super.onTextChanged(charSequence, start, before, count)

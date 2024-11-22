@@ -7,21 +7,14 @@ sealed class AuthenticationSecondFactor : Parcelable {
 
     abstract val login: String
     abstract val securityFeatures: Set<SecurityFeature>
-    abstract val authenticator: Authenticator?
-
-    val isAuthenticatorEnabled get() = authenticator != null
 
     @Parcelize
     data class EmailToken(
         override val login: String,
-        override val authenticator: Authenticator? = null
     ) : AuthenticationSecondFactor() {
         override val securityFeatures: Set<SecurityFeature>
             get() = buildSet {
                 add(SecurityFeature.EMAIL_TOKEN)
-                if (isAuthenticatorEnabled) {
-                    add(SecurityFeature.AUTHENTICATOR)
-                }
             }
     }
 
@@ -29,7 +22,6 @@ sealed class AuthenticationSecondFactor : Parcelable {
     data class Totp(
         override val login: String,
         override val securityFeatures: Set<SecurityFeature>,
-        override val authenticator: Authenticator? = null,
         val duoPush: DuoPush? = null,
         val u2f: U2f? = null,
     ) : AuthenticationSecondFactor() {
@@ -59,12 +51,6 @@ sealed class AuthenticationSecondFactor : Parcelable {
 
     @Parcelize
     data class DuoPush(
-        val login: String,
-        val securityFeatures: Set<SecurityFeature>
-    ) : Parcelable
-
-    @Parcelize
-    data class Authenticator(
         val login: String,
         val securityFeatures: Set<SecurityFeature>
     ) : Parcelable

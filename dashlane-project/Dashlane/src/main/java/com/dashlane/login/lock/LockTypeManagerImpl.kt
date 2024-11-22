@@ -1,26 +1,23 @@
 package com.dashlane.login.lock
 
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.biometricrecovery.BiometricRecovery
-import com.dashlane.lock.LockHelper
-import com.dashlane.lock.UnlockEvent
-import com.dashlane.login.pages.password.LoginPasswordPresenter
+import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.lock.LockType
+import com.dashlane.lock.LockTypeManager
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.SecurityHelper
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.securestorage.UserSecureStorageManager
-import com.dashlane.util.hardwaresecurity.BiometricAuthModule
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.Username
 import com.dashlane.util.isNotSemanticallyNull
-import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 
 class LockTypeManagerImpl @Inject constructor(
-    private val preferenceManager: UserPreferencesManager,
-    private val securityHelper: SecurityHelper,
+    private val preferencesManager: PreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val biometricAuthModule: BiometricAuthModule,
@@ -29,93 +26,57 @@ class LockTypeManagerImpl @Inject constructor(
     private val userAccountStorage: UserAccountStorage
 ) : LockTypeManager {
 
-    private val lockoutDays = 14L
-
-    @LockTypeManager.LockType
-    override fun getLockType(): Int {
-        return getLockType(true)
+    override fun getLocks(username: Username): List<LockType> {
+        val locks = mutableListOf<LockType>()
+        if (!isMPLess(username)) {
+            locks.add(LockType.MasterPassword)
+        }
+        if (biometricAuthModule.isHardwareSupported() &&
+            biometricAuthModule.isHardwareSetUp() &&
+            preferencesManager[username].getBoolean(ConstantsPrefs.USE_GOOGLE_FINGERPRINT)
+        ) {
+            locks.add(LockType.Biometric)
+        }
+        val isPin = preferencesManager[username].isPinCodeOn
+        if (isPin && isPinSettingValid()) {
+            locks.add(LockType.PinCode)
+        }
+        return locks
     }
 
-    @LockTypeManager.LockType
-    override fun getLockType(onlyIfAllow: Boolean): Int {
-        if (onlyIfAllow && !securityHelper.isDeviceSecured()) {
-            return LockTypeManager.LOCK_TYPE_MASTER_PASSWORD
-        }
-        if (biometricAuthModule.isHardwareSupported() && biometricAuthModule.isFeatureEnabled()) {
-            return LockTypeManager.LOCK_TYPE_BIOMETRIC
-        }
-        val isPin = preferenceManager.isPinCodeOn
-        return if (isPin && isPinSettingValid()) {
-            LockTypeManager.LOCK_TYPE_PIN_CODE
-        } else {
-            LockTypeManager.LOCK_TYPE_MASTER_PASSWORD
-        }
-    }
-
-    @LockTypeManager.LockType
-    override fun getLockType(@LockHelper.LockPrompt lockPrompt: Int): Int = when (lockPrompt) {
-        LockHelper.PROMPT_LOCK_FOR_SETTINGS -> !isSSO() && !isMPLess()
-        LockHelper.PROMPT_LOCK_FOR_ITEM -> !isItemUnlockableByPinOrFingerprint()
-        else -> false
-    }.let { forceMasterPassword ->
-        if (forceMasterPassword) LockTypeManager.LOCK_TYPE_MASTER_PASSWORD else getLockType()
-    }
-
-    override fun setLockType(@LockTypeManager.LockType lockType: Int) {
-        if (isMPLess()) {
-            setLockTypeForMPLess(lockType)
-            return
-        }
-
-        
-        biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
-
-        var lock = lockType
-        if (!securityHelper.isDeviceSecured()) {
-            lock = LockTypeManager.LOCK_TYPE_MASTER_PASSWORD
-        }
-        val session = sessionManager.session ?: return
-
-        preferenceManager.isPinCodeOn = lock == LockTypeManager.LOCK_TYPE_PIN_CODE
-        if (!preferenceManager.isPinCodeOn && !isMPLess()) {
-            userSecureStorageManager.wipePin(session.username)
-        }
-
-        if (lock != LockTypeManager.LOCK_TYPE_PIN_CODE && lock != LockTypeManager.LOCK_TYPE_BIOMETRIC) {
-            preferenceManager.remove(ConstantsPrefs.UNLOCK_ITEMS_WITH_PIN_OR_FP)
-            sessionCredentialsSaver.deleteSavedCredentials(session.username)
-            
-            preferenceManager.credentialsSaveDate = Instant.EPOCH
-        } else {
-            
-            resetLockoutTime()
-        }
-
-        val hardwareAuthShouldBeEnable = lock == LockTypeManager.LOCK_TYPE_BIOMETRIC
-        if (hardwareAuthShouldBeEnable != biometricAuthModule.isFeatureEnabled()) {
-            
-            if (hardwareAuthShouldBeEnable) {
-                biometricAuthModule.enableFeature()
-            } else {
-                biometricAuthModule.disableFeature()
+    override fun addLock(username: Username, lockType: LockType) {
+        val userPrefManager = preferencesManager[username]
+        when (lockType) {
+            LockType.MasterPassword -> Unit 
+            LockType.PinCode -> {
+                userPrefManager.credentialsSaveDate = Instant.now()
+                userPrefManager.isPinCodeOn = true
+            }
+            LockType.Biometric -> {
+                userPrefManager.credentialsSaveDate = Instant.now()
+                biometricAuthModule.enableFeature(username)
             }
         }
     }
 
-    private fun setLockTypeForMPLess(@LockTypeManager.LockType lockType: Int) {
-        biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
-        val lock = if (lockType == LockTypeManager.LOCK_TYPE_MASTER_PASSWORD) LockTypeManager.LOCK_TYPE_PIN_CODE else lockType
-
-        preferenceManager.isPinCodeOn = lock == LockTypeManager.LOCK_TYPE_PIN_CODE
-
-        val hardwareAuthShouldBeEnable = lock == LockTypeManager.LOCK_TYPE_BIOMETRIC
-        if (hardwareAuthShouldBeEnable != biometricAuthModule.isFeatureEnabled()) {
-            
-            if (hardwareAuthShouldBeEnable) {
-                biometricAuthModule.enableFeature()
-            } else {
-                biometricAuthModule.disableFeature()
+    override fun removeLock(username: Username, lockType: LockType) {
+        val userPrefManager = preferencesManager[username]
+        when (lockType) {
+            LockType.MasterPassword -> Unit 
+            LockType.PinCode -> {
+                userSecureStorageManager.wipePin(username)
             }
+            LockType.Biometric -> {
+                biometricAuthModule.disableFeature(username)
+                biometricRecovery.setBiometricRecoveryFeatureEnabled(false)
+            }
+        }
+
+        val locks = getLocks(username)
+        if (LockType.PinCode !in locks && LockType.Biometric !in locks) {
+            sessionCredentialsSaver.deleteSavedCredentials(username)
+            
+            userPrefManager.credentialsSaveDate = Instant.EPOCH
         }
     }
 
@@ -125,38 +86,7 @@ class LockTypeManagerImpl @Inject constructor(
         return pin.isNotSemanticallyNull()
     }
 
-    override fun isItemUnlockableByPinOrFingerprint(): Boolean {
-        return preferenceManager.getBoolean(
-            ConstantsPrefs.UNLOCK_ITEMS_WITH_PIN_OR_FP,
-            true
-        )
-    }
-
-    override fun shouldEnterMasterPassword(unlockReason: UnlockEvent.Reason?): Boolean {
-        val askedAccountRecovery =
-            unlockReason is UnlockEvent.Reason.WithCode && unlockReason.requestCode == LoginPasswordPresenter.UNLOCK_FOR_BIOMETRIC_RECOVERY
-
-        val accountType = sessionManager.session?.username?.let { userAccountStorage[it]?.accountType }
-
-        return when {
-            accountType is UserAccountInfo.AccountType.InvisibleMasterPassword -> false
-            askedAccountRecovery || getLockType() == LockTypeManager.LOCK_TYPE_MASTER_PASSWORD -> false
-            else -> {
-                val loginDate = preferenceManager.credentialsSaveDate
-                loginDate.plus(Duration.ofDays(lockoutDays)) < Instant.now()
-            }
-        }
-    }
-
-    override fun resetLockoutTime() {
-        preferenceManager.credentialsSaveDate = Instant.now()
-    }
-
-    private fun isSSO(): Boolean {
-        return sessionManager.session?.let { userAccountStorage[it.username]?.sso } == true
-    }
-
-    private fun isMPLess(): Boolean {
-        return sessionManager.session?.let { userAccountStorage[it.username]?.accountType } is UserAccountInfo.AccountType.InvisibleMasterPassword
+    private fun isMPLess(username: Username): Boolean {
+        return userAccountStorage[username]?.accountType is UserAccountInfo.AccountType.InvisibleMasterPassword
     }
 }

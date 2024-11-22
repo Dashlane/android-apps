@@ -2,7 +2,7 @@ package com.dashlane.ui.fab
 
 import android.os.Bundle
 import android.view.View
-import com.dashlane.home.vaultlist.Filter
+import com.dashlane.feature.home.data.Filter
 import com.skocken.presentation.definition.Base
 
 interface FabDef {

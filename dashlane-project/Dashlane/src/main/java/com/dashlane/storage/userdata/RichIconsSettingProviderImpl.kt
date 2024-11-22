@@ -1,7 +1,7 @@
 package com.dashlane.storage.userdata
 
 import com.dashlane.session.SessionManager
-import com.dashlane.session.UserDataRepository
+import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.util.inject.OptionalProvider
 import javax.inject.Inject

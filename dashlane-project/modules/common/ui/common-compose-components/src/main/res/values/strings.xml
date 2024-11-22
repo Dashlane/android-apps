@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="generic_error_title">Something went wrong</string>
+    
+    <string name="generic_error_message">An unexpected error occurred. Please try again.</string>
+</resources>

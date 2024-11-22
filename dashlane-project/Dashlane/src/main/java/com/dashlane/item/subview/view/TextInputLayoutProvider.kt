@@ -14,7 +14,7 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.res.ResourcesCompat
 import com.dashlane.R
 import com.dashlane.listeners.edittext.NoLockEditTextWatcher
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId

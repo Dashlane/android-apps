@@ -128,7 +128,7 @@ fun MenuItem(item: MenuItemModel.NavigationItem) {
 
 @Preview
 @Composable
-fun MenuItemPreview() {
+private fun MenuItemPreview() {
     DashlanePreview {
         var isSelected: Boolean by rememberSaveable { mutableStateOf(false) }
         MenuItem(

@@ -161,7 +161,7 @@ fun LoaderComposable(
 
 @Preview
 @Composable
-fun ConfirmationContentPreview() {
+private fun ConfirmationContentPreview() {
     DashlanePreview {
         ConfirmationContent(
             modifier = Modifier,

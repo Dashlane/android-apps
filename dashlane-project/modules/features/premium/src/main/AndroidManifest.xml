@@ -5,11 +5,11 @@
         <activity
             android:name=".offer.list.view.OffersActivity"
             android:label="@string/plans_action_bar_title"
-            android:theme="@style/Theme.Dashlane.NoActionBar" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         <activity
             android:name=".paywall.common.PaywallActivity"
-            android:theme="@style/Theme.Dashlane.Modal" />
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
 
         <activity
             android:name=".current.CurrentPlanActivity"

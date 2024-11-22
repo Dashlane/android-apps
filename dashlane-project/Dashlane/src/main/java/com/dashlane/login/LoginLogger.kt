@@ -13,7 +13,7 @@ import com.dashlane.hermes.generated.events.user.Login
 import com.dashlane.hermes.generated.events.user.Logout
 import com.dashlane.hermes.generated.events.user.ResendToken
 import com.dashlane.hermes.generated.events.user.UseAnotherAccount
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.lock.LockEvent
 import javax.inject.Inject
 
 interface LoginLogger {
@@ -30,7 +30,7 @@ interface LoginLogger {
 
     fun logResendToken()
 
-    fun logAskAuthentication(loginMode: LoginMode, unlockEventReason: UnlockEvent.Reason?)
+    fun logAskAuthentication(loginMode: LoginMode, unlockEventReason: LockEvent.Unlock.Reason?)
 
     fun logUseAnotherAccount()
 
@@ -165,22 +165,22 @@ class LoginLoggerImpl @Inject constructor(
         )
     }
 
-    override fun logAskAuthentication(loginMode: LoginMode, unlockEventReason: UnlockEvent.Reason?) {
+    override fun logAskAuthentication(loginMode: LoginMode, unlockEventReason: LockEvent.Unlock.Reason?) {
         val mode = loginMode.toMode()
 
         logEvent(
             AskAuthentication(
                 mode = mode ?: return,
                 reason = when (unlockEventReason) {
-                    is UnlockEvent.Reason.WithCode -> when (unlockEventReason.origin) {
-                        UnlockEvent.Reason.WithCode.Origin.EDIT_SETTINGS -> Reason.EDIT_SETTINGS
-                        UnlockEvent.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD -> Reason.CHANGE_MASTER_PASSWORD
+                    is LockEvent.Unlock.Reason.WithCode -> when (unlockEventReason.origin) {
+                        LockEvent.Unlock.Reason.WithCode.Origin.EDIT_SETTINGS -> Reason.EDIT_SETTINGS
+                        LockEvent.Unlock.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD -> Reason.CHANGE_MASTER_PASSWORD
                         null -> Reason.UNLOCK_APP
                     }
-                    is UnlockEvent.Reason.OpenItem -> Reason.UNLOCK_ITEM
-                    is UnlockEvent.Reason.AppAccess,
-                    is UnlockEvent.Reason.AccessFromAutofillApi,
-                    is UnlockEvent.Reason.AccessFromExternalComponent -> Reason.UNLOCK_APP
+                    is LockEvent.Unlock.Reason.OpenItem -> Reason.UNLOCK_ITEM
+                    is LockEvent.Unlock.Reason.AppAccess,
+                    is LockEvent.Unlock.Reason.AccessFromAutofillApi,
+                    is LockEvent.Unlock.Reason.AccessFromExternalComponent -> Reason.UNLOCK_APP
                     else -> Reason.LOGIN
                 },
                 verificationMode = loginMode.verification
@@ -208,16 +208,4 @@ class LoginLoggerImpl @Inject constructor(
     private fun logEvent(event: TrackingLog) {
         logRepository.queueEvent(event)
     }
-}
-
-private val LoginMode.verification get() = if (this is LoginMode.MasterPassword) verification else null
-
-private fun LoginMode.toMode(): Mode? = when (this) {
-    LoginMode.Biometric -> Mode.BIOMETRIC
-    LoginMode.Pin -> Mode.PIN
-    is LoginMode.MasterPassword -> Mode.MASTER_PASSWORD
-    LoginMode.Sso -> Mode.SSO
-    LoginMode.DeviceTransfer -> Mode.DEVICE_TRANSFER
-    LoginMode.SessionRestore,
-    LoginMode.MasterPasswordChanger -> null
 }

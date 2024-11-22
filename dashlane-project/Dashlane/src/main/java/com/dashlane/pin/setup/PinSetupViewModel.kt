@@ -3,7 +3,8 @@ package com.dashlane.pin.setup
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.security.SecurityHelper
+import com.dashlane.hardwaresecurity.SecurityHelper
+import com.dashlane.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -19,10 +20,11 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class PinSetupViewModel @Inject constructor(
     private val securityHelper: SecurityHelper,
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
 
     companion object {
-        const val PIN_LENGTH = 4
+        const val PIN_LENGTH = 6
         const val CLEAR_PIN_VALUE = ""
     }
 
@@ -34,7 +36,7 @@ class PinSetupViewModel @Inject constructor(
 
     fun onViewResumed(isCancellable: Boolean) {
         viewModelScope.launch {
-            val isSystemLockSetup = securityHelper.isDeviceSecured()
+            val isSystemLockSetup = securityHelper.isDeviceSecured(sessionManager.session?.username)
             stateFlow.update { PinSetupState.Initial(uiState.value.data.copy(isCancellable = isCancellable, isSystemLockSetup = isSystemLockSetup)) }
         }
     }
@@ -95,6 +97,7 @@ class PinSetupViewModel @Inject constructor(
                 stateFlow.update { PinSetupState.PinUpdated(data.copy(pinCode = pinCode, chosenPin = chosenPin)) }
                 delay(200) 
                 navigationFlow.send(PinSetupNavigationState.GoToNext(pinCode))
+                stateFlow.update { PinSetupState.Initial(PinSetupData(CLEAR_PIN_VALUE)) }
             } else {
                 stateFlow.update { PinSetupState.PinUpdated(data.copy(pinCode = CLEAR_PIN_VALUE), hasError = true) }
             }

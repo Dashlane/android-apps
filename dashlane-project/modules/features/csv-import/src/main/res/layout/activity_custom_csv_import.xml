@@ -8,6 +8,7 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical"
     tools:ignore="ButtonStyle"
+    android:fitsSystemWindows="true"
     >
 
     <LinearLayout

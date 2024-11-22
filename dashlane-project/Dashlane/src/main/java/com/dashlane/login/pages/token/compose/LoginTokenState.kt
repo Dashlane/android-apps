@@ -1,18 +1,19 @@
 package com.dashlane.login.pages.token.compose
 
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.mvvm.State
 
-data class LoginTokenState(
-    val email: String,
-    val token: String? = null,
-    val isLoading: Boolean = false,
-    val showHelpDialog: Boolean = false,
-    val error: LoginTokenError? = null,
-) : State
+sealed class LoginTokenState : State {
+    data class View(
+        val email: String,
+        val token: String? = null,
+        val isLoading: Boolean = false,
+        val showHelpDialog: Boolean = false,
+        val error: LoginTokenError? = null,
+    ) : LoginTokenState(), State.View
 
-sealed class LoginTokenNavigationState : State {
-    data class Success(val registeredUserDevice: RegisteredUserDevice.Remote, val authTicket: String) : LoginTokenNavigationState()
+    sealed class SideEffect : LoginTokenState(), State.SideEffect {
+        data object Success : SideEffect()
+    }
 }
 
 sealed class LoginTokenError : Exception() {

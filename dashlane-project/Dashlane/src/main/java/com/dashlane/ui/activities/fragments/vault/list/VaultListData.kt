@@ -1,7 +1,7 @@
 package com.dashlane.ui.activities.fragments.vault.list
 
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.home.vaultlist.Filter
 
 data class VaultListData(
     val filter: Filter,

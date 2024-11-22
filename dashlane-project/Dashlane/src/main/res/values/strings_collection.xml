@@ -159,7 +159,5 @@
     
     <string name="collection_detail_dialog_limited_title">Insufficient Permissions</string>
     
-    <string name="collection_detail_dialog_limited_description">You only have limited right
-    permission to this item. Adding this item to a shared collection requires full rights
-        on the item.</string>
+    <string name="collection_detail_dialog_limited_description">You only have limited right permission to this item. Adding this item to a shared collection requires full rights on the item.</string>
 </resources>

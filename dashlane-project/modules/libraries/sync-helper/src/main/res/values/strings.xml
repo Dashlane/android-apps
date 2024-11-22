@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="vault_offline_sync_error_message">You’re offline. We need an active internet connection to refresh and sync your vault.</string>
+    
+    <string name="vault_unknown_sync_error_message">We had an issue refreshing your vault. Please try again later.</string>
+</resources>

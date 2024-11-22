@@ -3,12 +3,13 @@ package com.dashlane.vault.util
 import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.core.helpers.PackageSignatureStatus
 import com.dashlane.core.helpers.SignatureVerification
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 
-fun SyncObject.Authentifiant.isNotIncorrectApplicationSignatureWith(
+fun VaultItem<SyncObject.Authentifiant>.isNotIncorrectApplicationSignatureWith(
     packageNameSignatureHelper: PackageNameSignatureHelper,
     packageName: String
 ): Boolean {

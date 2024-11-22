@@ -28,7 +28,7 @@ interface PasswordAnalysisContract {
     }
 
     interface DataProvider : Base.IDataProvider {
-        suspend fun getAuthentifiantsSecurityInfo(): AuthentifiantSecurityEvaluator.Result?
+        suspend fun getAuthentifiantsSecurityInfo(forceUpdate: Boolean): AuthentifiantSecurityEvaluator.Result?
         suspend fun saveModified(authentifiant: VaultItem<SyncObject.Authentifiant>)
 
         fun shouldDisplayProcessDuration(): Boolean

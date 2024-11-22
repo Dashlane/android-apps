@@ -2,22 +2,23 @@ package com.dashlane.login.pages.sso.compose
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.authentication.AuthenticationInvalidSsoException
 import com.dashlane.authentication.AuthenticationNetworkException
 import com.dashlane.authentication.AuthenticationOfflineException
 import com.dashlane.authentication.login.AuthenticationSsoRepository
 import com.dashlane.authentication.sso.GetSsoInfoResult
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockManager
+import com.dashlane.lock.LockPass
+import com.dashlane.lock.LockSetting
+import com.dashlane.lock.LockType
 import com.dashlane.login.LoginLogger
 import com.dashlane.login.LoginMode
-import com.dashlane.login.lock.LockManager
-import com.dashlane.login.lock.LockPass
-import com.dashlane.login.lock.LockSetting
-import com.dashlane.login.pages.sso.SsoLockContract
 import com.dashlane.mvvm.State
 import com.dashlane.preference.GlobalPreferencesManager
+import com.dashlane.session.SessionManager
+import com.dashlane.user.UserAccountInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,12 +31,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.VisibleForTesting
+import javax.inject.Inject
 
 @HiltViewModel
 class LoginSsoViewModel @Inject constructor(
     private val ssoRepository: AuthenticationSsoRepository,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val lockManager: LockManager,
+    private val sessionManager: SessionManager,
     private val loginLogger: LoginLogger,
 ) : ViewModel() {
 
@@ -98,7 +101,7 @@ class LoginSsoViewModel @Inject constructor(
         flow<State> {
             val userAccountInfo = stateFlow.value.userAccountInfo ?: throw IllegalStateException("userAccountInfo cannot be null")
             val userSsoInfo = result.userSsoInfo
-            if (userSsoInfo.login != userAccountInfo.username) throw SsoLockContract.NoSessionLoadedException()
+            check(userSsoInfo.login == userAccountInfo.username) { "userSsoInfo does not match" }
 
             val validateResult = ssoRepository.validate(
                 login = userAccountInfo.username,
@@ -109,10 +112,12 @@ class LoginSsoViewModel @Inject constructor(
 
             check(validateResult is AuthenticationSsoRepository.ValidateResult.Local)
 
-            lockManager.unlock(LockPass.ofPassword(validateResult.ssoKey))
+            val session = sessionManager.session ?: throw IllegalStateException("session null at validateSso")
+            lockManager.unlock(session, LockPass.ofPassword(validateResult.ssoKey))
 
             loginLogger.logSuccess(loginMode = LoginMode.Sso)
-            stateFlow.value.lockSetting?.unlockReason?.let { reason -> runCatching { lockManager.sendUnLock(reason, true) } }
+            val reason = uiState.value.lockSetting?.unlockReason ?: LockEvent.Unlock.Reason.AppAccess
+            runCatching { lockManager.sendUnlockEvent(LockEvent.Unlock(reason = reason, lockType = LockType.MasterPassword)) }
 
             emit(LoginSsoNavigationState.UnlockSuccess)
         }

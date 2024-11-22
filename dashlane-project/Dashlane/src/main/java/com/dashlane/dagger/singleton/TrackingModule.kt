@@ -3,8 +3,10 @@ package com.dashlane.dagger.singleton
 import android.content.Context
 import android.os.Build
 import com.dashlane.BuildConfig
+import com.dashlane.common.logger.DeveloperInfoLogger
 import com.dashlane.cryptography.CryptographyAppKeyStore
-import com.dashlane.debug.DaDaDa
+import com.dashlane.debug.services.DaDaDaHermes
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.hermes.AnalyticsIdRepository
 import com.dashlane.hermes.AppInfo
 import com.dashlane.hermes.LogFlush
@@ -13,37 +15,37 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.OsInfo
 import com.dashlane.hermes.TrackingRepository
 import com.dashlane.hermes.service.ActivityLogErrorReporter
-import com.dashlane.hermes.service.ActivityLogErrorReporter.InvalidActivityLog
 import com.dashlane.hermes.service.ActivityLogService
 import com.dashlane.hermes.service.AnalyticsErrorReporter
 import com.dashlane.hermes.service.AnalyticsLogService
+import com.dashlane.hermes.service.AnalyticsLogServiceImpl
 import com.dashlane.hermes.storage.LogStorage
 import com.dashlane.hermes.storage.SecureFileLogStorage
-import com.dashlane.common.logger.developerinfo.DeveloperInfoLogger
+import com.dashlane.logger.ActivityLogErrorReporterImpl
+import com.dashlane.logger.AnalyticsErrorReporterImpl
 import com.dashlane.logger.utils.HermesDebugUtil
+import com.dashlane.network.ServerUrlOverride
+import com.dashlane.nitro.Nitro
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.analytics.AnalyticsApi
-import com.dashlane.server.api.endpoints.teams.ActivityLog
-import com.dashlane.server.api.exceptions.DashlaneApiException
-import com.dashlane.session.SessionManager
 import com.dashlane.useractivity.InMemoryLogStorage
 import com.dashlane.useractivity.TestLogChecker
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
-import com.dashlane.util.stackTraceToSafeString
-import com.dashlane.util.tryOrNull
-import com.google.gson.Gson
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import java.io.File
 import java.time.Clock
+import java.util.Optional
 import java.util.UUID
+import javax.inject.Provider
 import javax.inject.Singleton
-import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -96,17 +98,24 @@ open class TrackingModule {
     @Provides
     open fun provideAnalyticsLogService(
         analyticsApi: AnalyticsApi,
-        testLogChecker: TestLogChecker
-    ) = AnalyticsLogService(analyticsApi, testLogChecker)
+        testLogChecker: TestLogChecker,
+        @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher,
+    ): AnalyticsLogService = AnalyticsLogServiceImpl(analyticsApi, testLogChecker, ioDispatcher)
 
     @Provides
-    open fun provideActivityLogService(dashlaneApi: DashlaneApi, sessionManager: SessionManager) =
-        object : ActivityLogService(dashlaneApi.endpoints.teams.storeActivityLogs) {
-            override val authorization: Authorization.User?
-                get() = sessionManager.session?.let {
-                    Authorization.User(it.userId, it.accessKey, it.secretKey)
-                }
-        }
+    open fun provideActivityLogService(
+        nitro: Nitro,
+        userFeaturesChecker: Provider<UserFeaturesChecker>,
+        serverUrlOverride: Optional<ServerUrlOverride>,
+        dashlaneApi: DashlaneApi,
+        @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher
+    ): ActivityLogService = com.dashlane.analytics.ActivityLogService(
+        nitro,
+        userFeaturesChecker,
+        dashlaneApi.endpoints.teams.storeActivityLogs,
+        serverUrlOverride,
+        ioDispatcher
+    )
 
     @Provides
     open fun provideAnalyticsIdRepository(globalPreferencesManager: GlobalPreferencesManager) =
@@ -120,41 +129,17 @@ open class TrackingModule {
 
     @Provides
     open fun provideHermesDebugUtil(
-        dadada: DaDaDa,
+        dadadaHermes: DaDaDaHermes,
         globalPreferencesManager: GlobalPreferencesManager
-    ) = HermesDebugUtil(dadada, globalPreferencesManager)
+    ) = HermesDebugUtil(dadadaHermes, globalPreferencesManager)
 
     @Provides
-    open fun provideActivityLogErrorReporter(developerInfoLogger: DeveloperInfoLogger) =
-        object : ActivityLogErrorReporter {
-            override fun report(invalidLogs: List<InvalidActivityLog>) {
-                invalidLogs.forEach { log ->
-                    val error = log.invalidLog.error.key
-                    val activityLog = tryOrNull {
-                        Gson().fromJson(log.logItem.logContent, ActivityLog::class.java)
-                    }
-                    developerInfoLogger.log(
-                        action = "StoreActivityLog",
-                        message = "$error - An activity log with a log type of " +
-                            "${activityLog?.logType?.key} and uid: ${log.logItem.logId} has " +
-                            "been detected to have a technical / schema error",
-                        exceptionType = error
-                    )
-                }
-            }
-        }
+    open fun provideActivityLogErrorReporter(developerInfoLogger: DeveloperInfoLogger): ActivityLogErrorReporter =
+        ActivityLogErrorReporterImpl()
 
     @Provides
-    open fun provideLogErrorReporter(developerInfoLogger: DeveloperInfoLogger) =
-        object : AnalyticsErrorReporter {
-            override fun report(exception: DashlaneApiException) {
-                developerInfoLogger.log(
-                    action = "Hermes",
-                    message = exception.message,
-                    exceptionType = exception.stackTraceToSafeString()
-                )
-            }
-        }
+    open fun provideLogErrorReporter(developerInfoLogger: DeveloperInfoLogger): AnalyticsErrorReporter =
+        AnalyticsErrorReporterImpl()
 
     private fun appInfo() = AppInfo(
         if (BuildConfig.VERSION_NAME == "dev_build_dev") "0-dev_build" else BuildConfig.VERSION_NAME,

@@ -3,8 +3,13 @@ package com.dashlane.credentialmanager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.BlendMode
 import android.graphics.drawable.Icon
 import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat.getColor
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.credentials.provider.BeginCreateCredentialRequest
 import androidx.credentials.provider.BeginCreatePasswordCredentialRequest
 import androidx.credentials.provider.BeginCreatePublicKeyCredentialRequest
@@ -18,7 +23,9 @@ import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.dashlane.credentialmanager.model.PasskeyCreationOptions
 import com.dashlane.credentialmanager.model.PasskeyRequestOptions
 import com.dashlane.credentialsmanager.R
+import com.dashlane.util.toBitmap
 import com.dashlane.vault.model.loginForUi
+import com.dashlane.vault.summary.SummaryObject
 import com.google.gson.Gson
 import java.time.Instant
 import javax.inject.Inject
@@ -39,7 +46,7 @@ class CredentialManagerHandlerImpl @Inject constructor(
                 CreateEntry.Builder(
                     context.getString(R.string.credential_manager_create_password),
                     pendingIntentForCreate(context)
-                ).setIcon(Icon.createWithResource(context, R.drawable.day_night_logo))
+                ).setIcon(buildMicroLogomarkIcon(context = context))
                     .setDescription(context.getString(R.string.credential_manager_create_password_description))
             )
             is BeginCreatePublicKeyCredentialRequest -> {
@@ -52,7 +59,7 @@ class CredentialManagerHandlerImpl @Inject constructor(
                     CreateEntry.Builder(
                         context.getString(R.string.credential_manager_create_passkey),
                         pendingIntentForCreate(context)
-                    ).setIcon(Icon.createWithResource(context, R.drawable.day_night_logo))
+                    ).setIcon(buildMicroLogomarkIcon(context = context))
                         .setDescription(context.getString(R.string.credential_manager_create_passkey_description))
                 )
             }
@@ -84,15 +91,15 @@ class CredentialManagerHandlerImpl @Inject constructor(
         request.beginGetCredentialOptions.flatMap { option ->
             when (option) {
                 is BeginGetPasswordOption -> request.callingAppInfo?.let { callingAppInfo ->
-                    credentialLoader.loadPasswordCredentials(callingAppInfo.packageName).map { summary ->
+                    credentialLoader.loadPasswordCredentials(callingAppInfo.packageName).map { login ->
                         PasswordCredentialEntry.Builder(
                             context,
-                            summary.loginForUi.orEmpty(),
-                            pendingIntentForGet(context, summary.id),
+                            getSuggestionTitle(login),
+                            pendingIntentForGet(context, login.id),
                             option
-                        ).setLastUsedTime(summary.locallyViewedDate)
-                            .setIcon(Icon.createWithResource(context, R.drawable.day_night_logo))
-                            .setDisplayName(summary.loginForUi)
+                        ).setLastUsedTime(login.locallyViewedDate)
+                            .setIcon(buildMicroLogomarkIcon(context = context))
+                            .setDisplayName(login.loginForUi)
                             .build()
                     }
                 } ?: listOf()
@@ -101,21 +108,16 @@ class CredentialManagerHandlerImpl @Inject constructor(
                     credentialLoader.loadPasskeyCredentials(
                         passkeyRequestOptions.rpId,
                         passkeyRequestOptions.allowCredentials ?: listOf()
-                    ).map { summary ->
-                        val userDisplayName = if (summary.userDisplayName.isNullOrEmpty()) {
-                            
-                            context.getString(R.string.credential_manager_unknown)
-                        } else {
-                            summary.userDisplayName!!
-                        }
+                    ).map { passkey ->
+                        val passkeyDisplayName = getSuggestionTitle(passkey, context)
                         PublicKeyCredentialEntry.Builder(
                             context,
-                            userDisplayName,
-                            pendingIntentForGet(context, summary.id),
+                            passkeyDisplayName,
+                            pendingIntentForGet(context, passkey.id),
                             option
-                        ).setLastUsedTime(summary.locallyViewedDate)
-                            .setIcon(Icon.createWithResource(context, R.drawable.day_night_logo))
-                            .setDisplayName(userDisplayName)
+                        ).setLastUsedTime(passkey.locallyViewedDate)
+                            .setIcon(buildMicroLogomarkIcon(context = context))
+                            .setDisplayName(passkeyDisplayName)
                             .build()
                     }.also {
                         credentialManagerLogger.logSuggestPasskeyLogin(request.callingAppInfo, it.size)
@@ -126,6 +128,15 @@ class CredentialManagerHandlerImpl @Inject constructor(
                 }
             }
         }
+
+    @VisibleForTesting
+    fun getSuggestionTitle(passkey: SummaryObject.Passkey, context: Context): String =
+        passkey.userDisplayName?.takeUnless { it.isEmpty() }
+            ?: passkey.rpId?.takeUnless { it.isEmpty() }
+            ?: context.getString(R.string.credential_manager_unknown)
+
+    @VisibleForTesting
+    fun getSuggestionTitle(login: SummaryObject.Authentifiant): String = login.loginForUi.orEmpty()
 
     private fun pendingIntentForCreate(context: Context): PendingIntent {
         val intent = Intent(CREATE_INTENT).setPackage(context.packageName)
@@ -149,6 +160,17 @@ class CredentialManagerHandlerImpl @Inject constructor(
             (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         )
     }
+
+    private fun buildMicroLogomarkIcon(context: Context) =
+        AppCompatResources.getDrawable(context, R.drawable.vd_logo_dashlane_micro_logomark)
+            ?.apply {
+                DrawableCompat.wrap(this)
+                DrawableCompat.setTint(this, getColor(context, R.color.oddity_brand))
+            }
+            ?.toBitmap()
+            ?.run { Icon.createWithBitmap(this) }
+            ?.apply { setTintBlendMode(BlendMode.DST) }
+            ?: Icon.createWithResource(context, R.drawable.vd_logo_dashlane_micro_logomark)
 
     companion object {
         private const val CREATE_INTENT = "com.dashlane.credentialmanager.CREATE_CREDENTIAL_MANAGER"

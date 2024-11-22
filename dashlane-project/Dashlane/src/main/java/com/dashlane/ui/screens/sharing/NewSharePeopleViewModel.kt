@@ -9,7 +9,6 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.sharing.exception.SharingAlreadyAccessException
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.sharing.SharingContact.SharingContactUser
-import com.dashlane.useractivity.SharingDeveloperLogger
 import com.dashlane.featureflipping.UserFeaturesChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +23,6 @@ class NewSharePeopleViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dataProvider: NewSharePeopleDataProvider,
     private val navigator: Navigator,
-    private val sharingDeveloperLogger: SharingDeveloperLogger,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val sharingDataProvider: SharingDataProvider
 ) : ViewModel(), NewSharePeopleViewModelContract {
@@ -55,8 +53,6 @@ class NewSharePeopleViewModel @Inject constructor(
             return
         }
 
-        sharingDeveloperLogger.newShareAttempt()
-
         viewModelScope.launch {
             uiState.tryEmit(NewSharePeopleViewModelContract.UIState.LOADING)
 
@@ -79,7 +75,6 @@ class NewSharePeopleViewModel @Inject constructor(
                     permission.value
                 )
             }.onFailure {
-                sharingDeveloperLogger.newShareFailure(it)
                 when (it) {
                     is SharingAlreadyAccessException -> {
                         uiState.tryEmit(NewSharePeopleViewModelContract.UIState.ERROR_ALREADY_ACCESS)
@@ -90,7 +85,6 @@ class NewSharePeopleViewModel @Inject constructor(
                     }
                 }
             }.onSuccess {
-                sharingDeveloperLogger.newShareSuccess()
                 uiState.tryEmit(NewSharePeopleViewModelContract.UIState.SUCCESS)
                 if (SharingNewSharePeopleFragment.FROM_ITEM_VIEW == args.from) {
                     uiState.tryEmit(NewSharePeopleViewModelContract.UIState.SUCCESS_FOR_RESULT)

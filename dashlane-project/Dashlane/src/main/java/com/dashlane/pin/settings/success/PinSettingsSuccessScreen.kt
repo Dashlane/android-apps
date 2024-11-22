@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 @Composable
 @Suppress("LongMethod")
 fun PinSettingsSuccessScreen(
+    modifier: Modifier = Modifier,
     viewModel: PinSettingSuccessViewModel,
     onSuccess: () -> Unit,
     onCancel: () -> Unit,
@@ -62,6 +63,7 @@ fun PinSettingsSuccessScreen(
     }
 
     PinSettingSuccessContent(
+        modifier = modifier,
         isSuccess = navigationState is PinSettingsSuccessNavigationState.Success,
         isMPStoreDialogShown = uiState.isMPStoreDialogShown,
         onDialogPositiveButtonClick = viewModel::onContinue,
@@ -135,7 +137,7 @@ fun StoreMPConfirmationDialog(
 
 @Preview
 @Composable
-fun PinSettingSuccessContentPreview() {
+private fun PinSettingSuccessContentPreview() {
     DashlanePreview {
         PinSettingSuccessContent(
             isSuccess = false,
@@ -148,7 +150,7 @@ fun PinSettingSuccessContentPreview() {
 
 @Preview
 @Composable
-fun StoreMPConfirmationDialogPreview() {
+private fun StoreMPConfirmationDialogPreview() {
     DashlanePreview {
         StoreMPConfirmationDialog(
             onPositiveButtonClick = {},

@@ -2,21 +2,18 @@ package com.dashlane.ui.screens.settings.list.security
 
 import android.content.Context
 import com.dashlane.R
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountstatus.subscriptioncode.SubscriptionCodeRepository
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.cryptography.CryptographyMarker
-import com.dashlane.lock.UnlockEvent
-import com.dashlane.masterpassword.ChangeMasterPasswordActivity
+import com.dashlane.lock.LockEvent
+import com.dashlane.masterpassword.ChangeMasterPasswordComposeActivity
 import com.dashlane.masterpassword.ChangeMasterPasswordFeatureAccessChecker
-import com.dashlane.masterpassword.ChangeMasterPasswordOrigin
-import com.dashlane.masterpassword.warning.ChangeMPWarningDesktopActivity
 import com.dashlane.navigation.Navigator
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionManager
-import com.dashlane.session.UserDataRepository
-import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.session.repository.UserDataRepository
 import com.dashlane.storage.userdata.RichIconsSettingProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.ScreenshotPolicy
@@ -26,8 +23,8 @@ import com.dashlane.ui.screens.settings.item.SettingCheckable
 import com.dashlane.ui.screens.settings.item.SettingHeader
 import com.dashlane.ui.screens.settings.item.SettingItem
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.featureflipping.FeatureFlip
-import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.usercryptography.UserCryptographyRepository
 import com.dashlane.util.Toaster
 import com.dashlane.util.getBaseActivity
 import com.dashlane.util.inject.OptionalProvider
@@ -39,7 +36,7 @@ class SettingsSecurityMiscList(
     private val coroutineScope: CoroutineScope,
     navigator: Navigator,
     screenshotPolicy: ScreenshotPolicy,
-    userPreferencesManager: UserPreferencesManager,
+    preferencesManager: PreferencesManager,
     teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     sessionManager: SessionManager,
     dialogHelper: DialogHelper,
@@ -47,7 +44,6 @@ class SettingsSecurityMiscList(
     sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     masterPasswordFeatureAccessChecker: ChangeMasterPasswordFeatureAccessChecker,
     toaster: Toaster,
-    userFeaturesChecker: UserFeaturesChecker,
     userAccountStorage: UserAccountStorage,
     subscriptionCodeRepository: SubscriptionCodeRepository,
     userDataRepository: UserDataRepository,
@@ -92,10 +88,10 @@ class SettingsSecurityMiscList(
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
         override fun isChecked(context: Context) =
-            userPreferencesManager.getBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT)
+            preferencesManager[sessionManager.session?.username].getBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT)
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
-            userPreferencesManager.putBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT, enable)
+            preferencesManager[sessionManager.session?.username].putBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT, enable)
         }
     }
 
@@ -105,13 +101,13 @@ class SettingsSecurityMiscList(
         override val title = context.getString(R.string.setting_automatically_copy_2fa)
         override val description = context.getString(R.string.setting_automatically_copy_2fa_description)
         override fun isEnable() = true
-        override fun isVisible() = userFeaturesChecker.has(FeatureFlip.AUTOMATICALLY_COPY_2FA)
+        override fun isVisible() = true
 
         override fun onClick(context: Context) = onCheckChanged(context, !isChecked(context))
-        override fun isChecked(context: Context) = userPreferencesManager.hasAutomatic2faTokenCopy
+        override fun isChecked(context: Context) = preferencesManager[sessionManager.session?.username].hasAutomatic2faTokenCopy
 
         override fun onCheckChanged(context: Context, enable: Boolean) {
-            userPreferencesManager.hasAutomatic2faTokenCopy = enable
+            preferencesManager[sessionManager.session?.username].hasAutomatic2faTokenCopy = enable
         }
     }
 
@@ -176,26 +172,18 @@ class SettingsSecurityMiscList(
         override fun isVisible(): Boolean = masterPasswordFeatureAccessChecker.canAccessFeature()
 
         override fun onClick(context: Context) {
-            if (userPreferencesManager.devicesCount > 1) {
+            sensibleSettingsClickHelper.perform(
+                context = context,
+                origin = LockEvent.Unlock.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD,
+                forceMasterPassword = true
+            ) {
                 context.startActivity(
-                    ChangeMPWarningDesktopActivity.newIntent(
-                        context,
-                        ChangeMasterPasswordOrigin.Settings
+                    ChangeMasterPasswordComposeActivity.newIntent(
+                        context = context,
+                        origin = ChangeMasterPasswordOrigin.Settings,
+                        showWarningDesktop = preferencesManager[sessionManager.session?.username].devicesCount > 1
                     )
                 )
-            } else {
-                sensibleSettingsClickHelper.perform(
-                    context = context,
-                    origin = UnlockEvent.Reason.WithCode.Origin.CHANGE_MASTER_PASSWORD,
-                    forceMasterPassword = true
-                ) {
-                    context.startActivity(
-                        ChangeMasterPasswordActivity.newIntent(
-                            context,
-                            ChangeMasterPasswordOrigin.Settings
-                        )
-                    )
-                }
             }
         }
     }

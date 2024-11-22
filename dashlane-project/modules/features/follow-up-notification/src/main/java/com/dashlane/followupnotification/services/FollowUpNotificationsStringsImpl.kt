@@ -24,7 +24,6 @@ class FollowUpNotificationsStringsImpl @Inject constructor(
             FollowUpNotificationsTypes.ID_CARD -> context.getString(R.string.follow_up_notification_vault_item_label_ids)
             FollowUpNotificationsTypes.PASSPORT -> context.getString(R.string.follow_up_notification_vault_item_label_passport)
             FollowUpNotificationsTypes.PAYMENTS_CARD -> context.getString(R.string.follow_up_notification_vault_item_label_credit_card)
-            FollowUpNotificationsTypes.PAYPAL -> context.getString(R.string.follow_up_notification_vault_item_label_paypal)
         }
     }
 
@@ -38,8 +37,6 @@ class FollowUpNotificationsStringsImpl @Inject constructor(
             CopyField.PaymentsNumber -> R.string.follow_up_notification_label_payments_number
             CopyField.PaymentsSecurityCode -> R.string.follow_up_notification_label_payments_security_code
             CopyField.PaymentsExpirationDate -> R.string.follow_up_notification_label_payments_expiration_date
-            CopyField.PayPalLogin -> R.string.follow_up_notification_label_paypal_login
-            CopyField.PayPalPassword -> R.string.follow_up_notification_label_paypal_password
             CopyField.BankAccountBank -> R.string.follow_up_notification_label_bankaccount_bank
             CopyField.BankAccountBicSwift -> R.string.follow_up_notification_label_bankaccount_bic_swift
             CopyField.BankAccountRoutingNumber -> R.string.follow_up_notification_label_bankaccount_routing_number

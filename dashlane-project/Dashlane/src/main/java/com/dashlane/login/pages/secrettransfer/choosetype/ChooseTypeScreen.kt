@@ -20,13 +20,13 @@ import com.dashlane.R
 import com.dashlane.design.component.ButtonLarge
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
+import com.dashlane.design.component.DashlaneLogoLockup
 import com.dashlane.design.component.Text
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.widgets.compose.DashlaneLogo
 
 @Composable
 fun ChooseTypeScreen(
@@ -82,7 +82,7 @@ fun ChooseTypeContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
     ) {
-        DashlaneLogo(color = DashlaneTheme.colors.oddityBrand)
+        DashlaneLogoLockup(height = 40.dp)
         Text(
             text = stringResource(id = R.string.login_secret_transfer_choose_type_title),
             style = DashlaneTheme.typography.titleSectionLarge,
@@ -130,7 +130,7 @@ fun ChooseTypeContent(
 
 @Preview
 @Composable
-fun ChooseTypeContentPreview() {
+private fun ChooseTypeContentPreview() {
     DashlanePreview {
         ChooseTypeContent(
             onComputerClicked = { },

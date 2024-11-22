@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:fitsSystemWindows="true"
     tools:context=".OnboardingQuestionnaireActivity"
     >
 
@@ -16,9 +17,9 @@
         android:animateLayoutChanges="true"
         android:clipToPadding="false"
         android:maxWidth="@dimen/size_480dp"
-        android:paddingStart="@dimen/spacing_small"
+        android:paddingStart="@dimen/spacing_normal"
         android:paddingTop="@dimen/spacing_big"
-        android:paddingEnd="@dimen/spacing_small"
+        android:paddingEnd="@dimen/spacing_normal"
         android:paddingBottom="@dimen/spacing_normal"
         tools:context=".ui.activities.onboarding.questionnaire.OnboardingQuestionnaireActivity"
         >

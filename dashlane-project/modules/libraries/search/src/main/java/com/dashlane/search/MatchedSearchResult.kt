@@ -19,7 +19,6 @@ enum class ItemType {
     PASSKEY,
     BANK_STATEMENT,
     CREDIT_CARD,
-    PAYPAL,
     SECURE_NOTE,
     DRIVER_LICENCE,
     FISCAL_STATEMENT,
@@ -32,6 +31,7 @@ enum class ItemType {
     IDENTITY,
     PERSONAL_WEBSITE,
     PHONE_NUMBER,
+    SECRET,
     SETTING,
     UNSUPPORTED;
 }

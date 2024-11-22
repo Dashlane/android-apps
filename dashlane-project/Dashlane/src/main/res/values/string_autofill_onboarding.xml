@@ -1,21 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="accessibility_onboarding_title">Turn on accessibility permissions for Dashlane</string>
-    <string name="accessibility_onboarding_body">Turn on accessibility permissions in your device settings. This allows us to read your screen and make changes on all web pages.\n\nThis is only used for Autofill. We do not collect or share your data.</string>
-    <string name="accessibility_onboarding_checkbox">Allow Dashlane to make changes</string>
-
-    <string name="onboarding_in_app_login_step2_positive_button">Go to Settings</string>
-
-    <string name="in_app_login_persistent_notification_title">Dashlane In App Login is running</string>
-    <string name="in_app_login_persistent_notification_message">Dashlane may help you logging in to this app</string>
-    <string name="in_app_login_window_select_account_add_new_account">Add a login</string>
-
     <string name="onboarding_in_app_login_done_title">You\'re ready to use Autofill</string>
     <string name="onboarding_in_app_login_done_subtitle">Dashlane will use your saved information to Autofill forms and logins.</string>
-
-    <string name="onboarding_accessibility_done_title">Autofill accessibility permissions are on</string>
-    <string name="onboarding_accessibility_done_subtitle">Dashlane can Autofill your saved logins on any web page.</string>
-
     <string name="onboarding_in_app_login_done_positive_button">OK, got it</string>
-
 </resources>

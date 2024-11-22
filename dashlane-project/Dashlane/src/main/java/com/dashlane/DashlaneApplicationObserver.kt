@@ -3,11 +3,11 @@ package com.dashlane
 import android.app.Application
 import android.app.backup.BackupManager
 import android.content.Context
+import com.dashlane.abtesting.OfflineExperimentReporter
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.async.SyncBroadcastManager
-import com.dashlane.authenticator.AuthenticatorAppConnection
 import com.dashlane.autofill.linkedservices.AppMetaDataToLinkedAppsMigration
 import com.dashlane.autofill.linkedservices.RememberToLinkedAppsMigration
 import com.dashlane.braze.BrazeWrapper
@@ -18,6 +18,7 @@ import com.dashlane.core.DataSyncNotification
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.debug.DeveloperUtilities.systemIsInDebug
 import com.dashlane.device.DeviceUpdateManager
+import com.dashlane.endoflife.EndOfLife
 import com.dashlane.events.AppEvents
 import com.dashlane.hermes.LogRepository
 import com.dashlane.inappbilling.BillingManager
@@ -25,8 +26,7 @@ import com.dashlane.logger.AdjustWrapper
 import com.dashlane.notification.FcmHelper
 import com.dashlane.preference.CleanupPreferencesManager
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.abtesting.OfflineExperimentReporter
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
@@ -44,20 +44,19 @@ import com.dashlane.session.observer.UserSettingsLogObserver
 import com.dashlane.session.repository.LockRepository
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
 import com.dashlane.session.repository.UserAccountInfoRepository
-import com.dashlane.session.repository.UserCryptographyRepository
-import com.dashlane.session.startRestoreSession
 import com.dashlane.ui.ActivityLifecycleListener
-import com.dashlane.ui.endoflife.EndOfLife
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 import com.dashlane.update.AppUpdateInstaller
 import com.dashlane.urldomain.CleanupLegacyUrlDomainIconDatabase
-import com.dashlane.util.DarkThemeHelper
+import com.dashlane.usercryptography.UserCryptographyRepository
 import com.dashlane.util.log.UserSupportFileLoggerApplicationCreated
 import com.dashlane.util.notification.NotificationHelper
 import com.dashlane.util.strictmode.StrictModeUtil.init
 import com.dashlane.vault.VaultReportLogger
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 interface ApplicationObserver {
@@ -82,7 +81,7 @@ class DashlaneApplicationObserver @Inject constructor(
     private val userAccountStorage: UserAccountStorage,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val appUpdateInstaller: AppUpdateInstaller,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val cryptographyMigrationObserver: CryptographyMigrationObserver,
     private val broadcastManagerObserver: BroadcastManagerObserver,
     private val endOfLife: EndOfLife,
@@ -92,10 +91,8 @@ class DashlaneApplicationObserver @Inject constructor(
     private val billingManager: BillingManager,
     private val notificationHelper: NotificationHelper,
     private val brazeWrapper: BrazeWrapper,
-    private val darkThemeHelper: DarkThemeHelper,
     private val userSupportFileLoggerApplicationCreated: UserSupportFileLoggerApplicationCreated,
     private val vaultReportLogger: VaultReportLogger,
-    private val authenticatorAppConnection: AuthenticatorAppConnection,
     private val dataSyncNotification: DataSyncNotification,
     private val appEvents: AppEvents,
     private val sessionRestorer: SessionRestorer,
@@ -107,7 +104,7 @@ class DashlaneApplicationObserver @Inject constructor(
     private val syncBroadcastManager: SyncBroadcastManager,
     private val cleanupPreferencesManager: CleanupPreferencesManager,
     private val antiPhishingObserver: AntiPhishingObserver,
-    private val cleanupLegacyUrlDomainIconDatabase: CleanupLegacyUrlDomainIconDatabase,
+    private val cleanupLegacyUrlDomainIconDatabase: CleanupLegacyUrlDomainIconDatabase
 ) : ApplicationObserver {
     override fun onCreate(application: DashlaneApplication) {
         init()
@@ -121,10 +118,8 @@ class DashlaneApplicationObserver @Inject constructor(
         billingManager.connect()
         notificationHelper.initChannels()
         brazeWrapper.configureBrazeNotificationFactory()
-        darkThemeHelper.onApplicationCreate()
         userSupportFileLoggerApplicationCreated.onApplicationCreated(application)
         vaultReportLogger.start()
-        authenticatorAppConnection.loadOtpsForBackup()
         cleanupPreferencesManager.cleanup()
         cleanupLegacyUrlDomainIconDatabase()
     }
@@ -146,8 +141,9 @@ class DashlaneApplicationObserver @Inject constructor(
 
         
         
-        sessionRestorer
-            .startRestoreSession(globalPreferencesManager.getDefaultUsername())
+        GlobalScope.launch {
+            sessionRestorer.restore(globalPreferencesManager.getDefaultUsername())
+        }
         setupMarketingStuff()
 
         
@@ -182,7 +178,7 @@ class DashlaneApplicationObserver @Inject constructor(
                 userCryptographyRepository
             )
         )
-        sessionManager.attach(SystemUpdateObserver(userPreferencesManager))
+        sessionManager.attach(SystemUpdateObserver(preferencesManager))
         sessionManager.attach(UserSettingsLogObserver(logRepository, userSettingsLogRepository))
         sessionManager.attach(endOfLife)
         sessionManager.attach(

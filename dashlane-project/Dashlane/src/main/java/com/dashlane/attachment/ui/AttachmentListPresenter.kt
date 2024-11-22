@@ -1,21 +1,17 @@
 package com.dashlane.attachment.ui
 
-import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.annotation.RequiresPermission
 import com.dashlane.R
 import com.dashlane.attachment.AttachmentListContract
-import com.dashlane.attachment.VaultItemLogAttachmentHelper
 import com.dashlane.attachment.ui.AttachmentItem.DownloadState.DOWNLOADED
 import com.dashlane.attachment.ui.AttachmentItem.DownloadState.NOT_DOWNLOADED
 import com.dashlane.cryptography.CryptographyException
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.lock.LockHelper
-import com.dashlane.permission.PermissionsManager
 import com.dashlane.securefile.Attachment
 import com.dashlane.securefile.DeleteFileManager
 import com.dashlane.securefile.DownloadFileContract
@@ -23,6 +19,7 @@ import com.dashlane.securefile.UploadFileContract
 import com.dashlane.securefile.extensions.toSecureFile
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.UriUtils
+import com.dashlane.vault.item.VaultItemLogAttachmentHelper
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,12 +28,10 @@ import okio.IOException
 
 class AttachmentListPresenter(
     private val coroutineScope: CoroutineScope,
-    private val actionBarColor: Int,
     private val uploadPresenter: UploadFileContract.Presenter,
     private val downloadPresenter: DownloadFileContract.Presenter,
     private val deleteManager: DeleteFileManager,
     private val lockHelper: LockHelper,
-    private val permissionsManager: PermissionsManager,
     private val vaultItemLogAttachmentHelper: VaultItemLogAttachmentHelper
 ) : AttachmentListContract.Presenter,
     BasePresenter<AttachmentListContract.DataProvider, AttachmentListContract.ViewProxy>() {
@@ -45,7 +40,7 @@ class AttachmentListPresenter(
     private var isFirstSearchLaunched = false
 
     override fun onCreate() {
-        view.updateActionBar(actionBarColor, provider.attachments)
+        view.updateActionBar(provider.attachments)
     }
 
     override fun onListLoaded(attachments: MutableList<AttachmentItem>) {
@@ -80,7 +75,7 @@ class AttachmentListPresenter(
         if (view.selectedAttachments > 0) {
             inflater.inflate(R.menu.delete_menu, menu)
         }
-        view.updateActionBar(actionBarColor, provider.attachments)
+        view.updateActionBar(provider.attachments)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -88,7 +83,7 @@ class AttachmentListPresenter(
             android.R.id.home -> {
                 if (view.selectedAttachments > 0) {
                     view.selectedAttachments = 0
-                    view.updateActionBar(actionBarColor, provider.attachments)
+                    view.updateActionBar(provider.attachments)
                     activity?.invalidateOptionsMenu()
                     return true
                 }
@@ -121,7 +116,7 @@ class AttachmentListPresenter(
     override fun downloadOrOpenAttachment(item: AttachmentItem) {
         when (item.downloadState) {
             DOWNLOADED -> askForActionOnAttachment(item)
-            NOT_DOWNLOADED -> downloadPresenter.downloadAttachment(item)
+            NOT_DOWNLOADED -> downloadPresenter.downloadAttachment(item.attachment)
             else -> Unit
         }
     }
@@ -137,7 +132,7 @@ class AttachmentListPresenter(
 
         DialogHelper()
             .builder(context!!)
-            .setTitle(item.filename)
+            .setTitle(item.attachment.filename)
             .setItems(items) { _, which ->
                 when (which) {
                     
@@ -177,18 +172,18 @@ class AttachmentListPresenter(
             val openIntent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(
                     UriUtils.getOpenFileUri(activity.applicationContext, file),
-                    item.type
+                    item.attachment.type
                 )
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            downloadPresenter.onAttachmentOpened(item)
+            downloadPresenter.onAttachmentOpened(item.attachment)
             if (openIntent.resolveActivity(activity.packageManager) != null) {
                 activity.startActivity(openIntent)
             } else {
                 DialogHelper()
                     .builder(context!!)
-                    .setTitle(item.filename)
-                    .setMessage(context!!.getString(R.string.file_open_error, item.filename))
+                    .setTitle(item.attachment.filename)
+                    .setMessage(context!!.getString(R.string.file_open_error, item.attachment.filename))
                     .setPositiveButton(android.R.string.ok, null)
                     .setCancelable(true)
                     .show()
@@ -197,54 +192,26 @@ class AttachmentListPresenter(
     }
 
     private fun exportAttachmentFile(item: AttachmentItem) {
-        val activity = activity ?: return
-
-        @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, conditional = true)
-        fun export() {
-            vaultItemLogAttachmentHelper.logDownload()
-
-            coroutineScope.launch(Dispatchers.Main) {
-                try {
-                    provider.writeDecipheredFileToPublicFolder(item)
-                    view.showExportDone()
-                } catch (e: IllegalArgumentException) {
-                    
-                    view.showExportStorageError()
-                } catch (e: CryptographyException) {
-                    view.showDecryptionError()
-                } catch (e: IOException) {
-                    view.showExportError()
-                }
+        vaultItemLogAttachmentHelper.logDownload()
+        coroutineScope.launch(Dispatchers.Main) {
+            try {
+                provider.writeDecipheredFileToPublicFolder(item)
+                view.showExportDone()
+            } catch (e: IllegalArgumentException) {
+                
+                view.showExportStorageError()
+            } catch (e: CryptographyException) {
+                view.showDecryptionError()
+            } catch (e: IOException) {
+                view.showExportError()
             }
-        }
-        if (permissionsManager.isAllowedToWriteToPublicFolder()) {
-            export()
-        } else {
-            permissionsManager.requestPermission(
-                activity,
-                PermissionsManager.PERMISSION_SDCARD,
-                object : PermissionsManager.OnPermissionResponseHandler {
-                    override fun onApproval() {
-                        export()
-                    }
-
-                    override fun onAlwaysDisapproved() {
-                        view.showPermissionError()
-                    }
-
-                    override fun onDisapproval() {
-                        view.showPermissionError()
-                    }
-                },
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
         }
     }
 
     private fun askForExport(item: AttachmentItem) {
         DialogHelper()
             .builder(context!!).apply {
-                setMessage(context.getString(R.string.export_file_confirm, item.filename))
+                setMessage(context.getString(R.string.export_file_confirm, item.attachment.filename))
                 setTitle(R.string.export_file_confirm_title)
                 setPositiveButton(android.R.string.ok) { dialog, _ ->
                     dialog.dismiss()
@@ -259,7 +226,7 @@ class AttachmentListPresenter(
         DialogHelper()
             .builder(context!!).apply {
                 if (selectedAttachments.size == 1) {
-                    setMessage(context.getString(R.string.delete_file_confirm, selectedAttachments[0].filename))
+                    setMessage(context.getString(R.string.delete_file_confirm, selectedAttachments[0].attachment.filename))
                 } else {
                     setMessage(
                         context.getString(
@@ -271,9 +238,9 @@ class AttachmentListPresenter(
                 setTitle(R.string.delete_file_confirm_title)
                 setPositiveButton(R.string.delete) { dialog, _ ->
                     dialog.dismiss()
-                    selectedAttachments.forEach { deleteFile(it) }
+                    selectedAttachments.forEach { deleteFile(it.attachment) }
                     view.selectedAttachments = 0
-                    view.updateActionBar(actionBarColor, provider.attachments)
+                    view.updateActionBar(provider.attachments)
                     activity?.invalidateOptionsMenu()
                 }
                 setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }

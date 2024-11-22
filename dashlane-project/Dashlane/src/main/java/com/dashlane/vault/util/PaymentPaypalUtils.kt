@@ -11,6 +11,8 @@ import com.dashlane.vault.model.formatTitle
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 
+const val PAYPAL_URL = "www.paypal.com"
+
 fun VaultItem<SyncObject.PaymentPaypal>.toAuthentifiant(): VaultItem<SyncObject.Authentifiant> {
     return createAuthentifiant(
         dataIdentifier = CommonDataIdentifierAttrsImpl(
@@ -18,7 +20,7 @@ fun VaultItem<SyncObject.PaymentPaypal>.toAuthentifiant(): VaultItem<SyncObject.
             teamSpaceId = TeamSpaceUtils.getTeamSpaceId(this)
         ),
         title = SyncObject.Authentifiant.formatTitle(syncObject.name),
-        deprecatedUrl = "www.paypal.com",
+        deprecatedUrl = PAYPAL_URL,
         email = syncObject.login,
         password = syncObject.password?.let { SyncObfuscatedValue(it) }
     )

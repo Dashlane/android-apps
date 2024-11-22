@@ -4,13 +4,13 @@ import android.app.backup.BackupManager
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.cryptography.encryptUtf8ToBase64String
 import com.dashlane.login.LoginInfo
-import com.dashlane.network.tools.authorization
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.endpoints.authentication.AuthRegistrationExtraDeviceTokenGeneratorService
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
-import com.dashlane.session.repository.UserCryptographyRepository
+import com.dashlane.session.authorization
+import com.dashlane.usercryptography.UserCryptographyRepository
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 

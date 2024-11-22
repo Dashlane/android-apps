@@ -4,5 +4,7 @@
     <string name="incomplete">Incomplete</string>
     <string name="item_expired">Expired</string>
     <string name="secure_note_is_locked">Note is locked!</string>
+    
+    <string name="secret_is_locked">Secret is locked!</string>
     <string name="item_expiring_soon">Expiring soon</string>
 </resources>

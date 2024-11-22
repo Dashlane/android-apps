@@ -142,13 +142,6 @@ interface AutofillAnalyzerDef {
         fun onAutoFillWarningClick()
     }
 
-    interface ILockManager {
-        fun showLockActivityForAutofillApi(context: Context)
-        fun showLockActivityForInAppLogin(context: Context, itemUID: String?)
-        val isInAppLoginLocked: Boolean
-        fun logoutAndCallLoginScreenForInAppLogin(context: Context)
-    }
-
     interface IUserPreferencesAccess {
         fun hasKeyboardAutofillEnabled(): Boolean
 

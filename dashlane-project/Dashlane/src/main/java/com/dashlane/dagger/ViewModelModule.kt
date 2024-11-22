@@ -1,7 +1,7 @@
 package com.dashlane.dagger
 
 import android.content.Context
-import com.dashlane.network.tools.authorization
+import com.dashlane.session.authorization
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.session.SessionManager
 import com.dashlane.url.icon.v2.UrlDomainIconDataStore

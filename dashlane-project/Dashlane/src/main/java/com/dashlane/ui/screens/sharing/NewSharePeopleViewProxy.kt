@@ -16,7 +16,7 @@ import com.dashlane.core.domain.sharing.SharingPermission
 import com.dashlane.core.domain.sharing.toSharingPermission
 import com.dashlane.core.domain.sharing.toUserPermission
 import com.dashlane.listeners.edittext.NoLockEditTextWatcher
-import com.dashlane.login.lock.LockManager
+import com.dashlane.lock.LockManager
 import com.dashlane.ui.adapters.sharing.SharingContactFilteredArrayAdapter
 import com.dashlane.ui.dialogs.fragment.WaiterDialogFragment
 import com.dashlane.ui.screens.fragments.sharing.dialog.SharingPermissionInfoDialogFragment

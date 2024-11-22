@@ -4,7 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import com.dashlane.help.HelpCenterCoordinator
 import com.dashlane.help.HelpCenterLink
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.vpn.thirdparty.VpnThirdPartyContract.DataProvider.Account
 import com.skocken.presentation.presenter.BasePresenter
@@ -17,7 +18,8 @@ class VpnThirdPartyPresenter @Inject constructor(
     @FragmentLifecycleCoroutineScope
     private val fragmentLifecycleCoroutineScope: CoroutineScope,
     private val logger: VpnThirdPartyLogger,
-    private val userPreferencesManager: UserPreferencesManager
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager
 ) :
     BasePresenter<VpnThirdPartyContract.DataProvider, VpnThirdPartyContract.ViewProxy>(),
     VpnThirdPartyContract.Presenter {
@@ -25,7 +27,7 @@ class VpnThirdPartyPresenter @Inject constructor(
     private var account: Account? = null
 
     override fun onStart() {
-        if (!userPreferencesManager.isThirdPartyVpnInfoboxDismissed) view.showInfobox()
+        if (!preferencesManager[sessionManager.session?.username].isThirdPartyVpnInfoboxDismissed) view.showInfobox()
     }
 
     override fun onResume() {
@@ -35,14 +37,14 @@ class VpnThirdPartyPresenter @Inject constructor(
                 if (provider.isHotspotShieldInstalled) view.showLaunchAppButton()
             }
             if (account == null) {
-                if (!userPreferencesManager.isThirdPartyVpnGetStartedDisplayed) {
+                if (!preferencesManager[sessionManager.session?.username].isThirdPartyVpnGetStartedDisplayed) {
                     view.showGettingStarted()
                 }
                 view.showActivate()
             }
             
             
-            userPreferencesManager.isThirdPartyVpnGetStartedDisplayed = true
+            preferencesManager[sessionManager.session?.username].isThirdPartyVpnGetStartedDisplayed = true
         }
     }
 
@@ -58,11 +60,11 @@ class VpnThirdPartyPresenter @Inject constructor(
     }
 
     override fun onDismissClicked() {
-        userPreferencesManager.isThirdPartyVpnInfoboxDismissed = true
+        preferencesManager[sessionManager.session?.username].isThirdPartyVpnInfoboxDismissed = true
     }
 
     override fun onLearnMoreClicked() {
-        userPreferencesManager.isThirdPartyVpnInfoboxDismissed = true
+        preferencesManager[sessionManager.session?.username].isThirdPartyVpnInfoboxDismissed = true
     }
 
     override fun onQuestionOneReadMoreClicked() =

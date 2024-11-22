@@ -51,7 +51,6 @@ fun SummaryObject.getComparableField(identityNameHolderService: IdentityNameHold
         is SummaryObject.IdCard -> identityNameHolderService.getOwner(this)
         is SummaryObject.Identity -> fullName
         is SummaryObject.Passport -> identityNameHolderService.getOwner(this)
-        is SummaryObject.PaymentPaypal -> name
         is SummaryObject.PaymentCreditCard -> ownerName
         is SummaryObject.PersonalWebsite -> name
         is SummaryObject.Phone -> phoneName

@@ -79,7 +79,6 @@ private val displayableDataTypes = setOf(
     SyncObjectType.PERSONAL_WEBSITE,
     SyncObjectType.BANK_STATEMENT,
     SyncObjectType.PHONE,
-    SyncObjectType.PAYMENT_PAYPAL,
     SyncObjectType.PAYMENT_CREDIT_CARD,
     SyncObjectType.DRIVER_LICENCE,
     SyncObjectType.FISCAL_STATEMENT,

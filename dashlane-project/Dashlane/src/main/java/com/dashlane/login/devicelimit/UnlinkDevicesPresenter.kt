@@ -9,6 +9,7 @@ import com.dashlane.login.Device
 import com.dashlane.login.LoginIntents
 import com.dashlane.login.devicelimit.UnlinkDevicesActivity.Companion.EXTRA_DEVICES
 import com.dashlane.login.progress.LoginSyncProgressActivity
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.util.getParcelableArrayCompat
@@ -19,12 +20,15 @@ import com.dashlane.hermes.generated.events.user.CallToAction as UserCallToActio
 class UnlinkDevicesPresenter @Inject constructor(
     private val activity: Activity,
     private val sessionManager: SessionManager,
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val logRepository: LogRepository
 ) : UnlinkDevicesContract.Presenter {
 
     override var viewProxy: UnlinkDevicesContract.ViewProxy? = null
     private lateinit var devices: List<Device>
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val myDeviceId = sessionManager.session?.accessKey

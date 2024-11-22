@@ -1,15 +1,10 @@
 package com.dashlane.similarpassword
 
-import javax.inject.Inject
-
-data class SimilarPassword constructor(
-    private val minCharsBeforeCheckSimilarity: Int,
-    private val similarLevenshteinThreshold: Int
+data class SimilarPassword(
+    private val minCharsBeforeCheckSimilarity: Int = 5,
+    private val similarLevenshteinThreshold: Int = 3
 ) {
     private val distanceCalculator = LevenshteinDistance()
-
-    @Inject
-    constructor() : this(minCharsBeforeCheckSimilarity = 5, similarLevenshteinThreshold = 3)
 
     fun areSimilar(password1: String?, password2: String?): Boolean {
         if (password1 == password2) {

@@ -7,15 +7,10 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dashlane.R
-import com.dashlane.events.AppEvents
-import com.dashlane.events.clearLastEvent
-import com.dashlane.item.subview.Action
-import com.dashlane.lock.UnlockEvent
+import com.dashlane.lock.LockManager
 import com.dashlane.login.lock.unlockItemIfNeeded
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.LockRepository
-import com.dashlane.session.repository.getLockManager
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
+import com.dashlane.ui.action.Action
 import com.dashlane.ui.activities.fragments.list.action.ActionItemHelper
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
@@ -34,10 +29,8 @@ class QuickActionsViewProxy(
     private val item: SummaryObject,
     private val quickActionsLogger: QuickActionsLogger,
     itemListContext: ItemListContext,
-    private val lockRepository: LockRepository,
-    private val sessionManager: SessionManager,
+    private val lockManager: LockManager,
     private val dataQuery: GenericDataQuery,
-    private val appEvents: AppEvents,
     private val originPage: String?
 ) : QuickActionsContract.ViewProxy, BaseViewProxy<QuickActionsContract.Presenter>(fragment) {
 
@@ -58,13 +51,12 @@ class QuickActionsViewProxy(
                 fragment.dismiss()
 
                 
-                val lockManager = lockRepository.getLockManager(sessionManager) ?: return@addAction
                 GlobalScope.launch(Dispatchers.Main.immediate) {
                     if (!lockManager.unlockItemIfNeeded(
-                            context,
-                            dataQuery,
-                            item.id,
-                            item.syncObjectType.xmlObjectName
+                            context = context,
+                            dataQuery = dataQuery,
+                            uid = item.id,
+                            type = item.syncObjectType.xmlObjectName,
                         )
                     ) {
                         return@launch
@@ -77,7 +69,6 @@ class QuickActionsViewProxy(
                             quickActionsLogger.logCloseQuickActions(originPage)
                         }
                     }
-                    appEvents.clearLastEvent<UnlockEvent>()
                 }
             }
         }

@@ -16,7 +16,7 @@ import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.drawable.CircleDrawable
 import com.dashlane.vault.model.titleForList
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.summary.toSummary
+import com.dashlane.vault.summary.toSummaryOrNull
 import java.time.Instant
 
 data class SharingActionItemItemGroup(
@@ -91,7 +91,7 @@ data class SharingActionItemItemGroup(
             val itemId = itemGroup.items?.firstOrNull()?.itemId ?: return
             val extraData = actionItem.sharingDao.loadItemContentExtraDataLegacy(itemId)
             val vaultItem = actionItem.xmlConverter.fromXml(itemId, extraData)?.vaultItem
-            val item: SummaryObject? = vaultItem?.toSummary()
+            val item: SummaryObject? = vaultItem?.toSummaryOrNull()
 
             binding.description.text = when (item) {
                 is SummaryObject.Authentifiant -> context.getString(

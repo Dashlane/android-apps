@@ -1,6 +1,7 @@
 package com.dashlane.ui.activities.fragments.vault.list
 
 import android.content.Context
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.sync.DataSync
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
@@ -23,7 +24,6 @@ import com.dashlane.vault.textfactory.list.DataIdentifierTypeTextFactory
 import com.dashlane.vault.util.comparatorAlphabeticAllVisibleItems
 import com.dashlane.vault.util.comparatorAlphabeticAuthentifiant
 import com.dashlane.vault.util.comparatorAlphabeticSecureNote
-import com.dashlane.home.vaultlist.Filter
 import com.dashlane.xml.domain.SyncObjectType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -91,6 +91,7 @@ class VaultListDataProvider @Inject constructor(
             Filter.FILTER_PAYMENT -> Container.PAYMENT_LIST
             Filter.FILTER_PERSONAL_INFO -> Container.PERSONAL_INFO_LIST
             Filter.FILTER_ID -> Container.IDS_LIST
+            Filter.FILTER_SECRET -> throw IllegalStateException("Secrets are not supported on old home screen")
         }.asListContext().copy(section = section)
     }
 

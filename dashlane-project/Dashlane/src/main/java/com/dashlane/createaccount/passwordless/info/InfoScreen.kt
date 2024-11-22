@@ -58,7 +58,7 @@ fun InfoContent(
         )
         Spacer(modifier = Modifier.weight(1f))
         ButtonMediumBar(
-            modifier = modifier
+            modifier = Modifier
                 .align(Alignment.End),
             primaryText = stringResource(id = R.string.passwordless_info_screen_button_get_started),
             secondaryText = stringResource(id = R.string.passwordless_info_screen_button_learn_more),
@@ -70,7 +70,7 @@ fun InfoContent(
 
 @Preview
 @Composable
-fun InfoScreenPreview() {
+private fun InfoScreenPreview() {
     DashlanePreview {
         InfoContent(
             modifier = Modifier,

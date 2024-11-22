@@ -37,67 +37,45 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.accountrecoverykey.R
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Dialog
+import com.dashlane.design.component.IndeterminateLoader
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.cardBackground
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.ui.common.compose.components.CircularProgressIndicator
-import com.dashlane.ui.widgets.compose.GenericErrorContent
+import com.dashlane.ui.common.compose.components.GenericErrorContent
+import com.dashlane.user.UserAccountInfo
 
 @Composable
 fun AccountRecoveryKeyGenerateScreen(
     modifier: Modifier = Modifier,
     viewModel: AccountRecoveryKeyGenerateViewModel,
+    userCanExitFlow: Boolean,
     goToConfirm: () -> Unit,
-    cancel: () -> Unit
+    cancel: () -> Unit,
 ) {
     BackHandler(enabled = true) {
         viewModel.onBackPressed()
     }
 
     LaunchedEffect(viewModel) {
-        viewModel.viewStarted()
-    }
-
-    val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(uiState) {
-        when (uiState) {
-            is AccountRecoveryKeyGenerateState.GoToConfirm -> {
-                viewModel.hasNavigated()
-                goToConfirm()
+        viewModel.viewStarted(userCanExitFlow)
+        viewModel.stateFlow.sideEffect.collect { sideEffect ->
+            when (sideEffect) {
+                AccountRecoveryKeyGenerateState.SideEffect.Cancel -> cancel()
+                AccountRecoveryKeyGenerateState.SideEffect.GoToConfirm -> goToConfirm()
             }
-            is AccountRecoveryKeyGenerateState.Cancel -> {
-                viewModel.hasNavigated()
-                cancel()
-            }
-            else -> Unit
         }
     }
 
-    when (uiState) {
-        is AccountRecoveryKeyGenerateState.GoToConfirm,
-        is AccountRecoveryKeyGenerateState.Initial,
-        is AccountRecoveryKeyGenerateState.KeyGenerated,
-        is AccountRecoveryKeyGenerateState.Loading,
-        is AccountRecoveryKeyGenerateState.Cancel -> {
-            AccountRecoveryKeyGenerateContent(
-                modifier = modifier,
-                isLoading = uiState is AccountRecoveryKeyGenerateState.Loading,
-                accountType = uiState.data.accountType,
-                accountRecoveryKey = uiState.data.accountRecoveryKey ?: "",
-                onContinueClicked = viewModel::continueClicked,
-                onCopy = { viewModel.copy(uiState.data.accountRecoveryKey ?: "") }
-            )
-        }
+    val uiState by viewModel.stateFlow.viewState.collectAsState()
 
-        is AccountRecoveryKeyGenerateState.Error -> {
+    when {
+        uiState.error != null -> {
             GenericErrorContent(
                 textPrimary = stringResource(id = R.string.generic_error_retry_button),
                 textSecondary = stringResource(id = R.string.generic_error_cancel_button),
@@ -105,9 +83,19 @@ fun AccountRecoveryKeyGenerateScreen(
                 onClickSecondary = cancel
             )
         }
+        else -> {
+            AccountRecoveryKeyGenerateContent(
+                modifier = modifier,
+                isLoading = uiState.isLoading,
+                accountType = uiState.accountType,
+                accountRecoveryKey = uiState.accountRecoveryKey ?: "",
+                onContinueClicked = viewModel::continueClicked,
+                onCopy = { viewModel.copy(uiState.accountRecoveryKey ?: "") }
+            )
+        }
     }
 
-    if (uiState.data.cancelDialogShown) {
+    if (uiState.cancelDialogShown) {
         CancelDialog(
             onDismiss = viewModel::cancelDialogDismissed,
             onCancel = viewModel::cancelConfirmed
@@ -168,7 +156,7 @@ fun AccountRecoveryKeyGenerateContent(
             contentAlignment = Alignment.Center
         ) {
             if (isLoading) {
-                CircularProgressIndicator()
+                IndeterminateLoader()
             } else {
                 Text(
                     modifier = Modifier.testTag("arkCode"),
@@ -243,7 +231,7 @@ fun CancelDialog(
 
 @Preview
 @Composable
-fun AccountRecoveryKeyCreationContentPreview() {
+private fun AccountRecoveryKeyCreationContentPreview() {
     DashlanePreview {
         AccountRecoveryKeyGenerateContent(
             accountType = UserAccountInfo.AccountType.MasterPassword,
@@ -256,7 +244,21 @@ fun AccountRecoveryKeyCreationContentPreview() {
 
 @Preview
 @Composable
-fun CancelDialogPreview() {
+private fun AccountRecoveryKeyCreationContentLoadingPreview() {
+    DashlanePreview {
+        AccountRecoveryKeyGenerateContent(
+            accountType = UserAccountInfo.AccountType.MasterPassword,
+            accountRecoveryKey = "AA11-AA11-AA11-AA11-AA11-AA11-AA11",
+            onContinueClicked = {},
+            onCopy = {},
+            isLoading = true,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun CancelDialogPreview() {
     DashlanePreview {
         CancelDialog(
             onDismiss = {},

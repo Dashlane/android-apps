@@ -10,6 +10,7 @@ fun ItemListContext.toAnyPage(): AnyPage? = when (this.container) {
     ItemListContext.Container.CREDENTIALS_LIST -> AnyPage.ITEM_CREDENTIAL_LIST
     ItemListContext.Container.SECURE_NOTE_LIST -> AnyPage.ITEM_SECURE_NOTE_LIST
     ItemListContext.Container.SEARCH -> AnyPage.SEARCH
+    ItemListContext.Container.SECRETS_LIST -> AnyPage.ITEM_SECRET
     ItemListContext.Container.CSV_IMPORT,
     ItemListContext.Container.PASSWORD_HEALTH,
     ItemListContext.Container.SHARING,

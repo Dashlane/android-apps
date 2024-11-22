@@ -1,6 +1,6 @@
 package com.dashlane.loaders.datalists
 
-import com.dashlane.loaders.datalists.search.SearchUtils
+import com.dashlane.feature.home.data.Filter
 import com.dashlane.search.MatchedSearchResult
 import com.dashlane.search.SearchSorter
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
@@ -42,7 +42,7 @@ class SearchLoader @Inject constructor(
         return if (cache?.acceptNewFilter(query) == true) {
             cache.result.map { it.item }
         } else {
-            val loadFilter = genericFilter { specificDataType(SearchUtils.FILTER_BY_DATA_TYPE.keys) }
+            val loadFilter = genericFilter { specificDataType(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES) }
             genericDataQuery.queryAll(loadFilter) + settingsList.getSearchableItems()
         }
     }
@@ -55,12 +55,12 @@ class SearchLoader @Inject constructor(
             .mapNotNull { it.item as? SummaryObject.Authentifiant }
     }
 
-    fun loadCredentialById(authentifiantId: String): VaultItem<SyncObject.Authentifiant>? {
+    suspend fun loadCredentialById(authentifiantId: String): VaultItem<SyncObject.Authentifiant>? {
         val loadFilter = vaultFilter {
             specificDataType(SyncObjectType.AUTHENTIFIANT)
             specificUid(authentifiantId)
         }
-        return vaultDataQuery.queryLegacy(loadFilter)?.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
+        return vaultDataQuery.query(loadFilter)?.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
     }
 
     private class CacheResult(private val queryString: String, val result: List<MatchedSearchResult>) {

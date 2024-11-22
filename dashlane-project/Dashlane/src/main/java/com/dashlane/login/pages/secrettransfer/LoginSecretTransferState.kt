@@ -1,8 +1,7 @@
 package com.dashlane.login.pages.secrettransfer
 
-import com.dashlane.user.UserAccountInfo
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
+import com.dashlane.user.UserAccountInfo
 
 sealed class LoginSecretTransferState {
     abstract val data: LoginSecretTransferData
@@ -16,6 +15,5 @@ sealed class LoginSecretTransferState {
 }
 
 data class LoginSecretTransferData(
-    val secretTransferPayload: SecretTransferPayload? = null,
-    val registeredUserDevice: RegisteredUserDevice.Remote? = null
+    val secretTransferPayload: SecretTransferPayload? = null
 )

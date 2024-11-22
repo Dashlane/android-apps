@@ -3,67 +3,64 @@ package com.dashlane.login.pages.token.compose
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.dashlane.authentication.AuthenticationInvalidTokenException
 import com.dashlane.authentication.AuthenticationLockedOutException
 import com.dashlane.authentication.AuthenticationOfflineException
 import com.dashlane.authentication.AuthenticationSecondFactor
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.AuthenticationSecondFactoryRepository
-import com.dashlane.debug.DaDaDa
+import com.dashlane.debug.services.DaDaDaLogin
 import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.login.LoginLogger
-import com.dashlane.login.root.LoginDestination.LOGIN_KEY
+import com.dashlane.login.root.LoginDestination.Token
+import com.dashlane.login.root.LoginRepository
+import com.dashlane.mvvm.MutableViewStateFlow
 import com.dashlane.mvvm.State
+import com.dashlane.mvvm.ViewStateFlow
 import com.dashlane.server.api.endpoints.authentication.AuthSendEmailTokenService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.VisibleForTesting
+import javax.inject.Inject
 
 @HiltViewModel
 class LoginTokenViewModel @Inject constructor(
     private val secondFactoryRepository: AuthenticationSecondFactoryRepository,
     private val sendEmailTokenService: AuthSendEmailTokenService,
-    private val daDaDa: DaDaDa,
+    private val dadadaLogin: DaDaDaLogin,
     private val loginLogger: LoginLogger,
+    private val loginRepository: LoginRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val login = savedStateHandle.get<String>(LOGIN_KEY) ?: throw IllegalStateException("Email is empty")
+    private val login = savedStateHandle.toRoute<Token>().login
 
-    private val stateFlow = MutableStateFlow(LoginTokenState(email = login))
-    private val navigationStateFlow = Channel<LoginTokenNavigationState>()
-
-    val uiState = stateFlow.asStateFlow()
-    val navigationState = navigationStateFlow.receiveAsFlow()
+    private val _stateFlow = MutableViewStateFlow<LoginTokenState.View, LoginTokenState.SideEffect>(LoginTokenState.View(login))
+    val stateFlow: ViewStateFlow<LoginTokenState.View, LoginTokenState.SideEffect> = _stateFlow
 
     fun viewStarted() {
-        flow<LoginTokenState> {
-            if (stateFlow.value.token == null) {
+        flow<LoginTokenState.View> {
+            if (_stateFlow.value.token == null) {
                 debug(login)
                 sendEmailTokenService.execute(AuthSendEmailTokenService.Request(login = login))
             }
         }
             .catch { throwable ->
-                emit(stateFlow.value.copy(error = LoginTokenError.Network))
+                emit(_stateFlow.value.copy(error = LoginTokenError.Network))
             }
-            .onEach { state -> stateFlow.update { state } }
+            .onEach { state -> _stateFlow.update { state } }
             .launchIn(viewModelScope)
     }
 
     fun onHelpClicked() {
         viewModelScope.launch {
-            stateFlow.update { state -> state.copy(showHelpDialog = true) }
+            _stateFlow.update { state -> state.copy(showHelpDialog = true) }
         }
     }
 
@@ -71,60 +68,64 @@ class LoginTokenViewModel @Inject constructor(
         viewModelScope.launch {
             loginLogger.logResendToken()
             secondFactoryRepository.resendToken(AuthenticationSecondFactor.EmailToken(login))
-            stateFlow.update { state -> state.copy(showHelpDialog = false) }
+            _stateFlow.update { state -> state.copy(showHelpDialog = false) }
         }
     }
 
     fun onDialogDismissed() {
         viewModelScope.launch {
-            stateFlow.update { state -> state.copy(showHelpDialog = false) }
+            _stateFlow.update { state -> state.copy(showHelpDialog = false) }
         }
     }
 
     fun onTokenChange(token: String) {
         viewModelScope.launch {
-            stateFlow.update { state -> state.copy(token = token, error = null) }
+            _stateFlow.update { state -> state.copy(token = token, error = null) }
         }
     }
 
     fun onNext() {
-        validateToken(stateFlow.value.token ?: "")
+        validateToken(_stateFlow.value.token ?: "")
     }
 
     @VisibleForTesting
     fun validateToken(token: String) {
         flow<State> {
             val result = secondFactoryRepository.validate(AuthenticationSecondFactor.EmailToken(login), token)
-            emit(LoginTokenNavigationState.Success(result.registeredUserDevice as RegisteredUserDevice.Remote, result.authTicket!!))
+            val authTicket = result.authTicket ?: throw AuthenticationInvalidTokenException()
+
+            loginRepository.updateRegisteredUserDevice(registeredUserDevice = result.registeredUserDevice)
+            loginRepository.updateAuthTicket(authTicket)
+            emit(LoginTokenState.SideEffect.Success)
         }
-            .onStart { emit(stateFlow.value.copy(token = token, isLoading = true)) }
+            .onStart { emit(_stateFlow.value.copy(token = token, isLoading = true)) }
             .catch { throwable ->
                 when (throwable) {
                     is AuthenticationInvalidTokenException,
                     is AuthenticationLockedOutException -> {
                         loginLogger.logWrongOtp(VerificationMode.EMAIL_TOKEN)
-                        emit(stateFlow.value.copy(isLoading = false, error = LoginTokenError.InvalidToken))
+                        emit(_stateFlow.value.copy(isLoading = false, error = LoginTokenError.InvalidToken))
                     }
-                    is AuthenticationOfflineException -> emit(stateFlow.value.copy(isLoading = false, error = LoginTokenError.Offline))
-                    else -> emit(stateFlow.value.copy(isLoading = false, error = LoginTokenError.Network))
+                    is AuthenticationOfflineException -> emit(_stateFlow.value.copy(isLoading = false, error = LoginTokenError.Offline))
+                    else -> emit(_stateFlow.value.copy(isLoading = false, error = LoginTokenError.Network))
                 }
             }
             .onEach { state ->
                 when (state) {
-                    is LoginTokenNavigationState -> {
-                        navigationStateFlow.send(state)
-                        stateFlow.update { it.copy(isLoading = false) }
+                    is LoginTokenState.SideEffect -> {
+                        _stateFlow.send(state)
+                        _stateFlow.update { it.copy(isLoading = false) }
                     }
-                    is LoginTokenState -> stateFlow.update { state }
+                    is LoginTokenState.View -> _stateFlow.update { state }
                 }
             }
             .launchIn(viewModelScope)
     }
 
     fun debug(username: String) {
-        daDaDa.getSecurityToken(username)
+        dadadaLogin.getSecurityToken(username)
             .onEach { token ->
-                stateFlow.update { state -> state.copy(token = token) }
+                _stateFlow.update { state -> state.copy(token = token) }
                 validateToken(token)
             }
             .launchIn(viewModelScope)

@@ -15,12 +15,13 @@ import com.dashlane.R
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.login.LoginStrategy
+import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.dashlane.ui.widgets.compose.DashlaneSyncProgress
-import com.dashlane.ui.widgets.compose.GenericErrorContent
 import kotlinx.coroutines.delay
 
 @Composable
 fun RecoveryScreen(
+    modifier: Modifier = Modifier,
     viewModel: RecoveryViewModel,
     onSuccess: (LoginStrategy.Strategy?) -> Unit,
     onCancel: () -> Unit
@@ -48,6 +49,7 @@ fun RecoveryScreen(
     when (uiState) {
         is RecoveryState.Error -> {
             GenericErrorContent(
+                modifier = modifier,
                 textPrimary = stringResource(id = R.string.generic_error_retry_button),
                 textSecondary = stringResource(id = R.string.generic_error_cancel_button),
                 onClickPrimary = viewModel::retry,
@@ -56,6 +58,7 @@ fun RecoveryScreen(
         }
         else -> {
             RecoveryContent(
+                modifier = modifier,
                 progress = uiState.progress,
                 hasFinishedLoading = uiState is RecoveryState.Finish
             )
@@ -65,11 +68,12 @@ fun RecoveryScreen(
 
 @Composable
 fun RecoveryContent(
+    modifier: Modifier = Modifier,
     progress: Int?,
     hasFinishedLoading: Boolean
 ) {
     DashlaneSyncProgress(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         color = DashlaneTheme.colors.oddityBrand,
         hasFinishedLoading = hasFinishedLoading,
         verticalArrangement = Arrangement.Center,
@@ -82,7 +86,7 @@ fun RecoveryContent(
 
 @Preview
 @Composable
-fun RecoveryContentPreview() {
+private fun RecoveryContentPreview() {
     DashlanePreview {
         RecoveryContent(
             progress = 75,

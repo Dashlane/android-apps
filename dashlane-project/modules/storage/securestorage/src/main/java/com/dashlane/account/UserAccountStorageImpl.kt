@@ -3,7 +3,7 @@ package com.dashlane.account
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.preference.ConstantsPrefs
-import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.user.UserAccountInfo
@@ -11,7 +11,7 @@ import com.dashlane.user.UserSecuritySettings
 import javax.inject.Inject
 
 class UserAccountStorageImpl @Inject constructor(
-    private val userPreferencesManager: UserPreferencesManager,
+    private val preferencesManager: PreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,
     private val deviceInfoRepository: DeviceInfoRepository
 ) : UserAccountStorage {
@@ -23,10 +23,10 @@ class UserAccountStorageImpl @Inject constructor(
         allowOverwriteAccessKey: Boolean
     ) {
         val username = userAccountInfo.username
-        val preferences = userPreferencesManager.preferencesFor(username)
+        val preferences = preferencesManager[username]
 
         preferences.putBoolean(ConstantsPrefs.OTP2SECURITY, userAccountInfo.otp2)
-        preferences.putString(ConstantsPrefs.ACCOUNT_TYPE, userAccountInfo.accountType.toString())
+        saveAccountType(username = username, accountType = userAccountInfo.accountType)
         val oldAccessKey = preferences.accessKey
         val newAccessKey = userAccountInfo.accessKey
         if (oldAccessKey.isNullOrEmpty()) {
@@ -55,7 +55,7 @@ class UserAccountStorageImpl @Inject constructor(
     override fun get(username: Username): UserAccountInfo? {
         val ukiStored = userSecureStorageManager.isSecretKeyStored(username)
         return if (ukiStored) {
-            val preferences = userPreferencesManager.preferencesFor(username)
+            val preferences = preferencesManager[username]
             val userIsOTP2 = preferences.getBoolean(ConstantsPrefs.OTP2SECURITY)
             
             val securitySettingsFlags = preferences.getLong(ConstantsPrefs.SECURITY_SETTINGS).toInt()
@@ -81,12 +81,11 @@ class UserAccountStorageImpl @Inject constructor(
     }
 
     override fun saveSecuritySettings(username: Username, securitySettings: UserSecuritySettings) {
-        val preferences = userPreferencesManager.preferencesFor(username)
+        val preferences = preferencesManager[username]
         preferences.putLong(ConstantsPrefs.SECURITY_SETTINGS, securitySettings.asFlags().toLong())
     }
 
     override fun saveAccountType(username: String, accountType: UserAccountInfo.AccountType) {
-        val preferences = userPreferencesManager.preferencesFor(username)
-        preferences.putString(ConstantsPrefs.ACCOUNT_TYPE, accountType.toString())
+        preferencesManager[username].accountType = accountType.toString()
     }
 }

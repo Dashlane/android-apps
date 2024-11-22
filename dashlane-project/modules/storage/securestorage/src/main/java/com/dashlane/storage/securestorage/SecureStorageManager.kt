@@ -56,22 +56,22 @@ class SecureStorageManager @Inject constructor(
         secureDataStorage.removeLegacy(keyIdentifier)
     }
 
-    fun wipeUserData(username: Username) {
+    suspend fun wipeUserData(username: Username) {
         
-        getSecureDataStorage(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED).removeLegacy(SecureDataKey.LOCAL_KEY)
+        getSecureDataStorage(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED).remove(SecureDataKey.LOCAL_KEY)
         
         getSecureDataStorage(username, SecureDataStorage.Type.LOCAL_KEY_PROTECTED)
             .apply {
-                removeLegacy(SecureDataKey.SECRET_KEY)
-                removeLegacy(SecureDataKey.SETTINGS)
-                removeLegacy(SecureDataKey.REMOTE_KEY)
+                remove(SecureDataKey.SECRET_KEY)
+                remove(SecureDataKey.SETTINGS)
+                remove(SecureDataKey.REMOTE_KEY)
             }
 
         
-        getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED).removeLegacy(SecureDataKey.LOCAL_KEY)
+        getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED).remove(SecureDataKey.LOCAL_KEY)
 
         
-        getSecureDataStorage(username, SecureDataStorage.Type.RECOVERY_KEY_PROTECTED).removeLegacy(SecureDataKey.LOCAL_KEY)
+        getSecureDataStorage(username, SecureDataStorage.Type.RECOVERY_KEY_PROTECTED).remove(SecureDataKey.LOCAL_KEY)
     }
 
     fun getSecureDataStorage(username: Username, secureDataStorageType: SecureDataStorage.Type): SecureDataStorage {

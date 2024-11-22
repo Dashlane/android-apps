@@ -3,30 +3,22 @@ package com.dashlane.item.subview.action
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import com.dashlane.R
 import com.dashlane.attachment.ui.AttachmentListActivity
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
 import com.dashlane.ui.activities.DashlaneWrapperActivity
 import com.dashlane.ui.screens.sharing.SharingNewSharePeopleFragment
-import com.dashlane.util.getThemeAttrColor
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 
-fun VaultItem<*>.showAttachments(activity: Activity, color: Int) {
-    this.toSummary<SummaryObject>().showAttachments(activity, color)
+fun VaultItem<*>.showAttachments(activity: Activity) {
+    this.toSummary<SummaryObject>().showAttachments(activity)
 }
 
-fun SummaryObject.showAttachments(activity: Activity, color: Int) {
-    var activityColor = color
+fun SummaryObject.showAttachments(activity: Activity) {
     val attachmentListIntent = Intent(activity, AttachmentListActivity::class.java).apply {
         putExtra(AttachmentListActivity.ITEM_ATTACHMENTS, attachments)
-        if (activityColor == -1) {
-            
-            activityColor = activity.getThemeAttrColor(R.attr.colorPrimary)
-        }
-        putExtra(AttachmentListActivity.ITEM_COLOR, activityColor)
         putExtra(AttachmentListActivity.ITEM_ID, id)
         putExtra(
             AttachmentListActivity.ITEM_TYPE,

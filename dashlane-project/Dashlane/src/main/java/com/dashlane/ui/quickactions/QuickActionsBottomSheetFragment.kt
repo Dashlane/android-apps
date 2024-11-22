@@ -7,8 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.dashlane.R
 import com.dashlane.events.AppEvents
-import com.dashlane.session.SessionManager
-import com.dashlane.session.repository.LockRepository
+import com.dashlane.lock.LockManager
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.ui.ExpandedBottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,10 +26,7 @@ class QuickActionsBottomSheetFragment : ExpandedBottomSheetDialogFragment() {
     lateinit var quickActionsLogger: QuickActionsLogger
 
     @Inject
-    lateinit var lockRepository: LockRepository
-
-    @Inject
-    lateinit var sessionManager: SessionManager
+    lateinit var lockManager: LockManager
 
     @Inject
     lateinit var appEvents: AppEvents
@@ -59,10 +55,8 @@ class QuickActionsBottomSheetFragment : ExpandedBottomSheetDialogFragment() {
                 item = summary,
                 quickActionsLogger = quickActionsLogger,
                 itemListContext = itemListContext,
-                lockRepository = lockRepository,
-                sessionManager = sessionManager,
+                lockManager = lockManager,
                 dataQuery = genericDataQuery,
-                appEvents = appEvents,
                 originPage = originPage
             )
             viewProxy.setPresenter(presenter)

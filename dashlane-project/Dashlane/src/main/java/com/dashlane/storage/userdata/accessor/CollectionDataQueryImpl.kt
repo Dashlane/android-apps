@@ -11,8 +11,8 @@ import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
 class CollectionDataQueryImpl @Inject constructor(
-    private val genericDataQuery: GenericDataQueryImplRaclette,
-    private val vaultDataQuery: VaultDataQueryImplRaclette,
+    private val genericDataQuery: GenericDataQuery,
+    private val vaultDataQuery: VaultDataQuery,
 ) : CollectionDataQuery {
 
     override fun queryByName(name: String, filter: CollectionFilter): VaultItem<SyncObject.Collection>? =

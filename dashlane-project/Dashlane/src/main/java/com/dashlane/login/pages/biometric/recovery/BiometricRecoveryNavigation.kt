@@ -1,39 +1,36 @@
 package com.dashlane.login.pages.biometric.recovery
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.dashlane.user.UserAccountInfo
+import com.dashlane.changemasterpassword.ChangeMasterPasswordScreen
 import com.dashlane.hermes.generated.definitions.VerificationMode
+import com.dashlane.lock.LockSetting
 import com.dashlane.login.LoginStrategy
-import com.dashlane.login.lock.LockSetting
 import com.dashlane.login.pages.biometric.compose.LoginBiometricScreen
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryNavigation.biometricDestination
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryNavigation.biometricRecoveryRoute
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryNavigation.changeMpDestination
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryNavigation.otpDestination
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryNavigation.recoveryDestination
+import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination.Biometric
+import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination.ChangeMp
+import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination.Otp
+import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination.Recovery
 import com.dashlane.login.pages.totp.compose.LoginTotpScreen
-import com.dashlane.login.root.LocalLoginDestination
-import com.dashlane.login.root.LoginDestination
-import com.dashlane.masterpassword.compose.ChangeMasterPasswordScreen
+import com.dashlane.login.pages.totp.compose.LoginTotpViewModel
+import com.dashlane.user.UserAccountInfo
+import kotlinx.serialization.Serializable
 
-object BiometricRecoveryNavigation {
-    const val biometricRecoveryRoute = "biometricRecovery"
-    const val otpDestination = "$biometricRecoveryRoute/otp"
-    const val biometricDestination = "$biometricRecoveryRoute/biometric"
-    const val changeMpDestination = "$biometricRecoveryRoute/changeMp"
-    const val recoveryDestination = "$biometricRecoveryRoute/success"
-}
+
+@Serializable
+data object BiometricRecoveryNavigation
 
 @Suppress("LongMethod")
 fun NavGraphBuilder.biometricRecoveryNavigation(
     navController: NavHostController,
+    contentPadding: PaddingValues = PaddingValues(),
     userAccountInfo: UserAccountInfo,
     lockSetting: LockSetting,
     onSuccess: (LoginStrategy.Strategy) -> Unit,
@@ -42,43 +39,33 @@ fun NavGraphBuilder.biometricRecoveryNavigation(
 ) {
     
     
-    val startDestination = if (userAccountInfo.securitySettings?.isTotp == true && !lockSetting.isMasterPasswordReset) {
-        otpDestination
-    } else {
-        biometricDestination
-    }
+    val startDestination =
+        if (userAccountInfo.securitySettings?.isTotp == true && !lockSetting.isMasterPasswordReset) {
+            Otp(userAccountInfo.username)
+        } else {
+            Biometric
+        }
 
-    navigation(
-        startDestination = startDestination,
-        route = biometricRecoveryRoute,
-    ) {
-        composable(
-            route = "$otpDestination?${LoginDestination.LOGIN_KEY}={${LoginDestination.LOGIN_KEY}}",
-            arguments = listOf(
-                navArgument(LocalLoginDestination.LOGIN_KEY) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = userAccountInfo.username
-                }
-            )
-        ) {
+    navigation<BiometricRecoveryNavigation>(startDestination = startDestination) {
+        composable<Otp> {
+            val viewModel: LoginTotpViewModel = hiltViewModel()
             LoginTotpScreen(
-                viewModel = hiltViewModel(),
+                modifier = Modifier.padding(contentPadding),
+                viewModel = viewModel,
                 verificationMode = VerificationMode.OTP1,
-                goToNext = { _, _ -> navController.navigate(route = biometricDestination) },
-                goToPush = {
-                    
-                }
+                goToNext = { navController.navigate(Biometric) },
             )
         }
-        composable(biometricDestination) {
+        composable<Biometric> {
             LoginBiometricScreen(
+                modifier = Modifier.padding(contentPadding),
                 viewModel = hiltViewModel(),
                 userAccountInfo = userAccountInfo,
                 lockSetting = lockSetting,
+                isBiometricRecovery = true,
                 onSuccess = {
-                    navController.navigate(changeMpDestination) {
-                        popUpTo(biometricDestination) {
+                    navController.navigate(ChangeMp) {
+                        popUpTo(Biometric) {
                             inclusive = true
                         }
                     }
@@ -89,17 +76,19 @@ fun NavGraphBuilder.biometricRecoveryNavigation(
                 onLogout = { _, _ -> onLogout() }
             )
         }
-        composable(changeMpDestination) { navBackStackEntry ->
-            val parentEntry = remember(navBackStackEntry) { navController.getBackStackEntry(biometricRecoveryRoute) }
+        composable<ChangeMp> { navBackStackEntry ->
+            val parentEntry =
+                remember(navBackStackEntry) { navController.getBackStackEntry<BiometricRecoveryNavigation>() }
             val biometricRecoveryViewModel = hiltViewModel<BiometricRecoveryViewModel>(parentEntry)
 
             ChangeMasterPasswordScreen(
+                modifier = Modifier.padding(contentPadding),
                 viewModel = hiltViewModel(),
                 hasSteps = false,
                 goToNext = { newMasterPassword ->
                     biometricRecoveryViewModel.updateNewMasterPassword(newMasterPassword)
-                    navController.navigate(recoveryDestination) {
-                        popUpTo(changeMpDestination) {
+                    navController.navigate(Recovery) {
+                        popUpTo(ChangeMp) {
                             inclusive = true
                         }
                     }
@@ -110,11 +99,13 @@ fun NavGraphBuilder.biometricRecoveryNavigation(
                 }
             )
         }
-        composable(recoveryDestination) { navBackStackEntry ->
-            val parentEntry = remember(navBackStackEntry) { navController.getBackStackEntry(biometricRecoveryRoute) }
+        composable<Recovery> { navBackStackEntry ->
+            val parentEntry =
+                remember(navBackStackEntry) { navController.getBackStackEntry<BiometricRecoveryNavigation>() }
             val biometricRecoveryViewModel = hiltViewModel<BiometricRecoveryViewModel>(parentEntry)
 
             BiometricRecoveryScreen(
+                modifier = Modifier.padding(contentPadding),
                 viewModel = biometricRecoveryViewModel,
                 onSuccess = onSuccess,
                 onCancel = onCancel

@@ -6,7 +6,9 @@ import com.dashlane.events.AppEvents
 import com.dashlane.events.clearLastEvent
 import com.dashlane.events.register
 import com.dashlane.events.unregister
+import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
+import com.dashlane.session.SessionManager
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.HomeActivity
@@ -19,10 +21,14 @@ import javax.inject.Inject
 class AppUpdateNeededActivityListener @Inject constructor(
     private val appEvents: AppEvents,
     private val appUpdateInstaller: AppUpdateInstaller,
-    private val userPreferencesManager: UserPreferencesManager
+    private val sessionManager: SessionManager,
+    private val preferencesManager: PreferencesManager
 ) : AbstractActivityLifecycleListener() {
 
     private lateinit var activity: WeakReference<DashlaneActivity>
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)

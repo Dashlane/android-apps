@@ -226,9 +226,9 @@ class AuthenticatorDashboardViewModel @Inject constructor(
             val otp = it.syncObject.otp() ?: return@mapNotNull null
             CredentialItem(
                 it.uid,
-                it.syncObject.titleForListNormalized ?: "",
-                it.syncObject.urlDomain,
-                it.syncObject.loginForUi,
+                it.titleForListNormalized ?: "",
+                it.urlDomain,
+                it.loginForUi,
                 it.isSpaceItem() && it.syncObject.spaceId.isNotSemanticallyNull(),
                 otp,
                 expanded = editMode,

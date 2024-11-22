@@ -11,6 +11,8 @@
         android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
     <application>
-        <activity android:name=".BarCodeCaptureActivity" />
+        <activity
+            android:name=".BarCodeCaptureActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
     </application>
 </manifest>
