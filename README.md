@@ -12,7 +12,7 @@ The Android project was started back in 2010 and was written in Java with some u
 
 ### Codebase organization
 
-The app used to be monolithic in a single repository and was progressively modularized. Some modules are directly put in our repository while others are built separately and published on a private maven repository to be used by our apps. Overall modularization helped us with our build processes, while also allowing us to reuse modules in our more recently released Authenticator app.
+The app used to be monolithic in a single repository and was progressively modularized. Some modules are directly put in our repository while others are built separately and published on a private maven repository to be used by our apps. Overall modularization helped us with our build processes, while also allowing us to reuse modules.
 
 ### UI architecture pattern
 
@@ -57,4 +57,3 @@ If there is an improvement for the codebase you would like to share with us, we 
 |  Dashlane Apps |  Download link | 
 |---|---|
 | Dashlane Password Manager   |  <a href="https://play.google.com/store/apps/details?id=com.dashlane"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height=100px /></a>  |
-|  Dashlane Authenticator   |  <a href="https://play.google.com/store/apps/details?id=com.dashlane.authenticator"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height=100px /> |
