@@ -21,7 +21,7 @@ fun createCountryField(
         override fun onValueChanged(origin: Any, newValue: String) {
             
         }
-    }
+    },
 ): ItemSubView<*> {
     val countryHeader = context.getString(R.string.country)
     val allCountryList = Country.labels(context)
@@ -30,7 +30,7 @@ fun createCountryField(
         editMode -> ItemEditValueListSubView(
             countryHeader,
             selectedCountry,
-            allCountryList
+            allCountryList,
         ) { it, value -> it.copyForUpdatedCountry(context, value) }.apply {
             addValueChangedListener(valueChangedListener)
         }

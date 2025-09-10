@@ -11,26 +11,26 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.dashlane.activatetotp.R
 import com.dashlane.activatetotp.databinding.FragmentDisableTotpEnterTokenBinding
-import com.dashlane.disabletotp.deactivation.DisableTotpDeactivationFragmentDirections
 import com.dashlane.login.CodeInputViewHelper
 import com.dashlane.ui.util.DialogHelper
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 internal class DisableTotpEnterTokenFragment : Fragment() {
-
     private val viewModel by viewModels<TotpRecoveryCodeDialogViewModel>()
     private var dialogBuilder: TotpRecoveryCodeAlertDialogBuilder? = null
     private var tokenWidth = 0
-    private var _binding: FragmentDisableTotpEnterTokenBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentDisableTotpEnterTokenBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentDisableTotpEnterTokenBinding.inflate(inflater, container, false)
+        binding = FragmentDisableTotpEnterTokenBinding.inflate(inflater, container, false)
 
         val minContentHeight = requireContext().resources.getDimensionPixelSize(R.dimen.size_480dp)
 
@@ -80,14 +80,18 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.sharedFlow.collect { state ->
-                when (state) {
-                    SmsRecoveryCodeDialogState.Error -> {
-                        findNavController().navigate(DisableTotpDeactivationFragmentDirections.goToDeactivationError())
-                    }
-                    SmsRecoveryCodeDialogState.Success -> {
-                        show2FARecoveryEnterCodeDialog(requireContext().getString(R.string.disable_totp_enter_token_recovery_dialog_phone_backup_description))
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.sharedFlow.collect { state ->
+                    when (state) {
+                        SmsRecoveryCodeDialogState.Error -> {
+                            findNavController().navigate(DisableTotpEnterTokenFragmentDirections.goToDeactivationError())
+                        }
+                        SmsRecoveryCodeDialogState.Success -> {
+                            show2FARecoveryEnterCodeDialog(
+                                requireContext().getString(R.string.disable_totp_enter_token_recovery_dialog_phone_backup_description),
+                            )
+                        }
                     }
                 }
             }
@@ -98,7 +102,6 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
     override fun onDestroyView() {
         tokenWidth = binding.token.width
         super.onDestroyView()
-        _binding = null
     }
 
     override fun onDestroy() {
@@ -108,7 +111,8 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        view?.let { FragmentDisableTotpEnterTokenBinding.bind(it) }
+        view
+            ?.let { FragmentDisableTotpEnterTokenBinding.bind(it) }
             ?.let { outState.putInt(STATE_TOKEN_WIDTH, it.token.width) }
     }
 
@@ -124,12 +128,12 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
             .setTitle(R.string.disable_totp_enter_token_recovery_dialog_title)
             .setMessage(R.string.disable_totp_enter_token_recovery_dialog_choice_description)
             .setPositiveButton(R.string.disable_totp_enter_token_recovery_dialog_choice_button_positive) { _, _ ->
-                show2FARecoveryEnterCodeDialog(requireContext().getString(R.string.disable_totp_enter_token_recovery_dialog_backup_description))
-            }
-            .setNegativeButton(R.string.disable_totp_enter_token_recovery_dialog_choice_button_negative) { _, _ ->
+                show2FARecoveryEnterCodeDialog(
+                    requireContext().getString(R.string.disable_totp_enter_token_recovery_dialog_backup_description),
+                )
+            }.setNegativeButton(R.string.disable_totp_enter_token_recovery_dialog_choice_button_negative) { _, _ ->
                 show2FARecoveryPhoneCodeDialog()
-            }
-            .setCancelable(true)
+            }.setCancelable(true)
             .show()
     }
 
@@ -138,7 +142,9 @@ internal class DisableTotpEnterTokenFragment : Fragment() {
             .builder(requireContext(), R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog)
             .setTitle(R.string.disable_totp_enter_token_recovery_dialog_title)
             .setMessage(R.string.disable_totp_enter_token_recovery_dialog_phone_description)
-            .setPositiveButton(R.string.disable_totp_enter_token_recovery_dialog_phone_button_positive) { _, _ -> viewModel.sendRecoveryBySms() }
+            .setPositiveButton(
+                R.string.disable_totp_enter_token_recovery_dialog_phone_button_positive,
+            ) { _, _ -> viewModel.sendRecoveryBySms() }
             .setNegativeButton(R.string.disable_totp_enter_token_recovery_dialog_phone_button_negative) { _, _ -> }
             .setCancelable(true)
             .show()

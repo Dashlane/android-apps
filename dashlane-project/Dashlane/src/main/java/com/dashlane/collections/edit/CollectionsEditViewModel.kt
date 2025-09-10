@@ -6,17 +6,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.core.sharing.SharingItemUpdater
-import com.dashlane.core.sharing.SharingItemUpdaterRequest
 import com.dashlane.server.api.endpoints.sharinguserdevice.RenameCollectionService
 import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.SessionManager
 import com.dashlane.session.authorization
+import com.dashlane.sharing.SharingDataProvider
+import com.dashlane.sharing.SharingItemUpdaterRequest
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.filter.collectionFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataUpdateProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.VaultActivityLogger
@@ -28,13 +28,13 @@ import com.dashlane.vault.model.createCollection
 import com.dashlane.vault.model.toSanitizedCollectionName
 import com.dashlane.vault.summary.toSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class CollectionsEditViewModel @Inject constructor(
@@ -48,9 +48,8 @@ class CollectionsEditViewModel @Inject constructor(
     private val sharingItemUpdater: SharingItemUpdater,
     private val renameCollectionService: RenameCollectionService,
     private val sessionManager: SessionManager,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val navArgs = CollectionEditFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private val editMode = navArgs.collectionId != null
 
@@ -60,9 +59,9 @@ class CollectionsEditViewModel @Inject constructor(
                 collectionName = TextFieldValue(text = ""),
                 editMode = editMode,
                 space = null,
-                availableSpaces = null
-            )
-        )
+                availableSpaces = null,
+            ),
+        ),
     )
     val uiState = _uiState.asStateFlow()
 
@@ -84,10 +83,12 @@ class CollectionsEditViewModel @Inject constructor(
         }
     }
 
-    private fun refreshPrivateCollection(collectionId: String) {
+    private suspend fun refreshPrivateCollection(collectionId: String) {
         val collection = collectionDataQuery.queryById(collectionId)
-        val spaceId = collection?.syncObject?.spaceId
-        val space = if (spaceId != null) {
+        val spaceId = collection?.syncObject?.spaceId ?: TeamSpace.Personal.teamId
+        val space = if (spaceId == TeamSpace.Personal.teamId) {
+            TeamSpace.Personal
+        } else {
             teamSpaceAccessorProvider.get()?.let { teamSpaceAccessor ->
                 if (teamSpaceAccessor.canChangeTeamspace) {
                     teamSpaceAccessor.currentBusinessTeam.takeIf { it?.teamId == spaceId }
@@ -95,8 +96,6 @@ class CollectionsEditViewModel @Inject constructor(
                     TeamSpace.Personal
                 }
             }
-        } else {
-            TeamSpace.Personal
         }
 
         _uiState.update { viewState ->
@@ -105,10 +104,10 @@ class CollectionsEditViewModel @Inject constructor(
                 viewState.viewData.copy(
                     collectionName = TextFieldValue(
                         text = collectionName,
-                        selection = TextRange(collectionName.length)
+                        selection = TextRange(collectionName.length),
                     ),
-                    space = space
-                )
+                    space = space,
+                ),
             )
         }
     }
@@ -123,30 +122,32 @@ class CollectionsEditViewModel @Inject constructor(
                 viewState.viewData.copy(
                     collectionName = TextFieldValue(
                         text = collectionName,
-                        selection = TextRange(collectionName.length)
+                        selection = TextRange(collectionName.length),
                     ),
                     
-                    space = teamSpaceAccessorProvider.get()?.currentBusinessTeam
-                )
+                    space = teamSpaceAccessorProvider.get()?.currentBusinessTeam,
+                ),
             )
         }
     }
 
     private fun refreshAvailableSpaces() {
-        val spaces = teamSpaceAccessorProvider.get()?.let { teamSpaceAccessor ->
+        val accessor = teamSpaceAccessorProvider.get()
+        val spaces = accessor?.let { teamSpaceAccessor ->
             if (teamSpaceAccessor.canChangeTeamspace) {
                 teamSpaceAccessor.availableSpaces.minus(TeamSpace.Combined)
             } else {
                 null
             }
         }
+        
+        val defaultSpace = accessor?.currentBusinessTeam ?: TeamSpace.Personal
         _uiState.update { viewState ->
             ViewState.Form(
                 viewState.viewData.copy(
                     availableSpaces = spaces,
-                    space = viewState.viewData.space.takeIf { it in (spaces ?: emptyList()) }
-                        ?: TeamSpace.Personal
-                )
+                    space = viewState.viewData.space ?: defaultSpace,
+                ),
             )
         }
     }
@@ -215,8 +216,8 @@ class CollectionsEditViewModel @Inject constructor(
                 RenameCollectionService.Request(
                     UuidFormat(collectionId),
                     name,
-                    collection.revision
-                )
+                    collection.revision,
+                ),
             )
         }.onSuccess { response ->
             response.data.collections?.let { collections ->
@@ -230,7 +231,7 @@ class CollectionsEditViewModel @Inject constructor(
                 ViewState.Error(
                     viewData = it.viewData,
                     fieldError = null,
-                    snackError = SnackError.SHARED_COLLECTION_RENAME_GENERIC_ERROR
+                    snackError = SnackError.SHARED_COLLECTION_RENAME_GENERIC_ERROR,
                 )
             }
         }
@@ -239,7 +240,7 @@ class CollectionsEditViewModel @Inject constructor(
     private suspend fun savePrivateCollection(
         name: String,
         space: TeamSpace,
-        collectionId: String?
+        collectionId: String?,
     ) {
         val existingCollection =
             collectionDataQuery.queryByName(name, collectionFilter { specificSpace(space) })
@@ -252,10 +253,10 @@ class CollectionsEditViewModel @Inject constructor(
             val collection = if (collectionId == null) {
                 createCollection(
                     dataIdentifier = CommonDataIdentifierAttrsImpl(
-                        teamSpaceId = space.teamId
+                        teamSpaceId = space.teamId,
                     ),
                     name = name,
-                    vaultItems = emptyList()
+                    vaultItems = emptyList(),
                 ).also { collection ->
                     vaultActivityLogger.sendCollectionCreatedActivityLog(collection = collection.toSummary())
                 }
@@ -271,7 +272,7 @@ class CollectionsEditViewModel @Inject constructor(
                 }?.also { editedCollection ->
                     vaultActivityLogger.sendCollectionRenamedActivityLog(
                         collection = editedCollection.toSummary(),
-                        previousName = collection.syncObject.name
+                        previousName = collection.syncObject.name,
                     )
                 }
             }

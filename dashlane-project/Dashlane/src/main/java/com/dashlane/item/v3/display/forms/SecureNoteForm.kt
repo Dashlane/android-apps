@@ -20,31 +20,26 @@ import com.dashlane.item.v3.viewmodels.Datas
 import com.dashlane.item.v3.viewmodels.FormState
 import com.dashlane.item.v3.viewmodels.SecureNoteItemEditViewModel
 import com.dashlane.teamspaces.model.TeamSpace
+import com.dashlane.xml.domain.SyncObject
 
 @Suppress("LongMethod")
 fun LazyListScope.secureNoteForm(
     viewModel: SecureNoteItemEditViewModel,
-    uiState: FormState<SecureNoteFormData>
+    uiState: FormState<SecureNoteFormData>,
 ) {
     secureNoteFormContent(
         uiState = uiState,
         onDeleteAction = {
             viewModel.actionDelete()
         },
-        organisationActions = OrganisationActions( 
-            onValueChanged = { value ->
-                viewModel.updateCommonDataFromView(value)
-            },
-            onCollectionOpen = {
-                viewModel.actionOpenCollection()
-            },
-            onCollectionRemove = {
-                viewModel.removeCollection(it)
-            },
-            onSecureNoteTypeChanged = {
-                viewModel.updateSecureNoteType(it)
-            }
-        ),
+        onItemNameChanged = viewModel::updateItemName,
+        onSpaceChanged = viewModel::updateSpace,
+        onCollectionOpen = {
+            viewModel.actionOpenCollection()
+        },
+        onSecureNoteTypeChanged = {
+            viewModel.updateSecureNoteType(it)
+        },
         noteActions = NoteActions(
             onValueChanged = {
                 viewModel.updateCurrentDataFromView(it)
@@ -54,18 +49,21 @@ fun LazyListScope.secureNoteForm(
             },
             onSecuredChanged = {
                 viewModel.onSecuredChanged(it)
-            }
+            },
         ),
         onViewAttachments = viewModel::onViewAttachments,
         onSharedClick = {
             viewModel.actionOpenShared()
-        }
+        },
     )
 }
 
-private fun LazyListScope.secureNoteFormContent(
+fun LazyListScope.secureNoteFormContent(
     uiState: FormState<SecureNoteFormData>,
-    organisationActions: OrganisationActions,
+    onItemNameChanged: (String) -> Unit,
+    onSpaceChanged: (TeamSpace) -> Unit,
+    onCollectionOpen: () -> Unit,
+    onSecureNoteTypeChanged: (SyncObject.SecureNoteType) -> Unit,
     onDeleteAction: () -> Unit,
     noteActions: NoteActions,
     onViewAttachments: () -> Unit,
@@ -75,26 +73,32 @@ private fun LazyListScope.secureNoteFormContent(
         NoteDetailSection(
             data = uiState.datas.current,
             editMode = uiState.isEditMode,
-            noteActions = noteActions
+            noteActions = noteActions,
         )
     }
     item(key = "OrganisationSection") {
         OrganisationSection(
             data = uiState.datas.current,
             editMode = uiState.isEditMode,
-            organisationActions = organisationActions
+            onItemNameChanged = onItemNameChanged,
+            onSpaceChanged = onSpaceChanged,
+            onCollectionOpen = onCollectionOpen,
+            onSecureNoteTypeChanged = onSecureNoteTypeChanged,
         )
     }
     item(key = "AttachmentsSection") {
         AttachmentsSection(
             data = uiState.datas.current,
             editMode = uiState.isEditMode,
-            onViewAttachments = onViewAttachments
+            onViewAttachments = onViewAttachments,
         )
     }
     sharedAccessSectionItem(uiState, onSharedClick)
     item(key = "SecureNoteSettingsSection") {
-        SecureNoteSettingsSection(data = uiState.datas.current, editMode = uiState.isEditMode) { secured ->
+        SecureNoteSettingsSection(
+            data = uiState.datas.current,
+            editMode = uiState.isEditMode,
+        ) { secured ->
             noteActions.onSecuredChanged(secured)
         }
     }
@@ -103,7 +107,7 @@ private fun LazyListScope.secureNoteFormContent(
             canDelete = uiState.datas.current.commonData.canDelete,
             editMode = uiState.isEditMode,
             label = stringResource(id = R.string.vault_delete_secure_note),
-            onDeleteAction = onDeleteAction
+            onDeleteAction = onDeleteAction,
         )
     }
 }
@@ -111,7 +115,7 @@ private fun LazyListScope.secureNoteFormContent(
 data class NoteActions(
     val onValueChanged: (Data<SecureNoteFormData>) -> Unit = {},
     val onSecuredChanged: (Boolean) -> Unit = {},
-    val onSecureNoteContentChanged: (String) -> Unit = {}
+    val onSecureNoteContentChanged: (String) -> Unit = {},
 )
 
 @Composable
@@ -122,13 +126,16 @@ private fun SecureNoteFormContentPreview() {
             content = {
                 secureNoteFormContent(
                     uiState = secureNoteFormDemoState(false),
-                    organisationActions = OrganisationActions(),
+                    onItemNameChanged = {},
+                    onSpaceChanged = {},
+                    onCollectionOpen = {},
+                    onSecureNoteTypeChanged = {},
                     onDeleteAction = {},
                     noteActions = NoteActions(),
                     onViewAttachments = {},
-                    onSharedClick = {}
+                    onSharedClick = {},
                 )
-            }
+            },
         )
     }
 }
@@ -141,13 +148,16 @@ private fun SecureNoteFormContentPreviewEdit() {
             content = {
                 secureNoteFormContent(
                     uiState = secureNoteFormDemoState(true),
-                    organisationActions = OrganisationActions(),
+                    onItemNameChanged = {},
+                    onSpaceChanged = {},
+                    onCollectionOpen = {},
+                    onSecureNoteTypeChanged = {},
                     onDeleteAction = {},
                     noteActions = NoteActions(),
                     onViewAttachments = {},
-                    onSharedClick = {}
+                    onSharedClick = {},
                 )
-            }
+            },
         )
     }
 }
@@ -155,18 +165,18 @@ private fun SecureNoteFormContentPreviewEdit() {
 private fun secureNoteFormDemoState(isEditMode: Boolean) = FormState(
     datas = Datas(
         current = secureNoteFormDemoData(),
-        initial = secureNoteFormDemoData()
+        initial = secureNoteFormDemoData(),
     ),
     isNew = false,
-    isEditMode = isEditMode
+    isEditMode = isEditMode,
 )
 
 private fun secureNoteFormDemoData() = Data(
     commonData = CommonData(
         name = "Name",
-        space = TeamSpace.Personal
+        space = TeamSpace.Personal,
     ),
     formData = SecureNoteFormData(
         content = "Lorem ipsum dolor sit amet.",
-    )
+    ),
 )

@@ -13,9 +13,8 @@ class ItemEditSpaceSubView(
     private var allowSuggestionAutoChange: Boolean,
     private val views: List<ItemSubView<String>>?,
     private val linkedWebsites: List<String>,
-    valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>
+    valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>,
 ) : ItemEditValueSubView<TeamSpace>(valueUpdate) {
-
     val enableValueChangeManager = ValueChangeManagerImpl<Boolean>()
     var changeEnable: Boolean = isChangeEnable(getSuggestedTeamspace())
         private set
@@ -23,7 +22,7 @@ class ItemEditSpaceSubView(
     enum class CategorizationMethod {
         FORCED_CATEGORIZATION,
         SMART_CATEGORIZATION,
-        MANUAL
+        MANUAL,
     }
 
     val categorizationMethod: CategorizationMethod
@@ -91,9 +90,9 @@ class ItemEditSpaceSubView(
         
         return (
             values.firstOrNullMatchingDefinedDomain(allViewValues.toTypedArray())
-            
+                
                 ?: initialValue.takeIf { allowSuggestionAutoChange }
-            )
+        )
     }
 
     private fun shouldAssignToSuggestedTeamspace(suggestedTeamspace: TeamSpace?) =

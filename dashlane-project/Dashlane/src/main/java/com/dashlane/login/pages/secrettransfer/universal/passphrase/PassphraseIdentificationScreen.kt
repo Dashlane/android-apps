@@ -21,13 +21,13 @@ import com.dashlane.ui.widgets.compose.PassphraseLayout
 @Composable
 fun PassphraseIdentificationScreen(
     modifier: Modifier = Modifier,
-    passphrase: List<Passphrase>
+    passphrase: List<Passphrase>,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp)
+            .padding(24.dp),
     ) {
         DashlaneLogoLockup(height = 40.dp)
         Text(
@@ -35,7 +35,7 @@ fun PassphraseIdentificationScreen(
             style = DashlaneTheme.typography.titleSectionLarge,
             color = DashlaneTheme.colors.textNeutralCatchy,
             modifier = Modifier
-                .padding(top = 72.dp, bottom = 16.dp)
+                .padding(top = 72.dp, bottom = 16.dp),
         )
 
         Text(
@@ -43,7 +43,7 @@ fun PassphraseIdentificationScreen(
             style = DashlaneTheme.typography.bodyStandardRegular,
             color = DashlaneTheme.colors.textNeutralStandard,
             modifier = Modifier
-                .padding(bottom = 24.dp)
+                .padding(bottom = 24.dp),
         )
 
         PassphraseLayout(passphrase = passphrase, onValueChange = null, onKeyboardDone = null)
@@ -60,8 +60,8 @@ private fun PassphraseVerificationScreenPreview() {
                 Passphrase.Word("whales"),
                 Passphrase.Word("potatoes"),
                 Passphrase.Word("plant"),
-                Passphrase.Word("mascara")
-            )
+                Passphrase.Word("mascara"),
+            ),
         )
     }
 }

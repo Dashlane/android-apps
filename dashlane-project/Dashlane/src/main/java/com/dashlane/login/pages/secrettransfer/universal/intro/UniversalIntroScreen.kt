@@ -33,8 +33,8 @@ import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroSta
 import com.dashlane.login.pages.secrettransfer.universal.passphrase.PassphraseIdentificationScreen
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.ui.common.compose.components.ContentStepper
-import com.dashlane.ui.common.compose.components.LoadingScreen
 import com.dashlane.ui.common.compose.components.GenericErrorContent
+import com.dashlane.ui.common.compose.components.LoadingScreen
 import com.dashlane.util.launchUrl
 
 @Composable
@@ -44,7 +44,7 @@ fun UniversalIntroScreen(
     email: String?,
     onCancel: () -> Unit,
     onSuccess: (SecretTransferPayload) -> Unit,
-    onGoToHelp: (String?) -> Unit
+    onGoToHelp: (String?) -> Unit,
 ) {
     val context = LocalContext.current
     val onContactSupport = { context.launchUrl("https://support.dashlane.com/hc/requests/new") }
@@ -73,27 +73,35 @@ fun UniversalIntroScreen(
     val uiState by viewModel.stateFlow.viewState.collectAsStateWithLifecycle()
     when (val state = uiState) {
         is UniversalIntroState.View.Initial -> UniversalIntroContent(modifier = modifier, onRecoveryClicked = viewModel::helpClicked)
-        is UniversalIntroState.View.LoadingPassphrase -> LoadingScreen(title = stringResource(id = R.string.login_universal_d2d_loading_challenge))
-        is UniversalIntroState.View.LoadingAccount -> LoadingScreen(title = stringResource(id = R.string.login_universal_d2d_loading_account))
+        is UniversalIntroState.View.LoadingPassphrase -> LoadingScreen(
+            title = stringResource(id = R.string.login_universal_d2d_loading_challenge),
+        )
+        is UniversalIntroState.View.LoadingAccount -> LoadingScreen(
+            title = stringResource(id = R.string.login_universal_d2d_loading_account),
+        )
         is UniversalIntroState.View.PassphraseVerification -> {
             PassphraseIdentificationScreen(
-                passphrase = state.passphrase
+                passphrase = state.passphrase,
             )
         }
-        is UniversalIntroState.View.Error -> UniversalIntroErrorContent(error = state.error, onCancel = onCancel, onContactSupport = onContactSupport)
+        is UniversalIntroState.View.Error -> UniversalIntroErrorContent(
+            error = state.error,
+            onCancel = onCancel,
+            onContactSupport = onContactSupport,
+        )
     }
 }
 
 @Composable
 fun UniversalIntroContent(
     modifier: Modifier = Modifier,
-    onRecoveryClicked: () -> Unit
+    onRecoveryClicked: () -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
+            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp),
     ) {
         DashlaneLogoLockup(height = 40.dp)
         Text(
@@ -103,12 +111,12 @@ fun UniversalIntroContent(
             modifier = Modifier
                 .padding(
                     top = 72.dp,
-                    bottom = 24.dp
-                )
+                    bottom = 24.dp,
+                ),
         )
         InfoboxMedium(
             title = stringResource(id = R.string.login_universal_d2d_intro_infoxbox),
-            mood = Mood.Neutral
+            mood = Mood.Neutral,
         )
         ContentStepper(
             modifier = Modifier.padding(top = 24.dp),
@@ -116,7 +124,7 @@ fun UniversalIntroContent(
                 stringResource(id = R.string.login_universal_d2d_intro_step1),
                 stringResource(R.string.login_universal_d2d_intro_step2),
                 stringResource(id = R.string.login_universal_d2d_intro_step3),
-            )
+            ),
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -128,8 +136,8 @@ fun UniversalIntroContent(
             onClick = onRecoveryClicked,
             intensity = Intensity.Quiet,
             layout = ButtonLayout.TextOnly(
-                text = stringResource(id = R.string.login_universal_d2d_intro_recovery_button)
-            )
+                text = stringResource(id = R.string.login_universal_d2d_intro_recovery_button),
+            ),
         )
     }
 }
@@ -138,7 +146,7 @@ fun UniversalIntroContent(
 fun UniversalIntroErrorContent(
     error: UniversalIntroError,
     onCancel: () -> Unit,
-    onContactSupport: () -> Unit
+    onContactSupport: () -> Unit,
 ) {
     when (error) {
         UniversalIntroError.Generic -> {
@@ -148,7 +156,7 @@ fun UniversalIntroErrorContent(
                 textPrimary = stringResource(id = R.string.login_universal_d2d_generic_error_primary_button),
                 textSecondary = stringResource(id = R.string.login_universal_d2d_generic_error_secondary_button),
                 onClickPrimary = onCancel,
-                onClickSecondary = onContactSupport
+                onClickSecondary = onContactSupport,
             )
         }
         UniversalIntroError.Timeout -> {
@@ -156,7 +164,7 @@ fun UniversalIntroErrorContent(
                 title = stringResource(id = R.string.login_universal_d2d_timeout_error_title),
                 message = stringResource(id = R.string.login_universal_d2d_timeout_error_description),
                 textPrimary = stringResource(id = R.string.login_universal_d2d_timeout_error_primary_button),
-                onClickPrimary = onCancel
+                onClickPrimary = onCancel,
             )
         }
     }

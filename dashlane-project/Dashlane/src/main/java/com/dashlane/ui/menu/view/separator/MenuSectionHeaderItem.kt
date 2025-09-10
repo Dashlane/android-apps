@@ -25,7 +25,7 @@ fun MenuSectionHeaderItem(item: MenuItemModel.SectionHeader) {
         text = stringResource(id = item.titleResId),
         style = DashlaneTheme.typography.titleSupportingSmall,
         enforceAllCaps = true,
-        color = DashlaneTheme.colors.textNeutralQuiet
+        color = DashlaneTheme.colors.textNeutralQuiet,
     )
 }
 

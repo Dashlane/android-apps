@@ -36,17 +36,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object FollowUpNotificationComponentModule {
     @Provides
-    fun providesFollowUpNotificationFlags(impl: FollowUpNotificationFlagsImpl):
-            FollowUpNotificationFlags = impl
+    fun providesFollowUpNotificationFlags(impl: FollowUpNotificationFlagsImpl): FollowUpNotificationFlags = impl
 
     @Provides
-    fun providesFollowUpNotificationsStrings(impl: FollowUpNotificationsStringsImpl):
-            FollowUpNotificationsStrings = impl
+    fun providesFollowUpNotificationsStrings(impl: FollowUpNotificationsStringsImpl): FollowUpNotificationsStrings = impl
 
     @Provides
     @Singleton
-    fun providesFollowUpNotificationRepository(impl: FollowUpNotificationRepositoryMemoryImpl):
-            FollowUpNotificationRepository = impl
+    fun providesFollowUpNotificationRepository(impl: FollowUpNotificationRepositoryMemoryImpl): FollowUpNotificationRepository = impl
 
     @Provides
     fun providesCreateFollowUpNotification(impl: CreateFollowUpNotificationImpl): CreateFollowUpNotification = impl
@@ -61,12 +58,10 @@ object FollowUpNotificationComponentModule {
 
     @Provides
     @Singleton
-    fun providesFollowUpNotificationDisplayService(impl: FollowUpNotificationDisplayServiceImpl):
-            FollowUpNotificationDisplayService = impl
+    fun providesFollowUpNotificationDisplayService(impl: FollowUpNotificationDisplayServiceImpl): FollowUpNotificationDisplayService = impl
 
     @Provides
-    fun providesFollowUpNotificationApiProvider(impl: FollowUpNotificationApiProviderImpl):
-            FollowUpNotificationApiProvider = impl
+    fun providesFollowUpNotificationApiProvider(impl: FollowUpNotificationApiProviderImpl): FollowUpNotificationApiProvider = impl
 
     @Provides
     @Named("activeFollowUp")
@@ -74,18 +69,15 @@ object FollowUpNotificationComponentModule {
 
     @Provides
     @Named("noOperationFollowUp")
-    fun providesFollowUpNotificationApiNoOperationImpl(impl: FollowUpNotificationApiNoOperationImpl):
-            FollowUpNotificationApi = impl
+    fun providesFollowUpNotificationApiNoOperationImpl(impl: FollowUpNotificationApiNoOperationImpl): FollowUpNotificationApi = impl
 
     @Provides
-    fun providesFollowUpNotificationDynamicData(impl: FollowUpNotificationDynamicDataImpl):
-            FollowUpNotificationDynamicData = impl
+    fun providesFollowUpNotificationDynamicData(impl: FollowUpNotificationDynamicDataImpl): FollowUpNotificationDynamicData = impl
 
     @Provides
-    fun providesVaultItemContentDisplayService(impl: VaultItemContentServiceImpl):
-            VaultItemContentService = impl
+    fun providesVaultItemContentDisplayService(impl: VaultItemContentServiceImpl): VaultItemContentService = impl
 
     @Provides
     fun providesFollowUpNotificationDiscoveryService(impl: FollowUpNotificationDiscoveryServiceImpl):
-            FollowUpNotificationDiscoveryService = impl
+        FollowUpNotificationDiscoveryService = impl
 }

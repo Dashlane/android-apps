@@ -20,7 +20,6 @@ class QuickActionProvider @Inject constructor(
     private val userFeaturesChecker: UserFeaturesChecker,
     private val frozenStateManager: FrozenStateManager,
 ) {
-
     private val isAccountFrozen: Boolean
         get() = frozenStateManager.isAccountFrozen
 
@@ -54,6 +53,7 @@ class QuickActionProvider @Inject constructor(
             is SummaryObject.SecureNote -> getSecureNoteQuickActions(summaryObject)
             is SummaryObject.SocialSecurityStatement -> getSocialSecurityStatementQuickActions(summaryObject)
             is SummaryObject.Secret -> getSecretQuickActions(summaryObject)
+            is SummaryObject.WiFi -> getWiFiQuickActions(summaryObject)
             else -> emptySequence()
         }
     }
@@ -64,28 +64,73 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.SecretValue,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.SecretId,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(1 to it) }
+
+            QuickActionShare.createActionIfShareAvailable(
+                summaryObject,
+                sharingPolicy = sharingPolicyDataProvider,
+                navigator = navigator,
+                isAccountFrozen = isAccountFrozen,
+            )?.let { yield(2 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
-            )?.let { yield(2 to it) }
+                isAccountFrozen = isAccountFrozen,
+            )?.let { yield(3 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
+            )?.let { yield(4 to it) }
+        }
+    }
+
+    private fun getWiFiQuickActions(summaryObject: SummaryObject.WiFi): Sequence<Pair<Int, Action>> {
+        return sequence {
+            QuickActionCopy.createActionIfFieldExist(
+                summaryObject,
+                copyField = CopyField.WiFiSsid,
+                vaultItemCopyService = vaultItemCopyService,
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
+            )?.let { yield(0 to it) }
+
+            QuickActionCopy.createActionIfFieldExist(
+                summaryObject,
+                copyField = CopyField.WiFiPassphrase,
+                vaultItemCopyService = vaultItemCopyService,
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
+            )?.let { yield(1 to it) }
+
+            QuickActionShare.createActionIfShareAvailable(
+                summaryObject,
+                sharingPolicy = sharingPolicyDataProvider,
+                navigator = navigator,
+                isAccountFrozen = isAccountFrozen,
+            )?.let { yield(2 to it) }
+
+            QuickActionEdit.createActionIfCanEdit(
+                summaryObject,
+                sharingPolicy = sharingPolicyDataProvider,
+                navigator = navigator,
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(3 to it) }
+
+            QuickActionDelete.createActionIfCanDelete(
+                summaryObject,
+                sharingPolicy = sharingPolicyDataProvider,
+                navigator = navigator,
+            )?.let { yield(4 to it) }
         }
     }
 
@@ -95,25 +140,25 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.SocialSecurityNumber,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopyIdentity.createActionIfIdentityExist(
                 vaultItemCopyService = vaultItemCopyService,
-                summaryObject
+                summaryObject,
             )?.let { yield(1 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(3 to it) }
         }
     }
@@ -124,7 +169,7 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(0 to it) }
 
             QuickActionOpenAttachment.createAttachmentsAction(
@@ -132,13 +177,12 @@ class QuickActionProvider @Inject constructor(
                 userFeaturesChecker = userFeaturesChecker,
                 navigator = navigator,
                 isAccountFrozen = isAccountFrozen,
-                hasCollections = false 
             )?.let { yield(1 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(2 to it) }
         }
     }
@@ -149,14 +193,14 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 CopyField.PhoneNumber,
                 vaultItemCopyService,
-                sharingPolicyDataProvider
+                sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicyDataProvider,
                 navigator,
-                isAccountFrozen
+                isAccountFrozen,
             )?.let { yield(1 to it) }
 
             QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
@@ -170,14 +214,14 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 CopyField.PersonalWebsite,
                 vaultItemCopyService,
-                sharingPolicyDataProvider
+                sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicyDataProvider,
                 navigator,
-                isAccountFrozen
+                isAccountFrozen,
             )?.let { yield(1 to it) }
 
             QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
@@ -191,7 +235,7 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.PassportNumber,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopyIdentity.createActionIfIdentityExist(vaultItemCopyService, summaryObject)
@@ -201,7 +245,7 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(summaryObject, sharingPolicyDataProvider, navigator)
@@ -215,41 +259,41 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.FirstName,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.LastName,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(1 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.MiddleName,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(2 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.IdentityLogin,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(3 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(4 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(5 to it) }
         }
     }
@@ -260,27 +304,27 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 CopyField.PaymentsNumber,
                 vaultItemCopyService,
-                sharingPolicyDataProvider
+                sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.PaymentsSecurityCode,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(1 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(3 to it) }
         }
     }
@@ -291,7 +335,7 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.PasskeyDisplayName,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionOpenWebsite(
@@ -304,13 +348,13 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(3 to it) }
         }
     }
@@ -321,25 +365,25 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.IdsNumber,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopyIdentity.createActionIfIdentityExist(
                 vaultItemCopyService = vaultItemCopyService,
-                summaryObject
+                summaryObject,
             )?.let { yield(1 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(3 to it) }
         }
     }
@@ -350,27 +394,27 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.TaxNumber,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.TaxOnlineNumber,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(1 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(3 to it) }
         }
     }
@@ -381,20 +425,20 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.JustEmail,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(1 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(2 to it) }
         }
     }
@@ -405,25 +449,25 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.DriverLicenseNumber,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopyIdentity.createActionIfIdentityExist(
                 vaultItemCopyService = vaultItemCopyService,
-                summaryObject
+                summaryObject,
             )?.let { yield(1 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(3 to it) }
         }
     }
@@ -434,27 +478,27 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.CompanyName,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.CompanyTitle,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(1 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(2 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(3 to it) }
         }
     }
@@ -465,34 +509,34 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.Address,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.City,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(1 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.ZipCode,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(2 to it) }
 
             QuickActionEdit.createActionIfCanEdit(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(3 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(4 to it) }
         }
     }
@@ -503,35 +547,35 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.Email,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.Login,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(1 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.SecondaryLogin,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(2 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.Password,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(3 to it) }
 
             QuickActionCopy.createActionIfFieldExist(
                 summaryObject,
                 copyField = CopyField.OtpCode,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(4 to it) }
 
             QuickActionOpenWebsite(
@@ -544,20 +588,20 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(6 to it) }
 
             QuickActionShare.createActionIfShareAvailable(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(7 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let { yield(8 to it) }
         }
     }
@@ -571,7 +615,7 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 copyField = CopyField.BankAccountBank,
                 vaultItemCopyService = vaultItemCopyService,
-                sharingPolicyDataProvider = sharingPolicyDataProvider
+                sharingPolicyDataProvider = sharingPolicyDataProvider,
             )?.let { yield(0 to it) }
 
             when (summaryObject.bankAccountCountry) {
@@ -580,14 +624,14 @@ class QuickActionProvider @Inject constructor(
                         summaryObject,
                         copyField = CopyField.BankAccountBicSwift,
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(1 to it) }
 
                     QuickActionCopy.createActionIfFieldExist(
                         summaryObject,
                         copyField = CopyField.BankAccountClabe,
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(2 to it) }
                 }
                 Country.UnitedKingdom -> {
@@ -595,15 +639,14 @@ class QuickActionProvider @Inject constructor(
                         summaryObject,
                         copyField = CopyField.BankAccountSortCode,
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(1 to it) }
 
                     QuickActionCopy.createActionIfFieldExist(
                         summaryObject,
                         copyField = CopyField.BankAccountAccountNumber,
-
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(2 to it) }
                 }
                 Country.UnitedStates -> {
@@ -611,14 +654,14 @@ class QuickActionProvider @Inject constructor(
                         summaryObject,
                         copyField = CopyField.BankAccountRoutingNumber,
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(1 to it) }
 
                     QuickActionCopy.createActionIfFieldExist(
                         summaryObject,
                         copyField = CopyField.BankAccountAccountNumber,
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(2 to it) }
                 }
                 else -> {
@@ -626,14 +669,14 @@ class QuickActionProvider @Inject constructor(
                         summaryObject,
                         copyField = CopyField.BankAccountBicSwift,
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(1 to it) }
 
                     QuickActionCopy.createActionIfFieldExist(
                         summaryObject,
                         copyField = CopyField.BankAccountIban,
                         vaultItemCopyService = vaultItemCopyService,
-                        sharingPolicyDataProvider = sharingPolicyDataProvider
+                        sharingPolicyDataProvider = sharingPolicyDataProvider,
                     )?.let { yield(2 to it) }
                 }
             }
@@ -642,13 +685,13 @@ class QuickActionProvider @Inject constructor(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
                 navigator = navigator,
-                isAccountFrozen = isAccountFrozen
+                isAccountFrozen = isAccountFrozen,
             )?.let { yield(3 to it) }
 
             QuickActionDelete.createActionIfCanDelete(
                 summaryObject,
                 sharingPolicy = sharingPolicyDataProvider,
-                navigator = navigator
+                navigator = navigator,
             )?.let {
                 yield(4 to it)
             }

@@ -10,7 +10,6 @@ import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 import java.util.Locale
 
 open class ReadStateViewHolder<T : NotificationItem>(view: View) : EfficientViewHolder<T>(view) {
-
     override fun updateView(context: Context, item: T?) {
         item ?: return
         initTitleField(item)
@@ -26,7 +25,7 @@ open class ReadStateViewHolder<T : NotificationItem>(view: View) : EfficientView
                     Typeface.NORMAL
                 } else {
                     Typeface.BOLD
-                }
+                },
             )
         }
     }
@@ -52,7 +51,7 @@ open class ReadStateViewHolder<T : NotificationItem>(view: View) : EfficientView
             accessTimestamp,
             currentTimeMillis,
             DateUtils.MINUTE_IN_MILLIS,
-            0
+            0,
         ).toString()
             .lowercase(Locale.getDefault())
     }

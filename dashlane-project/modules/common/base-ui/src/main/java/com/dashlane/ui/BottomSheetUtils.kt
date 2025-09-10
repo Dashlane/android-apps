@@ -14,13 +14,13 @@ val BottomSheetDialog.contentView get() = findViewById<FrameLayout>(R.id.design_
 
 data class BottomSheetHeightConfig(
     @FloatRange(from = 0.0, to = 1.0) val peekHeightRatio: Float = 0.33f,
-    @FloatRange(from = 0.0, to = 1.0) val expandedHeightRatio: Float = 0.9f
+    @FloatRange(from = 0.0, to = 1.0) val expandedHeightRatio: Float = 0.9f,
 )
 
 fun BottomSheetDialog.configureBottomSheet(
     config: BottomSheetHeightConfig? = null,
     behaviorState: Int = BottomSheetBehavior.STATE_EXPANDED,
-    hideKeyboardWhenDragging: Boolean = true
+    hideKeyboardWhenDragging: Boolean = true,
 ) = if (isShowing) {
     applyConfiguration(config, behaviorState, hideKeyboardWhenDragging)
 } else {
@@ -32,7 +32,7 @@ fun BottomSheetDialog.configureBottomSheet(
 private fun BottomSheetDialog.applyConfiguration(
     config: BottomSheetHeightConfig?,
     behaviorState: Int,
-    hideKeyboardWhenDragging: Boolean
+    hideKeyboardWhenDragging: Boolean,
 ) {
     if (config != null) {
         setPeekHeightRatio(config.peekHeightRatio)

@@ -18,6 +18,7 @@ import com.dashlane.R
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.item.passwordhistory.PasswordHistoryViewModel.PasswordHistoryState
 import com.dashlane.util.clipboard.ClipboardCopy
+import com.dashlane.util.tryOrNull
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -29,7 +30,11 @@ class PasswordHistoryFragment : Fragment() {
     lateinit var clipboardCopy: ClipboardCopy
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val uid = PasswordHistoryFragmentArgs.fromBundle(requireArguments()).uid
+        val uid = tryOrNull {
+            
+            
+            PasswordHistoryFragmentArgs.fromBundle(requireArguments()).uid
+        }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -37,7 +42,8 @@ class PasswordHistoryFragment : Fragment() {
 
                 LaunchedEffect(key1 = uiState) {
                     when (uiState) {
-                        PasswordHistoryState.Init -> viewModel.reloadForItemUid(uid = uid)
+                        PasswordHistoryState.Init -> uid?.let { viewModel.reloadForItemUid(uid = uid) }
+                            ?: viewModel.reloadForGeneratedPasswords()
                         PasswordHistoryState.Error -> finishWithResult(error = true)
                         PasswordHistoryState.Success -> finishWithResult(error = false)
                         is PasswordHistoryState.Loaded -> Unit
@@ -48,17 +54,14 @@ class PasswordHistoryFragment : Fragment() {
                     PasswordHistoryScreen(
                         state = uiState,
                         onRevertClick = { selectedPassword ->
-                            viewModel.restorePassword(
-                                vaultItemUid = uid,
-                                selectedPasswordHistory = selectedPassword
-                            )
+                            viewModel.restorePassword(selectedPasswordHistory = selectedPassword)
                             true
                         },
                         onCopyClick = {
                             clipboardCopy.copyToClipboard(
                                 data = it.password,
                                 sensitiveData = true,
-                                feedback = R.string.feedback_copy_password
+                                feedback = R.string.feedback_copy_password,
                             )
                             true
                         },

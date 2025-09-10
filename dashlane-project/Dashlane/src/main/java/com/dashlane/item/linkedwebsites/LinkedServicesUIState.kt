@@ -7,5 +7,5 @@ data class LinkedServicesUIState(
     val vaultItem: VaultItem<SyncObject.Authentifiant>?,
     val editMode: Boolean,
     val actionClosePageAfterSave: Boolean,
-    val closePageImmediate: Boolean
+    val closePageImmediate: Boolean,
 )

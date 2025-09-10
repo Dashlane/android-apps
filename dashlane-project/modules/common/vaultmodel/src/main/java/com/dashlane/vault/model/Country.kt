@@ -1,6 +1,7 @@
 package com.dashlane.vault.model
 
 import android.content.Context
+import android.content.res.Resources
 import com.dashlane.util.DeviceUtils
 import com.dashlane.xml.domain.utils.Country
 import java.text.Collator
@@ -19,15 +20,18 @@ fun Country.Companion.forLabelOrNull(context: Context, label: String) =
     values().firstOrNull { it.getLabel(context) == label }
 
 fun Country.getLabel(context: Context): String =
-    getLabel(buildAppLanguageLocale(context))
+    getLabel(buildAppLanguageLocale(context.resources))
+
+fun Country.getLabel(resources: Resources): String =
+    getLabel(buildAppLanguageLocale(resources))
 
 @Suppress("IfThenToElvis")
 val Country?.signature
     get() = if (this == null) 0 else signature 
 
-private fun buildAppLanguageLocale(context: Context) =
+private fun buildAppLanguageLocale(resources: Resources) =
     Locale.Builder()
-        .setLanguage(context.getString(R.string.language_iso_639_1))
+        .setLanguage(resources.getString(R.string.language_iso_639_1))
         .build()
 
 val Country?.isInGreatBritain

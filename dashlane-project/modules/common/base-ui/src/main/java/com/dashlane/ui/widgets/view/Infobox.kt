@@ -22,13 +22,13 @@ class Infobox @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.infoboxStyle,
-    defStyleRes: Int = R.style.Widget_Dashlane_Infobox
+    defStyleRes: Int = R.style.Widget_Dashlane_Infobox,
 ) : ConstraintLayout(
-    context,
-    attrs,
-    defStyleAttr,
-    defStyleRes
-) {
+        context,
+        attrs,
+        defStyleAttr,
+        defStyleRes,
+    ) {
     private val iconView by lazy(LazyThreadSafetyMode.NONE) { findViewById<ImageView>(R.id.infobox_icon)!! }
     private val titleView by lazy(LazyThreadSafetyMode.NONE) { findViewById<TextView>(R.id.infobox_title)!! }
     private val textView by lazy(LazyThreadSafetyMode.NONE) { findViewById<TextView>(R.id.infobox_text)!! }
@@ -75,7 +75,7 @@ class Infobox @JvmOverloads constructor(
             titleView.text = ta.getString(R.styleable.Infobox_title)
             text = ta.getString(R.styleable.Infobox_text)
             warning = ta.getBoolean(R.styleable.Infobox_warning, false) ||
-                    defStyleAttr == R.attr.warningInfoboxStyle
+                defStyleAttr == R.attr.warningInfoboxStyle
             
             inflateButtons()
             primaryButton.apply {

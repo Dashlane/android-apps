@@ -3,21 +3,23 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.items
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.sync.DataSync
-import com.dashlane.events.AppEvents
-import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.SharingDataProvider
+import com.dashlane.sync.DataSync
+import com.dashlane.sync.DataSyncState
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,9 +29,8 @@ class SharingItemsForUserViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     private val sharingItemsDataProvider: SharingItemsDataProvider,
     private val sharingDataProvider: SharingDataProvider,
-    appEvents: AppEvents,
     private val navigator: Navigator,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
 ) : ViewModel(), SharingItemsForUserViewModelContract {
     private val session: Session?
         get() = sessionManager.session
@@ -45,9 +46,10 @@ class SharingItemsForUserViewModel @Inject constructor(
 
     init {
         reloadData()
-        appEvents.register(this, SyncFinishedEvent::class.java, false) {
-            reloadData()
-        }
+        dataSync.dataSyncState
+            .filterIsInstance<DataSyncState.Idle.Success>()
+            .onEach { reloadData() }
+            .launchIn(viewModelScope)
     }
 
     override fun reloadData() {
@@ -99,7 +101,7 @@ class SharingItemsForUserViewModel @Inject constructor(
             runCatching {
                 sharingDataProvider.cancelInvitation(
                     itemGroup,
-                    listOf(memberLogin)
+                    listOf(memberLogin),
                 )
             }.onFailure {
                 uiState.tryEmit(SharingItemsForUserViewModelContract.UIState.RequestFailure)
@@ -117,7 +119,7 @@ class SharingItemsForUserViewModel @Inject constructor(
                 sharingDataProvider.updateItemGroupMember(
                     itemGroup,
                     newPermission,
-                    memberLogin
+                    memberLogin,
                 )
             }.onFailure {
                 uiState.tryEmit(SharingItemsForUserViewModelContract.UIState.RequestFailure)

@@ -2,6 +2,7 @@ package com.dashlane.accountrecoverykey
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.navigation.navArgs
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.DetailSettings
 import com.dashlane.accountrecoverykey.AccountRecoveryKeyDestination.Intro
@@ -12,10 +13,10 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class AccountRecoveryKeyActivity : DashlaneActivity() {
-
     val args: AccountRecoveryKeyActivityArgs by navArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val startDestination = if (args.showIntro) Intro else DetailSettings
         val userCanExitFlow: Boolean = args.userCanExitFlow
@@ -28,7 +29,7 @@ class AccountRecoveryKeyActivity : DashlaneActivity() {
                 AccountRecoveryKeySettingsNavigation(
                     startDestination = startDestination,
                     userCanExitFlow = userCanExitFlow,
-                    onCancel = { finish() }
+                    onCancel = { finish() },
                 )
             }
         }

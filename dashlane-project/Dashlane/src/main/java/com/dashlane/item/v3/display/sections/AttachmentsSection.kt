@@ -21,7 +21,7 @@ fun AttachmentsSection(data: Data<out FormData>, editMode: Boolean, onViewAttach
     if (editMode || data.commonData.attachmentCount == 0) {
         return
     }
-    SectionContent(editMode = editMode) {
+    SectionContent {
         SectionTitle(title = stringResource(id = R.string.vault_attachments), editMode = editMode)
         GenericField(
             label = stringResource(id = R.string.vault_attached_files_label),
@@ -29,9 +29,9 @@ fun AttachmentsSection(data: Data<out FormData>, editMode: Boolean, onViewAttach
             data = pluralStringResource(
                 id = R.plurals.vault_attached_files,
                 count = data.commonData.attachmentCount,
-                data.commonData.attachmentCount
+                data.commonData.attachmentCount,
             ),
-            onValueChanged = {}
+            onValueChanged = {},
         )
         LinkButton(
             text = stringResource(id = R.string.vault_attached_files_view_button),
@@ -50,9 +50,9 @@ private fun AttachmentSectionPreview() {
         AttachmentsSection(
             data = Data(
                 commonData = CommonData(attachmentCount = 2),
-                formData = SecureNoteFormData()
+                formData = SecureNoteFormData(),
             ),
-            editMode = false
+            editMode = false,
         ) {}
     }
 }

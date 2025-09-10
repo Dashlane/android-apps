@@ -8,6 +8,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class EmvCard extends AbstractData {
 
 	private static final long serialVersionUID = 736740432469989941L;

@@ -79,7 +79,7 @@ In order to make sure you are in a clean state, uninstall the app and disable th
 your device
 
 ```
-adb shell bmgr enable true
+adb shell bmgr enable false
 ```
 
 The app will be automatically installed and uninstalled by the tests

@@ -23,7 +23,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class OnboardingGuidedPasswordChangeActivity : DashlaneActivity() {
-
     @Inject
     lateinit var preferencesManager: PreferencesManager
 
@@ -71,7 +70,7 @@ class OnboardingGuidedPasswordChangeActivity : DashlaneActivity() {
             lifecycleScope,
             navigator,
             ToasterImpl(this),
-            lockHelper
+            lockHelper,
         ).apply {
             setProvider(OnboardingGuidedPasswordChangeDataProvider())
             setView(viewProxy)

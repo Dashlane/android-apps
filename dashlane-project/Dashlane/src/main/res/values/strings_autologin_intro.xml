@@ -4,4 +4,12 @@
     <string name="most_used_password_autologin_intro_text">Log in to your accounts with a tap—it\'s that easy!</string>
     <string name="most_used_password_autologin_intro_negative_button">Skip</string>
     <string name="most_used_password_autologin_positive_button">Activate Autofill</string>
+    
+    <string name="chrome_autologin_intro_title">Activate Dashlane Autofill for Chrome</string>
+    
+    <string name="chrome_autologin_intro_text">To autofill passwords using Dashlane in Google Chrome, you also need to turn off the Google Password Manager and select the second option.\nYou can skip this step if you don’t use Chrome.</string>
+    
+    <string name="chrome_autologin_intro_negative_button">Skip</string>
+    
+    <string name="chrome_autologin_intro_positive_button">Activate in Chrome</string>
 </resources>

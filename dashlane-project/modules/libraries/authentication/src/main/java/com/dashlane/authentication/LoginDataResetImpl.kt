@@ -9,7 +9,6 @@ class LoginDataResetImpl @Inject constructor(
     private val sessionTrasher: SessionTrasher,
     private val globalPreferencesManager: GlobalPreferencesManager,
 ) : LoginDataReset {
-
     override suspend fun clearData(username: Username, reason: DataLossTrackingLogger.Reason) {
         sessionTrasher.trash(username = username, deletePreferences = true)
         globalPreferencesManager.setLastLoggedInUser("")

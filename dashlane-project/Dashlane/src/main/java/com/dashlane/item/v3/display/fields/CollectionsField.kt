@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.dashlane.R
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.DisplayField
@@ -27,35 +29,36 @@ import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.data.SecureNoteFormData
-import com.dashlane.item.v3.display.forms.OrganisationActions
 import com.dashlane.item.v3.viewmodels.Data
-import com.dashlane.ui.widgets.view.CategoryChip
-import com.dashlane.ui.widgets.view.CategoryChipList
+import com.dashlane.ui.widgets.view.CollectionTag
+import com.dashlane.ui.widgets.view.CollectionTagList
 
 @Composable
 fun ColumnScope.CollectionsField(
     data: Data<out FormData>,
     editMode: Boolean,
-    organisationActions: OrganisationActions
+    onCollectionOpen: () -> Unit = {},
 ) {
     if (data.commonData.attachmentCount > 0) {
         if (data.formData is SecureNoteFormData) {
             Text(
                 text = stringResource(id = R.string.vault_secure_note_attachment_restrict_collections),
                 style = DashlaneTheme.typography.bodyReducedRegular,
-                color = DashlaneTheme.colors.textNeutralQuiet
+                color = DashlaneTheme.colors.textNeutralQuiet,
             )
         } 
         return
     }
     if (editMode) {
         CollectionFieldEdit(
-            data,
-            organisationActions.onCollectionOpen,
-            organisationActions.onCollectionRemove
+            data = data,
+            onCollectionOpen = onCollectionOpen,
         )
     } else {
-        CollectionsFieldDisplay(data, organisationActions.onCollectionOpen)
+        CollectionsFieldDisplay(
+            data = data,
+            onCollectionOpen = onCollectionOpen,
+        )
     }
 }
 
@@ -63,19 +66,14 @@ fun ColumnScope.CollectionsField(
 private fun ColumnScope.CollectionFieldEdit(
     data: Data<out FormData>,
     onCollectionOpen: () -> Unit,
-    onCollectionRemove: (CollectionData) -> Unit
 ) {
     val collections = data.commonData.collections ?: return
     if (collections.isNotEmpty()) {
-        CategoryChipList {
+        CollectionTagList(modifier = Modifier.padding(vertical = 8.dp)) {
             collections.forEach { collection ->
-                CategoryChip(
+                CollectionTag(
                     label = collection.name,
-                    editMode = true,
                     shared = collection.shared,
-                    onClick = {
-                        onCollectionRemove(collection)
-                    }
                 )
             }
         }
@@ -109,13 +107,13 @@ private fun CollectionsFieldDisplay(data: Data<out FormData>, onCollectionOpen: 
                 FieldAction.Generic(
                     iconLayout = ButtonLayout.IconOnly(
                         iconToken = IconTokens.actionAddOutlined,
-                        contentDescription = stringResource(id = R.string.vault_add_collection)
+                        contentDescription = stringResource(id = R.string.vault_add_collection),
                     ),
                     onClick = {
                         onCollectionOpen()
                         true
-                    }
-                )
+                    },
+                ),
             ),
         )
     } else {
@@ -125,16 +123,13 @@ private fun CollectionsFieldDisplay(data: Data<out FormData>, onCollectionOpen: 
                     text = stringResource(id = R.string.vault_collection_title),
                     style = DashlaneTheme.typography.bodyHelperRegular,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
-                CategoryChipList {
+                CollectionTagList(modifier = Modifier.padding(vertical = 4.dp)) {
                     collections.forEach { collection ->
-                        CategoryChip(
+                        CollectionTag(
                             label = collection.name,
-                            editMode = false,
                             shared = collection.shared,
-                            onClick = {
-                            }
                         )
                     }
                 }
@@ -161,12 +156,11 @@ private fun CollectionFieldPreview() {
                     commonData = CommonData(
                         collections = listOf(
                             CollectionData("", "Collection 1", false),
-                            CollectionData("", "Collection 2", true)
-                        )
-                    )
+                            CollectionData("", "Collection 2", true),
+                        ),
+                    ),
                 ),
                 editMode = false,
-                organisationActions = OrganisationActions()
             )
         }
     }
@@ -181,11 +175,10 @@ private fun RestrictedCollectionFieldPreview() {
                 data = Data(
                     formData = SecureNoteFormData(),
                     commonData = CommonData(
-                        attachmentCount = 2
-                    )
+                        attachmentCount = 2,
+                    ),
                 ),
                 editMode = false,
-                organisationActions = OrganisationActions()
             )
         }
     }

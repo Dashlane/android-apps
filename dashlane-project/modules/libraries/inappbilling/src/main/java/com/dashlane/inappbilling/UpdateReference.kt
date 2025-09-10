@@ -1,12 +1,12 @@
 package com.dashlane.inappbilling
 
 import android.os.Parcelable
-import com.android.billingclient.api.BillingFlowParams.ProrationMode
+import com.android.billingclient.api.BillingFlowParams.SubscriptionUpdateParams.ReplacementMode
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class UpdateReference(
     val productId: String,
     val oldPurchaseToken: String,
-    @ProrationMode val mode: Int
+    @ReplacementMode val mode: Int,
 ) : Parcelable

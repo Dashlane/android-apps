@@ -5,7 +5,6 @@ import javax.inject.Singleton
 
 @Singleton
 class ApplicationForegroundChecker @Inject constructor() : AbstractActivityLifecycleListener() {
-
     var isAppForeground: Boolean = false
         private set
 

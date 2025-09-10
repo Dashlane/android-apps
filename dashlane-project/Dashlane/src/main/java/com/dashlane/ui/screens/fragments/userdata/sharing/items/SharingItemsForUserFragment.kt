@@ -9,14 +9,13 @@ import com.dashlane.R
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
-import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
 import com.dashlane.util.setCurrentPageView
+import com.dashlane.vault.textfactory.list.DataIdentifierListTextResolver
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class SharingItemsForUserFragment : AbstractContentFragment() {
-
     @Inject
     lateinit var itemWrapperProvider: ItemWrapperProvider
 
@@ -24,10 +23,11 @@ class SharingItemsForUserFragment : AbstractContentFragment() {
     lateinit var dataIdentifierListTextResolver: DataIdentifierListTextResolver
 
     private val viewModel by viewModels<SharingItemsForUserViewModel>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         setCurrentPageView(AnyPage.SHARING_MEMBER_DETAILS)

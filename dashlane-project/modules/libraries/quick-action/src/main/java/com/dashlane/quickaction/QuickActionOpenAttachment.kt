@@ -14,7 +14,6 @@ class QuickActionOpenAttachment(
     private val summaryObject: SummaryObject,
     private val navigator: Navigator,
 ) : Action {
-
     override val text: Int = if (!hasAttachments) {
         R.string.quick_action_add_attachment
     } else {
@@ -29,7 +28,7 @@ class QuickActionOpenAttachment(
         navigator.showAttachments(
             id = summaryObject.id,
             xmlObjectName = summaryObject.syncObjectType.xmlObjectName,
-            attachments = summaryObject.attachments
+            attachments = summaryObject.attachments,
         )
     }
 
@@ -44,14 +43,14 @@ class QuickActionOpenAttachment(
             val attachmentsAllowed = summaryObject.attachmentsAllowed(
                 attachmentAllItems = userFeaturesChecker.has(FeatureFlip.ATTACHMENT_ALL_ITEMS),
                 isAccountFrozen = isAccountFrozen,
-                hasCollections = hasCollections
+                hasCollections = hasCollections,
             )
 
             if (attachmentsAllowed) {
                 return QuickActionOpenAttachment(
                     hasAttachments = summaryObject.hasAttachments(),
                     summaryObject = summaryObject,
-                    navigator = navigator
+                    navigator = navigator,
                 )
             }
             return null

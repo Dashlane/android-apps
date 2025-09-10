@@ -10,9 +10,8 @@ import com.dashlane.vault.summary.SummaryObject
 class CopyItemFieldListItemAction(
     private val item: SummaryObject,
     private val itemContainer: ItemListContext,
-    private val vaultItemCopyService: VaultItemCopyService
+    private val vaultItemCopyService: VaultItemCopyService,
 ) : ListItemAction {
-
     override val icon: Int = R.drawable.ic_item_action_copy
 
     override val contentDescription: Int = R.string.and_accessibility_copy_password

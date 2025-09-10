@@ -4,4 +4,18 @@
     <string name="generic_error_title">Something went wrong</string>
     
     <string name="generic_error_message">An unexpected error occurred. Please try again.</string>
+    
+    <string name="network_error">Network error</string>
+    
+    <string name="sso_contact_administrator_message">Please contact your company Admin to get access to this account creation.</string>
+
+    
+    <string name="change_master_password_confirm_text_edit_feedback_matching">It’s a match!</string>
+    
+    <string name="change_master_password_confirm_text_edit_feedback_error">This doesn’t match your new Master Password. Please try again.</string>
+
+    <string name="settings_use_pincode_need_screen_lock_title">Add a Screen Lock for PIN</string>
+    <string name="settings_use_pincode_need_screen_lock_description">For your security, you must have a screen lock for your device to use a PIN for Dashlane.</string>
+    <string name="settings_use_pincode_need_screen_lock_action_settings">Add Screen Lock</string>
+    <string name="settings_use_pincode_need_screen_lock_action_dontuse">Don\'t use PIN</string>
 </resources>

@@ -13,25 +13,29 @@ import com.dashlane.csvimport.utils.Intents.CSV_IMPORT_RESULT_ADD_INDIVIDUALLY
 import com.dashlane.csvimport.utils.Intents.CSV_IMPORT_RESULT_CANCEL
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.BackupFileType
-import com.dashlane.hermes.generated.definitions.ImportDataStatus
-import com.dashlane.hermes.generated.definitions.ImportDataStep
-import com.dashlane.hermes.generated.definitions.ImportSource
+import com.dashlane.hermes.generated.definitions.TransferDataSource
+import com.dashlane.hermes.generated.definitions.TransferDataStatus
+import com.dashlane.hermes.generated.definitions.TransferDataStep
 import com.dashlane.hermes.generated.events.user.ImportData
+import com.dashlane.lock.LockEvent
+import com.dashlane.lock.LockHelper
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class CsvImportViewModel @Inject constructor(
     private val logRepository: LogRepository,
     private val manager: CsvImportManager,
     private val authentifiantHelper: ImportAuthentifiantHelper,
+    private val lockHelper: LockHelper,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val uri: Uri = savedStateHandle[CsvImportActivity.EXTRA_URI]!!
 
@@ -71,7 +75,7 @@ class CsvImportViewModel @Inject constructor(
         val schema = CsvSchema(
             hasHeader = false,
             separator = state.separator,
-            fieldTypes = types
+            fieldTypes = types,
         )
         stateFlow.tryEmit(CsvImportState.Loading(stateFlow.value.data))
         viewModelScope.launch(ioDispatcher) {
@@ -80,8 +84,8 @@ class CsvImportViewModel @Inject constructor(
                 stateFlow.emit(
                     CsvImportState.Loaded(
                         stateFlow.value.data.copy(selectedCredentials = credentialsFromSchema),
-                        false
-                    )
+                        false,
+                    ),
                 )
             } catch (ex: Exception) {
                 stateFlow.emit(CsvImportState.Error(stateFlow.value.data, Intents.CSV_IMPORT_RESULT_FAILURE))
@@ -118,15 +122,19 @@ class CsvImportViewModel @Inject constructor(
                 val schema = manager.inferSchema()
                 if (schema == null) {
                     val (separator, fields) = manager.selectFields()!!
-                    stateFlow.emit(
-                        CsvImportState.OpenMatchActivity(stateFlow.value.data, fields, separator)
-                    )
+                    if (lockHelper.isLocked) {
+                        lockHelper.lockEventFlow
+                            .first { it is LockEvent.Unlock }
+                            .let { stateFlow.emit(CsvImportState.OpenMatchActivity(stateFlow.value.data, fields, separator)) }
+                    } else {
+                        stateFlow.emit(CsvImportState.OpenMatchActivity(stateFlow.value.data, fields, separator))
+                    }
                 } else {
                     stateFlow.emit(
                         CsvImportState.Loaded(
                             stateFlow.value.data.copy(selectedCredentials = manager.loadCredentials(schema)),
-                            false
-                        )
+                            false,
+                        ),
                     )
                 }
             } catch (ex: Exception) {
@@ -147,16 +155,16 @@ class CsvImportViewModel @Inject constructor(
                     .filter { it.selected }
                     .map { it.toVaultItem(authentifiantHelper) }
                 val countSaved = authentifiantHelper.addAuthentifiants(
-                    toSaveItems
+                    toSaveItems,
                 )
                 logRepository.queueEvent(
                     ImportData(
                         backupFileType = BackupFileType.CSV,
-                        importDataStatus = ImportDataStatus.SUCCESS,
-                        importSource = ImportSource.SOURCE_OTHER,
-                        importDataStep = ImportDataStep.SUCCESS,
-                        isDirectImport = false
-                    )
+                        importDataStatus = TransferDataStatus.SUCCESS,
+                        importSource = TransferDataSource.SOURCE_OTHER,
+                        importDataStep = TransferDataStep.SUCCESS,
+                        isDirectImport = false,
+                    ),
                 )
                 stateFlow.emit(CsvImportState.Saved(stateFlow.value.data, countSaved))
             } catch (ex: Exception) {

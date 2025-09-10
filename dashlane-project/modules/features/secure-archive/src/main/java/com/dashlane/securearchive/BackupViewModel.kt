@@ -16,9 +16,8 @@ import javax.inject.Inject
 internal class BackupViewModel @Inject constructor(
     private val secureArchiveManager: SecureArchiveManager,
     private val crashReporter: CrashReporter,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel(), BackupViewModelContract {
-
     override val operation = BackupActivityIntents.getBackupAction(savedStateHandle)
 
     override val state = MutableStateFlow<BackupViewState>(BackupViewState.Idle)
@@ -35,7 +34,7 @@ internal class BackupViewModel @Inject constructor(
                 val items = when (operation) {
                     is BackupOperation.Import -> secureArchiveManager.import(
                         operation.uri,
-                        password
+                        password,
                     )
                     is BackupOperation.Export -> secureArchiveManager.export(password)
                 }
@@ -53,7 +52,7 @@ internal class BackupViewModel @Inject constructor(
                         crashReporter.logNonFatal(t.originalException)
                         BackupViewState.FallbackToFileIntent(
                             t.data.countDisplayableDataType(),
-                            t.cacheFile
+                            t.cacheFile,
                         )
                     }
                     else -> {
@@ -86,7 +85,7 @@ private val displayableDataTypes = setOf(
     SyncObjectType.PASSPORT,
     SyncObjectType.SOCIAL_SECURITY_STATEMENT,
     SyncObjectType.SECURE_NOTE,
-    SyncObjectType.AUTHENTIFIANT
+    SyncObjectType.AUTHENTIFIANT,
 )
 
 private fun List<VaultItem<*>>.countDisplayableDataType() =

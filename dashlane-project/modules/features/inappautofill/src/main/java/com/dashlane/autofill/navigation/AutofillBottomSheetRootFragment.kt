@@ -7,7 +7,6 @@ import com.dashlane.bottomnavigation.delegatenavigation.DelegateNavigationBottom
 class AutofillBottomSheetRootFragment :
     DelegateNavigationBottomSheetFragment,
     Fragment() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         delegateNavigation()

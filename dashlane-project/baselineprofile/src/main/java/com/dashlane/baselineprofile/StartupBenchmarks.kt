@@ -21,7 +21,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class StartupBenchmarks {
-
     @get:Rule
     val rule = MacrobenchmarkRule()
 
@@ -53,7 +52,7 @@ class StartupBenchmarks {
                 
                 
                 device.wait(Until.findObject(By.text(GET_STARTED_BUTTON_TEXT)), DEFAULT_TIMEOUT)
-            }
+            },
         )
     }
 }

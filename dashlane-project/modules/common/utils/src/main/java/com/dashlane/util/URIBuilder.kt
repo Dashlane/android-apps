@@ -4,7 +4,7 @@ import java.net.URI
 
 class URIBuilder(
     val scheme: String = "https",
-    val authority: String
+    val authority: String,
 ) {
     var fragment: String? = null
     private val paths = mutableListOf<String>()
@@ -27,7 +27,7 @@ class URIBuilder(
                 append(paths.joinToString(prefix = "/", separator = "/"))
                 append(queries.joinToString(prefix = "?", separator = "&") { "${it.key}=${it.value}" })
                 fragment?.let { append("#$it") }
-            }
+            },
         )
     }
 

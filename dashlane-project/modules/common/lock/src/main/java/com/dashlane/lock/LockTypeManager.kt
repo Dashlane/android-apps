@@ -13,6 +13,9 @@ sealed interface LockType : Parcelable {
 
     @Parcelize
     data object Biometric : LockType
+
+    @Parcelize
+    data object WearAutoRestore : LockType
 }
 
 interface LockTypeManager {

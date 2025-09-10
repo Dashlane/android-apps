@@ -10,7 +10,7 @@ open class ItemEditValueNumberSubView(
     @SubViewFactory.TYPE val inputType: Int,
     valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?,
     val suggestions: List<String>? = null,
-    val protectedStateListener: (Boolean) -> Unit = {}
+    val protectedStateListener: (Boolean) -> Unit = {},
 ) : ItemEditValueSubView<String>(valueUpdate) {
     var invisible: Boolean = false
 }

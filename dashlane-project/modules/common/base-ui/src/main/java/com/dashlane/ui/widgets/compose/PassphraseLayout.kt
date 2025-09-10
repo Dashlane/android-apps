@@ -22,14 +22,14 @@ fun PassphraseLayout(
     modifier: Modifier = Modifier,
     passphrase: List<Passphrase>,
     onValueChange: ((String) -> Unit)?,
-    onKeyboardDone: (() -> Unit)?
+    onKeyboardDone: (() -> Unit)?,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .cardBackground()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         passphrase.forEach { word ->
             when (word) {
@@ -37,7 +37,7 @@ fun PassphraseLayout(
                     value = word.userInput,
                     isError = word.isError,
                     onValueChange = onValueChange ?: throw IllegalStateException("onValueChange is needed for a passphrase with a missing word"),
-                    onKeyboardDone = onKeyboardDone ?: throw IllegalStateException("onKeyboardDone is needed for a passphrase with a missing word")
+                    onKeyboardDone = onKeyboardDone ?: throw IllegalStateException("onKeyboardDone is needed for a passphrase with a missing word"),
                 )
                 is Passphrase.Word -> PassphraseWord(word.value)
             }
@@ -52,7 +52,7 @@ private fun PassphraseWord(word: String) {
         style = DashlaneTheme.typography.bodyReducedMonospace,
         color = DashlaneTheme.colors.textNeutralCatchy,
         modifier = Modifier
-            .padding(start = 4.dp)
+            .padding(start = 4.dp),
     )
 }
 
@@ -61,7 +61,7 @@ private fun PassphraseMissing(
     value: String,
     isError: Boolean,
     onValueChange: (String) -> Unit,
-    onKeyboardDone: (() -> Unit)?
+    onKeyboardDone: (() -> Unit)?,
 ) {
     TextField(
         modifier = Modifier
@@ -71,13 +71,15 @@ private fun PassphraseMissing(
         feedbackText = if (isError) stringResource(id = R.string.passphrase_component_missing_word_error) else null,
         onValueChange = onValueChange,
         keyboardActions = onKeyboardDone?.let { KeyboardActions(onDone = { onKeyboardDone() }) } ?: KeyboardActions.Default,
-        label = stringResource(id = R.string.passphrase_component_missing_word_label)
+        label = stringResource(id = R.string.passphrase_component_missing_word_label),
     )
 }
 
 sealed class Passphrase {
     abstract val value: String
+
     data class Word(override val value: String) : Passphrase()
+
     data class Missing(override val value: String, val userInput: String, val isError: Boolean) : Passphrase()
 }
 
@@ -91,10 +93,10 @@ private fun PassphraseLayoutReceiverPreview() {
                 Passphrase.Word("whales"),
                 Passphrase.Word("potatoes"),
                 Passphrase.Word("plant"),
-                Passphrase.Word("mascara")
+                Passphrase.Word("mascara"),
             ),
             onValueChange = {},
-            onKeyboardDone = {}
+            onKeyboardDone = {},
         )
     }
 }
@@ -109,10 +111,10 @@ private fun PassphraseLayoutSenderPreview() {
                 Passphrase.Word("whales"),
                 Passphrase.Word("potatoes"),
                 Passphrase.Missing(value = "plant", userInput = "", isError = true),
-                Passphrase.Word("mascara")
+                Passphrase.Word("mascara"),
             ),
             onValueChange = {},
-            onKeyboardDone = {}
+            onKeyboardDone = {},
         )
     }
 }

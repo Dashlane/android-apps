@@ -1,0 +1,39 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "os": {
+        "type": "mac_os",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "web",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "main_app",
+    "origin_page": "login"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 1
+  },
+  "properties": {
+    "name": "first_launch",
+    "ios": {
+      "adid": "some_id",
+      "idfa": "EA7583CD-A667-48BC-B806-42ECB2B48606",
+      "idfv": "EA7583CD-A667-48BC-B806-42ECB3B48606"
+    },
+    "is_marketing_opt_in": true
+  }
+}

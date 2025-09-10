@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
     <string name="vault_announcement_autofill_title">Start logging in faster with Autofill</string>
+    
+    <string name="vault_announcement_autofill_description">Activate Autofill to log in to apps without typing a password.</string>
+    
+    <string name="vault_announcement_autofill_positive_button">Activate</string>
+    
+    <string name="vault_announcement_autofill_negative_button">Not Now</string>
+    
+    <string name="vault_announcement_chrome_autofill_title">Activate Dashlane Autofill for Chrome</string>
+    
+    <string name="vault_announcement_chrome_autofill_description">To autofill passwords using Dashlane in Google Chrome, you also need to turn off the Google Password Manager and select the second option.</string>
+    
+    <string name="vault_announcement_chrome_autofill_positive_button">Activate</string>
+    
+    <string name="vault_announcement_chrome_autofill_negative_button">Not now</string>
     
     <string name="vault_announcement_password_limit_title">You’ve reached your Free plan password limit. Upgrade to premium</string>
     

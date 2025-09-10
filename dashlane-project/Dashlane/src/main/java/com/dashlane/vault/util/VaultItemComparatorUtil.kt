@@ -1,10 +1,10 @@
 package com.dashlane.vault.util
 
-import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.vault.model.title
 import com.dashlane.vault.model.titleForListNormalized
 import com.dashlane.vault.summary.SummaryObject
+import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
 
 fun comparatorAlphabeticAuthentifiant(identityNameHolderService: IdentityNameHolderService): Comparator<SummaryObject> =
     byTitle(identityNameHolderService).then(byLoginAuthentifiant())
@@ -13,10 +13,6 @@ fun comparatorAlphabeticSecureNote(): Comparator<SummaryObject.SecureNote> =
     compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) {
         it.title
     }
-
-fun comparatorAlphabeticAllVisibleItems(identityNameHolderService: IdentityNameHolderService): Comparator<SummaryObject> =
-    comparatorAlphabeticSummaryObject(identityNameHolderService)
-        .then(byLoginAuthentifiant())
 
 private fun byTitle(identityNameHolderService: IdentityNameHolderService): Comparator<SummaryObject> {
     return compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) {
@@ -31,12 +27,6 @@ private fun byLoginAuthentifiant(): Comparator<SummaryObject> {
             is SummaryObject.Passkey -> it.userDisplayName
             else -> null
         }
-    }
-}
-
-private fun comparatorAlphabeticSummaryObject(identityNameHolderService: IdentityNameHolderService): Comparator<SummaryObject> {
-    return compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) {
-        it.getComparableField(identityNameHolderService)
     }
 }
 
@@ -58,6 +48,14 @@ fun SummaryObject.getComparableField(identityNameHolderService: IdentityNameHold
         is SummaryObject.SecureNote -> title
         is SummaryObject.BankStatement -> bankAccountName
         is SummaryObject.Passkey -> title
-        else -> null
+        is SummaryObject.WiFi -> ssid
+        is SummaryObject.AuthCategory -> null
+        is SummaryObject.Collection -> null
+        is SummaryObject.DataChangeHistory -> null
+        is SummaryObject.GeneratedPassword -> null
+        is SummaryObject.Secret -> null
+        is SummaryObject.SecureFileInfo -> null
+        is SummaryObject.SecureNoteCategory -> null
+        is SummaryObject.SecurityBreach -> null
     }
 }

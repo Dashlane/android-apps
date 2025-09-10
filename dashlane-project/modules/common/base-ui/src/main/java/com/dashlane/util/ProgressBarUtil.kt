@@ -5,7 +5,9 @@ import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
 
-fun ProgressBar.setProgressDrawablePrimaryTrack(@DrawableRes drawableResId: Int): Boolean {
+fun ProgressBar.setProgressDrawablePrimaryTrack(
+    @DrawableRes drawableResId: Int,
+): Boolean {
     
     
     val progressDrawable = progressDrawable as? LayerDrawable

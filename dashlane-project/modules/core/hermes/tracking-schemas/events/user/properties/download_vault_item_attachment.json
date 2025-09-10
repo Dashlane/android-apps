@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/download_vault_item_attachment.json",
+  "type": "object",
+  "description": "In the vault item details view - In Android, User clicks the option to “Save a copy to download folder” ",
+  "metas": {
+    "area": "vault"
+  },
+  "properties": {
+    "name": {
+      "const": "download_vault_item_attachment"
+    },
+    "item_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_id"
+    },
+    "item_source": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_source"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+    }
+  },
+  "required": [
+    "name",
+    "item_id",
+    "item_type"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/context/context.json",
+  "type": "object",
+  "description": "Context of logs : user/app/device/browser",
+  "definitions": {
+    "context": {
+      "type": "object",
+      "description": "Context of logs for user events",
+      "properties": {
+        "app": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/app.json#/definitions/app"
+        },
+        "user": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/user.json#/definitions/user"
+        },
+        "device": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/device"
+        },
+        "browser": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json#/definitions/browser"
+        }
+      },
+      "required": [
+        "app",
+        "device"
+      ],
+      "additionalProperties": false
+    },
+    "context_anonymous": {
+      "type": "object",
+      "description": "Context of logs for anonymous event",
+      "properties": {
+        "app": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/app.json#/definitions/app"
+        },
+        "os": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/os"
+        },
+        "browser": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json#/definitions/anonymous_browser"
+        }
+      },
+      "required": [
+        "app",
+        "os"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

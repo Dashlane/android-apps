@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_sms_otp_dialog_error_title">We haven’t found anything…</string>
+    <string name="autofill_sms_otp_dialog_error_detail_timeout">It might be slow or hasn’t been sent. Please try and resend the code, or fill the code manually.</string>
+    <string name="autofill_sms_otp_dialog_success_title">We retrieved this SMS code:</string>
+    <string name="autofill_sms_otp_dialog_waiting_title">Just a moment. We\'re waiting for your SMS code.</string>
+    <string name="autofill_sms_otp_dialog_cancel_button">Cancel</string>
+    <string name="autofill_sms_otp_dialog_autofill_button">Autofill</string>
+    
+    <string name="and_accessibility_autofill_sms_otp_dialog_code_click_label">Autofill</string>
+</resources>

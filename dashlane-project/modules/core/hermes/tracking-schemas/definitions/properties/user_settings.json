@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/user_settings.json",
+  "type": "object",
+  "description": "Definitions for user settings",
+  "definitions": {
+    "has_authentication_with_biometrics": {
+      "description": "If user authenticates with biometrics",
+      "type": "boolean"
+    },
+    "has_authentication_with_pin": {
+      "description": "If user authenticates with pin code",
+      "type": "boolean"
+    },
+    "has_automatic_two_factor_authentication_token_copy": {
+      "description": "If user has enabled the setting to automatically copy the token inside his clipboard whenever he needs to login to a website/app for which he has a 2FA token",
+      "type": "boolean"
+    },
+    "has_authentication_with_webauthn": {
+      "description": "If user authenticates with WebAuthn (Web only)",
+      "type": "boolean"
+    },
+    "has_authentication_with_remember_me": {
+      "description": "If user authenticates with Remember Me (Web only)",
+      "type": "boolean"
+    },
+    "has_autofill_activated": {
+      "description": "If user has activated autofill",
+      "type": "boolean"
+    },
+    "has_clear_clipboard": {
+      "description": "If app can automatically clear clipboard",
+      "type": "boolean"
+    },
+    "has_master_password_biometric_reset": {
+      "description": "If user has activated master password reset with biometrics",
+      "type": "boolean"
+    },
+    "has_lock_on_exit": {
+      "description": "If app is locked automatically on exit",
+      "type": "boolean"
+    },
+    "lock_auto_timeout": {
+      "description": "The duration before the app is locked",
+      "type": "integer"
+    },
+    "has_unlock_item_with_biometric": {
+      "description": "If user unlocks items with biometrics",
+      "type": "boolean"
+    },
+    "has_credentials_protect_with_master_password": {
+      "description": "If user has master password protection of credentials activated",
+      "type": "boolean"
+    },
+    "has_payments_protect_with_master_password": {
+      "description": "If user has master password protection of payments activated",
+      "type": "boolean"
+    },
+    "has_ids_protect_with_master_password": {
+      "description": "If user has master password protection of ids activated",
+      "type": "boolean"
+    },
+    "has_secure_notes_protect_with_master_password": {
+      "description": "If user has master password protection of secure notes activated",
+      "type": "boolean"
+    }
+  }
+}

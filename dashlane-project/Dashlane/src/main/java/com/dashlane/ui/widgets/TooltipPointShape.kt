@@ -10,9 +10,8 @@ import android.graphics.drawable.shapes.Shape
 import android.os.Build
 
 class TooltipPointShape(
-    private val color: Int = Color.WHITE
+    private val color: Int = Color.WHITE,
 ) : Shape() {
-
     private val rect = Rect()
     private val path = Path()
 

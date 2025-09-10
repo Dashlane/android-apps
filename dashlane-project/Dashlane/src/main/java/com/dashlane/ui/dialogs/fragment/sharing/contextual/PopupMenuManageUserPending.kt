@@ -11,9 +11,8 @@ class PopupMenuManageUserPending(
     anchor: View,
     isItemInCollection: Boolean,
     private val onResendInvite: () -> Unit,
-    private val onCancelInvite: () -> Unit
+    private val onCancelInvite: () -> Unit,
 ) : PopupMenu(context, anchor), PopupMenu.OnMenuItemClickListener {
-
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.resend_invite -> onResendInvite()

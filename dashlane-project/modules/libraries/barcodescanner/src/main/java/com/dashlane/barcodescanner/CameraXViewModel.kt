@@ -28,7 +28,7 @@ class CameraXViewModel(application: Application) : AndroidViewModel(application)
                             
                         }
                     },
-                    ContextCompat.getMainExecutor(getApplication())
+                    ContextCompat.getMainExecutor(getApplication()),
                 )
             }
             return cameraProviderLiveData!!

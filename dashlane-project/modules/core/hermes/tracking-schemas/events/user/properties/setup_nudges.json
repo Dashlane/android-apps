@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/setup_nudges.json",
+  "type": "object",
+  "description": "The admin starts, completes or tests the Nudges integration setup.",
+  "metas": {
+    "area": "tools"
+  },
+  "properties": {
+    "name": {
+      "const": "setup_nudges"
+    },
+    "action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/integrations.json#/definitions/nudge_action"
+    },
+    "integration_platform": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/integrations.json#/definitions/integration_platform"
+    }
+  },
+  "required": [
+    "name",
+    "action",
+    "integration_platform"
+  ],
+  "additionalProperties": false
+}

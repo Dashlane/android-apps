@@ -8,7 +8,7 @@ fun createSecret(
     dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(uid = itemId, teamSpaceId = spaceId),
     title: String? = null,
     content: String? = null,
-    isSecured: Boolean = false
+    isSecured: Boolean = false,
 ): VaultItem<SyncObject.Secret> {
     return dataIdentifier.toVaultItem(
         SyncObject.Secret {
@@ -18,6 +18,6 @@ fun createSecret(
             this.secured = isSecured
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }

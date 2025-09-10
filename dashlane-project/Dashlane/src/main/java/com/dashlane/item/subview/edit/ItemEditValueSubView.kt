@@ -7,9 +7,8 @@ import com.dashlane.vault.model.VaultItem
 
 abstract class ItemEditValueSubView<T>(
     val valueUpdate: (VaultItem<*>, T) -> VaultItem<*>?,
-    private val valueChangeManager: ValueChangeManager<T> = ValueChangeManagerImpl()
+    private val valueChangeManager: ValueChangeManager<T> = ValueChangeManagerImpl(),
 ) : ItemSubViewImpl<T>(), ValueChangeManager<T> by valueChangeManager {
-
     fun updateValue(item: VaultItem<*>): VaultItem<*> {
         return valueUpdate(item, value) ?: item
     }

@@ -10,7 +10,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object AutofillApiComponentModule {
-
     @Provides
     fun providesAutoFillChangePasswordConfiguration(): AutoFillChangePasswordConfiguration {
         val domainUsername = OnboardingGuidedPasswordChangeActivity.currentDomainUsername
@@ -26,7 +25,7 @@ object AutofillApiComponentModule {
                 },
                 onDomainChanged = {
                     OnboardingGuidedPasswordChangeActivity.currentDomainUsername = null
-                }
+                },
             )
         }
     }

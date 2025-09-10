@@ -27,9 +27,8 @@ class TeamRevokedDialogDisplayer @Inject constructor(
     private val accountStatusProvider: OptionalProvider<AccountStatus>,
     private val sessionManager: SessionManager,
     private val preferencesManager: PreferencesManager,
-    @ApplicationCoroutineScope private val coroutineScope: CoroutineScope
+    @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
 ) {
-
     companion object {
         const val ARG_SPACE_REVOKED_ID = "ARG_SPACE_REVOKED_ID"
         private const val REVOKED_DETECTOR_DELAY_MILLIS = 500L
@@ -73,7 +72,7 @@ class TeamRevokedDialogDisplayer @Inject constructor(
             DateUtils.FORMAT_SHOW_DATE or
                 DateUtils.FORMAT_SHOW_YEAR or
                 DateUtils.FORMAT_NO_MONTH_DAY or
-                DateUtils.FORMAT_ABBREV_ALL
+                DateUtils.FORMAT_ABBREV_ALL,
         )
         val description = context.getString(R.string.space_revoked_popup_description, datePremiumOver)
         val dialog = NotificationDialogFragment.Builder().setArgs(args)

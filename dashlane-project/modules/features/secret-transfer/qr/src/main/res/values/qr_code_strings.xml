@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    
+    <string name="login_secret_transfer_step_label">%1$d of %2$d</string>
+    
+    <string name="login_secret_transfer_qr_code_title">Scan the QR code using the camera on your logged-in mobile device</string>
+    
+    <string name="login_secret_transfer_qr_code_help_button">Log in with another method</string>
+    
+    <string name="login_secret_transfer_qr_code_help_sheet_title">How do you want to log in?</string>
+    
+    <string name="login_secret_transfer_qr_code_help_sheet_primary_button">Take security challenge</string>
+    
+    <string name="login_secret_transfer_qr_code_help_sheet_secondary_button">Use recovery key</string>
+</resources>

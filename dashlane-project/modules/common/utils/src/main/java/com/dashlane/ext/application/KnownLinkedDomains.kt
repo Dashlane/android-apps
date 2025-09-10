@@ -7,7 +7,6 @@ import com.dashlane.url.domain.links.UrlDomainLinks
 import com.dashlane.url.toUrlDomainOrNull
 
 object KnownLinkedDomains {
-
     internal val urlDomainLinks: UrlDomainLinks =
         ExternalRepositoryUrlDomainLinks(ImmutableHardcodedLinkedDomainsRepository())
 

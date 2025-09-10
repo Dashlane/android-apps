@@ -11,6 +11,7 @@ import com.dashlane.hermes.generated.definitions.Space
 import com.dashlane.hermes.generated.events.user.SelectSpace
 import com.dashlane.lock.LockManager
 import com.dashlane.navigation.Navigator
+import com.dashlane.notification.badge.NotificationBadgeFlow
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.teamspaces.model.TeamSpace
@@ -21,6 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,9 +34,9 @@ class MenuViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockManager: LockManager,
     private val menuConfigurationProvider: MenuConfigurationProvider,
-    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
+    private val notificationBadgeFlow: NotificationBadgeFlow,
 ) : ViewModel(), NavController.OnDestinationChangedListener {
-
     private var teamspaceSelectionMode: Boolean = false
         set(value) {
             if (field == value) return
@@ -62,6 +64,11 @@ class MenuViewModel @Inject constructor(
                 accountStatuses[session]?.let {
                     refresh()
                 }
+            }
+        }
+        viewModelScope.launch {
+            notificationBadgeFlow.resultFlow.collect { result ->
+                _uiState.update { state -> MenuState.Loaded(state.items, hasUnReadActionItems = result.hasUnReadActionItems) }
             }
         }
     }
@@ -105,7 +112,10 @@ class MenuViewModel @Inject constructor(
     }
 
     fun refresh() {
-        val configuration = menuConfigurationProvider.getConfiguration(teamspaceSelectionMode)
+        val configuration = menuConfigurationProvider.getConfiguration(
+            teamspaceSelectionMode = teamspaceSelectionMode,
+            hasUnReadActionItems = _uiState.value.hasUnReadActionItems,
+        )
         val items = BuildMenuNavigationUseCase(navigator, configuration).build {
             onTeamspaceSelected(it)
         }
@@ -115,7 +125,7 @@ class MenuViewModel @Inject constructor(
     override fun onDestinationChanged(
         controller: NavController,
         destination: NavDestination,
-        arguments: Bundle?
+        arguments: Bundle?,
     ) {
         refresh()
     }

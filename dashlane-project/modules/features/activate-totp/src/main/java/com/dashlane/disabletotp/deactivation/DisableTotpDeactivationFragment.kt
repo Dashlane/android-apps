@@ -32,7 +32,7 @@ internal class DisableTotpDeactivationFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val binding = ActivateTotpLoadingBinding.inflate(inflater, container, false)
 

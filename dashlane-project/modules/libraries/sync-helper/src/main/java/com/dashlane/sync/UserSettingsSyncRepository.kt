@@ -14,7 +14,7 @@ import javax.inject.Inject
 class UserSettingsSyncRepository @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val sessionManager: SessionManager,
-    private val userDataRepository: UserDataRepository
+    private val userDataRepository: UserDataRepository,
 ) {
     fun insertOrUpdateForSync(value: SyncObject.Settings, backupTimeMillis: Long) {
         val session = sessionManager.session!!
@@ -41,10 +41,10 @@ class UserSettingsSyncRepository @Inject constructor(
         val pendingOperation = OutgoingTransaction.Update(
             Transaction(
                 "SETTINGS_userId",
-                Instant.ofEpochMilli(preferencesManager[session.username].userSettingsBackupTimeMillis)
+                Instant.ofEpochMilli(preferencesManager[session.username].userSettingsBackupTimeMillis),
             ),
             settings,
-            settings
+            settings,
         )
         return listOf(pendingOperation)
     }
@@ -56,7 +56,7 @@ class UserSettingsSyncRepository @Inject constructor(
         return SyncSummaryItem(
             objectId = settings.id ?: "SETTINGS_userId",
             lastUpdateTime = settingsBackupTime,
-            syncObjectType = SyncObjectType.SETTINGS
+            syncObjectType = SyncObjectType.SETTINGS,
         )
     }
 

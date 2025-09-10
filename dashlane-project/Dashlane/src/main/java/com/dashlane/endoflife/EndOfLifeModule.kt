@@ -9,7 +9,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class EndOfLifeModule {
-
     @Singleton
     @Binds
     abstract fun bindEndOfLife(endOfLife: EndOfLifeObserver): EndOfLife

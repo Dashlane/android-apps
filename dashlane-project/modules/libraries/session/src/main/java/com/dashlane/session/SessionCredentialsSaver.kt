@@ -7,13 +7,12 @@ import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.use
-import com.dashlane.logger.Log
+import com.dashlane.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.storage.securestorage.SecureDataKey
 import com.dashlane.storage.securestorage.SecureDataStorage
 import com.dashlane.storage.securestorage.SecureStorageManager
 import com.dashlane.user.Username
-import com.dashlane.hardwaresecurity.CryptoObjectHelper
 import javax.inject.Inject
 
 private const val TAG = "LockCredentialSaver"
@@ -21,7 +20,7 @@ private const val TAG = "LockCredentialSaver"
 class SessionCredentialsSaver @Inject constructor(
     private val secureStorageManager: SecureStorageManager,
     private val preferencesManager: PreferencesManager,
-    private val cryptoObjectHelper: CryptoObjectHelper
+    private val cryptoObjectHelper: CryptoObjectHelper,
 ) {
     fun saveCredentials(session: Session) {
         session.appKey.use { appKey ->
@@ -33,7 +32,7 @@ class SessionCredentialsSaver @Inject constructor(
                     keyData = it,
                     keyIdentifier = SecureDataKey.MASTER_PASSWORD,
                     username = session.username,
-                    localKey = session.localKey
+                    localKey = session.localKey,
                 )
             }
 
@@ -42,7 +41,13 @@ class SessionCredentialsSaver @Inject constructor(
             
             
             if (preferencesManager[session.username].is2FADisabled) {
-                appKey.serverKeyUtf8Bytes?.let { saveServerKey(it.use(ObfuscatedByteArray::toByteArray), session.localKey, session.username) }
+                appKey.serverKeyUtf8Bytes?.let {
+                    saveServerKey(
+                        it.use(ObfuscatedByteArray::toByteArray),
+                        session.localKey,
+                        session.username,
+                    )
+                }
             }
         }
     }
@@ -55,7 +60,6 @@ class SessionCredentialsSaver @Inject constructor(
             val storage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
             storage.writeLegacy(SecureDataKey.LOCAL_KEY, encrypted.encodeBase64ToString().asEncryptedBase64())
         } catch (e: Exception) {
-            Log.w(TAG, "Exception raised when saving the LK", e)
         }
     }
 
@@ -66,7 +70,7 @@ class SessionCredentialsSaver @Inject constructor(
                 keyData = it,
                 keyIdentifier = SecureDataKey.SERVER_KEY,
                 username = username,
-                localKey = localKey
+                localKey = localKey,
             )
         }
     }

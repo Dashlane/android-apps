@@ -6,17 +6,15 @@ import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.darkweb.DarkWebEmailStatus
 import com.dashlane.design.component.compat.view.ThumbnailView
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 data class DarkWebEmailItem(val emailStatus: DarkWebEmailStatus) : DashlaneRecyclerAdapter.ViewTypeProvider {
-
     var deleteListener: DeleteListener? = null
 
     override fun getViewType() = VIEW_TYPE
 
     class ViewHolder(val v: View) : EfficientViewHolder<DarkWebEmailItem>(v) {
-
         private var isClickable = false
 
         init {
@@ -56,7 +54,7 @@ data class DarkWebEmailItem(val emailStatus: DarkWebEmailStatus) : DashlaneRecyc
                     DarkWebEmailStatus.STATUS_PENDING -> R.color.text_warning_quiet
                     DarkWebEmailStatus.STATUS_ACTIVE -> R.color.text_positive_quiet
                     else -> R.color.text_neutral_quiet
-                }
+                },
             )
 
             findViewByIdEfficient<TextView>(R.id.item_line2)!!.apply {
@@ -77,7 +75,7 @@ data class DarkWebEmailItem(val emailStatus: DarkWebEmailStatus) : DashlaneRecyc
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType<DarkWebEmailItem>(
             R.layout.item_dark_web_email,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 }

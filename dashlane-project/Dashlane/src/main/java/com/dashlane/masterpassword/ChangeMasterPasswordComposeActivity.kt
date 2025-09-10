@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import com.dashlane.changemasterpassword.ChangeMasterPasswordNavigation
 import com.dashlane.changemasterpassword.ChangeMasterPasswordNavigation.ChangeMasterPassword
 import com.dashlane.changemasterpassword.ChangeMasterPasswordNavigation.Warning
@@ -12,7 +13,6 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.util.compose.BackPressedDispatcherBridge
 import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.setCurrentPageView
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ChangeMasterPasswordComposeActivity : DashlaneActivity() {
-
     @Inject
     lateinit var navigator: Navigator
 
@@ -31,7 +30,7 @@ class ChangeMasterPasswordComposeActivity : DashlaneActivity() {
         fun newIntent(
             context: Context,
             origin: ChangeMasterPasswordOrigin?,
-            showWarningDesktop: Boolean = true
+            showWarningDesktop: Boolean = true,
         ): Intent {
             return Intent(context, ChangeMasterPasswordComposeActivity::class.java)
                 .putExtra(EXTRA_ORIGIN, origin)
@@ -40,9 +39,11 @@ class ChangeMasterPasswordComposeActivity : DashlaneActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val origin = intent.getParcelableExtraCompat<ChangeMasterPasswordOrigin>(EXTRA_ORIGIN) ?: ChangeMasterPasswordOrigin.Settings
+        val successIntent = if (origin is ChangeMasterPasswordOrigin.Migration) origin.successIntent else null
 
         val page = if (origin is ChangeMasterPasswordOrigin.Settings) {
             AnyPage.SETTINGS_SECURITY_CHANGE_MASTER_PASSWORD
@@ -52,9 +53,6 @@ class ChangeMasterPasswordComposeActivity : DashlaneActivity() {
         if (page != null) {
             this.setCurrentPageView(page)
         }
-
-        val menuProvider = BackPressedDispatcherBridge.getMenuProvider(this)
-        addMenuProvider(menuProvider, this)
 
         val startDestination = if (intent.getBooleanExtra(EXTRA_SHOW_WARNING_DESKTOP, false)) {
             Warning
@@ -66,9 +64,13 @@ class ChangeMasterPasswordComposeActivity : DashlaneActivity() {
             DashlaneTheme {
                 ChangeMasterPasswordNavigation(
                     startDestination = startDestination,
-                    onSuccess = { finish() },
+                    origin = origin,
+                    onSuccess = {
+                        successIntent?.let { startActivity(it) }
+                        finish()
+                    },
                     onCancel = { finish() },
-                    logout = { navigator.logoutAndCallLoginScreen(this) }
+                    logout = { navigator.logoutAndCallLoginScreen(this) },
                 )
             }
         }

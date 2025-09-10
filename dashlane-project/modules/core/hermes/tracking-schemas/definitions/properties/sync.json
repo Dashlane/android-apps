@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json",
+  "type": "object",
+  "description": "Deprecated, this event costs a lot and brings zero value: When a sync has been performed.",
+  "definitions": {
+    "timestamp": {
+      "description": "The date when the sync was launched in seconds since the epoch time",
+      "type": "integer"
+    },
+    "duration": {
+      "type": "object",
+      "description": "Duration measurements of the sync processes",
+      "properties": {
+        "sync": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/duration_milliseconds"
+        },
+        "chronological": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/duration_chronological"
+        },
+        "treat_problem": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/duration_treat_problem"
+        },
+        "sharing": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/duration_sharing"
+        }
+      },
+      "required": [
+        "chronological",
+        "sharing",
+        "sync",
+        "treat_problem"
+      ],
+      "additionalProperties": false
+    },
+    "duration_milliseconds": {
+      "description": "Duration of the sync in milliseconds",
+      "type": "integer"
+    },
+    "duration_chronological": {
+      "description": "Duration of the chronological sync in milliseconds",
+      "type": "integer"
+    },
+    "duration_treat_problem": {
+      "description": "Duration to run the treat problem mechanism in milliseconds",
+      "type": "integer"
+    },
+    "duration_sharing": {
+      "description": "Duration to run the sharing sync in milliseconds",
+      "type": "integer"
+    },
+    "trigger": {
+      "description": "The event (manual or otherwise) which triggered the sync",
+      "type": "string",
+      "enum": [
+        "account_creation",
+        "change_master_password",
+        "change_team",
+        "initial_login",
+        "login",
+        "manual",
+        "periodic",
+        "push",
+        "save",
+        "save_meta",
+        "settings_change",
+        "sharing",
+        "wake"
+      ]
+    },
+    "extent": {
+      "description": "The extent of the sync. Initial is the first sync. Full is a sync with something to upload. Light is a sync with nothing to upload.",
+      "type": "string",
+      "enum": [
+        "full",
+        "initial",
+        "light"
+      ]
+    },
+    "full_backup_size": {
+      "description": "The number of transactions received in the full backup, if it was returned by server during the chronological sync.",
+      "type": "integer"
+    },
+    "incoming_update_count": {
+      "description": "The number of update transactions received during the chronological sync, which includes both the transactions in the full backup and in the transaction list. This doesn't count transactions which were dropped due to an error or due to an unknown type.",
+      "type": "integer"
+    },
+    "incoming_delete_count": {
+      "description": "The number of delete transactions received during the chronological sync. This doesn't count transactions which were dropped due to an unknown type.",
+      "type": "integer"
+    },
+    "outgoing_update_count": {
+      "description": "The number of update transactions sent during the chronological sync.",
+      "type": "integer"
+    },
+    "outgoing_delete_count": {
+      "description": "The number of delete transactions sent during the chronological sync.",
+      "type": "integer"
+    },
+    "treat_problem": {
+      "description": "Whether the treat problem mechanism needed to perform any operations with the server, and for which reason.",
+      "type": "string",
+      "enum": [
+        "download",
+        "not_needed",
+        "upload",
+        "upload_and_download"
+      ]
+    },
+    "error": {
+      "type": "object",
+      "description": "Deprecated, use unnested fields. error_name, error_step and error_description",
+      "deprecated": true,
+      "properties": {
+        "step": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/error_step"
+        },
+        "name": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/error_name"
+        },
+        "description": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/error_description"
+        }
+      },
+      "required": [
+        "name",
+        "step"
+      ],
+      "additionalProperties": false
+    },
+    "error_step": {
+      "description": "The step during which the sync failed.",
+      "type": "string",
+      "enum": [
+        "chronological",
+        "deduplicate",
+        "sharing",
+        "treat_problem"
+      ]
+    },
+    "error_name": {
+      "description": "The name of error which occurred.",
+      "type": "string",
+      "enum": [
+        "authentication",
+        "data_processing",
+        "database",
+        "download",
+        "http_io",
+        "http_status",
+        "item_group_invalid_group_accept_signature",
+        "item_group_invalid_group_propose_signature",
+        "item_group_invalid_key",
+        "item_group_invalid_user_accept_signature",
+        "item_group_invalid_user_propose_signature",
+        "item_group_no_access",
+        "memory",
+        "other",
+        "response_content",
+        "upload"
+      ]
+    },
+    "error_description": {
+      "description": "Additional platform specific information on the error.",
+      "type": "string",
+      "enum": [
+        "no_network"
+      ]
+    },
+    "deduplicates": {
+      "description": "The number of duplicate items which were removed from the user's vault during the sync.",
+      "type": "integer"
+    },
+    "item_group_id": {
+      "description": "unique identifier for a sharing item group, default to {00000000-0000-0000-A000-000000000000}",
+      "type": "string",
+      "pattern": "^\\{?[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}\\}?"
+    }
+  }
+}

@@ -14,12 +14,12 @@ import com.dashlane.ui.widgets.compose.IndeterminateLoading
 internal fun CollectionLoading() {
     Box(
         modifier = Modifier.padding(32.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         IndeterminateLoading(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(48.dp),
         )
     }
 }

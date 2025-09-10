@@ -10,17 +10,17 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.api.databinding.IncludeGeneratePasswordBinding
 import com.dashlane.password.generator.PasswordGeneratorCriteria
+import com.dashlane.password.generator.ui.PasswordGeneratorConfigurationView
+import com.dashlane.password.generator.utils.PasswordScrambler
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.passwordstrength.borderColorRes
 import com.dashlane.passwordstrength.getShortTitle
 import com.dashlane.passwordstrength.isSafeEnoughForSpecialMode
-import com.dashlane.ui.PasswordGeneratorConfigurationView
 import com.dashlane.ui.widgets.view.tintProgressDrawable
 import com.dashlane.util.animation.fadeIn
 import com.dashlane.util.animation.fadeOut
 import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.setProgressDrawablePrimaryTrack
-import com.dashlane.utils.PasswordScrambler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -88,7 +88,7 @@ class GeneratePasswordViewProxy(
             title = title,
             color = borderColor,
             strength = strength,
-            safeEnoughForSpecialMode = safeEnoughForSpecialMode
+            safeEnoughForSpecialMode = safeEnoughForSpecialMode,
         )
     }
 

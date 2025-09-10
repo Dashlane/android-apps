@@ -8,13 +8,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
 import com.dashlane.core.domain.sharing.toUserPermission
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.HeaderItem
-import com.dashlane.ui.adapter.util.populateItemsAsync
 import com.dashlane.ui.dialogs.fragment.sharing.confirmation.SharingConfirmationDialogCancelInvite
 import com.dashlane.ui.dialogs.fragment.sharing.confirmation.SharingConfirmationDialogRevoke
 import com.dashlane.ui.dialogs.fragment.sharing.contextual.PopupMenuManageUserAccepted
 import com.dashlane.ui.dialogs.fragment.sharing.contextual.PopupMenuManageUserPending
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.HeaderItem
+import com.dashlane.ui.legacy.recyclerview.util.populateItemsAsync
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingBaseViewProxy
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
@@ -32,7 +32,6 @@ class SharingUsersForItemViewProxy(
     view: View,
     private val viewModel: SharingUsersForItemViewModelContract,
 ) : SharingBaseViewProxy(fragment, view) {
-
     init {
         refreshLayout.setup {
             viewModel.pullToRefresh()
@@ -59,11 +58,11 @@ class SharingUsersForItemViewProxy(
 
         fragment.apply {
             setFragmentResultListener(
-                SharingConfirmationDialogCancelInvite.REQUEST_KEY
+                SharingConfirmationDialogCancelInvite.REQUEST_KEY,
             ) { _, bundle ->
                 viewModel.onCancelInvite(
                     bundle.getString(SharingConfirmationDialogCancelInvite.CANCEL_ITEM_GROUP_ID)!!,
-                    bundle.getString(SharingConfirmationDialogCancelInvite.CANCEL_FOR_USER_ID)!!
+                    bundle.getString(SharingConfirmationDialogCancelInvite.CANCEL_FOR_USER_ID)!!,
                 )
             }
             setFragmentResultListener(SharingConfirmationDialogRevoke.REQUEST_KEY) { _, bundle ->
@@ -84,7 +83,7 @@ class SharingUsersForItemViewProxy(
         toolbar?.title = when (summaryObject) {
             is SummaryObject.Authentifiant ->
                 summaryObject.title
-                ?: summaryObject.urlForGoToWebsite?.getUrlDisplayName
+                    ?: summaryObject.urlForGoToWebsite?.getUrlDisplayName
             is SummaryObject.SecureNote -> summaryObject.title
             else -> null
         }
@@ -100,7 +99,7 @@ class SharingUsersForItemViewProxy(
                         },
                         onAcceptedMenuClick = { view, item ->
                             showManageSharingContactAcceptedForUser(view, item)
-                        }
+                        },
                     )
                 }.sortedWith(SharingContactItem.comparator())
 
@@ -115,7 +114,7 @@ class SharingUsersForItemViewProxy(
                     },
                     onAcceptedMenuClick = { view, item ->
                         showManageSharingContactAcceptedForUserGroup(view, item)
-                    }
+                    },
                 )
             }.sortedWith(SharingContactItem.comparator())
 
@@ -136,7 +135,7 @@ class SharingUsersForItemViewProxy(
                 .takeIf { it != -1 }?.also {
                     add(
                         it,
-                        HeaderItem(context.getString(R.string.sharing_center_label_individuals))
+                        HeaderItem(context.getString(R.string.sharing_center_label_individuals)),
                     )
                 }
 
@@ -149,7 +148,7 @@ class SharingUsersForItemViewProxy(
 
     private fun showManageSharingContactPendingForUserGroup(
         view: View,
-        sharedItem: SharingModels.ItemUserGroup
+        sharedItem: SharingModels.ItemUserGroup,
     ) {
         val dialog = PopupMenuManageUserPending(
             context,
@@ -159,19 +158,19 @@ class SharingUsersForItemViewProxy(
                 SharingConfirmationDialogCancelInvite.newInstanceForUserGroup(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.groupId
+                    sharedItem.groupId,
                 ).show(fragmentManager, SharingConfirmationDialogCancelInvite.TAG)
             },
             onResendInvite = {
                 viewModel.onResendInvite(sharedItem.itemGroup, sharedItem.groupId)
-            }
+            },
         )
         dialog.show()
     }
 
     private fun showManageSharingContactPendingForUser(
         view: View,
-        sharedItem: SharingModels.ItemUser
+        sharedItem: SharingModels.ItemUser,
     ) {
         val dialog = PopupMenuManageUserPending(
             context,
@@ -181,19 +180,19 @@ class SharingUsersForItemViewProxy(
                 SharingConfirmationDialogCancelInvite.newInstanceForUser(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.userId
+                    sharedItem.userId,
                 ).show(fragmentManager, SharingConfirmationDialogCancelInvite.TAG)
             },
             onResendInvite = {
                 viewModel.onResendInvite(sharedItem.itemGroup, sharedItem.userId)
-            }
+            },
         )
         dialog.show()
     }
 
     private fun showManageSharingContactAcceptedForUser(
         view: View,
-        sharedItem: SharingModels.ItemUser
+        sharedItem: SharingModels.ItemUser,
     ) {
         val dialog = PopupMenuManageUserAccepted(
             context,
@@ -204,23 +203,23 @@ class SharingUsersForItemViewProxy(
                 SharingConfirmationDialogRevoke.newInstanceForUser(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.userId
+                    sharedItem.userId,
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {
                 viewModel.onChangePermission(
                     sharedItem.itemGroup,
                     it.toUserPermission(),
-                    sharedItem.userId
+                    sharedItem.userId,
                 )
-            }
+            },
         )
         dialog.show()
     }
 
     private fun showManageSharingContactAcceptedForUserGroup(
         view: View,
-        sharedItem: SharingModels.ItemUserGroup
+        sharedItem: SharingModels.ItemUserGroup,
     ) {
         val dialog = PopupMenuManageUserAccepted(
             context,
@@ -231,16 +230,16 @@ class SharingUsersForItemViewProxy(
                 SharingConfirmationDialogRevoke.newInstanceForUserGroup(
                     context,
                     sharedItem.itemGroup.groupId,
-                    sharedItem.groupId
+                    sharedItem.groupId,
                 ).show(fragmentManager, SharingConfirmationDialogRevoke.TAG)
             },
             onChangePermission = {
                 viewModel.onChangePermissionUserGroup(
                     sharedItem.itemGroup,
                     it.toUserPermission(),
-                    sharedItem.groupId
+                    sharedItem.groupId,
                 )
-            }
+            },
         )
         dialog.show()
     }

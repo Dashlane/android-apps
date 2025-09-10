@@ -13,7 +13,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotificationCenterFragment : AbstractContentFragment() {
-
     @Inject
     lateinit var dataProvider: NotificationCenterDataProvider
 
@@ -23,7 +22,7 @@ class NotificationCenterFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         this.setCurrentPageView(AnyPage.NOTIFICATION_HOME)
         super.onCreateView(inflater, container, savedInstanceState)

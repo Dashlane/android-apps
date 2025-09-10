@@ -21,7 +21,6 @@ import com.dashlane.hermes.generated.events.user.DownloadVpnClient
 import javax.inject.Inject
 
 class VpnThirdPartyLogger @Inject constructor(private val hermesLogRepository: LogRepository) {
-
     fun logViewPaywall() =
         hermesLogRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.PAYWALL_VPN)
 
@@ -41,15 +40,15 @@ class VpnThirdPartyLogger @Inject constructor(private val hermesLogRepository: L
                 field = Field.EMAIL,
                 itemId = ItemId(id = itemId),
                 itemType = ItemType.CREDENTIAL,
-                isProtected = false
-            )
+                isProtected = false,
+            ),
         )
         hermesLogRepository.queueEvent(
             CopyVaultItemFieldAnonymous(
                 field = Field.EMAIL,
                 itemType = ItemType.CREDENTIAL,
-                domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
-            )
+                domain = Domain(Sha256Hash.of(domain), DomainType.WEB),
+            ),
         )
     }
 
@@ -59,15 +58,15 @@ class VpnThirdPartyLogger @Inject constructor(private val hermesLogRepository: L
                 field = Field.PASSWORD,
                 itemId = ItemId(id = itemId),
                 itemType = ItemType.CREDENTIAL,
-                isProtected = false
-            )
+                isProtected = false,
+            ),
         )
         hermesLogRepository.queueEvent(
             CopyVaultItemFieldAnonymous(
                 field = Field.PASSWORD,
                 itemType = ItemType.CREDENTIAL,
-                domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
-            )
+                domain = Domain(Sha256Hash.of(domain), DomainType.WEB),
+            ),
         )
     }
 

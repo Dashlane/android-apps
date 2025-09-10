@@ -29,7 +29,8 @@ fun SyncObject.SecureNoteType?.getColorId(): Int {
         SyncObject.SecureNoteType.GREEN -> R.color.securenote_color_green
         SyncObject.SecureNoteType.ORANGE -> R.color.securenote_color_orange
         SyncObject.SecureNoteType.NO_TYPE,
-        null -> R.color.securenote_color_gray
+        null,
+        -> R.color.securenote_color_gray
     }
 }
 
@@ -59,6 +60,6 @@ fun getSecureNoteTypeDeprecatedDatabaseOrder(): List<SyncObject.SecureNoteType> 
         SyncObject.SecureNoteType.GREEN,
         SyncObject.SecureNoteType.ORANGE,
         SyncObject.SecureNoteType.YELLOW,
-        SyncObject.SecureNoteType.GRAY
+        SyncObject.SecureNoteType.GRAY,
     )
 }

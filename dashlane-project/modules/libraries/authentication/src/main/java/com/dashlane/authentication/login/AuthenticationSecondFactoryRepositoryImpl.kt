@@ -5,24 +5,24 @@ import com.dashlane.authentication.AuthenticationException
 import com.dashlane.authentication.AuthenticationInvalidTokenException
 import com.dashlane.authentication.AuthenticationLockedOutException
 import com.dashlane.authentication.AuthenticationOfflineException
-import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.AuthenticationSecondFactorFailedException
 import com.dashlane.authentication.AuthenticationTimeoutException
 import com.dashlane.authentication.AuthenticationUnknownException
-import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.UserStorage
 import com.dashlane.authentication.toAuthenticationException
 import com.dashlane.authentication.toRegisteredUserDevice
 import com.dashlane.cryptography.EncryptedBase64String
 import com.dashlane.cryptography.asEncryptedBase64
+import com.dashlane.data.login.AuthenticationSecondFactor
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SecurityFeature
 import com.dashlane.server.api.ConnectivityCheck
 import com.dashlane.server.api.endpoints.account.SharingKeys
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationAuthTicketService
-import com.dashlane.server.api.endpoints.authentication.AuthSendEmailTokenService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationEmailTokenService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationU2fService
+import com.dashlane.server.api.endpoints.authentication.CompleteDeviceRegistrationWithAuthTicketService
+import com.dashlane.server.api.endpoints.authentication.PerformEmailTokenVerificationService
+import com.dashlane.server.api.endpoints.authentication.PerformU2FVerificationService
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
+import com.dashlane.server.api.endpoints.authentication.RequestEmailTokenVerificationService
 import com.dashlane.server.api.endpoints.authentication.exceptions.AccountBlockedContactSupportException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceDeactivatedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceNotFoundException
@@ -37,28 +37,28 @@ import com.dashlane.server.api.endpoints.authentication.exceptions.VerificationT
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.exceptions.DashlaneApiHttp400BusinessException
 import com.dashlane.server.api.time.toInstant
-import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Instant
 
 class AuthenticationSecondFactoryRepositoryImpl(
     private val userStorage: UserStorage,
-    private val sendEmailTokenService: AuthSendEmailTokenService,
+    private val sendEmailTokenService: RequestEmailTokenVerificationService,
     private val connectivityCheck: ConnectivityCheck,
-    private val authTicketHelper: AuthenticationAuthTicketHelper
+    private val authTicketHelper: AuthenticationAuthTicketHelper,
 ) : AuthenticationSecondFactoryRepository {
     override suspend fun validate(
         emailToken: AuthenticationSecondFactor.EmailToken,
-        value: String
+        value: String,
     ): AuthenticationSecondFactoryRepository.ValidationResult =
         withContext(Dispatchers.Default) { validateImpl(value, emailToken) }
 
     private suspend fun validateImpl(
         value: String,
-        emailToken: AuthenticationSecondFactor.EmailToken
+        emailToken: AuthenticationSecondFactor.EmailToken,
     ): AuthenticationSecondFactoryRepository.ValidationResult {
         val token = try {
-            AuthVerificationEmailTokenService.Request.Token(value)
+            PerformEmailTokenVerificationService.Request.Token(value)
         } catch (e: IllegalArgumentException) {
             throw AuthenticationInvalidTokenException(cause = e)
         }
@@ -83,31 +83,29 @@ class AuthenticationSecondFactoryRepositoryImpl(
                 login = login,
                 securityFeatures = emailToken.securityFeatures,
                 encryptedSettings = encryptedSettings,
-                settingsDate = settingsDate
+                settingsDate = settingsDate,
             ),
-            authTicket = authTicket
+            authTicket = authTicket,
         )
-        
-        
     }
 
     private suspend fun registerDeviceWithToken(
         login: String,
-        token: AuthVerificationEmailTokenService.Request.Token
+        token: PerformEmailTokenVerificationService.Request.Token,
     ) = authTicketHelper.verifyEmailToken(
         login = login,
-        token = token
+        token = token,
     ).run { authTicket to registerDevice() }
 
     override suspend fun validate(
         totp: AuthenticationSecondFactor.Totp,
-        value: String
+        value: String,
     ): AuthenticationSecondFactoryRepository.ValidationResult =
         withContext(Dispatchers.Default) {
             TotpStrategy().validate(
                 totp.login,
                 totp.securityFeatures,
-                value
+                value,
             )
         }
 
@@ -115,28 +113,28 @@ class AuthenticationSecondFactoryRepositoryImpl(
         u2f: AuthenticationSecondFactor.U2f,
         challenge: String,
         signature: String,
-        clientData: String
+        clientData: String,
     ): AuthenticationSecondFactoryRepository.ValidationResult =
         withContext(Dispatchers.Default) {
             U2fStrategy().validate(
                 u2f.login,
                 u2f.securityFeatures,
-                AuthVerificationU2fService.Request.ChallengeAnswer(
+                PerformU2FVerificationService.Request.ChallengeAnswer(
                     challenge = challenge,
                     signatureData = signature,
-                    clientData = clientData
-                )
+                    clientData = clientData,
+                ),
             )
         }
 
     override suspend fun validate(
-        duoPush: AuthenticationSecondFactor.DuoPush
+        duoPush: AuthenticationSecondFactor.DuoPush,
     ): AuthenticationSecondFactoryRepository.ValidationResult =
         withContext(Dispatchers.Default) {
             DuoPushStrategy().validate(
                 duoPush.login,
                 duoPush.securityFeatures,
-                Unit
+                Unit,
             )
         }
 
@@ -147,9 +145,9 @@ class AuthenticationSecondFactoryRepositoryImpl(
         val login = emailToken.login
         try {
             sendEmailTokenService.execute(
-                AuthSendEmailTokenService.Request(
-                    login = login
-                )
+                RequestEmailTokenVerificationService.Request(
+                    login = login,
+                ),
             )
         } catch (e: TwofaEmailTokenNotEnabledException) {
             throw AuthenticationAccountConfigurationChangedException(cause = e)
@@ -162,7 +160,7 @@ class AuthenticationSecondFactoryRepositoryImpl(
         suspend fun validate(
             login: String,
             securityFeatures: Set<SecurityFeature>,
-            verification: VerificationT
+            verification: VerificationT,
         ): AuthenticationSecondFactoryRepository.ValidationResult {
             val userDevice = userStorage.getUser(login)
             return if (userDevice == null) {
@@ -185,12 +183,11 @@ class AuthenticationSecondFactoryRepositoryImpl(
                         login = login,
                         securityFeatures = securityFeatures,
                         encryptedSettings = encryptedSettings,
-                        settingsDate = settingsDate
+                        settingsDate = settingsDate,
                     ),
-                    authTicket = authTicket
+                    authTicket = authTicket,
                 )
             } else {
-                
                 if (connectivityCheck.isOffline) {
                     throw AuthenticationOfflineException()
                 }
@@ -203,10 +200,8 @@ class AuthenticationSecondFactoryRepositoryImpl(
                 }
                 AuthenticationSecondFactoryRepository.ValidationResult(
                     registeredUserDevice = userDevice.toRegisteredUserDevice(responseData.serverKey),
-                    authTicket = authTicket
+                    authTicket = authTicket,
                 )
-                
-                
             }
         }
 
@@ -216,7 +211,8 @@ class AuthenticationSecondFactoryRepositoryImpl(
                 is DeviceDeactivatedException,
                 is DeviceNotFoundException,
                 is VerificationMethodDisabledException,
-                is UserNotFoundException -> AuthenticationAccountConfigurationChangedException(cause = this)
+                is UserNotFoundException,
+                -> AuthenticationAccountConfigurationChangedException(cause = this)
 
                 is DashlaneApiHttp400BusinessException -> toError()
                 else -> toAuthenticationException()
@@ -226,56 +222,53 @@ class AuthenticationSecondFactoryRepositoryImpl(
 
         protected abstract suspend fun verify(
             login: String,
-            verification: VerificationT
+            verification: VerificationT,
         ): AuthenticationAuthTicketHelper.VerificationResult
     }
 
     private inner class TotpStrategy : SecondFactorStrategy<String>() {
-
         override fun DashlaneApiHttp400BusinessException.toError() =
             toTotpError()
 
         override suspend fun verify(
             login: String,
-            verification: String
+            verification: String,
         ) = authTicketHelper.verifyTotp(
             login = login,
-            otp = verification
+            otp = verification,
         )
     }
 
     private inner class U2fStrategy :
-        SecondFactorStrategy<AuthVerificationU2fService.Request.ChallengeAnswer>() {
-
+        SecondFactorStrategy<PerformU2FVerificationService.Request.ChallengeAnswer>() {
         override fun DashlaneApiHttp400BusinessException.toError() =
             AuthenticationUnknownException(cause = this)
 
         override suspend fun verify(
             login: String,
-            verification: AuthVerificationU2fService.Request.ChallengeAnswer
+            verification: PerformU2FVerificationService.Request.ChallengeAnswer,
         ) = authTicketHelper.verifyU2f(
             login = login,
-            challengeAnswer = verification
+            challengeAnswer = verification,
         )
     }
 
     private inner class DuoPushStrategy : SecondFactorStrategy<Unit>() {
-
         override fun DashlaneApiHttp400BusinessException.toError() =
             toDuoPushError()
 
         override suspend fun verify(
             login: String,
-            verification: Unit
+            verification: Unit,
         ) = authTicketHelper.verifyDuoPush(login)
     }
 }
 
-private fun AuthRegistrationAuthTicketService.Data.toRegisteredUserDevice(
+private fun CompleteDeviceRegistrationWithAuthTicketService.Data.toRegisteredUserDevice(
     login: String,
     securityFeatures: Set<SecurityFeature>,
     encryptedSettings: String,
-    settingsDate: Instant
+    settingsDate: Instant,
 ) = RegisteredUserDevice.Remote(
     login = login,
     securityFeatures = securityFeatures,
@@ -290,23 +283,24 @@ private fun AuthRegistrationAuthTicketService.Data.toRegisteredUserDevice(
     registeredDeviceCount = numberOfDevices,
     deviceAnalyticsId = deviceAnalyticsId,
     userAnalyticsId = userAnalyticsId,
-    encryptedRemoteKey = remoteKeys?.findByTypeOrNull(RemoteKey.Type.MASTER_PASSWORD)
+    encryptedRemoteKey = remoteKeys?.findByTypeOrNull(RemoteKey.Type.MASTER_PASSWORD),
 )
 
 internal fun SharingKeys.toRegisteredDeviceSharingKeys() =
     RegisteredUserDevice.Remote.SharingKeys(
         publicKey = publicKey,
-        encryptedPrivateKey = privateKey
+        encryptedPrivateKey = privateKey,
     )
 
 private suspend fun DashlaneApiHttp400BusinessException.toEmailTokenError(
     emailToken: AuthenticationSecondFactor.EmailToken,
-    resendToken: suspend (AuthenticationSecondFactor.EmailToken) -> Unit
+    resendToken: suspend (AuthenticationSecondFactor.EmailToken) -> Unit,
 ): AuthenticationException =
     when (this) {
         is VerificationFailedException -> AuthenticationInvalidTokenException(cause = this)
         is VerificationRequiresRequestException,
-        is VerificationTimeoutException -> {
+        is VerificationTimeoutException,
+        -> {
             
             try {
                 resendToken(emailToken)
@@ -317,7 +311,7 @@ private suspend fun DashlaneApiHttp400BusinessException.toEmailTokenError(
         }
 
         is VerificationMethodDisabledException -> AuthenticationAccountConfigurationChangedException(
-            cause = this
+            cause = this,
         )
 
         is AccountBlockedContactSupportException -> AuthenticationLockedOutException(cause = this)

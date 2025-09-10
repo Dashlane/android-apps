@@ -1,134 +1,86 @@
 package com.dashlane.autofill.phishing
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.autofill.formdetector.model.ApplicationFormSource
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
-import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProvider
-import com.dashlane.vault.model.getUrlDisplayName
+import com.dashlane.autofill.linkservices.model.FormSourcesDataProvider
+import com.dashlane.autofill.phishing.PhishingWarningState.SideEffect
+import com.dashlane.autofill.phishing.PhishingWarningState.ViewState
+import com.dashlane.hermes.generated.definitions.PhishingRisk
+import com.dashlane.inappautofill.AutofillPhishingLogger
+import com.dashlane.mvvm.MutableViewStateFlow
+import com.dashlane.mvvm.ViewStateFlow
+import com.dashlane.util.toRootUrlDomain
+import com.dashlane.vault.model.urlDomain
+import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PhishingWarningViewModel @Inject constructor(
-    private val phishingWarningDataProvider: PhishingWarningDataProvider,
+    private val phishingWarningRepository: PhishingWarningRepository,
     private val formSourceDataProvider: FormSourcesDataProvider,
+    private val autoFillDatabaseAccess: AutofillAnalyzerDef.DatabaseAccess,
     private val logger: AutofillPhishingLogger,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val hintSummary: AutoFillHintSummary? = savedStateHandle[EXTRA_PHISHING_HINT_SUMMARY]
-    private val itemId: String? = savedStateHandle[EXTRA_PHISHING_ITEM_ID]
-    private val phishingAttemptLevel: PhishingAttemptLevel = savedStateHandle[EXTRA_PHISHING_LEVEL]
-        ?: PhishingAttemptLevel.NONE
-    private val website = hintSummary?.webDomain?.getUrlDisplayName
-    private val isNativeApp = hintSummary?.formSource is ApplicationFormSource
-    private val packageName = hintSummary?.packageName
+    private val viewStateFlow = MutableViewStateFlow<ViewState, SideEffect>(ViewState.Initial)
+    val state: ViewStateFlow<ViewState, SideEffect> = viewStateFlow
 
-    private val _uiState = MutableStateFlow<UiState>(
-        UiState.Initial(
-            Data(
-                rememberChecked = false,
-                website = website,
-                itemWebsite = savedStateHandle[EXTRA_PHISHING_ITEM_WEBSITE],
-                isAlreadyRemembered = phishingWarningDataProvider.isWebsiteIgnored(website),
-                phishingAttemptLevel = phishingAttemptLevel
-            )
-        )
-    )
-    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-
-    fun toggleRemember() {
-        _uiState.tryEmit(UiState.Initial(_uiState.value.data.copy(rememberChecked = _uiState.value.data.rememberChecked.not())))
+    fun onViewStarted(itemId: String, webFormSource: WebDomainFormSource) {
+        viewModelScope.launch {
+            autoFillDatabaseAccess.loadSummary<SummaryObject.Authentifiant>(itemId)
+                ?.let { summaryItem ->
+                    phishingWarningRepository.updateData(
+                        webFormSource = webFormSource,
+                        summaryItem = summaryItem,
+                    )
+                    viewStateFlow.emit(
+                        ViewState.Loaded(
+                            itemWebsite = formatWebsiteForUi(summaryItem.urlDomain),
+                            suspiciousWebsite = formatWebsiteForUi(webFormSource.webDomain),
+                        ),
+                    )
+                }
+        }
     }
 
-    fun dismiss(origin: PhishingWarningOrigin) {
-        when (origin) {
-            PhishingWarningOrigin.PHISHING_WARNING -> {
-                if (_uiState.value.data.rememberChecked && packageName != null) {
-                    logger.onSuggestAutoFillRiskToNone(
-                        isNativeApp = isNativeApp,
-                        packageName = packageName,
-                    )
-                    logger.onDismissAutoFill(
-                        isNativeApp = isNativeApp,
-                        packageName = packageName,
-                        trust = true,
-                    )
-                }
-                saveRememberWebsite(linkWebsite = false)
-            }
-            PhishingWarningOrigin.AUTOFILL_PHISHING_WARNING -> {
-                if (packageName != null) {
-                    logger.onDismissAutoFill(
-                        isNativeApp = isNativeApp,
-                        packageName = packageName,
-                        trust = false,
-                    )
-                }
+    fun dismiss() {
+        viewModelScope.launch {
+            phishingWarningRepository.getData()?.let { (webFormSource, _) ->
+                logger.onDismissAutoFill(autoFillFormSource = webFormSource, trust = false)
+                viewStateFlow.send(SideEffect.OnResult(shouldAutofill = false))
             }
         }
     }
 
-    fun trustWebsite() {
-        if (packageName != null) {
-            logger.onAcceptAutoFillRisk(
-                isNativeApp = isNativeApp,
-                packageName = packageName,
-                phishingAttemptLevel = phishingAttemptLevel,
-            )
-            if (_uiState.value.data.rememberChecked) {
-                logger.onDismissAutoFill(
-                    isNativeApp = isNativeApp,
-                    packageName = packageName,
-                    trust = true,
+    fun trustAndAllowAutofill() {
+        viewModelScope.launch {
+            phishingWarningRepository.getData()?.let { (webFormSource, summaryItem) ->
+                logger.onAcceptAutoFillRisk(
+                    autoFillFormSource = webFormSource,
+                    phishingRisk = PhishingRisk.NONE,
+                )
+                saveRememberWebsite(
+                    summaryItem = summaryItem,
+                    webFormSource = webFormSource,
                 )
             }
         }
-
-        saveRememberWebsite(linkWebsite = true)
     }
 
-    private fun saveRememberWebsite(linkWebsite: Boolean) = viewModelScope.launch {
-        if (_uiState.value.data.rememberChecked) {
-            phishingWarningDataProvider.addPhishingWebsiteIgnored(website)
-            if (linkWebsite && itemId != null && website != null) {
-                
-                formSourceDataProvider.link(WebDomainFormSource("", website), itemId)
-            }
-        }
-        _uiState.tryEmit(UiState.DataSaved(_uiState.value.data))
+    private suspend fun saveRememberWebsite(
+        summaryItem: SummaryObject.Authentifiant,
+        webFormSource: WebDomainFormSource,
+    ) {
+        
+        formSourceDataProvider.link(formSource = webFormSource, authentifiantId = summaryItem.id)
+
+        viewStateFlow.send(SideEffect.OnResult(shouldAutofill = true))
     }
 
-    sealed class UiState {
-        abstract val data: Data
-
-        data class Initial(override val data: Data) : UiState()
-        data class DataSaved(override val data: Data) : UiState()
-    }
-
-    data class Data(
-        val rememberChecked: Boolean,
-        val website: String?,
-        val itemWebsite: String?,
-        val isAlreadyRemembered: Boolean,
-        val phishingAttemptLevel: PhishingAttemptLevel
-    )
-
-    enum class PhishingWarningOrigin {
-        PHISHING_WARNING,
-        AUTOFILL_PHISHING_WARNING,
-    }
-
-    companion object {
-        const val EXTRA_PHISHING_HINT_SUMMARY = "EXTRA_PHISHING_HINT_SUMMARY"
-        const val EXTRA_PHISHING_ITEM_WEBSITE = "EXTRA_PHISHING_ITEM_WEBSITE"
-        const val EXTRA_PHISHING_ITEM_ID = "EXTRA_PHISHING_ITEM_ID"
-        const val EXTRA_PHISHING_LEVEL = "EXTRA_PHISHING_LEVEL"
+    private fun formatWebsiteForUi(url: String?): String {
+        return url?.toRootUrlDomain()?.toString() ?: ""
     }
 }

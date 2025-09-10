@@ -4,26 +4,26 @@ import androidx.annotation.VisibleForTesting
 import com.dashlane.preference.PreferenceEntry
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.Authorization
-import com.dashlane.server.api.endpoints.abtesting.AbTestingUserExperimentsService
+import com.dashlane.server.api.endpoints.abtesting.GetAndEvaluateForUserService
 import com.dashlane.user.Username
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class RemoteAbTestManager @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
     private val preferencesManager: PreferencesManager,
-    private val service: AbTestingUserExperimentsService,
+    private val getAndEvaluateForUserService: GetAndEvaluateForUserService,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : RemoteConfiguration {
     private val refreshMutex = Mutex()
@@ -69,10 +69,10 @@ class RemoteAbTestManager @Inject constructor(
             setLastSuccessfulRefreshTime(authorization.login, System.currentTimeMillis())
             return@withContext
         }
-        val request = AbTestingUserExperimentsService.Request(ALL_TESTS.map { it.name })
+        val request = GetAndEvaluateForUserService.Request(ALL_TESTS.map { it.name })
 
         
-        val response = service.execute(authorization, request)
+        val response = getAndEvaluateForUserService.execute(authorization, request)
         val content = response.data.abTests
 
         
@@ -84,8 +84,8 @@ class RemoteAbTestManager @Inject constructor(
 
     @VisibleForTesting
     internal fun prepareUpdateList(
-        content: List<AbTestingUserExperimentsService.Data.AbTest>,
-        allKnownTests: Array<Test>
+        content: List<GetAndEvaluateForUserService.Data.AbTest>,
+        allKnownTests: Array<Test>,
     ): List<AbTestStatus> {
         return allKnownTests.map { currentTest ->
             getVariantIfEligibleForTest(currentTest, content)
@@ -94,14 +94,13 @@ class RemoteAbTestManager @Inject constructor(
 
     private fun getVariantIfEligibleForTest(
         currentTest: Test,
-        content: List<AbTestingUserExperimentsService.Data.AbTest>
-    ):
-        AbTestStatus {
+        content: List<GetAndEvaluateForUserService.Data.AbTest>,
+    ): AbTestStatus {
         val resultForThisTest = content.firstOrNull { it.name == currentTest.name }
             ?: return AbTestStatus(
                 currentTest.name,
                 null,
-                null
+                null,
             )
         val availableVariants = currentTest.variants.map { it.name }
 
@@ -109,13 +108,13 @@ class RemoteAbTestManager @Inject constructor(
             AbTestStatus(
                 currentTest.name,
                 resultForThisTest.variant,
-                resultForThisTest.version.toInt()
+                resultForThisTest.version.toInt(),
             )
         } else {
             AbTestStatus(
                 currentTest.name,
                 null,
-                null
+                null,
             )
         }
     }

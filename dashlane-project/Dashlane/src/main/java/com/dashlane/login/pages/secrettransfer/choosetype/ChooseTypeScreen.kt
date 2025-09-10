@@ -65,7 +65,7 @@ fun ChooseTypeScreen(
         modifier = modifier,
         onComputerClicked = viewModel::computerClicked,
         onMobileClicked = viewModel::mobileClicked,
-        onHelpClicked = viewModel::helpClicked
+        onHelpClicked = viewModel::helpClicked,
     )
 }
 
@@ -74,13 +74,13 @@ fun ChooseTypeContent(
     modifier: Modifier = Modifier,
     onComputerClicked: () -> Unit,
     onMobileClicked: () -> Unit,
-    onHelpClicked: () -> Unit
+    onHelpClicked: () -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxHeight()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp)
+            .padding(bottom = 18.dp, top = 24.dp, start = 24.dp, end = 24.dp),
     ) {
         DashlaneLogoLockup(height = 40.dp)
         Text(
@@ -88,7 +88,7 @@ fun ChooseTypeContent(
             style = DashlaneTheme.typography.titleSectionLarge,
             color = DashlaneTheme.colors.textNeutralCatchy,
             modifier = Modifier
-                .padding(top = 72.dp)
+                .padding(top = 72.dp),
         )
         ButtonLarge(
             modifier = Modifier
@@ -97,10 +97,10 @@ fun ChooseTypeContent(
             onClick = onComputerClicked,
             layout = ButtonLayout.IconLeading(
                 IconTokens.laptopOutlined,
-                stringResource(R.string.login_secret_transfer_choose_type_computer_button)
+                stringResource(R.string.login_secret_transfer_choose_type_computer_button),
             ),
             mood = Mood.Brand,
-            intensity = Intensity.Quiet
+            intensity = Intensity.Quiet,
         )
         ButtonLarge(
             modifier = Modifier
@@ -109,10 +109,10 @@ fun ChooseTypeContent(
             onClick = onMobileClicked,
             layout = ButtonLayout.IconLeading(
                 IconTokens.itemPhoneMobileOutlined,
-                stringResource(R.string.login_secret_transfer_choose_type_mobile_button)
+                stringResource(R.string.login_secret_transfer_choose_type_mobile_button),
             ),
             mood = Mood.Brand,
-            intensity = Intensity.Quiet
+            intensity = Intensity.Quiet,
         )
         Spacer(modifier = Modifier.weight(1.0f))
         ButtonMedium(
@@ -122,8 +122,8 @@ fun ChooseTypeContent(
             onClick = onHelpClicked,
             intensity = Intensity.Quiet,
             layout = ButtonLayout.TextOnly(
-                text = stringResource(id = R.string.login_secret_transfer_choose_type_recovery_button)
-            )
+                text = stringResource(id = R.string.login_secret_transfer_choose_type_recovery_button),
+            ),
         )
     }
 }
@@ -135,7 +135,7 @@ private fun ChooseTypeContentPreview() {
         ChooseTypeContent(
             onComputerClicked = { },
             onMobileClicked = { },
-            onHelpClicked = { }
+            onHelpClicked = { },
         )
     }
 }

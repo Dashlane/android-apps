@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/antiphishing_display_alert.json",
+  "type": "object",
+  "description": "Sent when the Antiphishing alert has been shown and completed prediction and scraping.",
+  "metas": {
+    "area": "antiphishing"
+  },
+  "properties": {
+    "name": {
+      "const": "antiphishing_display_alert"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "ms_to_alert": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_icon"
+    },
+    "ms_to_prediction": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_icon"
+    },
+    "ms_to_scraping": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_icon"
+    }
+  },
+  "required": [
+    "name",
+    "domain",
+    "ms_to_alert"
+  ],
+  "additionalProperties": false
+}

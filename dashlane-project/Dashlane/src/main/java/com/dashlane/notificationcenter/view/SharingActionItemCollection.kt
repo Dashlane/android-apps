@@ -10,9 +10,9 @@ import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.getUser
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.drawable.CircleDrawable
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 import java.time.Instant
 
 data class SharingActionItemCollection(
@@ -22,7 +22,7 @@ data class SharingActionItemCollection(
     override val actionItemsRepository: NotificationCenterRepository,
     override val section: ActionItemSection = ActionItemSection.SHARING,
     override val type: ActionItemType = ActionItemType.SHARING,
-    override val trackingKey: String = sharing.uuid
+    override val trackingKey: String = sharing.uuid,
 ) : NotificationItem, DiffUtilComparator<SharingActionItemCollection> {
     override val action: NotificationCenterDef.Presenter.() -> Unit = { startSharingRedirection() }
 
@@ -40,12 +40,11 @@ data class SharingActionItemCollection(
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.item_actionitem,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 
     class ViewHolder(val v: View) : ReadStateViewHolder<SharingActionItemCollection>(v) {
-
         private val binding = ItemActionitemBinding.bind(view)
 
         override fun updateView(context: Context, item: SharingActionItemCollection?) {
@@ -54,7 +53,7 @@ data class SharingActionItemCollection(
             updateCollection(getReferrer(item), item.sharing.name)
             binding.date.text = formatDateForNotification(
                 item.firstDisplayedDate.toEpochMilli(),
-                Instant.now().toEpochMilli()
+                Instant.now().toEpochMilli(),
             )
             binding.date.visibility = View.VISIBLE
             binding.title.text =
@@ -65,8 +64,8 @@ data class SharingActionItemCollection(
                     context = context,
                     backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
                     drawableRes = R.drawable.ic_folder_outlined,
-                    drawableTintColorRes = R.color.text_brand_standard
-                )
+                    drawableTintColorRes = R.color.text_brand_standard,
+                ),
             )
         }
 
@@ -80,7 +79,7 @@ data class SharingActionItemCollection(
                 context.getString(
                     R.string.action_item_sharing_invitation_collection_description,
                     referrer,
-                    collectionTitle
+                    collectionTitle,
                 )
         }
     }

@@ -1,27 +1,37 @@
 package com.dashlane.authenticator
 
+import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import com.dashlane.url.registry.UrlDomainRegistry
 import com.dashlane.vault.summary.SummaryObject
 
 interface AuthenticatorBaseViewModelContract {
     val urlDomainRegistry: UrlDomainRegistry
+
     fun getCredentials(): List<SummaryObject.Authentifiant>
+
     fun onSeeAll()
+
     fun onSeeLess()
+
     fun onSetupAuthenticator(activityResultLauncher: ActivityResultLauncher<Unit?>)
+
     fun onOtpSetup(itemId: String, otp: Otp)
+
     fun onSuccessAddOtp(itemId: String?, otp: Otp)
 
     sealed class UserCommand {
         data class OtpSetupCommand(
             val itemId: String,
             val otp: Otp?,
-            val updateModificationDate: Boolean = true
+            val updateModificationDate: Boolean = true,
         ) : UserCommand()
 
         object SeeAllCommand : UserCommand()
+
         object SeeLessCommand : UserCommand()
+
+        data class UriHandledCommand(val uri: Uri) : UserCommand()
     }
 
     companion object {

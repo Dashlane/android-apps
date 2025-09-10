@@ -3,11 +3,15 @@ package com.dashlane.autofill.generatepassword
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.autofill.createaccount.view.CreateAccountDialogFragmentArgs
 import com.dashlane.featureflipping.FeatureFlip
 import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.autofill.createaccount.view.CreateAccountDialogFragmentArgs
 import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.password.generator.PasswordGeneratorCriteria
+import com.dashlane.password.generator.PasswordGeneratorWrapper
+import com.dashlane.passwordstrength.PasswordStrengthEvaluator
+import com.dashlane.passwordstrength.getPasswordStrengthScore
+import com.dashlane.session.SessionManager
 import com.dashlane.url.root
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.useractivity.hermes.TrackingLogUtils
@@ -24,11 +28,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GeneratePasswordViewModel @Inject constructor(
-    private val service: AutofillGeneratePasswordService,
+    private val passwordGeneratorWrapper: PasswordGeneratorWrapper,
+    private val sessionManager: SessionManager,
+    private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
     userFeaturesChecker: UserFeaturesChecker,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val stateFlow =
         MutableStateFlow<GeneratePasswordState>(GeneratePasswordState.Initial(GeneratePasswordData()))
     val uiState = stateFlow.asStateFlow()
@@ -41,7 +46,7 @@ class GeneratePasswordViewModel @Inject constructor(
         userFeaturesChecker.has(FeatureFlip.SPECIAL_PRIDE_MODE).let {
             if (it) {
                 stateFlow.tryEmit(
-                    GeneratePasswordState.Initial(stateFlow.value.data.copy(specialMode = GeneratePasswordSpecialMode.PRIDE))
+                    GeneratePasswordState.Initial(stateFlow.value.data.copy(specialMode = GeneratePasswordSpecialMode.PRIDE)),
                 )
             }
         }
@@ -51,7 +56,7 @@ class GeneratePasswordViewModel @Inject constructor(
         val createAccountArgs = CreateAccountDialogFragmentArgs.fromSavedStateHandle(savedStateHandle)
         domainForLogs = TrackingLogUtils.createDomainForLog(
             createAccountArgs.argsWebpage,
-            createAccountArgs.argsPackageName
+            createAccountArgs.argsPackageName,
         )
     }
 
@@ -59,15 +64,17 @@ class GeneratePasswordViewModel @Inject constructor(
         generateNewPassword(criteria)
     }
 
-    fun generateNewPassword(criteria: PasswordGeneratorCriteria) {
+    fun generateNewPassword(criteria: PasswordGeneratorCriteria? = null) {
         generateNewPasswordJob?.cancel()
         generateNewPasswordJob = viewModelScope.launch {
-            val result = service.generatePassword(criteria)
+            val userId = sessionManager.session?.userId
+            val criteria = criteria ?: passwordGeneratorWrapper.getCriteria(userId)
+            val password = passwordGeneratorWrapper.generatePassword(userId, criteria)
             stateFlow.emit(
                 GeneratePasswordState.PasswordGenerated(
-                    stateFlow.value.data.copy(lastGeneratedPassword = result.password),
-                    result.password
-                )
+                    stateFlow.value.data.copy(lastGeneratedPassword = password),
+                    password,
+                ),
             )
         }
     }
@@ -76,7 +83,7 @@ class GeneratePasswordViewModel @Inject constructor(
         evaluatePasswordJob?.cancel()
         evaluatePasswordJob = viewModelScope.launch {
             val strengthScore = if (password.isNotSemanticallyNull()) {
-                service.evaluatePassword(password)
+                passwordStrengthEvaluator.getPasswordStrengthScore(password)
             } else {
                 null
             }
@@ -86,7 +93,8 @@ class GeneratePasswordViewModel @Inject constructor(
 
     fun onGeneratorConfigurationChanged(criteria: PasswordGeneratorCriteria) {
         generateNewPassword(criteria)
-        service.setPasswordGeneratorDefaultCriteria(criteria)
+        val session = sessionManager.session ?: return
+        passwordGeneratorWrapper.saveCriteria(session.userId, criteria)
     }
 
     fun saveGeneratedPasswordIfUsed(result: VaultItem<SyncObject.Authentifiant>) {
@@ -95,7 +103,7 @@ class GeneratePasswordViewModel @Inject constructor(
             val password = authentifiant.password.toString()
             if (authentifiant.password?.equalsString(uiState.value.data.lastGeneratedPassword) == true) {
                 result.urlForGoToWebsite?.toUrlOrNull()?.root?.let { domain ->
-                    service.saveToPasswordHistory(password, domain, result.uid)
+                    passwordGeneratorWrapper.saveToPasswordHistory(password, domain, result.uid)
                 }
             }
             stateFlow.emit(GeneratePasswordState.PasswordSavedToHistory(stateFlow.value.data, result))

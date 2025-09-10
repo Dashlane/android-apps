@@ -1,11 +1,11 @@
 package com.dashlane.attachment.ui
 
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 
 class AttachmentAdapter : DashlaneRecyclerAdapter<AttachmentItem>() {
-
     interface OnAttachmentListChangesListener {
         fun onItemAdded(item: AttachmentItem)
+
         fun onItemRemoved(item: AttachmentItem)
     }
 

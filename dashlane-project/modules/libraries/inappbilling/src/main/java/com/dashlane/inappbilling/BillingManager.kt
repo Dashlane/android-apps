@@ -1,7 +1,6 @@
 package com.dashlane.inappbilling
 
 interface BillingManager {
-
     fun connect()
 
     fun disconnect()

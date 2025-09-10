@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,16 +38,16 @@ fun VaultBanner(iconToken: IconToken, title: String?, description: String, mood:
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .clickable(
-                indication = rememberRipple(color = mood.textQuiet.value),
-                interactionSource = remember { MutableInteractionSource() }
+                indication = ripple(color = mood.textQuiet.value),
+                interactionSource = remember { MutableInteractionSource() },
             ) { onClick() }
             .padding(12.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.Top,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(
                 modifier = Modifier
@@ -55,7 +55,7 @@ fun VaultBanner(iconToken: IconToken, title: String?, description: String, mood:
                     .size(with(LocalDensity.current) { 16.sp.toDp() }),
                 token = iconToken,
                 contentDescription = null,
-                tint = mood.textStandard
+                tint = mood.textStandard,
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 title?.let {
@@ -73,25 +73,32 @@ private class BannerDataProvider : PreviewParameterProvider<BannerPreviewData> {
     override val values = sequenceOf(
         BannerPreviewData(IconTokens.featureAutofillOutlined, null, "Autofill is not enabled", Mood.Neutral),
         BannerPreviewData(IconTokens.premiumOutlined, null, "5 passwords left in your Free plan.\nUpgrade to Premium", Mood.Brand),
-        BannerPreviewData(IconTokens.premiumOutlined, null, "You’ve reached your Free plan password limit.\nUpgrade to premium", Mood.Warning),
+        BannerPreviewData(
+            IconTokens.premiumOutlined,
+            null,
+            "You’ve reached your Free plan password limit.\nUpgrade to premium",
+            Mood.Warning,
+        ),
         BannerPreviewData(
             IconTokens.feedbackFailOutlined,
             "Your account is read-only",
             "You have over 25 passwords saved. Remove passwords or upgrade to regain" + " full access to your account.",
-            Mood.Danger
+            Mood.Danger,
         ),
     )
 }
 
 @Preview
 @Composable
-private fun VaultBannerPreview(@PreviewParameter(BannerDataProvider::class) bannerContent: BannerPreviewData) {
+private fun VaultBannerPreview(
+    @PreviewParameter(BannerDataProvider::class) bannerContent: BannerPreviewData,
+) {
     DashlanePreview {
         VaultBanner(
             iconToken = bannerContent.iconToken,
             title = bannerContent.title,
             description = bannerContent.description,
-            mood = bannerContent.mood
+            mood = bannerContent.mood,
         ) {}
     }
 }

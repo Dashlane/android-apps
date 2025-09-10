@@ -19,17 +19,17 @@ class SharingPermissionSelectionDialogFragment : NotificationDialogFragment() {
         val sharingPermission = requireArguments().getSerializableCompat<SharingPermission>(ARGS_DEFAULT_PERMISSION)
         val items = arrayOf<CharSequence>(
             getString(SharingPermission.LIMITED.stringResource),
-            getString(SharingPermission.ADMIN.stringResource)
+            getString(SharingPermission.ADMIN.stringResource),
         )
         val checkedItem = if (sharingPermission === SharingPermission.ADMIN) 1 else 0
         val adapter = ArrayAdapter(requireContext(), R.layout.simple_list_item_single_choice, items)
         builder.setSingleChoiceItems(
             adapter,
-            checkedItem
+            checkedItem,
         ) { dialogInterface: DialogInterface, which: Int ->
             setFragmentResult(
                 NewSharePeopleViewProxy.CHANGE_PERMISSION_REQUEST_KEY,
-                bundleOf(CHANGE_PERMISSION_VALUE to if (which == 1) SharingPermission.ADMIN else SharingPermission.LIMITED)
+                bundleOf(CHANGE_PERMISSION_VALUE to if (which == 1) SharingPermission.ADMIN else SharingPermission.LIMITED),
             )
             dialogInterface.dismiss()
         }
@@ -43,7 +43,7 @@ class SharingPermissionSelectionDialogFragment : NotificationDialogFragment() {
         @JvmStatic
         fun newInstance(
             context: Context,
-            defaultPermission: SharingPermission
+            defaultPermission: SharingPermission,
         ): SharingPermissionSelectionDialogFragment {
             return Builder().setArgs(bundleOf(ARGS_DEFAULT_PERMISSION to defaultPermission))
                 .setTitle(context, R.string.sharing_add_group_member_choose_permission)

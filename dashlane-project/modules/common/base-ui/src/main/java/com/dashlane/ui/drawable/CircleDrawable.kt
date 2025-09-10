@@ -18,7 +18,7 @@ object CircleDrawable {
         context: Context,
         @ColorRes backgroundColorRes: Int,
         @DrawableRes drawableRes: Int,
-        @ColorRes drawableTintColorRes: Int
+        @ColorRes drawableTintColorRes: Int,
     ): Drawable {
         val drawable = AppCompatResources.getDrawable(context, drawableRes)
         drawable?.setTint(context.getColor(drawableTintColorRes))
@@ -26,7 +26,11 @@ object CircleDrawable {
     }
 
     @JvmStatic
-    fun with(context: Context, @ColorRes backgroundColorRes: Int, drawable: Drawable?): Drawable {
+    fun with(
+        context: Context,
+        @ColorRes backgroundColorRes: Int,
+        drawable: Drawable?,
+    ): Drawable {
         val circleBackground = ShapeDrawable(OvalShape()).apply {
             paint.isAntiAlias = true
             paint.style = Paint.Style.FILL

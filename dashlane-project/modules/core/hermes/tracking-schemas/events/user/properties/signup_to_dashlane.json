@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/signup_to_dashlane.json",
+  "type": "object",
+  "description": "When a user is invited to join a specific team_id and attempts to finish the employee pre-account creation process.",
+  "metas": {
+    "area": "Account"
+  },
+  "properties": {
+    "name": {
+      "const": "signup_to_dashlane"
+    },
+    "invitation_link_click_origin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/invitation_link_click_origin"
+    },
+    "signup_flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_creation.json#/definitions/signup_flow_step"
+    }
+  },
+  "required": [
+    "name",
+    "invitation_link_click_origin",
+    "signup_flow_step"
+  ],
+  "additionalProperties": false
+}

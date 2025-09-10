@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/register_passkey.json",
+  "type": "object",
+  "description": "When Dashlane suggests the user to register a new passkey on a website.",
+  "metas": {
+    "area": "passkey"
+  },
+  "properties": {
+    "name": {
+      "const": "register_passkey"
+    },
+    "algorithms_supported_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/algorithms_supported_list"
+    },
+    "authenticator_attachment": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_attachment"
+    },
+    "authenticator_resident_key": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_resident_key"
+    },
+    "authenticator_user_verification": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_user_verification"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "is_registered_with_dashlane": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/is_registered_with_dashlane"
+    },
+    "ms_to_complete_registration": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ms_to_complete_registration"
+    },
+    "ms_to_complete_registration_timeout": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ms_to_complete_registration_timeout"
+    },
+    "passkey_registration_error_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/passkey_registration_error_type"
+    },
+    "passkey_registration_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ceremony_status"
+    },
+    "passkey_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/passkey_type"
+    },
+    "webauthn_extension_supported_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/webauthn_extension_supported_list"
+    }
+  },
+  "required": [
+    "name",
+    "domain",
+    "passkey_registration_status"
+  ],
+  "additionalProperties": false
+}

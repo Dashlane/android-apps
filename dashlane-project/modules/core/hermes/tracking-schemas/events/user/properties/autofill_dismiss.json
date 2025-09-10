@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/autofill_dismiss.json",
+  "type": "object",
+  "description": "Dismiss autofill",
+  "metas": {
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_dismiss"
+    },
+    "dismiss_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/dismiss_type"
+    }
+  },
+  "required": [
+    "name",
+    "dismiss_type"
+  ],
+  "additionalProperties": false
+}

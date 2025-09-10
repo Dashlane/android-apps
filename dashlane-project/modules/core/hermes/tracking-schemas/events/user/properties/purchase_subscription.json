@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/purchase_subscription.json",
+  "type": "object",
+  "description": "Track the outcome of subscription purchase attempts from the Team Admin Console by Billing Admins",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "purchase_subscription"
+    },
+    "payment_amount": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/price_amount_cents"
+    },
+    "payment_currency": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/price_currency_code"
+    },
+    "payment_method": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/payment_method"
+    },
+    "payment_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/payment_status"
+    },
+    "purchased_plan": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/plan"
+    },
+    "purchased_seats_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/purchased_seats_count"
+    }
+  },
+  "required": [
+    "name",
+    "payment_amount",
+    "payment_currency",
+    "payment_method",
+    "payment_status",
+    "purchased_plan",
+    "purchased_seats_count"
+  ],
+  "additionalProperties": false
+}

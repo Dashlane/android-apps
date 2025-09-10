@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.dashlane.R
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.data.login.RegisteredUserDevice
 import com.dashlane.ui.common.compose.components.GenericErrorContent
 import com.dashlane.ui.widgets.compose.IndeterminateLoading
 
@@ -26,7 +26,7 @@ fun IntroScreen(
     goToARK: () -> Unit,
     goToTOTP: () -> Unit,
     goToToken: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     LaunchedEffect(viewModel) {
         viewModel.arkFlowStarted(registeredUserDevice, authTicket)
@@ -60,17 +60,17 @@ fun IntroScreen(
                 textPrimary = stringResource(id = R.string.generic_error_retry_button),
                 textSecondary = stringResource(id = R.string.generic_error_cancel_button),
                 onClickPrimary = { viewModel.retry(registeredUserDevice) },
-                onClickSecondary = onCancel
+                onClickSecondary = onCancel,
             )
         }
         IntroState.Loading -> {
             Column(
                 modifier = modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 IndeterminateLoading(
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(56.dp),
                 )
             }
         }

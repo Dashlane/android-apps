@@ -1,6 +1,5 @@
 package com.dashlane.home.vaultlist
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -10,15 +9,10 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.design.component.IndeterminateLoader
@@ -27,110 +21,88 @@ import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.ui.common.compose.components.EmptyScreen
+import com.dashlane.ui.common.compose.components.BaseEmptyContent
+import com.dashlane.ui.common.compose.components.PullToRefreshBox
+import com.dashlane.ui.common.compose.components.basescreen.centerWithTopOffset
 import com.dashlane.ui.common.compose.utils.rememberLargeScreen
 import com.dashlane.vault.item.VaultListItem
 import com.dashlane.vault.item.VaultListItemState
-import com.dashlane.vault.summary.SummaryObject
-import my.nanihadesuka.compose.LazyVerticalGridScrollbar
-import my.nanihadesuka.compose.ScrollbarSettings
+import com.dashlane.vault.model.createAuthentifiant
+import com.dashlane.vault.summary.toSummary
 
-@Suppress("LongMethod")
-@OptIn(ExperimentalMaterialApi::class)
+@Suppress("LongMethod", "kotlin:S3776")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun VaultListContent(
     modifier: Modifier = Modifier,
     state: VaultListState,
     onRefresh: () -> Unit,
-    onItemClick: (String) -> Unit,
+    onItemClick: (String, ItemListContext) -> Unit,
     onLongClick: (String, ItemListContext) -> Unit,
     onCopyClicked: (String, ItemListContext) -> Unit,
     onMoreClicked: (String, ItemListContext) -> Unit,
-    loadItemExtraContent: (SummaryObject) -> Unit,
 ) {
     val columnCount = rememberLargeScreen { isLarge ->
         if (isLarge) 2 else 1
     }
 
-    Box(
+    PullToRefreshBox(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        isRefreshing = state.isRefreshing,
+        onRefresh = onRefresh,
     ) {
-        val pullRefreshState = rememberPullRefreshState(
-            refreshing = state.isRefreshing,
-            onRefresh = onRefresh
-        )
         val lazyGridState = rememberLazyGridState()
-
-        LazyVerticalGridScrollbar(
+        LazyVerticalGrid(
+            modifier = Modifier
+                .fillMaxSize(),
             state = lazyGridState,
-            settings = ScrollbarSettings(
-                scrollbarPadding = 0.dp,
-                thumbThickness = 8.dp,
-                thumbShape = RectangleShape,
-                thumbUnselectedColor = DashlaneTheme.colors.borderNeutralStandardIdle,
-                thumbSelectedColor = DashlaneTheme.colors.borderNeutralStandardIdle,
-                hideDelayMillis = 1500,
-                ),
+            columns = GridCells.Fixed(count = columnCount),
+            contentPadding = PaddingValues(bottom = 64.dp),
         ) {
-            LazyVerticalGrid(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pullRefresh(pullRefreshState),
-                state = lazyGridState,
-                columns = GridCells.Fixed(count = columnCount),
-                contentPadding = PaddingValues(bottom = 64.dp),
-            ) {
-                items(
-                    items = state.items,
-                    key = { it.key },
-                    span = { item ->
-                        when (item) {
-                            is ListItemState.HeaderItemState -> GridItemSpan(columnCount)
-                            is ListItemState.VaultItemState -> GridItemSpan(1)
-                        }
-                    },
-                ) { item ->
+            items(
+                items = state.items,
+                key = { it.key },
+                span = { item ->
                     when (item) {
-                        is ListItemState.HeaderItemState -> Text(
-                            modifier = Modifier.padding(
-                                top = 24.dp,
-                                bottom = 8.dp,
-                                start = 16.dp,
-                                end = 16.dp,
-                            ),
-                            text = item.title,
-                            style = DashlaneTheme.typography.titleSupportingSmall,
-                            color = DashlaneTheme.colors.textNeutralQuiet,
-                            enforceAllCaps = true
+                        is ListItemState.HeaderItemState -> GridItemSpan(columnCount)
+                        is ListItemState.VaultItemState -> GridItemSpan(1)
+                    }
+                },
+            ) { item ->
+                when (item) {
+                    is ListItemState.HeaderItemState -> Text(
+                        modifier = Modifier.padding(
+                            top = 24.dp,
+                            bottom = 8.dp,
+                            start = 16.dp,
+                            end = 16.dp,
+                        ),
+                        text = item.title,
+                        style = DashlaneTheme.typography.titleSupportingSmall,
+                        color = DashlaneTheme.colors.textNeutralQuiet,
+                        enforceAllCaps = true,
+                    )
+                    is ListItemState.VaultItemState -> {
+                        VaultListItem(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            item = item.vaultItemState,
+                            onClick = { onItemClick(item.vaultItemState.id, item.itemListContext) },
+                            onLongClick = { onLongClick(item.vaultItemState.id, item.itemListContext) },
+                            onCopyClicked = { onCopyClicked(item.vaultItemState.id, item.itemListContext) },
+                            onMoreClicked = { onMoreClicked(item.vaultItemState.id, item.itemListContext) },
                         )
-                        is ListItemState.VaultItemState -> {
-                            LaunchedEffect(item.key, item.vaultItemState.extraContentLoaded) {
-                                if (!item.vaultItemState.extraContentLoaded) {
-                                    item.summaryObject?.let { loadItemExtraContent(it) }
-                                }
-                            }
-
-                            VaultListItem(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                item = item.vaultItemState,
-                                onClick = { onItemClick(item.vaultItemState.id) },
-                                onLongClick = { onLongClick(item.vaultItemState.id, item.itemListContext) },
-                                onCopyClicked = { onCopyClicked(item.vaultItemState.id, item.itemListContext) },
-                                onMoreClicked = { onMoreClicked(item.vaultItemState.id, item.itemListContext) },
-                            )
-                        }
                     }
                 }
             }
         }
 
         if (state.emptyState != null) {
-            EmptyScreen(
+            BaseEmptyContent(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .offset(y = (-96).dp),
-                icon = state.emptyState.icon,
+                    .centerWithTopOffset(96.dp)
+                    .padding(24.dp),
+                iconToken = state.emptyState.icon,
                 title = state.emptyState.title,
                 description = state.emptyState.description,
             )
@@ -143,14 +115,6 @@ internal fun VaultListContent(
                     .offset(y = (-96).dp),
             )
         }
-
-        PullRefreshIndicator(
-            refreshing = state.isRefreshing,
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter),
-            backgroundColor = DashlaneTheme.colors.backgroundAlternate,
-            contentColor = DashlaneTheme.colors.borderBrandStandardActive
-        )
     }
 }
 
@@ -162,11 +126,10 @@ private fun VaultListLoadingPreview() = DashlanePreview {
             isLoading = true,
         ),
         onRefresh = {},
-        onItemClick = {},
+        onItemClick = { _, _ -> },
         onLongClick = { _, _ -> },
         onCopyClicked = { _, _ -> },
         onMoreClicked = { _, _ -> },
-        loadItemExtraContent = {},
     )
 }
 
@@ -186,20 +149,19 @@ private fun VaultListContentPreview() = DashlanePreview {
                                     id = "id $it",
                                     title = "Title $it",
                                     description = "Description $it",
-                                    thumbnail = VaultListItemState.ThumbnailState.DomainIcon(""),
+                                    thumbnail = VaultListItemState.ThumbnailState.VaultThumbnail.DomainIcon(""),
                                 ),
                                 itemListContext = ItemListContext(),
-                                summaryObject = null,
+                                summaryObject = createAuthentifiant().toSummary(),
                             )
                         }
-                }
+                },
         ),
         onRefresh = {},
-        onItemClick = {},
+        onItemClick = { _, _ -> },
         onLongClick = { _, _ -> },
         onCopyClicked = { _, _ -> },
         onMoreClicked = { _, _ -> },
-        loadItemExtraContent = {},
     )
 }
 
@@ -213,13 +175,12 @@ private fun VaultListContentEmptyPreview() = DashlanePreview {
                 icon = IconTokens.protectionOutlined,
                 title = "One secure place for all your important info",
                 description = "Add anything from logins to payments—and so much more!",
-            )
+            ),
         ),
         onRefresh = {},
-        onItemClick = {},
+        onItemClick = { _, _ -> },
         onLongClick = { _, _ -> },
         onCopyClicked = { _, _ -> },
         onMoreClicked = { _, _ -> },
-        loadItemExtraContent = {},
     )
 }

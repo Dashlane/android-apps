@@ -2,7 +2,7 @@ package com.dashlane.nitro.cryptography
 
 internal data class SecretStreamServerInfo(
     val header: ByteArray,
-    val publicKey: ByteArray
+    val publicKey: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

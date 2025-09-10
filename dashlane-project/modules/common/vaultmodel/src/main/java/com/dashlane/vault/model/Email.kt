@@ -7,7 +7,7 @@ fun createEmail(
     dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(uid = itemId),
     type: SyncObject.Email.Type? = null,
     emailName: String? = null,
-    emailAddress: String? = null
+    emailAddress: String? = null,
 ): VaultItem<SyncObject.Email> {
     return dataIdentifier.toVaultItem(
         SyncObject.Email {
@@ -16,11 +16,10 @@ fun createEmail(
             this.email = emailAddress
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
-fun VaultItem<SyncObject.Email>.copySyncObject(builder: SyncObject.Email.Builder.() -> Unit = {}):
-    VaultItem<SyncObject.Email> {
+fun VaultItem<SyncObject.Email>.copySyncObject(builder: SyncObject.Email.Builder.() -> Unit = {}): VaultItem<SyncObject.Email> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

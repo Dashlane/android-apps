@@ -91,7 +91,7 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
             nitroViewModel.nitroState.collectLatest { state ->
                 when (state) {
                     is NitroSsoInfoViewModel.NitroState.Default -> {
-                        nitroViewModel.authenticate(nitroUrl = nitroUrl, login = login)
+                        nitroViewModel.authenticate(nitroHost = nitroUrl, login = login)
                     }
                     is NitroSsoInfoViewModel.NitroState.Init -> {
                         setContentView(
@@ -105,7 +105,7 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
                                         teamUuid = state.data.teamUuid,
                                         samlResponse = samlResponse,
                                         email = login,
-                                        domainName = domainName
+                                        domainName = domainName,
                                     )
                                 },
                                 onError = { error ->
@@ -113,18 +113,18 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
                                 },
                                 nitroUrlOverride = nitroUrlOverride.getOrNull(),
                                 ioDispatcher = ioDispatcher,
-                                coroutineScope = lifecycleScope
+                                coroutineScope = lifecycleScope,
                             ).apply {
                                 id = R.id.nitro_sso_webview
                                 loadUrl(state.data.idpAuthorizeUrl.toIdpUrl(login).toString())
-                            }
+                            },
                         )
                         nitroViewModel.onWebviewReady()
                     }
                     is NitroSsoInfoViewModel.NitroState.Ready -> {
                         
                         if (findViewById<NitroSsoWebView>(R.id.nitro_sso_webview) == null) {
-                            nitroViewModel.authenticate(nitroUrl = nitroUrl, login = login)
+                            nitroViewModel.authenticate(nitroHost = nitroUrl, login = login)
                         }
                     }
                     is NitroSsoInfoViewModel.NitroState.Loading -> {
@@ -170,7 +170,7 @@ class GetUserSsoInfoActivity : AppCompatActivity() {
             context: Context,
             login: String,
             serviceProviderUrl: String,
-            isNitroProvider: Boolean
+            isNitroProvider: Boolean,
         ): Intent = Intent(context, GetUserSsoInfoActivity::class.java)
             .putExtra(KEY_LOGIN, login)
             .putExtra(KEY_SERVICE_PROVIDER_URL, serviceProviderUrl)

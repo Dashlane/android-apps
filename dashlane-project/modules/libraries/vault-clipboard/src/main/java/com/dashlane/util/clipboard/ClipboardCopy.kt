@@ -7,6 +7,7 @@ interface ClipboardCopy {
         data: String,
         sensitiveData: Boolean,
         autoClear: Boolean = true,
-        @StringRes feedback: Int? = null
+        showToast: Boolean = true,
+        @StringRes feedback: Int? = null,
     )
 }

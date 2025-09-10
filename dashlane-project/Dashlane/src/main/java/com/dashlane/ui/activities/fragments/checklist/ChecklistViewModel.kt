@@ -8,10 +8,10 @@ import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.fragments.checklist.ChecklistData.ItemState
 import com.dashlane.user.UserAccountInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.shareIn
+import javax.inject.Inject
 
 @HiltViewModel
 class ChecklistViewModel @Inject constructor(
@@ -19,9 +19,8 @@ class ChecklistViewModel @Inject constructor(
     private val checklistHelper: ChecklistHelper,
     private val navigator: Navigator,
     private val sessionManager: SessionManager,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) : ViewModel(), ChecklistViewModelContract {
-
     override val checkListDataFlow =
         flow {
             val checklistData = buildChecklistData()
@@ -30,7 +29,7 @@ class ChecklistViewModel @Inject constructor(
         }.shareIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(),
-            replay = 1
+            replay = 1,
         )
 
     private suspend fun buildChecklistData(): ChecklistData {
@@ -48,14 +47,14 @@ class ChecklistViewModel @Inject constructor(
             activatedAutofill,
             m2d,
             isDismissable,
-            provider.hasSeenChecklist()
+            provider.hasSeenChecklist(),
         )
     }
 
     private fun getCheckDarkWebAlertsChecklistItem(): ChecklistItem {
         val state = getCheckListStepState(
             isAcknowledged = provider.hasCompletedAndAcknowledgedDarkWebAlerts(),
-            isCompleted = provider.hasCompletedAndAcknowledgedDarkWebAlerts()
+            isCompleted = provider.hasCompletedAndAcknowledgedDarkWebAlerts(),
         )
         val item = ChecklistItem(ChecklistData.ItemType.DARK_WEB_MONITORING, state, null)
         item.onChecklistItemAcknowledge = { this.onCheckDarkWebCompletionAcknowledged() }
@@ -65,12 +64,12 @@ class ChecklistViewModel @Inject constructor(
     private fun getAddCredentialChecklistItem(): ChecklistItem {
         val addCredentialStatus = getCheckListStepState(
             provider.hasCompletedAndAcknowledgedAddCredential(),
-            provider.hasAddedAccounts()
+            provider.hasAddedAccounts(),
         )
         val item = ChecklistItem(
             ChecklistData.ItemType.ADD_CREDENTIAL,
             addCredentialStatus,
-            provider.getGuidedOnBoardingAction()
+            provider.getGuidedOnBoardingAction(),
         )
         item.onChecklistItemAcknowledge = { this.onAddCredentialCompletionAcknowledged() }
         return item
@@ -79,7 +78,7 @@ class ChecklistViewModel @Inject constructor(
     private fun getActivatedAutofillChecklistItem(): ChecklistItem {
         val state = getCheckListStepState(
             provider.hasCompletedAndAcknowledgedAutofillActivation(),
-            provider.hasActivatedAutofill()
+            provider.hasActivatedAutofill(),
         )
         val item = ChecklistItem(ChecklistData.ItemType.AUTOFILL, state, null)
         item.onChecklistItemAcknowledge = { this.onAutofillActivationCompletionAcknowledged() }
@@ -87,7 +86,11 @@ class ChecklistViewModel @Inject constructor(
     }
 
     private fun getM2dChecklistItem(): ChecklistItem? {
-        val accountType = preferencesManager[sessionManager.session?.username].accountType?.let { UserAccountInfo.AccountType.fromString(it) }
+        val accountType = preferencesManager[sessionManager.session?.username].accountType?.let {
+            UserAccountInfo.AccountType.fromString(
+                it,
+            )
+        }
 
         if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) {
             return null
@@ -95,7 +98,7 @@ class ChecklistViewModel @Inject constructor(
 
         val state = getCheckListStepState(
             provider.hasCompletedAndAcknowledgedM2D(),
-            provider.hasFinishedM2D()
+            provider.hasFinishedM2D(),
         )
         val item = ChecklistItem(ChecklistData.ItemType.M2D, state, null)
         item.onChecklistItemAcknowledge = { this.onM2DCompletionAcknowledged() }

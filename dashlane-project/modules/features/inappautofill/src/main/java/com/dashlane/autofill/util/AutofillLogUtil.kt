@@ -11,15 +11,15 @@ object AutofillLogUtil {
         return when {
             rootUrlDomain == null && packageName != null -> DomainWrapper(
                 domain = Domain(id = Sha256Hash.of(packageName), type = DomainType.APP),
-                isNativeApp = true
+                isNativeApp = true,
             )
             rootUrlDomain != null -> DomainWrapper(
                 domain = Domain(id = Sha256Hash.of(rootUrlDomain), type = DomainType.WEB),
-                isNativeApp = false
+                isNativeApp = false,
             )
             else -> DomainWrapper(
                 domain = Domain(id = null, type = DomainType.APP),
-                isNativeApp = true
+                isNativeApp = true,
             )
         }
     }

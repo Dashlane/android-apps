@@ -1,19 +1,17 @@
 package com.dashlane.crypto.keys
 
+import com.dashlane.crypto.keys.VaultKey.RemoteKey
 import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.ObfuscatedByteArray
-import com.dashlane.crypto.keys.VaultKey.RemoteKey
 import okio.Closeable
 
 sealed class VaultKey : Closeable, Cloneable {
-
     abstract val cryptographyKey: CryptographyKey
     abstract val cryptographyKeyBytes: ObfuscatedByteArray
 
     public abstract override fun clone(): VaultKey
 
     class RemoteKey : VaultKey {
-
         private val _cryptographyKey: CryptographyKey.Raw64
         override val cryptographyKey: CryptographyKey.Raw64
             get() = _cryptographyKey.clone()
@@ -51,7 +49,6 @@ sealed class VaultKey : Closeable, Cloneable {
     }
 
     class Password : VaultKey {
-
         private val _appKey: AppKey.Password
         val appKey: AppKey.Password
             get() = _appKey.clone()

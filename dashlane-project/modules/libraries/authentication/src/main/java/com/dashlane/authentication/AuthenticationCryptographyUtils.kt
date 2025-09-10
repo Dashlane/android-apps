@@ -1,7 +1,11 @@
 package com.dashlane.authentication
 
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyException
+import com.dashlane.cryptography.CryptographyKey
+import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.cryptography.DecryptionEngine
 import com.dashlane.cryptography.EncryptedBase64String
 import com.dashlane.cryptography.EncryptionEngine
@@ -16,12 +20,9 @@ import com.dashlane.cryptography.decryptBase64ToXmlTransaction
 import com.dashlane.cryptography.encryptByteArrayToBase64String
 import com.dashlane.cryptography.encryptUtf8ToBase64String
 import com.dashlane.cryptography.encryptXmlTransactionToBase64String
-import com.dashlane.cryptography.use
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.crypto.keys.VaultKey
-import com.dashlane.cryptography.CryptographyKey
-import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.cryptography.toCryptographyMarkerOrNull
+import com.dashlane.cryptography.use
+import com.dashlane.data.login.Settings
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.toObject
@@ -36,54 +37,54 @@ internal fun Cryptography.createVaultDecryptionEngine(key: VaultKey): Decryption
 
 internal fun Cryptography.createPasswordEncryptionEngine(
     key: VaultKey.Password,
-    settings: Settings
+    settings: Settings,
 ): EncryptionEngine =
     key.cryptographyKey.use {
         createEncryptionEngine(settings.cryptographyMarker, it, settings.cryptographyFixedSalt)
     }
 
 internal fun Cryptography.createRemoteKeyEncryptionEngine(
-    remoteKey: VaultKey.RemoteKey
+    remoteKey: VaultKey.RemoteKey,
 ): EncryptionEngine =
     remoteKey.cryptographyKey.use(::createFlexibleNoDerivation64EncryptionEngine)
 
 fun Cryptography.createSsoEncryptionEngine(
-    ssoKey: AppKey.SsoKey
+    ssoKey: AppKey.SsoKey,
 ): EncryptionEngine =
     ssoKey.cryptographyKey.use(::createFlexibleNoDerivation64EncryptionEngine)
 
 fun EncryptionEngine.encryptRemoteKey(
-    remoteKey: VaultKey.RemoteKey
+    remoteKey: VaultKey.RemoteKey,
 ): EncryptedBase64String =
     remoteKey.cryptographyKeyBytes.use(ObfuscatedByteArray::toByteArray).use(::encryptByteArrayToBase64String)
 
 @Throws(CryptographyException::class)
 internal fun DecryptionEngine.decryptRemoteKey(
-    remoteKey: EncryptedBase64String
+    remoteKey: EncryptedBase64String,
 ): VaultKey.RemoteKey = decryptBase64ToByteArray(remoteKey).use(VaultKey::RemoteKey)
 
 internal fun XmlEncryptionEngine.encryptSettings(
-    settings: SyncObject.Settings
+    settings: SyncObject.Settings,
 ): EncryptedBase64String = encryptXmlTransactionToBase64String(settings.toTransaction())
 
 @Throws(CryptographyException::class, XmlException::class)
 internal fun XmlDecryptionEngine.decryptSettings(
-    settings: EncryptedBase64String
+    settings: EncryptedBase64String,
 ): SyncObject.Settings =
     decryptBase64ToXmlTransaction(settings).toObject(SyncObjectType.SETTINGS) as SyncObject.Settings
 
 internal fun EncryptionEngine.encryptSharingPrivateKey(
-    privateKey: SharingKeys.Private
+    privateKey: SharingKeys.Private,
 ): EncryptedBase64String = encryptUtf8ToBase64String(privateKey.value)
 
 @Throws(CryptographyException::class)
 internal fun DecryptionEngine.decryptSharingPrivateKey(
-    privateKey: EncryptedBase64String
+    privateKey: EncryptedBase64String,
 ): String = decryptBase64ToUtf8String(privateKey)
 
 @Throws(CryptographyException::class)
 internal fun DecryptionEngine.decryptBackupToken(
-    backupToken: EncryptedBase64String
+    backupToken: EncryptedBase64String,
 ): String = decryptBase64ToUtf8String(backupToken, compressed = true)
 
 val SyncObject.Settings.cryptographyMarker: CryptographyMarker?

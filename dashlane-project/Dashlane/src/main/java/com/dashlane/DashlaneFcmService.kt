@@ -8,7 +8,6 @@ import com.dashlane.debug.DeveloperUtilities
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DarkWebSetupCompleteEvent
 import com.dashlane.login.controller.LoginTokensModule
-import com.dashlane.session.authorization
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
 import com.dashlane.notification.FcmMessage
@@ -16,21 +15,23 @@ import com.dashlane.notification.model.DarkWebAlertNotificationHandler
 import com.dashlane.notification.model.PublicBreachAlertNotificationHandler
 import com.dashlane.notification.model.SyncNotificationHandler
 import com.dashlane.notification.model.TokenNotificationHandler
+import com.dashlane.passwordhealth.identitydashboard.breach.BreachLoader
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.PreferencesManager
-import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.sync.DataSync
+import com.dashlane.util.inject.OptionalProvider
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EarlyEntryPoint
 import dagger.hilt.android.EarlyEntryPoints
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
 import java.time.Clock
 
 class DashlaneFcmService : FirebaseMessagingService() {
-
     @EarlyEntryPoint
     @InstallIn(SingletonComponent::class)
     interface FcmServiceEntryPoint {
@@ -45,6 +46,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
         val globalPreferencesManager: GlobalPreferencesManager
         val clock: Clock
         val loginTokensModule: LoginTokensModule
+        val sessionCoroutineScopeProvider: OptionalProvider<CoroutineScope>
     }
 
     private val entryPoint: FcmServiceEntryPoint
@@ -64,7 +66,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
             message = "Received message: ${message.data}",
-            tag = "CLOUD_MESSAGING"
+            tag = "CLOUD_MESSAGING",
         )
         if (DeveloperUtilities.isEmulator) return
         val data = message.data
@@ -82,10 +84,10 @@ class DashlaneFcmService : FirebaseMessagingService() {
         
         val fcmMessage = FcmMessage(
             data = data["data"],
-            login = data["login"],
+            login = data["login"]?.removeSurrounding("\""),
             from = data["from"],
             code = fcmCode,
-            message = data["message"]
+            message = data["message"],
         )
         processMessage(applicationContext, fcmMessage)
     }
@@ -97,7 +99,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
                     context,
                     fcmMessage,
                     entryPoint.dataSync,
-                    entryPoint.sessionManager
+                    entryPoint.sessionManager,
                 ).handlePushNotification()
 
             FcmCode.DARK_WEB_SETUP_COMPLETE -> {
@@ -106,7 +108,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
                     context,
                     fcmMessage,
                     entryPoint.fcmHelper,
-                    entryPoint.globalPreferencesManager
+                    entryPoint.globalPreferencesManager,
                 ).handlePushNotification()
             }
 
@@ -117,7 +119,7 @@ class DashlaneFcmService : FirebaseMessagingService() {
                     entryPoint.sessionManager,
                     entryPoint.globalPreferencesManager,
                     entryPoint.clock,
-                    entryPoint.loginTokensModule
+                    entryPoint.loginTokensModule,
                 ).handlePushNotification()
 
             FcmCode.DARK_WEB_ALERT ->
@@ -125,17 +127,18 @@ class DashlaneFcmService : FirebaseMessagingService() {
                     context,
                     fcmMessage,
                     entryPoint.fcmHelper,
-                    entryPoint.globalPreferencesManager
+                    entryPoint.globalPreferencesManager,
                 ).handlePushNotification()
 
             FcmCode.PUBLIC_BREACH_ALERT ->
                 PublicBreachAlertNotificationHandler(
-                    context,
-                    fcmMessage,
-                    entryPoint.globalPreferencesManager,
-                    entryPoint.breachManager,
-                    entryPoint.breachLoader,
-                    entryPoint.sessionManager
+                    context = context,
+                    message = fcmMessage,
+                    globalPreferencesManager = entryPoint.globalPreferencesManager,
+                    breachManager = entryPoint.breachManager,
+                    breachLoader = entryPoint.breachLoader,
+                    sessionManager = entryPoint.sessionManager,
+                    sessionCoroutineScopeProvider = entryPoint.sessionCoroutineScopeProvider,
                 ).handlePushNotification()
         }
     }

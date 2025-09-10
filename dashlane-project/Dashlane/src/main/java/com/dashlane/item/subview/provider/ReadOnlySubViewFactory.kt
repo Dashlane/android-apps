@@ -1,6 +1,7 @@
 package com.dashlane.item.subview.provider
 
 import android.content.Context
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.item.ItemEditViewContract
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.readonly.ItemClickActionSubView
@@ -12,14 +13,12 @@ import com.dashlane.item.subview.readonly.ItemReadValueTextSubView
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.vault.model.VaultItem
 
 class ReadOnlySubViewFactory(
     userFeaturesChecker: UserFeaturesChecker,
-    currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
+    currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
 ) : BaseSubViewFactory(userFeaturesChecker, currentTeamSpaceUiFilter) {
-
     override fun createSubViewString(
         header: String,
         value: String?,
@@ -29,7 +28,7 @@ class ReadOnlySubViewFactory(
         allowReveal: Boolean,
         multiline: Boolean,
         coloredCharacter: Boolean,
-        protectedStateListener: (Boolean) -> Unit
+        protectedStateListener: (Boolean) -> Unit,
     ): ItemSubView<String>? {
         return value?.takeIf { it.isNotBlank() }
             ?.let {
@@ -40,7 +39,7 @@ class ReadOnlySubViewFactory(
                     allowReveal = allowReveal,
                     multiline = multiline,
                     coloredCharacter = coloredCharacter,
-                    protectedStateListener = protectedStateListener
+                    protectedStateListener = protectedStateListener,
                 )
             }
     }
@@ -52,7 +51,7 @@ class ReadOnlySubViewFactory(
         protected: Boolean,
         valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?,
         suggestions: List<String>?,
-        protectedStateListener: (Boolean) -> Unit
+        protectedStateListener: (Boolean) -> Unit,
     ): ItemSubView<String>? {
         return value?.takeIf { it.isNotBlank() }
             ?.let {
@@ -60,7 +59,7 @@ class ReadOnlySubViewFactory(
                     header,
                     it,
                     protected = protected,
-                    protectedStateListener = protectedStateListener
+                    protectedStateListener = protectedStateListener,
                 )
             }
     }
@@ -69,7 +68,7 @@ class ReadOnlySubViewFactory(
         title: String,
         selectedValue: String,
         values: List<String>,
-        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?
+        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?,
     ): ItemSubView<String>? {
         return ItemReadValueListSubView(title, selectedValue, values)
     }
@@ -78,7 +77,7 @@ class ReadOnlySubViewFactory(
         title: String,
         selectedValue: String,
         values: List<String>,
-        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?
+        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?,
     ): ItemSubView<String>? {
         return ItemReadValueListSubView(title, selectedValue, values)
     }
@@ -87,7 +86,7 @@ class ReadOnlySubViewFactory(
         header: String,
         description: String?,
         value: Boolean,
-        valueUpdate: (VaultItem<*>, Boolean) -> VaultItem<*>?
+        valueUpdate: (VaultItem<*>, Boolean) -> VaultItem<*>?,
     ): ItemSubView<Boolean> {
         return ItemReadValueBooleanSubView(header, description, value)
     }
@@ -97,11 +96,11 @@ class ReadOnlySubViewFactory(
         teamSpaceAccessor: TeamSpaceAccessor,
         toListenViews: List<ItemSubView<String>>?,
         valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>,
-        linkedWebsites: List<String>
+        linkedWebsites: List<String>,
     ): ItemSubView<TeamSpace> {
         return ItemReadSpaceSubView(
             getTeamspace(teamSpaceAccessor, currentSpaceId),
-            getTeamspaces(teamSpaceAccessor)
+            getTeamspaces(teamSpaceAccessor),
         )
     }
 
@@ -109,7 +108,7 @@ class ReadOnlySubViewFactory(
         context: Context,
         listener: ItemEditViewContract.View.UiUpdateListener,
         deleteAllowed: Boolean,
-        text: String
+        text: String,
     ): ItemClickActionSubView? {
         
         return null

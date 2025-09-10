@@ -11,40 +11,40 @@ import com.dashlane.xml.domain.SyncObject
 
 fun VaultItem<SyncObject.Authentifiant>.isNotIncorrectApplicationSignatureWith(
     packageNameSignatureHelper: PackageNameSignatureHelper,
-    packageName: String
+    packageName: String,
 ): Boolean {
     return packageNameSignatureHelper.getPackageNameSignatureVerificationStatus(
         packageName,
         this.toSummary<SummaryObject.Authentifiant>().linkedServices,
-        urlForUI()
+        urlForUI(),
     ) != PackageSignatureStatus.INCORRECT
 }
 
 fun SummaryObject.Authentifiant.isNotIncorrectApplicationSignatureWith(
     packageNameSignatureHelper: PackageNameSignatureHelper,
-    packageName: String
+    packageName: String,
 ): Boolean {
     return packageNameSignatureHelper.getPackageNameSignatureVerificationStatus(
         packageName,
         linkedServices,
-        urlForUI()
+        urlForUI(),
     ) != PackageSignatureStatus.INCORRECT
 }
 
 fun SummaryObject.Authentifiant.getSignatureVerificationWith(
     packageNameSignatureHelper: PackageNameSignatureHelper,
-    packageName: String
+    packageName: String,
 ): PackageSignatureStatus {
     return packageNameSignatureHelper.getPackageNameSignatureVerificationStatus(packageName, linkedServices, urlForUI())
 }
 
 fun SummaryObject.Authentifiant.getDetailedSignatureVerificationWith(
     packageNameSignatureHelper: PackageNameSignatureHelper,
-    packageName: String
+    packageName: String,
 ): SignatureVerification {
     return packageNameSignatureHelper.getPackageNameDetailedSignatureVerificationStatus(
         packageName,
         linkedServices,
-        urlForUI()
+        urlForUI(),
     )
 }

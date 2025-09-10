@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/submit_in_product_form_answer.json",
+  "type": "object",
+  "description": "When a user submits an answer from a form in product",
+  "metas": {
+    "area": "ui"
+  },
+  "properties": {
+    "name": {
+      "const": "submit_in_product_form_answer"
+    },
+    "answer_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_in_product_form_answer.json#/definitions/answer_list"
+    },
+    "chosen_answer_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_in_product_form_answer.json#/definitions/chosen_answer_list"
+    },
+    "form_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_in_product_form_answer.json#/definitions/form_name"
+    }
+  },
+  "required": [
+    "name",
+    "form_name"
+  ],
+  "additionalProperties": false
+}

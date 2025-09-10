@@ -13,10 +13,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class FollowUpNotificationComponentExternalModule {
-
     @Binds
     @Singleton
-    abstract fun bindsFollowUpNotificationSettingsService(service: FollowUpNotificationSettingsServiceImpl): FollowUpNotificationSettingsService
+    abstract fun bindsFollowUpNotificationSettingsService(
+        service: FollowUpNotificationSettingsServiceImpl,
+    ): FollowUpNotificationSettingsService
 
     @Binds
     @Singleton
@@ -24,7 +25,9 @@ abstract class FollowUpNotificationComponentExternalModule {
 
     @Binds
     @Singleton
-    abstract fun bindsFollowUpNotificationPermissionManager(manager: FollowUpNotificationPermissionManagerImpl): FollowUpNotificationPermissionManager
+    abstract fun bindsFollowUpNotificationPermissionManager(
+        manager: FollowUpNotificationPermissionManagerImpl,
+    ): FollowUpNotificationPermissionManager
 
     @Binds
     @Singleton

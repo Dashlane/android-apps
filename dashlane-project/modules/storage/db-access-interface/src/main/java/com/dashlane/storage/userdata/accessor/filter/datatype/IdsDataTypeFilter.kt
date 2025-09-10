@@ -8,6 +8,6 @@ object IdsDataTypeFilter : DataTypeFilter {
         SyncObjectType.PASSPORT,
         SyncObjectType.SOCIAL_SECURITY_STATEMENT,
         SyncObjectType.DRIVER_LICENCE,
-        SyncObjectType.FISCAL_STATEMENT
+        SyncObjectType.FISCAL_STATEMENT,
     )
 }

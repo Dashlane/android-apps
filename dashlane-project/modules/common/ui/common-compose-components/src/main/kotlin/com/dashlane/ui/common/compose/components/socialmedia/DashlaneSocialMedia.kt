@@ -14,31 +14,36 @@ enum class DashlaneSocialMedia(
     FACEBOOK(
         titleId = R.string.facebook,
         iconToken = IconTokens.socialFacebookFilled,
-        url = URL("https://www.facebook.com/GetDashlane")
+        url = URL("https://www.facebook.com/GetDashlane"),
     ),
     TWITTER(
         titleId = R.string.twitter,
         iconToken = IconTokens.socialTwitterFilled,
-        url = URL("https://x.com/dashlane")
+        url = URL("https://x.com/dashlane"),
     ),
     YOUTUBE(
         titleId = R.string.youtube,
         iconToken = IconTokens.socialYoutubeFilled,
-        url = URL("https://www.youtube.com/@Dashlane")
+        url = URL("https://www.youtube.com/@Dashlane"),
     ),
     INSTAGRAM(
         titleId = R.string.instagram,
         iconToken = IconTokens.socialInstagramFilled,
-        url = URL("https://www.instagram.com/dashlane")
+        url = URL("https://www.instagram.com/dashlane"),
     ),
     REDDIT(
         titleId = R.string.reddit,
         iconToken = IconTokens.socialRedditFilled,
-        url = URL("https://www.reddit.com/r/Dashlane")
+        url = URL("https://www.reddit.com/r/Dashlane"),
     ),
     LINKEDIN(
         titleId = R.string.linkedin,
         iconToken = IconTokens.socialLinkedinFilled,
-        url = URL("https://www.linkedin.com/company/dashlane")
-    )
+        url = URL("https://www.linkedin.com/company/dashlane"),
+    ),
+    BLUESKY(
+        titleId = R.string.bluesky,
+        iconToken = IconTokens.socialBlueskyFilled,
+        url = URL("https://bsky.app/profile/dashlane.com"),
+    ),
 }

@@ -7,7 +7,6 @@ import com.dashlane.ui.action.Action
 import com.dashlane.vault.summary.SummaryObject
 
 class QuickActionEdit(private val summaryObject: SummaryObject, private val navigator: Navigator) : Action {
-
     override val text: Int = R.string.quick_action_edit
 
     override val icon: Int = R.drawable.ic_action_edit_outlined
@@ -23,7 +22,7 @@ class QuickActionEdit(private val summaryObject: SummaryObject, private val navi
             summaryObject: SummaryObject,
             sharingPolicy: SharingPolicyDataProvider,
             navigator: Navigator,
-            isAccountFrozen: Boolean
+            isAccountFrozen: Boolean,
         ): QuickActionEdit? {
             return if (sharingPolicy.canEditItem(summaryObject, false) && !isAccountFrozen) {
                 return QuickActionEdit(summaryObject, navigator)

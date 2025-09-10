@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json",
+  "type": "object",
+  "description": "Definition for the browser context",
+  "definitions": {
+    "name": {
+      "description": "Browser name of browser where this log has been triggered",
+      "type": "string",
+      "pattern": ".+"
+    },
+    "user_agent": {
+      "description": "Browser user agent",
+      "type": "string",
+      "maxLength": 256,
+      "examples": [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
+      ]
+    },
+    "version": {
+      "description": "Browser version number, example 49 or 62.56",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "browser": {
+      "type": "object",
+      "description": "Definition for the browser context",
+      "properties": {
+        "name": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json#/definitions/name"
+        },
+        "version": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json#/definitions/version"
+        },
+        "user_agent": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json#/definitions/user_agent"
+        }
+      },
+      "required": [
+        "name",
+        "user_agent"
+      ]
+    },
+    "anonymous_browser": {
+      "type": "object",
+      "description": "Definition for the browser context",
+      "properties": {
+        "name": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json#/definitions/name"
+        },
+        "version": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/browser.json#/definitions/version"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  }
+}

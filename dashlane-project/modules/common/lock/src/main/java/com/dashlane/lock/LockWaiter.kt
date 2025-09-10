@@ -3,7 +3,6 @@ package com.dashlane.lock
 import kotlinx.coroutines.delay
 
 class LockWaiter {
-
     private var lockHelper: LockHelper? = null
 
     fun setLockHelper(lockHelper: LockHelper) {

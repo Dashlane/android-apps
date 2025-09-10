@@ -4,16 +4,15 @@ import com.dashlane.securefile.extensions.toSecureFile
 import com.dashlane.securefile.storage.DownloadAccessException
 import com.dashlane.securefile.storage.SecureFileStorage
 import com.skocken.presentation.provider.BaseDataProvider
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.coroutineScope
+import javax.inject.Inject
 
 class DownloadFileDataProvider @Inject constructor(
-    private val secureFileStorage: SecureFileStorage
+    private val secureFileStorage: SecureFileStorage,
 ) : BaseDataProvider<DownloadFileContract.Presenter>(), DownloadFileContract.DataProvider {
-
     @Suppress("EXPERIMENTAL_API_USAGE")
     override suspend fun downloadSecureFile(attachment: Attachment) {
         coroutineScope {

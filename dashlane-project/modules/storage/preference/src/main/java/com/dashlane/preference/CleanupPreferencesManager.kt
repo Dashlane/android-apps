@@ -1,8 +1,7 @@
 package com.dashlane.preference
 
-import com.dashlane.preference.ConstantsPrefs.Companion.DEVICE_COUNTRY
-import com.dashlane.preference.ConstantsPrefs.Companion.DEVICE_COUNTRY_REFRESH
-import com.dashlane.preference.ConstantsPrefs.Companion.DEVICE_EUROPEAN_UNION_STATUS
+import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_MODEL_LAST_CHECK_TIMESTAMP
+import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_WARNING_IGNORED_WEBSITES
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -13,13 +12,14 @@ class CleanupPreferencesManager @Inject constructor(
     private val applicationCoroutineScope: CoroutineScope,
     private val globalPreferencesManager: GlobalPreferencesManager,
 ) {
-
+    @Suppress("DEPRECATION")
     fun cleanup() {
         applicationCoroutineScope.launch {
             val itemsToRemove = listOf(
-                DEVICE_COUNTRY,
-                DEVICE_COUNTRY_REFRESH,
-                DEVICE_EUROPEAN_UNION_STATUS,
+                
+                PHISHING_MODEL_LAST_CHECK_TIMESTAMP,
+                
+                PHISHING_WARNING_IGNORED_WEBSITES,
             ).filter { globalPreferencesManager.contains(it) }
 
             if (itemsToRemove.isNotEmpty()) {

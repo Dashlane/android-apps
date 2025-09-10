@@ -9,6 +9,6 @@ interface ChangePasswordActionIntentProvider {
         context: Context,
         summary: AutoFillHintSummary,
         forKeyboard: Boolean,
-        isAccountFrozen: Boolean
+        isAccountFrozen: Boolean,
     ): IntentSender
 }

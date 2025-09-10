@@ -11,7 +11,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 internal class M2wConnectActivity : DashlaneActivity() {
-
     private val viewModel by viewModels<M2wConnectViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {

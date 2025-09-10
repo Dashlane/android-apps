@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/right_click_menu_action.json",
+  "type": "object",
+  "description": "When the user right clicks in a field, the right click menu appears. This event tracks the actions taken by the user in the right click menu from the the moment he triggers it.",
+  "metas": {
+    "area": "autofill",
+    "priority": false
+  },
+  "properties": {
+    "name": {
+      "const": "right_click_menu_action"
+    },
+    "field_filled": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+    },
+    "field_initial_classification_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+    },
+    "is_field_detected_by_analysis_engine": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_field_detected_by_analysis_engine"
+    },
+    "right_click_menu_flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/right_click_menu_flow_step"
+    }
+  },
+  "required": [
+    "name",
+    "is_field_detected_by_analysis_engine",
+    "right_click_menu_flow_step"
+  ],
+  "additionalProperties": false
+}

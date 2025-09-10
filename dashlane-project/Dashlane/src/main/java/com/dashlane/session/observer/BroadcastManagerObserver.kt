@@ -7,8 +7,7 @@ import javax.inject.Inject
 
 class BroadcastManagerObserver @Inject constructor(private val syncBroadcastManager: SyncBroadcastManager) :
     SessionObserver {
-
-    override suspend fun sessionEnded(session: Session, byUser: Boolean, forceLogout: Boolean) {
-        syncBroadcastManager.removePasswordBroadcastIntent()
+        override suspend fun sessionEnded(session: Session, byUser: Boolean, forceLogout: Boolean) {
+            syncBroadcastManager.removePasswordBroadcastIntent()
+        }
     }
-}

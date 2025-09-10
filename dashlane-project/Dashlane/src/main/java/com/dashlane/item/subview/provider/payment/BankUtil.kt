@@ -1,7 +1,7 @@
 package com.dashlane.item.subview.provider.payment
 
-import com.dashlane.vault.util.BankDataProvider
 import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.util.BankDataProvider
 import com.dashlane.xml.domain.utils.Country
 
 fun BankDataProvider.getBankName(bankDescriptor: String, defaultName: String): String {
@@ -14,18 +14,18 @@ fun BankDataProvider.getBankName(bankDescriptor: String, defaultName: String): S
 
 fun BankDataProvider.getCreditCardBankListCurrentCountry(
     item: VaultItem<*>,
-    defaultName: String
+    defaultName: String,
 ): List<Pair<String, String?>> {
     
     return getCreditCardBankList(
         country = item.syncObject.localeFormat ?: Country.UnitedStates,
-        defaultName = defaultName
+        defaultName = defaultName,
     )
 }
 
 fun BankDataProvider.getCreditCardBankList(
     country: Country,
-    defaultName: String
+    defaultName: String,
 ): List<Pair<String, String?>> {
     val bankList = arrayListOf<Pair<String, String?>>()
 

@@ -5,6 +5,7 @@ import android.view.WindowManager
 
 interface ScreenshotPolicy {
     fun setScreenshotAllowed(enable: Boolean)
+
     fun areScreenshotAllowed(): Boolean
 }
 

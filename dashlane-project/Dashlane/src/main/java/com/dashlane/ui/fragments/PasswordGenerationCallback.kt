@@ -6,7 +6,10 @@ import com.dashlane.xml.domain.SyncObject
 
 interface PasswordGenerationCallback {
     fun onPasswordGenerated()
+
     fun passwordSaved(generatedPassword: VaultItem<SyncObject.GeneratedPassword>, strength: PasswordStrength?)
+
     fun restoreDominantColor(color: Int)
+
     fun showPreviouslyGenerated()
 }

@@ -1,11 +1,11 @@
 package com.dashlane.accountstatus.premiumstatus
 
-import com.dashlane.session.authorization
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.devices.ListDevicesService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import javax.inject.Inject
 
 class DeviceNumberUpdater @Inject constructor(

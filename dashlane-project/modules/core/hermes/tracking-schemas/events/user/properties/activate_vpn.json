@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/activate_vpn.json",
+  "type": "object",
+  "description": "The user starts, completes, cancels, or has an error during the VPN activation flow. The start of the flow corresponds to the first user action to activate the VPN (e.g. click on an activate button.The cancellation is sent when the user leaves the VPN activation flow before its completion. The flow is \"complete\" once the VPN account is activated.",
+  "metas": {
+    "area": "tools"
+  },
+  "properties": {
+    "name": {
+      "const": "activate_vpn"
+    },
+    "error_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vpn.json#/definitions/activate_vpn_error"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step"
+  ],
+  "additionalProperties": false
+}

@@ -7,7 +7,7 @@ fun createFiscalStatement(
     fiscalNumber: String? = null,
     teleDeclarantNumber: String? = null,
     fullname: String? = null,
-    linkedIdentity: String? = null
+    linkedIdentity: String? = null,
 ): VaultItem<SyncObject.FiscalStatement> {
     return dataIdentifier.toVaultItem(
         SyncObject.FiscalStatement {
@@ -17,11 +17,11 @@ fun createFiscalStatement(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
 fun VaultItem<SyncObject.FiscalStatement>.copySyncObject(builder: SyncObject.FiscalStatement.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.FiscalStatement> {
+    VaultItem<SyncObject.FiscalStatement> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

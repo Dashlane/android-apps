@@ -3,10 +3,13 @@ package com.dashlane.preference
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.core.content.edit
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCESS_KEY
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCOUNT_CREATION_DATE
 import com.dashlane.preference.ConstantsPrefs.Companion.ACCOUNT_TYPE
 import com.dashlane.preference.ConstantsPrefs.Companion.BIOMETRIC_SEAL_PADDING_MIGRATION_ATTEMPT
+import com.dashlane.preference.ConstantsPrefs.Companion.CAN_SHOW_AUTOFILL_ANNOUNCEMENT
+import com.dashlane.preference.ConstantsPrefs.Companion.CAN_SHOW_CHROME_ANNOUNCEMENT
 import com.dashlane.preference.ConstantsPrefs.Companion.CREDENTIALS_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.FOLLOW_UP_NOTIFICATION_DISCOVERY_SCREEN
@@ -27,9 +30,6 @@ import com.dashlane.preference.ConstantsPrefs.Companion.LAST_OS_VERSION
 import com.dashlane.preference.ConstantsPrefs.Companion.LAST_SHOWN_AVAILABLE_UPDATE_DATE
 import com.dashlane.preference.ConstantsPrefs.Companion.MPLESS_ARK_ENABLED
 import com.dashlane.preference.ConstantsPrefs.Companion.MP_RESET_RECOVERY_STARTED
-import com.dashlane.preference.ConstantsPrefs.Companion.PASSWORD_RESTORE_INFO_BOX_CLOSED
-import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_MODEL_LAST_CHECK_TIMESTAMP
-import com.dashlane.preference.ConstantsPrefs.Companion.PHISHING_WARNING_IGNORED_WEBSITES
 import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_LENGTH
 import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_ON
 import com.dashlane.preference.ConstantsPrefs.Companion.PINCODE_TRY_COUNT
@@ -39,7 +39,6 @@ import com.dashlane.preference.ConstantsPrefs.Companion.RSA_PUBLIC_KEY
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_2FA_DISABLED
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_ON_LOGIN_PAYWALL
 import com.dashlane.preference.ConstantsPrefs.Companion.SETTINGS_SHOULD_SYNC
-import com.dashlane.preference.ConstantsPrefs.Companion.SUNSET_BANNER_DISPLAYED
 import com.dashlane.preference.ConstantsPrefs.Companion.TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP
 import com.dashlane.preference.ConstantsPrefs.Companion.UKI_TEMPORARY_MONOBUCKET
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_ACTIVITY_UPDATE_DATE
@@ -48,32 +47,35 @@ import com.dashlane.preference.ConstantsPrefs.Companion.USER_SETTINGS_BACKUP_TIM
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_SUBSCRIPTION_CODE
 import com.dashlane.preference.ConstantsPrefs.Companion.USE_INLINE_AUTOFILL_SETTING
 import com.dashlane.preference.ConstantsPrefs.Companion.VAULT_REPORT_LATEST_TRIGGER_TIMESTAMP
-import com.dashlane.preference.ConstantsPrefs.Companion.VPN_THIRD_PARTY_GET_STARTED_DISPLAYED
-import com.dashlane.preference.ConstantsPrefs.Companion.VPN_THIRD_PARTY_INFOBOX_DISMISSED
 import com.dashlane.user.Username
 import com.dashlane.util.MD5Hash
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class PreferencesManager @Inject constructor(@ApplicationContext private val context: Context) {
-
+@Singleton
+class PreferencesManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
     private val userPreferencesManagers: MutableMap<String, UserPreferencesManager> = mutableMapOf()
 
     operator fun get(username: Username?): UserPreferencesManager = get(username?.email)
-    operator fun get(username: String?): UserPreferencesManager {
-        return username?.let {
-            userPreferencesManagers.getOrElse(username) {
-                UserPreferencesManager.CustomUser(context, username).also { userPreferencesManagers[username] = it }
-            }
-        } ?: run {
-            UserPreferencesManager.CustomUser(context, null)
+
+    operator fun get(username: String?): UserPreferencesManager = username?.let {
+        userPreferencesManagers.getOrElse(username) {
+            UserPreferencesManager.CustomUser(context, username).also { userPreferencesManagers[username] = it }
         }
+    } ?: run {
+        UserPreferencesManager.CustomUser(context, null)
+    }
+
+    fun changeEmail(previousEmail: Username, newEmail: Username) {
+        this[previousEmail].getAll()?.let { this[newEmail].addAll(it) }
     }
 }
 
 abstract class UserPreferencesManager : DashlanePreferencesManager() {
-
     var accessKey: String? by stringPreference(ACCESS_KEY)
     var accountType: String? by stringPreference(ACCOUNT_TYPE)
     var publicKey: String? by stringPreference(RSA_PUBLIC_KEY)
@@ -98,14 +100,14 @@ abstract class UserPreferencesManager : DashlanePreferencesManager() {
 
     var hasInlineAutofill by booleanPreference(USE_INLINE_AUTOFILL_SETTING, true)
     var requestDisplayKeyboardAnnouncement by booleanPreference(
-        REQUEST_DISPLAY_KEYBOARD_ANNOUNCEMENT
+        REQUEST_DISPLAY_KEYBOARD_ANNOUNCEMENT,
     )
 
     var keyboardAutofillAnnouncementTimestamp by longPreference(
-        KEYBOARD_AUTOFILL_ANNOUNCEMENT_TIMESTAMP
+        KEYBOARD_AUTOFILL_ANNOUNCEMENT_TIMESTAMP,
     )
     var hasSeenKeyboardOnBoardingSuggestion by booleanPreference(
-        HAS_SEEN_KEYBOARD_ON_BOARDING_SUGGESTION
+        HAS_SEEN_KEYBOARD_ON_BOARDING_SUGGESTION,
     )
 
     var publicUserId by stringPreference(PUBLIC_USER_ID)
@@ -148,17 +150,17 @@ abstract class UserPreferencesManager : DashlanePreferencesManager() {
     var isFollowUpNotificationChecked by booleanPreference(FOLLOW_UP_NOTIFICATION_SETTING, true)
     var hasSeenFollowUpNotificationDiscoveryScreen: Boolean by booleanPreference(
         FOLLOW_UP_NOTIFICATION_DISCOVERY_SCREEN,
-        false
+        false,
     )
     var hasAcknowledgedFollowUpNotificationReminderScreen: Boolean by booleanPreference(
         FOLLOW_UP_NOTIFICATION_REMINDER_SCREEN,
-        false
+        false,
     )
     var lastFollowUpNotificationItem: Triple<String, String, Boolean>
         get() = Triple(
             getString(FOLLOW_UP_NOTIFICATION_LAST_ITEM_ID) ?: "",
             getString(FOLLOW_UP_NOTIFICATION_LAST_NOTIFICATION_ID) ?: "",
-            getBoolean(FOLLOW_UP_NOTIFICATION_HAS_INTERACTED, false)
+            getBoolean(FOLLOW_UP_NOTIFICATION_HAS_INTERACTED, false),
         )
         set(value) {
             putString(FOLLOW_UP_NOTIFICATION_LAST_ITEM_ID, value.first)
@@ -168,23 +170,13 @@ abstract class UserPreferencesManager : DashlanePreferencesManager() {
 
     var isMpResetRecoveryStarted by booleanPreference(MP_RESET_RECOVERY_STARTED, false)
 
-    var isThirdPartyVpnInfoboxDismissed by booleanPreference(
-        VPN_THIRD_PARTY_INFOBOX_DISMISSED,
-        false
-    )
-
-    var isThirdPartyVpnGetStartedDisplayed by booleanPreference(
-        VPN_THIRD_PARTY_GET_STARTED_DISPLAYED,
-        false
-    )
-
     var cryptoMigrationAttemptDate: Instant?
         get() =
             if (contains(CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP)) {
                 Instant.ofEpochMilli(
                     getLong(
-                        CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP
-                    )
+                        CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP,
+                    ),
                 )
             } else {
                 null
@@ -195,14 +187,14 @@ abstract class UserPreferencesManager : DashlanePreferencesManager() {
             } else {
                 putLong(
                     CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP,
-                    value.toEpochMilli()
+                    value.toEpochMilli(),
                 )
             }
         }
 
     var biometricSealPaddingMigrationAttempt by booleanPreference(
         BIOMETRIC_SEAL_PADDING_MIGRATION_ATTEMPT,
-        false
+        false,
     )
 
     var vaultReportLatestTriggerTimestamp: Instant
@@ -217,42 +209,45 @@ abstract class UserPreferencesManager : DashlanePreferencesManager() {
             putLong(USER_ACTIVITY_UPDATE_DATE, value.epochSecond)
         }
 
-    var latestCheckPhishingModelVersion: Instant
-        get() = Instant.ofEpochSecond(getLong(PHISHING_MODEL_LAST_CHECK_TIMESTAMP, 0))
-        set(value) {
-            putLong(PHISHING_MODEL_LAST_CHECK_TIMESTAMP, value.epochSecond)
-        }
-
     var subscriptionCode by stringPreference(USER_SUBSCRIPTION_CODE)
 
     var mplessARKEnabled by booleanPreference(MPLESS_ARK_ENABLED)
 
     var trialEndedAnnouncementTimestamp by longPreference(TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP)
 
-    var hasSunsetBannerDisplayed by booleanPreference(SUNSET_BANNER_DISPLAYED, false)
+    var canShowAutofillAnnouncement by booleanPreference(CAN_SHOW_AUTOFILL_ANNOUNCEMENT, true)
 
-    fun cleanPasswordChangedInfoBoxForItem(itemId: String) {
-        val list = getList(PASSWORD_RESTORE_INFO_BOX_CLOSED)?.toMutableList() ?: mutableListOf()
-        
-        list.removeAll { it.startsWith(itemId) }
-    }
+    var canShowChromeAnnouncement by booleanPreference(CAN_SHOW_CHROME_ANNOUNCEMENT, true)
 
-    fun getLabsActivated(): List<String> {
-        return getList(LABS_ACTIVATED) ?: emptyList()
-    }
+    fun getLabsActivated() = getList(LABS_ACTIVATED) ?: emptyList()
 
     fun setLabsActivated(list: List<String>) {
         putList(LABS_ACTIVATED, list)
     }
 
-    fun addPhishingWebsiteIgnored(website: String) {
-        val list = getList(PHISHING_WARNING_IGNORED_WEBSITES)?.toMutableList() ?: mutableListOf()
-        list.add(website)
-        putList(PHISHING_WARNING_IGNORED_WEBSITES, list)
-    }
+    fun getAll() = sharedPreferences?.all
 
-    fun getPhishingWebsiteIgnored(): List<String> {
-        return getList(PHISHING_WARNING_IGNORED_WEBSITES) ?: emptyList()
+    @Suppress("UNCHECKED_CAST")
+    fun addAll(values: Map<String, *>) {
+        sharedPreferences?.edit {
+            values.forEach { key, value ->
+                when (value) {
+                    is Boolean -> putBoolean(key, value)
+                    is Float -> putFloat(key, value)
+                    is Int -> putInt(key, value)
+                    is Long -> putLong(key, value)
+                    is String -> putString(key, value)
+                    is Set<*> -> {
+                        try {
+                            putStringSet(key, value as Set<String>)
+                        } catch (e: Exception) {
+                            
+                        }
+                    }
+                }
+            }
+            apply()
+        }
     }
 
     class CustomUser(context: Context, username: String?) : UserPreferencesManager() {

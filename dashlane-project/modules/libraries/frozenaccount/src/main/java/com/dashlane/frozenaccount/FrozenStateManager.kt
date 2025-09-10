@@ -13,7 +13,7 @@ interface FrozenStateManager {
 
 class FrozenStateManagerImpl @Inject constructor(
     private val passwordLimiter: PasswordLimiter,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val userFeaturesChecker: UserFeaturesChecker,
 ) : FrozenStateManager {
     override val isAccountFrozen: Boolean
         get() = passwordLimiter.isPasswordLimitExceeded() && isUserFrozenOnLimitBreached()
@@ -23,6 +23,6 @@ class FrozenStateManagerImpl @Inject constructor(
 
     private fun isUserFrozenOnLimitBreached(): Boolean {
         return userFeaturesChecker.has(PASSWORDSLIMIT) &&
-                userFeaturesChecker.getCapabilityInfo(PASSWORDSLIMIT)?.action == ENFORCE_FREEZE
+            userFeaturesChecker.getCapabilityInfo(PASSWORDSLIMIT)?.action == ENFORCE_FREEZE
     }
 }

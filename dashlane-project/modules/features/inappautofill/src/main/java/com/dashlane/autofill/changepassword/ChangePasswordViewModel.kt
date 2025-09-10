@@ -5,29 +5,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordErrors
 import com.dashlane.autofill.changepassword.domain.CredentialUpdateInfo
-import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.util.isSemanticallyNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.loginForUi
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @HiltViewModel
 class ChangePasswordViewModel @Inject constructor(
     @IoCoroutineDispatcher private val ioCoroutineDispatcher: CoroutineDispatcher,
     private val logger: AutofillChangePasswordLogger,
     private val provider: ChangePasswordDataProvider,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val stateFlow = MutableStateFlow<AutofillChangePasswordState>(
-        AutofillChangePasswordState.Initial(AutofillChangePasswordData(false))
+        AutofillChangePasswordState.Initial(AutofillChangePasswordData(false)),
     )
     val uiState = stateFlow.asStateFlow()
 
@@ -103,8 +103,8 @@ class ChangePasswordViewModel @Inject constructor(
         stateFlow.tryEmit(
             AutofillChangePasswordState.Error(
                 stateFlow.value.data,
-                error = errorRaised
-            )
+                error = errorRaised,
+            ),
         )
     }
 }

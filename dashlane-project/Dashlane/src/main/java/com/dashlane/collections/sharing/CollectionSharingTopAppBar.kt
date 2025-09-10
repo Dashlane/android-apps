@@ -1,8 +1,9 @@
 package com.dashlane.collections.sharing
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.IconButton
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
@@ -14,10 +15,11 @@ import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Icon
 import com.dashlane.design.iconography.IconTokens
-import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
+import com.dashlane.ui.common.compose.components.components.DashlaneTopAppBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CollectionSharingTopAppBar(
     title: String,
@@ -26,7 +28,7 @@ internal fun CollectionSharingTopAppBar(
     viewData: CollectionSharingViewState.ViewData,
     searchQuery: MutableState<String>,
     isSearching: MutableState<Boolean>,
-    listener: CollectionSharingAppBarListener
+    listener: CollectionSharingAppBarListener,
 ) {
     TopAppBar(
         title = {
@@ -35,7 +37,7 @@ internal fun CollectionSharingTopAppBar(
                 searchLabel = searchHint,
                 title = title,
                 searchQuery = searchQuery,
-                isSearching = isSearching
+                isSearching = isSearching,
             )
         },
         navigationIcon = {
@@ -49,7 +51,7 @@ internal fun CollectionSharingTopAppBar(
                     } else {
                         listener.onCloseClicked()
                     }
-                }
+                },
             ) {
                 Icon(
                     token = if (viewData.showSearch) {
@@ -58,11 +60,10 @@ internal fun CollectionSharingTopAppBar(
                         IconTokens.actionCloseOutlined
                     },
                     contentDescription = stringResource(id = R.string.and_accessibility_close),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
         },
-        backgroundColor = DashlaneTheme.colors.containerAgnosticNeutralStandard,
         actions = {
             ButtonMedium(
                 onClick = {
@@ -71,16 +72,18 @@ internal fun CollectionSharingTopAppBar(
                 },
                 layout = ButtonLayout.IconOnly(
                     IconTokens.actionSearchOutlined,
-                    stringResource(R.string.collection_new_share_search_accessibility)
+                    stringResource(R.string.collection_new_share_search_accessibility),
                 ),
                 mood = Mood.Neutral,
-                intensity = Intensity.Supershy
+                intensity = Intensity.Supershy,
             )
-        }
+        },
+        colors = DashlaneTopAppBar.defaultColors,
     )
 }
 
 internal interface CollectionSharingAppBarListener {
     fun onCloseClicked()
+
     fun onToggleSearch()
 }

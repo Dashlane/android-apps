@@ -10,12 +10,11 @@ import javax.inject.Inject
 
 class AuthentifiantHistoryGenerator @Inject constructor(
     private val sessionManager: SessionManager,
-    override val query: DataChangeHistoryQuery
+    override val query: DataChangeHistoryQuery,
 ) : AbstractHistoryGenerator<SyncObject.Authentifiant>() {
-
     override fun newChangeSet(
         oldItem: VaultItem<SyncObject.Authentifiant>,
-        newItem: VaultItem<SyncObject.Authentifiant>
+        newItem: VaultItem<SyncObject.Authentifiant>,
     ): SyncObject.DataChangeHistory.ChangeSet {
         val session = sessionManager.session ?: throw NotLoggedInException()
         return newItem.toChangeSet(oldItem.syncObject, userName = session.userId)

@@ -8,8 +8,11 @@ import com.dashlane.bottomnavigation.R
 
 interface NavigableBottomSheetActivity {
     fun getBottomSheetNavigationGraphId(): Int
+
     fun getStartDestinationId(): Int = R.id.use_graph_start_destination
+
     fun getStartDestinationArgs(): Bundle? = null
+
     fun getConsumeBackPress(): Boolean = true
 
     fun configureBottomSheetDialogNavigation(bottomSheetDialogNavHostFragmentId: Int) {
@@ -20,12 +23,12 @@ interface NavigableBottomSheetActivity {
             navigationGraphId = getBottomSheetNavigationGraphId(),
             startDestinationId = getStartDestinationId(),
             startDestinationArgs = getStartDestinationArgs(),
-            consumeBackPress = getConsumeBackPress()
+            consumeBackPress = getConsumeBackPress(),
         ).toBundle()
 
         navController.setGraph(
             R.navigation.navigable_bottom_sheet_dialog_navigation,
-            startDestinationArgs
+            startDestinationArgs,
         )
     }
 }

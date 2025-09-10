@@ -19,9 +19,8 @@ data class CounterFilter(
     override var dataTypeFilter: DataTypeFilter = AllDataTypeFilter,
     override var spaceFilter: SpaceFilter = NoSpaceFilter,
     override var lockFilter: LockFilter = DefaultLockFilter,
-    override var statusFilter: StatusFilter = DefaultStatusFilter
+    override var statusFilter: StatusFilter = DefaultStatusFilter,
 ) : BaseFilter, EditableDataTypeFilter, EditableSpaceFilter, EditableLockFilter, EditableStatusFilter {
-
     override fun getSpacesRestrictions(currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter) =
         spaceFilter.getSpacesRestrictions(currentTeamSpaceUiFilter)
 

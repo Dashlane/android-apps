@@ -9,6 +9,7 @@ interface AutofillFormSourcesStrings {
     val websiteTypeString: String
 
     fun getApplicationString(applicationFormSource: ApplicationFormSource): String
+
     fun getWebDomainString(webDomainFormSource: WebDomainFormSource): String
 
     fun getAutoFillFormSourceString(autoFillFormSource: AutoFillFormSource): String {

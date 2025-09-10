@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/search_vault_item.json",
+  "type": "object",
+  "description": "When the user exits the search UI\r\r\r\rWARNING: The structure shown here might not be fully implemented and validated. Please check the implementation status here\r\rhttps://confluence.dashlane.com/pages/viewpage.action?pageId=350869743#ImplementationstatusofSharingandVaulttracking-search_vault_item",
+  "metas": {
+    "area": "vault"
+  },
+  "properties": {
+    "name": {
+      "const": "search_vault_item"
+    },
+    "characters_typed_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/characters_typed_count"
+    },
+    "collection_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/search_collection_count"
+    },
+    "has_clicked_collection": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/has_clicked_collection"
+    },
+    "has_interacted": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/has_interacted"
+    },
+    "highlight": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/highlight"
+    },
+    "total_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/total_count"
+    }
+  },
+  "required": [
+    "name",
+    "characters_typed_count",
+    "has_interacted",
+    "total_count"
+  ],
+  "additionalProperties": false
+}

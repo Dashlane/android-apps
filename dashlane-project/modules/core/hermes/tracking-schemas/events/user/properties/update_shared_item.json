@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/update_shared_item.json",
+  "type": "object",
+  "description": "When permissions for a shared item have been updated\r\r\r\rWARNING: This event was only implemented in iOS platform. Since then it was decided to cancel its implementation and the client side tracking was replaced by a data model based on server data. Please check the implementation status here\r\rhttps://confluence.dashlane.com/pages/viewpage.action?pageId=350869743#ImplementationstatusofSharingandVaulttracking-update_shared_item",
+  "metas": {
+    "area": "sharing"
+  },
+  "properties": {
+    "name": {
+      "const": "update_shared_item"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/sharing_item_type"
+    },
+    "rights": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/rights"
+    },
+    "update_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/update_status"
+    }
+  },
+  "required": [
+    "name",
+    "item_type",
+    "rights",
+    "update_status"
+  ],
+  "additionalProperties": false
+}

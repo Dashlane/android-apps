@@ -10,9 +10,8 @@ import com.dashlane.vault.summary.SummaryObject
 open class LoginAction(
     private val url: String,
     private val linkedServices: SummaryObject.LinkedServices?,
-    private val listener: LoginOpener.Listener? = null
+    private val listener: LoginOpener.Listener? = null,
 ) : Action {
-
     override val icon: Int = R.drawable.ic_action_open
 
     override val tintColorRes: Int? = null

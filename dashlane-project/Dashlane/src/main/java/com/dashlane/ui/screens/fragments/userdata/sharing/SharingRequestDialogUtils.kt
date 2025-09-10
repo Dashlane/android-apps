@@ -12,7 +12,7 @@ fun FragmentManager.showLoadingDialog(context: Context) {
         false,
         context.getString(R.string.contacting_dashlane),
         context.getString(R.string.contacting_dashlane),
-        this
+        this,
     )
 }
 

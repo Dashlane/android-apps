@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class QuickActionsBottomSheetFragment : ExpandedBottomSheetDialogFragment() {
-
     @Inject
     lateinit var genericDataQuery: GenericDataQuery
 
@@ -57,7 +56,7 @@ class QuickActionsBottomSheetFragment : ExpandedBottomSheetDialogFragment() {
                 itemListContext = itemListContext,
                 lockManager = lockManager,
                 dataQuery = genericDataQuery,
-                originPage = originPage
+                originPage = originPage,
             )
             viewProxy.setPresenter(presenter)
             presenter.setView(viewProxy)

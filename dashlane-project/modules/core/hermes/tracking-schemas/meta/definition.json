@@ -1,0 +1,458 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Meta schema for definition validation.",
+  "type": "object",
+  "definitions": {
+    "required": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "valueType": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "A boolean property.",
+          "properties": {
+            "type": {
+              "const": "boolean"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "default": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "description"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A 32-bit integer value property.",
+          "properties": {
+            "type": {
+              "const": "integer"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "description"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A floating value property.",
+          "properties": {
+            "type": {
+              "const": "number"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "description"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A string property with a regex pattern",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "pattern": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "pattern"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A free string property. Use with caution",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "examples": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "minLength": {
+              "type": "integer"
+            },
+            "maxLength": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "examples"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A UUID property.",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "format": {
+              "const": "uuid"
+            },
+            "pattern": {
+              "const": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "format",
+            "pattern"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A Dashlane id property, UUId with optional curly brackets.",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "format": {
+              "const": "item_id"
+            },
+            "pattern": {
+              "const": "\\s?[{]?[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}[}]?[\\s]?|[A-Z]+(_[A-Z]+)*_userId*$"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "format",
+            "pattern"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A hexadecimal SHA-256 property, ie a string of length 64 consisting only of lowercase hexadecimal characters, for example 1191b6d2199790c5bad2b8c3d678c2aa41a23e2809ce7aa9fbec8778bc5c2973.",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "format": {
+              "const": "sha256"
+            },
+            "pattern": {
+              "const": "^$|^[A-Fa-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "format"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A date property for example `2007-12-03`.",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "format": {
+              "const": "date"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "format"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "A date-time property with time zone information, for example `2007-12-03T10:15:30+01:00[Europe/Paris]`.",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "format": {
+              "const": "date-time"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "format"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "An array of items whose type is defined by a reference to a complex type definition.",
+          "properties": {
+            "type": {
+              "const": "array"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "items": {
+              "type": "object",
+              "description": "A property whose type is defined by a reference to a complex type definition.",
+              "properties": {
+                "$ref": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "$ref"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "items",
+            "description"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "String enum type.",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "enum": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z]+([_/]?[a-z0-9]+)*$"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "enum"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "The definition of 'oneOf'. To be used with caution, this is not supported by clients, except for pages where it is hard coded.",
+          "properties": {
+            "deprecated": {
+              "type": "boolean"
+            },
+            "oneOf": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "description": "A property whose type is defined by a reference to a complex type definition. Only pages are supported.",
+                "oneOf": [
+                  {
+                    "properties": {
+                      "$ref": {
+                        "const": "https://track-production.service.kwift.eu/1.31.6/definitions/browse/pages.json#/definitions/page"
+                      }
+                    },
+                    "required": [
+                      "$ref"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "properties": {
+                      "$ref": {
+                        "const": "https://track-production.service.kwift.eu/1.31.6/definitions/browse/pages.json#/definitions/priority_page"
+                      }
+                    },
+                    "required": [
+                      "$ref"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "oneOf"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "The definition of an Object.",
+          "properties": {
+            "type": {
+              "const": "object"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "properties": {
+              "type": "object",
+              "patternProperties": {
+                "^([a-z][a-z]*)(_[a-z]+)*$": {
+                  "type": "object",
+                  "description": "A property whose type is defined by a reference to a complex type definition.",
+                  "properties": {
+                    "deprecated": {
+                      "type": "boolean"
+                    },
+                    "$ref": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "$ref"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": {
+              "$ref": "#/definitions/required"
+            },
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "description",
+            "properties"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "properties": {
+    "$schema": {
+      "const": "http://json-schema.org/draft-07/schema#"
+    },
+    "$id": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://track-production.service.kwift.eu/1.31.6/definitions/.*$"
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the event and of when it should be reported."
+    },
+    "type": {
+      "const": "object"
+    },
+    "definitions": {
+      "type": "object",
+      "patternProperties": {
+        "^([a-z][a-z]*)(_[a-z]+)*$": {
+          "$ref": "#/definitions/valueType"
+        }
+      }
+    }
+  },
+  "required": [
+    "$schema",
+    "$id",
+    "description",
+    "type",
+    "definitions"
+  ],
+  "additionalProperties": false
+}

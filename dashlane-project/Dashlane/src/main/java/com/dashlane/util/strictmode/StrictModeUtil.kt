@@ -24,7 +24,7 @@ object StrictModeUtil {
     private val DISK_VIOLATION_WHITELIST = listOf(
         "SharedPreferencesImpl",
         "GlobalPreferencesManager",
-        "DeviceInfoRepositoryImpl"
+        "DeviceInfoRepositoryImpl",
     )
 
     private fun setRules() {
@@ -41,7 +41,8 @@ object StrictModeUtil {
                     StrictMode.OnThreadViolationListener { violation ->
                         when (violation) {
                             is DiskWriteViolation,
-                            is DiskReadViolation -> {
+                            is DiskReadViolation,
+                            -> {
                                 if (isViolationException(violation, DISK_VIOLATION_WHITELIST)) {
                                     
                                     return@OnThreadViolationListener
@@ -49,9 +50,9 @@ object StrictModeUtil {
                             }
                         }
                         handleViolation(level, violation)
-                    }
+                    },
                 )
-            }.build()
+            }.build(),
         )
 
         
@@ -69,15 +70,15 @@ object StrictModeUtil {
                                 }
                             }
                             handleViolation(level, violation)
-                        }
+                        },
                     )
-                }.build()
+                }.build(),
         )
     }
 
     private fun isViolationException(
         violation: Violation,
-        exceptions: List<String>
+        exceptions: List<String>,
     ): Boolean {
         exceptions.forEach { exception ->
             if (violation.stackTrace.any { it.toString().contains(exception) }) {

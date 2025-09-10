@@ -9,6 +9,9 @@ import com.github.devnied.emvnfccard.utils.EnumUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class Service extends AbstractData {
 
     private static final long serialVersionUID = 5154895810563519768L;

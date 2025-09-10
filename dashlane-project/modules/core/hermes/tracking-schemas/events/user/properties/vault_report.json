@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/vault_report.json",
+  "type": "object",
+  "description": "For a given “scope” value, this event is sent after a successful sync (note that every login triggers a sync). It is sent only if the latest sending was more than 24 hours ago for this user on this device.\r\rExample 1 (in the same installation):\r\r 1 - I log in with my first account \r\r 2 - A vault_report event is triggered (assuming it was not triggered on this installation by this user within the past 24 hours)\r\r 3 - I log out\r\r 4 - I log in with my second account \r\r 5 - A vault_report is triggered (assuming it was not triggered on this installation by this user within the past 24 hours)\r\r\r\r Example 2 (with the same user account):\r\r 1 - I log in with my first device \r\r 2 - A vault_report event is triggered \r\r 3 - I log out\r\r 4 - I log in with my second device \r\r 5 - A vault_report is triggered \r\r\r\r Item type grouping:\r\r passwords [item_type = credential]\r\r secure_notes [item_type = secure_note]\r\r payments [item_type in (credit_card, paypal, bank_statement)]\r\r personal_info [item_type in (identity, email, phone, address, company, website)]\r\r ids [item_type in (id_card, social_security, driver_licence , passport, fiscal_statement)].\r\r\r\rWARNING: The structure shown here might not be fully implemented. Please check the implementation status here\r\rhttps://confluence.dashlane.com/pages/viewpage.action?pageId=350869743#ImplementationstatusofSharingandVaulttracking-vault_report",
+  "metas": {
+    "priority": true,
+    "area": "state"
+  },
+  "properties": {
+    "name": {
+      "const": "vault_report"
+    },
+    "collections_per_item_average_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/collections_per_item_average_count"
+    },
+    "collections_shared_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/items_shared_count"
+    },
+    "collections_total_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/collections_total_count"
+    },
+    "dark_web_alerts_active_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/dark_web_alerts_active_count"
+    },
+    "dark_web_alerts_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/dark_web_alerts_count"
+    },
+    "domains_without_autofill_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/domains_without_autofill_count"
+    },
+    "ids": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_counts"
+    },
+    "items_per_collection_average_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/items_per_collection_average_count"
+    },
+    "items_shared_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/items_shared_count"
+    },
+    "items_total_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/items_total_count"
+    },
+    "passkeys": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_counts"
+    },
+    "password_changer_compatible_credentials_count": {
+      "deprecated": true,
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/password_changer_compatible_credentials_count"
+    },
+    "passwords": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_counts"
+    },
+    "passwords_compromised_compatible_with_password_changer_count": {
+      "deprecated": true,
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_compromised_compatible_with_password_changer_count"
+    },
+    "passwords_compromised_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_compromised_count"
+    },
+    "passwords_compromised_through_dark_web_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_compromised_through_dark_web_count"
+    },
+    "passwords_excluded_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_excluded_count"
+    },
+    "passwords_protected_with_master_password_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_protected_with_master_password_count"
+    },
+    "passwords_reused_compatible_with_password_changer_count": {
+      "deprecated": true,
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_reused_compatible_with_password_changer_count"
+    },
+    "passwords_reused_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_reused_count"
+    },
+    "passwords_safe_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_safe_count"
+    },
+    "passwords_total_count": {
+      "deprecated": true,
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_total_count"
+    },
+    "passwords_weak_compatible_with_password_changer_count": {
+      "deprecated": true,
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_weak_compatible_with_password_changer_count"
+    },
+    "passwords_weak_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_weak_count"
+    },
+    "passwords_with_autologin_disabled_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_with_autologin_disabled_count"
+    },
+    "passwords_with_otp_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/passwords_with_otp_count"
+    },
+    "payments": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_counts"
+    },
+    "personal_info": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_counts"
+    },
+    "scope": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/scope"
+    },
+    "secrets": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_counts"
+    },
+    "secure_notes": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_counts"
+    },
+    "security_alerts_active_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/security_alerts_active_count"
+    },
+    "security_alerts_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/security_alerts_count"
+    },
+    "security_score": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/security_score"
+    }
+  },
+  "required": [
+    "name",
+    "ids",
+    "passwords",
+    "passwords_compromised_count",
+    "passwords_excluded_count",
+    "passwords_reused_count",
+    "passwords_safe_count",
+    "passwords_weak_count",
+    "passwords_with_otp_count",
+    "payments",
+    "personal_info",
+    "scope",
+    "secure_notes"
+  ],
+  "additionalProperties": false
+}

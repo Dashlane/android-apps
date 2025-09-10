@@ -8,7 +8,7 @@ import com.dashlane.util.domain.PopularWebsiteUtils.getPopularWebsites
 class InstalledAppAndPopularWebsiteLoader(
     private val fragment: Fragment,
     private val listener: Listener,
-    private val knownApplicationProvider: KnownApplicationProvider
+    private val knownApplicationProvider: KnownApplicationProvider,
 ) : DataLoaderForUi<List<String?>?>(fragment) {
     interface Listener {
         fun onLoadFinished(result: List<String>?)

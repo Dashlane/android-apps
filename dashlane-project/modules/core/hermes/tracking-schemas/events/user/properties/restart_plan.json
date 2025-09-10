@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/restart_plan.json",
+  "type": "object",
+  "description": "In its B2C account management space, the user clicks on restart subscription. It restarts the subscription if it was cancelled and/or it enable the auto-renew again.",
+  "metas": {
+    "area": "plan"
+  },
+  "properties": {
+    "name": {
+      "const": "restart_plan"
+    },
+    "plan": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/plan"
+    },
+    "plan_billing_period": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/plan_billing_period"
+    }
+  },
+  "required": [
+    "name",
+    "plan",
+    "plan_billing_period"
+  ],
+  "additionalProperties": false
+}

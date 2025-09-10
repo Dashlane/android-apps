@@ -9,7 +9,7 @@ fun hasCorrectDomain(
     url: String?,
     userSelectedUrl: String?,
     title: String?,
-    bundleWebsites: List<String?>?
+    bundleWebsites: List<String?>?,
 ): Boolean {
     val domains = filter.domains ?: return true 
     val websiteKeywords = domains.flatMap {
@@ -17,13 +17,13 @@ fun hasCorrectDomain(
     }
     for (keyword in websiteKeywords.distinct()) {
         val hasMatch = url?.matchDomain(keyword) ?: false ||
-                userSelectedUrl?.matchDomain(keyword) ?: false ||
-                title?.hardMatchDomain(keyword) ?: false ||
-                (
-                    filter.allowSimilarDomains && bundleWebsites?.any {
+            userSelectedUrl?.matchDomain(keyword) ?: false ||
+            title?.hardMatchDomain(keyword) ?: false ||
+            (
+                filter.allowSimilarDomains && bundleWebsites?.any {
                     it?.matchDomain(keyword) ?: false
                 } ?: false
-                )
+            )
         if (hasMatch) return true
     }
     

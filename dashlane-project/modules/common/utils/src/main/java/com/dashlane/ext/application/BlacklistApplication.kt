@@ -4,7 +4,7 @@ import com.dashlane.core.helpers.AppSignature
 
 object BlacklistApplication {
     data class AutofillBlackList(
-        override val packageName: String
+        override val packageName: String,
     ) : KnownApplication {
         override val signatures: AppSignature? = null
         override val mainDomain: String? = null
@@ -55,10 +55,10 @@ object BlacklistApplication {
         blackListAutoFillApp("com.ea.gp.fifaultimate"),
         blackListAutoFillApp("com.android.calendar"),
         blackListAutoFillApp("com.google.android.apps.docs"),
-        blackListAutoFillApp("com.android.contacts")
+        blackListAutoFillApp("com.android.contacts"),
     )
 
     private fun blackListAutoFillApp(
-        packageName: String
+        packageName: String,
     ) = AutofillBlackList(packageName)
 }

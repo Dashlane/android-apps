@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="biometric_settings_weak_warning_dialog_title">Your device biometrics is not the most secure</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_message">The biometric unlock method offered by your device could be compromised more easily than other methods. We recommend using a PIN instead.</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_positive_button_setup">Set up PIN</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_positive_button_keep">Keep PIN</string>
+    
+    <string name="biometric_settings_weak_warning_dialog_negative_button">Continue</string>
+
+    
+    <string name="account_recovery_weak_warning_dialog_title">Your device biometrics is not the most secure</string>
+    
+    <string name="account_recovery_weak_warning_dialog_message">Your device’s biometrics could be compromised more easily than other biometric methods. We don’t recommend using this as a recovery method.</string>
+    
+    <string name="account_recovery_weak_warning_dialog_positive_button">Continue</string>
+
+    
+    <string name="account_recovery_biometric_deactivation_title">This will also turn off biometric recovery</string>
+    
+    <string name="account_recovery_biometric_deactivation_message">Biometric unlock needs to be turned on to use biometric recovery.</string>
+    
+    <string name="account_recovery_biometric_deactivation_positive_cta">Disable both</string>
+
+    
+    <string name="account_recovery_deactivation_title">Turn off biometric recovery?</string>
+    
+    <string name="account_recovery_deactivation_message">You will not be able to access your account and data if you forget your Master Password</string>
+    
+    <string name="account_recovery_deactivation_positive_cta">Disable</string>
+    
+    <string name="account_recovery_deactivation_negative_cta">Keep enabled</string>
+
+    
+    <string name="disable_totp_confirmation_title">Turn off 2FA? </string>
+    <string name="disable_totp_confirmation_message">2FA is an extra layer of security. If you turn it off, you won’t be sent a push request or asked for a 6-digit token when logging in to your account.</string>
+    <string name="disable_totp_confirmation_cta_positive">Yes, turn off</string>
+    <string name="disable_totp_confirmation_cta_negative">Cancel</string>
+
+    
+    <string name="setting_choose_timeout">Auto-lock timeout</string>
+
+    
+    <string name="onboarding_dialog_auth_required_hardware_module_google_fp_title">Authenticate with biometric to activate it for Dashlane</string>
+
+    
+    <string name="settings_cryptography_description">Use %1$s for the key derivation</string>
+    <string name="settings_cryptography_dialog_title">You cannot edit this setting</string>
+    <string name="settings_cryptography_dialog_description_b2c">Please visit the Security settings on the web application to edit your key derivation function.</string>
+    <string name="settings_cryptography_dialog_description_b2b">Your account admin requires the use of this key derivation function as a result of company policy.</string>
+</resources>

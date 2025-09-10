@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 class VaultItemFieldContentServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val vaultDataQuery: VaultDataQuery
+    private val vaultDataQuery: VaultDataQuery,
 ) : VaultItemFieldContentService {
     override fun hasContent(item: SummaryObject, copyField: CopyField): Boolean {
         val genericMapper = copyField.contentMapper
@@ -57,7 +57,7 @@ class VaultItemFieldContentServiceImpl @Inject constructor(
             is CopyContent.FromRemoteItem -> {
                 val remoteItem = getVaultItem(
                     itemId = genericContent.uid,
-                    syncObjectType = genericContent.syncObjectType
+                    syncObjectType = genericContent.syncObjectType,
                 ) ?: return null
                 getContent(remoteItem, genericContent.copyField)
             }
@@ -73,7 +73,7 @@ class VaultItemFieldContentServiceImpl @Inject constructor(
             vaultFilter {
                 specificUid(itemId)
                 specificDataType(syncObjectType)
-            }
+            },
         )
     }
 

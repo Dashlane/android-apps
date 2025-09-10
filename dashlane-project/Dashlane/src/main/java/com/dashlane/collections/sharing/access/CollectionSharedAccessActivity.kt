@@ -2,6 +2,7 @@ package com.dashlane.collections.sharing.access
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import com.dashlane.R
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.ui.activities.DashlaneActivity
@@ -11,12 +12,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CollectionSharedAccessActivity : DashlaneActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
             DashlaneTheme {
                 CollectionSharedAccessScreen(
                     userInteractionListener = object : UserInteractionListener {
                         override fun onCloseClicked() = finish()
+
                         override fun onRevokeFailed() {
                             showRevokeFailed()
                         }
@@ -24,7 +27,7 @@ class CollectionSharedAccessActivity : DashlaneActivity() {
                         override fun onRevokeSuccess() {
                             showRevokeSuccess()
                         }
-                    }
+                    },
                 ).also {
                     totalMemberCountBeforeRevoke = 0
                 }
@@ -34,17 +37,19 @@ class CollectionSharedAccessActivity : DashlaneActivity() {
 
     private fun showRevokeSuccess() = SnackbarUtils.showSnackbar(
         this,
-        getString(R.string.collection_shared_access_revoke_success_text)
+        getString(R.string.collection_shared_access_revoke_success_text),
     )
 
     private fun showRevokeFailed() = SnackbarUtils.showSnackbar(
         this,
-        getString(R.string.collection_shared_access_revoke_error_text)
+        getString(R.string.collection_shared_access_revoke_error_text),
     )
 }
 
 internal interface UserInteractionListener {
     fun onCloseClicked()
+
     fun onRevokeSuccess()
+
     fun onRevokeFailed()
 }

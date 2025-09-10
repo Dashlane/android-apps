@@ -2,8 +2,8 @@ package com.dashlane.sync.repositories
 
 import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.server.api.endpoints.account.SharingKeys
-import com.dashlane.server.api.endpoints.sync.SyncDownloadService
-import com.dashlane.server.api.endpoints.sync.SyncUploadService
+import com.dashlane.server.api.endpoints.sync.GetLatestContentService
+import com.dashlane.server.api.endpoints.sync.UploadContentService
 import com.dashlane.server.api.time.InstantEpochMilli
 import com.dashlane.server.api.time.toInstant
 import com.dashlane.server.api.time.toInstantEpochMilli
@@ -17,9 +17,9 @@ import com.dashlane.sync.treat.SyncSummaryItem
 import com.dashlane.sync.util.SyncLogs
 import com.dashlane.sync.vault.SyncVault
 import com.dashlane.xml.domain.SyncObjectType
+import kotlinx.coroutines.flow.MutableSharedFlow
 import java.time.Instant
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 class ChronologicalSyncImpl @Inject constructor(
     private val syncServices: SyncServices,
@@ -27,9 +27,8 @@ class ChronologicalSyncImpl @Inject constructor(
     private val transactionCipher: TransactionCipher,
     private val incomingTransactionsHelper: IncomingTransactionsHelper,
     private val sharingSyncHelper: SharingSyncHelper,
-    private val syncLogs: SyncLogs
+    private val syncLogs: SyncLogs,
 ) : ChronologicalSync {
-
     override suspend fun sync(
         serverCredentials: ServerCredentials,
         vault: SyncVault,
@@ -49,7 +48,7 @@ class ChronologicalSyncImpl @Inject constructor(
         syncLogs.onSyncChronologicalStart(
             lastLocalSyncDate,
             outgoingTransactions.count { it is OutgoingTransaction.Update },
-            outgoingTransactions.count { it is OutgoingTransaction.Delete }
+            outgoingTransactions.count { it is OutgoingTransaction.Delete },
         )
 
         dataSyncState?.emit(DataSyncState.Active(SyncProgress.RemoteSync))
@@ -61,7 +60,7 @@ class ChronologicalSyncImpl @Inject constructor(
                 cryptographyEngineFactory,
                 vault,
                 outgoingTransactions,
-                dataSyncState
+                dataSyncState,
             )
 
         
@@ -80,10 +79,10 @@ class ChronologicalSyncImpl @Inject constructor(
             statistics = SyncRepository.Result.Statistics(
                 outgoingTransactions = SyncRepository.Result.Statistics.Outgoing(
                     outgoingUpdateCount,
-                    outgoingDeleteCount
+                    outgoingDeleteCount,
                 ),
-                incomingTransactions = vaultOperations.statistics
-            )
+                incomingTransactions = vaultOperations.statistics,
+            ),
         )
     }
 
@@ -96,11 +95,11 @@ class ChronologicalSyncImpl @Inject constructor(
         pendingOperations: List<OutgoingTransaction>,
         dataSyncState: MutableSharedFlow<DataSyncState>?,
     ): RemoteSyncResult {
-        val downloadRequest = SyncDownloadService.Request(
+        val downloadRequest = GetLatestContentService.Request(
             teamAdminGroups = false,
             needsKeys = requestSharingKeys,
             transactions = emptyList(),
-            timestamp = time.toInstantEpochMilli()
+            timestamp = time.toInstantEpochMilli(),
         )
         val downloadData = syncServices.download(serverCredentials, downloadRequest)
 
@@ -108,7 +107,7 @@ class ChronologicalSyncImpl @Inject constructor(
             downloadData = downloadData,
             cryptographyEngineFactory = cryptographyEngineFactory,
             dataSyncState = dataSyncState,
-            sharedIds = downloadData.sharing.toSharedIds()
+            sharedIds = downloadData.sharing.toSharedIds(),
         )
 
         val isSharingKeyGenerationNeeded = downloadRequest.needsKeys && downloadData.sharingKeys == null
@@ -123,7 +122,7 @@ class ChronologicalSyncImpl @Inject constructor(
                 isSharingKeyGenerationNeeded = isSharingKeyGenerationNeeded,
                 downloadData = downloadData,
                 serverCredentials = serverCredentials,
-                vault = vault
+                vault = vault,
             )
         } else {
             RemoteSyncResult(
@@ -131,7 +130,7 @@ class ChronologicalSyncImpl @Inject constructor(
                 downloadData.timestamp.toInstant(),
                 downloadData.summary,
                 sharingSummary,
-                downloadData.sharingKeys
+                downloadData.sharingKeys,
             )
         }
     }
@@ -142,22 +141,22 @@ class ChronologicalSyncImpl @Inject constructor(
         pendingOperations: List<OutgoingTransaction>,
         cryptographyEngineFactory: CryptographyEngineFactory,
         isSharingKeyGenerationNeeded: Boolean,
-        downloadData: SyncDownloadService.Data,
+        downloadData: GetLatestContentService.Data,
         serverCredentials: ServerCredentials,
-        vault: SyncVault
+        vault: SyncVault,
     ): RemoteSyncResult {
         dataSyncState?.emit(DataSyncState.Active(SyncProgress.Upload))
 
         
         val (mergedOutgoingTransactions, mergedIncomingTransactions) = syncMerger.mergeRemoteAndLocalData(
             incomingTransactions = incomingTransactions.transactions,
-            outgoingTransactions = pendingOperations
+            outgoingTransactions = pendingOperations,
         )
 
         
         val uploadTransactions = transactionCipher.cipherOutgoingTransactions(
             transactions = mergedOutgoingTransactions,
-            cryptographyEngineFactory = cryptographyEngineFactory
+            cryptographyEngineFactory = cryptographyEngineFactory,
         )
 
         val sharingKeys = if (isSharingKeyGenerationNeeded) {
@@ -166,7 +165,7 @@ class ChronologicalSyncImpl @Inject constructor(
             null
         }
 
-        val uploadRequest = SyncUploadService.Request(
+        val uploadRequest = UploadContentService.Request(
             transactions = uploadTransactions,
             sharingKeys = sharingKeys?.let { (publicKey, privateKey) ->
                 val encryptedPrivateKey = cryptographyEngineFactory.createEncryptionEngine().use { encryptionEngine ->
@@ -174,16 +173,16 @@ class ChronologicalSyncImpl @Inject constructor(
                 }
                 SharingKeys(
                     publicKey = publicKey.value,
-                    privateKey = encryptedPrivateKey.value
+                    privateKey = encryptedPrivateKey.value,
                 )
             },
-            timestamp = downloadData.timestamp
+            timestamp = downloadData.timestamp,
         )
 
         
         val uploadData = syncServices.upload(
             serverCredentials,
-            uploadRequest
+            uploadRequest,
         )
 
         sharingKeys?.let(sharingSyncHelper::saveSharingKeys)
@@ -196,7 +195,7 @@ class ChronologicalSyncImpl @Inject constructor(
             uploadData.timestamp.toInstant(),
             uploadData.summary,
             downloadData.sharing,
-            downloadData.sharingKeys
+            downloadData.sharingKeys,
         )
     }
 
@@ -204,15 +203,15 @@ class ChronologicalSyncImpl @Inject constructor(
         val incomingTransactions: IncomingTransactionsHelper.Result,
         val backupTime: Instant,
         val summary: Map<String, Map<String, InstantEpochMilli>>,
-        val sharingSyncSummaryJson: SyncDownloadService.Data.SharingSummary,
-        val downloadedSharingKeys: SharingKeys?
+        val sharingSyncSummaryJson: GetLatestContentService.Data.SharingSummary,
+        val downloadedSharingKeys: SharingKeys?,
     )
 
     private suspend fun syncLocal(
         vault: SyncVault,
         vaultOperations: List<IncomingTransaction>,
         dataSyncState: MutableSharedFlow<DataSyncState>?,
-        syncObjectTypes: List<SyncObjectType>
+        syncObjectTypes: List<SyncObjectType>,
     ) {
         
         vault.inTransaction {
@@ -234,11 +233,11 @@ class ChronologicalSyncImpl @Inject constructor(
                 is IncomingTransaction.Update -> insertOrUpdateForSync(
                     it.identifier,
                     it.syncObject,
-                    it.date.toEpochMilli()
+                    it.date.toEpochMilli(),
                 )
                 is IncomingTransaction.Delete -> deleteForSync(
                     it.syncObjectType.kClass,
-                    it.identifier
+                    it.identifier,
                 )
             }
         }
@@ -257,5 +256,5 @@ private fun Map<String, Map<String, InstantEpochMilli>>.toSummaryItems(): List<S
         }
     }
 
-internal fun SyncDownloadService.Data.SharingSummary.toSharedIds(): Set<String> =
+internal fun GetLatestContentService.Data.SharingSummary.toSharedIds(): Set<String> =
     items.mapTo(mutableSetOf()) { it.id }

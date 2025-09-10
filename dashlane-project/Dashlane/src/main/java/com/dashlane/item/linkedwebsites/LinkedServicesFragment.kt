@@ -31,12 +31,11 @@ import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.setCurrentPageView
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 open class LinkedServicesFragment : Fragment() {
-
     private val viewModel by viewModels<LinkedServicesViewModel>()
     private val websitesViewModel by viewModels<LinkedWebsitesViewModel>()
     private val appsViewModel by viewModels<LinkedAppsViewModel>()
@@ -63,7 +62,7 @@ open class LinkedServicesFragment : Fragment() {
         val binding = FragmentLinkedServicesBinding.inflate(layoutInflater)
         binding.viewpager.adapter = ListPagerAdapter(
             this,
-            listOf(LinkedWebsitesItemFragment(), LinkedAppsItemFragment())
+            listOf(LinkedWebsitesItemFragment(), LinkedAppsItemFragment()),
         )
         TabLayoutMediator(binding.servicesTabs, binding.viewpager) { tab, position ->
             val textResId = if (position == 0) {
@@ -105,7 +104,7 @@ open class LinkedServicesFragment : Fragment() {
                 override fun handleOnBackPressed() {
                     onClose(true)
                 }
-            }
+            },
         )
     }
 
@@ -168,7 +167,6 @@ open class LinkedServicesFragment : Fragment() {
             .setNegativeButtonText(getString(R.string.discart))
             .setPositiveButtonText(getString(R.string.dialog_save_item_save_button)).setCancelable(true)
             .setClickPositiveOnCancel(false).setClicker(object : NotificationDialogFragment.TwoButtonClicker {
-
                 override fun onNegativeButton() {
                     setResultAndClose(temporarySaveData = false, isDataSaved = false)
                 }
@@ -221,16 +219,16 @@ open class LinkedServicesFragment : Fragment() {
                     if (viewModel.hasWebsitesToSave(websitesViewModel.getEditableWebsitesResult())) {
                         putStringArray(
                             RESULT_TEMPORARY_WEBSITES,
-                            websitesViewModel.getEditableWebsitesResult().toTypedArray()
+                            websitesViewModel.getEditableWebsitesResult().toTypedArray(),
                         )
                     }
                     if (viewModel.hasAppsToSave(appsViewModel.getEditableAppsResult())) {
                         putStringArray(
                             RESULT_TEMPORARY_APPS,
-                            appsViewModel.getEditableAppsResult().toTypedArray()
+                            appsViewModel.getEditableAppsResult().toTypedArray(),
                         )
                     }
-                }
+                },
             )
         }
         if (isDataSaved) {
@@ -238,7 +236,7 @@ open class LinkedServicesFragment : Fragment() {
                 RESULT_LINKED_SERVICES,
                 Bundle().apply {
                     putBoolean(RESULT_DATA_SAVED, true)
-                }
+                },
             )
         }
         findNavController().popBackStack()
@@ -260,9 +258,8 @@ open class LinkedServicesFragment : Fragment() {
 
     private class ListPagerAdapter(
         parentFragment: Fragment,
-        private val linkedServicesFragments: List<Fragment>
+        private val linkedServicesFragments: List<Fragment>,
     ) : FragmentStateAdapter(parentFragment) {
-
         override fun getItemCount(): Int = linkedServicesFragments.size
 
         override fun createFragment(position: Int): Fragment = linkedServicesFragments[position]

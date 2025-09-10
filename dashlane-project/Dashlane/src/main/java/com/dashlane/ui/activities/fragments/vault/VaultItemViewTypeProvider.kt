@@ -5,15 +5,15 @@ import android.view.View
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.list.ItemWrapperViewHolder
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.vault.summary.SummaryObject
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class VaultItemViewTypeProvider(
     val summaryObject: SummaryObject,
     val itemListContext: ItemListContext,
-    itemWrapperProvider: ItemWrapperProvider
+    itemWrapperProvider: ItemWrapperProvider,
 ) : DashlaneRecyclerAdapter.MultiColumnViewTypeProvider {
     val itemWrapper = itemWrapperProvider(summaryObject, itemListContext)
 

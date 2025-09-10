@@ -6,16 +6,17 @@ import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.databinding.SharingPendingInvitationLayoutBinding
 import com.dashlane.design.component.compat.view.ThumbnailViewType
+import com.dashlane.sharing.SharingContact
 import com.dashlane.sharing.model.getUser
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class SharingInvitationCollection(
     context: Context,
     private val collectionInvite: SharingContact.CollectionInvite,
     private val onClickAccept: () -> Unit,
-    private val onClickDecline: () -> Unit
+    private val onClickDecline: () -> Unit,
 ) : MultiColumnViewTypeProvider {
     val displayTitle: String = collectionInvite.collection.name
     val displaySubtitle: String
@@ -33,7 +34,7 @@ class SharingInvitationCollection(
         return if (userCollectionDownload != null) {
             context.getString(
                 R.string.sharing_pending_invite_collection_description,
-                userCollectionDownload.referrer
+                userCollectionDownload.referrer,
             )
         } else {
             ""
@@ -43,6 +44,7 @@ class SharingInvitationCollection(
     class ItemViewHolder(itemView: View) :
         EfficientViewHolder<SharingInvitationCollection>(itemView) {
         private val viewBinding = SharingPendingInvitationLayoutBinding.bind(view)
+
         override fun updateView(context: Context, item: SharingInvitationCollection?) {
             item ?: return
             viewBinding.sharingPendingInviteTitle.text = item.displayTitle
@@ -74,13 +76,13 @@ class SharingInvitationCollection(
         private val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<out SharingInvitationCollection> =
             DashlaneRecyclerAdapter.ViewType(
                 R.layout.sharing_pending_invitation_layout_forwarder,
-                ItemViewHolder::class.java
+                ItemViewHolder::class.java,
             )
 
         fun comparator(): Comparator<SharingInvitationCollection> =
             compareBy(
                 { it.displayTitle },
-                { it.displaySubtitle }
+                { it.displaySubtitle },
             )
     }
 }

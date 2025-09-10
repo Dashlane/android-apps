@@ -28,21 +28,21 @@ fun DashlaneLoading(
     hasFinishedLoading: Boolean,
     verticalArrangement: Arrangement.Vertical,
     horizontalAlignment: Alignment.Horizontal,
-    successText: String? = null
+    successText: String? = null,
 ) {
     val success by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie_loading_success))
 
     Column(
         modifier = modifier,
         verticalArrangement = verticalArrangement,
-        horizontalAlignment = horizontalAlignment
+        horizontalAlignment = horizontalAlignment,
     ) {
         if (hasFinishedLoading) {
             LottieAnimation(
                 modifier = Modifier
                     .size(120.dp),
                 composition = success,
-                iterations = 1
+                iterations = 1,
             )
 
             successText?.let {
@@ -50,8 +50,8 @@ fun DashlaneLoading(
                     visible = true,
                     enter = fadeIn(
                         
-                        initialAlpha = 0.3f
-                    )
+                        initialAlpha = 0.3f,
+                    ),
                 ) {
                     Text(
                         text = successText,
@@ -59,7 +59,7 @@ fun DashlaneLoading(
                         color = DashlaneTheme.colors.textNeutralCatchy,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .padding(bottom = 32.dp)
+                            .padding(bottom = 32.dp),
                     )
                 }
             }
@@ -74,13 +74,13 @@ fun DashlaneLoading(
 
 @Composable
 fun IndeterminateLoading(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie_loading_indeterminate))
     LottieAnimation(
         modifier = modifier,
         iterations = LottieConstants.IterateForever,
-        composition = composition
+        composition = composition,
     )
 }
 
@@ -93,7 +93,7 @@ private fun DashlaneLoadingPreview() {
             hasFinishedLoading = false,
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            successText = "Success"
+            successText = "Success",
         )
     }
 }

@@ -11,7 +11,7 @@ open class ItemEditValueTextSubView(
     val allowReveal: Boolean = true,
     val multiline: Boolean = false,
     val coloredCharacter: Boolean = false,
-    val protectedStateListener: (Boolean) -> Unit = {}
+    val protectedStateListener: (Boolean) -> Unit = {},
 ) : ItemEditValueSubView<String>(valueUpdate) {
     var invisible: Boolean = false
 }

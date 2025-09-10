@@ -14,12 +14,15 @@ interface LockNavigationHelper {
         context: Context,
         reason: LockEvent.Unlock.Reason,
         lockPrompt: LockPrompt,
-        timeoutMs: Long = TimeUnit.MINUTES.toMillis(1)
+        timeoutMs: Long = TimeUnit.MINUTES.toMillis(1),
     ): LockEvent
 
     fun showLockActivityForAutofillApi(context: Context)
+
     suspend fun showLockActivityForFollowUpNotification(context: Context): LockEvent
+
     fun showLockActivityForInAppLogin(context: Context, itemUID: String?)
+
     fun showLockActivity(context: Context)
 
     fun logoutAndCallLoginScreenForInAppLogin(context: Context)

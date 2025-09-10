@@ -23,7 +23,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class DeleteVaultItemFragment : DialogFragment() {
-
     @Inject
     lateinit var navigator: Navigator
 
@@ -38,7 +37,7 @@ class DeleteVaultItemFragment : DialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -56,7 +55,7 @@ class DeleteVaultItemFragment : DialogFragment() {
                     DeleteVaultItemScreen(
                         state = state,
                         onConfirmed = { viewModel.deleteItem() },
-                        onCancelled = { closeDialog() }
+                        onCancelled = { closeDialog() },
                     )
                 }
             }
@@ -72,7 +71,7 @@ class DeleteVaultItemFragment : DialogFragment() {
         toaster.show(R.string.item_deleted, Toast.LENGTH_SHORT)
         parentFragmentManager.setFragmentResult(
             DELETE_VAULT_ITEM_RESULT,
-            bundleOf(DELETE_VAULT_ITEM_SUCCESS to true, DELETE_VAULT_ITEM_ID to itemId)
+            bundleOf(DELETE_VAULT_ITEM_SUCCESS to true, DELETE_VAULT_ITEM_ID to itemId),
         )
         closeDialog()
     }
@@ -81,7 +80,7 @@ class DeleteVaultItemFragment : DialogFragment() {
         toaster.show(R.string.network_failed_notification, Toast.LENGTH_LONG)
         parentFragmentManager.setFragmentResult(
             DELETE_VAULT_ITEM_RESULT,
-            bundleOf(DELETE_VAULT_ITEM_SUCCESS to false)
+            bundleOf(DELETE_VAULT_ITEM_SUCCESS to false),
         )
         closeDialog()
     }

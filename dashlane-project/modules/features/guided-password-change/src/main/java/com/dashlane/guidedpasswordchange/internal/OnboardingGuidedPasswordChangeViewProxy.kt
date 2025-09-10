@@ -13,10 +13,9 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 internal class OnboardingGuidedPasswordChangeViewProxy(
     private val activity: Activity,
     domain: String,
-    hasInlineAutofill: Boolean
+    hasInlineAutofill: Boolean,
 ) : BaseViewProxy<OnboardingGuidedPasswordChangeContract.Presenter>(activity),
     OnboardingGuidedPasswordChangeContract.ViewProxy {
-
     private val illustrations = findViewByIdEfficient<LottieAnimationView>(R.id.illustrations)!!.apply {
         addAnimatorUpdateListener {
             steps.lastOrNull { it.frameNumber <= frame }?.let {
@@ -54,8 +53,12 @@ internal class OnboardingGuidedPasswordChangeViewProxy(
         DialogHelper().builder(context, R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog)
             .setTitle(context.getString(R.string.guided_password_change_enable_autofill_dialog_title))
             .setMessage(context.getString(R.string.guided_password_change_enable_autofill_dialog_message))
-            .setPositiveButton(context.getString(R.string.guided_password_change_enable_autofill_dialog_positive_button)) { _, _ -> presenter.onEnableAutofillApiClicked() }
-            .setNegativeButton(context.getString(R.string.guided_password_change_enable_autofill_dialog_negative_button)) { _, _ -> activity.finish() }
+            .setPositiveButton(
+                context.getString(R.string.guided_password_change_enable_autofill_dialog_positive_button),
+            ) { _, _ -> presenter.onEnableAutofillApiClicked() }
+            .setNegativeButton(
+                context.getString(R.string.guided_password_change_enable_autofill_dialog_negative_button),
+            ) { _, _ -> activity.finish() }
             .setCancelable(false)
             .show()
     }
@@ -77,7 +80,7 @@ internal class OnboardingGuidedPasswordChangeViewProxy(
             action(
                 step,
                 findViewByIdEfficient(step.textId)!!,
-                findViewByIdEfficient(step.iconId)!!
+                findViewByIdEfficient(step.iconId)!!,
             )
         }
     }
@@ -86,7 +89,7 @@ internal class OnboardingGuidedPasswordChangeViewProxy(
         val index: Int,
         @IdRes val textId: Int,
         @IdRes val iconId: Int,
-        val frameNumber: Int
+        val frameNumber: Int,
     )
 
     companion object {
@@ -95,26 +98,26 @@ internal class OnboardingGuidedPasswordChangeViewProxy(
                 index = 0,
                 textId = R.id.text_step1,
                 iconId = R.id.icon_step1,
-                frameNumber = 0
+                frameNumber = 0,
             ),
             Step(
                 index = 1,
                 textId = R.id.text_step2,
                 iconId = R.id.icon_step2,
-                frameNumber = 100
+                frameNumber = 100,
             ),
             Step(
                 index = 2,
                 textId = R.id.text_step3,
                 iconId = R.id.icon_step3,
-                frameNumber = 150
+                frameNumber = 150,
             ),
             Step(
                 index = 3,
                 textId = R.id.text_step4,
                 iconId = R.id.icon_step4,
-                frameNumber = 300
-            )
+                frameNumber = 300,
+            ),
         )
     }
 }

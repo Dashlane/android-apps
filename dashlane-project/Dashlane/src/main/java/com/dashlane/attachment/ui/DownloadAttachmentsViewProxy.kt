@@ -12,7 +12,6 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 class DownloadAttachmentsViewProxy(activity: Activity) :
     BaseViewProxy<DownloadFileContract.Presenter>(activity),
     DownloadFileContract.ViewProxy {
-
     private val recyclerView = findViewByIdEfficient<RecyclerView>(R.id.attachment_list)!!
 
     override fun showFileDownloaded(attachment: Attachment) {
@@ -45,7 +44,7 @@ class DownloadAttachmentsViewProxy(activity: Activity) :
     private fun updateAttachment(
         attachment: Attachment,
         state: AttachmentItem.DownloadState,
-        progress: Int
+        progress: Int,
     ) {
         val adapter = recyclerView.adapter as EfficientAdapter<*>
         val index = adapter.objects.indexOfFirst { it is AttachmentItem && it.attachment.downloadKey == attachment.downloadKey }

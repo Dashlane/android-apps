@@ -2,7 +2,7 @@ package com.dashlane.sync.repositories
 
 import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.server.api.endpoints.account.SharingKeys
-import com.dashlane.server.api.endpoints.sync.SyncDownloadService
+import com.dashlane.server.api.endpoints.sync.GetLatestContentService
 import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.treat.SyncSummaryItem
 import com.dashlane.sync.treat.TreatProblemManager
@@ -17,9 +17,8 @@ class SyncRepositoryImpl @Inject constructor(
     private val deduplication: SyncDeduplication,
     private val treatProblemManager: TreatProblemManager,
     private val sharingSyncHelper: SharingSyncHelper,
-    private val syncLogs: SyncLogs
+    private val syncLogs: SyncLogs,
 ) : SyncRepository {
-
     override suspend fun sync(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
@@ -33,7 +32,7 @@ class SyncRepositoryImpl @Inject constructor(
                 serverCredentials = serverCredentials,
                 cryptographyEngineFactory = cryptographyEngineFactory,
                 vault = vault,
-                dataSyncState = dataSyncState
+                dataSyncState = dataSyncState,
             )
         } catch (t: Throwable) {
             
@@ -47,7 +46,7 @@ class SyncRepositoryImpl @Inject constructor(
     override suspend fun syncChronological(
         serverCredentials: ServerCredentials,
         cryptographyEngineFactory: CryptographyEngineFactory,
-        vault: SyncVault
+        vault: SyncVault,
     ) {
         syncLogs.onSyncBegin()
         try {
@@ -55,7 +54,7 @@ class SyncRepositoryImpl @Inject constructor(
                 serverCredentials,
                 cryptographyEngineFactory,
                 vault,
-                null
+                null,
             )
         } catch (t: Throwable) {
             
@@ -81,7 +80,7 @@ class SyncRepositoryImpl @Inject constructor(
             sync = SyncRepository.Timing(start = syncStart, end = Instant.now()),
             chronological = chronologicalSyncEnd?.let { SyncRepository.Timing(start = syncStart, it) },
             treatProblem = treatProblemEnd?.let { SyncRepository.Timing(start = chronologicalSyncEnd!!, it) },
-            sharing = sharingSyncEnd?.let { SyncRepository.Timing(start = treatProblemEnd!!, it) }
+            sharing = sharingSyncEnd?.let { SyncRepository.Timing(start = treatProblemEnd!!, it) },
         )
 
         try {
@@ -90,7 +89,7 @@ class SyncRepositoryImpl @Inject constructor(
                 serverCredentials = serverCredentials,
                 cryptographyEngineFactory = cryptographyEngineFactory,
                 vault = vault,
-                dataSyncState = dataSyncState
+                dataSyncState = dataSyncState,
             )
 
             chronologicalSyncEnd = Instant.now()
@@ -101,7 +100,7 @@ class SyncRepositoryImpl @Inject constructor(
                 cryptographyEngineFactory = cryptographyEngineFactory,
                 vault = vault,
                 dataSyncState = dataSyncState,
-                summary = chronologicalSyncResult.summary
+                summary = chronologicalSyncResult.summary,
             )
 
             treatProblemEnd = Instant.now()
@@ -112,7 +111,7 @@ class SyncRepositoryImpl @Inject constructor(
                 cryptographyEngineFactory = cryptographyEngineFactory,
                 dataSyncState = dataSyncState,
                 sharingKeys = chronologicalSyncResult.downloadedSharingKeys,
-                sharingSummary = chronologicalSyncResult.sharingSummary
+                sharingSummary = chronologicalSyncResult.sharingSummary,
             )
 
             sharingSyncEnd = Instant.now()
@@ -125,7 +124,7 @@ class SyncRepositoryImpl @Inject constructor(
                 timings = timings(),
                 statistics = chronologicalSyncResult.statistics,
                 treatProblemType = treatProblemResult.type,
-                duplicateCount = duplicateCount
+                duplicateCount = duplicateCount,
             )
         } catch (e: SyncRepository.SyncException) {
             e.timings = timings()
@@ -144,7 +143,7 @@ class SyncRepositoryImpl @Inject constructor(
                 serverCredentials = serverCredentials,
                 vault = vault,
                 cryptographyEngineFactory = cryptographyEngineFactory,
-                dataSyncState = dataSyncState
+                dataSyncState = dataSyncState,
             )
         }
 
@@ -153,7 +152,7 @@ class SyncRepositoryImpl @Inject constructor(
         cryptographyEngineFactory: CryptographyEngineFactory,
         vault: SyncVault,
         dataSyncState: MutableSharedFlow<DataSyncState>?,
-        summary: List<SyncSummaryItem>
+        summary: List<SyncSummaryItem>,
     ): TreatProblemManager.Result =
         runSyncStep(SyncRepository.SyncException.Step.TREAT) {
             syncLogs.onTreatProblemStart()
@@ -162,7 +161,7 @@ class SyncRepositoryImpl @Inject constructor(
                 serverCredentials = serverCredentials,
                 serverSummary = summary,
                 syncVault = vault,
-                cryptographyEngineFactory = cryptographyEngineFactory
+                cryptographyEngineFactory = cryptographyEngineFactory,
             )
         }
 
@@ -171,7 +170,7 @@ class SyncRepositoryImpl @Inject constructor(
         cryptographyEngineFactory: CryptographyEngineFactory,
         dataSyncState: MutableSharedFlow<DataSyncState>?,
         sharingKeys: SharingKeys?,
-        sharingSummary: SyncDownloadService.Data.SharingSummary
+        sharingSummary: GetLatestContentService.Data.SharingSummary,
     ): Unit =
         runSyncStep(SyncRepository.SyncException.Step.SHARING) {
             sharingSyncHelper.syncSharing(
@@ -179,12 +178,12 @@ class SyncRepositoryImpl @Inject constructor(
                 sharingKeys = sharingKeys,
                 sharingSummary = sharingSummary,
                 cryptographyEngineFactory = cryptographyEngineFactory,
-                dataSyncState = dataSyncState
+                dataSyncState = dataSyncState,
             )
         }
 
     private suspend fun runDeduplication(
-        vault: SyncVault
+        vault: SyncVault,
     ): Int =
         runSyncStep(SyncRepository.SyncException.Step.DEDUPLICATION) {
             deduplication.performDeduplication(vault)
@@ -192,7 +191,7 @@ class SyncRepositoryImpl @Inject constructor(
 
     private inline fun <T> runSyncStep(
         step: SyncRepository.SyncException.Step,
-        block: () -> T
+        block: () -> T,
     ): T {
         return try {
             block()

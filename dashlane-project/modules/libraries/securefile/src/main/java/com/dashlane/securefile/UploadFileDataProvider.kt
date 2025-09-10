@@ -5,14 +5,14 @@ import com.dashlane.cryptography.CryptographyKey
 import com.dashlane.cryptography.CryptographyKeyGenerator
 import com.dashlane.cryptography.EncryptedFile
 import com.dashlane.cryptography.encryptToFile
-import com.dashlane.session.authorization
 import com.dashlane.network.webservices.UploadFileService
 import com.dashlane.server.api.endpoints.securefile.CommitSecureFileService
-import com.dashlane.server.api.endpoints.securefile.GetSecureFileUploadLinkService
+import com.dashlane.server.api.endpoints.securefile.GetUploadLinkService
 import com.dashlane.server.api.endpoints.securefile.exceptions.HardQuotaExceededException
 import com.dashlane.server.api.endpoints.securefile.exceptions.MaxContentLengthExceededException
 import com.dashlane.server.api.endpoints.securefile.exceptions.SoftQuotaExceededException
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
@@ -40,7 +40,7 @@ import javax.inject.Inject
 class UploadFileDataProvider @Inject constructor(
     @ApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher private val mainCoroutineDispatcher: CoroutineDispatcher,
-    private val getSecureFileUploadLinkService: GetSecureFileUploadLinkService,
+    private val getUploadLinkService: GetUploadLinkService,
     private val uploadFileService: UploadFileService,
     private val commitSecureFileService: CommitSecureFileService,
     private val sessionManager: SessionManager,
@@ -48,11 +48,10 @@ class UploadFileDataProvider @Inject constructor(
     private val cryptography: Cryptography,
     private val keyGenerator: CryptographyKeyGenerator,
 ) : BaseDataProvider<UploadFileContract.Presenter>(), UploadFileContract.DataProvider {
-
     override suspend fun createSecureFile(
         filename: String,
         inputStream: InputStream,
-        encryptedFile: EncryptedFile
+        encryptedFile: EncryptedFile,
     ) = withContext(Dispatchers.Default) {
         keyGenerator.generateRaw32().use { key ->
             encryptToFile(key, encryptedFile, inputStream)
@@ -63,7 +62,7 @@ class UploadFileDataProvider @Inject constructor(
     private fun encryptToFile(
         key: CryptographyKey.Raw32,
         encryptedFile: EncryptedFile,
-        inputStream: InputStream
+        inputStream: InputStream,
     ) {
         cryptography.createFlexibleNoDerivationEncryptionEngine(key).use { encryptionEngine ->
             encryptionEngine.encryptToFile(encryptedFile) { sink ->
@@ -76,7 +75,7 @@ class UploadFileDataProvider @Inject constructor(
 
     override suspend fun uploadSecureFile(
         secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
+        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
     ) {
         
         getLinkAndUpload(secureFile, secureFileInfo)
@@ -84,7 +83,7 @@ class UploadFileDataProvider @Inject constructor(
 
     private suspend fun commit(
         secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
+        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
     ) {
         runCatching {
             val session = requireNotNull(sessionManager.session)
@@ -95,8 +94,8 @@ class UploadFileDataProvider @Inject constructor(
                 userAuthorization = session.authorization,
                 request = CommitSecureFileService.Request(
                     key = id,
-                    secureFileInfoId = secureFileInfoId
-                )
+                    secureFileInfoId = secureFileInfoId,
+                ),
             )
         }.onSuccess { response ->
             
@@ -116,19 +115,19 @@ class UploadFileDataProvider @Inject constructor(
 
     private suspend fun getLinkAndUpload(
         secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
+        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
     ) {
         runCatching {
             val session = requireNotNull(sessionManager.session)
             val secureFileInfoId = requireNotNull(secureFileInfo.syncObject.id)
             val contentLength = requireNotNull(secureFile.encryptedFile?.value?.length())
 
-            getSecureFileUploadLinkService.execute(
+            getUploadLinkService.execute(
                 userAuthorization = session.authorization,
-                request = GetSecureFileUploadLinkService.Request(
+                request = GetUploadLinkService.Request(
                     secureFileInfoId = secureFileInfoId,
                     contentLength = contentLength,
-                )
+                ),
             )
         }.onSuccess { response ->
             val updatedSecureFile = secureFile.copy(
@@ -144,7 +143,7 @@ class UploadFileDataProvider @Inject constructor(
             val uploadSuccessful = uploadFile(
                 data = response.data,
                 secureFile = updatedSecureFile,
-                secureFileInfo = updatedSecureFileInfoDataIdentifier
+                secureFileInfo = updatedSecureFileInfoDataIdentifier,
             )
             if (!uploadSuccessful) {
                 onLinkAndUploadFailure(secureFile = secureFile, secureFileInfo = secureFileInfo)
@@ -166,11 +165,12 @@ class UploadFileDataProvider @Inject constructor(
             
             is MaxContentLengthExceededException -> presenter.notifyFileSizeLimitExceeded(
                 secureFile,
-                secureFileInfo
+                secureFileInfo,
             )
             
             is HardQuotaExceededException,
-            is SoftQuotaExceededException -> presenter.notifyMaxStorageSpaceReached(
+            is SoftQuotaExceededException,
+            -> presenter.notifyMaxStorageSpaceReached(
                 secureFile,
                 secureFileInfo,
             )
@@ -179,9 +179,9 @@ class UploadFileDataProvider @Inject constructor(
     }
 
     private suspend fun uploadFile(
-        data: GetSecureFileUploadLinkService.Data,
+        data: GetUploadLinkService.Data,
         secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
+        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
     ): Boolean {
         val fields: Map<String, String> = data.fields.toMutableMap().apply {
             put("key", data.key)
@@ -195,7 +195,7 @@ class UploadFileDataProvider @Inject constructor(
             presenter,
             secureFile.encryptedFile!!,
             applicationCoroutineScope,
-            mainCoroutineDispatcher
+            mainCoroutineDispatcher,
         )
         val filePart = MultipartBody.Part.createFormData("file", null, requestFile)
 
@@ -212,9 +212,8 @@ class UploadFileDataProvider @Inject constructor(
         val presenter: UploadFileContract.Presenter,
         val encryptedFile: EncryptedFile,
         val applicationCoroutineScope: CoroutineScope,
-        val mainCoroutineDispatcher: CoroutineDispatcher
+        val mainCoroutineDispatcher: CoroutineDispatcher,
     ) : RequestBody() {
-
         val file
             get() = encryptedFile.value
 
@@ -228,7 +227,7 @@ class UploadFileDataProvider @Inject constructor(
                 source = file.source(),
                 contentLength = file.length(),
                 applicationCoroutineScope = applicationCoroutineScope,
-                mainCoroutineDispatcher = mainCoroutineDispatcher
+                mainCoroutineDispatcher = mainCoroutineDispatcher,
             ).use { source ->
                 sink.writeAll(source)
             }
@@ -243,7 +242,7 @@ class UploadFileDataProvider @Inject constructor(
         val source: Source,
         val contentLength: Long,
         val applicationCoroutineScope: CoroutineScope,
-        val mainCoroutineDispatcher: CoroutineDispatcher
+        val mainCoroutineDispatcher: CoroutineDispatcher,
     ) : Source by source {
         var totalBytesUploaded = 0L
 

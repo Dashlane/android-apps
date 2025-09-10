@@ -12,33 +12,35 @@ import com.dashlane.item.v3.data.SecureNoteFormData
 import com.dashlane.item.v3.display.fields.SectionContent
 import com.dashlane.item.v3.display.fields.SectionTitle
 import com.dashlane.item.v3.viewmodels.Data
-import com.dashlane.ui.widgets.compose.SettingField
+import com.dashlane.ui.common.compose.components.SettingField
 
 @Composable
 fun SecureNoteSettingsSection(data: Data<SecureNoteFormData>, editMode: Boolean, onSecuredChange: (Boolean) -> Unit) {
     if (!editMode || !data.formData.secureSettingAvailable) return
-    SectionContent(editMode = editMode) {
+    SectionContent {
         SectionTitle(title = stringResource(id = R.string.vault_preferences), editMode = editMode)
         SettingField(
             title = stringResource(id = R.string.vault_secure_note_setting_secured_title),
             description = stringResource(id = R.string.vault_secure_note_setting_secured_description),
             checked = data.formData.secured,
-            onCheckedChange = onSecuredChange
+            onCheckedChange = onSecuredChange,
         )
     }
 }
 
 @Preview
 @Composable
-private fun SecureNoteSettingsSectionPreview(@PreviewParameter(BooleanProvider::class) secured: Boolean) {
+private fun SecureNoteSettingsSectionPreview(
+    @PreviewParameter(BooleanProvider::class) secured: Boolean,
+) {
     DashlanePreview {
         SecureNoteSettingsSection(
             data = Data(
                 commonData = CommonData(),
-                formData = SecureNoteFormData(secured = secured)
+                formData = SecureNoteFormData(secured = secured),
             ),
             editMode = true,
-            onSecuredChange = {}
+            onSecuredChange = {},
         )
     }
 }

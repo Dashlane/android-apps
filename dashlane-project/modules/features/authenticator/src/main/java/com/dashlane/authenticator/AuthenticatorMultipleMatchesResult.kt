@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.dashlane.authenticator.AuthenticatorResultIntro.Companion.EXTRA_INPUT
-import com.dashlane.authenticator.AuthenticatorResultIntro.Companion.EXTRA_SUCCESS
-import com.dashlane.authenticator.AuthenticatorResultIntro.Companion.RESULT_INPUT
+import com.dashlane.authenticator.AuthenticatorResultActivity.Companion.RESULT_INPUT
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsCredentialItemAdapter
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.HasLogins.CredentialItem
 import com.dashlane.authenticator.util.SetUpAuthenticatorResultContract.SuccessResultContract.Input
@@ -16,7 +14,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class AuthenticatorMultipleMatchesResult : DashlaneActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mutliple_matches_result)
@@ -41,10 +38,10 @@ class AuthenticatorMultipleMatchesResult : DashlaneActivity() {
             adapter = AuthenticatorSuggestionsCredentialItemAdapter().apply {
                 addAll(
                     inputs.map {
-                    CredentialItem(it.itemId!!, it.itemTitle, it.domain, it.itemUsername).apply {
-                        layout = R.layout.authenticator_credential_multiple_matches_item
-                    }
-                }
+                        CredentialItem(it.itemId!!, it.itemTitle, it.domain, it.itemUsername).apply {
+                            layout = R.layout.authenticator_credential_multiple_matches_item
+                        }
+                    },
                 )
                 setOnItemClickListener { _, _, _, position ->
                     val input = inputs[position]
@@ -52,18 +49,16 @@ class AuthenticatorMultipleMatchesResult : DashlaneActivity() {
                     setResult(
                         RESULT_OK,
                         Intent().apply {
-                        putExtra(RESULT_INPUT, input)
-                    }
+                            putExtra(RESULT_INPUT, input)
+                        },
                     )
                     
                     startActivity(
-                        Intent(
-                            this@AuthenticatorMultipleMatchesResult,
-                            AuthenticatorResultIntro::class.java
-                        ).apply {
-                            putExtra(EXTRA_SUCCESS, true)
-                            putExtra(EXTRA_INPUT, input)
-                        }
+                        AuthenticatorResultActivity.newIntent(
+                            context = this@AuthenticatorMultipleMatchesResult,
+                            success = true,
+                            input = input,
+                        ),
                     )
                     finish()
                 }

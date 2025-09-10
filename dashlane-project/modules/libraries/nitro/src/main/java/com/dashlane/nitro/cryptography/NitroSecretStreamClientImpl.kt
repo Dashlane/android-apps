@@ -10,79 +10,78 @@ import javax.inject.Inject
 
 internal class NitroSecretStreamClientImpl @Inject constructor(private val sodiumCryptography: SodiumCryptography) :
     NitroSecretStreamClient {
+        override fun initializeSecretStream(
+            clientKeyPair: KeyExchangeKeyPair,
+            serverInfo: SecretStreamServerInfo,
+        ): SecretStreamClientInfo {
+            val sharedKeyPair = sodiumCryptography.keyExchangeClientSessionKeys(
+                clientKeyPair = clientKeyPair,
+                serverPublicKey = serverInfo.publicKey,
+            ) ?: throw NitroCryptographyException(message = "Failed to compute shared keys")
 
-    override fun initializeSecretStream(
-        clientKeyPair: KeyExchangeKeyPair,
-        serverInfo: SecretStreamServerInfo
-    ): SecretStreamClientInfo {
-        val sharedKeyPair = sodiumCryptography.keyExchangeClientSessionKeys(
-            clientKeyPair = clientKeyPair,
-            serverPublicKey = serverInfo.publicKey
-        ) ?: throw NitroCryptographyException(message = "Failed to compute shared keys")
+            val encryptionState = ByteArray(SODIUM_STATE_BYTES)
+            val clientHeader = ByteArray(SODIUM_HEADER_BYTES)
 
-        val encryptionState = ByteArray(SODIUM_STATE_BYTES)
-        val clientHeader = ByteArray(SODIUM_HEADER_BYTES)
+            if (!sodiumCryptography.secretstreamXchacha20poly1305InitPush(
+                    state = encryptionState,
+                    header = clientHeader,
+                    key = sharedKeyPair.rx,
+                )
+            ) {
+                throw NitroCryptographyException(message = "Failed to initiate encryption stream")
+            }
 
-        if (!sodiumCryptography.secretstreamXchacha20poly1305InitPush(
-                state = encryptionState,
+            val decryptionState = ByteArray(SODIUM_STATE_BYTES)
+
+            if (!sodiumCryptography.secretstreamXchacha20poly1305InitPull(
+                    state = decryptionState,
+                    header = serverInfo.header,
+                    key = sharedKeyPair.tx,
+                )
+            ) {
+                throw NitroCryptographyException(message = "Failed to initiate encryption stream")
+            }
+
+            return SecretStreamClientInfo(
                 header = clientHeader,
-                key = sharedKeyPair.rx
+                states = SecretStreamStates(
+                    encryptionState = encryptionState,
+                    decryptionState = decryptionState,
+                ),
             )
-        ) {
-            throw NitroCryptographyException(message = "Failed to initiate encryption stream")
         }
 
-        val decryptionState = ByteArray(SODIUM_STATE_BYTES)
+        override fun encryptSecretStream(
+            states: SecretStreamStates,
+            message: ByteArray,
+        ): ByteArray {
+            val encrypted = ByteArray(message.size + ENCRYPTED_EXTRA_BYTES)
 
-        if (!sodiumCryptography.secretstreamXchacha20poly1305InitPull(
-                state = decryptionState,
-                header = serverInfo.header,
-                key = sharedKeyPair.tx
-            )
-        ) {
-            throw NitroCryptographyException(message = "Failed to initiate encryption stream")
+            if (!sodiumCryptography.secretstreamXchacha20poly1305Push(
+                    state = states.encryptionState,
+                    message = message,
+                    encrypted = encrypted,
+                )
+            ) {
+                throw NitroCryptographyException(message = "Failed to encrypt")
+            }
+            return encrypted
         }
 
-        return SecretStreamClientInfo(
-            header = clientHeader,
-            states = SecretStreamStates(
-                encryptionState = encryptionState,
-                decryptionState = decryptionState
-            )
-        )
+        override fun decryptSecretStream(
+            states: SecretStreamStates,
+            encrypted: ByteArray,
+        ): ByteArray {
+            val message = ByteArray(encrypted.size - ENCRYPTED_EXTRA_BYTES)
+
+            if (!sodiumCryptography.secretstreamXchacha20poly1305Pull(
+                    state = states.decryptionState,
+                    message = message,
+                    encrypted = encrypted,
+                )
+            ) {
+                throw NitroCryptographyException(message = "Failed to decrypt")
+            }
+            return message
+        }
     }
-
-    override fun encryptSecretStream(
-        states: SecretStreamStates,
-        message: ByteArray
-    ): ByteArray {
-        val encrypted = ByteArray(message.size + ENCRYPTED_EXTRA_BYTES)
-
-        if (!sodiumCryptography.secretstreamXchacha20poly1305Push(
-                state = states.encryptionState,
-                message = message,
-                encrypted = encrypted
-            )
-        ) {
-            throw NitroCryptographyException(message = "Failed to encrypt")
-        }
-        return encrypted
-    }
-
-    override fun decryptSecretStream(
-        states: SecretStreamStates,
-        encrypted: ByteArray
-    ): ByteArray {
-        val message = ByteArray(encrypted.size - ENCRYPTED_EXTRA_BYTES)
-
-        if (!sodiumCryptography.secretstreamXchacha20poly1305Pull(
-                state = states.decryptionState,
-                message = message,
-                encrypted = encrypted
-            )
-        ) {
-            throw NitroCryptographyException(message = "Failed to decrypt")
-        }
-        return message
-    }
-}

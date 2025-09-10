@@ -13,10 +13,10 @@ class NumberOfRunsActivityListener @Inject constructor(
     private val preferencesManager: PreferencesManager,
 ) :
     AbstractActivityLifecycleListener() {
-    override fun onFirstLoggedInActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        super.onFirstLoggedInActivityCreated(activity, savedInstanceState)
-        val userPreferencesManager = preferencesManager[sessionManager.session?.username]
-        val runs = userPreferencesManager.getInt(ConstantsPrefs.RUNS)
-        userPreferencesManager.putInt(ConstantsPrefs.RUNS, runs + 1)
+        override fun onFirstLoggedInActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+            super.onFirstLoggedInActivityCreated(activity, savedInstanceState)
+            val userPreferencesManager = preferencesManager[sessionManager.session?.username]
+            val runs = userPreferencesManager.getInt(ConstantsPrefs.RUNS)
+            userPreferencesManager.putInt(ConstantsPrefs.RUNS, runs + 1)
+        }
     }
-}

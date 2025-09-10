@@ -26,7 +26,7 @@ sealed class SharingModels {
         override val sharingStatusResource: Int,
         override val itemGroup: ItemGroup,
         override val item: SummaryObject,
-        override val isItemInCollection: Boolean
+        override val isItemInCollection: Boolean,
     ) : SharingModels()
 
     data class ItemUserGroup(
@@ -38,13 +38,13 @@ sealed class SharingModels {
         override val sharingStatusResource: Int,
         override val itemGroup: ItemGroup,
         override val item: SummaryObject,
-        override val isItemInCollection: Boolean
+        override val isItemInCollection: Boolean,
     ) : SharingModels()
 }
 
 data class SharingUserGroupUser(
     val userGroup: UserGroup,
-    val user: UserDownload
+    val user: UserDownload,
 ) {
     val sharingStatusResource: Int
         get() = user.getSharingStatusResourceShort()

@@ -16,18 +16,22 @@ import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.tooling.DashlanePreview
 
 @Composable
-fun DescriptionItemContent(iconToken: IconToken, title: String) {
+fun DescriptionItemContent(iconToken: IconToken?, title: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        ExpressiveIcon(icon = iconToken)
+        if (iconToken != null) {
+            ExpressiveIcon(icon = iconToken)
+        }
         Text(
-            modifier = Modifier.padding(start = 16.dp),
+            modifier = Modifier.padding(
+                start = if (iconToken != null) 16.dp else 0.dp,
+            ),
             text = title,
             style = DashlaneTheme.typography.bodyStandardRegular,
-            color = DashlaneTheme.colors.textNeutralStandard
+            color = DashlaneTheme.colors.textNeutralStandard,
         )
     }
 }
@@ -38,7 +42,7 @@ private fun DescriptionItemContentPreview() {
     DashlanePreview {
         DescriptionItemContent(
             iconToken = IconTokens.itemPhoneMobileOutlined,
-            title = "Use an Android phone for the best Dashlane experience"
+            title = "Use an Android phone for the best Dashlane experience",
         )
     }
 }

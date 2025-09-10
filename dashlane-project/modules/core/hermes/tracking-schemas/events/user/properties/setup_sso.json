@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/setup_sso.json",
+  "type": "object",
+  "description": "When an admin performs specific actions throughout the SSO setup funnel (Nitro or Self-hosted SSO)",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "setup_sso"
+    },
+    "current_billing_plan_tier": {
+      "deprecated": true,
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/b2b_plan_tier"
+    },
+    "email_domain_error": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/email_domain_error"
+    },
+    "email_domain_submitted_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/email_domain_submitted_count"
+    },
+    "email_domain_validated_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/email_domain_validated_count"
+    },
+    "encryption_service_platform_selected": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/encryption_service_platform_selected"
+    },
+    "idp_validation_response": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/idp_validation_response"
+    },
+    "sso_setup_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/sso_setup_step"
+    },
+    "sso_solution_chosen": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/sso_solution_chosen"
+    },
+    "test_sso_response": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json#/definitions/test_sso_response"
+    }
+  },
+  "required": [
+    "name",
+    "email_domain_error",
+    "email_domain_submitted_count",
+    "email_domain_validated_count",
+    "encryption_service_platform_selected",
+    "idp_validation_response",
+    "sso_setup_step",
+    "sso_solution_chosen",
+    "test_sso_response"
+  ],
+  "additionalProperties": false
+}

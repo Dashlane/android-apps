@@ -34,10 +34,10 @@ fun LoginDetailSection(
     revealedFields: Set<SensitiveField>,
     editMode: Boolean,
     passwordActions: PasswordActions,
-    loginActions: LoginActions
+    loginActions: LoginActions,
 ) {
     val showFieldOnEdit = editMode && data.commonData.isEditable
-    SectionContent(editMode = editMode) {
+    SectionContent(showCard = !editMode) {
         SectionTitle(title = stringResource(id = R.string.vault_login_detail_title), editMode = editMode)
         if (!data.formData.email.isNullOrBlank() || showFieldOnEdit && !isNewItem) {
             GenericField(
@@ -46,16 +46,17 @@ fun LoginDetailSection(
                 editMode = editMode,
                 isEditable = data.commonData.isEditable,
                 keyboardType = KeyboardType.Email,
+                disablePersonalizedLearning = false,
                 onValueChanged = { value ->
                     loginActions.onValueChanged(
                         data.copyFormData {
                             it.copy(email = value)
-                        }
+                        },
                     )
                 },
                 onValueCopy = {
                     loginActions.onValueCopy(CopyField.Email)
-                }.takeIf { data.commonData.isCopyActionAllowed }
+                }.takeIf { data.commonData.isCopyActionAllowed },
             )
         }
         if (!data.formData.login.isNullOrBlank() || showFieldOnEdit) {
@@ -69,7 +70,7 @@ fun LoginDetailSection(
                 },
                 onValueCopy = {
                     loginActions.onValueCopy(CopyField.Login)
-                }.takeIf { data.commonData.isCopyActionAllowed }
+                }.takeIf { data.commonData.isCopyActionAllowed },
             )
         }
         if ((!data.formData.login.isNullOrBlank() && showFieldOnEdit) || !data.formData.secondaryLogin.isNullOrBlank()) {
@@ -83,14 +84,14 @@ fun LoginDetailSection(
                 },
                 onValueCopy = {
                     loginActions.onValueCopy(CopyField.SecondaryLogin)
-                }.takeIf { data.commonData.isCopyActionAllowed }
+                }.takeIf { data.commonData.isCopyActionAllowed },
             )
         }
         PasswordField(
             data = data,
             revealedFields = revealedFields,
             editMode = editMode,
-            passwordActions = passwordActions
+            passwordActions = passwordActions,
         )
         TwoFactorAuthenticatorField(
             editMode = editMode,
@@ -101,7 +102,7 @@ fun LoginDetailSection(
             onValueCopy = {
                 loginActions.onValueCopy(CopyField.OtpCode)
             }.takeIf { data.commonData.isCopyActionAllowed },
-            onHotpRefreshed = loginActions.onHotpRefreshed
+            onHotpRefreshed = loginActions.onHotpRefreshed,
         )
         GenericField(
             label = stringResource(id = R.string.authentifiant_hint_url),
@@ -111,13 +112,13 @@ fun LoginDetailSection(
             onValueChanged = { value ->
                 loginActions.onValueChanged(data.copyFormData { it.copy(url = value) })
             },
-            onValueOpen = loginActions.onWebsiteOpen
+            onValueOpen = loginActions.onWebsiteOpen,
         )
         LinkedServicesField(
             linkedServices = data.formData.linkedServices,
             editMode = editMode,
             isEditable = data.commonData.isEditable,
-            loginActions = loginActions
+            loginActions = loginActions,
         )
         if (!data.formData.note.isNullOrBlank() || showFieldOnEdit) {
             GenericField(
@@ -159,18 +160,18 @@ private fun LoginDetailSectionPreview() = DashlanePreview {
                     passwordStrength = PasswordStrength(PasswordStrengthScore.SAFELY_UNGUESSABLE, null, listOf()),
                     isCompromised = false,
                     reusedCount = 0,
-                    isPasswordEmpty = false
+                    isPasswordEmpty = false,
                 ),
             ),
             commonData = CommonData(
                 isCopyActionAllowed = true,
-                space = TeamSpace.Personal
-            )
+                space = TeamSpace.Personal,
+            ),
         ),
         isNewItem = false,
         revealedFields = emptySet(),
         editMode = false,
         passwordActions = PasswordActions(),
-        loginActions = LoginActions()
+        loginActions = LoginActions(),
     )
 }

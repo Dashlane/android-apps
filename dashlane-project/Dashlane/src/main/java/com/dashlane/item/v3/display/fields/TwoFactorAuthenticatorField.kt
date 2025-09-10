@@ -41,7 +41,7 @@ fun TwoFactorAuthenticatorField(
     onSetupTwoFactorAuthenticator: () -> Unit,
     onRemoveTwoFactorAuthenticator: () -> Unit,
     onValueCopy: (() -> Unit)?,
-    onHotpRefreshed: (Hotp) -> Unit
+    onHotpRefreshed: (Hotp) -> Unit,
 ) {
     when {
         editMode && otp == null && isEditable -> {
@@ -53,7 +53,7 @@ fun TwoFactorAuthenticatorField(
                     otp,
                     isEditable,
                     onRemoveTwoFactorAuthenticator,
-                    onHotpRefreshed
+                    onHotpRefreshed,
                 )
             } else {
                 TwoFactorAuthenticatorDisplay(otp, onValueCopy, onHotpRefreshed)
@@ -67,18 +67,18 @@ private fun TwoFactorAuthenticatorEdit(
     otp: Otp,
     isEditable: Boolean,
     onRemoveTwoFactorAuthenticator: () -> Unit,
-    onHotpRefreshed: (Hotp) -> Unit
+    onHotpRefreshed: (Hotp) -> Unit,
 ) {
     val fieldAction = if (isEditable) {
         FieldAction.Generic(
             iconLayout = ButtonLayout.IconOnly(
                 iconToken = IconTokens.actionDeleteOutlined,
-                contentDescription = stringResource(id = R.string.authenticator_item_edit_remove_action)
+                contentDescription = stringResource(id = R.string.authenticator_item_edit_remove_action),
             ),
             onClick = {
                 onRemoveTwoFactorAuthenticator()
                 true
-            }
+            },
         )
     } else {
         null
@@ -93,7 +93,7 @@ private fun TwoFactorAuthenticatorEdit(
             label = stringResource(id = R.string.login_totp_text_field_label),
             animatedTimeRemaining = animatedTimeRemaining,
             timeStep = pin.refreshInterval,
-            action = fieldAction
+            action = fieldAction,
         )
         LaunchedEffect(Unit) {
             while (true) {
@@ -114,16 +114,17 @@ private fun TwoFactorAuthenticatorEdit(
             onRefreshClick = {
                 onHotpRefreshed(otp)
                 true
-            }
+            },
         )
     }
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun TwoFactorAuthenticatorDisplay(
     otp: Otp,
     onValueCopy: (() -> Unit)?,
-    onHotpRefreshed: (Hotp) -> Unit
+    onHotpRefreshed: (Hotp) -> Unit,
 ) {
     if (otp is Totp) {
         val pin = otp.getPin() ?: return
@@ -139,14 +140,15 @@ private fun TwoFactorAuthenticatorDisplay(
             action1 = FieldAction.Generic(
                 iconLayout = ButtonLayout.IconOnly(
                     iconToken = IconTokens.actionCopyOutlined,
-                    contentDescription = stringResource(id = R.string.vault_action_copy) + " " + stringResource(
-                        id = R.string.login_totp_text_field_label
-                    )
+                    contentDescription = stringResource(
+                        id = R.string.vault_action_copy_field,
+                        stringResource(R.string.login_totp_text_field_label),
+                    ),
                 ),
                 onClick = {
                     onValueCopy?.invoke()
                     true
-                }
+                },
             ).takeIf { onValueCopy != null },
         )
         LaunchedEffect(Unit) {
@@ -167,19 +169,20 @@ private fun TwoFactorAuthenticatorDisplay(
             action1 = FieldAction.Generic(
                 iconLayout = ButtonLayout.IconOnly(
                     iconToken = IconTokens.actionCopyOutlined,
-                    contentDescription = stringResource(id = R.string.vault_action_copy) + " " + stringResource(
-                        id = R.string.login_totp_text_field_label
-                    )
+                    contentDescription = stringResource(
+                        id = R.string.vault_action_copy_field,
+                        stringResource(R.string.login_totp_text_field_label),
+                    ),
                 ),
                 onClick = {
                     onValueCopy?.invoke()
                     true
-                }
+                },
             ).takeIf { onValueCopy != null },
             onRefreshClick = {
                 onHotpRefreshed(otp)
                 true
-            }
+            },
         )
     }
 }
@@ -192,7 +195,7 @@ private fun TwoFactorAuthenticatorAddButton(onSetupTwoFactorAuthenticator: () ->
                 .align(Alignment.CenterEnd),
             text = stringResource(id = R.string.vault_setup_2fa),
             destinationType = LinkButtonDestinationType.INTERNAL,
-            onClick = onSetupTwoFactorAuthenticator
+            onClick = onSetupTwoFactorAuthenticator,
         )
     }
 }
@@ -218,7 +221,7 @@ private fun TwoFactorAuthenticatorFieldPreview() {
                 },
                 onHotpRefreshed = {
                     
-                }
+                },
             )
             TwoFactorAuthenticatorField(
                 editMode = false,
@@ -235,7 +238,7 @@ private fun TwoFactorAuthenticatorFieldPreview() {
                 },
                 onHotpRefreshed = {
                     
-                }
+                },
             )
             TwoFactorAuthenticatorField(
                 editMode = true,
@@ -252,7 +255,7 @@ private fun TwoFactorAuthenticatorFieldPreview() {
                 },
                 onHotpRefreshed = {
                     
-                }
+                },
             )
             TwoFactorAuthenticatorField(
                 editMode = true,
@@ -269,7 +272,7 @@ private fun TwoFactorAuthenticatorFieldPreview() {
                 },
                 onHotpRefreshed = {
                     
-                }
+                },
             )
             
             TwoFactorAuthenticatorField(
@@ -285,7 +288,7 @@ private fun TwoFactorAuthenticatorFieldPreview() {
                 onValueCopy = null,
                 onHotpRefreshed = {
                     
-                }
+                },
             )
         }
     }

@@ -14,5 +14,5 @@ private fun formatDateTime(context: Context, instant: Instant): String? =
     DateUtils.formatDateTime(
         context,
         instant.toEpochMilli(),
-        DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_NUMERIC_DATE
+        DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_NUMERIC_DATE,
     )

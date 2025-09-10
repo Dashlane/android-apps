@@ -31,7 +31,7 @@ class CsvSendActionHandler : DashlaneActivity() {
     private val uri: Uri
         get() = requireNotNull(
             intent?.takeIf { it.action == Intent.ACTION_SEND }
-            ?.getParcelableExtraCompat(Intent.EXTRA_STREAM)
+                ?.getParcelableExtraCompat(Intent.EXTRA_STREAM),
         ) { "uri == null" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +42,7 @@ class CsvSendActionHandler : DashlaneActivity() {
                 val intent = if (hasSession) {
                     CsvImportActivity.newIntent(
                         this@CsvSendActionHandler,
-                        uri
+                        uri,
                     )
                 } else {
                     Intent(Intent.ACTION_VIEW).apply {

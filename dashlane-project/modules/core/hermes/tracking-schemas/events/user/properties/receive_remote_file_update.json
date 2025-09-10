@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/receive_remote_file_update.json",
+  "type": "object",
+  "description": "Sent everytime the extension attempts to download a remote file from the Remote File API. Remote file update allows classification bug fixes and other related ML improvements to reach users faster and independently of extension releases.",
+  "metas": {
+    "area": "technical"
+  },
+  "properties": {
+    "name": {
+      "const": "receive_remote_file_update"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    },
+    "package_source": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/receive_remote_file_update.json#/definitions/package_source"
+    },
+    "remote_file_update_error": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/receive_remote_file_update.json#/definitions/remote_file_update_error"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step"
+  ],
+  "additionalProperties": false
+}

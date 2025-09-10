@@ -51,6 +51,12 @@ data class VaultListResourceProvider @Inject constructor(
     val vaultListEmptySecretDescription
         get() = resources.getString(R.string.empty_screen_secret_line2)
 
+    val vaultListEmptyWiFiTitle
+        get() = resources.getString(R.string.empty_screen_wifi_line1)
+
+    val vaultListEmptyWiFiDescription
+        get() = resources.getString(R.string.empty_screen_wifi_line2)
+
     fun getCategoryHeader(syncObjectType: SyncObjectType): String {
         return resources.getString(DataIdentifierTypeTextFactory.getStringResId(syncObjectType))
     }

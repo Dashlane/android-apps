@@ -28,9 +28,8 @@ class ItemScreenConfigurationEmailProvider(
     private val teamSpaceAccessor: TeamSpaceAccessor,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -38,12 +37,12 @@ class ItemScreenConfigurationEmailProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.Email>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, canDelete, editMode, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -55,7 +54,7 @@ class ItemScreenConfigurationEmailProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val emailTitle = context.getString(R.string.email_address)
         return ItemHeader(
@@ -72,7 +71,7 @@ class ItemScreenConfigurationEmailProvider(
         subViewFactory: SubViewFactory,
         canDelete: Boolean,
         editMode: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         val emailView = createEmailField(subViewFactory, context, item, editMode)
 
@@ -92,21 +91,21 @@ class ItemScreenConfigurationEmailProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.Email>,
-        emailView: ItemSubView<String>?
+        emailView: ItemSubView<String>?,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 listOfNotNull(emailView),
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -117,7 +116,7 @@ class ItemScreenConfigurationEmailProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.Email>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<String>? {
         val emailSuggestions = emailSuggestionProvider.getAllEmails()
         val email = item.syncObject.email
@@ -126,7 +125,7 @@ class ItemScreenConfigurationEmailProvider(
             email,
             false,
             VaultItem<*>::copyForUpdatedEmail,
-            emailSuggestions
+            emailSuggestions,
         )
         return if (emailView == null || editMode) {
             emailView
@@ -136,8 +135,8 @@ class ItemScreenConfigurationEmailProvider(
                 CopyAction(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.JustEmail,
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -145,7 +144,7 @@ class ItemScreenConfigurationEmailProvider(
     private fun createTypeField(
         context: Context,
         item: VaultItem<SyncObject.Email>,
-        subViewFactory: SubViewFactory
+        subViewFactory: SubViewFactory,
     ): ItemSubView<*>? {
 
         if (teamSpaceAccessor.hasEnforcedTeamSpace) return null
@@ -159,14 +158,14 @@ class ItemScreenConfigurationEmailProvider(
             context.getString(R.string.type),
             selectedType,
             allTypeCategories.map { context.getString(it.getStringId()) },
-            typeUpdate
+            typeUpdate,
         )
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun copyForUpdatedType(
         context: Context,
-        allTypeCategories: List<SyncObject.Email.Type>
+        allTypeCategories: List<SyncObject.Email.Type>,
     ): (Any, String) -> VaultItem<SyncObject.Email> {
         return { it, value ->
             val email = it as VaultItem<SyncObject.Email>
@@ -189,13 +188,13 @@ class ItemScreenConfigurationEmailProvider(
     private fun createNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Email>
+        item: VaultItem<SyncObject.Email>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.email_hint_name),
             item.syncObject.emailName,
             false,
-            VaultItem<*>::copyForUpdatedName
+            VaultItem<*>::copyForUpdatedName,
         )
     }
 }

@@ -1,14 +1,13 @@
 package com.dashlane.autofill.fillresponse.filler
 
-import com.dashlane.autofill.fillresponse.DatasetWrapperBuilder
 import com.dashlane.autofill.api.util.AutofillValueFactory
+import com.dashlane.autofill.fillresponse.DatasetWrapperBuilder
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 
 internal class PauseFiller(private val autofillValueFactory: AutofillValueFactory) {
-
     fun fill(
         dataSetBuilder: DatasetWrapperBuilder,
-        summary: AutoFillHintSummary
+        summary: AutoFillHintSummary,
     ): Boolean {
         summary.entries.map {
             it.id

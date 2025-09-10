@@ -2,8 +2,8 @@ package com.dashlane.autofill.api
 
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import com.dashlane.autofill.internal.ApplicationFormSourceDeviceStatus
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
+import com.dashlane.autofill.internal.ApplicationFormSourceDeviceStatus
 import com.dashlane.core.helpers.PackageNameSignatureHelper
 import com.dashlane.core.helpers.PackageSignatureStatus
 import com.dashlane.ext.application.KnownApplicationProvider
@@ -14,11 +14,10 @@ import javax.inject.Inject
 class ApplicationFormSourceDeviceStatusFromContext @Inject constructor(
     private val packageManager: PackageManager,
     private val knownApplicationProvider: KnownApplicationProvider,
-    private val packageNameSignatureHelper: PackageNameSignatureHelper
+    private val packageNameSignatureHelper: PackageNameSignatureHelper,
 ) : ApplicationFormSourceDeviceStatus {
-
     override fun getApplicationInfo(applicationFormSource: ApplicationFormSource): ApplicationInfo? {
-        return tryOrNull { packageManager.getApplicationInfoCompat(applicationFormSource.packageName, 0) }
+        return tryOrNull { packageManager.getApplicationInfoCompat(applicationFormSource.packageName) }
     }
 
     override fun getSignatureAssessment(applicationFormSource: ApplicationFormSource): PackageSignatureStatus {
@@ -26,7 +25,7 @@ class ApplicationFormSourceDeviceStatusFromContext @Inject constructor(
             packageNameSignatureHelper.getPackageNameSignatureVerificationStatus(
                 applicationFormSource.packageName,
                 null,
-                it.mainDomain
+                it.mainDomain,
             )
         } ?: PackageSignatureStatus.UNKNOWN
     }

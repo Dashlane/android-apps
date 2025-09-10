@@ -10,18 +10,22 @@ import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.securearchive.databinding.ActivityBackupBinding
+import com.dashlane.util.FileUtils.Companion.FILE_PROVIDER_AUTHORITY
 import com.dashlane.util.UriUtils
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setCurrentPageView
+import kotlinx.coroutines.launch
 import java.io.File
 
 internal class BackupViewProxy(
     private val activity: AppCompatActivity,
     private val binding: ActivityBackupBinding,
-    private val viewModel: BackupViewModelContract
+    private val viewModel: BackupViewModelContract,
 ) {
     init {
         when (val operation = viewModel.operation) {
@@ -51,9 +55,11 @@ internal class BackupViewProxy(
             requestFocus()
         }
 
-        activity.lifecycleScope.launchWhenStarted {
-            viewModel.state.collect {
-                setState(it)
+        activity.lifecycleScope.launch {
+            activity.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect {
+                    setState(it)
+                }
             }
         }
     }
@@ -70,7 +76,7 @@ internal class BackupViewProxy(
                 setResultOkAndFinish(
                     isSuccessful = true,
                     count = state.count,
-                    isShared = false
+                    isShared = false,
                 )
             }
             BackupViewState.InvalidPasswordError -> {
@@ -88,15 +94,15 @@ internal class BackupViewProxy(
                     Intent.createChooser(
                         intent,
                         activity.resources.getString(
-                            R.string.backup_export_sharing_fallback_title
-                        )
-                    )
+                            R.string.backup_export_sharing_fallback_title,
+                        ),
+                    ),
                 )
 
                 setResultOkAndFinish(
                     isSuccessful = true,
                     count = state.count,
-                    isShared = true
+                    isShared = true,
                 )
             }
             BackupViewState.Cancelled -> {
@@ -113,9 +119,9 @@ internal class BackupViewProxy(
                 Color.TRANSPARENT
             } else {
                 activity.getThemeAttrColor(
-                R.attr.colorOnSecondary
-            )
-            }
+                    R.attr.colorOnSecondary,
+                )
+            },
         )
         binding.editText.isEnabled = !shown
         binding.progress.visibility = if (shown) View.VISIBLE else View.GONE
@@ -126,7 +132,7 @@ internal class BackupViewProxy(
     }
 
     private fun getIntentToShareArchive(context: Context, file: File): Intent {
-        val contentUri: Uri = FileProvider.getUriForFile(context, "com.dashlane.fileprovider", file)
+        val contentUri: Uri = FileProvider.getUriForFile(context, FILE_PROVIDER_AUTHORITY, file)
 
         return Intent().apply {
             action = Intent.ACTION_SEND
@@ -140,9 +146,9 @@ internal class BackupViewProxy(
     private fun setResultOkAndFinish(
         isSuccessful: Boolean,
         count: Int = 0,
-        isShared: Boolean = false
+        isShared: Boolean = false,
     ) {
-        val data = BackupActivityIntents.newData(activity.intent, isSuccessful, isShared, count)
+        val data = BackupActivityIntents.newData(isSuccessful, isShared, count)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }
@@ -157,7 +163,7 @@ internal class BackupViewProxy(
     private fun configureViewForImport(uri: Uri) = configureView(
         title = activity.getString(
             R.string.backup_import_title,
-            UriUtils.getFileDisplayName(activity, uri).orEmpty()
+            UriUtils.getFileDisplayName(activity, uri).orEmpty(),
         ),
         message = activity.getString(R.string.backup_import_message),
         primaryCta = activity.getString(R.string.backup_import_cta_primary),
@@ -168,7 +174,7 @@ internal class BackupViewProxy(
         title: String,
         message: String?,
         primaryCta: String,
-        secondaryCta: String
+        secondaryCta: String,
     ) {
         this.binding.title.text = title
         if (message != null) {

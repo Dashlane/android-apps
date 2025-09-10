@@ -11,7 +11,6 @@ import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.vault.item.delete.DeleteVaultItemLogger
 import com.dashlane.vault.item.delete.DeleteVaultItemProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -21,6 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 @HiltViewModel
 class DeleteVaultItemViewModel @Inject constructor(
@@ -28,7 +28,7 @@ class DeleteVaultItemViewModel @Inject constructor(
     @MainCoroutineDispatcher private val mainDispatcher: CoroutineDispatcher,
     private val provider: DeleteVaultItemProvider,
     private val logger: DeleteVaultItemLogger,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val navArgs = DeleteVaultItemFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private val _stateFlow: MutableViewStateFlow<UiState, NavigationState>
@@ -67,11 +67,12 @@ class DeleteVaultItemViewModel @Inject constructor(
     data class UiState(
         val itemId: String,
         val mode: WarningMode,
-        val deleting: Boolean
+        val deleting: Boolean,
     ) : State.View
 
     sealed class NavigationState : State.SideEffect {
         data class Success(val itemId: String) : NavigationState()
+
         data object Failure : NavigationState()
     }
 

@@ -6,5 +6,5 @@ data class CredentialInfo(
     val login: String,
     val password: String,
     val packageName: String?,
-    val spaceId: String?
+    val spaceId: String?,
 )

@@ -11,11 +11,6 @@ import com.dashlane.authentication.sso.GetUserSsoInfoActivity.Companion.createUs
 import com.dashlane.debug.services.DaDaDaTheme
 import com.dashlane.design.theme.color.DebugTheme
 import com.dashlane.navigation.NavigationConstants
-import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.preference.PreferencesManager
-import com.dashlane.session.SessionCredentialsSaver
-import com.dashlane.session.SessionManager
-import com.dashlane.ui.activities.SplashScreenIntentFactory.Companion.create
 import com.dashlane.util.findContentParent
 import com.dashlane.util.log.FirstLaunchDetector
 import com.dashlane.util.log.LaunchLogger
@@ -25,7 +20,6 @@ import javax.inject.Inject
 @SuppressLint("CustomSplashScreen")
 @AndroidEntryPoint
 class SplashScreenActivity : FragmentActivity() {
-
     @Inject
     lateinit var firstLaunchDetector: FirstLaunchDetector
 
@@ -36,19 +30,10 @@ class SplashScreenActivity : FragmentActivity() {
     lateinit var syncBroadcastManager: SyncBroadcastManager
 
     @Inject
-    lateinit var globalPreferencesManager: GlobalPreferencesManager
-
-    @Inject
-    lateinit var preferencesManager: PreferencesManager
-
-    @Inject
-    lateinit var sessionManager: SessionManager
-
-    @Inject
-    lateinit var sessionCredentialsSaver: SessionCredentialsSaver
-
-    @Inject
     lateinit var dadadaTheme: DaDaDaTheme
+
+    @Inject
+    lateinit var splashScreenIntentFactory: SplashScreenIntentFactory
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,22 +64,11 @@ class SplashScreenActivity : FragmentActivity() {
 
     private fun proceedWithLoading() {
         syncBroadcastManager.removePasswordBroadcastIntent()
-        val lastUser = globalPreferencesManager.getDefaultUsername()
-        if (lastUser != null) {
-            globalPreferencesManager.saveSkipIntro()
-        }
         startNextActivity()
     }
 
     private fun startNextActivity() {
-        val intentFactory = create(
-            this,
-            globalPreferencesManager,
-            preferencesManager,
-            sessionManager,
-            sessionCredentialsSaver,
-        )
-        val newIntent = intentFactory.createIntent()
+        val newIntent = splashScreenIntentFactory.createIntent(this)
         newIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         val currentIntent = intent
         newIntent.putExtra(NavigationConstants.STARTED_WITH_INTENT, currentIntent)
@@ -110,7 +84,7 @@ class SplashScreenActivity : FragmentActivity() {
         val options = ActivityOptionsCompat.makeCustomAnimation(
             this,
             android.R.anim.fade_in,
-            android.R.anim.fade_out
+            android.R.anim.fade_out,
         ).toBundle()
         startActivity(newIntent, options)
         finishAffinity()

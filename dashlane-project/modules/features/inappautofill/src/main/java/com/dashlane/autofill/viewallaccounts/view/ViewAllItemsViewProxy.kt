@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
 import com.dashlane.autofill.api.databinding.ViewAllItemsDialogFragmentBinding
 import com.dashlane.autofill.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.search.MatchedSearchResult
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.util.DeviceUtils
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
@@ -27,7 +27,7 @@ class ViewAllItemsViewProxy(
     private val fragment: ViewAllItemsDialogFragment,
     private val binding: ViewAllItemsDialogFragmentBinding,
     private val authentifiantSearchViewTypeProviderFactory: AuthentifiantSearchViewTypeProviderFactory,
-    private val viewModel: ViewAllItemsViewModel
+    private val viewModel: ViewAllItemsViewModel,
 ) {
     private val heightPeekExpanded: Pair<Int?, Int?>
     private val context = binding.root.context
@@ -44,7 +44,6 @@ class ViewAllItemsViewProxy(
     init {
         adapter.onItemClickListener = authentifiantClickListener
         binding.listview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (newState == SCROLL_STATE_DRAGGING) {
                     DeviceUtils.hideKeyboard(recyclerView)
@@ -80,7 +79,7 @@ class ViewAllItemsViewProxy(
         binding.fab.setOnClickListener {
             val bottomSheetNavigator = fragment.getAutofillBottomSheetNavigator()
             getBottomSheetAuthentifiantListDialogResponse()?.onNavigateToCreateAuthentifiant(
-                bottomSheetNavigator
+                bottomSheetNavigator,
             )
         }
 
@@ -93,8 +92,14 @@ class ViewAllItemsViewProxy(
                         hideLoading()
                     }
                     when (state) {
-                        is ViewAllItemsState.Loaded -> onUpdateAuthentifiants(state.data, state.query)
-                        is ViewAllItemsState.Selected -> onSelected(state.selectedCredential, state.itemListContext)
+                        is ViewAllItemsState.Loaded -> onUpdateAuthentifiants(
+                            state.data,
+                            state.query,
+                        )
+                        is ViewAllItemsState.Selected -> onSelected(
+                            state.selectedCredential,
+                            state.itemListContext,
+                        )
                         is ViewAllItemsState.Error -> onError()
                         else -> Unit
                     }
@@ -105,7 +110,8 @@ class ViewAllItemsViewProxy(
 
     private fun setupViewHeight() {
         heightPeekExpanded.second?.let { eh ->
-            val layoutParams = ConstraintLayout.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, eh)
+            val layoutParams =
+                ConstraintLayout.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, eh)
             binding.root.layoutParams = layoutParams
         }
     }
@@ -126,16 +132,16 @@ class ViewAllItemsViewProxy(
         val totalCount = searchResult.size
         val baseListContext = ItemListContext(
             container = ItemListContext.Container.SEARCH,
-            section = ItemListContext.Section.SEARCH_RESULT
+            section = ItemListContext.Section.SEARCH_RESULT,
         )
         adapter.populateItems(
             searchResult.mapIndexed { index, item ->
                 authentifiantSearchViewTypeProviderFactory.create(
                     item,
                     baseListContext.copy(position = index, count = totalCount),
-                    query
+                    query,
                 )
-            }
+            },
         )
         binding.listview.scrollToPosition(0)
     }
@@ -144,18 +150,18 @@ class ViewAllItemsViewProxy(
         getBottomSheetAuthentifiantListDialogResponse()?.onAuthentifiantDialogResponse(
             authentifiant = null,
             itemListContext = ItemListContext(sectionCount = adapter.itemCount),
-            searchQuery = getQuery()
+            searchQuery = getQuery(),
         )
     }
 
     private fun onSelected(
         authentifiant: VaultItem<SyncObject.Authentifiant>,
-        itemListContext: ItemListContext
+        itemListContext: ItemListContext,
     ) {
         getBottomSheetAuthentifiantListDialogResponse()?.onAuthentifiantDialogResponse(
             authentifiant,
             itemListContext,
-            searchQuery = getQuery()
+            searchQuery = getQuery(),
         )
     }
 

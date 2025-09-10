@@ -3,11 +3,11 @@ package com.dashlane.ui.widgets.view.empty;
 import android.content.Context;
 import android.view.View;
 
-import com.dashlane.ui.R;
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter;
-import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder;
-
 import androidx.annotation.NonNull;
+
+import com.dashlane.ui.R;
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter;
+import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder;
 
 public class EmptyScreenViewProvider
         implements DashlaneRecyclerAdapter.MultiColumnViewTypeProvider {

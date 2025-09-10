@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sso.json",
+  "type": "object",
+  "description": "Definitions for B2B properties relating to SSO setup and usage by Admins",
+  "definitions": {
+    "email_domain_error": {
+      "description": "During Nitro SSO setup: if there is an error during email domain validation, indicate which one",
+      "type": "string",
+      "enum": [
+        "incorrect_text",
+        "not_found",
+        "other_error"
+      ]
+    },
+    "email_domain_submitted_count": {
+      "description": "Number of email domains submitted for validation so far by the Admin (Nitro SSO)",
+      "type": "integer"
+    },
+    "email_domain_validated_count": {
+      "description": "Number of email domains successfully validated so far (Nitro SSO)",
+      "type": "integer"
+    },
+    "encryption_service_platform_selected": {
+      "description": "Encryption service selected for SSO (Azure or AWS for Self-hosted SSO, AWS for Nitro SSO)",
+      "type": "string",
+      "enum": [
+        "amazon_web_services",
+        "azure"
+      ]
+    },
+    "idp_validation_response": {
+      "description": "Response from IdP validation",
+      "type": "string",
+      "enum": [
+        "idp_entrypoint_not_found",
+        "invalid_entrypoint",
+        "invalid_idp_sso_descriptor",
+        "key_descriptor_not_found",
+        "missing_certificate",
+        "multiple_certificates",
+        "success",
+        "xml_parse_failed"
+      ]
+    },
+    "sso_setup_step": {
+      "description": "The step which the admin is either on Nitro SSO or Self-Hosted SSO setup",
+      "type": "string",
+      "enum": [
+        "add_configuration_to_service_host",
+        "choose_your_sso_solution",
+        "clear_sso_settings",
+        "complete_sso_setup",
+        "create_sso_application",
+        "email_domain_error",
+        "generate_and_save_configuration",
+        "return_to_sso_selection",
+        "select_encryption_service_platform",
+        "set_up_encryption_service_settings",
+        "submit_email_domain",
+        "test_sso_connection",
+        "turn_on_sso",
+        "update_idp_settings",
+        "validate_idp_metadata",
+        "verify_domain"
+      ]
+    },
+    "sso_solution_chosen": {
+      "description": "Admin chooses between Nitro SSO and Self Hosted SSO at the start of the funnel",
+      "type": "string",
+      "enum": [
+        "nitro_sso",
+        "self_hosted_sso"
+      ]
+    },
+    "test_sso_response": {
+      "description": "Response from the optional SSO testing (Step 5, Nitro SSO)",
+      "type": "string",
+      "enum": [
+        "failure",
+        "not_tested",
+        "success",
+        "timeout"
+      ]
+    }
+  }
+}

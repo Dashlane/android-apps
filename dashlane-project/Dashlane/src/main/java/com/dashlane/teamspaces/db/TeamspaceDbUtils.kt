@@ -5,7 +5,6 @@ import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 
 object TeamspaceDbUtils {
-
     @JvmStatic
     fun prepareItemForDuplication(item: VaultItem<*>): VaultItem<*> {
         

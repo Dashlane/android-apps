@@ -9,9 +9,8 @@ import com.dashlane.password.generator.PasswordGeneratorCriteria
 import javax.inject.Inject
 
 class AutofillGeneratePasswordLoggerImpl @Inject constructor(
-    private val hermesLogRepository: LogRepository
+    private val hermesLogRepository: LogRepository,
 ) : AutofillGeneratePasswordLogger {
-
     override fun logGeneratePassword(criteria: PasswordGeneratorCriteria, domainForLogs: Domain) {
         val isNativeApp = when (domainForLogs.type) {
             DomainType.APP -> true
@@ -25,8 +24,8 @@ class AutofillGeneratePasswordLoggerImpl @Inject constructor(
                 length = criteria.length,
                 hasSymbols = criteria.symbols,
                 isNativeApp = isNativeApp,
-                hasDigits = criteria.digits
-            )
+                hasDigits = criteria.digits,
+            ),
         )
     }
 }

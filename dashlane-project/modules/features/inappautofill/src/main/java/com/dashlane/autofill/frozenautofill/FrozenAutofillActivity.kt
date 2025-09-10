@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class FrozenAutofillActivity : AutoFillResponseActivity() {
-
     @Inject
     lateinit var autofillNavigationService: AutofillNavigationService
 
@@ -34,7 +33,8 @@ class FrozenAutofillActivity : AutoFillResponseActivity() {
                 FrozenAutofillBottomSheet(
                     state = uiState.value,
                     onCancelClick = ::onNotNowClick,
-                    onUpgradeClick = ::onUpgradeClick
+                    onUpgradeClick = ::onUpgradeClick,
+                    onDismissRequest = ::onBottomSheetDismiss,
                 )
             }
         }
@@ -51,10 +51,15 @@ class FrozenAutofillActivity : AutoFillResponseActivity() {
         onFinish()
     }
 
+    private fun onBottomSheetDismiss() {
+        viewModel.onBottomSheetDismiss()
+        onFinish()
+    }
+
     private fun onFinish() {
         finishWithResult(
             itemToFill = null,
-            matchType = matchType
+            matchType = matchType,
         )
     }
 
@@ -66,7 +71,7 @@ class FrozenAutofillActivity : AutoFillResponseActivity() {
             val intent = createIntent(context, summary, FrozenAutofillActivity::class)
             return createIntentSender(
                 context,
-                intent
+                intent,
             )
         }
     }

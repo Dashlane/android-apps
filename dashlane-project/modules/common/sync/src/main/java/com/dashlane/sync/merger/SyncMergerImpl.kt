@@ -14,12 +14,11 @@ import com.dashlane.xml.domain.toTransaction
 import javax.inject.Inject
 
 class SyncMergerImpl @Inject constructor(
-    private val syncConflict: SyncConflict
+    private val syncConflict: SyncConflict,
 ) : SyncMerger {
-
     override fun mergeRemoteAndLocalData(
         incomingTransactions: List<IncomingTransaction>,
-        outgoingTransactions: List<OutgoingTransaction>
+        outgoingTransactions: List<OutgoingTransaction>,
     ): Pair<List<OutgoingTransaction>, List<IncomingTransaction>> {
         val localOperationUUIDs = outgoingTransactions.asSequence()
             .map(OutgoingTransaction::identifier)
@@ -38,7 +37,7 @@ class SyncMergerImpl @Inject constructor(
         
         val (resolvedToDoOnLocalVault, resolvedTodoOnServer) = resolveConflicts(
             conflictTodoOnLocalVault,
-            conflictTodoOnServer
+            conflictTodoOnServer,
         )
 
         
@@ -50,7 +49,7 @@ class SyncMergerImpl @Inject constructor(
 
     private fun resolveConflicts(
         toDoOnLocal: List<IncomingTransaction>,
-        toDoOnServer: List<OutgoingTransaction>
+        toDoOnServer: List<OutgoingTransaction>,
     ): Pair<List<IncomingTransaction>, List<OutgoingTransaction>> {
         val associatedLocal = toDoOnLocal.associateBy { it.identifier }
         val conflictsMapping = toDoOnServer.map { associatedLocal.getValue(it.identifier) to it }
@@ -62,7 +61,7 @@ class SyncMergerImpl @Inject constructor(
 
     private fun resolveConflict(
         pendingLocalOperation: IncomingTransaction,
-        pendingRemoteOperation: OutgoingTransaction
+        pendingRemoteOperation: OutgoingTransaction,
     ): Pair<List<IncomingTransaction>, List<OutgoingTransaction>> {
         if (pendingLocalOperation !is IncomingTransaction.Update) {
             
@@ -82,27 +81,27 @@ class SyncMergerImpl @Inject constructor(
 
     private fun mergePasswordHistory(
         incomingUpdate: IncomingTransaction.Update,
-        outgoingUpdate: OutgoingTransaction.Update
+        outgoingUpdate: OutgoingTransaction.Update,
     ): Pair<List<IncomingTransaction>, List<OutgoingTransaction>> {
         val mergeResult = outgoingUpdate.syncObject.toTransaction().node.mergeInto(
             other = incomingUpdate.syncObject.toTransaction().node,
-            anonymousListsStrategy = MergeListStrategy.DEDUPLICATE
+            anonymousListsStrategy = MergeListStrategy.DEDUPLICATE,
         )
         val mergedTransaction = XmlTransaction(mergeResult)
         val mergedObject = mergedTransaction.toObject()
 
         val mergedIncomingTransaction = incomingUpdate.copy(
-            syncObject = mergedObject
+            syncObject = mergedObject,
         )
         val mergedOutgoingTransaction = outgoingUpdate.copy(
-            syncObject = mergedObject
+            syncObject = mergedObject,
         )
         return listOf(mergedIncomingTransaction) to listOf(mergedOutgoingTransaction)
     }
 
     private fun defaultConflictResolution(
         incomingUpdate: IncomingTransaction.Update,
-        outgoingUpdate: OutgoingTransaction.Update
+        outgoingUpdate: OutgoingTransaction.Update,
     ): Pair<List<IncomingTransaction>, List<OutgoingTransaction>> {
         if (incomingUpdate.isShared || outgoingUpdate.isShared) {
             
@@ -115,7 +114,7 @@ class SyncMergerImpl @Inject constructor(
                 outgoingUpdate.syncObjectType,
                 outgoingUpdate.backup,
                 outgoingUpdate.syncObject,
-                incomingUpdate.syncObject
+                incomingUpdate.syncObject,
             )
         } catch (e: SyncConflict.DuplicateException) {
             val (incomingDuplicate, outgoingDuplicate) = createDuplicate(outgoingUpdate)
@@ -127,31 +126,31 @@ class SyncMergerImpl @Inject constructor(
     }
 
     private fun createDuplicate(
-        outgoingUpdate: OutgoingTransaction.Update
+        outgoingUpdate: OutgoingTransaction.Update,
     ): Pair<IncomingTransaction.Update, OutgoingTransaction.Update> {
         val syncObject = outgoingUpdate.syncObject
         val transactionXml = syncObject.toTransaction()
         val identifier = generateUniqueIdentifier()
         val transactionCopy = outgoingUpdate.transaction.copy(
-            identifier = identifier
+            identifier = identifier,
         )
         val transactionXmlCopy = transactionXml.copy(
             node = transactionXml.node.copy(
-                data = transactionXml.node.data + (SyncObjectXml.ID to XmlData.ItemNode(identifier))
-            )
+                data = transactionXml.node.data + (SyncObjectXml.ID to XmlData.ItemNode(identifier)),
+            ),
         )
         val syncObjectCopy = transactionXmlCopy.toObject(SyncObjectType.forObject(syncObject))
         val isShared = false 
         val incomingCopy = IncomingTransaction.Update(
             transactionCopy,
             syncObjectCopy,
-            isShared
+            isShared,
         )
         val outgoingCopy = OutgoingTransaction.Update(
             transactionCopy,
             syncObjectCopy,
             syncObjectCopy,
-            isShared
+            isShared,
         )
         return incomingCopy to outgoingCopy
     }

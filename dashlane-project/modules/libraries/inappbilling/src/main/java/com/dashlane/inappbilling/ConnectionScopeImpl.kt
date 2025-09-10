@@ -22,13 +22,13 @@ import kotlin.coroutines.resume
 
 class ConnectionScopeImpl(
     private val billingClient: BillingClient,
-    private val purchaseChannel: Channel<ServiceResult>
+    private val purchaseChannel: Channel<ServiceResult>,
 ) : ConnectionScope {
     override suspend fun startPurchaseFlow(
         activity: Activity,
         productDetails: ProductDetails,
         offerToken: String?,
-        updateReference: UpdateReference?
+        updateReference: UpdateReference?,
     ): ServiceResult {
         val productParams = BillingFlowParams.ProductDetailsParams.newBuilder().apply {
             setProductDetails(productDetails)
@@ -42,7 +42,7 @@ class ConnectionScopeImpl(
                 setSubscriptionUpdateParams(
                     BillingFlowParams.SubscriptionUpdateParams.newBuilder()
                         .setOldPurchaseToken(updateReference.oldPurchaseToken)
-                        .setReplaceProrationMode(updateReference.mode).build()
+                        .setSubscriptionReplacementMode(updateReference.mode).build(),
                 )
             }
         }
@@ -99,7 +99,7 @@ class ConnectionScopeImpl(
                     ServiceResult.Success.Purchases(inAppPurchases.purchases + subscriptionPurchases.purchases)
                 }
                 inAppPurchases.responseCode.isSuccess() -> ServiceResult.Success.Purchases(
-                    inAppPurchases.purchases
+                    inAppPurchases.purchases,
                 )
                 else -> inAppPurchases.responseCode.toFailureServiceResult()
             }
@@ -109,7 +109,7 @@ class ConnectionScopeImpl(
     private suspend fun queryPurchaseForType(productType: String): PurchaseResult {
         return suspendCancellableCoroutine { continuation ->
             billingClient.queryPurchasesAsync(
-                QueryPurchasesParams.newBuilder().setProductType(productType).build()
+                QueryPurchasesParams.newBuilder().setProductType(productType).build(),
             ) { purchasesResult: BillingResult, purchasesList: List<Purchase> ->
                 if (continuation.isActive) {
                     continuation.resume(PurchaseResult(purchasesResult.responseCode, purchasesList))
@@ -120,7 +120,7 @@ class ConnectionScopeImpl(
 
     override suspend fun queryProductDetails(
         productList: List<String>,
-        types: List<String>
+        types: List<String>,
     ): ServiceResult {
         return coroutineScope {
             val result = types.map { productType ->
@@ -145,7 +145,7 @@ class ConnectionScopeImpl(
 
     private suspend fun queryProductDetailsForType(
         @ProductType itemType: String,
-        productId: List<String>
+        productId: List<String>,
     ): ProductDetailsResult {
         return suspendCancellableCoroutine { continuation ->
             val productsDetailsParams = productId.map { productId ->
@@ -162,8 +162,8 @@ class ConnectionScopeImpl(
                     continuation.resume(
                         ProductDetailsResult(
                             billingResult.responseCode,
-                            productDetailsList
-                        )
+                            productDetailsList,
+                        ),
                     )
                 }
             }
@@ -172,11 +172,11 @@ class ConnectionScopeImpl(
 
     private data class PurchaseResult(
         val responseCode: Int,
-        val purchases: List<Purchase>
+        val purchases: List<Purchase>,
     )
 
     private data class ProductDetailsResult(
         val responseCode: Int,
-        val productDetails: List<ProductDetails>
+        val productDetails: List<ProductDetails>,
     )
 }

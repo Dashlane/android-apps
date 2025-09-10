@@ -10,7 +10,6 @@ import okio.use
 import kotlin.experimental.xor
 
 sealed class AppKey : Closeable, Cloneable {
-
     abstract val cryptographyKey: CryptographyKey
     abstract val cryptographyKeyType: CryptographyKey.Type
     abstract val cryptographyKeyBytes: ObfuscatedByteArray
@@ -56,10 +55,9 @@ sealed class AppKey : Closeable, Cloneable {
             _cryptographyKey.hashCode()
 
         companion object {
-
             fun create(
                 serverKey: ByteArray,
-                serviceProviderKey: ByteArray
+                serviceProviderKey: ByteArray,
             ): SsoKey {
                 require(serverKey.size == CryptographyKey.KEY_SIZE_64) { "Unexpected server key size ${serverKey.size}" }
                 require(serviceProviderKey.size == CryptographyKey.KEY_SIZE_64) { "Unexpected SP key size ${serverKey.size}" }
@@ -69,7 +67,6 @@ sealed class AppKey : Closeable, Cloneable {
     }
 
     class Password : AppKey {
-
         override val cryptographyKeyType: CryptographyKey.Type
             get() = CryptographyKey.Type.PASSWORD
         private val _passwordUtf8Bytes: ObfuscatedByteArray

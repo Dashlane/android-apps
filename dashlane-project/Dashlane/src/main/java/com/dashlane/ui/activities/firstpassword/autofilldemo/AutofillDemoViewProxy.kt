@@ -18,7 +18,6 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 class AutofillDemoViewProxy(activity: AppCompatActivity) :
     BaseViewProxy<AutofillDemo.Presenter>(activity),
     AutofillDemo.ViewProxy {
-
     private val mainView = findViewByIdEfficient<ConstraintLayout>(R.id.autofill_demo_constraint_layout)!!
     private val scrollView = findViewByIdEfficient<ScrollView>(R.id.scroll_view)!!
     private val websiteIcon = findViewByIdEfficient<ThumbnailDomainIconView>(R.id.website_icon)!!

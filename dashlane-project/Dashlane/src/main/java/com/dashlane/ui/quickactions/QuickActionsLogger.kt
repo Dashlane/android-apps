@@ -14,11 +14,11 @@ import javax.inject.Inject
 class QuickActionsLogger @Inject constructor(private val logRepository: LogRepository) : QuickActionsContract.Logger {
     override fun logOpenQuickActions(
         summaryObject: SummaryObject,
-        itemListContext: ItemListContext
+        itemListContext: ItemListContext,
     ) {
         logRepository.queuePageView(
             component = BrowseComponent.MAIN_APP,
-            page = AnyPage.ITEM_QUICK_ACTIONS_DROPDOWN
+            page = AnyPage.ITEM_QUICK_ACTIONS_DROPDOWN,
         )
         logRepository.queueEvent(
             OpenVaultItemDropdown(
@@ -26,8 +26,8 @@ class QuickActionsLogger @Inject constructor(private val logRepository: LogRepos
                 dropdownType = DropdownType.QUICK_ACTIONS,
                 itemType = summaryObject.syncObjectType.toItemType(),
                 totalCount = itemListContext.sectionCount,
-                index = itemListContext.positionInContainerSection.toDouble()
-            )
+                index = itemListContext.positionInContainerSection.toDouble(),
+            ),
         )
     }
 
@@ -36,7 +36,7 @@ class QuickActionsLogger @Inject constructor(private val logRepository: LogRepos
 
         logRepository.queuePageView(
             component = BrowseComponent.MAIN_APP,
-            page = page
+            page = page,
         )
     }
 }

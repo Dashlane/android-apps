@@ -8,9 +8,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.dashlane.autofill.api.databinding.BottomSheetChangePasswordLayoutBinding
 import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordErrors
 import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordResultHandler
-import com.dashlane.autofill.api.databinding.BottomSheetChangePasswordLayoutBinding
 import com.dashlane.autofill.generatepassword.GeneratePasswordState
 import com.dashlane.autofill.generatepassword.GeneratePasswordViewModel
 import com.dashlane.autofill.navigation.AutofillBottomSheetNavigator
@@ -30,7 +30,6 @@ class ChangePasswordViewProxy(
     viewLifecycleOwner: LifecycleOwner,
     autofillBottomSheetNavigator: AutofillBottomSheetNavigator,
 ) : ChangePasswordContract.ViewProxy {
-
     private val context: Context
         get() = binding.root.context
 
@@ -40,7 +39,7 @@ class ChangePasswordViewProxy(
             super.onTextChanged(charSequence, start, before, count)
             viewModel.updateCanUse(
                 binding.login.selectedItem?.toString(),
-                binding.generateLayout.password.text?.toString()
+                binding.generateLayout.password.text?.toString(),
             )
         }
     }
@@ -50,7 +49,7 @@ class ChangePasswordViewProxy(
         binding.saveButton.setOnClickListener {
             viewModel.useNewPassword(
                 binding.login.selectedItem.toString(),
-                binding.generateLayout.password.text?.toString()
+                binding.generateLayout.password.text?.toString(),
             )
         }
         binding.backArrow.setOnClickListener { autofillBottomSheetNavigator.popStack() }
@@ -117,7 +116,8 @@ class ChangePasswordViewProxy(
         when (error) {
             AutofillChangePasswordErrors.USER_LOGGED_OUT,
             AutofillChangePasswordErrors.DATABASE_ERROR,
-            AutofillChangePasswordErrors.NO_MATCHING_CREDENTIAL -> {
+            AutofillChangePasswordErrors.NO_MATCHING_CREDENTIAL,
+            -> {
                 resultHandler?.onError(error)
             }
             AutofillChangePasswordErrors.INCOMPLETE -> displayError(context.getString(error.resId))

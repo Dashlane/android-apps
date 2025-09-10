@@ -7,13 +7,13 @@ import com.dashlane.item.v3.viewmodels.FormState
 
 fun LazyListScope.sharedAccessSectionItem(
     uiState: FormState<out FormData>,
-    onSharedClick: () -> Unit
+    onSharedClick: () -> Unit,
 ) {
     item(key = "SharedAccessSection") {
         SharedAccessSection(
             commonData = uiState.datas.current.commonData,
             editMode = uiState.isEditMode,
-            onSharedClick = onSharedClick
+            onSharedClick = onSharedClick,
         )
     }
 }

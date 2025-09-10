@@ -2,24 +2,22 @@ package com.dashlane.autofill.securitywarnings.model
 
 import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
-import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
-import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
+import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
+import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.core.helpers.SignatureVerification
-import com.dashlane.hermes.generated.definitions.Domain
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 internal class SecurityWarningsProcessor(
     private val securityWarningsView: SecurityWarningsView,
     @ApplicationContext
     private val context: Context,
-    private val authentifiantResult: AutofillAnalyzerDef.IAutofillSecurityApplication,
+    private val authentifiantResult: AutofillAnalyzerDef.AutofillSecurityApplication,
     private val warningsLogger: AutofillSecurityWarningsLogger,
-    private val rememberSecurityWarningsService: RememberSecurityWarningsService
+    private val rememberSecurityWarningsService: RememberSecurityWarningsService,
 ) {
-
     private var securityWarning: Pair<UnlockedAuthentifiant, SignatureVerification>? = null
 
     fun dealWithSecurityBeforeFill(unlockedAuthentifiant: UnlockedAuthentifiant) {
@@ -31,7 +29,7 @@ internal class SecurityWarningsProcessor(
             securityWarningsView.finishWithResult(
                 unlockedAuthentifiant,
                 showWarningRemembered = false,
-                warningShown = false
+                warningShown = false,
             )
         } else {
             showSecurityWarning(signatureVerification, unlockedAuthentifiant)
@@ -42,26 +40,26 @@ internal class SecurityWarningsProcessor(
         authentifiantResult.getSignatureVerification(
             context,
             unlockedAuthentifiant.packageName,
-            unlockedAuthentifiant.authentifiantSummary
+            unlockedAuthentifiant.authentifiantSummary,
         )
 
     private fun isVerifiedOrRemembered(
         signatureVerification: SignatureVerification,
-        unlockedAuthentifiant: UnlockedAuthentifiant
+        unlockedAuthentifiant: UnlockedAuthentifiant,
     ) = signatureVerification.isVerified() ||
-            rememberSecurityWarningsService.isItemSourceRemembered(
-                unlockedAuthentifiant,
-                signatureVerification
-            )
+        rememberSecurityWarningsService.isItemSourceRemembered(
+            unlockedAuthentifiant,
+            signatureVerification,
+        )
 
     private fun showSecurityWarning(
         signatureVerification: SignatureVerification,
-        unlockedAuthentifiant: UnlockedAuthentifiant
+        unlockedAuthentifiant: UnlockedAuthentifiant,
     ) {
         when (signatureVerification) {
             is SignatureVerification.Incorrect -> showIncorrect(
                 unlockedAuthentifiant,
-                signatureVerification
+                signatureVerification,
             )
             is SignatureVerification.MismatchUnknown ->
                 showMismatch(unlockedAuthentifiant, signatureVerification)
@@ -73,18 +71,18 @@ internal class SecurityWarningsProcessor(
 
     private fun showIncorrect(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        signatureVerification: SignatureVerification.Incorrect
+        signatureVerification: SignatureVerification.Incorrect,
     ) {
         warningsLogger.onDisplayedIncorrectWarning(
             signatureVerification,
-            unlockedAuthentifiant
+            unlockedAuthentifiant,
         )
         securityWarningsView.showIncorrectWarning(unlockedAuthentifiant)
     }
 
     private fun showUnknownOrMismatch(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        signatureVerification: SignatureVerification.WithSignatureUnknown
+        signatureVerification: SignatureVerification.WithSignatureUnknown,
     ) {
         if (signatureVerification.isKnownUnknownSource(unlockedAuthentifiant)) {
             showMismatch(unlockedAuthentifiant, signatureVerification)
@@ -95,19 +93,19 @@ internal class SecurityWarningsProcessor(
 
     private fun showMismatch(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        signatureVerification: SignatureVerification.UnknownWithSignature
+        signatureVerification: SignatureVerification.UnknownWithSignature,
     ) {
         if (securityWarningsView.autoAcceptMismatch()) {
             rememberMismatchWarning(unlockedAuthentifiant, signatureVerification)
             securityWarningsView.finishWithResult(
                 unlockedAuthentifiant,
                 showWarningRemembered = false,
-                warningShown = false
+                warningShown = false,
             )
         } else {
             warningsLogger.onDisplayedMismatchWarning(
                 signatureVerification,
-                unlockedAuthentifiant
+                unlockedAuthentifiant,
             )
             securityWarningsView.showMismatchWarning(unlockedAuthentifiant)
         }
@@ -115,160 +113,137 @@ internal class SecurityWarningsProcessor(
 
     private fun showUnknown(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        signatureVerification: SignatureVerification
+        signatureVerification: SignatureVerification,
     ) {
         if (securityWarningsView.autoAcceptUnknown()) {
             rememberUnknownWarning(unlockedAuthentifiant, signatureVerification)
             securityWarningsView.finishWithResult(
                 unlockedAuthentifiant,
                 showWarningRemembered = false,
-                warningShown = false
+                warningShown = false,
             )
         } else {
             warningsLogger.onDisplayedUnknownWarning(
                 signatureVerification,
-                unlockedAuthentifiant
+                unlockedAuthentifiant,
             )
             securityWarningsView.showUnknownWarning(unlockedAuthentifiant)
         }
     }
 
     private fun SignatureVerification.WithSignatureUnknown.isKnownUnknownSource(
-        unlockedAuthentifiant: UnlockedAuthentifiant
+        unlockedAuthentifiant: UnlockedAuthentifiant,
     ): Boolean =
         rememberSecurityWarningsService.isSourceRemembered(unlockedAuthentifiant, this)
 
-    fun incorrectWarningPositiveClick(doNotShowAgain: Boolean, domain: Domain) {
+    fun incorrectWarningPositiveClick(doNotShowAgain: Boolean) {
         val unlockedAuthentifiant = securityWarning?.first ?: return
         val signatureVerification =
             securityWarning?.second as? SignatureVerification.Incorrect ?: return
 
-        warningsLogger.onApprovedIncorrectWarning(
-            signatureVerification,
-            unlockedAuthentifiant,
-            doNotShowAgain,
-            domain
+        warningsLogger.onApprovedWarning(
+            fill = unlockedAuthentifiant,
+            neverShowAgain = doNotShowAgain,
         )
 
         val securityWarningRemembered = doNotShowAgain && rememberIncorrectWarning(
             unlockedAuthentifiant,
-            signatureVerification
+            signatureVerification,
         )
-        securityWarningsView.finishWithResult(unlockedAuthentifiant, securityWarningRemembered, true)
+        securityWarningsView.finishWithResult(
+            unlockedAuthentifiant,
+            securityWarningRemembered,
+            true,
+        )
     }
 
     private fun rememberIncorrectWarning(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        signatureVerification: SignatureVerification.Incorrect
+        signatureVerification: SignatureVerification.Incorrect,
     ): Boolean {
         if (!isPackageNameMatch(unlockedAuthentifiant.formSource, signatureVerification)) {
             return false
         }
         return rememberSecurityWarningsService.remember(
             unlockedAuthentifiant,
-            signatureVerification
-        )
-    }
-
-    fun incorrectWarningNegativeClick(domain: Domain) {
-        val unlockedAuthentifiant = securityWarning?.first ?: return
-        val signatureVerification =
-            securityWarning?.second as? SignatureVerification.Incorrect ?: return
-
-        warningsLogger.onDeclinedIncorrectWarning(
             signatureVerification,
-            unlockedAuthentifiant,
-            domain
         )
+    }
+
+    fun incorrectWarningNegativeClick() {
+        val unlockedAuthentifiant = securityWarning?.first ?: return
+        warningsLogger.onDeclinedWarning(unlockedAuthentifiant)
         securityWarningsView.finish()
     }
 
-    fun incorrectWarningCancelClick(domain: Domain) {
+    fun incorrectWarningCancelClick() {
+        val unlockedAuthentifiant = securityWarning?.first ?: return
+        warningsLogger.onDeclinedWarning(fill = unlockedAuthentifiant)
+        securityWarningsView.finish()
+    }
+
+    fun mismatchWarningPositiveClick(doNotShowAgain: Boolean) {
         val unlockedAuthentifiant = securityWarning?.first ?: return
         val signatureVerification =
             securityWarning?.second as? SignatureVerification.UnknownWithSignature ?: return
 
-        logDismiss(signatureVerification, unlockedAuthentifiant, domain)
-        securityWarningsView.finish()
-    }
-
-    fun mismatchWarningPositiveClick(doNotShowAgain: Boolean, domain: Domain) {
-        val unlockedAuthentifiant = securityWarning?.first ?: return
-        val signatureVerification =
-            securityWarning?.second as? SignatureVerification.UnknownWithSignature ?: return
-
-        logDismiss(signatureVerification, unlockedAuthentifiant, domain, doNotShowAgain)
+        warningsLogger.onApprovedWarning(
+            fill = unlockedAuthentifiant,
+            neverShowAgain = doNotShowAgain,
+        )
 
         val securityWarningRemembered = doNotShowAgain && rememberMismatchWarning(
             unlockedAuthentifiant,
-            signatureVerification
-        )
-        securityWarningsView.finishWithResult(unlockedAuthentifiant, securityWarningRemembered, true)
-    }
-
-    private fun logDismiss(
-        signatureVerification: SignatureVerification.UnknownWithSignature,
-        unlockedAuthentifiant: UnlockedAuthentifiant,
-        domain: Domain,
-        doNotShowAgain: Boolean = false
-    ) {
-        warningsLogger.onApprovedMismatchWarning(
             signatureVerification,
+        )
+        securityWarningsView.finishWithResult(
             unlockedAuthentifiant,
-            doNotShowAgain,
-            domain
+            securityWarningRemembered,
+            true,
         )
     }
 
     private fun rememberMismatchWarning(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        signatureVerification: SignatureVerification.UnknownWithSignature
+        signatureVerification: SignatureVerification.UnknownWithSignature,
     ): Boolean {
         if (!isPackageNameMatch(unlockedAuthentifiant.formSource, signatureVerification)) {
             return false
         }
         return rememberSecurityWarningsService.remember(
             unlockedAuthentifiant,
-            signatureVerification
-        )
-    }
-
-    fun mismatchWarningCancelClick(domain: Domain) {
-        logDecline(domain)
-        securityWarningsView.finish()
-    }
-
-    private fun logDecline(domain: Domain) {
-        val unlockedAuthentifiant = securityWarning?.first ?: return
-        val signatureVerification =
-            securityWarning?.second as? SignatureVerification.UnknownWithSignature ?: return
-
-        warningsLogger.onDeclinedMismatchWarning(
             signatureVerification,
-            unlockedAuthentifiant,
-            domain
         )
-        return
     }
 
-    fun unknownWarningPositiveClick(domain: Domain) {
+    fun mismatchWarningNegativeClick() {
+        onCloseSecurityWarningWithDeny()
+    }
+
+    fun mismatchWarningCancelClick() {
+        onCloseSecurityWarningWithDeny()
+    }
+
+    fun unknownWarningPositiveClick() {
         val unlockedAuthentifiant = securityWarning?.first ?: return
         val signatureVerification =
             securityWarning?.second as? SignatureVerification.Unknown ?: return
 
-        warningsLogger.onApprovedUnknownWarning(
-            signatureVerification,
+        warningsLogger.onApprovedWarning(
             unlockedAuthentifiant,
             true,
-            domain
         )
         rememberUnknownWarning(unlockedAuthentifiant, signatureVerification)
-        securityWarningsView.finishWithResult(unlockedAuthentifiant, showWarningRemembered = false, warningShown = true)
+        securityWarningsView.finishWithResult(
+            unlockedAuthentifiant,
+            showWarningRemembered = false,
+            warningShown = true,
+        )
     }
 
     private fun rememberUnknownWarning(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        signatureVerification: SignatureVerification
+        signatureVerification: SignatureVerification,
     ): Boolean {
         if (!isPackageNameMatch(unlockedAuthentifiant.formSource, signatureVerification)) {
             return false
@@ -279,31 +254,31 @@ internal class SecurityWarningsProcessor(
 
         return rememberSecurityWarningsService.remember(
             unlockedAuthentifiant,
-            signatureVerification
+            signatureVerification,
         )
     }
 
-    fun onCloseSecurityWarningWithDeny(domain: Domain) {
-        logDeclineWarning(domain)
+    fun unknownWarningNegativeClick() {
+        onCloseSecurityWarningWithDeny()
+    }
+
+    fun unknownWarningCancelClick() {
+        onCloseSecurityWarningWithDeny()
+    }
+
+    private fun onCloseSecurityWarningWithDeny() {
+        logDeclineWarning()
         securityWarningsView.finish()
     }
 
-    private fun logDeclineWarning(domain: Domain) {
+    private fun logDeclineWarning() {
         val unlockedAuthentifiant = securityWarning?.first ?: return
-        val signatureVerification =
-            securityWarning?.second as? SignatureVerification.Unknown ?: return
-
-        warningsLogger.onDeclinedUnknownWarning(
-            signatureVerification,
-            unlockedAuthentifiant,
-            domain
-        )
-        return
+        warningsLogger.onDeclinedWarning(unlockedAuthentifiant)
     }
 
     private fun isPackageNameMatch(
         formSource: AutoFillFormSource,
-        signatureVerification: SignatureVerification
+        signatureVerification: SignatureVerification,
     ): Boolean {
         return when (signatureVerification) {
             is SignatureVerification.VaultLinkedAppsIncorrect ->

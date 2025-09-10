@@ -13,7 +13,6 @@ import okhttp3.Request
 internal class OnboardingGuidedPasswordChangeDataProvider :
     BaseDataProvider<OnboardingGuidedPasswordChangeContract.Presenter>(),
     OnboardingGuidedPasswordChangeContract.DataProvider {
-
     private val client = OkHttpClient()
 
     override suspend fun getPasswordChangeUrl(domain: String): Uri? {

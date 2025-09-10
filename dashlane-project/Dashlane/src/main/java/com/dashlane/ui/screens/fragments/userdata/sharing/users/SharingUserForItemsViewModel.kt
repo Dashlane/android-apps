@@ -3,18 +3,20 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.users
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.sync.DataSync
-import com.dashlane.events.AppEvents
-import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.navigation.Navigator
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
+import com.dashlane.sharing.SharingDataProvider
+import com.dashlane.sync.DataSync
+import com.dashlane.sync.DataSyncState
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,10 +24,9 @@ import javax.inject.Inject
 class SharingUserForItemsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sharingDataProvider: SharingDataProvider,
-    appEvents: AppEvents,
     private val sharingUsersDataProvider: SharingUsersDataProvider,
     private val navigator: Navigator,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
 ) : ViewModel(), SharingUsersForItemViewModelContract {
     override val itemId =
         SharingUserForItemsFragmentArgs.fromSavedStateHandle(savedStateHandle).argsItemUid
@@ -37,9 +38,10 @@ class SharingUserForItemsViewModel @Inject constructor(
 
     init {
         reloadData()
-        appEvents.register(this, SyncFinishedEvent::class.java, false) {
-            reloadData()
-        }
+        dataSync.dataSyncState
+            .filterIsInstance<DataSyncState.Idle.Success>()
+            .onEach { reloadData() }
+            .launchIn(viewModelScope)
     }
 
     override fun reloadData() {
@@ -88,7 +90,7 @@ class SharingUserForItemsViewModel @Inject constructor(
             runCatching {
                 sharingDataProvider.cancelInvitation(
                     itemGroup,
-                    listOf(memberLogin)
+                    listOf(memberLogin),
                 )
             }.onFailure {
                 uiState.tryEmit(SharingUsersForItemViewModelContract.UIState.RequestFailure)
@@ -106,7 +108,7 @@ class SharingUserForItemsViewModel @Inject constructor(
             runCatching {
                 sharingDataProvider.cancelInvitationUserGroups(
                     itemGroup,
-                    listOf(userGroupId)
+                    listOf(userGroupId),
                 )
             }.onFailure {
                 uiState.tryEmit(SharingUsersForItemViewModelContract.UIState.RequestFailure)
@@ -120,7 +122,7 @@ class SharingUserForItemsViewModel @Inject constructor(
     override fun onChangePermission(
         itemGroup: ItemGroup,
         newPermission: Permission,
-        memberLogin: String
+        memberLogin: String,
     ) {
         uiState.tryEmit(SharingUsersForItemViewModelContract.UIState.RequestLoading)
         viewModelScope.launch {
@@ -128,7 +130,7 @@ class SharingUserForItemsViewModel @Inject constructor(
                 sharingDataProvider.updateItemGroupMember(
                     itemGroup,
                     newPermission,
-                    memberLogin
+                    memberLogin,
                 )
             }.onFailure {
                 uiState.tryEmit(SharingUsersForItemViewModelContract.UIState.RequestFailure)
@@ -142,7 +144,7 @@ class SharingUserForItemsViewModel @Inject constructor(
     override fun onChangePermissionUserGroup(
         itemGroup: ItemGroup,
         newPermission: Permission,
-        userGroupId: String
+        userGroupId: String,
     ) {
         uiState.tryEmit(SharingUsersForItemViewModelContract.UIState.RequestLoading)
         viewModelScope.launch {
@@ -150,7 +152,7 @@ class SharingUserForItemsViewModel @Inject constructor(
                 sharingDataProvider.updateItemGroupMemberUserGroup(
                     itemGroup,
                     newPermission,
-                    userGroupId
+                    userGroupId,
                 )
             }.onFailure {
                 uiState.tryEmit(SharingUsersForItemViewModelContract.UIState.RequestFailure)

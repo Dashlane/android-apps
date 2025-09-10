@@ -2,19 +2,15 @@ package com.dashlane.preference
 
 class ConstantsPrefs {
     companion object {
-        internal const val SKIP_INTRO = "skipIntro"
         internal const val LOGGED_USER = "lastLoggedUser"
         internal const val USER_LIST_HISTORY = "userListHistory"
         internal const val USER_LIST_HISTORY_MAX_SIZE = 5
 
-        @Deprecated("Production clean in progress - to remove after good adoption")
-        internal const val DEVICE_COUNTRY = "deviceCountry"
+        @Deprecated("Production clean in progress since Jan 22 2025- to remove after good adoption")
+        internal const val PHISHING_MODEL_LAST_CHECK_TIMESTAMP = "phishing_model_last_check_timestamp"
 
-        @Deprecated("Production clean in progress - to remove after good adoption")
-        internal const val DEVICE_COUNTRY_REFRESH = "deviceCountryRefreshTimestamp"
-
-        @Deprecated("Production clean in progress - to remove after good adoption")
-        internal const val DEVICE_EUROPEAN_UNION_STATUS = "deviceIsInEuropeanUnion"
+        @Deprecated("Production clean in progress since Jan 22 2025 - to remove after good adoption")
+        internal const val PHISHING_WARNING_IGNORED_WEBSITES = "phishing_warning_ignored_websites"
 
         internal const val IS_USER_LOCKED = "isUserLocked"
         internal const val ACCESS_KEY = "pref_api_auth_access_key"
@@ -68,13 +64,10 @@ class ConstantsPrefs {
         const val REFERRED_BY = "referred_by"
         const val IN_APP_REVIEW_NEXT_SCHEDULE_TIMESTAMP = "nextRateTime"
         const val IN_APP_REVIEW_PREVIOUS_VERSION_CODE = "inAppReviewPreviousVersion"
-        const val CALL_PERMISSION = "call_permission"
 
         const val NEED_POPUP_SPACE_REVOKED_FOR = "space_just_revoked"
 
         const val HAS_ACTIVATED_AUTOFILL_ONCE = "has_activated_autofill_once"
-
-        const val IS_DARK_THEME_ENABLED = "isDarkThemeEnabled"
 
         const val PREMIUM_NEW_DEVICE_LATEST_TIMESTAMP = "premium_new_device_latest_timestamp"
         const val PREMIUM_NEW_DEVICE_DISPLAY_COUNT = "premium_new_device_display_count"
@@ -88,10 +81,10 @@ class ConstantsPrefs {
 
         const val AUTOFILL_NOTIFICATION_DISMISS_COUNT = "autofill_notification_dismiss"
 
+        const val AUTOFILL_NOTIFICATION_CHROME_DISMISS_COUNT = "autofill_notification_chrome_dismiss"
+
         const val PAUSED_APP_SOURCES_LIST = "paused_app_sources_list"
         const val PAUSED_WEB_SOURCES_LIST = "paused_web_sources_list"
-
-        const val AUTOFILL_UPGRADE_POPUP_LATEST_TIMESTAMP = "autofill_upgrade_popup_latest_timestamp"
 
         const val BACKUP_TOKEN_SET = "backup_token_set"
 
@@ -126,10 +119,6 @@ class ConstantsPrefs {
 
         const val MP_RESET_RECOVERY_STARTED = "mp_reset_recovery_started"
 
-        const val VPN_THIRD_PARTY_INFOBOX_DISMISSED = "vpn_third_party_infobox_dismissed"
-
-        const val VPN_THIRD_PARTY_GET_STARTED_DISPLAYED = "vpn_third_party_get_started_displayed"
-
         const val CRYPTO_MIGRATION_ATTEMPT_TIMESTAMP = "crypto_migration_attempt_timstamp"
 
         const val VAULT_REPORT_LATEST_TRIGGER_TIMESTAMP = "vault_report_latest_trigger_timestamp"
@@ -140,19 +129,14 @@ class ConstantsPrefs {
 
         const val HAS_AUTOMATIC_2FA_TOKEN_COPY = "has_automatic_2fa_token_copy"
 
-        @Deprecated("Preference to be cleared on June 2024")
-        const val PASSWORD_RESTORE_INFO_BOX_CLOSED = "password_restore_info_box_closed"
-
         const val IS_ANTI_PHISHING_ENABLED = "is_anti_phishing_enabled"
 
-        const val PHISHING_MODEL_LAST_CHECK_TIMESTAMP = "phishing_model_last_check_timestamp"
+        const val CAN_SHOW_AUTOFILL_ANNOUNCEMENT = "can_show_autofill_announcement"
 
-        const val PHISHING_WARNING_IGNORED_WEBSITES = "phishing_warning_ignored_websites"
+        const val CAN_SHOW_CHROME_ANNOUNCEMENT = "can_show_chrome_announcement"
 
         const val LABS_ACTIVATED = "labs_activated"
 
         const val TRIAL_ENDED_ANNOUNCEMENT_DISPLAY_TIMESTAMP = "trial_ended_announcement_display_timestamp"
-
-        const val SUNSET_BANNER_DISPLAYED = "sunset_banner_displayed"
     }
 }

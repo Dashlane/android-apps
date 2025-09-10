@@ -7,18 +7,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferState
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferViewModel
-import com.dashlane.ui.common.compose.components.LoadingScreen
 import com.dashlane.ui.common.compose.components.GenericErrorContent
+import com.dashlane.ui.common.compose.components.LoadingScreen
+import com.dashlane.user.UserAccountInfo
 
 @Composable
 fun AuthorizeScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginSecretTransferViewModel,
     onCancelled: () -> Unit,
-    onSuccess: (UserAccountInfo.AccountType) -> Unit
+    onSuccess: (UserAccountInfo.AccountType) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -31,7 +31,8 @@ fun AuthorizeScreen(
             is LoginSecretTransferState.ConfirmEmail,
             is LoginSecretTransferState.Error,
             is LoginSecretTransferState.Initial,
-            is LoginSecretTransferState.LoadingLogin -> Unit
+            is LoginSecretTransferState.LoadingLogin,
+            -> Unit
             is LoginSecretTransferState.Cancelled -> {
                 viewModel.hasNavigated()
                 onCancelled()
@@ -50,7 +51,7 @@ fun AuthorizeScreen(
             textPrimary = stringResource(id = R.string.login_secret_transfer_error_button_retry),
             textSecondary = stringResource(id = R.string.login_secret_transfer_error_button_cancel),
             onClickPrimary = viewModel::login,
-            onClickSecondary = viewModel::cancelOnError
+            onClickSecondary = viewModel::cancelOnError,
         )
         else -> {
             LoadingScreen(modifier, stringResource(R.string.login_secret_transfer_loading_login_title))

@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("ViewConstructor")
 class ScreenOverLockProtectionView(activity: DashlaneActivity) : View(activity) {
-
     companion object {
         fun showOrHide(activity: DashlaneActivity, lockWatcher: LockWatcher) {
             val decorView = activity.window.decorView as ViewGroup
@@ -46,7 +45,7 @@ class ScreenOverLockProtectionView(activity: DashlaneActivity) : View(activity) 
     init {
         setBackgroundColor(
             ContextThemeWrapper(context, R.style.Theme_Dashlane_Transparent)
-                .getThemeAttrColor(android.R.attr.colorBackground)
+                .getThemeAttrColor(android.R.attr.colorBackground),
         )
         isClickable = true
     }

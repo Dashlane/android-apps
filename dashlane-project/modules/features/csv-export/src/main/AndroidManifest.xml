@@ -2,7 +2,7 @@
 
     <application>
         <activity
-            android:name=".intro.CsvExportFromWebActivity"
+            android:name=".CsvExportActivity"
             android:exported="false" />
     </application>
 </manifest>

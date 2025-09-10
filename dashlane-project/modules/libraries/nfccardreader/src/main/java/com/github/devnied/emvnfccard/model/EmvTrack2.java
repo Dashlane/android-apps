@@ -2,6 +2,10 @@ package com.github.devnied.emvnfccard.model;
 
 import java.util.Date;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public class EmvTrack2 extends AbstractData {
 
 	private static final long serialVersionUID = -2906133619803198319L;

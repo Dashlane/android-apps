@@ -1,8 +1,8 @@
 package com.dashlane.login.lock
 
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.biometricrecovery.BiometricRecovery
 import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.BiometricRecovery
 import com.dashlane.lock.LockType
 import com.dashlane.lock.LockTypeManager
 import com.dashlane.preference.ConstantsPrefs
@@ -23,9 +23,8 @@ class LockTypeManagerImpl @Inject constructor(
     private val biometricAuthModule: BiometricAuthModule,
     private val sessionManager: SessionManager,
     private val biometricRecovery: BiometricRecovery,
-    private val userAccountStorage: UserAccountStorage
+    private val userAccountStorage: UserAccountStorage,
 ) : LockTypeManager {
-
     override fun getLocks(username: Username): List<LockType> {
         val locks = mutableListOf<LockType>()
         if (!isMPLess(username)) {
@@ -47,7 +46,9 @@ class LockTypeManagerImpl @Inject constructor(
     override fun addLock(username: Username, lockType: LockType) {
         val userPrefManager = preferencesManager[username]
         when (lockType) {
-            LockType.MasterPassword -> Unit 
+            LockType.WearAutoRestore,
+            LockType.MasterPassword,
+            -> Unit 
             LockType.PinCode -> {
                 userPrefManager.credentialsSaveDate = Instant.now()
                 userPrefManager.isPinCodeOn = true
@@ -62,7 +63,9 @@ class LockTypeManagerImpl @Inject constructor(
     override fun removeLock(username: Username, lockType: LockType) {
         val userPrefManager = preferencesManager[username]
         when (lockType) {
-            LockType.MasterPassword -> Unit 
+            LockType.WearAutoRestore,
+            LockType.MasterPassword,
+            -> Unit 
             LockType.PinCode -> {
                 userSecureStorageManager.wipePin(username)
             }

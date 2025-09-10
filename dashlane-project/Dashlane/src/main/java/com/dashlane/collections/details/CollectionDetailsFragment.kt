@@ -8,6 +8,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,20 +19,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
+import com.dashlane.design.component.DashlaneSnackbarWrapper
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
-import com.dashlane.util.SnackbarUtils
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class CollectionDetailsFragment : AbstractContentFragment() {
-
     private lateinit var actionBarView: ComposeView
     private val viewModel: CollectionDetailsViewModel by viewModels()
     private var previousMenuProvider: MenuProvider? = null
@@ -36,28 +41,36 @@ class CollectionDetailsFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         actionBarView = ComposeView(requireContext())
         return ComposeView(requireContext()).apply {
             setContent {
                 DashlaneTheme {
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-                    SetupToolbar(
-                        editAllowed = uiState.viewData.editAllowed,
-                        deleteAllowed = uiState.viewData.deleteAllowed,
-                        isBusiness = uiState.viewData.spaceData?.businessSpace ?: false
-                    )
-                    CollectionDetailsScreen(
-                        uiState = uiState,
-                        onDismissDialog = { viewModel.dismissDialogClicked() },
-                        onDeleteConfirmed = { viewModel.confirmDeleteClicked(uiState.viewData.shared) },
-                        onRevokeToDeleteClicked = ::navigateToSharedAccess,
-                        onBack = { navigator.popBackStack() },
-                        goToItem = { id, type -> navigator.goToItem(uid = id, type = type) },
-                        removeItem = viewModel::removeItem
-                    )
+                    val snackbarHostState = remember { SnackbarHostState() }
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        SetupToolbar(
+                            editAllowed = uiState.viewData.editAllowed,
+                            deleteAllowed = uiState.viewData.deleteAllowed,
+                            canShare = uiState.viewData.canShare,
+                            isBusiness = uiState.viewData.spaceData?.businessSpace ?: false,
+                            snackbarHostState = snackbarHostState,
+                        )
+                        CollectionDetailsScreen(
+                            uiState = uiState,
+                            snackbarHostState = snackbarHostState,
+                            onDismissDialog = { viewModel.dismissDialogClicked() },
+                            onDeleteConfirmed = { viewModel.confirmDeleteClicked(uiState.viewData.shared) },
+                            onRevokeToDeleteClicked = ::navigateToSharedAccess,
+                            onBack = { navigator.popBackStack() },
+                            goToItem = { id, type -> navigator.goToItem(uid = id, type = type) },
+                            removeItem = viewModel::removeItem,
+                        )
+                        DashlaneSnackbarWrapper {
+                            SnackbarHost(snackbarHostState)
+                        }
+                    }
                 }
             }
         }
@@ -74,27 +87,33 @@ class CollectionDetailsFragment : AbstractContentFragment() {
     }
 
     @Composable
-    fun SetupToolbar(editAllowed: Boolean, deleteAllowed: Boolean, isBusiness: Boolean) {
+    fun SetupToolbar(
+        editAllowed: Boolean,
+        deleteAllowed: Boolean,
+        canShare: Boolean,
+        isBusiness: Boolean,
+        snackbarHostState: SnackbarHostState,
+    ) {
         var displayBusinessMemberLimitDialog by rememberSaveable { mutableStateOf(false) }
         val menuHost: MenuHost = requireActivity()
         val disabledTextColor = DashlaneTheme.colors.textOddityDisabled.value
-        val menuProvider = remember(editAllowed, deleteAllowed) {
+        val menuProvider = remember(editAllowed, deleteAllowed, canShare) {
             object : MenuProvider {
                 override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                     menuInflater.inflate(R.menu.collection_detail_menu, menu)
                     menu.findItem(R.id.menu_share).isVisible = isBusiness
                     menu.findItem(R.id.menu_shared_access).isVisible = isBusiness && viewModel.navArgs.sharedCollection
                     menu.findItem(R.id.menu_share).updateStateAndTitleColor(
-                        viewModel.navArgs.shareAllowed && !viewModel.isCollectionSharingLimited,
-                        disabledTextColor
+                        canShare && !viewModel.isCollectionSharingLimited,
+                        disabledTextColor,
                     )
                     menu.findItem(R.id.menu_edit).updateStateAndTitleColor(
                         editAllowed,
-                        disabledTextColor
+                        disabledTextColor,
                     )
                     menu.findItem(R.id.menu_delete).updateStateAndTitleColor(
                         deleteAllowed,
-                        disabledTextColor
+                        disabledTextColor,
                     )
                 }
 
@@ -109,7 +128,7 @@ class CollectionDetailsFragment : AbstractContentFragment() {
                             viewModel.listeningChanges = true
                             navigator.goToCollectionEditFromCollectionDetail(
                                 collectionId = viewModel.navArgs.collectionId,
-                                sharedCollection = viewModel.navArgs.sharedCollection
+                                sharedCollection = viewModel.navArgs.sharedCollection,
                             )
                             true
                         }
@@ -145,14 +164,12 @@ class CollectionDetailsFragment : AbstractContentFragment() {
         }
 
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val context = LocalContext.current
         LaunchedEffect(key1 = uiState) {
             if (uiState is ViewState.SharingWithAttachmentError) {
-                activity?.let { activity ->
-                    SnackbarUtils.showSnackbar(
-                        activity,
-                        activity.getString(R.string.collection_error_sharing_collection_containing_items_with_attachments)
-                    )
-                }
+                snackbarHostState.showSnackbar(
+                    context.getString(R.string.collection_error_sharing_collection_containing_items_with_attachments),
+                )
             }
         }
         actionBarView.setContent { CollectionDetailScreenToolbar(uiState) }

@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/load_dark_web_insights_results.json",
+  "type": "object",
+  "description": "When a Dark Web Insights report in TAC is fetched from server and loaded for a domain, after its domain has been verified",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "load_dark_web_insights_results"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

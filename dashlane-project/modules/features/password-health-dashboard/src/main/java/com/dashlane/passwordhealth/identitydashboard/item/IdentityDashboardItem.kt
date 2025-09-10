@@ -1,0 +1,5 @@
+package com.dashlane.passwordhealth.identitydashboard.item
+
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+
+interface IdentityDashboardItem : DashlaneRecyclerAdapter.ViewTypeProvider

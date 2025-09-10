@@ -10,10 +10,9 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object ActivityLifecycleListenerModule {
-
     @Provides
     fun provideActivityLifecycleListener(
-        globalActivityLifecycleListener: GlobalActivityLifecycleListener
+        globalActivityLifecycleListener: GlobalActivityLifecycleListener,
     ): ActivityLifecycleListener =
         globalActivityLifecycleListener
 }

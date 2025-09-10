@@ -8,7 +8,7 @@ import javax.inject.Inject
 class FirstLaunchDetector @Inject constructor(
     private val preferencesManager: GlobalPreferencesManager,
     private val accountsManager: AccountsManager,
-    private val sessionCredentialsSaver: SessionCredentialsSaver
+    private val sessionCredentialsSaver: SessionCredentialsSaver,
 ) {
     fun detect() {
         if (preferencesManager.isInitialRunFinished) {
@@ -16,9 +16,6 @@ class FirstLaunchDetector @Inject constructor(
         }
         
         
-            "Count of GlobalPreferences stored: ${preferencesManager.count()}",
-            logToUserSupportFile = true
-        )
         accountsManager.clearAllAccounts()
         sessionCredentialsSaver.deleteSavedCredentials(preferencesManager.getDefaultUsername())
         preferencesManager.isInitialRunFinished = true

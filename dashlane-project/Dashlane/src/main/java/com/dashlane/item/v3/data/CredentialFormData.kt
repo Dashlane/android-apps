@@ -9,6 +9,7 @@ import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObfuscatedValue
+import java.time.Instant
 
 data class CredentialFormData(
     val email: String? = null,
@@ -21,10 +22,11 @@ data class CredentialFormData(
     val otp: Otp? = null,
     
     val password: Password? = null,
+    val lastUsed: Instant? = null,
 ) : FormData {
     data class Password(
         val value: SyncObfuscatedValue?,
-        val idFromPasswordGenerator: String? = null
+        val idFromPasswordGenerator: String? = null,
     )
 
     data class LinkedServices(
@@ -32,7 +34,7 @@ data class CredentialFormData(
         val addedByDashlaneApps: List<String> = emptyList(),
         val addedByUserDomains: List<String> = emptyList(),
         val addedByDashlaneDomains: List<String> = emptyList(),
-        val size: Int = addedByUserApps.size + addedByDashlaneApps.size + addedByUserDomains.size + addedByDashlaneDomains.size
+        val size: Int = addedByUserApps.size + addedByDashlaneApps.size + addedByUserDomains.size + addedByDashlaneDomains.size,
     )
 }
 
@@ -43,7 +45,7 @@ internal fun SummaryObject.Authentifiant.toCredentialFormData(
     canDelete: Boolean?,
     sharingCount: FormData.SharingCount?,
     teamSpace: TeamSpace?,
-    isSharedWithLimitedRight: Boolean
+    isSharedWithLimitedRight: Boolean,
 ) = Data(
     commonData = CommonData(
         id = this.id,
@@ -54,11 +56,12 @@ internal fun SummaryObject.Authentifiant.toCredentialFormData(
         canDelete = canDelete ?: false,
         sharingCount = sharingCount ?: FormData.SharingCount(),
         space = teamSpace,
-        availableSpaces = availableSpaces, 
+        availableSpaces = availableSpaces,
+        
         created = this.creationDatetime,
         updated = this.userModificationDatetime,
         isSharedWithLimitedRight = isSharedWithLimitedRight,
-        attachmentCount = attachmentsCount()
+        attachmentCount = attachmentsCount(),
     ),
     formData = CredentialFormData(
         email = this.email,
@@ -66,8 +69,9 @@ internal fun SummaryObject.Authentifiant.toCredentialFormData(
         secondaryLogin = this.secondaryLogin,
         url = this.urlForUI(),
         note = this.note,
-        linkedServices = this.getItemLinkedServices()
-    )
+        linkedServices = this.getItemLinkedServices(),
+        lastUsed = this.lastUsed,
+    ),
 )
 
 fun SummaryObject.Authentifiant.getItemLinkedServices() =
@@ -81,5 +85,5 @@ fun SummaryObject.Authentifiant.getItemLinkedServices() =
             ?.mapNotNull { it.packageName }
             ?: emptyList(),
         linkedServices?.associatedDomains?.map { it.domain } ?: emptyList(),
-        KnownLinkedDomains.getMatchingLinkedDomainSet(urlDomain)?.map { it.value } ?: emptyList()
+        KnownLinkedDomains.getMatchingLinkedDomainSet(urlDomain)?.map { it.value } ?: emptyList(),
     )

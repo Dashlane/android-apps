@@ -7,7 +7,10 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemContent
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
-import com.dashlane.server.api.endpoints.sync.SyncDownloadService
+import com.dashlane.server.api.endpoints.sync.GetLatestContentService
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingGetProvider
+import com.dashlane.sharing.SharingItemUpdaterRequest
 import com.dashlane.sharing.SharingSyncCommunicator
 import com.dashlane.sharing.internal.model.ItemToUpdate
 import com.dashlane.sharing.util.SharingCryptographyHelper
@@ -23,19 +26,18 @@ class SharingSyncImpl @Inject constructor(
     private val sharingCryptographyHelper: SharingCryptographyHelper,
     private val sharingDao: SharingDao,
     private val sharingItemUpdater: SharingItemUpdater,
-    private val sharingGetProvider: SharingGetProvider
+    private val sharingGetProvider: SharingGetProvider,
 ) : SharingSync {
-
     override suspend fun syncSharing(
         session: Authorization.User,
-        sharingSummary: SyncDownloadService.Data.SharingSummary
+        sharingSummary: GetLatestContentService.Data.SharingSummary,
     ) {
         runCatching { doUpdate(session, sharingSummary) }
     }
 
     private suspend fun doUpdate(
         session: Authorization.User,
-        summary: SyncDownloadService.Data.SharingSummary
+        summary: GetLatestContentService.Data.SharingSummary,
     ) {
         val (itemUidToUpdate, itemUidToDelete) =
             getUidOutdated(SharingDataType.ITEM, summary.items.associate { it.id to it.timestamp })
@@ -43,25 +45,25 @@ class SharingSyncImpl @Inject constructor(
         val (itemGroupUidToUpdate, itemGroupUidToDelete) =
             getUidOutdated(
                 SharingDataType.ITEM_GROUP,
-                summary.itemGroups.associate { it.id to it.revision }
+                summary.itemGroups.associate { it.id to it.revision },
             )
 
         val (userGroupUidToUpdate, userGroupUidToDelete) =
             getUidOutdated(
                 SharingDataType.USER_GROUP,
-                summary.userGroups.associate { it.id to it.revision }
+                summary.userGroups.associate { it.id to it.revision },
             )
 
         val (collectionUidToUpdate, collectionUidToDelete) =
             getUidOutdated(
                 SharingDataType.COLLECTION,
-                summary.collections.associate { it.id to it.revision }
+                summary.collections.associate { it.id to it.revision },
             )
 
         requestUpdate(
             session,
             SharingSync.IdCollection(itemUidToUpdate, itemGroupUidToUpdate, userGroupUidToUpdate, collectionUidToUpdate),
-            SharingSync.IdCollection(itemUidToDelete, itemGroupUidToDelete, userGroupUidToDelete, collectionUidToDelete)
+            SharingSync.IdCollection(itemUidToDelete, itemGroupUidToDelete, userGroupUidToDelete, collectionUidToDelete),
         )
 
         sendItemsLocalUpdates(session, summary)
@@ -70,11 +72,11 @@ class SharingSyncImpl @Inject constructor(
     private suspend fun requestUpdate(
         session: Authorization.User,
         idsToRequest: SharingSync.IdCollection,
-        idsToDelete: SharingSync.IdCollection
+        idsToDelete: SharingSync.IdCollection,
     ) {
         val result = sharingGetProvider.requestUpdate(
             session,
-            idsToRequest
+            idsToRequest,
         )
         if (!result.isEmptyResult) {
             updateItemLocally(
@@ -82,11 +84,11 @@ class SharingSyncImpl @Inject constructor(
                 itemContents = result.itemContents,
                 userGroupDownloads = result.userGroups,
                 collections = result.collections,
-                idsToDelete = idsToDelete
+                idsToDelete = idsToDelete,
             )
         } else if (!idsToDelete.isEmpty) {
             updateItemLocally(
-                idsToDelete = idsToDelete
+                idsToDelete = idsToDelete,
             )
         }
     }
@@ -96,7 +98,7 @@ class SharingSyncImpl @Inject constructor(
         itemContents: List<ItemContent> = emptyList(),
         userGroupDownloads: List<UserGroup> = emptyList(),
         collections: List<Collection> = emptyList(),
-        idsToDelete: SharingSync.IdCollection
+        idsToDelete: SharingSync.IdCollection,
     ) {
         sharingItemUpdater.update(
             SharingItemUpdaterRequest(
@@ -107,14 +109,14 @@ class SharingSyncImpl @Inject constructor(
                 itemsDeletionIds = idsToDelete.items,
                 itemGroupsDeletionIds = idsToDelete.itemGroups,
                 userGroupDeletionIds = idsToDelete.userGroups,
-                collectionsDeletionIds = idsToDelete.collections
-            )
+                collectionsDeletionIds = idsToDelete.collections,
+            ),
         )
     }
 
     private suspend fun sendItemsLocalUpdates(
         session: Authorization.User,
-        summary: SyncDownloadService.Data.SharingSummary
+        summary: GetLatestContentService.Data.SharingSummary,
     ) {
         val itemToUpdateList = sharingDao.getDirtyForSharing().mapNotNull { dataIdentifier ->
             getItemToUpdateFrom(dataIdentifier, summary)
@@ -131,7 +133,7 @@ class SharingSyncImpl @Inject constructor(
 
     private suspend fun getItemToUpdateFrom(
         dataIdentifier: DataIdentifierExtraDataWrapper<out SyncObject>,
-        summary: SyncDownloadService.Data.SharingSummary
+        summary: GetLatestContentService.Data.SharingSummary,
     ): ItemToUpdate? {
         val uid = dataIdentifier.vaultItem.uid
         val syncTimestamp = summary.items.firstOrNull { it.id == uid }?.timestamp
@@ -154,7 +156,7 @@ class SharingSyncImpl @Inject constructor(
 
     private suspend fun getUidOutdated(
         dataType: SharingDataType,
-        remoteRevisionById: Map<String, Long>
+        remoteRevisionById: Map<String, Long>,
     ): Pair<List<String>, List<String>> {
         val localRevisionById = runCatching { sharingDao.getItemsSummary(dataType) }
             .getOrElse { return emptyList<String>() to emptyList() }

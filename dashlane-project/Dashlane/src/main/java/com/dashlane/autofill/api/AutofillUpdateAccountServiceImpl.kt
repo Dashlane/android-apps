@@ -3,20 +3,19 @@ package com.dashlane.autofill.api
 import com.dashlane.autofill.changepassword.domain.AutofillUpdateAccountService
 import com.dashlane.autofill.changepassword.domain.CredentialUpdateInfo
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
-import com.dashlane.sync.DataSync
 import com.dashlane.hermes.generated.definitions.Trigger
+import com.dashlane.sync.DataSync
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
 class AutofillUpdateAccountServiceImpl @Inject constructor(
     private val autoFillDataBaseAccess: AutoFillDataBaseAccess,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
 ) : AutofillUpdateAccountService {
-
     override suspend fun loadAuthentifiants(
         website: String?,
-        packageName: String?
+        packageName: String?,
     ): List<VaultItem<SyncObject.Authentifiant>> {
         val authByPackageName =
             if (packageName != null) {

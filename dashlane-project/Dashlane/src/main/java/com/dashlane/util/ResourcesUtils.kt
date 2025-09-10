@@ -7,8 +7,7 @@ import java.util.regex.Pattern
 
 private val pattern: Pattern by lazy { Pattern.compile("%1\\\$(?:\\.\\d+)?[a-z]") }
 
-fun Resources.getFormattedSpannable(resId: Int, formatValue: Any, spanList: List<Any>):
-        SpannableStringBuilder {
+fun Resources.getFormattedSpannable(resId: Int, formatValue: Any, spanList: List<Any>): SpannableStringBuilder {
     val nonFormatted = getString(resId)
     val formatted = nonFormatted.format(formatValue)
 

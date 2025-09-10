@@ -16,7 +16,7 @@ import com.dashlane.collections.sharing.CollectionSharingViewState.ViewData
 import com.dashlane.collections.sharing.item.CollectionSharingItemDataProvider
 import com.dashlane.core.sharing.SharingItemUpdater
 import com.dashlane.core.sharing.handleCollectionSharingResult
-import com.dashlane.session.authorization
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
@@ -26,6 +26,8 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.InviteCollectionMembe
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.internal.builder.request.SharingRequestRepository
 import com.dashlane.sharing.internal.model.GroupToInvite
 import com.dashlane.sharing.internal.model.UserToInvite
@@ -33,9 +35,7 @@ import com.dashlane.sharing.service.FindUsersDataProvider
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataUpdateProvider
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.model.SyncState
@@ -67,7 +67,7 @@ class CollectionsNewShareViewModel @Inject constructor(
     private val collectionDataQuery: CollectionDataQuery,
     private val dataSaver: DataSaver,
     private val collectionLimiter: CollectionLimiter,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel(), UserInteractionListener {
     private val session: Session
         get() = sessionManager.session!!
@@ -103,7 +103,7 @@ class CollectionsNewShareViewModel @Inject constructor(
                     userGroup.groupId,
                     userGroup.name,
                     userGroup.users.size,
-                    selected = selectedGroups.contains(userGroup.groupId)
+                    selected = selectedGroups.contains(userGroup.groupId),
                 )
             }.sortedBy { it.name }
             val individuals = sharingDataProvider.getTeamLogins()
@@ -119,7 +119,7 @@ class CollectionsNewShareViewModel @Inject constructor(
                 individuals,
                 collectionName = getCollectionName(collectionId),
                 showSharingButton = showSharingButton,
-                showSharingLimit = getCollectionLimit()
+                showSharingLimit = getCollectionLimit(),
             )
             _uiState.emit(ShowList(viewData))
         }
@@ -137,7 +137,7 @@ class CollectionsNewShareViewModel @Inject constructor(
                 individual.copy(selected = selectedIndividuals.contains(individual.username))
             },
             showSharingButton = showSharingButton,
-            showSharingLimit = getCollectionLimit()
+            showSharingLimit = getCollectionLimit(),
         )
         _uiState.emit(ShowList(viewData))
     }
@@ -171,17 +171,17 @@ class CollectionsNewShareViewModel @Inject constructor(
                     SharingSuccess(
                         viewData = _uiState.value.viewData.copy(
                             collectionName = getCollectionName(collectionId),
-                            sharedCollectionId = sharedCollection.uuid
-                        )
-                    )
+                            sharedCollectionId = sharedCollection.uuid,
+                        ),
+                    ),
                 )
             } else {
                 _uiState.emit(
                     SharingFailed(
                         viewData = _uiState.value.viewData.copy(
-                            collectionName = getCollectionName(collectionId)
-                        )
-                    )
+                            collectionName = getCollectionName(collectionId),
+                        ),
+                    ),
                 )
             }
         }
@@ -199,7 +199,7 @@ class CollectionsNewShareViewModel @Inject constructor(
     private suspend fun doSharing(
         collectionId: String,
         groups: MutableList<String>,
-        individuals: MutableList<String>
+        individuals: MutableList<String>,
     ): Collection? {
         
         val businessSpaceId = teamSpaceAccessorProvider.get()?.currentBusinessTeam?.teamId
@@ -208,7 +208,7 @@ class CollectionsNewShareViewModel @Inject constructor(
             return null
         }
         
-        val usersFound = findUsersDataProvider.findUsers(session, individuals)
+        val usersFound = findUsersDataProvider.findUsers(session.authorization, individuals)
         val usersToInvite = individuals.map { individual ->
             val userFound = usersFound.find {
                 it.email == individual || it.login == individual
@@ -216,8 +216,9 @@ class CollectionsNewShareViewModel @Inject constructor(
             UserToInvite(
                 userId = userFound?.login ?: "",
                 alias = userFound?.email ?: individual,
-                permission = Permission.ADMIN, 
-                publicKey = userFound?.publicKey
+                
+                permission = Permission.ADMIN,
+                publicKey = userFound?.publicKey,
             )
         }
         val userGroups = sharingDataProvider.getUserGroupsAccepted(login)
@@ -225,7 +226,7 @@ class CollectionsNewShareViewModel @Inject constructor(
             val foundGroup = userGroups.find { it.groupId == group } ?: return@mapNotNull null
             GroupToInvite(
                 foundGroup,
-                Permission.ADMIN
+                Permission.ADMIN,
             )
         }
         
@@ -234,7 +235,6 @@ class CollectionsNewShareViewModel @Inject constructor(
             sharingDataProvider.getAcceptedCollections(needsAdminRights = false)
                 .firstOrNull { it.uuid == collectionId }
         if (collection == null) {
-            verbose("Shared collection does not exist and will be created")
             
             val sharedCollection =
                 createCollection(collectionId, usersToInvite, groupsToInvite, businessSpaceId)
@@ -250,7 +250,7 @@ class CollectionsNewShareViewModel @Inject constructor(
 
             val createdItemGroups =
                 collectionSharingItemDataProvider.createMultipleItemGroups(
-                    itemList = itemGroupsToCreate.map { it.first }
+                    itemList = itemGroupsToCreate.map { it.first },
                 )
 
             val itemGroups = existingItemGroups.mapNotNull { it.second } + createdItemGroups
@@ -262,7 +262,7 @@ class CollectionsNewShareViewModel @Inject constructor(
                 error(
                     "Some ItemGroups can't be created or found," +
                         "${collectionItems.size} item(s) in $collectionId but " +
-                        "only ${itemGroups.size} ItemGroup(s) available"
+                        "only ${itemGroups.size} ItemGroup(s) available",
                 )
                 return null
             }
@@ -277,7 +277,7 @@ class CollectionsNewShareViewModel @Inject constructor(
                 collectionSharingItemDataProvider.addItemsGroupsToCollection(
                     sharedCollection,
                     itemGroups,
-                    userGroups
+                    userGroups,
                 )
             if (collectionsAndGroups == null) {
                 
@@ -291,11 +291,11 @@ class CollectionsNewShareViewModel @Inject constructor(
             return updatedCollections.first().also {
                 sharingItemUpdater.handleCollectionSharingResult(
                     collectionsAndGroups.first,
-                    collectionsAndGroups.second
+                    collectionsAndGroups.second,
                 )
             }
         } else {
-            return inviteToCollection(collection, userGroups, usersToInvite, groupsToInvite)?.also {
+            return inviteToCollection(login, collection, userGroups, usersToInvite, groupsToInvite)?.also {
                 sharingItemUpdater.handleCollectionSharingResult(it)
             }?.first()
         }
@@ -305,14 +305,14 @@ class CollectionsNewShareViewModel @Inject constructor(
         collectionId: String,
         usersToInvite: List<UserToInvite>,
         groupsToInvite: List<GroupToInvite>,
-        spaceId: String
+        spaceId: String,
     ): Collection? {
         
         val author = UserToInvite(
             userId = login,
             alias = session.username.email,
             permission = Permission.ADMIN,
-            publicKey = preferencesManager[sessionManager.session?.username].publicKey
+            publicKey = preferencesManager[sessionManager.session?.username].publicKey,
         )
 
         
@@ -324,38 +324,38 @@ class CollectionsNewShareViewModel @Inject constructor(
                     author = author,
                     teamId = spaceId,
                     users = usersToInvite,
-                    groups = groupsToInvite
-                )
+                    groups = groupsToInvite,
+                ),
             )
         }.onFailure {
-            error(
                 "Collection: $collectionId can't be created for space: $spaceId",
-                throwable = it
+                throwable = it,
             )
         }
         return response.getOrNull()?.data?.collections?.first()
     }
 
     private suspend fun inviteToCollection(
+        currentUsername: String,
         collection: Collection,
         myUserGroups: List<com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup>,
         usersToInvite: List<UserToInvite>,
-        groupsToInvite: List<GroupToInvite>
+        groupsToInvite: List<GroupToInvite>,
     ): List<Collection>? {
         
         val response = runCatching {
             inviteCollectionMembersService.execute(
                 authorization,
                 sharingRequestRepository.createInviteCollectionMembersRequest(
+                    username = currentUsername,
                     collection = collection,
                     myUserGroups = myUserGroups,
                     users = usersToInvite,
-                    groups = groupsToInvite
-                )
+                    groups = groupsToInvite,
+                ),
             )
         }
         return response.onFailure {
-            error("Users can't be invited to Collection", throwable = it)
         }.getOrNull()?.data?.collections
     }
 
@@ -376,7 +376,10 @@ class CollectionsNewShareViewModel @Inject constructor(
 
 internal interface UserInteractionListener {
     fun onGroupSelectionChange(group: UserGroup)
+
     fun onIndividualSelectionChange(individual: Individual)
+
     fun onShareClicked()
+
     fun onToggleSearch()
 }

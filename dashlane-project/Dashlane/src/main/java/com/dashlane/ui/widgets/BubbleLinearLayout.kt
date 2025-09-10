@@ -11,7 +11,6 @@ import com.dashlane.util.getThemeAttrColor
 import kotlin.math.roundToInt
 
 class BubbleLinearLayout : LinearLayout {
-
     private val drawable = ShapeDrawable(TooltipPointShape(context.getThemeAttrColor(R.attr.colorSurface)))
 
     constructor(context: Context?) : super(context)
@@ -21,7 +20,7 @@ class BubbleLinearLayout : LinearLayout {
         context,
         attrs,
         defStyleAttr,
-        defStyleRes
+        defStyleRes,
     )
 
     init {
@@ -33,7 +32,7 @@ class BubbleLinearLayout : LinearLayout {
             paddingLeft,
             paddingTop,
             paddingRight,
-            paddingBottom + arrowHeight
+            paddingBottom + arrowHeight,
         )
     }
 

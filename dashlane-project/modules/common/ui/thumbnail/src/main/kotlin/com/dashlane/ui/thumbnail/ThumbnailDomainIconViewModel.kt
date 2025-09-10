@@ -20,7 +20,7 @@ import javax.inject.Inject
 class ThumbnailDomainIconViewModel @Inject constructor(
     private val urlDomainIconRepository: UrlDomainIconRepository,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val richIconsSettingProvider: RichIconsSettingProvider
+    private val richIconsSettingProvider: RichIconsSettingProvider,
 ) : ViewModel() {
     private val _urlDomain = MutableStateFlow<UrlDomainState?>(null)
     val urlDomainIcon: Flow<UrlDomainState?> = _urlDomain.asStateFlow()
@@ -41,11 +41,11 @@ class ThumbnailDomainIconViewModel @Inject constructor(
     private fun UrlDomainIcon.toUrlDomainState(): UrlDomainState =
         UrlDomainState(
             url = url,
-            color = backgroundColor?.let { Color(it) }
+            color = backgroundColor?.let { Color(it) },
         )
 }
 
 data class UrlDomainState(
     val url: String?,
-    val color: Color?
+    val color: Color?,
 )

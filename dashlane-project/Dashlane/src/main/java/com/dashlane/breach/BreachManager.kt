@@ -4,9 +4,9 @@ import android.text.format.DateUtils
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.dashlane.announcements.modules.BreachAlertPopupModule
+import com.dashlane.breach.events.BreachStatusChangedEvent
 import com.dashlane.darkweb.DarkWebMonitoringManager
 import com.dashlane.events.AppEvents
-import com.dashlane.events.BreachStatusChangedEvent
 import com.dashlane.events.BreachesRefreshedEvent
 import com.dashlane.events.DarkWebSetupCompleteEvent
 import com.dashlane.events.PasswordChangedEvent
@@ -15,11 +15,11 @@ import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.ItemId
 import com.dashlane.hermes.generated.events.user.ReceiveSecurityAlert
 import com.dashlane.notificationcenter.alerts.BreachDataHelper
+import com.dashlane.passwordhealth.identitydashboard.breach.BreachLoader
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.security.getAlertTypeForLogs
 import com.dashlane.security.getItemTypesForLogs
-import com.dashlane.security.identitydashboard.breach.BreachLoader
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
@@ -66,7 +66,6 @@ class BreachManager @Inject constructor(
     private val hermesLogRepository: LogRepository,
     private val breachService: BreachService,
 ) {
-
     private var lastRefresh = 0L
     private var refreshInProgress = false
     private var lastSession: String? = null
@@ -112,12 +111,12 @@ class BreachManager @Inject constructor(
         val lastFetchedPublicRevision = lastFetchedPublicBreachRevision()
         val lastFetchedDarkWebDate = lastFetchedDarkWebDate()
 
-        sessionCoroutineScope?.launch(mainCoroutineDispatcher) {
+        sessionCoroutineScope?.launch {
             val publicBreachResult = try {
                 breachService.getBreaches(
                     fromRevision = lastFetchedPublicRevision,
                     
-                    revisionOnly = lastFetchedPublicRevision == 0
+                    revisionOnly = lastFetchedPublicRevision == 0,
                 )
             } catch (e: Throwable) {
                 refreshInProgress = false
@@ -147,8 +146,7 @@ class BreachManager @Inject constructor(
     }
 
     @WorkerThread
-    fun getSecurityBreachesToSave(breaches: List<BreachWithOriginalJson>):
-            List<VaultItem<SyncObject.SecurityBreach>> {
+    suspend fun getSecurityBreachesToSave(breaches: List<BreachWithOriginalJson>): List<VaultItem<SyncObject.SecurityBreach>> {
         val existingSecurityBreaches = getAllSecurityBreaches()
 
         return breaches.mapNotNull { breachWithJson ->
@@ -158,16 +156,12 @@ class BreachManager @Inject constructor(
                     ReceiveSecurityAlert(
                         securityAlertItemId = ItemId(breach.id),
                         itemTypesAffected = breach.getItemTypesForLogs(),
-                        securityAlertType = breach.getAlertTypeForLogs()
-                    )
+                        securityAlertType = breach.getAlertTypeForLogs(),
+                    ),
                 )
                 breachWithJson.breach.isDarkWebBreach()
             }
         }
-    }
-
-    fun onTerminate() {
-        breachAlertCenter.onTerminate()
     }
 
     @WorkerThread
@@ -188,9 +182,9 @@ class BreachManager @Inject constructor(
 
     @WorkerThread
     @VisibleForTesting
-    fun getSecurityBreachToSave(
+    suspend fun getSecurityBreachToSave(
         existingSecurityBreaches: Map<String, VaultItem<SyncObject.SecurityBreach>>,
-        breachWithJson: BreachWithOriginalJson
+        breachWithJson: BreachWithOriginalJson,
     ): VaultItem<SyncObject.SecurityBreach>? {
         val breach = breachWithJson.breach
         val json = breachWithJson.json
@@ -251,13 +245,13 @@ class BreachManager @Inject constructor(
         return createSecurityBreach(
             dataIdentifier = CommonDataIdentifierAttrsImpl(
                 syncState = SyncState.MODIFIED,
-                creationDate = Instant.now()
+                creationDate = Instant.now(),
             ),
             breachId = upcomingBreachId,
             status = SyncObject.SecurityBreach.Status.PENDING,
             content = json,
             contentRevision = upcomingBreachRevision,
-            leakedPasswords = affectedPasswords
+            leakedPasswords = affectedPasswords,
         )
     }
 
@@ -296,20 +290,20 @@ class BreachManager @Inject constructor(
 
     @Suppress("UNCHECKED_CAST")
     @WorkerThread
-    private fun getAllSecurityBreaches(): Map<String, VaultItem<SyncObject.SecurityBreach>> {
+    private suspend fun getAllSecurityBreaches(): Map<String, VaultItem<SyncObject.SecurityBreach>> {
         val filter = vaultFilter {
             
             ignoreUserLock()
             specificDataType(SyncObjectType.SECURITY_BREACH)
         }
-        return vaultDataQuery.queryAllLegacy(filter).filter { it.syncObject is SyncObject.SecurityBreach }
+        return vaultDataQuery.queryAll(filter).filter { it.syncObject is SyncObject.SecurityBreach }
             .map { it as VaultItem<SyncObject.SecurityBreach> }
             .associateBy { it.syncObject.breachId ?: "" }
     }
 
-    private fun getAffectedPasswords(
+    private suspend fun getAffectedPasswords(
         breach: Breach,
-        credentialsForBreach: List<SummaryObject.Authentifiant>
+        credentialsForBreach: List<SummaryObject.Authentifiant>,
     ): Set<String> {
         val eventDate = breach.eventDateParsed
 
@@ -324,12 +318,12 @@ class BreachManager @Inject constructor(
             }
         }
 
-        return vaultDataQuery.queryAllLegacy(
+        return vaultDataQuery.queryAll(
             vaultFilter {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)
                 specificUid(ids)
-            }
+            },
         )
             .asSequence()
             .filterIsInstance<VaultItem<SyncObject.Authentifiant>>()

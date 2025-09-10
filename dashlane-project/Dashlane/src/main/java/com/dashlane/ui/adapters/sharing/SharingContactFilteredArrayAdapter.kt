@@ -16,7 +16,7 @@ import com.tokenautocomplete.FilteredArrayAdapter
 class SharingContactFilteredArrayAdapter(
     context: Context,
     private val layoutRes: Int,
-    objects: List<SharingContact>
+    objects: List<SharingContact>,
 ) : FilteredArrayAdapter<SharingContact>(context, layoutRes, objects) {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: newView()

@@ -3,12 +3,12 @@ package com.dashlane.authentication.login
 import com.dashlane.authentication.AuthenticationInvalidPasswordException
 import com.dashlane.authentication.AuthenticationOfflineException
 import com.dashlane.authentication.DeviceRegistrationInfo
-import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.createAppDecryptionEngine
 import com.dashlane.authentication.createVaultDecryptionEngine
 import com.dashlane.authentication.decryptRemoteKey
 import com.dashlane.authentication.decryptSettings
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyException
 import com.dashlane.cryptography.CryptographyKey
@@ -16,15 +16,15 @@ import com.dashlane.cryptography.EncryptedBase64String
 import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.decryptBase64ToUtf8String
 import com.dashlane.cryptography.forXml
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SecurityFeature
 import com.dashlane.server.api.ConnectivityCheck
 import com.dashlane.server.api.endpoints.Platform
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationAuthTicketService
 import com.dashlane.server.api.endpoints.authentication.AuthRegistrationDevice
+import com.dashlane.server.api.endpoints.authentication.CompleteDeviceRegistrationWithAuthTicketService
 import com.dashlane.server.api.endpoints.authentication.PerformExtraDeviceVerificationService
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
 import com.dashlane.server.api.time.toInstant
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.serializer.XmlException
 import javax.inject.Inject
@@ -33,10 +33,9 @@ class AuthenticationSecretTransferRepository @Inject constructor(
     private val connectivityCheck: ConnectivityCheck,
     private val performExtraDeviceVerificationService: PerformExtraDeviceVerificationService,
     private val deviceRegistrationInfo: DeviceRegistrationInfo,
-    private val completeRegistrationAuthTicketService: AuthRegistrationAuthTicketService,
-    private val cryptography: Cryptography
+    private val completeDeviceRegistrationWithAuthTicketService: CompleteDeviceRegistrationWithAuthTicketService,
+    private val cryptography: Cryptography,
 ) {
-
     suspend fun register(
         login: String,
         token: String,
@@ -50,20 +49,24 @@ class AuthenticationSecretTransferRepository @Inject constructor(
         val performExtraDeviceVerificationRequest = PerformExtraDeviceVerificationService.Request(login = login, token = token)
         val performExtraDeviceVerificationResponse = performExtraDeviceVerificationService.execute(performExtraDeviceVerificationRequest)
 
-        val completeRegistrationAuthTicketRequest = AuthRegistrationAuthTicketService.Request(
+        val completeRegistrationAuthTicketRequest = CompleteDeviceRegistrationWithAuthTicketService.Request(
             login = login,
-            authTicket = AuthRegistrationAuthTicketService.Request.AuthTicket(performExtraDeviceVerificationResponse.data.authTicket),
+            authTicket = CompleteDeviceRegistrationWithAuthTicketService.Request.AuthTicket(
+                performExtraDeviceVerificationResponse.data.authTicket,
+            ),
             device = AuthRegistrationDevice(
                 osCountry = deviceRegistrationInfo.osCountry,
                 temporary = false,
                 appVersion = deviceRegistrationInfo.appVersion,
                 deviceName = deviceRegistrationInfo.deviceName,
                 platform = Platform.SERVER_ANDROID,
-                osLanguage = deviceRegistrationInfo.osLanguage
+                osLanguage = deviceRegistrationInfo.osLanguage,
             ),
         )
 
-        val completeRegistrationAuthTicketResponse = completeRegistrationAuthTicketService.execute(completeRegistrationAuthTicketRequest)
+        val completeRegistrationAuthTicketResponse = completeDeviceRegistrationWithAuthTicketService.execute(
+            completeRegistrationAuthTicketRequest,
+        )
 
         return completeRegistrationAuthTicketResponse.data.toRegisteredUserDevice(login, securityFeatures, remoteKeyType)
     }
@@ -97,10 +100,10 @@ class AuthenticationSecretTransferRepository @Inject constructor(
     }
 }
 
-private fun AuthRegistrationAuthTicketService.Data.toRegisteredUserDevice(
+private fun CompleteDeviceRegistrationWithAuthTicketService.Data.toRegisteredUserDevice(
     login: String,
     securityFeatures: Set<SecurityFeature>,
-    remoteKeyType: RemoteKey.Type
+    remoteKeyType: RemoteKey.Type,
 ) = RegisteredUserDevice.Remote(
     login = login,
     securityFeatures = securityFeatures,
@@ -115,5 +118,5 @@ private fun AuthRegistrationAuthTicketService.Data.toRegisteredUserDevice(
     registeredDeviceCount = numberOfDevices,
     deviceAnalyticsId = deviceAnalyticsId,
     userAnalyticsId = userAnalyticsId,
-    encryptedRemoteKey = remoteKeys?.findByTypeOrNull(remoteKeyType)
+    encryptedRemoteKey = remoteKeys?.findByTypeOrNull(remoteKeyType),
 )

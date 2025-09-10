@@ -9,16 +9,15 @@ import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter.Companion.COMBINED_SP
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter.Companion.PERSONAL_SPACE_FILTER_ID
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 interface CurrentTeamSpaceUiFilter {
-
     val teamSpaceFilterState: StateFlow<SpaceFilterState>
 
     val currentFilter: SpaceFilterState
@@ -38,9 +37,8 @@ class CurrentTeamSpaceUiFilterImpl @Inject constructor(
     private val userSecureStorage: UserSecureStorageManager,
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     @ApplicationCoroutineScope private val coroutineScope: CoroutineScope,
-    @DefaultCoroutineDispatcher private val dispatcher: CoroutineDispatcher
+    @DefaultCoroutineDispatcher private val dispatcher: CoroutineDispatcher,
 ) : CurrentTeamSpaceUiFilter {
-
     private val _teamSpaceFilterState = MutableStateFlow<SpaceFilterState>(SpaceFilterState.Init)
     override val teamSpaceFilterState = _teamSpaceFilterState.asStateFlow()
     override val currentFilter: SpaceFilterState
@@ -58,7 +56,7 @@ class CurrentTeamSpaceUiFilterImpl @Inject constructor(
             userSecureStorage.storeCurrentSpaceFilter(
                 it.localKey,
                 it.username,
-                filterId = teamSpace.filterId
+                filterId = teamSpace.filterId,
             )
             loadFilter()
         }

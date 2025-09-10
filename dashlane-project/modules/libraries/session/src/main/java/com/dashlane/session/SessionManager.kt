@@ -2,11 +2,10 @@ package com.dashlane.session
 
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.LocalKey
-import com.dashlane.login.LoginMode
+import com.dashlane.data.login.LoginMode
 import com.dashlane.user.Username
 
 interface SessionManager {
-
     val session: Session?
 
     suspend fun loadSession(
@@ -15,7 +14,7 @@ interface SessionManager {
         secretKey: String,
         localKey: LocalKey,
         accessKey: String? = null,
-        loginMode: LoginMode
+        loginMode: LoginMode,
     ): SessionResult
 
     suspend fun destroySession(session: Session, byUser: Boolean, forceLogout: Boolean = true)
@@ -41,6 +40,6 @@ sealed class SessionResult {
 
         ERROR_REMOTE_KEY,
 
-        ERROR_SESSION_ACCESS_KEY
+        ERROR_SESSION_ACCESS_KEY,
     }
 }

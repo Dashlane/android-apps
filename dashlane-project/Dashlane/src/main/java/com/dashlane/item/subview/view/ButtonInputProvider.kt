@@ -10,14 +10,13 @@ import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 
 object ButtonInputProvider {
-
     fun create(
         context: Context,
         buttonText: String,
         @DrawableRes buttonIcon: Int,
         mood: Mood,
         intensity: Intensity,
-        buttonAction: () -> Unit
+        buttonAction: () -> Unit,
     ): View {
         return ButtonMediumView(context, null, -1).apply {
             this.mood = mood
@@ -37,7 +36,7 @@ object ButtonInputProvider {
         @DrawableRes buttonIcon: Int,
         mood: Mood,
         intensity: Intensity,
-        buttonAction: () -> Unit
+        buttonAction: () -> Unit,
     ): View {
         return ButtonMediumView(context, null, -1).apply {
             this.mood = mood

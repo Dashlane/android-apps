@@ -10,12 +10,12 @@ import com.dashlane.autofill.api.R
 import com.dashlane.autofill.changepassword.ChangePasswordDialogFragmentArgs
 
 internal class AutofillNavigatorImpl(
-    private val navHostFragment: NavHostFragment
+    private val navHostFragment: NavHostFragment,
 ) : AutofillNavigator {
     private val navigationController: NavController = navHostFragment.navController
 
     constructor(containingActivity: AppCompatActivity) :
-            this(containingActivity.supportFragmentManager.findFragmentById(R.id.autofill_nav_host_fragment) as NavHostFragment)
+        this(containingActivity.supportFragmentManager.findFragmentById(R.id.autofill_nav_host_fragment) as NavHostFragment)
 
     override fun goToViewAllAccountsDialogFromWaitForDecision() {
         if (!hasNavigated()) {
@@ -36,12 +36,12 @@ internal class AutofillNavigatorImpl(
             markAsNavigated()
             val args = ChangePasswordDialogFragmentArgs(
                 argsPackageName = if (website.isEmpty() && packageName.isNotEmpty()) packageName else null,
-                argsWebpage = website.ifEmpty { null }
+                argsWebpage = website.ifEmpty { null },
             ).toBundle()
             navigate(
                 WaitForNavigationDecisionFragmentDirections.toNavChangePasswordDialog(
-                    startDestinationArgs = args
-                )
+                    startDestinationArgs = args,
+                ),
             )
         }
     }
@@ -50,7 +50,8 @@ internal class AutofillNavigatorImpl(
         var madeDecision: Boolean = false
     }
 
-    private fun hasNavigated(): Boolean = getAutofillDecisionActivityViewModel()?.madeDecision == true
+    private fun hasNavigated(): Boolean =
+        getAutofillDecisionActivityViewModel()?.madeDecision == true
 
     private fun markAsNavigated() {
         getAutofillDecisionActivityViewModel()?.madeDecision = true

@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/browse.json",
+  "type": "object",
+  "description": "Definition for the Browse section.",
+  "definitions": {
+    "browse_component": {
+      "description": "The component that displays this page. Note: `main_app` is the main component that displays a list of items for example, it also includes app.dashlane.com. `dashlane_com` is only for dashane.com website, not one in which the user can log in. The `os_autofill` is for mobile autofill events (which are handled by the OS) and `webcard` covers Autofill events.",
+      "type": "string",
+      "enum": [
+        "dashlane_com",
+        "extension_popup",
+        "extension_webcard",
+        "main_app",
+        "os_autofill",
+        "tac",
+        "watch_app",
+        "webcard"
+      ]
+    },
+    "browse": {
+      "type": "object",
+      "description": "Browse object. The page is only filled when landing on a new page, the origin_page is a reference to the last page triggered.",
+      "properties": {
+        "page": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/browse/pages.json#/definitions/any_page"
+        },
+        "origin_page": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/browse/pages.json#/definitions/any_page"
+        },
+        "component": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/browse.json#/definitions/browse_component"
+        },
+        "origin_component": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/browse.json#/definitions/browse_component"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

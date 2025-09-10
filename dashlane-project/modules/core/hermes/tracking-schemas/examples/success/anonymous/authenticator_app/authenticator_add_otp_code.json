@@ -1,0 +1,30 @@
+{
+  "id": "838bf943-b9a1-4301-83e4-cb192f2e70c4",
+  "schema_version": "1.31.6",
+  "category": "anonymous",
+  "date": "2021-03-02",
+  "date_origin": "local",
+  "context": {
+    "os": {
+      "type": "iphone",
+      "version": "4.1",
+      "locale": "en-US"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "authenticator_ios",
+      "build_type": "dev"
+    }
+  },
+  "properties": {
+    "name": "authenticator_add_otp_code",
+    "authenticator_issuer_id": "bbdefa2950f49882f295b1285d4fa9dec45fc4144bfb07ee6acc68762d12c2e3",
+    "otp_addition_mode": "qr_code",
+    "otp_specifications": {
+      "encryption_algorithm": "sha256",
+      "otp_code_size": 6,
+      "otp_type": "totp",
+      "duration_otp_validity": 30
+    }
+  }
+}

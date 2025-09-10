@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="wear_free_user_paywall_body">Your current plan supports only 1 device. Upgrade to Premium to access your data on unlimited devices.</string>
+    
+    <string name="wear_free_user_paywall_cta_upgrade">Upgrade to Premium</string>
+    
+    <string name="wear_free_user_paywall_cta_cancel">Cancel</string>
+</resources>

@@ -24,7 +24,7 @@ interface KnownApplication {
             KnownLinkedDomains.getMatchingLinkedDomainId(mainUrlDomain)
         },
         val keywords: Set<String>?,
-        val allowedDomains: Set<UrlDomain>?
+        val allowedDomains: Set<UrlDomain>?,
     ) : KnownApplication {
         override val mainDomain: String = mainUrlDomain.value
 
@@ -34,7 +34,7 @@ interface KnownApplication {
 
             return matchMainDomain(
                 mainUrlDomain,
-                urlDomainToAccept
+                urlDomainToAccept,
             ) || matchCommonUsedUrlDomains(urlDomainToAccept) || matchLinkedDomains(urlDomainToAccept)
         }
 
@@ -60,7 +60,6 @@ interface KnownApplication {
 
     
     sealed class Signature {
-
         abstract fun toAppSignature(packageName: String): AppSignature?
 
         class Sha256(val signatures: Array<out String>) : Signature() {
@@ -76,6 +75,7 @@ interface KnownApplication {
 
     companion object {
         fun sha256(vararg signatures: String) = Signature.Sha256(signatures)
+
         fun sha512(vararg signatures: String) = Signature.Sha512(signatures)
     }
 }

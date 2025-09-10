@@ -2,11 +2,14 @@ package com.dashlane.core.sharing
 
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserDatabaseRepository
+import com.dashlane.sharing.SharingDaoMemoryDataAccess
+import com.dashlane.sharing.SharingDaoMemoryDataAccessImpl
+import com.dashlane.sharing.SharingDaoMemoryDataAccessProvider
 import javax.inject.Inject
 
 class SharingDaoMemoryDataAccessProviderImpl @Inject constructor(
     private val sessionManager: SessionManager,
-    private val userDataRepository: UserDatabaseRepository
+    private val userDataRepository: UserDatabaseRepository,
 ) : SharingDaoMemoryDataAccessProvider {
     override suspend fun create(): SharingDaoMemoryDataAccess =
         createForRaclette()

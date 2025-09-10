@@ -16,7 +16,6 @@ import dagger.Lazy
 import javax.inject.Inject
 
 interface UserCryptographyRepository {
-
     fun getCryptographyMarker(session: Session): CryptographyMarker?
 
     fun getCryptographyEngineFactory(session: Session): CryptographyEngineFactory
@@ -28,9 +27,8 @@ class UserCryptographyRepositoryImpl @Inject constructor(
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
     private val userDataRepositoryLazy: Lazy<UserDataRepository>,
-    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) : UserCryptographyRepository {
-
     private val userDataRepository
         get() = userDataRepositoryLazy.get()
 
@@ -55,7 +53,7 @@ class UserCryptographyRepositoryImpl @Inject constructor(
         CryptographyEngineFactory(
             cryptography,
             session.vaultKey.use(VaultKey::cryptographyKey),
-            getCryptographySettings(session)
+            getCryptographySettings(session),
         )
 
     override fun getCryptographySettings(session: Session): CryptographySettings =

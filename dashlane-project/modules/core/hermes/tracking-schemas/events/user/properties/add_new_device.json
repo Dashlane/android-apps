@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/add_new_device.json",
+  "type": "object",
+  "description": "After user does certain actions or completes certain steps of the device transfer request from the trusted device",
+  "metas": {
+    "area": "authentication"
+  },
+  "properties": {
+    "name": {
+      "const": "add_new_device"
+    },
+    "action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/device_transfer.json#/definitions/action_during_transfer"
+    }
+  },
+  "required": [
+    "name",
+    "action"
+  ],
+  "additionalProperties": false
+}

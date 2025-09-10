@@ -29,12 +29,12 @@ import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.account.SharingKeys
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
-import com.dashlane.server.api.endpoints.sync.CryptoChangeUploadService
-import com.dashlane.server.api.endpoints.sync.MasterPasswordConfirmationService
-import com.dashlane.server.api.endpoints.sync.MasterPasswordDownloadService
-import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
+import com.dashlane.server.api.endpoints.sync.ConfirmMasterPasswordChangeDoneService
+import com.dashlane.server.api.endpoints.sync.GetDataForMasterPasswordChangeService
 import com.dashlane.server.api.endpoints.sync.SyncDownloadTransaction
 import com.dashlane.server.api.endpoints.sync.SyncUploadTransaction
+import com.dashlane.server.api.endpoints.sync.UploadDataForCryptoUpdateService
+import com.dashlane.server.api.endpoints.sync.UploadDataForMasterPasswordChangeService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.time.InstantEpochMilli
 import com.dashlane.server.api.time.toInstant
@@ -44,19 +44,19 @@ import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.toObject
 import com.dashlane.xml.domain.toTransaction
 import com.dashlane.xml.serializer.XmlException
-import java.time.Instant
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import javax.inject.Inject
 
 class SyncCryptoChangerImpl @Inject constructor(
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
-    private val downloadService: MasterPasswordDownloadService,
-    private val passwordChangeUploadService: MasterPasswordUploadService,
-    private val cryptoChangeUploadService: CryptoChangeUploadService,
-    private val confirmationService: MasterPasswordConfirmationService,
-    private val remoteKeyIdGenerator: RemoteKeyIdGenerator
+    private val getDataForMasterPasswordChangeService: GetDataForMasterPasswordChangeService,
+    private val uploadDataForMasterPasswordChangeService: UploadDataForMasterPasswordChangeService,
+    private val uploadDataForCryptoUpdateService: UploadDataForCryptoUpdateService,
+    private val confirmMasterPasswordChangeDoneService: ConfirmMasterPasswordChangeDoneService,
+    private val remoteKeyIdGenerator: RemoteKeyIdGenerator,
 ) : SyncCryptoChanger {
     override suspend fun updateCryptography(
         authorization: Authorization.User,
@@ -68,8 +68,8 @@ class SyncCryptoChangerImpl @Inject constructor(
         authTicket: String?,
         ssoServerKey: ByteArray?,
         syncVault: SyncVault,
-        uploadReason: MasterPasswordUploadService.Request.UploadReason?,
-        publishProgress: suspend (SyncCryptoChanger.Progress) -> Unit
+        uploadReason: UploadDataForMasterPasswordChangeService.Request.UploadReason?,
+        publishProgress: suspend (SyncCryptoChanger.Progress) -> Unit,
     ): SyncObject.Settings {
         val cryptoUpdateArgs = prepareCryptoUpdate(
             authorization,
@@ -78,23 +78,23 @@ class SyncCryptoChangerImpl @Inject constructor(
             vaultKey,
             newVaultKey,
             cryptographyMarker,
-            publishProgress
+            publishProgress,
         )
 
         val updateVerification = createUpdateVerificationRequest(appKey, newAppKey, ssoServerKey)
 
         val response = try {
-            passwordChangeUploadService.execute(
+            uploadDataForMasterPasswordChangeService.execute(
                 authorization,
-                MasterPasswordUploadService.Request(
+                UploadDataForMasterPasswordChangeService.Request(
                     remoteKeys = cryptoUpdateArgs.remoteKeys,
                     sharingKeys = cryptoUpdateArgs.reEncryptedSharingKeys,
                     updateVerification = updateVerification,
                     transactions = cryptoUpdateArgs.reEncryptedTransactions,
                     authTicket = authTicket,
                     timestamp = cryptoUpdateArgs.timestamp,
-                    uploadReason = uploadReason
-                )
+                    uploadReason = uploadReason,
+                ),
             )
         } catch (e: DashlaneApiException) {
             throw SyncCryptoChangerUploadException(cause = e)
@@ -105,7 +105,7 @@ class SyncCryptoChangerImpl @Inject constructor(
         updateLatestBackupDatetime(
             cryptoUpdateArgs = cryptoUpdateArgs,
             newLatestBackupTime = response.data.timestamp.toInstant(),
-            syncVault = syncVault
+            syncVault = syncVault,
         )
 
         publishProgress(SyncCryptoChanger.Progress.Completed)
@@ -116,7 +116,7 @@ class SyncCryptoChangerImpl @Inject constructor(
     private suspend fun updateLatestBackupDatetime(
         cryptoUpdateArgs: CryptoUpdateArgs,
         newLatestBackupTime: Instant,
-        syncVault: SyncVault
+        syncVault: SyncVault,
     ) {
         val descriptors = cryptoUpdateArgs.reEncryptedTransactions.mapNotNull {
             val kClass = SyncObjectType.forTransactionTypeOrNull(it.type)?.kClass
@@ -131,7 +131,7 @@ class SyncCryptoChangerImpl @Inject constructor(
         authorization: Authorization.User,
         appKey: AppKey,
         vaultKey: VaultKey,
-        cryptographyMarker: CryptographyMarker
+        cryptographyMarker: CryptographyMarker,
     ): SyncObject.Settings {
         val cryptoUpdateArgs = prepareCryptoUpdate(
             authorization = authorization,
@@ -139,17 +139,17 @@ class SyncCryptoChangerImpl @Inject constructor(
             newAppKey = appKey, 
             vaultKey = vaultKey,
             newVaultKey = vaultKey, 
-            cryptographyMarker = cryptographyMarker
+            cryptographyMarker = cryptographyMarker,
         )
 
-        cryptoChangeUploadService.execute(
+        uploadDataForCryptoUpdateService.execute(
             authorization,
-            CryptoChangeUploadService.Request(
+            UploadDataForCryptoUpdateService.Request(
                 remoteKeys = cryptoUpdateArgs.remoteKeys,
                 sharingKeys = cryptoUpdateArgs.reEncryptedSharingKeys,
                 transactions = cryptoUpdateArgs.reEncryptedTransactions,
-                timestamp = cryptoUpdateArgs.timestamp
-            )
+                timestamp = cryptoUpdateArgs.timestamp,
+            ),
         )
 
         return cryptoUpdateArgs.newSettings
@@ -162,12 +162,12 @@ class SyncCryptoChangerImpl @Inject constructor(
         vaultKey: VaultKey,
         newVaultKey: VaultKey,
         cryptographyMarker: CryptographyMarker?,
-        publishProgress: suspend (SyncCryptoChanger.Progress) -> Unit = {}
+        publishProgress: suspend (SyncCryptoChanger.Progress) -> Unit = {},
     ): CryptoUpdateArgs {
         publishProgress(SyncCryptoChanger.Progress.Downloading)
 
         val downloadResponse = try {
-            downloadService.execute(authorization)
+            getDataForMasterPasswordChangeService.execute(authorization)
         } catch (e: DashlaneApiException) {
             throw SyncCryptoChangerDownloadException(cause = e)
         }
@@ -196,11 +196,11 @@ class SyncCryptoChangerImpl @Inject constructor(
                         downloadResponseData.data.transactions,
                         encryptionEngine,
                         newSettings,
-                        publishProgress
+                        publishProgress,
                     )
 
                     reEncryptedSharingKeys = cryptographyChanger.changeCryptography(
-                        downloadResponseData.data.sharingKeys
+                        downloadResponseData.data.sharingKeys,
                     )
                 }
             }
@@ -214,7 +214,7 @@ class SyncCryptoChangerImpl @Inject constructor(
             reEncryptedSharingKeys,
             reEncryptedTransactions,
             remoteKeys,
-            downloadResponseData.timestamp
+            downloadResponseData.timestamp,
         )
     }
 
@@ -222,7 +222,7 @@ class SyncCryptoChangerImpl @Inject constructor(
         newVaultKey: VaultKey,
         newAppKey: AppKey,
         marker: CryptographyMarker,
-        salt: CryptographyFixedSalt?
+        salt: CryptographyFixedSalt?,
     ) =
         if (newVaultKey is VaultKey.RemoteKey) {
             listOf(
@@ -232,8 +232,8 @@ class SyncCryptoChangerImpl @Inject constructor(
                         is AppKey.SsoKey -> RemoteKey.Type.SSO
                     },
                     uuid = remoteKeyIdGenerator.generateRemoteKeyId(),
-                    key = encryptRemoteKey(newVaultKey, newAppKey, marker, salt)
-                )
+                    key = encryptRemoteKey(newVaultKey, newAppKey, marker, salt),
+                ),
             )
         } else {
             null
@@ -241,7 +241,7 @@ class SyncCryptoChangerImpl @Inject constructor(
 
     private fun getSettings(
         transactions: List<SyncDownloadTransaction>,
-        vaultKey: VaultKey
+        vaultKey: VaultKey,
     ): SyncObject.Settings {
         val settingsTransaction =
             transactions.first { it.type == SyncObjectType.SETTINGS.transactionType }
@@ -254,18 +254,18 @@ class SyncCryptoChangerImpl @Inject constructor(
     private fun getCryptographyMarker(
         cryptographyMarker: CryptographyMarker?,
         settings: SyncObject.Settings,
-        newAppKey: AppKey
+        newAppKey: AppKey,
     ) = cryptographyMarker ?: settings.cryptoUserPayload?.toCryptographyMarkerOrNull()
-    ?: when (newAppKey) {
-        is AppKey.Password -> CryptographyMarker.Flexible.Defaults.argon2d
-        is AppKey.SsoKey -> CryptographyMarker.Flexible.Defaults.noDerivation64
-    }
+        ?: when (newAppKey) {
+            is AppKey.Password -> CryptographyMarker.Flexible.Defaults.argon2d
+            is AppKey.SsoKey -> CryptographyMarker.Flexible.Defaults.noDerivation64
+        }
 
     private fun encryptRemoteKey(
         remoteKey: VaultKey.RemoteKey,
         appKey: AppKey,
         marker: CryptographyMarker,
-        salt: CryptographyFixedSalt?
+        salt: CryptographyFixedSalt?,
     ) =
         createAppEncryptionEngine(appKey, marker, salt)
             .use { encryptionEngine ->
@@ -277,7 +277,7 @@ class SyncCryptoChangerImpl @Inject constructor(
     private fun createAppEncryptionEngine(
         appKey: AppKey,
         marker: CryptographyMarker,
-        salt: CryptographyFixedSalt?
+        salt: CryptographyFixedSalt?,
     ) =
         
         appKey.cryptographyKey.use { cryptography.createEncryptionEngine(marker, it, salt) }
@@ -285,7 +285,7 @@ class SyncCryptoChangerImpl @Inject constructor(
     private fun createVaultEncryptionEngine(
         vaultKey: VaultKey,
         marker: CryptographyMarker,
-        salt: CryptographyFixedSalt?
+        salt: CryptographyFixedSalt?,
     ) =
         if (vaultKey is VaultKey.RemoteKey) {
             
@@ -299,7 +299,7 @@ class SyncCryptoChangerImpl @Inject constructor(
         }
 
     override suspend fun reAuthorizeDevice(authorization: Authorization.User) {
-        withContext(Dispatchers.Default) { confirmationService.execute(authorization) }
+        withContext(Dispatchers.Default) { confirmMasterPasswordChangeDoneService.execute(authorization) }
     }
 
     private data class CryptoUpdateArgs(
@@ -307,13 +307,13 @@ class SyncCryptoChangerImpl @Inject constructor(
         val reEncryptedSharingKeys: SharingKeys,
         val reEncryptedTransactions: List<SyncUploadTransaction>,
         val remoteKeys: List<RemoteKey>?,
-        val timestamp: InstantEpochMilli
+        val timestamp: InstantEpochMilli,
     )
 }
 
 private fun checkOtp2status(
-    downloadResponseData: MasterPasswordDownloadService.Data,
-    appKey: AppKey
+    downloadResponseData: GetDataForMasterPasswordChangeService.Data,
+    appKey: AppKey,
 ) {
     val isServerKeyExpected = downloadResponseData.otpStatus.isServerKeyRequired
     if (appKey is AppKey.Password && appKey.isServerKeyNotNull != isServerKeyExpected) {
@@ -322,18 +322,18 @@ private fun checkOtp2status(
 }
 
 private fun XmlDecryptionEngine.decryptTransaction(
-    transaction: SyncDownloadTransaction
+    transaction: SyncDownloadTransaction,
 ) = try {
     decryptBase64ToXmlTransaction(transaction.content!!.asEncryptedBase64())
 } catch (e: CryptographyException) {
     throw SyncCryptoChangerCryptographyException(
         message = "Unable to decrypt transaction ${transaction.identifier}.",
-        cause = e
+        cause = e,
     )
 } catch (e: XmlException) {
     throw SyncCryptoChangerCryptographyException(
         message = "Unable to parse transaction ${transaction.identifier}.",
-        cause = e
+        cause = e,
     )
 }
 
@@ -344,7 +344,7 @@ private suspend fun CryptographyChanger.changeCryptography(
     transactions: List<SyncDownloadTransaction>,
     encryptionEngine: EncryptionEngine,
     newSettings: SyncObject.Settings,
-    publishProgress: suspend (SyncCryptoChanger.Progress) -> Unit
+    publishProgress: suspend (SyncCryptoChanger.Progress) -> Unit,
 ): List<SyncUploadTransaction> {
     val transactionCount = transactions.size
     return transactions.mapIndexedNotNull { index, it ->
@@ -356,7 +356,7 @@ private suspend fun CryptographyChanger.changeCryptography(
                 action = SyncUploadTransaction.Action.BACKUP_EDIT,
                 time = it.time,
                 type = it.type,
-                content = encryptionEngine.forXml().encryptSettings(newSettings)
+                content = encryptionEngine.forXml().encryptSettings(newSettings),
             )
         } else {
             changeCryptography(it)
@@ -365,7 +365,7 @@ private suspend fun CryptographyChanger.changeCryptography(
 }
 
 private fun CryptographyChanger.changeCryptography(
-    transaction: SyncDownloadTransaction
+    transaction: SyncDownloadTransaction,
 ): SyncUploadTransaction? {
     val content =
         try {
@@ -378,12 +378,12 @@ private fun CryptographyChanger.changeCryptography(
         action = SyncUploadTransaction.Action.BACKUP_EDIT,
         time = transaction.time,
         type = transaction.type,
-        content = content
+        content = content,
     )
 }
 
 private fun CryptographyChanger.changeCryptography(
-    sharingKeys: SharingKeys
+    sharingKeys: SharingKeys,
 ) = SharingKeys(
     publicKey = sharingKeys.publicKey,
     privateKey = try {
@@ -391,29 +391,29 @@ private fun CryptographyChanger.changeCryptography(
     } catch (e: CryptographyException) {
         throw SyncCryptoChangerCryptographyException(
             message = "Unable to re-encrypt private key.",
-            cause = e
+            cause = e,
         )
-    }
+    },
 )
 
-private val MasterPasswordDownloadService.Data.OtpStatus.isServerKeyRequired
-    get() = this == MasterPasswordDownloadService.Data.OtpStatus.LOGIN
+private val GetDataForMasterPasswordChangeService.Data.OtpStatus.isServerKeyRequired
+    get() = this == GetDataForMasterPasswordChangeService.Data.OtpStatus.LOGIN
 
 private fun createUpdateVerificationRequest(
     appKey: AppKey,
     newAppKey: AppKey,
-    ssoServerKey: ByteArray?
-): MasterPasswordUploadService.Request.UpdateVerification? {
+    ssoServerKey: ByteArray?,
+): UploadDataForMasterPasswordChangeService.Request.UpdateVerification? {
     val securityType = appKey.toSecurityAuthType()
     val newSecurityType = newAppKey.toSecurityAuthType()
 
     return if (securityType == newSecurityType) {
         return null
     } else {
-        MasterPasswordUploadService.Request.UpdateVerification(
+        UploadDataForMasterPasswordChangeService.Request.UpdateVerification(
             type = newSecurityType,
             serverKey = newAppKey.serverKeyUtf8Bytes?.decodeUtf8ToString(),
-            ssoServerKey = ssoServerKey?.encodeBase64ToString()
+            ssoServerKey = ssoServerKey?.encodeBase64ToString(),
         )
     }
 }

@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -50,6 +50,7 @@ import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood.Brand
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.design.theme.typography.withSearchHighlight
+import com.dashlane.ui.common.compose.components.basescreen.scaffoldBackgroundAndInsets
 import com.dashlane.util.MD5Hash
 
 const val COLLECTION_ROLE_SEPARATOR = " • "
@@ -57,13 +58,15 @@ const val COLLECTION_ROLE_SEPARATOR = " • "
 @Composable
 internal fun CollectionNewShareScreen(
     viewModel: CollectionsNewShareViewModel = viewModel(),
-    userNavigationListener: UserNavigationListener
+    userNavigationListener: UserNavigationListener,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val viewData = uiState.viewData
     val searchQuery = remember { mutableStateOf("") }
     val isSearching = remember { mutableStateOf(false) }
     Scaffold(
+        modifier = Modifier.scaffoldBackgroundAndInsets(),
+        containerColor = DashlaneTheme.colors.backgroundAlternate,
         topBar = {
             CollectionNewShareTopBar(
                 uiState,
@@ -71,11 +74,11 @@ internal fun CollectionNewShareScreen(
                 searchQuery,
                 isSearching,
                 viewModel,
-                userNavigationListener
+                userNavigationListener,
             )
-        }
-    ) {
-        Box(modifier = Modifier.padding(it)) {
+        },
+    ) { contentPadding ->
+        Box(modifier = Modifier.padding(contentPadding)) {
             when (uiState) {
                 is Loading -> CollectionLoading()
                 is ShowList ->
@@ -83,14 +86,14 @@ internal fun CollectionNewShareScreen(
                         viewData,
                         viewData.showSharingButton,
                         searchQuery.value,
-                        viewModel
+                        viewModel,
                     )
                 is SharingSuccess ->
                     userNavigationListener.onSharingSucceed(
                         collectionName = viewData.collectionName,
                         collectionId = viewData.sharedCollectionId!!,
                         
-                        isBusiness = true
+                        isBusiness = true,
                     )
                 is SharingFailed ->
                     userNavigationListener.onSharingFailed(viewData.collectionName)
@@ -110,7 +113,7 @@ private fun CollectionNewShareTopBar(
     searchQuery: MutableState<String>,
     isSearching: MutableState<Boolean>,
     viewModel: CollectionsNewShareViewModel,
-    userNavigationListener: UserNavigationListener
+    userNavigationListener: UserNavigationListener,
 ) {
     CollectionSharingTopAppBar(
         title = stringResource(id = R.string.collection_new_share_title),
@@ -127,7 +130,7 @@ private fun CollectionNewShareTopBar(
             override fun onToggleSearch() {
                 viewModel.onToggleSearch()
             }
-        }
+        },
     )
 }
 
@@ -137,7 +140,7 @@ private fun AvailableRecipientsList(
     viewData: ViewData,
     showSharingButton: Boolean,
     searchQuery: String,
-    userInteractionListener: UserInteractionListener
+    userInteractionListener: UserInteractionListener,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (searchQuery.isEmpty()) {
@@ -150,7 +153,7 @@ private fun AvailableRecipientsList(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
         ) {
             val filteredUserGroups = if (searchQuery.isNotEmpty()) {
                 viewData.userGroups.filter { it.name.contains(searchQuery, ignoreCase = true) }
@@ -165,7 +168,7 @@ private fun AvailableRecipientsList(
                     UserGroupItem(
                         group = group,
                         searchQuery = searchQuery,
-                        onSelectionChange = userInteractionListener::onGroupSelectionChange
+                        onSelectionChange = userInteractionListener::onGroupSelectionChange,
                     )
                 }
             }
@@ -182,7 +185,7 @@ private fun AvailableRecipientsList(
                     IndividualItem(
                         individual = individual,
                         searchQuery = searchQuery,
-                        onSelectionChange = userInteractionListener::onIndividualSelectionChange
+                        onSelectionChange = userInteractionListener::onIndividualSelectionChange,
                     )
                 }
             }
@@ -211,7 +214,7 @@ private fun InfoboxPermission() {
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
         mood = Brand,
         title = stringResource(id = R.string.collection_new_share_infobox_title_roles),
-        description = stringResource(id = R.string.collection_new_share_infobox_description_roles)
+        description = stringResource(id = R.string.collection_new_share_infobox_description_roles),
     )
 }
 
@@ -225,7 +228,7 @@ private fun ColumnScope.ShareButton(userInteractionListener: UserInteractionList
             .padding(all = 16.dp),
         layout = ButtonLayout.TextOnly(stringResource(R.string.collection_new_share_primary_button)),
         mood = Brand,
-        intensity = Intensity.Catchy
+        intensity = Intensity.Catchy,
     )
 }
 
@@ -236,7 +239,7 @@ private fun NoResultsItem() {
         modifier = Modifier.padding(all = 16.dp),
         style = DashlaneTheme.typography.bodyStandardRegular,
         color = DashlaneTheme.colors.textWarningStandard,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
@@ -244,12 +247,12 @@ private fun NoResultsItem() {
 private fun UserGroupItem(
     group: UserGroup,
     searchQuery: String,
-    onSelectionChange: (UserGroup) -> Unit
+    onSelectionChange: (UserGroup) -> Unit,
 ) {
     val statusText = pluralStringResource(
         id = R.plurals.collections_new_share_group_members,
         count = group.membersCount,
-        formatArgs = arrayOf(group.membersCount)
+        formatArgs = arrayOf(group.membersCount),
     ) + COLLECTION_ROLE_SEPARATOR + stringResource(id = R.string.collection_role_manager)
     ListItem(
         modifier = Modifier.padding(horizontal = 8.dp),
@@ -265,7 +268,7 @@ private fun UserGroupItem(
 private fun IndividualItem(
     individual: Individual,
     searchQuery: String,
-    onSelectionChange: (Individual) -> Unit
+    onSelectionChange: (Individual) -> Unit,
 ) {
     val url = remember(individual.username) {
         "https://www.gravatar.com/avatar/${MD5Hash.hash(individual.username)}?s=200&r=pg&d=404"
@@ -276,7 +279,7 @@ private fun IndividualItem(
         thumbnailType = ThumbnailType.User.Single(url = url),
         title = individual.username.withSearchHighlight(match = searchQuery, ignoreCase = true),
         description = AnnotatedString(stringResource(id = R.string.collection_role_manager)),
-        onClick = { onSelectionChange(individual) }
+        onClick = { onSelectionChange(individual) },
     )
 }
 
@@ -289,7 +292,7 @@ private fun PreviewShareBusinessCollection() {
                 listOf(
                     UserGroup("1", "All", 324),
                     UserGroup("2", "Marketing", 34),
-                    UserGroup("3", "Engineering", 16)
+                    UserGroup("3", "Engineering", 16),
                 ),
                 listOf(
                     Individual("randomemail@provider.com"),
@@ -298,8 +301,8 @@ private fun PreviewShareBusinessCollection() {
                     Individual("randomemail@provider.com"),
                     Individual("randomemail@provider.com"),
                     Individual("randomemail@provider.com"),
-                    Individual("randomemail@provider.com")
-                )
+                    Individual("randomemail@provider.com"),
+                ),
             ),
             showSharingButton = true,
             searchQuery = "",
@@ -319,7 +322,7 @@ private fun PreviewShareBusinessCollection() {
                 override fun onToggleSearch() {
                     
                 }
-            }
+            },
         )
     }
 }

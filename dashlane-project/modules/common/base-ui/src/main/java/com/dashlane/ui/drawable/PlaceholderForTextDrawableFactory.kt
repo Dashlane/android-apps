@@ -16,7 +16,7 @@ object PlaceholderForTextDrawableFactory {
         context: Context,
         originalTitle: String?,
         @ColorInt textColor: Int,
-        @ColorInt backgroundColor: Int
+        @ColorInt backgroundColor: Int,
     ): Drawable {
         var letters = "?"
         if (originalTitle != null) {

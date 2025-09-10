@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/fields_filled_by.json",
+  "type": "object",
+  "description": "Definition for the fields_filled_by property used in autofill_submit_form event.",
+  "definitions": {
+    "fields_filled_by_count": {
+      "type": "object",
+      "description": "The methodologies used by a user to fill the fields in a submitted form.",
+      "properties": {
+        "autofill_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "autologin_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "manually_typed_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        }
+      },
+      "required": [
+        "autofill_count",
+        "autologin_count",
+        "manually_typed_count"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

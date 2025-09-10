@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/autofill_suggest.json",
+  "type": "object",
+  "description": "When Dashlane suggests to autofill some data field (eg. address, credit_card, website) with an extension webcard (or with the Android dropdown/keyboard suggestions (eg. autofill/keyboard/suggestion and autofill/dropdown/suggestion)) or to save/replace a password with a webcard.",
+  "metas": {
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_suggest"
+    },
+    "autofill_message_type_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_message_type_list"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "is_login_prefilled": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_login_prefilled"
+    },
+    "is_native_app": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+    },
+    "is_password_prefilled": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_password_prefilled"
+    },
+    "is_suggest_last_unsaved": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_suggest_last_unsaved"
+    },
+    "ms_to_webcard": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_webcard"
+    },
+    "phishing_risk": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/phishing_risk"
+    },
+    "vault_type_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+    },
+    "webcard_item_total_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/webcard_item_total_count"
+    },
+    "webcard_save_options": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/webcard_save_options_list"
+    }
+  },
+  "required": [
+    "name",
+    "domain",
+    "is_native_app"
+  ],
+  "additionalProperties": false
+}

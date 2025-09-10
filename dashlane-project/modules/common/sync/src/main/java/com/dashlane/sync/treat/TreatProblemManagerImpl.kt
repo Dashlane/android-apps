@@ -1,9 +1,9 @@
 package com.dashlane.sync.treat
 
 import com.dashlane.cryptography.CryptographyEngineFactory
-import com.dashlane.server.api.endpoints.sync.SyncDownloadService
-import com.dashlane.server.api.endpoints.sync.SyncUploadService
+import com.dashlane.server.api.endpoints.sync.GetLatestContentService
 import com.dashlane.server.api.endpoints.sync.SyncUploadTransaction
+import com.dashlane.server.api.endpoints.sync.UploadContentService
 import com.dashlane.server.api.time.toInstant
 import com.dashlane.server.api.time.toInstantEpochMilli
 import com.dashlane.sync.domain.IncomingTransaction
@@ -22,14 +22,13 @@ class TreatProblemManagerImpl @Inject constructor(
     private val syncServices: SyncServices,
     private val transactionCipher: TransactionCipher,
     private val transactionFailureRegistry: TransactionFailureRegistry,
-    private val syncLogs: SyncLogs
+    private val syncLogs: SyncLogs,
 ) : TreatProblemManager {
-
     override suspend fun execute(
         serverCredentials: ServerCredentials,
         serverSummary: List<SyncSummaryItem>,
         syncVault: SyncVault,
-        cryptographyEngineFactory: CryptographyEngineFactory
+        cryptographyEngineFactory: CryptographyEngineFactory,
     ): TreatProblemManager.Result {
         val (itemsToUpload, uuidsToDownload) = getSyncSummaryDiff(serverSummary.toSet(), syncVault)
 
@@ -38,18 +37,18 @@ class TreatProblemManagerImpl @Inject constructor(
         
         val isDownloadNeeded = uuidsToDownload.isNotEmpty()
         val ignoredErrors = if (isDownloadNeeded) {
-            val downloadRequest = SyncDownloadService.Request(
+            val downloadRequest = GetLatestContentService.Request(
                 teamAdminGroups = false,
                 needsKeys = false,
                 transactions = uuidsToDownload.toList(),
-                timestamp = timestamp.toInstantEpochMilli()
+                timestamp = timestamp.toInstantEpochMilli(),
             )
             treatProblemDownload(
                 serverCredentials,
                 downloadRequest,
                 cryptographyEngineFactory,
                 syncVault,
-                uuidsToDownload = uuidsToDownload
+                uuidsToDownload = uuidsToDownload,
             )
         } else {
             emptyList()
@@ -62,7 +61,7 @@ class TreatProblemManagerImpl @Inject constructor(
                 cryptographyEngineFactory,
                 syncVault,
                 itemsToUpload = itemsToUpload,
-                timestamp
+                timestamp,
             )
         }
 
@@ -80,20 +79,20 @@ class TreatProblemManagerImpl @Inject constructor(
 
         return TreatProblemManager.Result(
             treatProblemType,
-            ignoredErrors
+            ignoredErrors,
         )
     }
 
     private suspend fun getSyncSummaryDiff(
         serverSummary: Set<SyncSummaryItem>,
-        syncVault: SyncVault
+        syncVault: SyncVault,
     ): Pair<List<SyncSummaryItem>, Set<String>> {
         val syncObjectTypes = enumValues<SyncObjectType>().toList()
         val failedTransactions = transactionFailureRegistry.getAll()
         val failedTransactionIds = failedTransactions.map { it.objectId }.toSet()
         val localSummary = cleanupDuplicateIdsBug(
             syncVault,
-            failedTransactions + syncVault.getSummary(syncObjectTypes).filterNot { it.objectId in failedTransactionIds }
+            failedTransactions + syncVault.getSummary(syncObjectTypes).filterNot { it.objectId in failedTransactionIds },
         )
 
         syncLogs.onTreatProblemSummaryBegin(localSummary.size, serverSummary.size)
@@ -112,7 +111,7 @@ class TreatProblemManagerImpl @Inject constructor(
                 uploadMissing = uploadMissing,
                 uploadOutOfDate = uploadOutOfDate,
                 localObject,
-                serverObjectById[localObject.objectId]
+                serverObjectById[localObject.objectId],
             )
         }
         syncLogs.apply {
@@ -127,11 +126,11 @@ class TreatProblemManagerImpl @Inject constructor(
             .asSequence()
             .filter {
                 shouldDownload(
-                downloadMissing = downloadMissing,
-                downloadOutOfDate = downloadOutOfDate,
-                it,
-                localSummaryById[it.objectId]
-            )
+                    downloadMissing = downloadMissing,
+                    downloadOutOfDate = downloadOutOfDate,
+                    it,
+                    localSummaryById[it.objectId],
+                )
             }
             .map(SyncSummaryItem::objectId)
             .toSet()
@@ -146,7 +145,7 @@ class TreatProblemManagerImpl @Inject constructor(
 
     private suspend fun cleanupDuplicateIdsBug(
         syncVault: SyncVault,
-        localSummary: Set<SyncSummaryItem>
+        localSummary: Set<SyncSummaryItem>,
     ): Set<SyncSummaryItem> {
         
         
@@ -179,10 +178,10 @@ class TreatProblemManagerImpl @Inject constructor(
 
     private suspend fun treatProblemDownload(
         serverCredentials: ServerCredentials,
-        downloadRequest: SyncDownloadService.Request,
+        downloadRequest: GetLatestContentService.Request,
         cryptographyEngineFactory: CryptographyEngineFactory,
         syncVault: SyncVault,
-        uuidsToDownload: Set<String>
+        uuidsToDownload: Set<String>,
     ): List<Throwable> {
         syncLogs.onTreatProblemDownload(uuidsToDownload.size)
 
@@ -196,14 +195,14 @@ class TreatProblemManagerImpl @Inject constructor(
         cryptographyEngineFactory: CryptographyEngineFactory,
         syncVault: SyncVault,
         itemsToUpload: List<SyncSummaryItem>,
-        timestamp: Instant
+        timestamp: Instant,
     ) {
         syncLogs.onTreatProblemUpload(itemsToUpload.size)
 
         val outgoingTransactions = createUploadTransactions(cryptographyEngineFactory, syncVault, itemsToUpload)
-        val uploadRequest = SyncUploadService.Request(
+        val uploadRequest = UploadContentService.Request(
             transactions = outgoingTransactions,
-            timestamp = timestamp.toInstantEpochMilli()
+            timestamp = timestamp.toInstantEpochMilli(),
         )
 
         val uploadData = syncServices.upload(serverCredentials, uploadRequest)
@@ -214,37 +213,37 @@ class TreatProblemManagerImpl @Inject constructor(
     private suspend fun createUploadTransactions(
         cryptographyEngineFactory: CryptographyEngineFactory,
         syncVault: SyncVault,
-        itemsToUpload: List<SyncSummaryItem>
+        itemsToUpload: List<SyncSummaryItem>,
     ): List<SyncUploadTransaction> {
         val batch = itemsToUpload.map { it.syncObjectType.kClass to it.objectId }
         val outgoingTransactions = syncVault.fetchAsOutgoingUpdate(batch)
 
         return transactionCipher.cipherOutgoingTransactions(
             transactions = outgoingTransactions,
-            cryptographyEngineFactory = cryptographyEngineFactory
+            cryptographyEngineFactory = cryptographyEngineFactory,
         )
     }
 
     private suspend fun applyUploadedTransactionsLocally(
-        uploaded: SyncUploadService.Data,
+        uploaded: UploadContentService.Data,
         syncVault: SyncVault,
-        itemsToUpload: List<SyncSummaryItem>
+        itemsToUpload: List<SyncSummaryItem>,
     ) {
 
         val latestTimestamp = uploaded.timestamp.toInstant()
         syncVault.lastSyncTime = latestTimestamp
         syncVault.applyBackupDate(
             itemsToUpload.map { it.syncObjectType.kClass to it.objectId },
-            latestTimestamp
+            latestTimestamp,
         )
     }
 
     private suspend fun applyDownloadedTransactionsLocally(
         cryptographyEngineFactory: CryptographyEngineFactory,
         syncVault: SyncVault,
-        latestResult: SyncDownloadService.Data,
+        latestResult: GetLatestContentService.Data,
         uuidsToDownload: Set<String>,
-        sharing: SyncDownloadService.Data.SharingSummary
+        sharing: GetLatestContentService.Data.SharingSummary,
     ): List<Throwable> {
         val transactionList = latestResult.transactions
         val usefulTransactions =
@@ -260,7 +259,7 @@ class TreatProblemManagerImpl @Inject constructor(
         val (incomingTransactions, ignoredErrors) = transactionCipher.decipherIncomingTransactions(
             transactionList,
             cryptographyEngineFactory,
-            sharing.toSharedIds()
+            sharing.toSharedIds(),
         )
         runCatching {
             
@@ -270,12 +269,12 @@ class TreatProblemManagerImpl @Inject constructor(
                         is IncomingTransaction.Update -> insertOrUpdateForSync(
                             incomingTransaction.identifier,
                             incomingTransaction.syncObject,
-                            incomingTransaction.date.toEpochMilli()
+                            incomingTransaction.date.toEpochMilli(),
                         )
 
                         is IncomingTransaction.Delete -> deleteForSync(
                             incomingTransaction.syncObjectType.kClass,
-                            incomingTransaction.identifier
+                            incomingTransaction.identifier,
                         )
                     }
                 }
@@ -291,7 +290,7 @@ class TreatProblemManagerImpl @Inject constructor(
         uploadMissing: MutableList<SyncSummaryItem>,
         uploadOutOfDate: MutableList<SyncSummaryItem>,
         localObject: SyncSummaryItem,
-        serverObject: SyncSummaryItem?
+        serverObject: SyncSummaryItem?,
     ): Boolean {
         if (serverObject == null) {
             uploadMissing.add(localObject)
@@ -308,7 +307,7 @@ class TreatProblemManagerImpl @Inject constructor(
         downloadMissing: MutableList<SyncSummaryItem>,
         downloadOutOfDate: MutableList<SyncSummaryItem>,
         serverObject: SyncSummaryItem,
-        localObject: SyncSummaryItem?
+        localObject: SyncSummaryItem?,
     ): Boolean {
         if (localObject == null) {
             downloadMissing.add(serverObject)

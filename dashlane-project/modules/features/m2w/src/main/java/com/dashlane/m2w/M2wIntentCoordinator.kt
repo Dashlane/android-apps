@@ -8,7 +8,7 @@ object M2wIntentCoordinator {
     internal const val EXTRA_M2W_SKIPPED = "m2w_skipped"
 
     fun createConnectActivityIntent(
-        context: Context
+        context: Context,
     ) = Intent(context, M2wConnectActivity::class.java)
 
     fun isM2wCompleted(intent: Intent) = intent.getBooleanExtra(EXTRA_M2W_COMPLETED, false)

@@ -1,0 +1,87 @@
+package com.dashlane.passwordhealth.identitydashboard
+
+import com.dashlane.breach.events.BreachStatusChangedEvent
+import com.dashlane.events.AppEvents
+import com.dashlane.events.clearLastEvent
+import com.dashlane.events.register
+import com.dashlane.events.unregister
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.passwordanalysis.SecurityScoreEvaluator
+import com.dashlane.passwordhealth.identitydashboard.password.AuthentifiantSecurityEvaluator
+import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
+import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
+import com.skocken.presentation.provider.BaseDataProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import java.lang.ref.WeakReference
+import javax.inject.Inject
+
+class IdentityDashboardDataProvider @Inject constructor(
+    private val userFeaturesChecker: UserFeaturesChecker,
+    private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
+    private val appEvents: AppEvents,
+    private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
+) : BaseDataProvider<IdentityDashboardContract.Presenter>(),
+    IdentityDashboardContract.DataProvider {
+    lateinit var coroutineScope: CoroutineScope
+    private val appEventListener = AppEventsListener(appEvents, this)
+    private var latestSecurityScoreEvaluatorResult: Deferred<SecurityScoreEvaluator.Result?>? = null
+
+    override fun hasProtectionPackage(): Boolean {
+        return userFeaturesChecker.has(Capability.CREDITMONITORING)
+    }
+
+    override fun shouldIdentityRestorationBeVisible(): Boolean {
+        return userFeaturesChecker.has(Capability.IDENTITYRESTORATION)
+    }
+
+    override fun getAuthentifiantsSecurityInfoAsync(forceRefresh: Boolean): Deferred<SecurityScoreEvaluator.Result?> {
+        if (forceRefresh) {
+            latestSecurityScoreEvaluatorResult?.cancel()
+            latestSecurityScoreEvaluatorResult = null
+        }
+        return latestSecurityScoreEvaluatorResult
+            ?: coroutineScope.async(Dispatchers.Default) {
+                getAuthentifiantSecurityInfoAsync()
+            }.apply {
+                latestSecurityScoreEvaluatorResult?.cancel()
+                latestSecurityScoreEvaluatorResult = this
+            }
+    }
+
+    private suspend fun getAuthentifiantSecurityInfoAsync(): SecurityScoreEvaluator.Result {
+        return authentifiantSecurityEvaluator.computeResult(currentTeamSpaceUiFilter.currentFilter.teamSpace).first
+    }
+
+    override fun listenForChanges() {
+        appEventListener.listen()
+    }
+
+    override fun unlistenForChanges() {
+        appEventListener.unlisten()
+    }
+
+    class AppEventsListener(
+        private val appEvents: AppEvents,
+        dataProvider: IdentityDashboardDataProvider,
+    ) {
+        private val dataProviderRef = WeakReference(dataProvider)
+
+        fun listen() {
+            appEvents.register<BreachStatusChangedEvent>(this, true) {
+                dataProviderRef.get()?.apply {
+                    appEvents.clearLastEvent<BreachStatusChangedEvent>()
+                    presenter.requireRefresh(forceRefresh = true)
+                } ?: appEvents.unregister<BreachStatusChangedEvent>(this)
+            }
+        }
+
+        fun unlisten() {
+            runCatching {
+                appEvents.unregister<BreachStatusChangedEvent>(this)
+            }
+        }
+    }
+}

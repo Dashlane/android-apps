@@ -1,0 +1,41 @@
+{
+  "id": "838bf943-b9a1-4301-83e4-cb192f2e70c4",
+  "schema_version": "1.31.6",
+  "category": "user",
+  "date": "2021-02-13T20:20:39+00:00",
+  "date_origin": "local",
+  "context": {
+    "user": {
+      "id": "b293a330-2e7c-4a69-b1c6-4f5cae8b8a9b"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "saex",
+      "build_type": "dev"
+    },
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "id": "514ecc2f-2431-4b03-9f6d-dfc832e05591",
+      "os": {
+        "type": "mac_os",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    }
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 18
+  },
+  "browse": {
+    "component": "extension_popup",
+    "page": "search"
+  },
+  "properties": {
+    "name": "update_collection",
+    "action": "add",
+    "collection_id": "9f10c2f9-a72b-4fc8-b231-94ad78d2516a",
+    "is_shared": false,
+    "item_count": 1
+  }
+}

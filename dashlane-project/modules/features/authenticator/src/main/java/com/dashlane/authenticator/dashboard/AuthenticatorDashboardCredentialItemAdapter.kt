@@ -2,18 +2,19 @@ package com.dashlane.authenticator.dashboard
 
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.dashboard.AuthenticatorDashboardUiState.HasLogins.CredentialItem
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.ui.widgets.view.ExpandableCardView
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class AuthenticatorDashboardCredentialItemAdapter(
-    private val listener: Listener
+    private val listener: Listener,
 ) : DashlaneRecyclerAdapter<CredentialItem>() {
-
     interface Listener {
         fun onOtpCounterUpdate(itemId: String, otp: Otp)
+
         fun onOtpCopy(code: String, itemId: String, domain: String?)
+
         fun onOtpDelete(item: CredentialItem, issuer: String?)
     }
 

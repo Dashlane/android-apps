@@ -8,9 +8,8 @@ import javax.inject.Inject
 
 class ChangePasswordDataProvider @Inject constructor(
     private val service: AutofillUpdateAccountService,
-    private val autoFillchangePasswordConfiguration: AutoFillChangePasswordConfiguration
+    private val autoFillchangePasswordConfiguration: AutoFillChangePasswordConfiguration,
 ) : ChangePasswordContract.DataProvider {
-
     private lateinit var existingAuthentifiants: List<VaultItem<SyncObject.Authentifiant>>
 
     override suspend fun loadAuthentifiants(website: String?, packageName: String?) =
@@ -19,7 +18,7 @@ class ChangePasswordDataProvider @Inject constructor(
         }
 
     override suspend fun updateCredentialToVault(
-        credential: CredentialUpdateInfo
+        credential: CredentialUpdateInfo,
     ) = service.updateExistingAuthentifiant(credential)?.also {
         autoFillchangePasswordConfiguration.onItemUpdated.invoke()
     }

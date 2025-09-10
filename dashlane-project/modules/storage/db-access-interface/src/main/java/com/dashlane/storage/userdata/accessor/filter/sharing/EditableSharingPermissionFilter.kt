@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import com.dashlane.sharing.UserPermission
 
 interface EditableSharingPermissionFilter : SharingFilter {
-
     var sharingFilter: SharingFilter
 
     fun noSharingFilter() {
@@ -25,7 +24,9 @@ interface EditableSharingPermissionFilter : SharingFilter {
         specificSharingPermission(arrayOf(UserPermission.UNDEFINED, UserPermission.ADMIN))
     }
 
-    fun specificSharingPermission(@UserPermission permission: Array<String>?) {
+    fun specificSharingPermission(
+        @UserPermission permission: Array<String>?,
+    ) {
         @SuppressLint("WrongConstant") 
         sharingFilter = SpecificSharingFilter(sharingPermissions = permission)
     }

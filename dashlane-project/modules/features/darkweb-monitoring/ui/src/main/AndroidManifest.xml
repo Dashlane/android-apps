@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.APP_EMAIL" />
+        </intent>
+    </queries>
+    <application>
+        <activity
+            android:name=".setup.DarkWebSetupMailActivity"
+            android:parentActivityName=".intro.DarkWebSetupIntroActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.dashlane.darkweb.ui.result.DarkWebSetupResultActivity"
+            android:theme="@style/Theme.Dashlane.TransparentSystemBars" />
+    </application>
+</manifest>

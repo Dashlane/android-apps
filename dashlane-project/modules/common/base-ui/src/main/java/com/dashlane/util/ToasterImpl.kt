@@ -14,21 +14,40 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 @SuppressLint("ToastUsage")
-class ToasterImpl @Inject constructor(@ApplicationContext private val context: Context) : Toaster {
-
-    override fun show(@StringRes resId: Int, @Duration duration: Int) =
+class ToasterImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
+) : Toaster {
+    override fun show(
+        @StringRes resId: Int,
+        @Duration duration: Int,
+    ) =
         show(context.resources?.getText(resId), duration, Toaster.Position.BOTTOM)
 
-    override fun show(@StringRes resId: Int, @Duration duration: Int, position: Toaster.Position) =
+    override fun show(
+        @StringRes resId: Int,
+        @Duration duration: Int,
+        position: Toaster.Position,
+    ) =
         show(context.resources?.getText(resId), duration, position)
 
-    override fun show(text: CharSequence?, @Duration duration: Int) = show(text, duration, Toaster.Position.BOTTOM)
+    override fun show(
+        text: CharSequence?,
+        @Duration duration: Int,
+    ) = show(text, duration, Toaster.Position.BOTTOM)
 
-    override fun show(text: CharSequence?, @Duration duration: Int, position: Toaster.Position) {
+    override fun show(
+        text: CharSequence?,
+        @Duration duration: Int,
+        position: Toaster.Position,
+    ) {
         makeToast(text, duration, position).show()
     }
 
-    private fun makeToast(text: CharSequence?, @Duration duration: Int, position: Toaster.Position): Toast {
+    private fun makeToast(
+        text: CharSequence?,
+        @Duration duration: Int,
+        position: Toaster.Position,
+    ): Toast {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             makeDefaultToast(text, duration, position)
         } else {
@@ -36,17 +55,25 @@ class ToasterImpl @Inject constructor(@ApplicationContext private val context: C
         }
     }
 
-    private fun makeDefaultToast(text: CharSequence?, @Duration duration: Int, position: Toaster.Position): Toast {
+    private fun makeDefaultToast(
+        text: CharSequence?,
+        @Duration duration: Int,
+        position: Toaster.Position,
+    ): Toast {
         return Toast.makeText(context, text, duration).apply {
             setGravity(
                 Gravity.FILL_HORIZONTAL or position.gravity,
                 0,
-                0
+                0,
             )
         }
     }
 
-    private fun makeCustomToast(text: CharSequence?, @Duration duration: Int, position: Toaster.Position): Toast {
+    private fun makeCustomToast(
+        text: CharSequence?,
+        @Duration duration: Int,
+        position: Toaster.Position,
+    ): Toast {
         val toast = Toast(context)
         prepareToast(text, toast, duration, position)
         return toast
@@ -57,7 +84,7 @@ class ToasterImpl @Inject constructor(@ApplicationContext private val context: C
         text: CharSequence?,
         toast: Toast,
         duration: Int,
-        position: Toaster.Position
+        position: Toaster.Position,
     ) {
         val toastLayout = LayoutInflater.from(context).inflate(R.layout.toast_layout, null)
         val textView: TextView = toastLayout.findViewById(R.id.text)
@@ -74,7 +101,7 @@ class ToasterImpl @Inject constructor(@ApplicationContext private val context: C
             setGravity(
                 Gravity.FILL_HORIZONTAL or position.gravity,
                 0,
-                0
+                0,
             )
             this.duration = duration
             view = toastLayout
@@ -90,7 +117,7 @@ class ToasterImpl @Inject constructor(@ApplicationContext private val context: C
 fun Context.showToaster(
     text: CharSequence?,
     @Duration duration: Int,
-    position: Toaster.Position = Toaster.Position.BOTTOM
+    position: Toaster.Position = Toaster.Position.BOTTOM,
 ) {
     ToasterImpl(this).show(text, duration, position)
 }
@@ -98,7 +125,7 @@ fun Context.showToaster(
 fun Context.showToaster(
     @StringRes text: Int,
     @Duration duration: Int,
-    position: Toaster.Position = Toaster.Position.BOTTOM
+    position: Toaster.Position = Toaster.Position.BOTTOM,
 ) {
     ToasterImpl(this).show(text, duration, position)
 }

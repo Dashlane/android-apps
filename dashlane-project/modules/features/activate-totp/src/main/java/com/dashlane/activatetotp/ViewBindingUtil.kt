@@ -15,7 +15,7 @@ internal fun ActivateTotpErrorBinding.setup(
     positiveButtonResId: Int,
     negativeButtonResId: Int? = null,
     onClickPositiveButton: () -> Unit,
-    onClickNegativeButton: (() -> Unit)? = null
+    onClickNegativeButton: (() -> Unit)? = null,
 ) {
     val minContentHeight = root.context.resources.getDimensionPixelSize(R.dimen.size_480dp)
 
@@ -46,7 +46,7 @@ internal fun ActivateTotpErrorBinding.setup(
 
 internal fun ActivateTotpLoadingBinding.setup(
     messageResId: Int,
-    isSuccess: Boolean = false
+    isSuccess: Boolean = false,
 ) {
     lottie.run {
         removeAllAnimatorListeners()

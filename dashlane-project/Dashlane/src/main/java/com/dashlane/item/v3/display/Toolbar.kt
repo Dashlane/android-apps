@@ -16,11 +16,19 @@ internal fun Toolbar(
     actionBar: ActionBar?,
     lazyListState: LazyListState,
     uiState: ItemEditState<out FormData>,
-    actionBarView: ComposeView
+    actionBarView: ComposeView,
 ) {
     val firstVisibleIndex by remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
     val isNameVisible = firstVisibleIndex > 0 || uiState.isEditMode
-    actionBarView.setupToolbar(uiState, isNameVisible)
+    
+    uiState.datas?.current?.let { currentData ->
+        actionBarView.setupToolbar(
+            currentData = currentData,
+            isNameVisible = isNameVisible,
+            isEditMode = uiState.isEditMode,
+            isNew = uiState.isNew,
+        )
+    }
     if (actionBarView.parent == null) {
         actionBar?.customView = actionBarView
     }

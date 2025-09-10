@@ -7,8 +7,6 @@ import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.IntentSender
-import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.autofill.pausedautofillsettings.PausedAutofillActivity
 import com.dashlane.autofill.util.AutofillNavigationService
 import com.dashlane.autofill.util.AutofillNavigationService.Companion.REQUEST_KEYBOARD_AUTOFILL_ON_BOARDING
 import com.dashlane.navigation.NavigationHelper
@@ -20,9 +18,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class AutofillNavigationServiceImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) : AutofillNavigationService {
-
     override fun navigateToAutofillSettings(activity: Activity, startAsNewTask: Boolean) {
         activity.startActivity(
             Intent(
@@ -30,12 +27,12 @@ class AutofillNavigationServiceImpl @Inject constructor(
                 NavigationUriBuilder()
                     .host(NavigationHelper.Destination.MainPath.SETTINGS)
                     .appendPath(NavigationHelper.Destination.SecondaryPath.SettingsPath.GENERAL)
-                    .build()
+                    .build(),
             ).apply {
                 if (startAsNewTask) {
                     flags = FLAG_ACTIVITY_NEW_TASK
                 }
-            }
+            },
         )
     }
 
@@ -45,32 +42,25 @@ class AutofillNavigationServiceImpl @Inject constructor(
                 ACTION_VIEW,
                 NavigationUriBuilder()
                     .host(NavigationHelper.Destination.MainPath.PASSWORDS)
-                    .build()
+                    .build(),
             ).apply {
                 if (startAsNewTask) {
                     flags = FLAG_ACTIVITY_NEW_TASK
                 }
-            }
+            },
         )
     }
 
-    override fun navigateToPausedAutofillSection(
-        activity: Activity,
-        autofillFormSource: AutoFillFormSource
-    ) {
-        activity.startActivity(PausedAutofillActivity.newIntent(context, autofillFormSource))
-    }
-
     override fun navigateToFrozenAccountPaywall(
-        activity: Activity
+        activity: Activity,
     ) {
         activity.startActivity(
             Intent(
                 ACTION_VIEW,
                 NavigationUriBuilder()
                     .host(NavigationHelper.Destination.MainPath.GET_PREMIUM)
-                    .build()
-            )
+                    .build(),
+            ),
         )
     }
 
@@ -85,7 +75,7 @@ class AutofillNavigationServiceImpl @Inject constructor(
             context,
             0,
             inlineLongPressIntent,
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
 
@@ -100,7 +90,7 @@ class AutofillNavigationServiceImpl @Inject constructor(
             context,
             0,
             intent,
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         ).intentSender
     }
 }

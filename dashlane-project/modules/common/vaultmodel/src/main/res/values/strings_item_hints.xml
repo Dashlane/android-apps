@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="authentifiant_hint_url">Website</string>
+    <string name="authentifiant_hint_name">Item name</string>
+    <string name="authentifiant_hint_login">Username</string>
+    <string name="authentifiant_hint_password">Password</string>
+    <string name="authentifiant_hint_note">Note</string>
+    <string name="authentifiant_hint_secondary_login">Alternate username</string>
+
+    <string name="secure_note_hint_title">Title</string>
+    <string name="secure_note_hint_content">Content</string>
+
+    <string name="address_hint_name">Item name</string>
+    <string name="address_hint_address">Address</string>
+    <string name="address_hint_house_number">House number</string>
+    <string name="address_hint_city">City</string>
+    <string name="address_hint_zipcode">Zip code</string>
+    <string name="address_hint_receipent">Recipient</string>
+    <string name="address_hint_building">Building</string>
+    <string name="address_hint_floor">Floor</string>
+    <string name="address_hint_appartment">Apartment</string>
+    <string name="address_hint_doorcode">Door code</string>
+
+    <string name="company_hint_company">Company</string>
+    <string name="company_hint_job">Job title</string>
+
+    <string name="email_hint_name">Item name</string>
+    <string name="email_hint_email">Email</string>
+
+    <string name="identity_hint_first_name">First name</string>
+    <string name="identity_hint_last_name">Last name</string>
+    <string name="identity_hint_middle_name">Middle name</string>
+    <string name="identity_hint_default_login">Default username</string>
+    <string name="identity_hint_place_of_birth">Place of birth</string>
+
+    <string name="phone_hint_name">Item name</string>
+    <string name="phone_hint_number">Number</string>
+
+    <string name="personal_website_hint_name">Item name</string>
+    <string name="personal_website_hint_url">Website</string>
+
+    <string name="abstact_ids_hint_full_name">Full name</string>
+
+    <string name="passport_hint_number">Number</string>
+
+    <string name="tax_statement_hint_number">Tax number</string>
+    <string name="tax_statement_hint_online_number">Online registration number</string>
+
+    <string name="bank_account_hint_name">Item name</string>
+    <string name="bank_account_hint_account_holder">Account holder</string>
+
+    <string name="credit_card_hint_name">Item name</string>
+    <string name="credit_card_hint_number">Number</string>
+    <string name="credit_card_hint_security_code">Security code</string>
+    <string name="credit_card_hint_account_holder">Account holder</string>
+    <string name="credit_card_hint_issue_number">Issue number</string>
+</resources>

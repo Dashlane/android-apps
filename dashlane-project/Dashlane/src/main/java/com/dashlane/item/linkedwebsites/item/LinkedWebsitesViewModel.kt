@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.dashlane.R
 import com.dashlane.ext.application.KnownLinkedDomains
 import com.dashlane.item.linkedwebsites.LinkedServicesFragmentArgs
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.getAllLinkedPackageName
@@ -13,20 +13,19 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 @HiltViewModel
 class LinkedWebsitesViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     val state: StateFlow<LinkedWebsitesUIState>
         get() = _state
     private val _state: MutableStateFlow<LinkedWebsitesUIState> = MutableStateFlow(
-        LinkedWebsitesUIState(viewProvider = listOf(), null)
+        LinkedWebsitesUIState(viewProvider = listOf(), null),
     )
     private val args = LinkedServicesFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private var vaultItem: VaultItem<SyncObject.Authentifiant>? = null
@@ -66,8 +65,8 @@ class LinkedWebsitesViewModel @Inject constructor(
                     onValueUpdated = this::onWebsiteValueUpdated,
                     getUrlValue = this::getUrlValue,
                     removeWebsiteListener = this::removeWebsite,
-                    openWebsiteListener = this::openWebsite
-                )
+                    openWebsiteListener = this::openWebsite,
+                ),
             )
         } ?: emptyList()
     }
@@ -86,10 +85,10 @@ class LinkedWebsitesViewModel @Inject constructor(
                     onValueUpdated = this::onWebsiteValueUpdated,
                     getUrlValue = this::getUrlValue,
                     removeWebsiteListener = this::removeWebsite,
-                    openWebsiteListener = this::openWebsite
+                    openWebsiteListener = this::openWebsite,
                 ).apply {
                     editableResult[uid] = it
-                }
+                },
             )
         }
         if (isEditMode) {
@@ -103,8 +102,8 @@ class LinkedWebsitesViewModel @Inject constructor(
                         onValueUpdated = this::onWebsiteValueUpdated,
                         getUrlValue = this::getUrlValue,
                         removeWebsiteListener = this::removeWebsite,
-                        openWebsiteListener = this::openWebsite
-                    )
+                        openWebsiteListener = this::openWebsite,
+                    ),
                 )
             }
             items.add(LinkedWebsitesAddItem(R.string.multi_domain_credentials_add_website, ::addAnotherWebsite))
@@ -127,8 +126,8 @@ class LinkedWebsitesViewModel @Inject constructor(
                     onValueUpdated = this::onWebsiteValueUpdated,
                     getUrlValue = this::getUrlValue,
                     removeWebsiteListener = this::removeWebsite,
-                    openWebsiteListener = this::openWebsite
-                )
+                    openWebsiteListener = this::openWebsite,
+                ),
             )
         }
         return items
@@ -148,8 +147,8 @@ class LinkedWebsitesViewModel @Inject constructor(
                     onValueUpdated = this::onWebsiteValueUpdated,
                     getUrlValue = this::getUrlValue,
                     removeWebsiteListener = this::removeWebsite,
-                    openWebsiteListener = this::openWebsite
-                )
+                    openWebsiteListener = this::openWebsite,
+                ),
             )
         }
         _state.update {
@@ -192,8 +191,8 @@ class LinkedWebsitesViewModel @Inject constructor(
             it.copy(
                 actionOpenWebsite = LinkedWebsitesUIState.LinkedWebsitesUIStateLoginOpener(
                     item.defaultUrl.toUrlOrNull()?.toString(),
-                    packageNames
-                )
+                    packageNames,
+                ),
             )
         }
     }
@@ -206,7 +205,7 @@ class LinkedWebsitesViewModel @Inject constructor(
 
     data class LinkedWebsitesUIState(
         val viewProvider: List<DashlaneRecyclerAdapter.ViewTypeProvider>,
-        val actionOpenWebsite: LinkedWebsitesUIStateLoginOpener?
+        val actionOpenWebsite: LinkedWebsitesUIStateLoginOpener?,
     ) {
         data class LinkedWebsitesUIStateLoginOpener(val url: String?, val packageNames: Set<String>)
     }

@@ -14,7 +14,6 @@ import com.tokenautocomplete.TokenCompleteTextView
 
 class SharingContactAutocompleteTextView(context: Context, attrs: AttributeSet) :
     TokenCompleteTextView<SharingContact>(context, attrs) {
-
     private val layoutInflater: LayoutInflater =
         context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
@@ -26,7 +25,7 @@ class SharingContactAutocompleteTextView(context: Context, attrs: AttributeSet) 
         val view = layoutInflater.inflate(
             R.layout.chips_text_sharing_contact,
             this@SharingContactAutocompleteTextView.parent as ViewGroup,
-            false
+            false,
         ) as SharingContactChipsView
         view.setName(obj.toString())
         return view

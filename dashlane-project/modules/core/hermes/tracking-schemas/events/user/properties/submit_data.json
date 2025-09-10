@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/submit_data.json",
+  "type": "object",
+  "description": "When an admin submits data in TAC.",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "submit_data"
+    },
+    "item_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/items_to_transfer_count"
+    },
+    "item_source": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/backup_file_type"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/data_source"
+    },
+    "submit_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transfer_data_status"
+    }
+  },
+  "required": [
+    "name",
+    "item_source",
+    "item_type",
+    "submit_step"
+  ],
+  "additionalProperties": false
+}

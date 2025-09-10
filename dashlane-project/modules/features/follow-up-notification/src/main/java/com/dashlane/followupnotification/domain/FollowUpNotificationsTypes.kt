@@ -23,71 +23,71 @@ enum class FollowUpNotificationsTypes(
         CopyField.Login,
         CopyField.Email,
         CopyField.Password,
-        CopyField.OtpCode
+        CopyField.OtpCode,
     ),
     ADDRESS(
         SyncObjectType.ADDRESS,
         R.drawable.ic_home_outlined,
         CopyField.Address,
         CopyField.City,
-        CopyField.ZipCode
+        CopyField.ZipCode,
     ),
     BANK_ACCOUNT(
         SyncObjectType.BANK_STATEMENT,
         R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountBicSwift,
-        CopyField.BankAccountIban
+        CopyField.BankAccountIban,
     ),
     BANK_ACCOUNT_US(
         SyncObjectType.BANK_STATEMENT,
         R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountRoutingNumber,
-        CopyField.BankAccountAccountNumber
+        CopyField.BankAccountAccountNumber,
     ),
     BANK_ACCOUNT_MX(
         SyncObjectType.BANK_STATEMENT,
         R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountBicSwift,
-        CopyField.BankAccountClabe
+        CopyField.BankAccountClabe,
     ),
     BANK_ACCOUNT_GB(
         SyncObjectType.BANK_STATEMENT,
         R.drawable.ic_item_bank_account_outlined,
         CopyField.BankAccountBank,
         CopyField.BankAccountSortCode,
-        CopyField.BankAccountAccountNumber
+        CopyField.BankAccountAccountNumber,
     ),
     DRIVERS_LICENSE(
         SyncObjectType.DRIVER_LICENCE,
         R.drawable.ic_item_drivers_license_outlined,
         CopyField.DriverLicenseNumber,
         CopyField.DriverLicenseIssueDate,
-        CopyField.DriverLicenseExpirationDate
+        CopyField.DriverLicenseExpirationDate,
     ),
     ID_CARD(
         SyncObjectType.ID_CARD,
         R.drawable.ic_item_personal_info_outlined,
         CopyField.IdsNumber,
         CopyField.IdsIssueDate,
-        CopyField.IdsExpirationDate
+        CopyField.IdsExpirationDate,
     ),
     PASSPORT(
         SyncObjectType.PASSPORT,
         R.drawable.ic_item_passport_outlined,
         CopyField.PassportNumber,
         CopyField.PassportIssueDate,
-        CopyField.PassportExpirationDate
+        CopyField.PassportExpirationDate,
     ),
     PAYMENTS_CARD(
         SyncObjectType.PAYMENT_CREDIT_CARD,
         R.drawable.ic_item_payment_outlined,
         CopyField.PaymentsNumber,
         CopyField.PaymentsSecurityCode,
-        CopyField.PaymentsExpirationDate
-    )
+        CopyField.PaymentsExpirationDate,
+    ),
 }
 
 internal fun SummaryObject.getFollowUpType(context: Context, country: Country?): FollowUpNotificationsTypes? {

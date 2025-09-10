@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/import_data.json",
+  "type": "object",
+  "description": "Vault import from the application. Event is created after the operation succeeds or after a failure.",
+  "metas": {
+    "area": "vault"
+  },
+  "properties": {
+    "name": {
+      "const": "import_data"
+    },
+    "backup_file_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/backup_file_type"
+    },
+    "import_data_drop_action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/import_data_drop_action"
+    },
+    "import_data_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transfer_data_status"
+    },
+    "import_data_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transfer_data_step"
+    },
+    "import_source": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transfer_data_source"
+    },
+    "imported_items_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transferred_items_count"
+    },
+    "is_direct_import": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/is_direct_import"
+    },
+    "items_to_import_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/items_to_transfer_count"
+    },
+    "space": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/space"
+    }
+  },
+  "required": [
+    "name",
+    "backup_file_type",
+    "import_data_status",
+    "import_data_step",
+    "import_source",
+    "is_direct_import"
+  ],
+  "additionalProperties": false
+}

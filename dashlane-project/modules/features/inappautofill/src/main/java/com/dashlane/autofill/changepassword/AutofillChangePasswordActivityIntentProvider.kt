@@ -9,12 +9,11 @@ import com.dashlane.autofill.frozenautofill.FrozenAutofillActivity
 import javax.inject.Inject
 
 class AutofillChangePasswordActivityIntentProvider @Inject constructor() : ChangePasswordActionIntentProvider {
-
     override fun getChangePasswordIntentSender(
         context: Context,
         summary: AutoFillHintSummary,
         forKeyboard: Boolean,
-        isAccountFrozen: Boolean
+        isAccountFrozen: Boolean,
     ): IntentSender {
         if (isAccountFrozen) {
             return FrozenAutofillActivity.getPendingIntent(context, summary)

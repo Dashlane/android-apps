@@ -14,13 +14,13 @@ import com.dashlane.util.graphics.TextDrawable
 class TeamspaceIconDrawable(
     context: Context,
     displayLetter: Char,
-    @ColorInt color: Int
+    @ColorInt color: Int,
 ) : TextDrawable(
-    displayLetter.toString(),
-    Color.WHITE,
-    color,
-    ResourcesCompat.getFont(context, R.font.gt_walsheim_pro_bold)
-) {
+        displayLetter.toString(),
+        Color.WHITE,
+        color,
+        ResourcesCompat.getFont(context, R.font.gt_walsheim_pro_bold),
+    ) {
     private val path = Path()
 
     private val paintBorder = Paint()

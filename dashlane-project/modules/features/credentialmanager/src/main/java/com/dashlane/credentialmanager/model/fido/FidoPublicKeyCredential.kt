@@ -1,21 +1,29 @@
 package com.dashlane.credentialmanager.model.fido
 
-import com.dashlane.credentialmanager.model.b64Encode
-import org.json.JSONObject
+import com.dashlane.credentialmanager.model.fido.common.AuthenticatorAttachment
+import com.dashlane.credentialmanager.model.fido.common.ClientExtensionResults
+import com.dashlane.credentialmanager.model.fido.common.CredentialType
+import com.dashlane.credentialmanager.model.fido.response.AuthenticatorResponse
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
-class FidoPublicKeyCredential(
-    val rawId: ByteArray,
-    val response: AuthenticatorResponse
-) {
-    fun json(): String {
-        val encodedId = b64Encode(rawId)
-        val ret = JSONObject()
-        ret.put("id", encodedId)
-        ret.put("rawId", encodedId)
-        ret.put("type", "public-key")
-        ret.put("authenticatorAttachment", "platform")
-        ret.put("response", response.json())
-        ret.put("clientExtensionResults", JSONObject())
-        return ret.toString()
-    }
-}
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
+@JsonIgnoreUnknownKeys
+data class FidoPublicKeyCredential(
+    @SerialName("id")
+    val id: String,
+    @SerialName("rawId")
+    val rawId: String,
+    @EncodeDefault @SerialName("type")
+    val type: CredentialType = CredentialType.PUBLIC_KEY,
+    @SerialName("authenticatorAttachment")
+    val authenticatorAttachment: AuthenticatorAttachment?,
+    @SerialName("response")
+    val response: AuthenticatorResponse,
+    @EncodeDefault @SerialName("clientExtensionResults")
+    val clientExtensionResults: ClientExtensionResults = ClientExtensionResults(),
+)

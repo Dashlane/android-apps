@@ -7,5 +7,5 @@ enum class BiometricActivationStatus {
 
     ENABLED_WEAK,
 
-    ENABLED_STRONG
+    ENABLED_STRONG,
 }

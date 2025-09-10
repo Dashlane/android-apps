@@ -6,7 +6,6 @@ import com.dashlane.ui.action.Action
 import com.dashlane.ui.util.DialogHelper
 
 class LimitedSharingRightsInfoAction : Action {
-
     override val icon: Int = R.drawable.ic_info_24
 
     override val tintColorRes: Int? = null

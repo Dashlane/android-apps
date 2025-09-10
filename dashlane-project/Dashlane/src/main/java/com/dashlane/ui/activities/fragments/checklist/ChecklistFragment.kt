@@ -18,7 +18,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ChecklistFragment : AbstractContentFragment() {
-
     @Inject
     lateinit var sessionManager: SessionManager
 
@@ -30,7 +29,7 @@ class ChecklistFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         setCurrentPageView(AnyPage.HOME_ONBOARDING_CHECKLIST)
@@ -46,7 +45,7 @@ class ChecklistFragment : AbstractContentFragment() {
             binding = binding,
             lifecycle = lifecycle,
             navigator = navigator,
-            m2wResultLauncher = m2wResultLauncher
+            m2wResultLauncher = m2wResultLauncher,
         )
         return binding.root
     }

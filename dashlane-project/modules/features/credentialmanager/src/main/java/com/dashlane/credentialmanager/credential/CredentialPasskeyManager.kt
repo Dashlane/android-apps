@@ -5,159 +5,207 @@ import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePublicKeyCredentialResponse
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.provider.CallingAppInfo
+import com.dashlane.cloudpasskeys.CloudPasskeyService
 import com.dashlane.credentialmanager.CredentialManagerDAO
+import com.dashlane.credentialmanager.CredentialManagerDAO.PasskeySaveRequest
 import com.dashlane.credentialmanager.CredentialManagerLogger
-import com.dashlane.credentialmanager.algorithm.PasskeyAlgorithm
+import com.dashlane.credentialmanager.model.CloudPasskeyNetworkException
 import com.dashlane.credentialmanager.model.DashlaneCredentialManagerException
-import com.dashlane.credentialmanager.model.PasskeyCreationOptions
+import com.dashlane.credentialmanager.model.MissingArgumentException
 import com.dashlane.credentialmanager.model.PasskeyPrivateKeyException
-import com.dashlane.credentialmanager.model.PasskeyRequestOptions
 import com.dashlane.credentialmanager.model.PasskeyUnsupportedAlgorithmException
 import com.dashlane.credentialmanager.model.appInfoToOrigin
 import com.dashlane.credentialmanager.model.b64Decode
 import com.dashlane.credentialmanager.model.b64Encode
-import com.dashlane.credentialmanager.model.fido.AuthenticatorAssertionResponse
-import com.dashlane.credentialmanager.model.fido.AuthenticatorAttestationResponse
 import com.dashlane.credentialmanager.model.fido.FidoPublicKeyCredential
+import com.dashlane.credentialmanager.model.fido.common.AuthenticatorAttachment
+import com.dashlane.credentialmanager.model.fido.common.ClientExtensionResults
+import com.dashlane.credentialmanager.model.fido.common.ClientJson
+import com.dashlane.credentialmanager.model.fido.common.CredentialType
+import com.dashlane.credentialmanager.model.fido.common.RequestType
+import com.dashlane.credentialmanager.model.fido.common.toInternalClientExtensionResults
+import com.dashlane.credentialmanager.model.fido.request.PasskeyCreationOptions
+import com.dashlane.credentialmanager.model.fido.request.PasskeyRequestOptions
+import com.dashlane.credentialmanager.model.fido.response.AuthenticatorAssertionResponse
+import com.dashlane.credentialmanager.model.fido.response.AuthenticatorAttestationResponse
+import com.dashlane.credentialmanager.model.getB64HashForRequest
 import com.dashlane.hermes.generated.definitions.CeremonyStatus
 import com.dashlane.hermes.generated.definitions.PasskeyAuthenticationErrorType
 import com.dashlane.hermes.generated.definitions.PasskeyRegistrationErrorType
+import com.dashlane.passkeys.algorithm.PasskeyAlgorithm
+import com.dashlane.passkeys.algorithm.PasskeyAlgorithm.Cloud
+import com.dashlane.server.api.exceptions.DashlaneApiHttp400BusinessException
+import com.dashlane.storage.userdata.restriction.PasskeysRestrictionsChecker
+import com.dashlane.util.stackTraceToSafeString
+import com.dashlane.vault.model.CloudPasskeyData
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
-import com.google.gson.Gson
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.ECKey
-import com.nimbusds.jose.jwk.KeyOperation
-import com.nimbusds.jose.jwk.KeyUse
-import com.nimbusds.jose.util.Base64URL
-import java.security.KeyPair
-import java.security.PrivateKey
+import kotlinx.serialization.json.Json
+import java.security.MessageDigest
 import java.security.SecureRandom
 import java.security.interfaces.ECPublicKey
 import java.time.Instant
-import java.util.Date
-import java.util.UUID
 import javax.inject.Inject
 
 interface CredentialPasskeyManager {
     suspend fun createPasskey(
-        createPublicKeyRequest: CreatePublicKeyCredentialRequest,
-        callingAppInfo: CallingAppInfo
+        request: CreatePublicKeyCredentialRequest,
+        requestOptions: PasskeyCreationOptions,
+        callingAppInfo: CallingAppInfo,
     ): CreatePublicKeyCredentialResponse
 
     suspend fun providePasskey(
-        publicKeyRequest: PasskeyRequestOptions,
+        requestOptions: PasskeyRequestOptions,
         vaultItem: VaultItem<SyncObject.Passkey>,
         callingAppInfo: CallingAppInfo,
-        clientDataHash: ByteArray?
+        clientDataHash: ByteArray?,
     ): PublicKeyCredential
 }
 
 @RequiresApi(34)
+@Suppress("LargeClass")
 class CredentialPasskeyManagerImpl @Inject constructor(
     private val databaseAccess: CredentialManagerDAO,
-    private val credentialManagerLogger: CredentialManagerLogger
+    private val credentialManagerLogger: CredentialManagerLogger,
+    private val cloudPasskeyService: CloudPasskeyService,
+    private val passkeysRestrictionsChecker: PasskeysRestrictionsChecker,
 ) : CredentialPasskeyManager {
-
     override suspend fun createPasskey(
-        createPublicKeyRequest: CreatePublicKeyCredentialRequest,
-        callingAppInfo: CallingAppInfo
+        request: CreatePublicKeyCredentialRequest,
+        requestOptions: PasskeyCreationOptions,
+        callingAppInfo: CallingAppInfo,
     ): CreatePublicKeyCredentialResponse {
-        
-        val credId = ByteArray(32)
-        SecureRandom().nextBytes(credId)
-
-        val request = Gson().fromJson(createPublicKeyRequest.requestJson, PasskeyCreationOptions::class.java)
-
-        
-        val passkeyAlgorithm = request.pubKeyCredParams.firstNotNullOfOrNull {
-            PasskeyAlgorithm.provider(it.alg)
+        val passkeyAlgorithm = requestOptions.pubKeyCredParams.firstNotNullOfOrNull {
+            PasskeyAlgorithm.provider(it.alg) as? PasskeyAlgorithm.Local
         }
         if (passkeyAlgorithm == null) {
-            logCreatePasskeyError(request, callingAppInfo, PasskeyRegistrationErrorType.NOT_SUPPORTED)
+            logCreatePasskeyError(
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+                errorType = PasskeyRegistrationErrorType.NOT_SUPPORTED,
+            )
             throw PasskeyUnsupportedAlgorithmException(
-                "Unsupported algorithm ${request.pubKeyCredParams.map { it.alg }.joinToString(", ")}"
+                "Unsupported algorithm(s) ${requestOptions.pubKeyCredParams.map { it.alg }.joinToString(", ")}",
             )
         }
-        val keyPair = passkeyAlgorithm.createKeyPair()
-
-        
-        savePasskeyIntoDatabase(credId, keyPair, request, callingAppInfo, passkeyAlgorithm)
-
-        
-        val response = AuthenticatorAttestationResponse(
-            requestOptions = request,
-            credentialId = credId,
-            publicKey = keyPair.public,
-            credentialPublicKey = passkeyAlgorithm.encodePublicKey(keyPair.public as ECPublicKey),
+        val clientJson = ClientJson(
+            type = RequestType.CREATE,
+            challenge = requestOptions.challenge,
             origin = appInfoToOrigin(callingAppInfo),
-            publicKeyAlgorithm = passkeyAlgorithm.algorithmIdentifier,
-            packageName = callingAppInfo.packageName,
-            clientDataHash = createPublicKeyRequest.clientDataHash
+            androidPackageName = callingAppInfo.packageName,
         )
-        val credential = FidoPublicKeyCredential(
-            rawId = credId,
-            response = response
+        val (saveRequest, credential) = if (passkeysRestrictionsChecker.canUseCloudPasskeys()) {
+            registerCloudPasskey(
+                request = request,
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+                passkeyAlgorithm = passkeyAlgorithm,
+                clientJson = clientJson,
+            )
+        } else {
+            registerLocalPasskey(
+                request = request,
+                requestOptions = requestOptions,
+                passkeyAlgorithm = passkeyAlgorithm,
+                clientJson = clientJson,
+            )
+        }
+        
+        savePasskeyIntoDatabase(
+            saveRequest = saveRequest,
+            credentialId = saveRequest.credentialId,
+            requestOptions = requestOptions,
+            callingAppInfo = callingAppInfo,
         )
-        return CreatePublicKeyCredentialResponse(credential.json())
+
+        return CreatePublicKeyCredentialResponse(registrationResponseJson = Json.encodeToString(credential))
     }
 
-    private suspend fun savePasskeyIntoDatabase(
-        credId: ByteArray,
-        keyPair: KeyPair,
-        request: PasskeyCreationOptions,
+    private suspend fun registerCloudPasskey(
+        request: CreatePublicKeyCredentialRequest,
+        requestOptions: PasskeyCreationOptions,
         callingAppInfo: CallingAppInfo,
-        passkeyAlgorithm: PasskeyAlgorithm
-    ): VaultItem<SyncObject.Passkey> {
-        val savedPasskey = databaseAccess.savePasskeyCredential(
-            counter = 0,
-            privateKey = keyPair.toDashlanePrivateKey(),
-            credentialId = b64Encode(credId),
-            rpName = request.rp.name,
-            rpId = request.rp.id,
-            userHandle = request.user.id,
-            userDisplayName = request.user.displayName,
-            keyAlgorithm = passkeyAlgorithm.algorithmIdentifier
+        passkeyAlgorithm: PasskeyAlgorithm.Local,
+        clientJson: ClientJson,
+    ): Pair<PasskeySaveRequest.Cloud, FidoPublicKeyCredential> {
+        val registerResult = cloudPasskeyService.register(
+            relyingPartyName = requestOptions.rp.name,
+            relyingPartyId = requestOptions.rp.id,
+            userName = requestOptions.user.displayName,
+            userId = requestOptions.user.id,
+            b64ClientDataHash = getB64HashForRequest(
+                type = RequestType.CREATE,
+                challenge = requestOptions.challenge,
+                callingAppInfo = callingAppInfo,
+                clientDataHash = request.clientDataHash,
+            ),
+            passkeyAlgorithmIdentifier = passkeyAlgorithm.algorithmIdentifier,
+            attestation = requestOptions.attestation,
         )
-        if (savedPasskey == null) {
-            logCreatePasskeyError(request, callingAppInfo, PasskeyRegistrationErrorType.UNKNOWN)
-            throw DashlaneCredentialManagerException("Failed to save the passkey item")
-        }
+
+        val registerData = registerResult.credentialRegisterData
+        return PasskeySaveRequest.Cloud(
+            cloudPasskeyData = CloudPasskeyData(
+                key = registerResult.encryptionKey.key,
+                keyId = registerResult.encryptionKey.uuid,
+                passkeyId = registerResult.passkeyId,
+            ),
+            credentialId = registerData.rawId,
+        ) to FidoPublicKeyCredential(
+            rawId = registerData.rawId,
+            id = registerData.id,
+            type = CredentialType.fromResponseType(registerData.type),
+            authenticatorAttachment = AuthenticatorAttachment.fromStringOrDefault(registerData.authenticatorAttachment),
+            response = AuthenticatorAttestationResponse.fromRegisterData(
+                registerData = registerData,
+                passkeyAlgorithm = passkeyAlgorithm,
+                clientJson = clientJson,
+                request = request,
+            ),
+            clientExtensionResults = registerData.clientExtensionResults.toInternalClientExtensionResults(),
+        )
+    }
+
+    private fun registerLocalPasskey(
+        request: CreatePublicKeyCredentialRequest,
+        requestOptions: PasskeyCreationOptions,
+        passkeyAlgorithm: PasskeyAlgorithm.Local,
+        clientJson: ClientJson,
+    ): Pair<PasskeySaveRequest.Local, FidoPublicKeyCredential> {
+        
+        val rawCredentialId = ByteArray(32)
+        SecureRandom().nextBytes(rawCredentialId)
+        val credentialId = b64Encode(rawCredentialId)
 
         
-        credentialManagerLogger.logPasskeyCreate(
-            request,
-            callingAppInfo,
-            savedPasskey,
-            CeremonyStatus.SUCCESS
+        val keyPair = passkeyAlgorithm.createKeyPair()
+        return PasskeySaveRequest.Local(
+            privateKey = keyPair.toDashlanePrivateKey(),
+            credentialId = credentialId,
+        ) to FidoPublicKeyCredential(
+            rawId = credentialId,
+            id = credentialId,
+            response = AuthenticatorAttestationResponse.fromLocalPasskey(
+                clientDataHash = request.clientDataHash,
+                publicKey = keyPair.public,
+                publicKeyAlgorithm = passkeyAlgorithm.algorithmIdentifier,
+                requestOptions = requestOptions,
+                rawCredentialId = rawCredentialId,
+                credentialPublicKey = passkeyAlgorithm.encodePublicKey(keyPair.public as ECPublicKey),
+                clientJson = clientJson,
+            ),
+            type = CredentialType.fromTypeStringOrDefault(request.type),
+            authenticatorAttachment = requestOptions.authenticatorSelection.authenticatorAttachment,
         )
-
-        return savedPasskey
-    }
-
-    private fun logCreatePasskeyError(
-        request: PasskeyCreationOptions,
-        callingAppInfo: CallingAppInfo,
-        errorType: PasskeyRegistrationErrorType
-    ) {
-        credentialManagerLogger.logPasskeyCreate(request, callingAppInfo, null, CeremonyStatus.FAILURE, errorType)
     }
 
     override suspend fun providePasskey(
-        publicKeyRequest: PasskeyRequestOptions,
+        requestOptions: PasskeyRequestOptions,
         vaultItem: VaultItem<SyncObject.Passkey>,
         callingAppInfo: CallingAppInfo,
-        clientDataHash: ByteArray?
+        clientDataHash: ByteArray?,
     ): PublicKeyCredential {
         val syncObject = vaultItem.syncObject
-        val response = AuthenticatorAssertionResponse(
-            requestOptions = publicKeyRequest,
-            origin = appInfoToOrigin(callingAppInfo),
-            userHandle = b64Decode(syncObject.userHandle!!),
-            packageName = callingAppInfo.packageName,
-            clientDataHash = clientDataHash
-        )
 
         
         val counter = syncObject.counter ?: 0
@@ -167,74 +215,196 @@ class CredentialPasskeyManagerImpl @Inject constructor(
         
         databaseAccess.updatePasskey(vaultItem.uid, Instant.now(), newCounter)
 
+        val passkeyAlgorithm = syncObject.keyAlgorithm?.let { PasskeyAlgorithm.provider(it) }
+        val clientJson = ClientJson(
+            type = RequestType.GET,
+            challenge = requestOptions.challenge,
+            origin = appInfoToOrigin(callingAppInfo),
+            androidPackageName = callingAppInfo.packageName,
+        )
+        val (signature, clientExtensionResult) = when (passkeyAlgorithm) {
+            is PasskeyAlgorithm.Local -> handleLocalPasskey(
+                syncObject = syncObject,
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+                passkeyAlgorithm = passkeyAlgorithm,
+                clientDataHash = clientDataHash,
+                clientJson = clientJson,
+            )
+            is Cloud -> handleCloudPasskey(
+                syncObject = syncObject,
+                clientDataHash = clientDataHash,
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+            )
+            null -> throwUnsupportedAlgorithm(
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+                vaultItem = vaultItem,
+                syncObject = syncObject,
+            )
+        }
+
+        val response = AuthenticatorAssertionResponse(
+            b64ClientDataJson = if (clientDataHash == null) {
+                b64Encode(Json.encodeToString(clientJson).toByteArray())
+            } else {
+                null
+            },
+            authenticatorData = b64Encode(requestOptions.getDefaultAuthenticatorData()),
+            signature = b64Encode(signature),
+            userHandle = syncObject.userHandle!!,
+        )
+
+        
+        logPasskeyLoginSuccess(vaultItem, requestOptions, callingAppInfo)
+
+        
+        return PublicKeyCredential(
+            authenticationResponseJson = Json.encodeToString(
+                FidoPublicKeyCredential(
+                    rawId = syncObject.credentialId!!,
+                    id = syncObject.credentialId!!,
+                    response = response,
+                    type = CredentialType.PUBLIC_KEY,
+                    authenticatorAttachment = AuthenticatorAttachment.PLATFORM,
+                    clientExtensionResults = clientExtensionResult ?: ClientExtensionResults(),
+                ),
+            ),
+        )
+    }
+
+    private fun throwUnsupportedAlgorithm(
+        requestOptions: PasskeyRequestOptions,
+        callingAppInfo: CallingAppInfo,
+        vaultItem: VaultItem<SyncObject.Passkey>,
+        syncObject: SyncObject.Passkey,
+    ): Nothing {
+        credentialManagerLogger.logPasskeyLogin(
+            requestOptions = requestOptions,
+            callingAppInfo = callingAppInfo,
+            status = CeremonyStatus.FAILURE,
+            vaultItem = vaultItem,
+            errorType = PasskeyAuthenticationErrorType.NOT_SUPPORTED,
+        )
+        throw PasskeyUnsupportedAlgorithmException("Unsupported algorithms => ${syncObject.keyAlgorithm}")
+    }
+
+    private suspend fun handleCloudPasskey(
+        syncObject: SyncObject.Passkey,
+        clientDataHash: ByteArray?,
+        requestOptions: PasskeyRequestOptions,
+        callingAppInfo: CallingAppInfo,
+    ) = try {
+        val cloudPasskeyData = CloudPasskeyData.fromPasskey(passkey = syncObject)
+
+        requireNotNull(cloudPasskeyData)
+        val data = cloudPasskeyService.usePasskey(
+            relyingPartyId = requestOptions.rpId,
+            b64ClientDataHash = getB64HashForRequest(
+                type = RequestType.GET,
+                challenge = requestOptions.challenge,
+                callingAppInfo = callingAppInfo,
+                clientDataHash = clientDataHash,
+            ),
+            cloudPasskey = cloudPasskeyData,
+        )
+        
+        b64Decode(data.credentialGetData.response.signature) to
+            data.credentialGetData.clientExtensionResults.toInternalClientExtensionResults()
+    } catch (e: IllegalArgumentException) {
+        throw MissingArgumentException("Missing argument for remote validation: ${e.stackTraceToSafeString()}")
+    } catch (e: DashlaneApiHttp400BusinessException) {
+        throw CloudPasskeyNetworkException(e.stackTraceToSafeString())
+    }
+
+    private fun handleLocalPasskey(
+        syncObject: SyncObject.Passkey,
+        requestOptions: PasskeyRequestOptions,
+        callingAppInfo: CallingAppInfo,
+        passkeyAlgorithm: PasskeyAlgorithm.Local,
+        clientJson: ClientJson,
+        clientDataHash: ByteArray?,
+    ): Pair<ByteArray, ClientExtensionResults?> {
         
         val privateKey = syncObject.privateKey
         if (privateKey == null) {
             credentialManagerLogger.logPasskeyLogin(
-                publicKeyRequest,
-                callingAppInfo,
-                CeremonyStatus.FAILURE,
-                PasskeyAuthenticationErrorType.UNKNOWN
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+                status = CeremonyStatus.FAILURE,
+                vaultItem = null,
+                errorType = PasskeyAuthenticationErrorType.UNKNOWN,
             )
             throw PasskeyPrivateKeyException()
         }
 
         
-        val passkeyAlgorithm = syncObject.keyAlgorithm?.let {
-            PasskeyAlgorithm.provider(it)
-        }
-        if (passkeyAlgorithm == null) {
-            credentialManagerLogger.logPasskeyLogin(
-                publicKeyRequest,
-                callingAppInfo,
-                CeremonyStatus.FAILURE,
-                PasskeyAuthenticationErrorType.NOT_SUPPORTED
+        val hash = clientDataHash ?: MessageDigest.getInstance("SHA-256").digest(Json.encodeToString(clientJson).toByteArray())
+        val dataToSign = requestOptions.getDefaultAuthenticatorData() + hash
+
+        return passkeyAlgorithm.signChallenge(
+            challenge = dataToSign,
+            privateKey = privateKey.toJavaPrivateKey(),
+        ) to null
+    }
+
+    private suspend fun savePasskeyIntoDatabase(
+        saveRequest: PasskeySaveRequest,
+        credentialId: String,
+        requestOptions: PasskeyCreationOptions,
+        callingAppInfo: CallingAppInfo,
+    ): VaultItem<SyncObject.Passkey> {
+        val savedPasskey = databaseAccess.savePasskeyCredential(
+            saveRequest = saveRequest,
+            credentialId = credentialId,
+            rpName = requestOptions.rp.name,
+            rpId = requestOptions.rp.id,
+            userHandle = requestOptions.user.id,
+            userDisplayName = requestOptions.user.displayName,
+        )
+        if (savedPasskey == null) {
+            logCreatePasskeyError(
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+                errorType = PasskeyRegistrationErrorType.UNKNOWN,
             )
-            throw PasskeyUnsupportedAlgorithmException("Unsupported algorithms => ${syncObject.keyAlgorithm}")
+            throw DashlaneCredentialManagerException("Failed to save the passkey item")
         }
-        response.signature = passkeyAlgorithm.signChallenge(
-            response.dataToSign(),
-            privateKey.toJavaPrivateKey()
-        )
 
         
-        credentialManagerLogger.logPasskeyLogin(
-            publicKeyRequest,
-            callingAppInfo,
-            CeremonyStatus.SUCCESS
+        credentialManagerLogger.logPasskeyCreate(
+            requestOptions = requestOptions,
+            callingAppInfo = callingAppInfo,
+            vaultItem = savedPasskey,
+            status = CeremonyStatus.SUCCESS,
         )
 
-        
-        val credential = FidoPublicKeyCredential(
-            rawId = b64Decode(syncObject.credentialId!!),
-            response = response
-        )
-        return PublicKeyCredential(credential.json())
+        return savedPasskey
     }
 
-    private fun KeyPair.toDashlanePrivateKey(): SyncObject.Passkey.PrivateKey {
-        val crv = SyncObject.Passkey.Crv.P_256
-        val kty = SyncObject.Passkey.Kty.EC
-        val jwk = ECKey.Builder(Curve(crv.value), public as ECPublicKey)
-            .privateKey(private)
-            .keyUse(KeyUse.SIGNATURE)
-            .keyID(UUID.randomUUID().toString())
-            .keyOperations(setOf(KeyOperation.VERIFY, KeyOperation.SIGN))
-            .issueTime(Date()).build()
-        return SyncObject.Passkey.PrivateKey.Builder().apply {
-            this.crv = crv
-            ext = true
-            keyOps = jwk.keyOperations?.map { it.name.lowercase() } ?: listOf()
-            this.kty = kty
-            d = jwk.d.toString()
-            x = jwk.x.toString()
-            y = jwk.y.toString()
-        }.build()
+    private fun logPasskeyLoginSuccess(
+        vaultItem: VaultItem<SyncObject.Passkey>,
+        requestOptions: PasskeyRequestOptions,
+        callingAppInfo: CallingAppInfo,
+    ) {
+        credentialManagerLogger.apply {
+            activityLogPasskeyLogin(vaultItem = vaultItem, currentDomain = requestOptions.rpId)
+            logPasskeyLogin(
+                requestOptions = requestOptions,
+                callingAppInfo = callingAppInfo,
+                status = CeremonyStatus.SUCCESS,
+                vaultItem = vaultItem,
+                errorType = null,
+            )
+        }
     }
 
-    private fun SyncObject.Passkey.PrivateKey.toJavaPrivateKey(): PrivateKey {
-        val jwk = ECKey.Builder(Curve(crv?.value), Base64URL(x), Base64URL(y)).d(Base64URL(d)).algorithm(JWSAlgorithm.EdDSA)
-            .keyOperations(setOf(KeyOperation.SIGN)).build()
-        return jwk.toECPrivateKey()
+    private fun logCreatePasskeyError(
+        requestOptions: PasskeyCreationOptions,
+        callingAppInfo: CallingAppInfo,
+        errorType: PasskeyRegistrationErrorType,
+    ) {
+        credentialManagerLogger.logPasskeyCreate(requestOptions, callingAppInfo, null, CeremonyStatus.FAILURE, errorType)
     }
 }

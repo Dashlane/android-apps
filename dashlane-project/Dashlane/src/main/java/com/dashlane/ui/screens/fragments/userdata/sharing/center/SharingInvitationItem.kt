@@ -5,11 +5,12 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.databinding.SharingPendingInvitationLayoutBinding
+import com.dashlane.sharing.SharingContact
 import com.dashlane.sharing.model.getUser
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
 import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.summary.SummaryObject
@@ -20,7 +21,7 @@ class SharingInvitationItem(
     private val itemWrapperProvider: ItemWrapperProvider,
     private val itemInvite: SharingContact.ItemInvite,
     private val onClickAccept: () -> Unit,
-    private val onClickDecline: () -> Unit
+    private val onClickDecline: () -> Unit,
 ) : MultiColumnViewTypeProvider {
     val displayTitle: String
     val displaySubtitle: String
@@ -39,8 +40,8 @@ class SharingInvitationItem(
         val itemWrapper = itemWrapperProvider(
             summaryObject,
             ItemListContext.Container.NONE.asListContext(
-                ItemListContext.Section.NONE
-            )
+                ItemListContext.Section.NONE,
+            ),
         )
         return itemWrapper?.getTitle(context)?.text ?: "?"
     }
@@ -51,7 +52,7 @@ class SharingInvitationItem(
         return if (referrer.isNotSemanticallyNull()) {
             context.getString(
                 R.string.sharing_pending_invite_item_group_description,
-                referrer
+                referrer,
             )
         } else {
             ""
@@ -61,6 +62,7 @@ class SharingInvitationItem(
     class ItemViewHolder(itemView: View) :
         EfficientViewHolder<SharingInvitationItem>(itemView) {
         private val viewBinding = SharingPendingInvitationLayoutBinding.bind(view)
+
         override fun updateView(context: Context, item: SharingInvitationItem?) {
             item ?: return
             viewBinding.sharingPendingInviteTitle.text = item.displayTitle
@@ -68,7 +70,7 @@ class SharingInvitationItem(
         }
 
         private fun updateViewItemGroup(
-            item: SharingInvitationItem
+            item: SharingInvitationItem,
         ) {
             val accept = viewBinding.sharingPendingInviteBtnAccept
             val refuse = viewBinding.sharingPendingInviteBtnRefuse
@@ -95,13 +97,13 @@ class SharingInvitationItem(
         private val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<out SharingInvitationItem> =
             DashlaneRecyclerAdapter.ViewType(
                 R.layout.sharing_pending_invitation_layout_forwarder,
-                ItemViewHolder::class.java
+                ItemViewHolder::class.java,
             )
 
         fun comparator(): Comparator<SharingInvitationItem> =
             compareBy(
                 { it.displayTitle },
-                { it.displaySubtitle }
+                { it.displaySubtitle },
             )
     }
 }

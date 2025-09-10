@@ -4,7 +4,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.dashlane.feature.home.data.VaultItemsRepository
+import com.dashlane.vault.VaultItemsRepository
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -14,7 +14,6 @@ import javax.inject.Inject
 class VaultViewModel @Inject constructor(
     private val vaultItemsRepository: VaultItemsRepository,
 ) : ViewModel() {
-
     fun refresh() {
         viewModelScope.launch {
             vaultItemsRepository.loadVault()

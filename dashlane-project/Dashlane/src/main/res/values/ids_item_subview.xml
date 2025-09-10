@@ -5,6 +5,4 @@
     <item name="item_subview_imageview" type="id"/>
     <item name="item_subview_textview" type="id"/>
     <item name="item_subview_text_input_layout" type="id"/>
-    <item name="item_subview_strength_level_progress_bar" type="id"/>
-    <item name="item_subview_strength_level_textview" type="id"/>
 </resources>

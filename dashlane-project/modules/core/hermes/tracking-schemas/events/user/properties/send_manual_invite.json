@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/send_manual_invite.json",
+  "type": "object",
+  "description": "When an admin sends a manual invite through the Team Admin Console. Warning : this event is NOT the source of truth for calculating invites per team and should only be used for UX-based analysis on the manual process. Please refer to https://da.gitlab.dashlane.com/data/dbt/#!/overview to find the correct tables for invites.",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "send_manual_invite"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    },
+    "import_size": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/import_size"
+    },
+    "initial_seat_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/initial_seat_count"
+    },
+    "invite_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/invite_count"
+    },
+    "invite_failed_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/invite_failed_count"
+    },
+    "invite_resent_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/invite_resent_count"
+    },
+    "invite_successful_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/invite_successful_count"
+    },
+    "is_import": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/is_import"
+    },
+    "is_resend": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/is_resend"
+    },
+    "seat_added_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/seat_added_count"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step",
+    "invite_count",
+    "invite_failed_count",
+    "invite_resent_count",
+    "invite_successful_count",
+    "is_import",
+    "is_resend"
+  ],
+  "additionalProperties": false
+}

@@ -9,7 +9,7 @@ fun createPhone(
     dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(),
     type: SyncObject.Phone.Type? = null,
     phoneNumber: String? = null,
-    phoneName: String? = ""
+    phoneName: String? = "",
 ): VaultItem<SyncObject.Phone> {
     return dataIdentifier.toVaultItem(
         SyncObject.Phone {
@@ -18,7 +18,7 @@ fun createPhone(
             this.phoneName = phoneName
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
@@ -28,7 +28,6 @@ fun SummaryObject.Phone.getPhoneNameAndNumber(context: Context): String {
     return builder.toString()
 }
 
-fun VaultItem<SyncObject.Phone>.copySyncObject(builder: SyncObject.Phone.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.Phone> {
+fun VaultItem<SyncObject.Phone>.copySyncObject(builder: SyncObject.Phone.Builder.() -> Unit = {}): VaultItem<SyncObject.Phone> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

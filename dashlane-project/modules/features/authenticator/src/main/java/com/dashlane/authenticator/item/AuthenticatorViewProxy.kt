@@ -21,7 +21,7 @@ class AuthenticatorViewProxy(
     private val actionView: ImageView,
     private val scope: CoroutineScope,
     private val otp: Otp,
-    private val valueUpdate: (Otp) -> Unit
+    private val valueUpdate: (Otp) -> Unit,
 ) {
     private val countDown = CountDownDrawable(otpCodeView.context)
     private val tintColor = otpCodeView.context.getColor(R.color.text_brand_standard)

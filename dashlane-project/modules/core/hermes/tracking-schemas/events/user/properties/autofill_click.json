@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/autofill_click.json",
+  "type": "object",
+  "description": "When the user interacts with specific UI components managed by the autofill team (password generator, autofill options, etc.)",
+  "metas": {
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_click"
+    },
+    "autofill_button": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_button"
+    }
+  },
+  "required": [
+    "name",
+    "autofill_button"
+  ],
+  "additionalProperties": false
+}

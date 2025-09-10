@@ -1,9 +1,9 @@
 package com.dashlane.teamspaces.db
 
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.SharingDao
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isLimited
@@ -24,7 +24,7 @@ open class TeamspaceForceDeletionSharingWorker @Inject constructor(
     private val sharingRevokeMe: SharingRevokeMe,
     private val vaultDataQuery: VaultDataQuery,
     private val dataSaver: DataSaver,
-    private val sharingDao: SharingDao
+    private val sharingDao: SharingDao,
 ) {
     private val session: Session?
         get() = sessionManager.session
@@ -38,7 +38,7 @@ open class TeamspaceForceDeletionSharingWorker @Inject constructor(
                 specificUid(sharedForcedItems)
                 allStatusFilter()
                 spaceFilter = NoRestrictionSpaceFilter
-            }
+            },
         )
         val username = session.userId
         val itemGroups = getItemGroups(sharedForcedItems)
@@ -65,7 +65,7 @@ open class TeamspaceForceDeletionSharingWorker @Inject constructor(
     }
 
     private suspend fun getItemGroups(
-        itemsUidToRevoke: List<String>
+        itemsUidToRevoke: List<String>,
     ): List<ItemGroup> {
         val allItemGroups = sharingDao.loadAllItemGroup()
         return allItemGroups.filter { it.items?.firstOrNull()?.itemId in itemsUidToRevoke }

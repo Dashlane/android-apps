@@ -20,7 +20,7 @@ internal fun CollectionSharingListTitle(text: String) {
         enforceAllCaps = true,
         color = DashlaneTheme.colors.textNeutralQuiet,
         maxLines = 1,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
     )
 }
 

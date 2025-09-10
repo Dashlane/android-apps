@@ -14,9 +14,8 @@ import com.dashlane.xml.domain.SyncObject
 internal class CryptographySettingsImpl(
     private val settingsManager: SettingsManager,
     private val saltGenerator: SaltGenerator,
-    private val teamSpaceAccessor: TeamSpaceAccessor?
+    private val teamSpaceAccessor: TeamSpaceAccessor?,
 ) : CryptographySettings {
-
     override fun getOrCreateMarker(keyType: CryptographyKey.Type): CryptographyMarker {
         
         val teamMarker =
@@ -39,13 +38,13 @@ internal class CryptographySettingsImpl(
                     fixedSalt.copyOfRange(0, length)
                 else ->
                     fixedSalt
-            }
+            },
         )
     }
 
     private fun createFixedSaltValue(
         length: Int,
-        settings: SyncObject.Settings
+        settings: SyncObject.Settings,
     ): ByteArray {
         val salt = saltGenerator.generateRandomSalt(length)
         updateSettings(settings) {
@@ -56,7 +55,7 @@ internal class CryptographySettingsImpl(
 
     private inline fun updateSettings(
         settings: SyncObject.Settings,
-        builder: SyncObject.Settings.Builder.() -> Unit = {}
+        builder: SyncObject.Settings.Builder.() -> Unit = {},
     ) {
         settingsManager.updateSettings(settings.copy(builder))
     }

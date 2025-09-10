@@ -20,13 +20,12 @@ import com.dashlane.vault.utils.attachmentsAllowed
 
 abstract class BaseSubViewFactory(
     private val userFeaturesChecker: UserFeaturesChecker,
-    private val currentTeamSpaceFilter: CurrentTeamSpaceUiFilter
+    private val currentTeamSpaceFilter: CurrentTeamSpaceUiFilter,
 ) : SubViewFactory {
-
     override fun createSubviewSharingDetails(
         context: Context,
         vaultItem: VaultItem<*>,
-        sharingPolicy: SharingPolicyDataProvider
+        sharingPolicy: SharingPolicyDataProvider,
     ): ItemSubView<String>? {
         val uid = vaultItem.uid
         val sharingCount = sharingPolicy.getSharingCount(uid)
@@ -36,18 +35,18 @@ abstract class BaseSubViewFactory(
         val userCount = context.resources.getQuantityString(
             R.plurals.sharing_shared_counter_users,
             sharingCount.first,
-            sharingCount.first
+            sharingCount.first,
         )
         val groupCount = context.resources.getQuantityString(
             R.plurals.sharing_shared_counter_groups,
             sharingCount.second,
-            sharingCount.second
+            sharingCount.second,
         )
         val sharingDetailsText = if (sharingCount.first != 0 && sharingCount.second != 0) {
             context.getString(
                 R.string.sharing_shared_shared_with_users_and_groups,
                 userCount,
-                groupCount
+                groupCount,
             )
         } else if (sharingCount.first != 0) {
             context.getString(R.string.sharing_shared_shared_with, userCount)
@@ -59,15 +58,15 @@ abstract class BaseSubViewFactory(
             ReadOnlySubViewFactory(userFeaturesChecker, currentTeamSpaceFilter).createSubViewString(
                 context.getString(R.string.sharing_services_view_section_title),
                 sharingDetailsText,
-                false
+                false,
             )!!,
-            ShareDetailsAction(vaultItem)
+            ShareDetailsAction(vaultItem),
         )
     }
 
     override fun createSubviewAttachmentDetails(
         context: Context,
-        vaultItem: VaultItem<*>
+        vaultItem: VaultItem<*>,
     ): ItemSubView<String>? {
         val summary: SummaryObject = vaultItem.toSummary()
         if (!summary.attachmentsAllowed(attachmentAllItems = userFeaturesChecker.has(ATTACHMENT_ALL_ITEMS))) {
@@ -81,15 +80,15 @@ abstract class BaseSubViewFactory(
         val attachmentsDetailsText = context.resources.getQuantityString(
             R.plurals.attachment_quantity,
             attachmentsCount,
-            attachmentsCount
+            attachmentsCount,
         )
         return ItemSubViewWithActionWrapper(
             ReadOnlySubViewFactory(userFeaturesChecker, currentTeamSpaceFilter).createSubViewString(
                 context.getString(R.string.attachments_view_section_title),
                 attachmentsDetailsText,
-                false
+                false,
             )!!,
-            AttachmentDetailsAction(vaultItem)
+            AttachmentDetailsAction(vaultItem),
         )
     }
 

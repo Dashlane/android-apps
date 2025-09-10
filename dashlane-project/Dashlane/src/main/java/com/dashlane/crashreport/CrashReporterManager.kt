@@ -9,12 +9,23 @@ import androidx.fragment.app.Fragment
 import com.dashlane.BuildConfig
 import com.dashlane.crashreport.reporter.SentryCrashReporter
 import com.dashlane.preference.GlobalPreferencesManager
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+interface CrashReporterModule {
+    @Binds
+    fun bindCrashReporter(crashReporter: CrashReporterManager): CrashReporter
+}
 
 @Singleton
 class CrashReporterManager @Inject constructor(
@@ -22,7 +33,6 @@ class CrashReporterManager @Inject constructor(
     private val globalPreferencesManager: GlobalPreferencesManager,
     @ApplicationContext private val mContext: Context,
 ) : CrashReporter {
-
     private val crashReporters: MutableList<Client> = ArrayList()
     private val crashTrace = CrashTrace(this)
     override val crashReporterId: String

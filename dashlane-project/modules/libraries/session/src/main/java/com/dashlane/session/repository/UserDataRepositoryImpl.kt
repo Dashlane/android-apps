@@ -1,17 +1,17 @@
 package com.dashlane.session.repository
 
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.account.UserAccountStorage
+import com.dashlane.crypto.keys.isServerKeyNotNull
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.Session
-import com.dashlane.crypto.keys.isServerKeyNotNull
 import com.dashlane.storage.securestorage.UserSecureStorageManager
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.withContext
 
 @Singleton
 open class UserDataRepositoryImpl @Inject constructor(
@@ -30,9 +30,9 @@ open class UserDataRepositoryImpl @Inject constructor(
                 SettingsManager(
                     userSecureStorageManager.get(),
                     preferencesManager,
-                    session
+                    session,
                 )
-            }
+            },
         )
 
     override fun get(session: Session?): SettingsManager? = session?.let { getSettingsManager(it) }
@@ -41,7 +41,7 @@ open class UserDataRepositoryImpl @Inject constructor(
         session: Session,
         userSettings: SyncObject.Settings?,
         accountType: UserAccountInfo.AccountType,
-        allowOverwriteAccessKey: Boolean
+        allowOverwriteAccessKey: Boolean,
     ) {
         sessionCoroutineScopeRepository.getCoroutineScope(session)?.let {
             withContext(it.coroutineContext) {
@@ -53,13 +53,13 @@ open class UserDataRepositoryImpl @Inject constructor(
                     username = session.userId,
                     accessKey = session.accessKey,
                     otp2 = session.appKey.isServerKeyNotNull,
-                    accountType = accountType
+                    accountType = accountType,
                 )
                 userAccountStorage.get().saveUserAccountInfo(
                     userAccountInfo,
                     session.localKey,
                     session.secretKey,
-                    allowOverwriteAccessKey
+                    allowOverwriteAccessKey,
                 )
 
                 

@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/sync.json",
+  "type": "object",
+  "description": "Deprecated, this event costs a lot and brings zero value: When a sync has been performed.",
+  "deprecated": true,
+  "metas": {
+    "area": "technical"
+  },
+  "properties": {
+    "name": {
+      "const": "sync"
+    },
+    "deduplicates": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/deduplicates"
+    },
+    "duration": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/duration"
+    },
+    "error": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/error"
+    },
+    "error_description": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/error_description"
+    },
+    "error_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/error_name"
+    },
+    "error_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/error_step"
+    },
+    "extent": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/extent"
+    },
+    "full_backup_size": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/full_backup_size"
+    },
+    "incoming_delete_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/incoming_delete_count"
+    },
+    "incoming_update_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/incoming_update_count"
+    },
+    "item_group_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/item_group_id"
+    },
+    "outgoing_delete_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/outgoing_delete_count"
+    },
+    "outgoing_update_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/outgoing_update_count"
+    },
+    "timestamp": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/timestamp"
+    },
+    "treat_problem": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/treat_problem"
+    },
+    "trigger": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sync.json#/definitions/trigger"
+    }
+  },
+  "required": [
+    "name",
+    "duration",
+    "extent",
+    "timestamp",
+    "trigger"
+  ],
+  "additionalProperties": false
+}

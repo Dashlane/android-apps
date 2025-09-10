@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/migrate_auth_method.json",
+  "type": "object",
+  "description": "When an admin performs specific actions throughout the Authentication Method Migration flow.",
+  "metas": {
+    "area": "authentication"
+  },
+  "properties": {
+    "name": {
+      "const": "migrate_auth_method"
+    },
+    "auth_method_migration_flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_auth_method.json#/definitions/auth_method_migration_flow_step"
+    },
+    "error_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_auth_method.json#/definitions/migrate_auth_method_error"
+    },
+    "original_auth_method": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_auth_method.json#/definitions/original_auth_method"
+    }
+  },
+  "required": [
+    "name",
+    "auth_method_migration_flow_step"
+  ],
+  "additionalProperties": false
+}

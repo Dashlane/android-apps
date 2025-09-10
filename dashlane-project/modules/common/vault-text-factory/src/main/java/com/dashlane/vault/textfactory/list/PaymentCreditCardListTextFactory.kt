@@ -13,7 +13,6 @@ class PaymentCreditCardListTextFactory @Inject constructor(
     private val resources: Resources,
     private val clock: Clock,
 ) : DataIdentifierListTextFactory<SummaryObject.PaymentCreditCard> {
-
     override fun getTitle(item: SummaryObject.PaymentCreditCard): StatusText {
         val name = item.name
         return StatusText(if (name.isNotSemanticallyNull()) name!! else resources.getString(R.string.creditcard))

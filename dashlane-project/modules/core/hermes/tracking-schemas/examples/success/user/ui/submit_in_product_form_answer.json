@@ -1,0 +1,47 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "os": {
+        "type": "linux",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2108.0-armeabi-v7a",
+      "platform": "web",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "main_app",
+    "origin_page": "tac/dashboard"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 12
+  },
+  "properties": {
+    "name": "submit_in_product_form_answer",
+    "form_name": "reason_to_extend_trial",
+    "answer_list": [
+      "need_more_time_team_usage",
+      "need_more_time_convince",
+      "not_aware_trial_ending",
+      "need_help_sso",
+      "need_help_scim",
+      "need_sales_rep",
+      "other"
+    ],
+    "chosen_answer_list": [
+      "need_help_sso",
+      "need_sales_rep"
+    ]
+  }
+}

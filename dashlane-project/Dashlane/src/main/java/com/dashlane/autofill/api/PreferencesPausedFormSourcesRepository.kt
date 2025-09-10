@@ -13,9 +13,8 @@ import kotlin.coroutines.CoroutineContext
 
 class PreferencesPausedFormSourcesRepository @VisibleForTesting constructor(
     val globalPreferencesManager: GlobalPreferencesManager,
-    val coroutineContext: CoroutineContext = Dispatchers.IO
+    val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : PausedFormSourcesRepository {
-
     @Inject
     constructor(globalPreferencesManager: GlobalPreferencesManager) : this(globalPreferencesManager, Dispatchers.IO)
 
@@ -89,7 +88,7 @@ class PreferencesPausedFormSourcesRepository @VisibleForTesting constructor(
         key: String,
         formSourceId: String,
         formSources: MutableMap<String, Instant>,
-        pauseUntil: Instant
+        pauseUntil: Instant,
     ) {
         formSources[formSourceId] = pauseUntil
         globalPreferencesManager.remove(key)
@@ -99,7 +98,7 @@ class PreferencesPausedFormSourcesRepository @VisibleForTesting constructor(
     private fun removePauseFromPreferences(
         key: String,
         formSourceId: String,
-        formSources: MutableMap<String, Instant>
+        formSources: MutableMap<String, Instant>,
     ) {
         formSources.remove(formSourceId)
         globalPreferencesManager.remove(key)

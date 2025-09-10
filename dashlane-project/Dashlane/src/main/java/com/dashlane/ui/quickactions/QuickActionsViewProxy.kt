@@ -31,9 +31,8 @@ class QuickActionsViewProxy(
     itemListContext: ItemListContext,
     private val lockManager: LockManager,
     private val dataQuery: GenericDataQuery,
-    private val originPage: String?
+    private val originPage: String?,
 ) : QuickActionsContract.ViewProxy, BaseViewProxy<QuickActionsContract.Presenter>(fragment) {
-
     private val activity = fragment.requireActivity() as AppCompatActivity
 
     init {
@@ -79,7 +78,7 @@ class QuickActionsViewProxy(
         thumbnailType: Int?,
         thumbnailIconRes: Int?,
         thumbnailColorRes: Int?,
-        thumbnailUrlDomain: String?
+        thumbnailUrlDomain: String?,
     ) {
         findViewByIdEfficient<ThumbnailDomainIconView>(R.id.quick_actions_icon)?.apply {
             thumbnailType?.let { this.thumbnailType = it }
@@ -90,14 +89,19 @@ class QuickActionsViewProxy(
         findViewByIdEfficient<TextView>(R.id.quick_actions_title)?.text = title
     }
 
-    private fun addAction(@DrawableRes iconRes: Int, @StringRes title: Int, tintColor: Int?, action: () -> Unit) {
+    private fun addAction(
+        @DrawableRes iconRes: Int,
+        @StringRes title: Int,
+        tintColor: Int?,
+        action: () -> Unit,
+    ) {
         val actionView = ActionItemHelper().createNewActionItem(
             context,
             ContextCompat.getDrawable(context, iconRes),
             true,
             context.getString(title),
             tintColor,
-            action
+            action,
         )
         findViewByIdEfficient<LinearLayout>(R.id.actions)?.addView(actionView)
     }

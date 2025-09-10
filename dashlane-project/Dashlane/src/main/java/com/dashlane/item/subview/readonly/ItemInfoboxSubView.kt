@@ -8,5 +8,5 @@ class ItemInfoboxSubView(
     val mood: Mood? = null,
     val description: String? = null,
     val primaryButton: InfoboxButton? = null,
-    val secondaryButton: InfoboxButton? = null
+    val secondaryButton: InfoboxButton? = null,
 ) : ItemReadValueSubView<String>()

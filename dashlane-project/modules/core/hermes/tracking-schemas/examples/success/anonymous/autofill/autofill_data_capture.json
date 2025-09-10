@@ -1,0 +1,33 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "category": "anonymous",
+  "date": "2021-03-02",
+  "date_origin": "local",
+  "context": {
+    "os": {
+      "type": "linux",
+      "version": "4.1",
+      "locale": "en-US"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "web",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "webcard",
+    "origin_page": "autofill/notification/data_capture"
+  },
+  "properties": {
+    "name": "autofill_accept",
+    "domain": {
+      "type": "web",
+      "id": "31193328f8e21dfb6c99f322d22d7b0b508778e64ffbba86e52293379031b874"
+    },
+    "is_protected": false,
+    "item_position": 1,
+    "phishing_risk": "none"
+  }
+}

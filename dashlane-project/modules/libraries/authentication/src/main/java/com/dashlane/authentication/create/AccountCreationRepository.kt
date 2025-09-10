@@ -4,12 +4,12 @@ import com.dashlane.authentication.AuthenticationExpiredVersionException
 import com.dashlane.authentication.AuthenticationInvalidLoginException
 import com.dashlane.authentication.AuthenticationNetworkException
 import com.dashlane.authentication.AuthenticationUnknownException
-import com.dashlane.authentication.TermsOfService
-import com.dashlane.cryptography.ObfuscatedByteArray
-import com.dashlane.cryptography.SharingKeys
-import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.cryptography.ObfuscatedByteArray
+import com.dashlane.cryptography.SharingKeys
+import com.dashlane.data.login.TermsOfService
+import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.xml.domain.SyncObject
 
 interface AccountCreationRepository {
@@ -17,7 +17,7 @@ interface AccountCreationRepository {
         AuthenticationInvalidLoginException::class,
         AuthenticationNetworkException::class,
         AuthenticationExpiredVersionException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun createAccount(
         login: String,
@@ -26,20 +26,20 @@ interface AccountCreationRepository {
         termsOfService: TermsOfService,
         withRemoteKey: Boolean = false,
         withLegacyCrypto: Boolean = false,
-        country: String?
+        country: String?,
     ): Result
 
     @Throws(
         AuthenticationInvalidLoginException::class,
         AuthenticationNetworkException::class,
         AuthenticationExpiredVersionException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun createSsoAccount(
         login: String,
         ssoToken: String,
         serviceProviderKey: String,
-        termsOfService: TermsOfService
+        termsOfService: TermsOfService,
     ): Result
 
     data class Result(
@@ -53,6 +53,6 @@ interface AccountCreationRepository {
         val remoteKey: VaultKey.RemoteKey?,
         val appKey: AppKey,
         val userAnalyticsId: String,
-        val deviceAnalyticsId: String
+        val deviceAnalyticsId: String,
     )
 }

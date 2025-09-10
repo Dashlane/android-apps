@@ -1,14 +1,10 @@
 package com.dashlane.ui.screens.sharing
 
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.sharing.SharingItemUpdater
 import com.dashlane.core.sharing.handleServerResponse
-import com.dashlane.core.sharing.toItemForEmailing
-import com.dashlane.core.sharing.toSharedVaultItemLite
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
-import com.dashlane.session.authorization
-import com.dashlane.server.api.endpoints.sharinguserdevice.CreateItemGroupService
-import com.dashlane.server.api.endpoints.sharinguserdevice.InviteItemGroupMembersService
+import com.dashlane.server.api.endpoints.sharinguserdevice.CreateMultipleItemGroupsService
+import com.dashlane.server.api.endpoints.sharinguserdevice.InviteMultipleItemGroupMembersService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemForEmailing
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemUpload
@@ -16,7 +12,9 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.user.Username
+import com.dashlane.session.authorization
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.exception.SharingAlreadyAccessException
 import com.dashlane.sharing.exception.SharingException
 import com.dashlane.sharing.internal.builder.request.SharingRequestRepository
@@ -24,10 +22,12 @@ import com.dashlane.sharing.internal.model.GroupToInvite
 import com.dashlane.sharing.internal.model.ItemToShare
 import com.dashlane.sharing.internal.model.UserToInvite
 import com.dashlane.sharing.service.FindUsersDataProvider
+import com.dashlane.sharing.toItemForEmailing
+import com.dashlane.sharing.toSharedVaultItemLite
 import com.dashlane.sharing.util.AuditLogHelper
 import com.dashlane.sync.DataIdentifierExtraDataWrapper
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.sharing.SharingContact.SharingContactUser
+import com.dashlane.user.Username
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
@@ -35,12 +35,12 @@ import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.SyncObjectTypeUtils.SHAREABLE
-import java.text.Collator
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import java.text.Collator
+import javax.inject.Inject
 
 class NewSharePeopleDataProvider @Inject constructor(
     @IoCoroutineDispatcher
@@ -53,10 +53,10 @@ class NewSharePeopleDataProvider @Inject constructor(
     private val xmlConverter: DataIdentifierSharingXmlConverter,
     private val sharingDataProvider: SharingDataProvider,
     private val sharingItemUpdater: SharingItemUpdater,
-    private val createItemGroupService: CreateItemGroupService,
-    private val inviteItemGroupMembersService: InviteItemGroupMembersService,
+    private val createMultipleItemGroupsService: CreateMultipleItemGroupsService,
+    private val inviteMultipleItemGroupMembersService: InviteMultipleItemGroupMembersService,
     private val findUsersDataProvider: FindUsersDataProvider,
-    private val auditLogHelper: AuditLogHelper
+    private val auditLogHelper: AuditLogHelper,
 ) {
     private val session: Session?
         get() = sessionManager.session
@@ -76,13 +76,15 @@ class NewSharePeopleDataProvider @Inject constructor(
 
     @Throws(
         SharingAlreadyAccessException::class,
-        SharingException::class
+        SharingException::class,
     )
+    @Suppress("LongMethod")
     suspend fun share(
         accountIds: Array<String>,
         secureNoteIds: Array<String>,
+        secrets: Array<String>,
         contacts: List<SharingContact>,
-        permission: Permission
+        permission: Permission,
     ) {
         val session = session ?: return
         withContext(defaultDispatcher) {
@@ -101,14 +103,15 @@ class NewSharePeopleDataProvider @Inject constructor(
                         GroupToInvite(it, permission)
                     }
             val usersToInvite = if (users.isNotEmpty()) {
-                findUsersDataProvider.findUsers(session, users).map {
+                findUsersDataProvider.findUsers(session.authorization, users).map {
                     val alias = it.email
                     val user = it.login
                     UserToInvite(
-                        userId = user ?: "", 
+                        
+                        userId = user ?: "",
                         alias = alias,
                         publicKey = it.publicKey,
-                        permission = permission
+                        permission = permission,
                     )
                 }
             } else {
@@ -120,7 +123,7 @@ class NewSharePeopleDataProvider @Inject constructor(
             }
 
             val itemGroupsActual = sharingDao.loadAllItemGroup()
-            val itemGroupsToUpdate = mutableListOf<ItemGroup>()
+            val itemGroupsToUpdate = mutableListOf<Pair<ItemGroup, List<ItemForEmailing>>>()
             val items = mutableListOf<Pair<ItemToShare, ItemForEmailing>>()
 
             fillItemsToUploadGroupToUpdate(
@@ -128,14 +131,21 @@ class NewSharePeopleDataProvider @Inject constructor(
                 items,
                 itemGroupsActual,
                 accountIds,
-                SyncObjectType.AUTHENTIFIANT
+                SyncObjectType.AUTHENTIFIANT,
             )
             fillItemsToUploadGroupToUpdate(
                 itemGroupsToUpdate,
                 items,
                 itemGroupsActual,
                 secureNoteIds,
-                SyncObjectType.SECURE_NOTE
+                SyncObjectType.SECURE_NOTE,
+            )
+            fillItemsToUploadGroupToUpdate(
+                itemGroupsToUpdate = itemGroupsToUpdate,
+                items = items,
+                itemGroupsActual = itemGroupsActual,
+                itemsUid = secrets,
+                dataType = SyncObjectType.SECRET,
             )
             sendRequests(items, usersToInvite, userGroupsToInvite, itemGroupsToUpdate)
         }
@@ -145,20 +155,30 @@ class NewSharePeopleDataProvider @Inject constructor(
         items: List<Pair<ItemToShare, ItemForEmailing>>,
         usersToInvite: List<UserToInvite>,
         userGroupsToInvite: List<GroupToInvite>,
-        itemGroupsToUpdate: List<ItemGroup>
+        itemGroupsToUpdate: List<Pair<ItemGroup, List<ItemForEmailing>>>,
     ) {
         val throwables = mutableListOf<Throwable>()
         val authorization = session?.authorization ?: return
-        items.forEach { (itemToShare, email) ->
+
+        if (items.isNotEmpty()) {
             runCatching {
-                val request = sharingRequestRepository.createItemGroupRequest(
+                val itemIds = items.map { it.first.itemId }
+                val auditLogs = auditLogHelper.buildAuditLogDetails(authorization, itemIds)
+                val request = sharingRequestRepository.createMultipleItemGroupsRequest(
+                    username = login,
                     users = usersToInvite,
                     groups = userGroupsToInvite,
-                    item = itemToShare,
-                    itemForEmailing = email,
-                    auditLogs = auditLogHelper.buildAuditLogDetails(itemToShare.itemId)
+                    items = items.map { (itemToShare, itemForEmailing) ->
+                        val auditLog = auditLogs.firstOrNull { (itemId, _) -> itemId == itemToShare.itemId }?.second
+                        Triple(
+                            itemToShare,
+                            itemForEmailing,
+                            auditLog,
+                        )
+                    },
                 )
-                createItemGroupService.execute(authorization, request).also {
+
+                createMultipleItemGroupsService.execute(authorization, request).also {
                     sharingItemUpdater.handleServerResponse(it)
                 }
             }.onFailure {
@@ -168,69 +188,66 @@ class NewSharePeopleDataProvider @Inject constructor(
 
         val myUserGroups: List<UserGroup> = getMyUserGroups(login)
 
-        itemGroupsToUpdate.forEach { itemGroup ->
+        if (itemGroupsToUpdate.isNotEmpty()) {
             runCatching {
-                val request = sharingRequestRepository.createInviteItemGroupMembersRequest(
-                    itemGroup,
-                    getItemsForEmailing(items, itemGroup),
+                val itemIds = itemGroupsToUpdate.mapNotNull {
+                    it.first.items
+                        ?.singleOrNull()
+                        ?.itemId
+                }
+                val auditLogs = auditLogHelper.buildAuditLogDetails(authorization, itemIds)
+                val request = sharingRequestRepository.createMultipleInviteItemGroupMembersRequest(
+                    username = login,
+                    itemGroups = itemGroupsToUpdate.map { (itemGroup, itemForEmailing) ->
+                        val auditLog = auditLogHelper.getAuditLogDetailForItemGroup(itemGroup, auditLogs)
+                        Triple(
+                            itemGroup,
+                            itemForEmailing,
+                            auditLog,
+                        )
+                    },
                     usersToInvite,
                     userGroupsToInvite,
                     myUserGroups,
-                    auditLogHelper.buildAuditLogDetails(itemGroup)
                 )
-                inviteItemGroupMembersService.execute(authorization, request)
-                    .also {
-                        sharingItemUpdater.handleServerResponse(it)
-                    }
+
+                inviteMultipleItemGroupMembersService.execute(authorization, request).also {
+                    sharingItemUpdater.handleServerResponse(it)
+                }
             }.onFailure {
                 throwables.add(it)
             }
         }
+
         if (throwables.isNotEmpty()) throw throwables.first()
     }
 
     @Throws(SharingAlreadyAccessException::class)
     private fun checkMyAccess(
-        contacts: List<String>
+        contacts: List<String>,
     ) = if (login in contacts) throw SharingAlreadyAccessException() else Unit
 
-    private fun getMyUserGroups(login: String): List<UserGroup> =
-        sharingDao.loadUserGroupsAcceptedOrPendingLegacy(login) 
+    private suspend fun getMyUserGroups(login: String): List<UserGroup> =
+        sharingDao.loadUserGroupsAcceptedOrPending(login) 
 
-    private fun getItemsForEmailing(
-        items: List<Pair<ItemToShare, ItemForEmailing>>,
-        itemGroup: ItemGroup
-    ): List<ItemForEmailing> {
-        return itemGroup.items?.map {
-            items.mapNotNull { (itemToShare, email) ->
-                if (itemToShare.itemId == it.itemId) {
-                    email
-                } else {
-                    null
-                }
-            }
-        }?.flatten() ?: emptyList()
-    }
-
-    private fun fillItemsToUploadGroupToUpdate(
-        itemGroupsToUpdate: MutableList<ItemGroup>,
+    private suspend fun fillItemsToUploadGroupToUpdate(
+        itemGroupsToUpdate: MutableList<Pair<ItemGroup, List<ItemForEmailing>>>,
         items: MutableList<Pair<ItemToShare, ItemForEmailing>>,
         itemGroupsActual: List<ItemGroup>,
         itemsUid: Array<String>,
-        dataType: SyncObjectType
+        dataType: SyncObjectType,
     ) {
         itemsUid.forEach { itemUid ->
             val itemGroup: ItemGroup? = getItemGroupFor(itemGroupsActual, itemUid)
+            val dataIdentifierWrapper = getDataIdentifier(dataType, itemUid) ?: return@forEach
+            val liteItem = dataIdentifierWrapper.vaultItem.toSummary<SummaryObject>().toSharedVaultItemLite()
             if (itemGroup == null) {
-                val dataIdentifierWrapper = getDataIdentifier(dataType, itemUid) ?: return@forEach
                 val itemContent: String = getItemContent(dataIdentifierWrapper) ?: return@forEach
                 val itemType = dataType.toItemType() ?: return@forEach
                 val itemToShare = ItemToShare(itemUid, itemContent, itemType)
-                val liteItem = dataIdentifierWrapper.vaultItem.toSummary<SummaryObject>()
-                    .toSharedVaultItemLite()
                 items.add(itemToShare to liteItem.toItemForEmailing())
             } else {
-                itemGroupsToUpdate.add(itemGroup)
+                itemGroupsToUpdate.add(itemGroup to listOf(liteItem.toItemForEmailing()))
             }
         }
     }
@@ -238,18 +255,18 @@ class NewSharePeopleDataProvider @Inject constructor(
     private fun getItemContent(item: DataIdentifierExtraDataWrapper<out SyncObject>): String? =
         xmlConverter.toXml(item)
 
-    private fun getDataIdentifier(
+    private suspend fun getDataIdentifier(
         dataType: SyncObjectType,
-        itemUid: String
+        itemUid: String,
     ): DataIdentifierExtraDataWrapper<out SyncObject>? = if (dataType in SHAREABLE) {
-        sharingDao.getItemWithExtraDataLegacy(itemUid, dataType)
+        sharingDao.getItemWithExtraData(itemUid, dataType)
     } else {
         null
     }
 
     private fun getItemGroupFor(
         itemGroupsActual: List<ItemGroup>,
-        itemUid: String
+        itemUid: String,
     ): ItemGroup? = itemGroupsActual.find { itemGroup ->
         itemGroup.items?.find { it.itemId == itemUid } != null
     }
@@ -275,11 +292,10 @@ class NewSharePeopleDataProvider @Inject constructor(
         }
 
     private fun SyncObjectType.toItemType(): ItemUpload.ItemType? =
-        if (this == SyncObjectType.AUTHENTIFIANT) {
-            ItemUpload.ItemType.AUTHENTIFIANT
-        } else if (this == SyncObjectType.SECURE_NOTE) {
-            ItemUpload.ItemType.SECURENOTE
-        } else {
-            null
+        when (this) {
+            SyncObjectType.AUTHENTIFIANT -> ItemUpload.ItemType.AUTHENTIFIANT
+            SyncObjectType.SECURE_NOTE -> ItemUpload.ItemType.SECURENOTE
+            SyncObjectType.SECRET -> ItemUpload.ItemType.SECRET
+            else -> null
         }
 }

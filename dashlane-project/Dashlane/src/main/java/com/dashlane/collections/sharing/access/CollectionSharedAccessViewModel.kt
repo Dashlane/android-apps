@@ -14,7 +14,6 @@ import com.dashlane.collections.sharing.CollectionSharingViewState.ViewData
 import com.dashlane.core.sharing.SharingItemUpdater
 import com.dashlane.core.sharing.handleCollectionSharingResult
 import com.dashlane.hermes.generated.definitions.Trigger
-import com.dashlane.session.authorization
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
@@ -23,9 +22,10 @@ import com.dashlane.server.api.pattern.UserIdFormat
 import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sync.DataSync
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,7 +44,7 @@ class CollectionSharedAccessViewModel @Inject constructor(
     private val dataSync: DataSync,
     @DefaultCoroutineDispatcher
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val session: Session
         get() = sessionManager.session!!
@@ -85,7 +85,7 @@ class CollectionSharedAccessViewModel @Inject constructor(
                     userGroup.groupId,
                     userGroup.name,
                     userGroup.users.size,
-                    permission = collection.getGroupPermission(userGroup.groupId)
+                    permission = collection.getGroupPermission(userGroup.groupId),
                 )
             }.sortedBy { it.name }
             
@@ -94,14 +94,14 @@ class CollectionSharedAccessViewModel @Inject constructor(
                 Individual(
                     it.login,
                     accepted = it.isAccepted,
-                    permission = it.permission
+                    permission = it.permission,
                 )
             }?.sortedWith(compareBy({ it.accepted }, { it.username })) ?: emptyList()
             val isAdmin = sharingDataProvider.isAdmin(collection)
             val viewData = ViewData(
                 userGroups,
                 individuals,
-                isAdmin = isAdmin
+                isAdmin = isAdmin,
             )
             _uiState.emit(ShowList(viewData))
         }
@@ -136,8 +136,8 @@ class CollectionSharedAccessViewModel @Inject constructor(
                         collectionId = UuidFormat(collection.uuid),
                         revision = collection.revision,
                         userGroupUUIDs = groupId?.let { listOf(UuidFormat(it)) },
-                        userLogins = userId?.let { listOf(UserIdFormat(it)) }
-                    )
+                        userLogins = userId?.let { listOf(UserIdFormat(it)) },
+                    ),
                 ).also {
                     it.data.collections?.let { collections ->
                         sharingItemUpdater.handleCollectionSharingResult(collections)

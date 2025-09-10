@@ -12,9 +12,10 @@ internal data class AttestationDocument(
     val certificate: ByteArray,
     val pcrs: ObjectNode,
     val cabundle: List<ByteArray>,
-    val userData: UserData
+    val userData: UserData,
 ) {
     override fun toString() = "AttestationDocument(▪)"
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -37,7 +38,7 @@ internal data class AttestationDocument(
 
     data class UserData(
         val header: ByteArray,
-        val publicKey: ByteArray
+        val publicKey: ByteArray,
     ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -77,7 +78,7 @@ internal data class AttestationDocument(
                     publicKey = (userDataObj["publicKey"] as? TextNode)?.textValue()
                         ?.decodeBase64ToByteArrayOrNull()
                         ?: return null,
-                )
+                ),
             )
         }
     }

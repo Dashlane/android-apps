@@ -3,26 +3,25 @@ package com.dashlane.teamspaces.db
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.dashlane.hermes.generated.definitions.Action
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.teamspaces.manager.SpaceDeletedNotifier
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.manager.matchForceDomains
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.VaultActivityLogger
+import com.dashlane.vault.item.delete.RemoteContentDeleter
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Suppress("LargeClass")
-@OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class SmartSpaceCategorizationManager @Inject constructor(
     private val databaseAccessor: SmartSpaceCategorizationDatabaseAccessor,
@@ -30,7 +29,8 @@ class SmartSpaceCategorizationManager @Inject constructor(
     private val spaceDeletedNotifier: SpaceDeletedNotifier,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val teamspaceForceDeletionSharingWorker: TeamspaceForceDeletionSharingWorker,
-    private val activityLogger: VaultActivityLogger
+    private val activityLogger: VaultActivityLogger,
+    private val remoteContentDeleter: RemoteContentDeleter,
 ) {
     private val mutex = Mutex()
 
@@ -62,7 +62,7 @@ class SmartSpaceCategorizationManager @Inject constructor(
 
     private suspend fun moveVaultItems(
         currentBusinessSpace: TeamSpace.Business.Current?,
-        pastTeams: List<TeamSpace.Business.Past>
+        pastTeams: List<TeamSpace.Business.Past>,
     ): Result {
         val forceCategorizedItems: MutableList<VaultItem<SyncObject>> = mutableListOf()
         val deletedItems: MutableList<VaultItem<SyncObject>> = mutableListOf()
@@ -77,6 +77,11 @@ class SmartSpaceCategorizationManager @Inject constructor(
         }
 
         
+        if (currentBusinessSpace != null) {
+            applyForceSpaceToSecrets(currentBusinessSpace)
+        }
+
+        
         pastTeams.forEach { pastTeam ->
             handleItemFromRevokedTeam(pastTeam, deletedItems, sharedItemIdsToRevoke)
         }
@@ -85,7 +90,7 @@ class SmartSpaceCategorizationManager @Inject constructor(
 
     private suspend fun moveCollectionItemsToBusinessSpace(
         currentBusinessSpace: TeamSpace.Business.Current?,
-        itemsForced: MutableList<VaultItem<SyncObject>>
+        itemsForced: MutableList<VaultItem<SyncObject>>,
     ) {
         val itemGroups = sharingDataProvider.getItemGroups()
         val currentBusinessTeamId = currentBusinessSpace?.teamId ?: return
@@ -127,7 +132,7 @@ class SmartSpaceCategorizationManager @Inject constructor(
     private suspend fun handleItemFromRevokedTeam(
         pastTeam: TeamSpace.Business.Past,
         itemsDeleted: MutableList<VaultItem<SyncObject>>,
-        idsSharedToRevoked: MutableList<String>
+        idsSharedToRevoked: MutableList<String>,
     ) {
         
         
@@ -183,9 +188,42 @@ class SmartSpaceCategorizationManager @Inject constructor(
         databaseAccessor.save(modifiedItems)
     }
 
+    private suspend fun applyForceSpaceToSecrets(businessSpace: TeamSpace.Business.Current) {
+        val items = databaseAccessor.getSummarySecretsForPersonalSpace()
+        if (items.isEmpty()) return
+        moveSecretsToBusinessSpace(businessSpace, items)
+    }
+
+    private suspend fun moveSecretsToBusinessSpace(
+        businessSpace: TeamSpace.Business.Current,
+        secrets: List<SummaryObject.Secret>,
+    ) {
+        
+        val ids = secrets.filterNot {
+            it.syncState == SyncState.DELETED ||
+                it.syncState == SyncState.IN_SYNC_DELETED
+        }.filter {
+            it.spaceId == null ||
+                it.spaceId == TeamSpace.Personal.teamId
+        }.map { it.id }
+        
+        val vaultItems = databaseAccessor.getVaultItems(ids)
+            .ifEmpty { return }
+
+        
+        val modifiedItems = vaultItems.map { vault ->
+            vault.copyWithAttrs {
+                teamSpaceId = businessSpace.teamId
+                syncState = SyncState.MODIFIED
+            }
+        }
+        
+        databaseAccessor.save(modifiedItems)
+    }
+
     @Suppress("UNCHECKED_CAST")
     private suspend fun deleteTeamItems(
-        teamItems: List<SummaryObject>
+        teamItems: List<SummaryObject>,
     ): List<VaultItem<SyncObject>> {
         val ids = teamItems.map { it.id }
             .ifEmpty { return emptyList() }
@@ -196,6 +234,9 @@ class SmartSpaceCategorizationManager @Inject constructor(
 
         
         val deletedItems = vaultItems.map { vault ->
+            
+            remoteContentDeleter.deleteFor(syncObject = vault.syncObject, ignoreFailures = true)
+
             vault.copyWithAttrs { syncState = SyncState.DELETED }
         }
         
@@ -226,7 +267,7 @@ class SmartSpaceCategorizationManager @Inject constructor(
 
     private suspend fun moveForceCategorizationItemsToSpace(
         itemsToMove: List<SummaryObject>,
-        teamId: String
+        teamId: String,
     ): List<VaultItem<SyncObject>> {
         
         val ids = itemsToMove
@@ -273,6 +314,6 @@ class SmartSpaceCategorizationManager @Inject constructor(
     private data class Result(
         val itemsForced: List<VaultItem<SyncObject>>,
         val itemsDeleted: List<VaultItem<SyncObject>>,
-        val idsSharedToRevoked: List<String>
+        val idsSharedToRevoked: List<String>,
     )
 }

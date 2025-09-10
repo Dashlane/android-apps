@@ -32,10 +32,9 @@ class AttachmentListPresenter(
     private val downloadPresenter: DownloadFileContract.Presenter,
     private val deleteManager: DeleteFileManager,
     private val lockHelper: LockHelper,
-    private val vaultItemLogAttachmentHelper: VaultItemLogAttachmentHelper
+    private val vaultItemLogAttachmentHelper: VaultItemLogAttachmentHelper,
 ) : AttachmentListContract.Presenter,
     BasePresenter<AttachmentListContract.DataProvider, AttachmentListContract.ViewProxy>() {
-
     override var isAttachmentListUpdated = false
     private var isFirstSearchLaunched = false
 
@@ -127,7 +126,7 @@ class AttachmentListPresenter(
         val items = listOf(
             R.string.open_file_action,
             R.string.export_file_action,
-            R.string.delete_file_action
+            R.string.delete_file_action,
         ).map { activity.getString(it) }.toTypedArray<CharSequence>()
 
         DialogHelper()
@@ -172,7 +171,7 @@ class AttachmentListPresenter(
             val openIntent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(
                     UriUtils.getOpenFileUri(activity.applicationContext, file),
-                    item.attachment.type
+                    item.attachment.type,
                 )
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
@@ -231,8 +230,8 @@ class AttachmentListPresenter(
                     setMessage(
                         context.getString(
                             R.string.delete_files_confirm,
-                            selectedAttachments.size.toString()
-                        )
+                            selectedAttachments.size.toString(),
+                        ),
                     )
                 }
                 setTitle(R.string.delete_file_confirm_title)

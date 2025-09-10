@@ -12,8 +12,10 @@ import com.dashlane.teamspaces.adapter.TeamspaceDrawableProvider.getIcon
 import com.dashlane.teamspaces.model.SpaceName
 import com.dashlane.teamspaces.model.TeamSpace
 
-class TeamspaceSpinnerAdapter(context: Context, list: List<TeamSpace>) : ArrayAdapter<TeamSpace>(context, R.layout.spinner_item_dropdown, list) {
-
+class TeamspaceSpinnerAdapter(
+    context: Context,
+    list: List<TeamSpace>,
+) : ArrayAdapter<TeamSpace>(context, R.layout.spinner_item_dropdown, list) {
     var isDisabled = false
         set(value) {
             field = value
@@ -30,7 +32,13 @@ class TeamspaceSpinnerAdapter(context: Context, list: List<TeamSpace>) : ArrayAd
         return view
     }
 
-    private fun getView(position: Int, convertView: View?, parent: ViewGroup, layoutResId: Int, @DimenRes iconSizeRes: Int): View {
+    private fun getView(
+        position: Int,
+        convertView: View?,
+        parent: ViewGroup,
+        layoutResId: Int,
+        @DimenRes iconSizeRes: Int,
+    ): View {
         val resources = parent.resources
         val view: TextView
         if (convertView is TextView) {

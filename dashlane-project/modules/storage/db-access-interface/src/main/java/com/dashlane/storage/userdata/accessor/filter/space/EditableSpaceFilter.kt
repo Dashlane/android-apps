@@ -3,7 +3,6 @@ package com.dashlane.storage.userdata.accessor.filter.space
 import com.dashlane.teamspaces.model.TeamSpace
 
 interface EditableSpaceFilter : SpaceFilter {
-
     var spaceFilter: SpaceFilter
 
     fun forCurrentSpace() {

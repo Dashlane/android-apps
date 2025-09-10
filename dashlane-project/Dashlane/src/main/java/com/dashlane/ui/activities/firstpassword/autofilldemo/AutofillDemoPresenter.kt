@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 class AutofillDemoPresenter @Inject constructor(
     dataProvider: AutofillDemo.DataProvider,
-    private val navigator: Navigator
+    private val navigator: Navigator,
 ) : BasePresenter<AutofillDemo.DataProvider, AutofillDemo.ViewProxy>(),
     AutofillDemo.Presenter {
     lateinit var login: String
@@ -46,7 +46,7 @@ class AutofillDemoPresenter @Inject constructor(
     }
 
     override fun onButtonFinishClicked() {
-        navigator.goToInAppLoginIntro()
+        navigator.goToInAppLogin()
         activity?.finish()
     }
 

@@ -14,9 +14,8 @@ import kotlinx.coroutines.launch
 internal class M2wConnectViewProxy(
     private val activity: AppCompatActivity,
     val viewModel: M2wConnectViewModelContract,
-    val lifecycleScope: CoroutineScope
+    val lifecycleScope: CoroutineScope,
 ) {
-
     private val rootView: View = activity.findViewById(android.R.id.content)
 
     init {
@@ -41,11 +40,11 @@ internal class M2wConnectViewProxy(
                 when (result) {
                     M2WResult.SKIPPED -> data.putExtra(
                         M2wIntentCoordinator.EXTRA_M2W_SKIPPED,
-                        true
+                        true,
                     )
                     M2WResult.COMPLETED -> data.putExtra(
                         M2wIntentCoordinator.EXTRA_M2W_COMPLETED,
-                        true
+                        true,
                     )
                     else -> Unit
                 }

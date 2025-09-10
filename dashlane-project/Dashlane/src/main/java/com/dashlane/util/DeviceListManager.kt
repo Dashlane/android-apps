@@ -1,14 +1,15 @@
 package com.dashlane.util
 
 import androidx.annotation.MainThread
-import com.dashlane.session.authorization
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.endpoints.devices.DeactivateDevicesService
 import com.dashlane.server.api.endpoints.devices.ListDevicesService.Data.Device
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.Session
+import com.dashlane.session.authorization
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -18,9 +19,8 @@ class DeviceListManager(
     coroutineContext: CoroutineContext,
     private val session: Session,
     dashlaneApi: DashlaneApi,
-    private val refreshCallback: (List<Device>) -> Unit
+    private val refreshCallback: (List<Device>) -> Unit,
 ) : CoroutineScope by CoroutineScope(coroutineContext + Dispatchers.Main.immediate) {
-
     private val listDevicesService = dashlaneApi
         .endpoints
         .devices
@@ -31,12 +31,12 @@ class DeviceListManager(
         .devices
         .deactivateDevicesService
 
-    @Suppress("EXPERIMENTAL_API_USAGE")
+    @OptIn(ObsoleteCoroutinesApi::class)
     private val actor = actor<Unit> {
         consumeEach {
             val response = try {
                 listDevicesService.execute(session.authorization)
-            } catch (ignored: DashlaneApiException) {
+            } catch (_: DashlaneApiException) {
                 
                 return@consumeEach
             }
@@ -48,7 +48,7 @@ class DeviceListManager(
     fun refresh() {
         try {
             actor.trySend(Unit)
-        } catch (ignored: Throwable) {
+        } catch (_: Throwable) {
             
         }
     }
@@ -59,9 +59,9 @@ class DeviceListManager(
             try {
                 deactivateDevicesService.execute(
                     session.authorization,
-                    DeactivateDevicesService.Request(deviceIds = listOf(d.id))
+                    DeactivateDevicesService.Request(deviceIds = listOf(d.id)),
                 )
-            } catch (e: DashlaneApiException) {
+            } catch (_: DashlaneApiException) {
                 
                 return@launch
             }

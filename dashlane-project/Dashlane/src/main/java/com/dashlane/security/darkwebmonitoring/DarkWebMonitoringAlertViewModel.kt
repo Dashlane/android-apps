@@ -2,8 +2,8 @@ package com.dashlane.security.darkwebmonitoring
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.breach.BreachWrapper
 import com.dashlane.darkweb.DarkWebEmailStatus
-import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,9 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DarkWebMonitoringAlertViewModel @Inject constructor(
-    private val provider: DarkWebMonitoringDataProvider
+    private val provider: DarkWebMonitoringDataProvider,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow<DarkWebStatus?>(null)
     val breachesState = stateFlow.asStateFlow()
 
@@ -27,7 +26,7 @@ class DarkWebMonitoringAlertViewModel @Inject constructor(
                 DarkWebStatus(
                     breaches = breaches.await(),
                     emailStatus = emailStatuses.await(),
-                )
+                ),
             )
         }
     }

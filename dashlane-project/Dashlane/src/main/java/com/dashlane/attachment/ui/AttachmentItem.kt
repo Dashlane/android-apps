@@ -2,7 +2,7 @@ package com.dashlane.attachment.ui
 
 import com.dashlane.R
 import com.dashlane.securefile.Attachment
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 
 class AttachmentItem(
     val attachment: Attachment,
@@ -10,7 +10,7 @@ class AttachmentItem(
     enum class DownloadState {
         NOT_DOWNLOADED,
         DOWNLOADING,
-        DOWNLOADED
+        DOWNLOADED,
     }
 
     var downloadState = DownloadState.NOT_DOWNLOADED
@@ -20,7 +20,7 @@ class AttachmentItem(
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<out AttachmentItem> {
         return DashlaneRecyclerAdapter.ViewType(
             R.layout.attachment_list_item,
-            AttachmentViewHolder::class.java
+            AttachmentViewHolder::class.java,
         )
     }
 }

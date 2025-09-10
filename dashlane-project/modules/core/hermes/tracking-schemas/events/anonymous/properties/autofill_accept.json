@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/autofill_accept.json",
+  "type": "object",
+  "description": "When the user accepts a suggestion made by Dashlane.",
+  "metas": {
+    "area": "autofill",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_accept"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "is_protected": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_protected"
+    },
+    "is_set_as_default": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_set_as_default"
+    },
+    "item_position": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/item_position"
+    },
+    "phishing_risk": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/phishing_risk"
+    },
+    "webcard_option_selected": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/webcard_save_options"
+    }
+  },
+  "required": [
+    "name",
+    "domain"
+  ],
+  "additionalProperties": false
+}

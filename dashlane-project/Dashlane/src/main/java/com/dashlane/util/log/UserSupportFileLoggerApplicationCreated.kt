@@ -12,9 +12,8 @@ import javax.inject.Inject
 
 class UserSupportFileLoggerApplicationCreated @Inject constructor(
     private val globalPreferencesManager: GlobalPreferencesManager,
-    private val deviceInfoRepository: DeviceInfoRepository
+    private val deviceInfoRepository: DeviceInfoRepository,
 ) {
-
     fun onApplicationCreated(application: Application) {
         val userLoggedOut = globalPreferencesManager.isUserLoggedOut
         val isMultipleAccountLoadedOnThisDevice = globalPreferencesManager.isMultipleAccountLoadedOnThisDevice
@@ -27,14 +26,13 @@ class UserSupportFileLoggerApplicationCreated @Inject constructor(
         val appLastUpdateDate = appPackageInfo?.lastUpdateTime?.toZonedDateTime()
 
             "Dump device informations. " +
-                    "userLoggedOut: $userLoggedOut, " +
-                    "isMultipleAccountLoadedOnThisDevice: $isMultipleAccountLoadedOnThisDevice, " +
-                    "lastLoggedInUser: $lastLoggedInUser, " +
-                    "anonymousDeviceId: $anonymousDeviceId, " +
-                    "deviceId: $deviceId, " +
-                    "appInstallDate: $appInstallDate, " +
-                    "appLastUpdateDate: $appLastUpdateDate",
-            logToUserSupportFile = true
+                "userLoggedOut: $userLoggedOut, " +
+                "isMultipleAccountLoadedOnThisDevice: $isMultipleAccountLoadedOnThisDevice, " +
+                "lastLoggedInUser: $lastLoggedInUser, " +
+                "anonymousDeviceId: $anonymousDeviceId, " +
+                "deviceId: $deviceId, " +
+                "appInstallDate: $appInstallDate, " +
+                "appLastUpdateDate: $appLastUpdateDate",
         )
     }
 

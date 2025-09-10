@@ -11,7 +11,6 @@ import javax.inject.Inject
 class AddressListTextFactory @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : DataIdentifierListTextFactory<SummaryObject.Address> {
-
     override fun getTitle(item: SummaryObject.Address): StatusText {
         val label = item.addressName?.takeUnless { it.isSemanticallyNull() }
             ?: return StatusText(context.getString(R.string.address))

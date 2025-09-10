@@ -5,6 +5,7 @@ import com.dashlane.util.MD5Hash
 
 sealed class PreferenceEntry {
     abstract val key: String
+
     internal abstract fun addTo(editor: SharedPreferences.Editor)
 
     data class StringPreferenceEntry(override val key: String, private val value: String?) : PreferenceEntry() {
@@ -64,7 +65,6 @@ sealed class PreferenceEntry {
     }
 
     companion object {
-
         @JvmStatic
         fun setString(label: String, value: String?): PreferenceEntry {
             return StringPreferenceEntry(label, value)

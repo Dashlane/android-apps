@@ -3,28 +3,35 @@ package com.dashlane.autofill.emptywebsitewarning.view
 import android.content.Context
 import android.content.IntentSender
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
+import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.api.R
-import com.dashlane.autofill.emptywebsitewarning.domain.EmptyWebsiteWarningDialogResponse
+import com.dashlane.autofill.emptywebsitewarning.EmptyWebsiteWarningViewModel
+import com.dashlane.autofill.emptywebsitewarning.ui.EmptyWebsiteBottomSheetScreen
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
-import com.dashlane.autofill.model.toItemToFill
+import com.dashlane.autofill.model.AuthentifiantItemToFill
 import com.dashlane.autofill.ui.AutoFillResponseActivity
+import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.url.toUrlDomain
+import com.dashlane.util.Toaster
 import com.dashlane.util.tryOrNull
-import com.dashlane.vault.model.VaultItem
-import com.dashlane.xml.domain.SyncObject
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-class EmptyWebsiteWarningActivity :
-    AutoFillResponseActivity(),
-    EmptyWebsiteWarningDialogResponse,
-    CoroutineScope {
-
+@AndroidEntryPoint
+class EmptyWebsiteWarningActivity : AutoFillResponseActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = lifecycleScope.coroutineContext
+
+    private val viewModel by viewModels<EmptyWebsiteWarningViewModel>()
+
+    @Inject
+    lateinit var toaster: Toaster
 
     private lateinit var summaryWebDomain: String
 
@@ -34,52 +41,62 @@ class EmptyWebsiteWarningActivity :
         super.onCreate(savedInstanceState)
         summaryWebDomain = tryOrNull { summary?.webDomain?.toUrlDomain()?.root?.value } ?: ""
         itemId = intent.getStringExtra(EXTRA_SELECTED_ITEM_ID) ?: ""
+        setContent {
+            DashlaneTheme {
+                EmptyWebsiteBottomSheetScreen(
+                    viewModel = viewModel,
+                    onAddWebsiteSuccess = ::onAddWebsiteSuccess,
+                    onAddWebsiteError = ::onAddWebsiteError,
+                    onCancel = ::onCancel,
+                )
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
 
+        val summary = summary
         if (summary == null) {
             finish()
             return
         }
         performLoginAndUnlock {
-            openWarningBottomSheetDialog()
+            viewModel.load(websiteToAdd = summaryWebDomain, itemId = itemId)
         }
     }
 
-    override fun onAutofillResult(result: VaultItem<SyncObject.Authentifiant>) = finishWithResult(
-        itemToFill = result.toItemToFill(),
-        matchType = matchType
-    )
+    fun onAddWebsiteSuccess(message: String, itemToFill: AuthentifiantItemToFill) {
+        toaster.show(message, Toast.LENGTH_SHORT)
+        finishWithResult(
+            itemToFill = itemToFill,
+            matchType = matchType,
+        )
+    }
 
-    override fun onNoResult() = finishWithResult(
-        itemToFill = null,
-        matchType = matchType
-    )
+    fun onAddWebsiteError() {
+        toaster.show(R.string.error, Toast.LENGTH_SHORT)
+        finishWithResult(
+            itemToFill = null,
+            matchType = matchType,
+        )
+    }
 
-    private fun openWarningBottomSheetDialog() {
-        var dialog = supportFragmentManager.findFragmentByTag(EMPTY_WEBSITE_WARNING_DIALOG)
-        if (dialog == null) {
-            dialog = BottomSheetEmptyWebsiteWarningDialogFragment.create(summaryWebDomain, itemId)
-            dialog.setStyle(
-                DialogFragment.STYLE_NO_FRAME,
-                R.style.Theme_Dashlane_Transparent_Cancelable
-            )
-            dialog.show(supportFragmentManager, EMPTY_WEBSITE_WARNING_DIALOG)
-        }
+    fun onCancel() {
+        finishWithResult(
+            itemToFill = null,
+            matchType = matchType,
+        )
     }
 
     companion object {
-
-        const val EMPTY_WEBSITE_WARNING_DIALOG = "empty_website_warning_dialog"
         const val EXTRA_SELECTED_ITEM_ID = "selected_item_id"
 
         internal fun getAuthIntentSenderForEmptyWebsiteWarning(
             context: Context,
             itemId: String,
             summary: AutoFillHintSummary,
-            matchType: MatchType
+            matchType: MatchType,
         ): IntentSender {
             val intent = createIntent(context, summary, EmptyWebsiteWarningActivity::class)
             intent.putExtra(EXTRA_SELECTED_ITEM_ID, itemId)

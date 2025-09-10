@@ -4,4 +4,12 @@
     <string name="notification_autofill_description">Want automatic logins for your favorite apps? Activate Dashlane Autofill.</string>
     <string name="notification_autofill_action">Not Now</string>
     <string name="notification_autofill_action_positive">Activate</string>
+    
+    <string name="notification_autofill_chrome_title">Enable Dashlane Autofill in Chrome</string>
+    
+    <string name="notification_autofill_chrome_description">Due to a recent Chrome update, Dashlane Autofill needs your permission again to keep filling your passwords smoothly. Activate it now to continue autofilling securely in Chrome.</string>
+    
+    <string name="notification_autofill_chrome_action">Not Now</string>
+    
+    <string name="notification_autofill_chrome_action_positive">Activate now</string>
 </resources>

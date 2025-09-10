@@ -5,17 +5,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import com.dashlane.R
-import com.dashlane.design.component.ButtonLayout
-import com.dashlane.design.component.DisplayField
 import com.dashlane.design.component.TextArea
 import com.dashlane.design.component.TextField
-import com.dashlane.design.component.tooling.DisplayFieldActions
-import com.dashlane.design.component.tooling.FieldAction
-import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.tooling.DashlanePreview
 
 @Suppress("kotlin:S107", "LongMethod")
@@ -27,11 +21,14 @@ fun GenericField(
     isEditable: Boolean = true,
     multiLine: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Unspecified,
     onValueChanged: (String) -> Unit,
     onValueCopy: (() -> Unit)? = null,
     onValueOpen: (() -> Unit)? = null,
     feedbackText: String? = null,
-    isError: Boolean = false
+    isError: Boolean = false,
+    isRequired: Boolean = false,
+    disablePersonalizedLearning: Boolean = true,
 ) {
     if (editMode) {
         if (multiLine) {
@@ -39,13 +36,18 @@ fun GenericField(
                 modifier = Modifier.fillMaxWidth(),
                 value = data ?: "",
                 label = label,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = keyboardType,
+                    imeAction = imeAction,
+                ),
                 readOnly = isEditable.not(),
                 onValueChange = {
                     onValueChanged(it)
                 },
                 feedbackText = feedbackText,
-                isError = isError
+                isError = isError,
+                isRequired = isRequired,
+                disablePersonalizedLearning = disablePersonalizedLearning,
             )
         } else {
             TextField(
@@ -55,49 +57,25 @@ fun GenericField(
                 enabled = true,
                 readOnly = isEditable.not(),
                 labelPersists = true,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = keyboardType,
+                    imeAction = imeAction,
+                ),
                 onValueChange = {
                     onValueChanged(it)
                 },
                 feedbackText = feedbackText,
-                isError = isError
+                isError = isError,
+                isRequired = isRequired,
+                disablePersonalizedLearning = disablePersonalizedLearning,
             )
         }
     } else {
-        DisplayField(
+        ItemEditGenericDisplayField(
             label = label,
-            value = data,
-            singleLine = !multiLine,
-            actions = DisplayFieldActions.newInstance(
-                action1 = if (onValueCopy != null) {
-                    FieldAction.Generic(
-                        iconLayout = ButtonLayout.IconOnly(
-                            iconToken = IconTokens.actionCopyOutlined,
-                            contentDescription = stringResource(id = R.string.vault_action_copy) + " " + label
-                        ),
-                        onClick = {
-                            onValueCopy()
-                            true
-                        }
-                    )
-                } else {
-                    null
-                },
-                action2 = if (onValueOpen != null) {
-                    FieldAction.Generic(
-                        iconLayout = ButtonLayout.IconOnly(
-                            iconToken = IconTokens.actionOpenExternalLinkOutlined,
-                            contentDescription = stringResource(id = R.string.vault_action_open) + " " + label
-                        ),
-                        onClick = {
-                            onValueOpen()
-                            true
-                        }
-                    )
-                } else {
-                    null
-                }
-            )
+            data = data,
+            onValueCopy = onValueCopy,
+            onValueOpen = onValueOpen,
         )
     }
 }
@@ -121,7 +99,7 @@ private fun GenericFieldEditPreview() {
                 multiLine = true,
                 onValueChanged = {
                     
-                }
+                },
             )
         }
     }
@@ -146,7 +124,7 @@ private fun GenericFieldPreview() {
                 multiLine = true,
                 onValueChanged = {
                     
-                }
+                },
             )
         }
     }
@@ -166,12 +144,16 @@ private fun GenericFieldEditSingleLinePreview() {
             })
             GenericField(
                 label = "Label",
-                data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+                data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut " +
+                    "labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco " +
+                    "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
+                    "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat " +
+                    "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
                 editMode = true,
                 multiLine = false,
                 onValueChanged = {
                     
-                }
+                },
             )
         }
     }
@@ -191,12 +173,16 @@ private fun GenericFieldSingleLinePreview() {
             })
             GenericField(
                 label = "Label",
-                data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+                data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut " +
+                    "labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco " +
+                    "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
+                    "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat " +
+                    "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
                 editMode = false,
                 multiLine = false,
                 onValueChanged = {
                     
-                }
+                },
             )
         }
     }

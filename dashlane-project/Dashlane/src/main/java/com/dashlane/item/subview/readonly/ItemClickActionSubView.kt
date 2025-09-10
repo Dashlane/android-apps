@@ -11,5 +11,5 @@ class ItemClickActionSubView(
     @DrawableRes
     val iconResId: Int = -1,
     val gravity: Int,
-    val clickAction: () -> Unit
+    val clickAction: () -> Unit,
 ) : ItemReadValueSubView<String>()

@@ -8,7 +8,7 @@ sealed class GetSsoInfoResult : Parcelable {
     @Parcelize
     data class Success(
         val login: String,
-        val userSsoInfo: UserSsoInfo
+        val userSsoInfo: UserSsoInfo,
     ) : GetSsoInfoResult()
 
     sealed class Error : GetSsoInfoResult() {
@@ -19,7 +19,7 @@ sealed class GetSsoInfoResult : Parcelable {
         data object CannotOpenServiceProvider : Error()
 
         @Parcelize
-        data object UnauthorizedNavigation : Error()
+        data object ForbiddenNavigation : Error()
 
         @Parcelize
         data object SamlResponseNotFound : Error()

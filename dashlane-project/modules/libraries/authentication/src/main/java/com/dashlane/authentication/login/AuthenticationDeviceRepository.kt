@@ -1,14 +1,20 @@
 package com.dashlane.authentication.login
 
+import com.dashlane.data.login.MigrationToSsoMemberInfo
+
 interface AuthenticationDeviceRepository {
+    var restoredSessionMigrationToSsoMemberInfo: MigrationToSsoMemberInfo?
+
     suspend fun getAccessKeyStatus(
         login: String,
-        accessKey: String
+        accessKey: String,
     ): AccessKeyStatus
 
     sealed class AccessKeyStatus {
-        data class Valid(val ssoInfo: SsoInfo?) : AccessKeyStatus()
-        object Revoked : AccessKeyStatus()
-        object Invalid : AccessKeyStatus()
+        data object Valid : AccessKeyStatus()
+
+        data object Revoked : AccessKeyStatus()
+
+        data object Invalid : AccessKeyStatus()
     }
 }

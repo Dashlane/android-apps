@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/open_external_vault_item_link.json",
+  "type": "object",
+  "description": "Open an external link on a vault item field",
+  "metas": {
+    "area": "vault"
+  },
+  "properties": {
+    "name": {
+      "const": "open_external_vault_item_link"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type_with_link"
+    }
+  },
+  "required": [
+    "name",
+    "domain",
+    "item_type"
+  ],
+  "additionalProperties": false
+}

@@ -2,16 +2,16 @@ package com.dashlane.login.pages.secrettransfer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
+import com.dashlane.data.login.RegisteredUserDevice
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.lock.LockEvent
 import com.dashlane.lock.LockManager
 import com.dashlane.lock.LockType
-import com.dashlane.login.root.LoginRepository
-import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
+import com.dashlane.login.LoginRepository
+import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.notificationcenter.view.ActionItemType
 import com.dashlane.pin.PinSetupRepository
 import com.dashlane.preference.PreferencesManager
@@ -26,7 +26,6 @@ import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionResult
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +36,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class LoginSecretTransferViewModel @Inject constructor(
@@ -51,9 +51,8 @@ class LoginSecretTransferViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     private val secretTransferAnalytics: SecretTransferAnalytics,
     private val pinSetupRepository: PinSetupRepository,
-    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher
+    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow<LoginSecretTransferState>(LoginSecretTransferState.Initial(LoginSecretTransferData()))
 
     val uiState = stateFlow.asStateFlow()
@@ -96,7 +95,11 @@ class LoginSecretTransferViewModel @Inject constructor(
                 sessionCredentialsSaver.saveCredentials(session)
 
                 
-                NotificationCenterRepositoryImpl.setDismissed(preferencesManager[session.username], ActionItemType.BIOMETRIC.trackingKey, false)
+                NotificationCenterRepository.setDismissed(
+                    preferencesManager[session.username],
+                    ActionItemType.BIOMETRIC.trackingKey,
+                    false,
+                )
                 lockManager.addLock(session.username, LockType.Biometric)
             }
         }
@@ -105,14 +108,16 @@ class LoginSecretTransferViewModel @Inject constructor(
     fun login() {
         flow<LoginSecretTransferState> {
             val state = stateFlow.value
-            val secretTransferPayload = state.data.secretTransferPayload ?: throw IllegalStateException("SecretTransferPayload must not be empty")
+            val secretTransferPayload = state.data.secretTransferPayload
+                ?: throw IllegalStateException("SecretTransferPayload must not be empty")
             val registeredUserDevice = loginRepository.getRegisteredUserDevice() as? RegisteredUserDevice.Remote
                 ?: throw IllegalStateException("registeredUserDevice must not be empty and should always be Remote for SecretTransfer")
             val accountType = secretTransferPayload.vaultKey.type.toUserAccountInfoType()
 
             val (sessionResult, username, lockPass) = when (secretTransferPayload.vaultKey.type) {
                 SecretTransferPayload.Type.MASTER_PASSWORD,
-                SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD -> loginPassword(
+                SecretTransferPayload.Type.INVISIBLE_MASTER_PASSWORD,
+                -> loginPassword(
                     sessionInitializer = sessionInitializer,
                     authenticationPasswordRepository = authenticationPasswordRepository,
                     secretTransferPayload = secretTransferPayload,
@@ -124,7 +129,7 @@ class LoginSecretTransferViewModel @Inject constructor(
                     registeredUserDevice = registeredUserDevice,
                     sessionInitializer = sessionInitializer,
                     authenticationLocalKeyRepository = authenticationLocalKeyRepository,
-                    authenticationSecretTransferRepository = authenticationSecretTransferRepository
+                    authenticationSecretTransferRepository = authenticationSecretTransferRepository,
                 )
             }
             when (sessionResult) {
@@ -134,7 +139,7 @@ class LoginSecretTransferViewModel @Inject constructor(
                     lockManager.unlock(sessionResult.session, lockPass)
                     runCatching {
                         lockManager.sendUnlockEvent(
-                            LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword)
+                            LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword),
                         )
                     }
                 }

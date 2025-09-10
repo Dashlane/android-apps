@@ -1,6 +1,9 @@
 package com.dashlane.security.identitydashboard.password
 
 import com.dashlane.debug.services.DaDaDaBase
+import com.dashlane.passwordanalysis.SecurityScoreEvaluator
+import com.dashlane.passwordhealth.identitydashboard.password.AuthentifiantSecurityEvaluator
+import com.dashlane.passwordhealth.identitydashboard.password.PasswordAnalysisContract
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
@@ -21,10 +24,9 @@ class PasswordAnalysisDataProvider @Inject constructor(
     private val dadada: DaDaDaBase,
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
     @ApplicationCoroutineScope
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
 ) : BaseDataProvider<PasswordAnalysisContract.Presenter>(), PasswordAnalysisContract.DataProvider {
-
-    private var latestSecurityScoreEvaluatorResult: Deferred<AuthentifiantSecurityEvaluator.Result?>? =
+    private var latestSecurityScoreEvaluatorResult: Deferred<SecurityScoreEvaluator.Result?>? =
         null
 
     override fun shouldDisplayProcessDuration() = dadada.isEnabled
@@ -33,18 +35,18 @@ class PasswordAnalysisDataProvider @Inject constructor(
         dataSaver.save(authentifiant.copyWithAttrs { syncState = SyncState.MODIFIED })
     }
 
-    override suspend fun getAuthentifiantsSecurityInfo(forceUpdate: Boolean): AuthentifiantSecurityEvaluator.Result? {
+    override suspend fun getAuthentifiantsSecurityInfo(forceUpdate: Boolean): SecurityScoreEvaluator.Result? {
         return withContext(Dispatchers.Default) { getAuthentifiantSecurityInfoAsync(forceUpdate) }
     }
 
-    private suspend fun getAuthentifiantSecurityInfoAsync(forceUpdate: Boolean): AuthentifiantSecurityEvaluator.Result? {
+    private suspend fun getAuthentifiantSecurityInfoAsync(forceUpdate: Boolean): SecurityScoreEvaluator.Result? {
         if (forceUpdate) {
             latestSecurityScoreEvaluatorResult?.cancel()
             latestSecurityScoreEvaluatorResult = null
         }
         val result =
-            latestSecurityScoreEvaluatorResult ?: coroutineScope.async(Dispatchers.Default) {
-                authentifiantSecurityEvaluator.computeResult(currentTeamSpaceUiFilter.currentFilter.teamSpace)
+            latestSecurityScoreEvaluatorResult ?: coroutineScope.async {
+                authentifiantSecurityEvaluator.computeResult(currentTeamSpaceUiFilter.currentFilter.teamSpace).first
             }.apply {
                 latestSecurityScoreEvaluatorResult?.cancel()
                 latestSecurityScoreEvaluatorResult = this

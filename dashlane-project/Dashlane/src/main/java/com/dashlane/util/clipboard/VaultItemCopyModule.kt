@@ -17,14 +17,13 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object VaultItemCopyModule {
-
     @Provides
     fun providersVaultItemCopyService(impl: VaultItemCopyServiceImpl): VaultItemCopyService = impl
 
     @Provides
     fun providesVaultItemCopyListenerHolder(
         followUpNotificationVaultItemCopyListener: FollowUpNotificationVaultItemCopyListenerImpl,
-        vaultItemLogCopyListener: VaultItemLogCopyListener
+        vaultItemLogCopyListener: VaultItemLogCopyListener,
     ): VaultItemCopyListenerHolder {
         val list: MutableList<VaultItemCopyListener> = ArrayList()
         list.add(followUpNotificationVaultItemCopyListener)

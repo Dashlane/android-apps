@@ -11,9 +11,8 @@ import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
 class CreateAccountDataProvider @Inject constructor(
-    private val service: AutofillCreateAccountService
+    private val service: AutofillCreateAccountService,
 ) {
-
     suspend fun saveCredentialToVault(credential: CredentialInfo): VaultItem<SyncObject.Authentifiant>? =
         service.saveNewAuthentifiant(credential)
 
@@ -23,7 +22,7 @@ class CreateAccountDataProvider @Inject constructor(
         context: Context?,
         website: String?,
         packageName: String?,
-        inputWebsite: String?
+        inputWebsite: String?,
     ): String? {
         if (website.isSemanticallyNull() && packageName != null && context != null) {
             val appName = PackageUtilities.getApplicationNameFromPackage(context, packageName)

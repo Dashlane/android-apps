@@ -4,8 +4,6 @@ import com.dashlane.authentication.AuthenticationDeviceCredentialsInvalidExcepti
 import com.dashlane.authentication.AuthenticationEmptyPasswordException
 import com.dashlane.authentication.AuthenticationInvalidPasswordException
 import com.dashlane.authentication.DeviceRegistrationInfo
-import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.UserStorage
 import com.dashlane.authentication.createAppDecryptionEngine
 import com.dashlane.authentication.createVaultDecryptionEngine
@@ -15,6 +13,11 @@ import com.dashlane.authentication.decryptSettings
 import com.dashlane.authentication.decryptSharingPrivateKey
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.authentication.toAuthenticationException
+import com.dashlane.common.logger.DeveloperLogAction
+import com.dashlane.common.logger.Logs
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyException
 import com.dashlane.cryptography.CryptographyMarker
@@ -24,11 +27,13 @@ import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.cryptography.forXml
 import com.dashlane.cryptography.isEmpty
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SecurityFeature
 import com.dashlane.server.api.Response
 import com.dashlane.server.api.endpoints.Platform
-import com.dashlane.server.api.endpoints.authentication.AuthLoginService
 import com.dashlane.server.api.endpoints.authentication.AuthRegistrationDevice
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationExtraDeviceService
+import com.dashlane.server.api.endpoints.authentication.CompleteExtraDeviceRegistrationWithTokenService
+import com.dashlane.server.api.endpoints.authentication.GetAuthenticationMethodsForLoginService
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceDeactivatedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceNotFoundException
@@ -36,39 +41,35 @@ import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.exceptions.DashlaneApiHttpException
 import com.dashlane.server.api.exceptions.DashlaneApiIoException
 import com.dashlane.server.api.time.toInstant
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.user.Username
-import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.serializer.XmlException
-import java.time.Instant
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 class AuthenticationPasswordRepositoryImpl(
     private val userStorage: UserStorage,
     private val authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
-    private val loginService: AuthLoginService,
-    private val extraDeviceService: AuthRegistrationExtraDeviceService,
+    private val getAuthenticationMethodsForLoginService: GetAuthenticationMethodsForLoginService,
+    private val completeExtraDeviceRegistrationWithTokenService: CompleteExtraDeviceRegistrationWithTokenService,
     private val deviceRegistrationInfo: DeviceRegistrationInfo,
-    private val cryptography: Cryptography
+    private val cryptography: Cryptography,
 ) : AuthenticationPasswordRepository {
-
     override suspend fun validate(
         registeredUserDevice: RegisteredUserDevice,
-        passwordUtf8Bytes: ObfuscatedByteArray
+        passwordUtf8Bytes: ObfuscatedByteArray,
     ): AuthenticationPasswordRepository.Result =
         withContext(Dispatchers.Default) { validateImpl(registeredUserDevice, passwordUtf8Bytes) }
 
     private suspend fun validateImpl(
         registeredUserDevice: RegisteredUserDevice,
-        passwordUtf8Bytes: ObfuscatedByteArray
+        passwordUtf8Bytes: ObfuscatedByteArray,
     ): AuthenticationPasswordRepository.Result {
         if (passwordUtf8Bytes.isEmpty) {
             throw AuthenticationEmptyPasswordException()
@@ -76,7 +77,7 @@ class AuthenticationPasswordRepositoryImpl(
 
         val applicationPassword = AppKey.Password(
             passwordUtf8Bytes,
-            registeredUserDevice.serverKey?.encodeUtf8ToObfuscated()
+            registeredUserDevice.serverKey?.encodeUtf8ToObfuscated(),
         )
         return when (registeredUserDevice) {
             is RegisteredUserDevice.Local -> validateLocalUser(registeredUserDevice, applicationPassword)
@@ -87,7 +88,7 @@ class AuthenticationPasswordRepositoryImpl(
 
     private suspend fun validateLocalUser(
         registeredUserDevice: RegisteredUserDevice.Local,
-        password: AppKey.Password
+        password: AppKey.Password,
     ): AuthenticationPasswordRepository.Result = coroutineScope {
         
         
@@ -108,7 +109,7 @@ class AuthenticationPasswordRepositoryImpl(
             val isValidPassword = localKeyResult.isSuccess
             throw AuthenticationDeviceCredentialsInvalidException(
                 isValidPassword,
-                deviceValidity == DeviceValidity.UNRECOGNIZED
+                deviceValidity == DeviceValidity.UNRECOGNIZED,
             )
         } else {
             localKeyResult
@@ -118,7 +119,7 @@ class AuthenticationPasswordRepositoryImpl(
                     },
                     onFailure = {
                         throw AuthenticationInvalidPasswordException(cause = it)
-                    }
+                    },
                 )
         }
     }
@@ -128,27 +129,27 @@ class AuthenticationPasswordRepositoryImpl(
 
         REVOKED,
 
-        UNRECOGNIZED
+        UNRECOGNIZED,
     }
 
     private suspend fun getDeviceValidity(
-        device: RegisteredUserDevice.Local
+        device: RegisteredUserDevice.Local,
     ): DeviceValidity {
         val login = device.login
-        val request = AuthLoginService.Request(
+        val request = GetAuthenticationMethodsForLoginService.Request(
             login = login,
             deviceAccessKey = device.accessKey,
             profiles = listOf(
-                AuthLoginService.Request.Profile(
+                GetAuthenticationMethodsForLoginService.Request.Profile(
                     login = device.login,
-                    deviceAccessKey = device.accessKey
-                )
+                    deviceAccessKey = device.accessKey,
+                ),
             ),
-            methods = emptyList()
+            methods = emptyList(),
         )
-        val response: Response<AuthLoginService.Data> = try {
+        val response: Response<GetAuthenticationMethodsForLoginService.Data> = try {
             withTimeout(TimeUnit.SECONDS.toMillis(2)) {
-                loginService.execute(request)
+                getAuthenticationMethodsForLoginService.execute(request)
             }
         } catch (e: DeviceDeactivatedException) {
             
@@ -184,7 +185,7 @@ class AuthenticationPasswordRepositoryImpl(
 
     override suspend fun validateRemoteUser(
         registeredUserDevice: RegisteredUserDevice.Remote,
-        password: AppKey.Password
+        password: AppKey.Password,
     ): AuthenticationPasswordRepository.Result.Remote {
         val encryptedRemoteKey = registeredUserDevice.encryptedRemoteKey
         val vaultKey = if (encryptedRemoteKey == null) {
@@ -200,10 +201,25 @@ class AuthenticationPasswordRepositoryImpl(
         return cryptography.createVaultDecryptionEngine(vaultKey).use { decryptionEngine ->
             val userSettings = try {
                 decryptionEngine.forXml().decryptSettings(registeredUserDevice.encryptedSettings.asEncryptedBase64())
-            } catch (e: CryptographyException) {
-                throw AuthenticationInvalidPasswordException(cause = e)
-            } catch (e: XmlException) {
-                throw AuthenticationInvalidPasswordException(cause = e)
+            } catch (e: Exception) {
+                when (e) {
+                    is CryptographyException,
+                    is XmlException,
+                    -> {
+                            message = "validateRemoteUser decryptSettings",
+                            throwable = e,
+                            customLogs = listOf(
+                                Logs.Kibana(
+                                    action = DeveloperLogAction.AUTHENTICATION_ERROR,
+                                    username = registeredUserDevice.login,
+                                    accessKey = registeredUserDevice.accessKey,
+                                ),
+                            ),
+                        )
+                        throw AuthenticationInvalidPasswordException(cause = e)
+                    }
+                    else -> throw e
+                }
             }
 
             val sharingKeys = registeredUserDevice.sharingKeys?.let {
@@ -219,7 +235,7 @@ class AuthenticationPasswordRepositoryImpl(
             val localKey = authenticationLocalKeyRepository.createForRemote(
                 username = username,
                 appKey = password,
-                cryptographyMarker = CryptographyMarker.Flexible.Defaults.argon2d
+                cryptographyMarker = CryptographyMarker.Flexible.Defaults.argon2d,
             )
             registeredUserDevice.toSuccess(
                 password = password,
@@ -227,14 +243,14 @@ class AuthenticationPasswordRepositoryImpl(
                 settingsDate = registeredUserDevice.settingsDate,
                 sharingKeys = sharingKeys,
                 localKey = localKey,
-                remoteKey = vaultKey as? VaultKey.RemoteKey
+                remoteKey = vaultKey as? VaultKey.RemoteKey,
             )
         }
     }
 
     private suspend fun validateToRestoreUser(
         userDevice: RegisteredUserDevice.ToRestore,
-        vaultKey: AppKey.Password
+        vaultKey: AppKey.Password,
     ): AuthenticationPasswordRepository.Result {
         val backupToken = try {
             cryptography.createVaultDecryptionEngine(vaultKey.toVaultKey())
@@ -242,16 +258,17 @@ class AuthenticationPasswordRepositoryImpl(
         } catch (e: CryptographyException) {
             throw AuthenticationDeviceCredentialsInvalidException(isValidPassword = false, cause = e)
         }
-        val registeredDevice: RegisteredUserDevice.Remote = registerExtraDevice(userDevice.login, backupToken, userDevice.securityFeatures)
+        val registeredDevice: RegisteredUserDevice.Remote =
+            registerExtraDevice(userDevice.login, backupToken, userDevice.securityFeatures)
         return validateRemoteUser(registeredDevice, vaultKey)
     }
 
     private suspend fun registerExtraDevice(
         login: String,
         backupToken: String,
-        securityFeatures: Set<SecurityFeature>
+        securityFeatures: Set<SecurityFeature>,
     ): RegisteredUserDevice.Remote {
-        val request = AuthRegistrationExtraDeviceService.Request(
+        val request = CompleteExtraDeviceRegistrationWithTokenService.Request(
             login = login,
             device = AuthRegistrationDevice(
                 osCountry = deviceRegistrationInfo.osCountry,
@@ -259,14 +276,14 @@ class AuthenticationPasswordRepositoryImpl(
                 appVersion = deviceRegistrationInfo.appVersion,
                 deviceName = deviceRegistrationInfo.deviceName,
                 platform = Platform.SERVER_ANDROID,
-                osLanguage = deviceRegistrationInfo.osLanguage
+                osLanguage = deviceRegistrationInfo.osLanguage,
             ),
-            verification = AuthRegistrationExtraDeviceService.Request.Verification(
-                AuthRegistrationExtraDeviceService.Request.Verification.Token(backupToken)
-            )
+            verification = CompleteExtraDeviceRegistrationWithTokenService.Request.Verification(
+                CompleteExtraDeviceRegistrationWithTokenService.Request.Verification.Token(backupToken),
+            ),
         )
         val response = try {
-            extraDeviceService.execute(request)
+            completeExtraDeviceRegistrationWithTokenService.execute(request)
         } catch (e: DashlaneApiIoException) {
             throw e.toAuthenticationException()
         } catch (e: DashlaneApiException) {
@@ -280,7 +297,7 @@ class AuthenticationPasswordRepositoryImpl(
             login = login,
             securityFeatures = securityFeatures,
             encryptedSettings = encryptedSettings,
-            settingsDate = settingsDate
+            settingsDate = settingsDate,
         )
     }
 }
@@ -291,7 +308,7 @@ private fun RegisteredUserDevice.Remote.toSuccess(
     settingsDate: Instant,
     sharingKeys: SharingKeys?,
     localKey: LocalKey,
-    remoteKey: VaultKey.RemoteKey?
+    remoteKey: VaultKey.RemoteKey?,
 ) = AuthenticationPasswordRepository.Result.Remote(
     login = login,
     securityFeatures = securityFeatures,
@@ -305,13 +322,13 @@ private fun RegisteredUserDevice.Remote.toSuccess(
     localKey = localKey,
     deviceAnalyticsId = deviceAnalyticsId,
     userAnalyticsId = userAnalyticsId,
-    remoteKey = remoteKey
+    remoteKey = remoteKey,
 )
 
 private fun RegisteredUserDevice.Local.toSuccess(
     secretKey: String,
     password: AppKey.Password,
-    localKey: LocalKey
+    localKey: LocalKey,
 ) = AuthenticationPasswordRepository.Result.Local(
     login = login,
     securityFeatures = securityFeatures,
@@ -319,14 +336,14 @@ private fun RegisteredUserDevice.Local.toSuccess(
     secretKey = secretKey,
     password = password,
     isAccessKeyRefreshed = false,
-    localKey = localKey
+    localKey = localKey,
 )
 
-private fun AuthRegistrationExtraDeviceService.Data.toRegisteredUserDevice(
+private fun CompleteExtraDeviceRegistrationWithTokenService.Data.toRegisteredUserDevice(
     login: String,
     securityFeatures: Set<SecurityFeature>,
     encryptedSettings: String,
-    settingsDate: Instant
+    settingsDate: Instant,
 ) = RegisteredUserDevice.Remote(
     login = login,
     securityFeatures = securityFeatures,
@@ -341,5 +358,5 @@ private fun AuthRegistrationExtraDeviceService.Data.toRegisteredUserDevice(
     registeredDeviceCount = numberOfDevices,
     deviceAnalyticsId = deviceAnalyticsId,
     userAnalyticsId = userAnalyticsId,
-    encryptedRemoteKey = remoteKeys?.findByTypeOrNull(RemoteKey.Type.MASTER_PASSWORD)
+    encryptedRemoteKey = remoteKeys?.findByTypeOrNull(RemoteKey.Type.MASTER_PASSWORD),
 )

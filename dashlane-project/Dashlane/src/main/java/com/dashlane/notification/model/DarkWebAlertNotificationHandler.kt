@@ -3,11 +3,12 @@ package com.dashlane.notification.model
 import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
+import com.dashlane.BuildConfig
 import com.dashlane.R
+import com.dashlane.navigation.appendBreachNotificationExtra
 import com.dashlane.notification.FcmCode
 import com.dashlane.notification.FcmHelper
 import com.dashlane.notification.FcmMessage
-import com.dashlane.notification.appendBreachNotificationExtra
 import com.dashlane.notification.getJsonData
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.security.DashlaneIntent
@@ -20,10 +21,9 @@ class DarkWebAlertNotificationHandler(
     context: Context,
     message: FcmMessage,
     private val fcmHelper: FcmHelper,
-    private val globalPreferencesManager: GlobalPreferencesManager
+    private val globalPreferencesManager: GlobalPreferencesManager,
 ) :
-    AbstractNotificationHandler(context, message) {
-
+    AbstractNotificationHandler(BuildConfig.APPLICATION_ID, context, message) {
     init {
         parseMessage()
         notificationId = NOTIFICATION_ID
@@ -62,7 +62,7 @@ class DarkWebAlertNotificationHandler(
             context,
             0,
             notificationIntent,
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val notification = buildNotification(context) {
             setContentTitle(title)
@@ -90,7 +90,7 @@ class DarkWebAlertNotificationHandler(
         val message = context.resources.getQuantityString(
             R.plurals.darkweb_notification_confirm_alert_description,
             counter,
-            counter
+            counter,
         )
         return title to message
     }

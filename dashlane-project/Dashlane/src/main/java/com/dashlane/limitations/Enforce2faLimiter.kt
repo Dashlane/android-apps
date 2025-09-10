@@ -2,35 +2,33 @@ package com.dashlane.limitations
 
 import android.app.Activity
 import android.os.Bundle
-import com.dashlane.login.LoginIntents.createEnforce2faLimitActivityIntent
-import com.dashlane.login.pages.enforce2fa.HasEnforced2FaLimitUseCaseImpl
-import com.dashlane.login.pages.enforce2fa.HasEnforced2faLimitUseCase
-import com.dashlane.server.api.endpoints.authentication.Auth2faSettingsService
+import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.authentication.twofa.Use2faSettingStateHolder
+import com.dashlane.login.pages.enforce2fa.HasEnforced2FaLimitUseCase
+import com.dashlane.navigation.LoginIntentFactory
+import com.dashlane.server.api.endpoints.authentication.Get2FAStatusService
 import com.dashlane.session.SessionManager
-import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.ui.AbstractActivityLifecycleListener
 import com.dashlane.ui.activities.HomeActivity
-import com.dashlane.ui.screens.settings.Use2faSettingStateHolder
-import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class Enforce2faLimiter(
     private val applicationCoroutineScope: CoroutineScope,
     private val mainCoroutineDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
-    private val enforced2faLimitUseCase: HasEnforced2faLimitUseCase,
-    private val use2faSettingState: Use2faSettingStateHolder
+    private val enforced2faLimitUseCase: HasEnforced2FaLimitUseCase,
+    private val use2faSettingState: Use2faSettingStateHolder,
+    private val loginIntentFactory: LoginIntentFactory,
 ) : AbstractActivityLifecycleListener() {
-
     @Inject
     constructor(
         @ApplicationCoroutineScope
@@ -38,21 +36,22 @@ class Enforce2faLimiter(
         @MainCoroutineDispatcher
         mainCoroutineDispatcher: CoroutineDispatcher,
         sessionManager: SessionManager,
-        teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
-        auth2faSettingsService: Auth2faSettingsService,
-        use2faSettingState: Use2faSettingStateHolder
+        accountStatusRepository: AccountStatusRepository,
+        get2FAStatusService: Get2FAStatusService,
+        use2faSettingState: Use2faSettingStateHolder,
+        loginIntentFactory: LoginIntentFactory,
     ) : this(
         applicationCoroutineScope = applicationCoroutineScope,
         mainCoroutineDispatcher = mainCoroutineDispatcher,
         sessionManager = sessionManager,
-        enforced2faLimitUseCase = HasEnforced2FaLimitUseCaseImpl(
-            teamSpaceAccessor = teamSpaceAccessorProvider,
-            auth2faSettingsService = auth2faSettingsService
+        enforced2faLimitUseCase = HasEnforced2FaLimitUseCase(
+            accountStatusRepository = accountStatusRepository,
+            get2FAStatusService = get2FAStatusService,
         ),
-        use2faSettingState = use2faSettingState
+        use2faSettingState = use2faSettingState,
+        loginIntentFactory = loginIntentFactory,
     )
 
-    var isFirstLogin = false
     private var shouldCheckLimit = false
     private var hasEnforce2faLimit: Boolean? = null
     private var redirectionDone = false
@@ -60,7 +59,6 @@ class Enforce2faLimiter(
     override fun onFirstLoggedInActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         super.onFirstLoggedInActivityCreated(activity, savedInstanceState)
         redirectionDone = false
-        if (isFirstLogin) return
         checkLimit(activity)
         listenTo2FAChanges()
     }
@@ -68,7 +66,6 @@ class Enforce2faLimiter(
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         sessionManager.session ?: return
-        if (isFirstLogin) return
         if (shouldCheckLimit) checkLimit(activity)
         mayShowIntro(activity)
     }
@@ -83,7 +80,7 @@ class Enforce2faLimiter(
         applicationCoroutineScope.launch(mainCoroutineDispatcher) {
             hasEnforce2faLimit = enforced2faLimitUseCase(
                 session = session,
-                hasTotpSetupFallback = null
+                hasTotpSetupFallback = null,
             )
             if (!activity.isFinishing) mayShowIntro(activity)
         }
@@ -103,7 +100,7 @@ class Enforce2faLimiter(
 
     private fun mayShowIntro(activity: Activity) {
         if (hasEnforce2faLimit != true || redirectionDone || activity !is HomeActivity) return
-        val intent = createEnforce2faLimitActivityIntent(activity = activity, clearTask = false)
+        val intent = loginIntentFactory.createEnforce2faLimitActivityIntent(activity, clearTask = false)
         activity.startActivity(intent)
     }
 }

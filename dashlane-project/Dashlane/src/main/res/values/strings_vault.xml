@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="vault_fab_add_item">Add new</string>
-    <string name="vault_fab_add_password">Add new</string>
-    <string name="vault_fab_add_secure_note">Add new</string>
-    <string name="vault_fab_add_payment">Add new</string>
-    <string name="vault_fab_add_personal_info">Add new</string>
-    <string name="vault_fab_add_id">Add new</string>
-    
-    <string name="vault_fab_add_secret">Add new</string>
-    <string name="vault_header_suggested">Suggested</string>
-    <string name="vault_header_most_recent">Most recent</string>
-    <string name="vault_search_hint">Find an item, tool, or setting</string>
+    <string name="vault_search_hint">Search in your vault</string>
     <string name="vault_action_bar_title">Home</string>
 
     <string name="vault_filter_all_items">All items</string>
@@ -21,6 +11,8 @@
     <string name="vault_filter_ids">IDs</string>
     
     <string name="vault_filter_secrets">Secrets</string>
+    
+    <string name="vault_filter_wifi">Wi-Fi</string>
     
     <string name="vault_collection_title">Collections</string>
     
@@ -34,7 +26,7 @@
     
     <string name="vault_setup_2fa">Set up 2-factor authentication</string>
     
-    <string name="vault_action_copy">Copy</string>
+    <string name="vault_action_copy_field">Copy %s</string>
     
     <string name="vault_action_open">Open</string>
     
@@ -46,11 +38,11 @@
     
     <string name="vault_password_safety">Safety</string>
     
-    <string name="vault_organisation">Organisation</string>
+    <string name="vault_organisation">Organization</string>
     
     <string name="vault_shared_access">Shared access</string>
     
-    <string name="vault_preferences">Preferences</string>">
+    <string name="vault_preferences">Preferences</string>
     
     <string name="vault_attachments">Attachments</string>
     
@@ -84,7 +76,7 @@
     
     <string name="vault_limited_rights_infobox_title">This item is shared with limited rights</string>
     
-    <string name="vault_limited_rights_infobox_content">You can only autofill the content or remove it from your vault.</string>
+    <string name="vault_limited_rights_infobox_content">You can only autofill content or remove it from your vault.</string>
     
     <string name="vault_limited_rights_secure_note_infobox_content">You can only view the content or remove it from your vault.</string>
     
@@ -98,17 +90,17 @@
     
     <string name="vault_note_detail_title">Note details</string>
     
-    <string name="vault_secure_note_setting_secured_title">Lock Secure Note</string>
+    <string name="vault_secure_note_setting_secured_title">Protect item</string>
     
-    <string name="vault_secure_note_setting_secured_description">Ask for your Biometrics or Master Password to unlock this note.</string>
+    <string name="vault_secure_note_setting_secured_description">Ask for your biometrics or Master Password to unlock this note.</string>
     
-    <string name="secure_note_attachments_restriction_infobox_title">Attachments cannot be added to shared or Secure Notes in a Collection</string>
+    <string name="secure_note_attachments_restriction_infobox_title">Attachments cannot be added to items that are shared or belong to a Collection.</string>
     
     <string name="secure_note_sharing_and_collection_restriction_infobox_title">Secure Notes with attachments cannot be shared or added to a Collection.</string>
     
     <string name="vault_secure_note_attachment_restrict_collections">Secure Notes with attachments cannot be added to a Collection.</string>
     
-    <string name="vault_toolbar_secure_note_create_title">Add a secure note</string>
+    <string name="vault_toolbar_secure_note_create_title">Add a Secure Note</string>
     
     <string name="vault_delete_secure_note">Delete secure note</string>
     
@@ -133,11 +125,39 @@
     
     <string name="secret_hint_content">Secret value</string>
     
-    <string name="vault_secret_setting_secured_title">Content protected</string>
+    <string name="vault_secret_setting_secured_title">Protect item</string>
     
     <string name="vault_secret_setting_secured_description">Ask for your Biometrics or Master Password to unlock this secret.</string>
     
     <string name="vault_delete_secret">Delete secret</string>
     
     <string name="vault_toolbar_secret_create_title">Add a secret</string>
+    
+    <string name="save_item_to_proceed_description">Some pending changes require to be saved before proceeding. Do you want to save your item now?</string>
+    
+    <string name="vault_toolbar_credit_card_create_title">Add a credit/debit card</string>
+    
+    <string name="vault_delete_credit_card">Delete credit/debit card</string>
+    
+    <string name="credit_card_nfc_infobox_title">Tap your NFC card on the back of your device to instantly fill your card details.</string>
+    
+    <string name="credit_card_nfc_infobox_description">Ensure your enable NFC on your device\'s settings.</string>
+
+    
+    <string name="vault_toolbar_unknown_type">Add an item</string>
+    
+    <string name="vault_toolbar_wifi_create_title">Add a Wi-Fi</string>
+    
+    <string name="vault_delete_wifi">Delete Wi-Fi</string>
+    
+    <string name="wifi_missing_location_permission_infobox_title">Enable precise location permission to allow the app to search for nearby Wi-Fi networks.</string>
+    
+    <string name="wifi_missing_location_permission_infobox_button">Allow</string>
+    <string name="wifi_disable_infobox_title">Enable Wi-Fi to allow the app to search for nearby Wi-Fi networks.</string>
+    <string name="location_disable_infobox_title">Enable location to allow the app to search for nearby Wi-Fi networks.</string>
+    <string name="wifi_location_permission_denied_dialog_title">Permission denied</string>
+    <string name="wifi_location_permission_denied_dialog_message">You should allow precise location permission from the settings.</string>
+    <string name="wifi_location_permission_denied_dialog_open_settings">Open settings</string>
+    <string name="wifi_infobox_open_settings">Open settings</string>
+
 </resources>

@@ -16,7 +16,7 @@ class PasswordResetReceiver(
     private val sessionTrasher: SessionTrasher,
     private val syncBroadcastManager: SyncBroadcastManager,
     private val sessionManager: SessionManager,
-    private val navigator: Navigator
+    private val navigator: Navigator,
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action

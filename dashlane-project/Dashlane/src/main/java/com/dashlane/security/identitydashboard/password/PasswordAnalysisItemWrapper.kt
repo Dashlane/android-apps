@@ -3,6 +3,7 @@ package com.dashlane.security.identitydashboard.password
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import com.dashlane.R
+import com.dashlane.passwordhealth.identitydashboard.password.PasswordAnalysisContract
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
@@ -17,11 +18,9 @@ class PasswordAnalysisItemWrapper(
     mode: PasswordAnalysisContract.Mode,
     authentifiantWrapper: DefaultVaultItemWrapper<SummaryObject.Authentifiant>,
     private val actionListener: ActionListener,
-    private val vaultDataQuery: VaultDataQuery
+    private val vaultDataQuery: VaultDataQuery,
 ) : VaultItemDoubleWrapper<SummaryObject.Authentifiant>(authentifiantWrapper) {
-
     private val listItemAction = object : ListItemAction {
-
         override val icon: Int = R.drawable.ic_item_action_more
 
         override val contentDescription: Int = R.string.and_accessibility_vault_item_menu
@@ -32,9 +31,7 @@ class PasswordAnalysisItemWrapper(
         override fun onClickItemAction(v: View, item: SummaryObject) {
             if (item !is SummaryObject.Authentifiant) return
             val vaultItem = vaultDataQuery.queryLegacy(
-                vaultFilter {
-                    specificUid(item.id)
-                }
+                vaultFilter { specificUid(item.id) },
             ) as? VaultItem<SyncObject.Authentifiant> ?: return
 
             PopupMenu(v.context, v).apply {
@@ -48,10 +45,12 @@ class PasswordAnalysisItemWrapper(
                 setOnMenuItemClickListener {
                     when (it) {
                         menuItemInclude -> actionListener.saveModified(
-                            vaultItem.copySyncObject { checked = false }
+                            authentifiant = vaultItem.copySyncObject { checked = false },
+                            isExcluded = false,
                         )
                         menuItemExclude -> actionListener.saveModified(
-                            vaultItem.copySyncObject { checked = true }
+                            authentifiant = vaultItem.copySyncObject { checked = true },
+                            isExcluded = true,
                         )
                         menuItemGoWebsite -> actionListener.goToWebsite(item)
                     }
@@ -67,8 +66,10 @@ class PasswordAnalysisItemWrapper(
     }
 
     interface ActionListener {
-        fun saveModified(authentifiant: VaultItem<SyncObject.Authentifiant>)
+        fun saveModified(authentifiant: VaultItem<SyncObject.Authentifiant>, isExcluded: Boolean)
+
         fun open(authentifiant: SummaryObject.Authentifiant)
+
         fun goToWebsite(authentifiant: SummaryObject.Authentifiant)
     }
 }

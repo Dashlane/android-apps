@@ -2,6 +2,10 @@ package com.github.devnied.emvnfccard.model.enums;
 
 import java.util.Locale;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum CurrencyEnum implements IKeyEnum {
 
     AED(784, Digits.DIGITS_2, "United Arab Emirates dirham", new CountryCodeEnum[]{CountryCodeEnum.AE}),

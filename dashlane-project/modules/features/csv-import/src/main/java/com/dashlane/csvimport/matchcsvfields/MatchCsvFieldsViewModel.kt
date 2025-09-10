@@ -9,16 +9,15 @@ import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CA
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CATEGORY_URL
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CATEGORY_USERNAME
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 internal class MatchCsvFieldsViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val _showIntroPopupFlow = MutableSharedFlow<Int?>(replay = 1)
     val showIntroPopupFlow: Flow<Int?>
         get() = _showIntroPopupFlow
@@ -26,7 +25,7 @@ internal class MatchCsvFieldsViewModel @Inject constructor(
     private var state = MatchCsvFieldsViewState(
         emptyList(),
         0,
-        false
+        false,
     ) 
         set(value) {
             field = value
@@ -57,7 +56,7 @@ internal class MatchCsvFieldsViewModel @Inject constructor(
                 state = MatchCsvFieldsViewState(
                     buildItems(),
                     0,
-                    false
+                    false,
                 )
 
                 viewModelScope.launch { _showIntroPopupFlow.emit(state.items.size) }
@@ -67,7 +66,7 @@ internal class MatchCsvFieldsViewModel @Inject constructor(
                 state = MatchCsvFieldsViewState(
                     items,
                     position,
-                    hasRequiredCategories
+                    hasRequiredCategories,
                 )
             }
         }
@@ -100,7 +99,7 @@ internal class MatchCsvFieldsViewModel @Inject constructor(
         val hasRequiredCategories = hasRequiredCategories(items)
         state = state.copy(
             items = items,
-            canValidate = hasRequiredCategories
+            canValidate = hasRequiredCategories,
         )
     }
 

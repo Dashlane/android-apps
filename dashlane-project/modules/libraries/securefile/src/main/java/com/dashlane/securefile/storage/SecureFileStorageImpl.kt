@@ -7,7 +7,7 @@ import com.dashlane.cryptography.asEncryptedFile
 import com.dashlane.cryptography.decryptFile
 import com.dashlane.network.webservices.DownloadFileService
 import com.dashlane.securefile.SecureFile
-import com.dashlane.server.api.endpoints.securefile.GetSecureFileDownloadLinkService
+import com.dashlane.server.api.endpoints.securefile.GetDownloadLinkService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.session.SessionManager
 import com.dashlane.session.authorization
@@ -28,12 +28,11 @@ import javax.inject.Inject
 class SecureFileStorageImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sessionManager: SessionManager,
-    private val getSecureFileDownloadLinkService: GetSecureFileDownloadLinkService,
-    private val downloadService: DownloadFileService,
+    private val getDownloadLinkService: GetDownloadLinkService,
+    private val downloadFileService: DownloadFileService,
     private val cryptography: Cryptography,
-    private val fileUtils: FileUtils
+    private val fileUtils: FileUtils,
 ) : SecureFileStorage {
-
     private val secureFilesDir
         get() = File(context.cacheDir, "secure_files")
 
@@ -52,7 +51,7 @@ class SecureFileStorageImpl @Inject constructor(
 
     override suspend fun download(secureFile: SecureFile, progression: SendChannel<Float>) {
         val link = fetchDownloadLink(secureFile.id!!)
-        val body = downloadService.execute(link)
+        val body = downloadFileService.execute(link)
 
         withContext(Dispatchers.IO) {
             body.source().use { source ->
@@ -66,9 +65,9 @@ class SecureFileStorageImpl @Inject constructor(
                             progression.trySend(downloadedSize * 100F / body.contentLength())
                         }
                     }
-                    ).buffer().use { sink ->
-                        sink.writeAll(source)
-                    }
+                ).buffer().use { sink ->
+                    sink.writeAll(source)
+                }
             }
         }
     }
@@ -97,9 +96,9 @@ class SecureFileStorageImpl @Inject constructor(
             
             
             fileUtils.writeFileToPublicFolder(
-                secureFile.fileName,
-                mimeType,
-                localSize
+                fileName = secureFile.fileName,
+                type = mimeType,
+                size = localSize,
             ) {
                 decipher(secureFile) { it }
             }
@@ -117,11 +116,11 @@ class SecureFileStorageImpl @Inject constructor(
     private suspend fun fetchDownloadLink(id: String): String {
         try {
             val session = sessionManager.session ?: throw DownloadAccessException()
-            val response = getSecureFileDownloadLinkService.execute(
+            val response = getDownloadLinkService.execute(
                 userAuthorization = session.authorization,
-                request = GetSecureFileDownloadLinkService.Request(
+                request = GetDownloadLinkService.Request(
                     key = id,
-                )
+                ),
             )
 
             return response.data.url
@@ -132,7 +131,7 @@ class SecureFileStorageImpl @Inject constructor(
 
     private fun decipher(
         secureFile: SecureFile,
-        targetSupplier: SecureFile.() -> OutputStream
+        targetSupplier: SecureFile.() -> OutputStream,
     ) = secureFile.targetSupplier().use { target ->
         decryptFile(secureFile, target)
     }

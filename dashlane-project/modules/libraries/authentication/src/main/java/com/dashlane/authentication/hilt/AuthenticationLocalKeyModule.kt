@@ -12,6 +12,6 @@ import dagger.hilt.components.SingletonComponent
 fun interface AuthenticationLocalKeyModule {
     @Binds
     fun bindLocalKeyRepository(
-        localKeyRepository: AuthenticationLocalKeyRepositoryImpl
+        localKeyRepository: AuthenticationLocalKeyRepositoryImpl,
     ): AuthenticationLocalKeyRepository
 }

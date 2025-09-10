@@ -22,19 +22,19 @@ fun SummaryObject.showAttachments(activity: Activity) {
         putExtra(AttachmentListActivity.ITEM_ID, id)
         putExtra(
             AttachmentListActivity.ITEM_TYPE,
-            this@showAttachments.syncObjectType.xmlObjectName
+            this@showAttachments.syncObjectType.xmlObjectName,
         )
     }
     activity.startActivityForResult(
         attachmentListIntent,
-        AttachmentListActivity.REQUEST_CODE_ATTACHMENT_LIST
+        AttachmentListActivity.REQUEST_CODE_ATTACHMENT_LIST,
     )
 }
 
 fun SummaryObject.showSharing(
     requestCode: Int,
     activity: Activity,
-    startNewShare: Boolean = false
+    startNewShare: Boolean = false,
 ) {
     val uri = NavigationUriBuilder().apply {
         when (this@showSharing) {
@@ -44,6 +44,10 @@ fun SummaryObject.showSharing(
             }
             is SummaryObject.SecureNote -> {
                 host(NavigationHelper.Destination.MainPath.NOTES)
+                origin(SharingNewSharePeopleFragment.FROM_ITEM_VIEW)
+            }
+            is SummaryObject.Secret -> {
+                host(NavigationHelper.Destination.MainPath.SECRETS)
                 origin(SharingNewSharePeopleFragment.FROM_ITEM_VIEW)
             }
             else -> {
@@ -63,7 +67,7 @@ fun SummaryObject.showSharing(
         uri,
         Bundle().apply {
             if (!startNewShare) putBoolean(ShareDetailsAction.EXTRA_NOTIFY_UID_CHANGES, true)
-        }
+        },
     )
 }
 

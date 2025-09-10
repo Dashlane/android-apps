@@ -3,12 +3,10 @@ package com.dashlane.ui.screens.fragments.userdata.sharing
 import com.dashlane.R
 import com.dashlane.core.domain.sharing.SharingPermission
 import com.dashlane.server.api.endpoints.sharinguserdevice.CollectionDownload
-import com.dashlane.server.api.endpoints.sharinguserdevice.GetUsersPublicKeyService
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserCollectionDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupCollectionDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroupMember
-import com.dashlane.sharing.internal.model.UserToUpdate
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAdmin
 import com.dashlane.sharing.model.isPending
@@ -95,17 +93,4 @@ fun CollectionDownload.getSharingStatusResource(): Int {
     } else {
         0
     }
-}
-
-fun List<UserDownload>.getUsersToUpdate(
-    users: List<GetUsersPublicKeyService.Data.Data>
-) = mapNotNull { userDownload ->
-    users.find { it.publicKey != null && it.login != null && it.login == userDownload.userId }
-        ?.let {
-            UserToUpdate(
-                userId = it.login!!,
-                permission = userDownload.permission,
-                publicKey = it.publicKey!!
-            )
-        }
 }

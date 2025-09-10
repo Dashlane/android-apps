@@ -21,7 +21,7 @@ interface SubViewFactory {
         allowReveal: Boolean = true,
         multiline: Boolean = false,
         coloredCharacter: Boolean = false,
-        protectedStateListener: (Boolean) -> Unit = {}
+        protectedStateListener: (Boolean) -> Unit = {},
     ): ItemSubView<String>?
 
     fun createSubViewNumber(
@@ -31,28 +31,28 @@ interface SubViewFactory {
         protected: Boolean,
         valueUpdate: (VaultItem<*>, String) -> VaultItem<*>? = { _, _ -> null },
         suggestions: List<String>? = null,
-        protectedStateListener: (Boolean) -> Unit = {}
+        protectedStateListener: (Boolean) -> Unit = {},
     ): ItemSubView<String>?
 
     fun createSubviewList(
         title: String,
         selectedValue: String,
         values: List<String>,
-        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>? = { _, _ -> null }
+        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>? = { _, _ -> null },
     ): ItemSubView<String>?
 
     fun createSubviewListNonDefault(
         title: String,
         selectedValue: String,
         values: List<String>,
-        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>? = { _, _ -> null }
+        valueUpdate: (VaultItem<*>, String) -> VaultItem<*>? = { _, _ -> null },
     ): ItemSubView<String>?
 
     fun createSubviewBoolean(
         header: String,
         description: String?,
         value: Boolean,
-        valueUpdate: (VaultItem<*>, Boolean) -> VaultItem<*>? = { _, _ -> null }
+        valueUpdate: (VaultItem<*>, Boolean) -> VaultItem<*>? = { _, _ -> null },
     ): ItemSubView<Boolean>?
 
     fun createSpaceSelector(
@@ -60,20 +60,20 @@ interface SubViewFactory {
         teamSpaceAccessor: TeamSpaceAccessor,
         toListenViews: List<ItemSubView<String>>?,
         valueUpdate: (VaultItem<*>, TeamSpace) -> VaultItem<*>,
-        linkedWebsites: List<String> = listOf()
+        linkedWebsites: List<String> = listOf(),
     ): ItemSubView<TeamSpace>?
 
     fun createSubviewDelete(
         context: Context,
         listener: ItemEditViewContract.View.UiUpdateListener,
         deleteAllowed: Boolean,
-        text: String = context.getString(R.string.delete)
+        text: String = context.getString(R.string.delete),
     ): ItemClickActionSubView?
 
     fun createSubviewSharingDetails(
         context: Context,
         vaultItem: VaultItem<*>,
-        sharingPolicy: SharingPolicyDataProvider
+        sharingPolicy: SharingPolicyDataProvider,
     ): ItemSubView<String>?
 
     fun createSubviewAttachmentDetails(context: Context, vaultItem: VaultItem<*>): ItemSubView<String>?

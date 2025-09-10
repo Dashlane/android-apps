@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/setup_risk_detection.json",
+  "type": "object",
+  "description": "When an admin performs specific actions throughout the Risk Detection setup funnel",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "setup_risk_detection"
+    },
+    "risk_detection_setup_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/risk_detection_setup_step"
+    }
+  },
+  "required": [
+    "name",
+    "risk_detection_setup_step"
+  ],
+  "additionalProperties": false
+}

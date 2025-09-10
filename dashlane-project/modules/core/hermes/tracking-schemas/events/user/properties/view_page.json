@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/view_page.json",
+  "type": "object",
+  "description": "Page view",
+  "metas": {
+    "area": "ui"
+  },
+  "properties": {
+    "name": {
+      "const": "view_page"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

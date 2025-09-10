@@ -4,60 +4,71 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Parcelable
 import android.text.format.DateUtils
-import com.google.gson.annotations.SerializedName
+import com.dashlane.breach.utils.BreachDateSerializer
+import com.dashlane.breach.utils.CriticalitySerializer
 import kotlinx.parcelize.Parcelize
-import java.time.Duration
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.time.temporal.ChronoField
 
+@OptIn(ExperimentalSerializationApi::class)
 @SuppressLint("ParcelCreator")
 @Parcelize
+@Serializable
+@JsonIgnoreUnknownKeys
 data class Breach(
-    @SerializedName("id")
+    @SerialName("id")
     val id: String,
-    @SerializedName("breachModelVersion")
+    @EncodeDefault
+    @SerialName("breachModelVersion")
     val breachModelVersion: Int = 0,
-    @SerializedName("name")
+    @SerialName("name")
     val name: String? = null,
-    @SerializedName("domains")
+    @SerialName("domains")
     val domains: List<String>? = null,
-    @SerializedName("eventDate")
+    @SerialName("eventDate")
     val eventDate: String? = null,
-    @SerializedName("announcedDate")
+    @SerialName("announcedDate")
     val announcedDate: String? = null,
-    @SerializedName("leakedData")
+    @SerialName("leakedData")
     val leakedData: List<String>? = null,
-    @SerializedName("impactedEmails")
+    @SerialName("impactedEmails")
     val impactedEmails: List<String>? = null,
-    @SerializedName("sensitiveDomain")
+    @EncodeDefault
+    @SerialName("sensitiveDomain")
     val sensitiveDomain: Boolean = false,
-    @SerializedName("criticality")
-    val criticality: Int = 0,
-    @SerializedName("restrictedArea")
+    @EncodeDefault
+    @SerialName("criticality")
+    @Serializable(with = CriticalitySerializer::class)
+    val criticality: Int = DEFAULT_CRITICALITY,
+    @SerialName("restrictedArea")
     val restrictedArea: List<String>? = null,
-    @SerializedName("relatedLinks")
+    @SerialName("relatedLinks")
     val relatedLinks: List<String>? = null,
-    @SerializedName("template")
+    @SerialName("template")
     val template: String? = null,
-    @SerializedName("status")
+    @SerialName("status")
     val status: String? = null,
-    @SerializedName("breachCreationDate")
-    val breachCreationDate: Long = 0,
-    @SerializedName("lastModificationRevision")
-    val lastModificationRevision: Int = 0
+    @SerialName("breachCreationDate")
+    @EncodeDefault
+    @Serializable(with = BreachDateSerializer::class)
+    val breachCreationDate: Long = EPOCH_TIMESTAMP,
+    @EncodeDefault
+    @SerialName("lastModificationRevision")
+    val lastModificationRevision: Int = 0,
 ) : Parcelable {
-
     val title: String?
         get() = name ?: domains?.joinToString(separator = ", ")
 
     val eventDateParsed: Instant
-        get() = parseDate(eventDate) ?: Instant.EPOCH
+        get() = BreachDateSerializer.parseDate(eventDate)
+            ?: Instant.EPOCH
 
     fun hasLeakedData(type: String) = leakedData?.contains(type) ?: false
 
@@ -66,49 +77,18 @@ data class Breach(
     fun hasCreditCardLeaked() = hasLeakedData(DATA_CREDIT_CARD)
 
     fun hasPrivateInformationLeaked() = hasLeakedData(DATA_USERNAME) ||
-            (
-                (isDarkWebBreach() && !hasLeakedData(DATA_PASSWORD)) || 
-                    (!isDarkWebBreach() && !hasLeakedData(DATA_EMAIL))
-            ) || 
-            hasLeakedData(DATA_CREDIT_CARD) ||
-            hasLeakedData(DATA_PHONE) ||
-            hasLeakedData(DATA_ADDRESS) ||
-            hasLeakedData(DATA_SSN) ||
-            hasLeakedData(DATA_IP) ||
-            hasLeakedData(DATA_LOCATION) ||
-            hasLeakedData(DATA_PERSONAL_INFORMATION) ||
-            hasLeakedData(DATA_SOCIAL_NETWORK)
-
-    private fun parseDate(date: String?): Instant? {
-        date ?: return null
-        
-        date.toLongOrNull()
-            ?.takeIf { it > 10_000 } 
-            ?.let {
-                return if (it < 100_000_000_000L) {
-                    Instant.ofEpochSecond(it) 
-                } else {
-                    Instant.ofEpochMilli(it) 
-                }
-            }
-        
-        DATES_FORMAT.forEach { (pattern, timeToAdd) ->
-            val formatter = DateTimeFormatter.ofPattern(pattern)
-            val accessor = try {
-                formatter.parse(date)
-            } catch (e: Exception) {
-                
-                return@forEach
-            }
-            val localDate = LocalDate.of(
-                accessor.get(ChronoField.YEAR),
-                if (accessor.isSupported(ChronoField.MONTH_OF_YEAR)) accessor.get(ChronoField.MONTH_OF_YEAR) else 1,
-                if (accessor.isSupported(ChronoField.DAY_OF_MONTH)) accessor.get(ChronoField.DAY_OF_MONTH) else 1
-            )
-            return ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, ZoneId.systemDefault()).toInstant() + timeToAdd
-        }
-        return null
-    }
+        (
+            (isDarkWebBreach() && !hasLeakedData(DATA_PASSWORD)) || 
+                (!isDarkWebBreach() && !hasLeakedData(DATA_EMAIL))
+        ) || 
+        hasLeakedData(DATA_CREDIT_CARD) ||
+        hasLeakedData(DATA_PHONE) ||
+        hasLeakedData(DATA_ADDRESS) ||
+        hasLeakedData(DATA_SSN) ||
+        hasLeakedData(DATA_IP) ||
+        hasLeakedData(DATA_LOCATION) ||
+        hasLeakedData(DATA_PERSONAL_INFORMATION) ||
+        hasLeakedData(DATA_SOCIAL_NETWORK)
 
     fun getDateEventFormated(context: Context): String? {
         val time = eventDateParsed
@@ -121,7 +101,7 @@ data class Breach(
                 DateUtils.formatDateTime(
                     context,
                     time.toEpochMilli(),
-                    DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_NO_MONTH_DAY
+                    DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_NO_MONTH_DAY,
                 )
             eventDate?.length == 4 && dashCount == 0 -> 
                 time.atZone(ZoneId.systemDefault()).year.toString()
@@ -131,8 +111,8 @@ data class Breach(
 
     fun shouldBeDisplay(): Boolean {
         return status == STATUS_LIVE ||
-                status == STATUS_LEGACY ||
-                status == STATUS_STAGING
+            status == STATUS_LEGACY ||
+            status == STATUS_STAGING
     }
 
     fun isDarkWebBreach() = impactedEmails?.isNotEmpty() ?: false
@@ -150,16 +130,13 @@ data class Breach(
         const val DATA_PERSONAL_INFORMATION = "personalinfo"
         const val DATA_SOCIAL_NETWORK = "social"
 
+        const val DEFAULT_CRITICALITY = 1
+        const val EPOCH_TIMESTAMP = 0L
+
         const val STATUS_LIVE = "live"
 
         const val STATUS_STAGING = "staging"
 
         const val STATUS_LEGACY = "legacy"
-
-        private val DATES_FORMAT = listOf(
-            "yyyy-MM-dd" to Duration.ZERO, 
-            "yyyy-MM" to Duration.ofDays(30), 
-            "yyyy" to Duration.ofDays(364) 
-        )
     }
 }

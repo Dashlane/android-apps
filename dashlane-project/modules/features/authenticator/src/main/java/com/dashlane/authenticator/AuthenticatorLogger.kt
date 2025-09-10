@@ -36,7 +36,6 @@ import com.dashlane.hermes.generated.events.user.UpdateVaultItem
 import javax.inject.Inject
 
 class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: LogRepository) {
-
     private var professional: Boolean? = null
 
     private var domain: Domain? = null
@@ -55,16 +54,16 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 field = OTP_SECRET,
                 itemType = CREDENTIAL,
                 itemId = ItemId(itemId),
-                isProtected = false
-            )
+                isProtected = false,
+            ),
         )
         domain?.let {
             hermesLogRepository.queueEvent(
                 CopyVaultItemFieldAnonymous(
                     field = OTP_SECRET,
                     itemType = CREDENTIAL,
-                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
-                )
+                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB),
+                ),
             )
         }
     }
@@ -77,16 +76,16 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 fieldsEdited = listOf(OTP_SECRET),
                 itemId = ItemId(id = itemId),
                 itemType = CREDENTIAL,
-                space = space
-            )
+                space = space,
+            ),
         )
         hermesLogRepository.queueEvent(
             UpdateCredentialAnonymous(
                 action = EDIT,
                 domain = domain ?: Domain(null, DomainType.WEB),
                 fieldList = listOf(OTP_SECRET),
-                space = space
-            )
+                space = space,
+            ),
         )
     }
 
@@ -97,8 +96,8 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 flowStep = START,
                 itemId = itemId.getItemId(),
                 otpAdditionMode = additionMode,
-                space = getSpace()
-            )
+                space = getSpace(),
+            ),
         )
     }
 
@@ -109,8 +108,8 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 flowStep = COMPLETE,
                 itemId = itemId.getItemId(),
                 otpAdditionMode = additionMode,
-                space = getSpace()
-            )
+                space = getSpace(),
+            ),
         )
         hermesLogRepository.queueEvent(
             AddTwoFactorAuthenticationToCredentialAnonymous(
@@ -119,8 +118,8 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 domain = domain,
                 otpAdditionMode = additionMode,
                 space = getSpace(),
-                authenticatorIssuerId = otp.issuer?.let { Sha256Hash.of(it) }
-            )
+                authenticatorIssuerId = otp.issuer?.let { Sha256Hash.of(it) },
+            ),
         )
     }
 
@@ -138,7 +137,7 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
         otp: Otp?,
         error: OtpAdditionError,
         byScan: Boolean,
-        itemId: String? = null
+        itemId: String? = null,
     ) {
         val additionMode = otp?.getAdditionMode() ?: getAdditionMode(byScan)
         hermesLogRepository.queueEvent(
@@ -147,8 +146,8 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 itemId = itemId.getItemId(),
                 otpAdditionMode = additionMode,
                 otpAdditionError = error,
-                space = getSpace()
-            )
+                space = getSpace(),
+            ),
         )
         hermesLogRepository.queueEvent(
             AddTwoFactorAuthenticationToCredentialAnonymous(
@@ -156,8 +155,8 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 flowStep = ERROR,
                 otpAdditionMode = additionMode,
                 otpAdditionError = error,
-                space = getSpace()
-            )
+                space = getSpace(),
+            ),
         )
     }
 
@@ -165,8 +164,8 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
         RemoveTwoFactorAuthenticationFromCredentialAnonymous(
             domain = domain!!,
             space = getSpace(professional)!!,
-            authenticatorIssuerId = issuer?.let { Sha256Hash.of(it) }
-        )
+            authenticatorIssuerId = issuer?.let { Sha256Hash.of(it) },
+        ),
     )
 
     private fun Otp.getAdditionMode() = if (url != null) QR_CODE else TEXT_CODE
@@ -193,13 +192,13 @@ class AuthenticatorLogger @Inject constructor(private val hermesLogRepository: L
                 durationOtpValidity = otp.period,
                 encryptionAlgorithm = algorithm,
                 otpType = TOTP,
-                otpCodeSize = otp.digits
+                otpCodeSize = otp.digits,
             )
             is Hotp -> OtpSpecifications(
                 encryptionAlgorithm = algorithm,
                 otpType = HOTP,
                 otpIncrementCount = otp.counter.toInt(),
-                otpCodeSize = otp.digits
+                otpCodeSize = otp.digits,
             )
             else -> null
         }

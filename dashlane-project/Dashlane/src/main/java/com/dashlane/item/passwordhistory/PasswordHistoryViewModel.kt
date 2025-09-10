@@ -2,17 +2,22 @@ package com.dashlane.item.passwordhistory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.item.passwordhistory.PasswordHistoryEntry.CredentialPasswordHistoryEntry
+import com.dashlane.item.passwordhistory.PasswordHistoryEntry.GeneratedPasswordHistoryEntry
 import com.dashlane.storage.userdata.accessor.DataChangeHistoryQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.GeneratedPasswordQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.DataChangeHistoryFilter
 import com.dashlane.storage.userdata.accessor.filter.VaultFilter
+import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.date.RelativeDateFormatter
 import com.dashlane.vault.VaultItemLogger
 import com.dashlane.vault.history.DataChangeHistoryField
 import com.dashlane.vault.history.password
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
+import com.dashlane.vault.model.isNotSemanticallyNull
 import com.dashlane.vault.model.urlForGoToWebsite
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
@@ -29,12 +34,36 @@ import kotlin.math.max
 class PasswordHistoryViewModel @Inject constructor(
     private val vaultDataQuery: VaultDataQuery,
     private val dataChangeHistoryQuery: DataChangeHistoryQuery,
+    private val generatedPasswordQuery: GeneratedPasswordQuery,
     private val relativeDateFormatter: RelativeDateFormatter,
     private val dataSaver: DataSaver,
     private val vaultItemLogger: VaultItemLogger,
 ) : ViewModel() {
     private val _historyState = MutableStateFlow<PasswordHistoryState>(PasswordHistoryState.Init)
     val historyState = _historyState.asStateFlow()
+
+    fun reloadForGeneratedPasswords() {
+        viewModelScope.launch {
+            val generatedPasswords = generatedPasswordQuery
+                .queryAllNotRevoked()
+                .sortedByDescending { it.syncObject.generatedDate }
+            val passwordHistory = generatedPasswords.mapNotNull { generatedPassword ->
+                buildGeneratedPasswordHistoryOrNull(
+                    password = generatedPassword.syncObject.password?.toString(),
+                    instant = generatedPassword.syncObject.generatedDate?.let { Instant.ofEpochSecond(it) },
+                    domain = generatedPassword.syncObject.domain
+                        ?.toUrlDomainOrNull()
+                        ?.value,
+                    saved = generatedPassword.syncObject.authId.isNotSemanticallyNull(),
+                )
+            }
+            if (passwordHistory.isEmpty()) {
+                _historyState.emit(PasswordHistoryState.Error)
+            } else {
+                _historyState.emit(PasswordHistoryState.Loaded(entries = passwordHistory))
+            }
+        }
+    }
 
     fun reloadForItemUid(uid: String) {
         viewModelScope.launch {
@@ -47,9 +76,10 @@ class PasswordHistoryViewModel @Inject constructor(
 
             
             val filter = DataChangeHistoryFilter(SyncObjectType.AUTHENTIFIANT, uid)
-            val passwordHistory = dataChangeHistoryQuery.query(filter)
+            val passwordHistory = dataChangeHistoryQuery
+                .query(filter)
                 ?.syncObject
-                ?.extractPasswordHistory()
+                ?.extractPasswordHistory(uid)
 
             if (passwordHistory.isNullOrEmpty()) {
                 _historyState.emit(PasswordHistoryState.Error)
@@ -64,34 +94,52 @@ class PasswordHistoryViewModel @Inject constructor(
         vaultDataQuery.query(
             VaultFilter(
                 dataType = SyncObjectType.AUTHENTIFIANT,
-                uid = uid
-            )
+                uid = uid,
+            ),
         ) as VaultItem<SyncObject.Authentifiant>?
 
-    private fun SyncObject.DataChangeHistory.extractPasswordHistory(): List<PasswordHistoryEntry>? {
+    private fun SyncObject.DataChangeHistory.extractPasswordHistory(itemUid: String): List<PasswordHistoryEntry>? {
         val passwordChangeSets = changeSets
             ?.filter { it.changedProperties?.contains(DataChangeHistoryField.PASSWORD.field) ?: false }
             ?.sortedByDescending { it.modificationDate } ?: return null
 
-        return passwordChangeSets.mapIndexed { index, item ->
-            
-            buildPasswordHistoryOrNull(
-                password = item.password,
-                instant = passwordChangeSets[max(0, index - 1)].modificationDate
-            )
-        }.filterNotNull()
+        return passwordChangeSets
+            .mapIndexed { index, item ->
+                
+                buildPasswordHistoryOrNull(
+                    uid = itemUid,
+                    password = item.password,
+                    instant = passwordChangeSets[max(0, index - 1)].modificationDate,
+                )
+            }.filterNotNull()
     }
 
-    private fun buildPasswordHistoryOrNull(password: String?, instant: Instant?): PasswordHistoryEntry? =
+    private fun buildPasswordHistoryOrNull(uid: String, password: String?, instant: Instant?) =
         if (password == null || instant == null) {
             null
         } else {
-            PasswordHistoryEntry(password = password, lastModifiedDateString = relativeDateFormatter.format(instant))
+            CredentialPasswordHistoryEntry(
+                credentialId = uid,
+                password = password,
+                lastModifiedDateString = relativeDateFormatter.format(instant),
+            )
         }
 
-    fun restorePassword(vaultItemUid: String, selectedPasswordHistory: PasswordHistoryEntry) {
+    private fun buildGeneratedPasswordHistoryOrNull(password: String?, instant: Instant?, domain: String?, saved: Boolean) =
+        if (password == null || instant == null) {
+            null
+        } else {
+            GeneratedPasswordHistoryEntry(
+                password = password,
+                lastModifiedDateString = relativeDateFormatter.format(instant),
+                domain = domain,
+                saved = saved,
+            )
+        }
+
+    fun restorePassword(selectedPasswordHistory: CredentialPasswordHistoryEntry) {
         viewModelScope.launch {
-            val item = getLoginForUid(vaultItemUid)
+            val item = getLoginForUid(selectedPasswordHistory.credentialId)
 
             if (item == null) {
                 _historyState.emit(PasswordHistoryState.Error)

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="sharing_center_fab_new_share">Share</string>
+    
+    <string name="sharing_center_usergroups_section_header">Groups</string>
+    
+    <string name="sharing_center_users_section_header">Individuals</string>
+
+    
+    <string name="sharing_center_tab_pending_requests">Requests</string>
+    
+    <string name="sharing_center_tab_pending_requests_content_empty_title">No pending request</string>
+    
+    <string name="sharing_center_tab_pending_requests_content_empty_description">All your shared items are up-to-date</string>
+
+    
+    <string name="sharing_center_tab_people">People</string>
+    
+    <string name="sharing_center_tab_people_content_empty_title">No contacts in your vault</string>
+    
+    <string name="sharing_center_tab_people_content_empty_description">Start sharing to add a new contact</string>
+
+    
+    <string name="sharing_center_tab_content">Content</string>
+    
+    <string name="sharing_center_tab_content_empty_title">No items shared yet</string>
+    
+    <string name="sharing_center_tab_content_empty_description">Share your first item</string>
+
+    
+    <string name="sharing_center_pending_group_invite_title">Invited by</string>
+    
+    <string name="sharing_center_pending_collection_invite_title">Shared by</string>
+    
+    <string name="sharing_center_pending_item_invite_title">Shared by</string>
+
+    
+    <string name="sharing_center_pending_invite_accept">Accept</string>
+    
+    <string name="sharing_center_pending_invite_decline">Decline</string>
+
+    
+    <string name="sharing_center_pending_invite_item_accept_success">\"%1$s\" is now available in your vault.</string>
+    
+    <string name="sharing_center_pending_invite_group_accept_success">You are now part of the group \"%1$s\"</string>
+    
+    <string name="sharing_center_pending_invite_collection_accept_success">The Collection \"%1$s\" is now available in your vault.</string>
+
+    
+    <string name="sharing_center_pending_invite_item_decline_success">You declined access to \"%1$s\".</string>
+    
+    <string name="sharing_center_pending_invite_group_decline_success">You declined to join the group \"%1$s\"</string>
+    
+    <string name="sharing_center_pending_invite_collection_decline_success">You declined access to the Collection \"%1$s\".</string>
+
+    <string name="sharing_center_collection_item_count_hidden"># of items hidden</string>
+
+    
+    <string name="sharing_center_content_collections_header">Collections</string>
+    
+    <string name="sharing_center_content_items_header">Items</string>
+
+    
+    <plurals name="sharing_center_group_member_count">
+        <item quantity="one">%1$d member</item>
+        <item quantity="other">%1$d members</item>
+    </plurals>
+    
+    <plurals name="sharing_center_collection_item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+
+    
+    <plurals name="sharing_center_item_shared_count">
+        <item quantity="one">%1$d item shared</item>
+        <item quantity="other">%1$d items shared</item>
+    </plurals>
+</resources>

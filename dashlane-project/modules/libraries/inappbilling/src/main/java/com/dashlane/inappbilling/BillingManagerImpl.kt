@@ -6,12 +6,10 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.PendingPurchasesParams
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -22,6 +20,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 @Singleton
 class BillingManagerImpl @Inject constructor(
@@ -30,9 +31,8 @@ class BillingManagerImpl @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
     @MainCoroutineDispatcher
-    private val mainCoroutineDispatcher: CoroutineDispatcher
+    private val mainCoroutineDispatcher: CoroutineDispatcher,
 ) : BillingManager {
-
     private var billingClient: BillingClient? = null
 
     private var isServiceConnected: Boolean = false
@@ -59,8 +59,7 @@ class BillingManagerImpl @Inject constructor(
         }
     }
 
-    override fun areSubscriptionsSupported(): Boolean =
-        billingClient?.areSubscriptionsSupported() ?: false
+    override fun areSubscriptionsSupported() = billingClient?.areSubscriptionsSupported() == true
 
     override suspend fun getServiceConnection(): ConnectionScope? {
         withContext(mainCoroutineDispatcher) { initializeBillingClientIfNecessary() }
@@ -82,42 +81,52 @@ class BillingManagerImpl @Inject constructor(
         }
     }
 
-    private suspend fun startServiceConnection(): Int {
-        return suspendCancellableCoroutine { continuation ->
-            billingClient?.startConnection(object : BillingClientStateListener {
-                override fun onBillingSetupFinished(billingResult: BillingResult) {
-                    
-                    if (continuation.isActive) {
+    private suspend fun startServiceConnection() = suspendCancellableCoroutine { continuation ->
+        billingClient?.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                
+                if (continuation.isActive) {
+                    try {
                         continuation.resume(billingResult.responseCode)
+                    } catch (_: IllegalStateException) {
+                        
+                        
+                        
                     }
                 }
+            }
 
-                override fun onBillingServiceDisconnected() {
-                    isServiceConnected = false
-                }
-            })
-        }
+            override fun onBillingServiceDisconnected() {
+                isServiceConnected = false
+            }
+        })
     }
 
-    private suspend fun startServiceConnectionIfNecessary(): Int = withTimeoutOrNull(CONNECTION_TIMEOUT_MILLIS) {
-        if (isServiceConnected && billingClient?.isReady == true) BillingResponseCode.OK
+    private suspend fun startServiceConnectionIfNecessary(): Int =
+        withTimeoutOrNull(CONNECTION_TIMEOUT_MILLIS) {
+            if (isServiceConnected && billingClient?.isReady == true) BillingResponseCode.OK
 
-        connectionDeferred?.takeUnless { it.isCancelled && it.isCompleted }
-            ?.await() ?: applicationCoroutineScope.async { startServiceConnection() }
-            .also { connectionDeferred = it }.await()
-    } ?: BillingResponseCode.ERROR
+            connectionDeferred
+                ?.takeUnless { it.isCancelled && it.isCompleted }
+                ?.await() ?: applicationCoroutineScope
+                .async { startServiceConnection() }
+                .also { connectionDeferred = it }
+                .await()
+        } ?: BillingResponseCode.ERROR
 
     @MainThread
     private fun initializeBillingClientIfNecessary() {
         if (billingClient == null) {
-            billingClient = BillingClient.newBuilder(context)
+            billingClient = BillingClient
+                .newBuilder(context)
                 .setListener { billingResult, purchases ->
                     if (billingResult.responseCode.isSuccess() && purchases != null) {
                         purchaseChannel.trySend(ServiceResult.Success.Purchases(purchases))
                     } else {
                         purchaseChannel.trySend(billingResult.responseCode.toFailureServiceResult())
                     }
-                }.enablePendingPurchases().build()
+                }.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+                .build()
         }
     }
 

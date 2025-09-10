@@ -15,9 +15,8 @@ class FollowUpNotificationApiImpl @Inject constructor(
     private val copyFollowUpNotificationToClipboard: CopyFollowUpNotificationToClipboard,
     private val followUpNotificationRepository: FollowUpNotificationRepository,
     private val followUpNotificationDisplayService: FollowUpNotificationDisplayService,
-    private val followUpNotificationLogger: FollowUpNotificationLogger
+    private val followUpNotificationLogger: FollowUpNotificationLogger,
 ) : FollowUpNotificationApi {
-
     override fun startFollowUpNotification(summaryObject: SummaryObject, copyField: CopyField?) {
         try {
             createFollowUpNotification.createFollowUpNotification(summaryObject, copyField)?.let {

@@ -13,7 +13,7 @@ class EmptyListTextFactory @Inject constructor(
         if (DeveloperUtilities.systemIsInDebug(context)) {
             return StatusText(
                 "TODO: ListTextFactory missing for ${item.javaClass.simpleName} in DataIdentifierListTextResolver",
-                true
+                true,
             )
         }
         return StatusText("", false)
@@ -23,7 +23,7 @@ class EmptyListTextFactory @Inject constructor(
         if (DeveloperUtilities.systemIsInDebug(context)) {
             return StatusText(
                 "TODO: ListTextFactory missing for ${item.javaClass.simpleName} in DataIdentifierListTextResolver",
-                true
+                true,
             )
         }
         return StatusText("", false)

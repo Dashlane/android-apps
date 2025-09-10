@@ -6,7 +6,6 @@ import com.dashlane.teamspaces.R
 import com.dashlane.teamspaces.model.SpaceName.TeamName
 
 sealed class TeamSpace {
-
     abstract val teamId: String?
 
     abstract val name: SpaceName
@@ -34,7 +33,6 @@ sealed class TeamSpace {
     }
 
     data object Personal : TeamSpace() {
-
         override val teamId: String
             get() = ""
 
@@ -51,7 +49,6 @@ sealed class TeamSpace {
     }
 
     sealed class Business : TeamSpace() {
-
         abstract override val teamId: String
 
         val cryptoForcedPayload: String?
@@ -96,6 +93,12 @@ sealed class TeamSpace {
                 is Past -> space.teamInfo.collectSensitiveDataAuditLogsEnabled == true
             }
 
+        val hasPersonalSpace: Boolean
+            get() = when (this) {
+                is Current -> space.teamInfo.personalSpaceEnabled == true
+                is Past -> space.teamInfo.personalSpaceEnabled == true
+            }
+
         data class Current(val space: PremiumStatus.B2bStatus.CurrentTeam) : Business() {
             override val teamId: String
                 get() = space.teamId.toString()
@@ -112,8 +115,6 @@ sealed class TeamSpace {
                     ?: ' '
 
             override val domains: List<String> = space.teamInfo.teamDomains ?: listOf()
-
-            val hasPersonalSpace: Boolean = space.teamInfo.personalSpaceEnabled == true
         }
 
         data class Past(val space: PremiumStatus.B2bStatus.PastTeam) : Business() {

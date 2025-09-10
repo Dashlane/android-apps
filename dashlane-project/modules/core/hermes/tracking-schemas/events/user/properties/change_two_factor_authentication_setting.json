@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/change_two_factor_authentication_setting.json",
+  "type": "object",
+  "description": "When user changes 2FA setting on web app - activation or deactivation. This event follows the flow of that process. Flow (start, cancel, error, complete): starts when user checks or unchecks two-factor authentication button on web app. If error, includes the error property. Complete when message '2FA is off' or '2FA is on' is displayed.  The flow_type tells which flows the user is in - activation or deactivation flow.Figma: https://www.figma.com/file/eBon4v44dd9utwtooZjFDI/%5BAS%5D--2FA-Settings---WebApp?node-id=1%3A2.",
+  "metas": {
+    "area": "settings"
+  },
+  "properties": {
+    "name": {
+      "const": "change_two_factor_authentication_setting"
+    },
+    "error_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/two_factor_authentication_error"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    },
+    "flow_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_type"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step",
+    "flow_type"
+  ],
+  "additionalProperties": false
+}

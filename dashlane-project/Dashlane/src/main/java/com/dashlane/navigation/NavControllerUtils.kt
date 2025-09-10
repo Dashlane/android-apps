@@ -25,14 +25,14 @@ object NavControllerUtils {
         R.id.nav_dark_web_monitoring,
         R.id.nav_authenticator_dashboard,
         R.id.nav_authenticator_suggestions,
-        R.id.nav_collections_list
+        R.id.nav_collections_list,
     )
 
     fun NavController.setup(
         activity: Activity,
         openedFromDeepLink: Boolean,
         checklistHelper: ChecklistHelper,
-        topLevelDestinations: Set<Int> = TOP_LEVEL_DESTINATIONS
+        topLevelDestinations: Set<Int> = TOP_LEVEL_DESTINATIONS,
     ) {
         
         
@@ -65,7 +65,7 @@ object NavControllerUtils {
         appCompatActivity.setSupportActionBar(toolbar)
         val appBarConfiguration = AppBarConfiguration(
             topLevelDestinations,
-            activity.findViewById<DrawerLayout>(R.id.drawer_layout)
+            activity.findViewById<DrawerLayout>(R.id.drawer_layout),
         )
         appCompatActivity.setupActionBarWithNavController(this, appBarConfiguration)
     }

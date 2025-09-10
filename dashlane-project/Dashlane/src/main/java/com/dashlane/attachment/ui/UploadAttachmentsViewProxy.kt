@@ -22,7 +22,6 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 class UploadAttachmentsViewProxy(val activity: AppCompatActivity) :
     BaseViewProxy<UploadFileContract.Presenter>(activity),
     UploadFileContract.ViewProxy {
-
     private val addAttachmentButton =
         findViewByIdEfficient<FloatingActionButton>(R.id.data_list_floating_button)!!
     private val recyclerView = findViewByIdEfficient<RecyclerView>(R.id.attachment_list)!!
@@ -75,10 +74,10 @@ class UploadAttachmentsViewProxy(val activity: AppCompatActivity) :
             .setPositiveButton(
                 android.R.string.ok,
                 object : DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface, which: Int) {
-                    dialog.dismiss()
-                }
-            }
+                    override fun onClick(dialog: DialogInterface, which: Int) {
+                        dialog.dismiss()
+                    }
+                },
             )
             .setCancelable(true).show()
     }

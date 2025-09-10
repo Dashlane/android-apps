@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/update_payment_method.json",
+  "type": "object",
+  "description": "When the user updates their payment method in their B2C account management panel or from the B2B Team Admin Console. The steps in the payment update flow : Start when the payment method update flow begins. Success_update when the payment method is successfully updated (either added for a user with initially no payment method or updated for a user with a prior payment method). Failed_update when the payment method update failed.",
+  "metas": {
+    "area": "plan"
+  },
+  "properties": {
+    "name": {
+      "const": "update_payment_method"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    },
+    "plan": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/plan"
+    },
+    "plan_billing_period": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/plan_billing_period"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step"
+  ],
+  "additionalProperties": false
+}

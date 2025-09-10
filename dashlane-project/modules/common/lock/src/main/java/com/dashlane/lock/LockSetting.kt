@@ -1,8 +1,7 @@
 package com.dashlane.lock
 
-import android.os.Bundle
 import android.os.Parcelable
-import com.dashlane.util.getParcelableCompat
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.parcelize.Parcelize
 
 sealed interface LockPrompt : Parcelable {
@@ -13,7 +12,10 @@ sealed interface LockPrompt : Parcelable {
     data class ForItem(val isSecureNote: Boolean = false) : LockPrompt
 
     @Parcelize
-    data object ForSettings : LockPrompt
+    data class ForSettings(val forceMasterPassword: Boolean = false) : LockPrompt
+
+    @Parcelize
+    data object ForSharing : LockPrompt
 }
 
 @Parcelize
@@ -25,7 +27,6 @@ data class LockSetting(
     val lockPrompt: LockPrompt = LockPrompt.Regular,
     val locks: List<LockType> = emptyList(),
     val shouldThemeAsDialog: Boolean = false,
-    val lockWebsite: String? = null,
     val redirectToHome: Boolean = false,
     val allowBypass: Boolean = false,
     val isMasterPasswordReset: Boolean = false,
@@ -36,29 +37,25 @@ data class LockSetting(
         const val EXTRA_LOCK_REASON = "extra_lock_reason"
         const val EXTRA_IS_LOCK_CANCELABLE = "extra_is_lock_cancelable"
         const val EXTRA_AS_DIALOG = "extra_as_dialog"
-        const val EXTRA_DOMAIN = "extra_domain"
 
         const val EXTRA_REDIRECT_TO_HOME = "extra_redirect_to_home"
         const val EXTRA_IS_MASTER_PASSWORD_RESET = "extra_is_master_password_reset"
 
         @JvmStatic
-        fun buildFrom(bundle: Bundle?): LockSetting = if (bundle != null) {
-            val unlockReason = bundle.getParcelableCompat<LockEvent.Unlock.Reason>(EXTRA_LOCK_REASON)
-            LockSetting(
+        fun buildFrom(savedStateHandle: SavedStateHandle): LockSetting {
+            val unlockReason: LockEvent.Unlock.Reason? = savedStateHandle[EXTRA_LOCK_REASON]
+            return LockSetting(
                 unlockReason = unlockReason,
                 isLockCancelable = if (unlockReason != null) {
                     unlockReason !is LockEvent.Unlock.Reason.AppAccess && unlockReason !is LockEvent.Unlock.Reason.AccessFromAutofillApi
                 } else {
-                    bundle.getBoolean(EXTRA_IS_LOCK_CANCELABLE, false)
+                    savedStateHandle[EXTRA_IS_LOCK_CANCELABLE] ?: false
                 },
-                lockPrompt = bundle.getParcelableCompat<LockPrompt>(EXTRA_LOCK_PROMPT) ?: LockPrompt.Regular,
-                shouldThemeAsDialog = bundle.getBoolean(EXTRA_AS_DIALOG, false),
-                lockWebsite = bundle.getString(EXTRA_DOMAIN),
-                redirectToHome = bundle.getBoolean(EXTRA_REDIRECT_TO_HOME, false),
-                isMasterPasswordReset = bundle.getBoolean(EXTRA_IS_MASTER_PASSWORD_RESET, false)
+                lockPrompt = savedStateHandle[EXTRA_LOCK_PROMPT] ?: LockPrompt.Regular,
+                shouldThemeAsDialog = savedStateHandle[EXTRA_AS_DIALOG] ?: false,
+                redirectToHome = savedStateHandle[EXTRA_REDIRECT_TO_HOME] ?: false,
+                isMasterPasswordReset = savedStateHandle[EXTRA_IS_MASTER_PASSWORD_RESET] ?: false,
             )
-        } else {
-            LockSetting()
         }
     }
 }

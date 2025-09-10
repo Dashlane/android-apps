@@ -9,7 +9,7 @@ import com.dashlane.R
 
 internal fun PopupMenu.setupContextualMenuForCollections(
     context: Context,
-    isItemInCollection: Boolean
+    isItemInCollection: Boolean,
 ) {
     val disabledColor = context.getColor(R.color.text_oddity_disabled)
     menu.iterator().forEach {

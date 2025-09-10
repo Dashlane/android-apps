@@ -17,7 +17,7 @@ fun GenericDataQuery.getPhoneList(context: Context, defaultLabel: String): List<
     val phoneDataIdentifiersList = queryAll(
         genericFilter {
             specificDataType(SyncObjectType.PHONE)
-        }
+        },
     ).filterIsInstance<SummaryObject.Phone>()
     if (phoneDataIdentifiersList.isNotEmpty()) {
         phoneList.add(Pair(defaultLabel, null))

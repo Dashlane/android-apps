@@ -1,7 +1,9 @@
 package com.dashlane.autofill.core
 
-import com.dashlane.autofill.phishing.AutofillPhishingLogger
-import com.dashlane.autofill.phishing.PhishingAttemptLevel
+import com.dashlane.autofill.formdetector.model.ApplicationFormSource
+import com.dashlane.autofill.formdetector.model.AutoFillFormSource
+import com.dashlane.autofill.formdetector.model.WebDomainFormSource
+import com.dashlane.autofill.util.formSourceIdentifier
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.Sha256Hash
 import com.dashlane.hermes.generated.definitions.AutofillConfiguration
@@ -16,11 +18,10 @@ import com.dashlane.hermes.generated.definitions.PhishingRisk
 import com.dashlane.hermes.generated.definitions.WebcardSaveOptions
 import com.dashlane.hermes.generated.events.anonymous.AutofillAcceptAnonymous
 import com.dashlane.hermes.generated.events.anonymous.AutofillDismissAnonymous
-import com.dashlane.hermes.generated.events.anonymous.AutofillSuggestAnonymous
 import com.dashlane.hermes.generated.events.user.AutofillAccept
 import com.dashlane.hermes.generated.events.user.AutofillDismiss
 import com.dashlane.hermes.generated.events.user.AutofillSetting
-import com.dashlane.hermes.generated.events.user.AutofillSuggest
+import com.dashlane.inappautofill.AutofillPhishingLogger
 import javax.inject.Inject
 
 class AutofillPhishingLoggerImpl @Inject constructor(
@@ -31,96 +32,44 @@ class AutofillPhishingLoggerImpl @Inject constructor(
             DisableSetting(
                 durationSetting = AutofillDurationSetting.UNTIL_TURNED_BACK_OFF,
                 configuration = AutofillConfiguration.PHISHING_ALERTS_ENABLED,
-                scope = AutofillScope.GLOBAL
+                scope = AutofillScope.GLOBAL,
             )
         } else {
             DisableSetting(
                 durationSetting = AutofillDurationSetting.UNTIL_TURNED_BACK_ON,
                 configuration = AutofillConfiguration.PHISHING_ALERTS_DISABLED,
-                scope = AutofillScope.GLOBAL
-
+                scope = AutofillScope.GLOBAL,
             )
         }
         logRepository.queueEvent(
             AutofillSetting(
                 isBulk = false,
                 disableSetting = disableSetting,
-            )
-        )
-    }
-
-    override fun onSuggestAutoFillRiskToNone(isNativeApp: Boolean, packageName: String) {
-        val domainType = if (isNativeApp) {
-            DomainType.APP
-        } else {
-            DomainType.WEB
-        }
-        val domain = Domain(
-            id = Sha256Hash.of(packageName),
-            type = domainType,
-        )
-
-        logRepository.queueEvent(
-            AutofillSuggest(
-                isNativeApp = isNativeApp,
-                phishingRisk = PhishingRisk.NONE,
-            )
-        )
-        logRepository.queueEvent(
-            AutofillSuggestAnonymous(
-                isNativeApp = isNativeApp,
-                domain = domain,
-                phishingRisk = PhishingRisk.NONE,
-            )
+            ),
         )
     }
 
     override fun onAcceptAutoFillRisk(
-        isNativeApp: Boolean,
-        packageName: String,
-        phishingAttemptLevel: PhishingAttemptLevel,
+        autoFillFormSource: AutoFillFormSource,
+        phishingRisk: PhishingRisk,
     ) {
-        val domainType = if (isNativeApp) {
-            DomainType.APP
-        } else {
-            DomainType.WEB
-        }
-        val domain = Domain(
-            id = Sha256Hash.of(packageName),
-            type = domainType,
-        )
-        val phishingRisk = when (phishingAttemptLevel) {
-            PhishingAttemptLevel.NONE -> PhishingRisk.NONE
-            PhishingAttemptLevel.MODERATE -> PhishingRisk.MODERATE
-            PhishingAttemptLevel.HIGH -> PhishingRisk.HIGH
-        }
-
         logRepository.queueEvent(
             AutofillAccept(
                 dataTypeList = listOf(ItemType.CREDENTIAL),
                 webcardOptionSelected = WebcardSaveOptions.TRUST_AND_AUTOFILL,
                 phishingRisk = phishingRisk,
-            )
+            ),
         )
         logRepository.queueEvent(
             AutofillAcceptAnonymous(
                 webcardOptionSelected = WebcardSaveOptions.TRUST_AND_AUTOFILL,
-                domain = domain,
+                domain = autoFillFormSource.getDomainForLog(),
                 phishingRisk = phishingRisk,
-            )
+            ),
         )
     }
 
-    override fun onDismissAutoFill(isNativeApp: Boolean, packageName: String, trust: Boolean) {
-        val domainType = if (isNativeApp) {
-            DomainType.APP
-        } else {
-            DomainType.WEB
-        }
-        val domain = Domain(
-            id = Sha256Hash.of(packageName),
-            type = domainType,
-        )
+    override fun onDismissAutoFill(autoFillFormSource: AutoFillFormSource, trust: Boolean) {
         val dismissType = if (trust) {
             DismissType.TRUST
         } else {
@@ -130,14 +79,30 @@ class AutofillPhishingLoggerImpl @Inject constructor(
         logRepository.queueEvent(
             AutofillDismiss(
                 dismissType = dismissType,
-            )
+            ),
         )
+
         logRepository.queueEvent(
             AutofillDismissAnonymous(
                 dismissType = dismissType,
-                domain = domain,
-                isNativeApp = isNativeApp,
-            )
+                domain = autoFillFormSource.getDomainForLog(),
+                isNativeApp = autoFillFormSource.isNativeApp(),
+            ),
         )
     }
+
+    private fun AutoFillFormSource.getDomainType() = when (this) {
+        is ApplicationFormSource -> DomainType.APP
+        is WebDomainFormSource -> DomainType.WEB
+    }
+
+    private fun AutoFillFormSource.getDomainForLog(): Domain {
+        return Domain(
+            id = Sha256Hash.of(formSourceIdentifier),
+            type = getDomainType(),
+        )
+    }
+
+    private fun AutoFillFormSource.isNativeApp(): Boolean =
+        this is ApplicationFormSource
 }

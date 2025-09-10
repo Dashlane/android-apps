@@ -10,7 +10,6 @@ import retrofit2.http.PartMap
 import retrofit2.http.Url
 
 interface UploadFileService {
-
     @Multipart
     @POST
     suspend fun execute(
@@ -19,6 +18,6 @@ interface UploadFileService {
         @PartMap
         body: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part
-        encryptedFile: MultipartBody.Part
+        encryptedFile: MultipartBody.Part,
     ): Response<Unit> 
 }

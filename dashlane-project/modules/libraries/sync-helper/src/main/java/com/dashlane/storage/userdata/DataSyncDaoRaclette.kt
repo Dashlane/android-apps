@@ -21,7 +21,7 @@ typealias PendingSyncItemRaclette = Pair<VaultItemBackupWrapper<SyncObject>, Syn
 
 class DataSyncDaoRaclette @Inject constructor(
     private val sessionManager: SessionManager,
-    private val userDataRepository: UserDatabaseRepository
+    private val userDataRepository: UserDatabaseRepository,
 ) {
     private val memorySummaryRepository: MemorySummaryRepository?
         get() {
@@ -49,7 +49,7 @@ class DataSyncDaoRaclette @Inject constructor(
                 val vaultItem: VaultItem<*> =
                     vaultObjectRepository.get(Id.of(it)) ?: return@mapNotNull null
                 vaultItem.copy(
-                    backupDate = backupTime
+                    backupDate = backupTime,
                 )
             }
             vaultObjectRepository.transaction {
@@ -72,13 +72,13 @@ class DataSyncDaoRaclette @Inject constructor(
     suspend fun getItemsWithExtraData(ids: List<String>): List<PendingSyncItemRaclette> {
         val vaultObjectRepository = vaultObjectRepository ?: return emptyList()
         return ids.mapNotNull {
-                val id = Id.of(it)
-                val vaultItem = vaultObjectRepository.get(id) ?: return@mapNotNull null
-                val backup = backupRepository?.load(id)
-                VaultItemBackupWrapper(
-                    vaultItem = vaultItem,
-                    backup = backup
-                ) to vaultItem.syncState
+            val id = Id.of(it)
+            val vaultItem = vaultObjectRepository.get(id) ?: return@mapNotNull null
+            val backup = backupRepository?.load(id)
+            VaultItemBackupWrapper(
+                vaultItem = vaultItem,
+                backup = backup,
+            ) to vaultItem.syncState
         }
     }
 
@@ -95,7 +95,7 @@ class DataSyncDaoRaclette @Inject constructor(
             val backup = backupRepository?.load(id)
             VaultItemBackupWrapper(
                 vaultItem = vaultItem,
-                backup = backup
+                backup = backup,
             ) to vaultItem.syncState
         }
     }
@@ -128,7 +128,7 @@ class DataSyncDaoRaclette @Inject constructor(
     suspend fun markItemsInSync(
         dataTypes: List<SyncObjectType>,
         syncedState: SyncState,
-        currentState: SyncState
+        currentState: SyncState,
     ) {
         val databaseSyncSummary = memorySummaryRepository?.databaseSyncSummary ?: return
         val ids = databaseSyncSummary.items.filter {
@@ -174,7 +174,7 @@ class DataSyncDaoRaclette @Inject constructor(
     private suspend fun getDuplicationCandidates(
         type: SyncObjectType,
         databaseSyncSummary: DatabaseSyncSummary,
-        vaultObjectRepository: VaultObjectRepository
+        vaultObjectRepository: VaultObjectRepository,
     ): List<List<PendingSyncItemRaclette>> {
         val list: List<List<SyncSummaryItem>> =
             databaseSyncSummary.items
@@ -191,7 +191,7 @@ class DataSyncDaoRaclette @Inject constructor(
                 val backup = backupRepository?.load(id)
                 VaultItemBackupWrapper(
                     vaultItem = vaultItem,
-                    backup = backup
+                    backup = backup,
                 ) to vaultItem.syncState
             }
         }

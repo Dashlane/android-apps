@@ -25,14 +25,14 @@ object SpinnerNoDefaultInputProvider {
         title: String,
         defaultText: String,
         values: List<String>,
-        selectionAction: (String) -> Unit = { _ -> }
+        selectionAction: (String) -> Unit = { _ -> },
     ): View {
         val adapter = object : SpinnerAdapterDefaultValueString(
             context,
             R.layout.spinner_item_dropdown,
             R.layout.spinner_item_preview,
             values,
-            values[0]
+            values[0],
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 return (super.getView(position, convertView, parent) as TextView).apply {
@@ -51,7 +51,7 @@ object SpinnerNoDefaultInputProvider {
             values = values,
             promptText = promptText,
             adapter = adapter,
-            selectionAction = selectionAction
+            selectionAction = selectionAction,
         )
     }
 
@@ -59,7 +59,7 @@ object SpinnerNoDefaultInputProvider {
         context: Context,
         promptText: String?,
         adapter: SpinnerAdapter,
-        itemSelectedListener: AdapterView.OnItemSelectedListener
+        itemSelectedListener: AdapterView.OnItemSelectedListener,
     ): Spinner {
         return CustomItemSelectSpinner(context).apply {
             minimumHeight = context.resources.getDimensionPixelSize(R.dimen.minimum_clickable_area_size)
@@ -78,7 +78,7 @@ object SpinnerNoDefaultInputProvider {
         values: List<String>,
         promptText: String?,
         adapter: SpinnerAdapter,
-        selectionAction: (String) -> Unit
+        selectionAction: (String) -> Unit,
     ): FrameLayout {
         val layout = FrameLayout(context)
         val textInputLayout = TextInputLayoutProvider.create(context, lockManager, title, defaultText, false)
@@ -86,7 +86,6 @@ object SpinnerNoDefaultInputProvider {
         var userSelect = false
 
         val spinnerListener = object : AdapterView.OnItemSelectedListener {
-
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (userSelect) {
                     textInputLayout.editText?.setText(values[position])
@@ -122,20 +121,20 @@ object SpinnerNoDefaultInputProvider {
                 spinner.apply {
                     layoutParams = FrameLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
                     ).apply {
                         setMargins(0, context.dpToPx(16f).toInt(), 0, 0)
                     }
                     SpinnerUtil.disableSpinner(this)
-                }
+                },
             )
             addView(
                 textInputLayout.apply {
                     layoutParams = FrameLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
                     )
-                }
+                },
             )
         }
 

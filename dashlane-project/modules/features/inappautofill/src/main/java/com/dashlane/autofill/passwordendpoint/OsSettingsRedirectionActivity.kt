@@ -15,7 +15,7 @@ class SettingsRedirectionActivity : OsSettingsRedirectionActivity() {
         super.onResume()
         navigationService.navigateToAutofillSettings(
             activity = this,
-            startAsNewTask = true
+            startAsNewTask = true,
         )
         finish()
     }
@@ -26,7 +26,7 @@ class VaultRedirectionActivity : OsSettingsRedirectionActivity() {
         super.onResume()
         navigationService.navigateToPasswordSection(
             activity = this,
-            startAsNewTask = true
+            startAsNewTask = true,
         )
         finish()
     }

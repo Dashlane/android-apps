@@ -30,17 +30,18 @@ import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.withContext
+import okio.ByteString
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.withContext
-import okio.ByteString
 
 @Singleton
 class AuthentifiantAppLinkDownloader @Inject constructor(
@@ -55,12 +56,11 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
     private val credentialDataQuery: CredentialDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private val dataSync: DataSync,
-    private val linkedServicesHelper: LinkedServicesHelper
+    private val linkedServicesHelper: LinkedServicesHelper,
 ) : AbstractActivityLifecycleListener() {
-
     private val clock = Clock.systemUTC()
 
-    @Suppress("EXPERIMENTAL_API_USAGE")
+    @OptIn(ObsoleteCoroutinesApi::class)
     private val actor = applicationCoroutineScope.actor<Fetch>(capacity = Channel.UNLIMITED) {
         
         val fetched = mutableSetOf<UrlDomain>()
@@ -87,7 +87,7 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
 
         data class Url(
             val domain: UrlDomain,
-            val url: String
+            val url: String,
         ) : Fetch()
     }
 
@@ -138,25 +138,23 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     private suspend fun saveAppSignatures(
         authentifiantFilter: VaultFilter,
-        result: List<AppSignature>
+        result: List<AppSignature>,
     ) {
-        vaultDataQuery.queryAll(authentifiantFilter)
+        vaultDataQuery
+            .queryAll(authentifiantFilter)
             .map { vaultItem ->
                 vaultItem as VaultItem<SyncObject.Authentifiant>
                 val newLinkedServices = linkedServicesHelper.addSignatureToLinkedServices(
                     result,
                     vaultItem.syncObject.linkedServices,
-                    SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps.LinkSource.DASHLANE
+                    SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps.LinkSource.DASHLANE,
                 )
                 Pair(vaultItem, newLinkedServices)
-            }
-            .filter { (vaultItem, newLinkedServices) ->
+            }.filter { (vaultItem, newLinkedServices) ->
                 newLinkedServices != vaultItem.syncObject.linkedServices
-            }
-            .map { (vaultItem, newLinkedServices) ->
+            }.map { (vaultItem, newLinkedServices) ->
                 vaultItem.copy(syncState = SyncState.MODIFIED).copySyncObject { linkedServices = newLinkedServices }
-            }
-            .let { dataSaver.save(DataSaver.SaveRequest(it)) }
+            }.let { dataSaver.save(DataSaver.SaveRequest(it)) }
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -174,5 +172,5 @@ class AuthentifiantAppLinkDownloader @Inject constructor(
 
 private fun UrlDomainAssetLink.Target.AndroidApp.toAppSignature() = AppSignature(
     packageName,
-    sha256signatures.map(ByteString::hex)
+    sha256signatures.map(ByteString::hex),
 )

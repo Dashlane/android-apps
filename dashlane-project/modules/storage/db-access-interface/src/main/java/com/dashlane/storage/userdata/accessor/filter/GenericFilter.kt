@@ -30,7 +30,7 @@ class GenericFilter(
     override var uidFilter: UidFilter = NoUidFilter,
     override var sharingFilter: SharingFilter = NoSharingFilter,
     override var lockFilter: LockFilter = DefaultLockFilter,
-    override var statusFilter: StatusFilter = DefaultStatusFilter
+    override var statusFilter: StatusFilter = DefaultStatusFilter,
 ) : BaseFilter,
     EditableSpaceFilter,
     EditableDataTypeFilter,
@@ -38,11 +38,10 @@ class GenericFilter(
     EditableSharingPermissionFilter,
     EditableLockFilter,
     EditableStatusFilter {
-
     constructor(uid: String, dataType: SyncObjectType? = null) :
         this(
             uidFilter = SpecificUidFilter(uid),
-            dataTypeFilter = dataType?.let { SpecificDataTypeFilter(it) } ?: AllDataTypeFilter
+            dataTypeFilter = dataType?.let { SpecificDataTypeFilter(it) } ?: AllDataTypeFilter,
         )
 
     override fun getSpacesRestrictions(currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter): Array<out TeamSpace>? =

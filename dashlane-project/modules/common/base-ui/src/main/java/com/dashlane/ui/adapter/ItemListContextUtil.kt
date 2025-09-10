@@ -15,5 +15,6 @@ fun ItemListContext.toAnyPage(): AnyPage? = when (this.container) {
     ItemListContext.Container.PASSWORD_HEALTH,
     ItemListContext.Container.SHARING,
     ItemListContext.Container.PASSKEYS_LIST,
-    ItemListContext.Container.NONE -> null
+    ItemListContext.Container.NONE,
+    -> null
 }

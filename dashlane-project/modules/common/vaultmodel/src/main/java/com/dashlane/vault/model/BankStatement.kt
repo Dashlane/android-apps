@@ -9,7 +9,7 @@ fun createBankStatement(
     owner: String? = null,
     bic: String? = null,
     iban: String? = null,
-    bank: CreditCardBank? = null
+    bank: CreditCardBank? = null,
 ): VaultItem<SyncObject.BankStatement> {
     return dataIdentifier.toVaultItem(
         SyncObject.BankStatement {
@@ -20,11 +20,11 @@ fun createBankStatement(
             this.bankAccountBank = bank?.bankDescriptor
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
 fun VaultItem<SyncObject.BankStatement>.copySyncObject(builder: SyncObject.BankStatement.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.BankStatement> {
+    VaultItem<SyncObject.BankStatement> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

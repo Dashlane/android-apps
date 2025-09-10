@@ -22,9 +22,8 @@ class NitroSsoWebView(
     private val onSamlResponse: (String) -> Unit,
     activity: Activity,
     redirectionUrl: String,
-    onError: (GetSsoInfoResult.Error) -> Unit
+    onError: (GetSsoInfoResult.Error) -> Unit,
 ) : WebView(activity.baseContext) {
-
     private val nitroUrl: String
         get() = if (nitroUrlOverride?.nitroStagingEnabled == true) {
             nitroUrlOverride.nitroUrl ?: NITRO_DEFAULT_URL
@@ -46,9 +45,9 @@ class NitroSsoWebView(
             addJavascriptInterface(
                 SamlCatcherJavascriptInterface(
                     onSamlResponse = onSamlResponse,
-                    onError = onError
+                    onError = onError,
                 ),
-                JS_INTERFACE
+                JS_INTERFACE,
             )
             webChromeClient = LimitedWebChromeClient()
             webViewClient = NitroSsoWebViewClient(
@@ -61,16 +60,15 @@ class NitroSsoWebView(
                 post = ::post,
                 jsInterfaceName = JS_INTERFACE,
                 ioDispatcher = ioDispatcher,
-                coroutineScope = coroutineScope
+                coroutineScope = coroutineScope,
             )
         }
     }
 
     internal class SamlCatcherJavascriptInterface(
         private val onSamlResponse: (String) -> Unit,
-        private val onError: (GetSsoInfoResult.Error) -> Unit
+        private val onError: (GetSsoInfoResult.Error) -> Unit,
     ) {
-
         @JavascriptInterface
         fun init() = Unit
 

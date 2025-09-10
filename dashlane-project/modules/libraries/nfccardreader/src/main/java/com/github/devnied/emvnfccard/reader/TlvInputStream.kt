@@ -66,10 +66,12 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         var length: Int
         var b = inputStream.readUnsignedByte()
         bytesRead++
+        if (b and 0x80 == 0x00) { 
             length = b
+        } else { 
             val count = b and 0x7F
             length = 0
-            (0 until count).forEach { _ ->
+            repeat(count) {
                 b = inputStream.readUnsignedByte()
                 bytesRead++
                 length = length shl 8
@@ -145,15 +147,14 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         private val state: Deque<TlStruct>,
         var isAtStartOfTag: Boolean,
         var isAtStartOfLength: Boolean,
-        var isProcessingValue: Boolean
+        var isProcessingValue: Boolean,
     ) {
-
         constructor() : this(ArrayDeque<TlStruct>(), true, false, false)
         constructor(original: TlvInputState) : this(
             original.deepCopyOfState,
             original.isAtStartOfTag,
             original.isAtStartOfLength,
-            original.isProcessingValue
+            original.isProcessingValue,
         )
 
         val tag: Int
@@ -170,7 +171,8 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
 
         fun setTagProcessed(
             tag: Int,
-            byteCount: Int
+            byteCount: Int,
+        ) { 
             val obj = TlStruct(tag)
             if (!state.isEmpty()) {
                 val parent = state.peek()!!
@@ -185,7 +187,7 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         fun setLengthProcessed(length: Int, byteCount: Int) {
             require(length >= 0) {
                 "Cannot set negative length (length = $length, 0x" + Integer.toHexString(
-                    length
+                    length,
                 ) + " for tag " + Integer.toHexString(tag) + ")."
             }
             val obj = state.pop()
@@ -206,7 +208,9 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
             }
             val currentObject = state.peek()!!
             val bytesLeft = currentObject.length - currentObject.valueBytesProcessed
-            require(byteCount <= bytesLeft) { "Cannot process $byteCount bytes! Only $bytesLeft bytes left in this TLV object $currentObject" }
+            require(
+                byteCount <= bytesLeft,
+            ) { "Cannot process $byteCount bytes! Only $bytesLeft bytes left in this TLV object $currentObject" }
             currentObject.updateValueBytesProcessed(byteCount)
             val currentLength = currentObject.length
             if (currentObject.valueBytesProcessed == currentLength) {
@@ -236,13 +240,12 @@ class TlvInputStream(inputStream: InputStream) : InputStream() {
         private inner class TlStruct(
             val tag: Int,
             var length: Int = Int.MAX_VALUE,
-            var valueBytesProcessed: Int = 0
+            var valueBytesProcessed: Int = 0,
         ) {
-
             constructor(original: TlStruct) : this(
                 original.tag,
                 original.length,
-                original.valueBytesProcessed
+                original.valueBytesProcessed,
             )
 
             fun updateValueBytesProcessed(n: Int) {

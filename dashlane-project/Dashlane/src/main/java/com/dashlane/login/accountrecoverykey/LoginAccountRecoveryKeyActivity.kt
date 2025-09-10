@@ -5,12 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.data.login.RegisteredUserDevice
 import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.login.LoginIntents
 import com.dashlane.login.LoginStrategy
-import com.dashlane.login.LoginSuccessIntentFactory
+import com.dashlane.navigation.LoginIntentFactory
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.user.UserAccountInfo
@@ -19,12 +19,11 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginAccountRecoveryKeyActivity : DashlaneActivity() {
-
     @Inject
     lateinit var loginStrategy: LoginStrategy
 
     @Inject
-    lateinit var successIntentFactory: LoginSuccessIntentFactory
+    lateinit var successIntentFactory: LoginIntentFactory
 
     @Inject
     lateinit var preferencesManager: PreferencesManager
@@ -36,12 +35,14 @@ class LoginAccountRecoveryKeyActivity : DashlaneActivity() {
         const val EXTRA_REGISTERED_USER_DEVICE = "registered_user_device"
         const val ACCOUNT_TYPE = "account_type"
         const val AUTH_TICKET = "auth_ticket"
+
         fun newIntent(context: Context): Intent = Intent(context, LoginAccountRecoveryKeyActivity::class.java)
     }
 
     override var requireUserUnlock: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
@@ -77,7 +78,7 @@ class LoginAccountRecoveryKeyActivity : DashlaneActivity() {
                     authTicket = authTicket,
                     accountType = accountType,
                     onSuccess = onSuccess,
-                    onCancel = { finish() }
+                    onCancel = { finish() },
                 )
             }
         }
@@ -85,12 +86,12 @@ class LoginAccountRecoveryKeyActivity : DashlaneActivity() {
 
     private fun createStrategyIntent(username: String, strategy: LoginStrategy.Strategy?): Intent {
         return when {
-            strategy == null -> successIntentFactory.createApplicationHomeIntent()
-            strategy is LoginStrategy.Strategy.DeviceLimit -> successIntentFactory.createDeviceLimitIntent(loginStrategy.devices)
+            strategy == null -> successIntentFactory.createApplicationHomeIntent(this)
+            strategy is LoginStrategy.Strategy.DeviceLimit -> successIntentFactory.createDeviceLimitIntent(this, strategy.devices)
             strategy is LoginStrategy.Strategy.Monobucket && preferencesManager[username].ukiRequiresMonobucketConfirmation ->
-                successIntentFactory.createMonobucketIntent(strategy.device)
-            strategy is LoginStrategy.Strategy.Enforce2FA -> successIntentFactory.createEnforce2faLimitActivityIntent()
-            else -> LoginIntents.createHomeActivityIntent(this)
+                successIntentFactory.createMonobucketIntent(this, strategy.device)
+            strategy is LoginStrategy.Strategy.Enforce2FA -> successIntentFactory.createEnforce2faLimitActivityIntent(this)
+            else -> successIntentFactory.createApplicationHomeIntent(this)
         }
     }
 }

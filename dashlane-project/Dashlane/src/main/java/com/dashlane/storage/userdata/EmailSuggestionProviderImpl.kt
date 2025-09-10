@@ -8,9 +8,8 @@ import java.util.Locale
 import javax.inject.Inject
 
 class EmailSuggestionProviderImpl @Inject constructor(
-    private val genericDataQuery: GenericDataQuery
+    private val genericDataQuery: GenericDataQuery,
 ) : EmailSuggestionProvider {
-
     override fun getAllEmails(): List<String> {
         val filter = genericFilter { specificDataType(SyncObjectType.AUTHENTIFIANT, SyncObjectType.EMAIL) }
         val emails = genericDataQuery.queryAll(filter).mapNotNull {

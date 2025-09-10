@@ -1,38 +1,40 @@
 package com.dashlane.item.nfc
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
-import com.dashlane.util.getParcelableExtraCompat
+import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.github.devnied.emvnfccard.model.EmvCard
 import com.github.devnied.emvnfccard.parser.EmvTemplate
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object NfcCreditCardReader {
+@Singleton
+class NfcCreditCardReader @Inject constructor(
+    @DefaultCoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+) {
     @SuppressLint("JavaUtilDateUsage")
-    suspend fun readCard(intent: Intent): EmvCard? = withContext(Dispatchers.Default) {
-        if (intent.action == NfcAdapter.ACTION_TECH_DISCOVERED) {
-            val tag = intent.getParcelableExtraCompat<Tag>(NfcAdapter.EXTRA_TAG)
-            val isoDep = IsoDep.get(tag) ?: return@withContext null
-            runCatching {
-                isoDep.use {
-                    it.connect()
-                    val provider = EmvCardProvider(it)
-                    val config = EmvTemplate.Config().apply {
-                        readAt = true
-                        readTransactions = false
-                    }
-                    val parser = EmvTemplate.Builder()
-                        .setConfig(config)
-                        .setProvider(provider)
-                        .build()
-                    return@withContext parser.readEmvCard(Calendar.getInstance())
+    suspend fun readTag(tag: Tag): EmvCard? = withContext(dispatcher) {
+        val isoDep = IsoDep.get(tag) ?: return@withContext null
+        try {
+            isoDep.use {
+                it.connect()
+                val provider = EmvCardProvider(it)
+                val config = EmvTemplate.GetConfig().apply {
+                    readAt = true
+                    readTransactions = false
                 }
+                val parser = EmvTemplate.GetBuilder()
+                    .setConfig(config)
+                    .setProvider(provider)
+                    .build()
+                return@withContext parser.readEmvCard(Calendar.getInstance())
             }
+        } catch (e: Exception) {
         }
         return@withContext null
     }

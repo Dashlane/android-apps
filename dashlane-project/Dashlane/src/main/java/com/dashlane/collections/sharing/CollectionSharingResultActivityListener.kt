@@ -5,7 +5,6 @@ import android.content.Intent
 import com.dashlane.R
 import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_COLLECTION_ID
 import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_COLLECTION_NAME
-import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_IS_BUSINESS
 import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.RESULT_EXTRA_IS_ERROR
 import com.dashlane.collections.sharing.share.CollectionNewShareActivity.Companion.SHARE_COLLECTION
 import com.dashlane.navigation.Navigator
@@ -17,9 +16,8 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class CollectionSharingResultActivityListener @Inject constructor(
-    private val navigator: Navigator
+    private val navigator: Navigator,
 ) : AbstractActivityLifecycleListener() {
-
     private lateinit var activity: WeakReference<DashlaneActivity>
 
     override fun onActivityResumed(activity: Activity) {
@@ -38,7 +36,7 @@ class CollectionSharingResultActivityListener @Inject constructor(
         activity: DashlaneActivity,
         requestCode: Int,
         resultCode: Int,
-        data: Intent?
+        data: Intent?,
     ) {
         super.onActivityResult(activity, requestCode, resultCode, data)
         if (requestCode != SHARE_COLLECTION) return
@@ -55,13 +53,10 @@ class CollectionSharingResultActivityListener @Inject constructor(
         
         if (!isError && resultCode == Activity.RESULT_OK) {
             val collectionId = data?.getStringExtra(RESULT_EXTRA_COLLECTION_ID)!!
-            val isBusiness = data.getBooleanExtra(RESULT_EXTRA_IS_BUSINESS, false)
             
             navigator.goToCollectionDetails(
                 collectionId = collectionId,
-                businessSpace = isBusiness,
                 sharedCollection = true,
-                shareAllowed = true
             )
         }
         

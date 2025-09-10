@@ -11,7 +11,6 @@ import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 class SharingConfirmationDialogDeclineUserGroupInvite :
     NotificationDialogFragment(),
     NotificationDialogFragment.TwoButtonClicker {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         clicker = this
         return super.onCreateDialog(savedInstanceState)
@@ -20,7 +19,7 @@ class SharingConfirmationDialogDeclineUserGroupInvite :
     override fun onPositiveButton() {
         setFragmentResult(
             REQUEST_KEY,
-            requireArguments()
+            requireArguments(),
         )
     }
 
@@ -34,21 +33,21 @@ class SharingConfirmationDialogDeclineUserGroupInvite :
         @JvmStatic
         fun newInstance(
             context: Context,
-            userGroupId: String
+            userGroupId: String,
         ): SharingConfirmationDialogDeclineUserGroupInvite {
             return Builder().setArgs(bundleOf(DECLINE_USER_GROUP_ID to userGroupId))
                 .setTitle(context, R.string.sharing_confirmation_popup_title_decline_group_invite)
                 .setMessage(
                     context,
-                    R.string.sharing_confirmation_popup_description_decline_user_group_invite
+                    R.string.sharing_confirmation_popup_description_decline_user_group_invite,
                 )
                 .setPositiveButtonText(
                     context,
-                    R.string.sharing_confirmation_popup_btn_confirm_decline_group_invite
+                    R.string.sharing_confirmation_popup_btn_confirm_decline_group_invite,
                 )
                 .setNegativeButtonText(
                     context,
-                    R.string.sharing_confirmation_popup_btn_cancel_decline_group_invite
+                    R.string.sharing_confirmation_popup_btn_cancel_decline_group_invite,
                 )
                 .build(SharingConfirmationDialogDeclineUserGroupInvite())
         }

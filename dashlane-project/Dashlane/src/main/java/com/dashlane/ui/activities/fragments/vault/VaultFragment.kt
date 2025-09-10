@@ -9,11 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.MenuProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.limitations.PasswordLimiter
-import com.dashlane.notification.badge.NotificationBadgeActor
+import com.dashlane.notification.badge.NotificationBadgeFlow
 import com.dashlane.notification.badge.NotificationBadgeListener
 import com.dashlane.session.SessionManager
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
@@ -31,7 +33,7 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
     lateinit var presenter: Vault.Presenter
 
     @Inject
-    lateinit var notificationBadgeActor: NotificationBadgeActor
+    lateinit var notificationBadgeFlow: NotificationBadgeFlow
 
     @Inject
     lateinit var sessionManager: SessionManager
@@ -48,13 +50,20 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
     private val menuProvider = object : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.fragment_vault_menu, menu)
-            if (notificationBadgeActor.hasUnread) {
-                val alertMenu = menu.findItem(R.id.menu_alert)
-                alertMenu.icon = ResourcesCompat.getDrawable(
-                    resources,
-                    R.drawable.action_bar_menu_alert_with_dot,
-                    context?.theme
-                )
+
+            lifecycleScope.launch {
+                notificationBadgeFlow.resultFlow
+                    .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                    .collect { result ->
+                        if (result.hasSharing || result.hasUnReadActionItems) {
+                            val alertMenu = menu.findItem(R.id.menu_alert)
+                            alertMenu?.icon = ResourcesCompat.getDrawable(
+                                resources,
+                                R.drawable.action_bar_menu_alert_with_dot,
+                                context?.theme,
+                            )
+                        }
+                    }
             }
         }
 
@@ -69,12 +78,22 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
 
     private var fabPresenter: FabDef.IPresenter? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         val layout = inflater.inflate(R.layout.fragment_vault, container, false)
 
         presenter.also {
-            it.setView(VaultViewProxy(view = layout, fragment = this))
+            it.setView(
+                VaultViewProxy(
+                    view = layout,
+                    fragment = this,
+                    featuresChecker = featuresChecker,
+                ),
+            )
             it.onCreate(arguments, savedInstanceState)
         }
 
@@ -84,7 +103,7 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
                 teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
                 navigator = navigator,
                 passwordLimiter = passwordLimiter,
-                featuresChecker = featuresChecker
+                featuresChecker = featuresChecker,
             )
             setView(fabViewProxy)
 
@@ -96,7 +115,12 @@ class VaultFragment : AbstractContentFragment(), NotificationBadgeListener {
         }
         requireActivity().addMenuProvider(menuProvider)
 
-        notificationBadgeActor.subscribe(lifecycleScope, this)
+        lifecycleScope.launch {
+            notificationBadgeFlow.resultFlow
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { activity?.invalidateOptionsMenu() }
+        }
+
         return layout
     }
 

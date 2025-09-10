@@ -8,7 +8,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.dashlane.R
 import com.dashlane.authenticator.Hotp
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.item.v3.data.CollectionData
 import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.PasswordHealthData
@@ -27,12 +26,11 @@ import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.clipboard.vault.CopyField
-import com.dashlane.xml.domain.SyncObject
 
 @Suppress("LongMethod")
 fun LazyListScope.credentialForm(
     viewModel: CredentialItemEditViewModel,
-    uiState: FormState<CredentialFormData>
+    uiState: FormState<CredentialFormData>,
 ) {
     credentialFormContent(
         uiState = uiState,
@@ -54,7 +52,7 @@ fun LazyListScope.credentialForm(
             },
             onLimitedRightInfoOpen = {
                 viewModel.actionOpenNoRights()
-            }
+            },
         ),
         loginActions = LoginActions(
             onValueChanged = { value ->
@@ -77,26 +75,20 @@ fun LazyListScope.credentialForm(
             },
             onHotpRefreshed = {
                 viewModel.refreshHotp(it)
-            }
-        ),
-        organisationActions = OrganisationActions(
-            onValueChanged = { value ->
-                viewModel.updateCommonDataFromView(value)
             },
-            onCollectionOpen = {
-                viewModel.actionOpenCollection()
-            },
-            onCollectionRemove = {
-                viewModel.removeCollection(it)
-            }
         ),
+        onItemNameChanged = viewModel::updateItemName,
+        onSpaceChanged = viewModel::updateSpace,
+        onCollectionOpen = {
+            viewModel.actionOpenCollection()
+        },
         onSharedClick = {
             viewModel.actionOpenShared()
         },
         onDeleteAction = {
             viewModel.actionDelete()
         },
-        onViewAttachments = viewModel::onViewAttachments
+        onViewAttachments = viewModel::onViewAttachments,
     )
 }
 
@@ -104,10 +96,12 @@ private fun LazyListScope.credentialFormContent(
     uiState: FormState<CredentialFormData>,
     passwordActions: PasswordActions,
     loginActions: LoginActions,
-    organisationActions: OrganisationActions,
+    onItemNameChanged: (String) -> Unit,
+    onSpaceChanged: (TeamSpace) -> Unit,
+    onCollectionOpen: () -> Unit,
     onSharedClick: () -> Unit,
     onDeleteAction: () -> Unit,
-    onViewAttachments: () -> Unit
+    onViewAttachments: () -> Unit,
 ) {
     item(key = "LoginDetailSection") {
         LoginDetailSection(
@@ -116,7 +110,7 @@ private fun LazyListScope.credentialFormContent(
             revealedFields = uiState.revealedFields,
             editMode = uiState.isEditMode,
             passwordActions = passwordActions,
-            loginActions = loginActions
+            loginActions = loginActions,
         )
     }
     item(key = "HealthDetailSection") {
@@ -126,14 +120,16 @@ private fun LazyListScope.credentialFormContent(
         OrganisationSection(
             data = uiState.datas.current,
             editMode = uiState.isEditMode,
-            organisationActions = organisationActions
+            onItemNameChanged = onItemNameChanged,
+            onSpaceChanged = onSpaceChanged,
+            onCollectionOpen = onCollectionOpen,
         )
     }
     item(key = "AttachmentsSection") {
         AttachmentsSection(
             data = uiState.datas.current,
             editMode = uiState.isEditMode,
-            onViewAttachments = onViewAttachments
+            onViewAttachments = onViewAttachments,
         )
     }
     sharedAccessSectionItem(uiState, onSharedClick)
@@ -142,7 +138,7 @@ private fun LazyListScope.credentialFormContent(
             canDelete = uiState.datas.current.commonData.canDelete,
             editMode = uiState.isEditMode,
             label = stringResource(id = R.string.vault_delete_login),
-            onDeleteAction = onDeleteAction
+            onDeleteAction = onDeleteAction,
         )
     }
 }
@@ -159,16 +155,18 @@ private fun CredentialFormContentPreview() {
                         "",
                         datas = Datas(current = formData, initial = formData),
                         isNew = false,
-                        isEditMode = false
+                        isEditMode = false,
                     ),
                     passwordActions = PasswordActions(),
                     loginActions = LoginActions(),
-                    organisationActions = OrganisationActions(),
+                    onCollectionOpen = {},
+                    onItemNameChanged = {},
+                    onSpaceChanged = {},
                     onDeleteAction = {},
                     onViewAttachments = {},
-                    onSharedClick = {}
+                    onSharedClick = {},
                 )
-            }
+            },
         )
     }
 }
@@ -183,20 +181,28 @@ private fun CredentialFormContentPreviewEdit() {
                     uiState = FormState(
                         itemId = "",
                         datas = Datas(
-                            current = Data(formData = CredentialFormData(), commonData = CommonData()),
-                            initial = Data(formData = CredentialFormData(), commonData = CommonData())
+                            current = Data(
+                                formData = CredentialFormData(),
+                                commonData = CommonData(),
+                            ),
+                            initial = Data(
+                                formData = CredentialFormData(),
+                                commonData = CommonData(),
+                            ),
                         ),
                         isEditMode = true,
-                        isNew = false
+                        isNew = false,
                     ),
                     passwordActions = PasswordActions(),
                     loginActions = LoginActions(),
-                    organisationActions = OrganisationActions(),
+                    onCollectionOpen = {},
+                    onItemNameChanged = {},
+                    onSpaceChanged = {},
                     onDeleteAction = {},
                     onViewAttachments = {},
-                    onSharedClick = {}
+                    onSharedClick = {},
                 )
-            }
+            },
         )
     }
 }
@@ -207,22 +213,19 @@ private fun credentialFormDemoData() = Data(
         secondaryLogin = "secondaryLogin",
         url = "https://www.dashlane.com",
         passwordHealth = PasswordHealthData(
-            passwordStrength = PasswordStrength(PasswordStrengthScore.SAFELY_UNGUESSABLE, null, listOf()),
+            passwordStrength = PasswordStrength(
+                PasswordStrengthScore.SAFELY_UNGUESSABLE,
+                null,
+                listOf(),
+            ),
             isCompromised = false,
             reusedCount = 0,
-            isPasswordEmpty = false
+            isPasswordEmpty = false,
         ),
     ),
     commonData = CommonData(
-        space = TeamSpace.Personal
-    )
-)
-
-data class OrganisationActions(
-    val onValueChanged: (CommonData) -> Unit = {},
-    val onCollectionOpen: () -> Unit = {},
-    val onCollectionRemove: (CollectionData) -> Unit = {},
-    val onSecureNoteTypeChanged: (SyncObject.SecureNoteType) -> Unit = {}
+        space = TeamSpace.Personal,
+    ),
 )
 
 data class LoginActions(
@@ -232,7 +235,7 @@ data class LoginActions(
     val onWebsiteOpen: () -> Unit = {},
     val onSetupTwoFactorAuthenticator: () -> Unit = {},
     val onRemoveTwoFactorAuthenticator: () -> Unit = {},
-    val onHotpRefreshed: (Hotp) -> Unit = {}
+    val onHotpRefreshed: (Hotp) -> Unit = {},
 )
 
 data class PasswordActions(

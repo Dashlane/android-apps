@@ -26,6 +26,6 @@ fun LostKeyScreen(
         textPrimary = stringResource(id = R.string.login_universal_d2d_lost_key_primary_button),
         onClickPrimary = resetAccount,
         textSecondary = stringResource(id = R.string.login_universal_d2d_lost_key_secondary_button),
-        onClickSecondary = learnMore
+        onClickSecondary = learnMore,
     )
 }

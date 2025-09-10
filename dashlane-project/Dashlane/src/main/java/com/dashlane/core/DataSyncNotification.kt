@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.dashlane.R
-import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.debug.services.DaDaDaBase
 import com.dashlane.util.notification.DashlaneNotificationBuilder
 import com.dashlane.util.notification.NotificationHelper
@@ -15,7 +14,6 @@ class DataSyncNotification @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val dadada: DaDaDaBase,
-    private val syncBroadcastManager: SyncBroadcastManager
 ) {
     private val systemIsInDebug: Boolean
         get() = dadada.isEnabled
@@ -46,14 +44,12 @@ class DataSyncNotification @Inject constructor(
         } catch (e: Exception) {
             
         }
-        syncBroadcastManager.sendSyncShowProgressBroadcast(true)
     }
 
     fun hideSyncNotification() {
         if (systemIsInDebug) {
             notificationManager.cancel(SYNC_NOTIFICATION_ID)
         }
-        syncBroadcastManager.sendSyncShowProgressBroadcast(false)
     }
 
     companion object {

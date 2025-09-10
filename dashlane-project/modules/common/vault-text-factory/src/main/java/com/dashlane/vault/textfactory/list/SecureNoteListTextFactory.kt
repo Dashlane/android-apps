@@ -9,7 +9,6 @@ import javax.inject.Inject
 class SecureNoteListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.SecureNote> {
-
     override fun getTitle(item: SummaryObject.SecureNote): StatusText {
         val title = item.title
         return StatusText(if (title.isNotSemanticallyNull()) title!! else resources.getString(R.string.securenote))
@@ -21,7 +20,7 @@ class SecureNoteListTextFactory @Inject constructor(
                 resources.getString(R.string.secure_note_is_locked)
             } else {
                 item.content?.lineSequence()?.firstOrNull()?.take(n = 80) ?: ""
-            }
+            },
         )
     }
 }

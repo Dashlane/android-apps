@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_auth_method.json",
+  "type": "object",
+  "description": "Definition for Authentication Method Migration events",
+  "definitions": {
+    "auth_method_migration_flow_step": {
+      "description": "Captures various steps in the Authentication Method Migration flow.",
+      "type": "string",
+      "enum": [
+        "alert_mp_compromised",
+        "alert_sso_enabled",
+        "error",
+        "proceed_to_change_to_mpless",
+        "skip_option_for_compromised_mp",
+        "start_change_of_mp",
+        "start_change_to_mpless",
+        "start_migration_to_mpless",
+        "start_migration_to_sso",
+        "successful_migration_to_mpless",
+        "successful_migration_to_sso",
+        "view_options_for_compromised_mp"
+      ]
+    },
+    "migrate_auth_method_error": {
+      "description": "Captures various errors that can appear during the Authentication Method Migration flow.",
+      "type": "string",
+      "enum": [
+        "sso_feature_blocked",
+        "sso_login_corrupt",
+        "sso_setup_error",
+        "unknown_error"
+      ]
+    },
+    "original_auth_method": {
+      "description": "This is the authentication method from which a user is migrating from.",
+      "type": "string",
+      "enum": [
+        "mp",
+        "mpless",
+        "property_not_available"
+      ]
+    }
+  }
+}

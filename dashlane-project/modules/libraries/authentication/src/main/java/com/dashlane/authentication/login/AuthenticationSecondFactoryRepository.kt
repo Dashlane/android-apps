@@ -4,11 +4,11 @@ import com.dashlane.authentication.AuthenticationAccountConfigurationChangedExce
 import com.dashlane.authentication.AuthenticationInvalidTokenException
 import com.dashlane.authentication.AuthenticationLockedOutException
 import com.dashlane.authentication.AuthenticationNetworkException
-import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.AuthenticationSecondFactorFailedException
 import com.dashlane.authentication.AuthenticationTimeoutException
 import com.dashlane.authentication.AuthenticationUnknownException
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.data.login.AuthenticationSecondFactor
+import com.dashlane.data.login.RegisteredUserDevice
 
 interface AuthenticationSecondFactoryRepository {
     @Throws(
@@ -16,11 +16,11 @@ interface AuthenticationSecondFactoryRepository {
         AuthenticationLockedOutException::class,
         AuthenticationAccountConfigurationChangedException::class,
         AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun validate(
         emailToken: AuthenticationSecondFactor.EmailToken,
-        value: String
+        value: String,
     ): ValidationResult
 
     @Throws(
@@ -28,11 +28,11 @@ interface AuthenticationSecondFactoryRepository {
         AuthenticationLockedOutException::class,
         AuthenticationAccountConfigurationChangedException::class,
         AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun validate(
         totp: AuthenticationSecondFactor.Totp,
-        value: String
+        value: String,
     ): ValidationResult
 
     @Throws(
@@ -40,13 +40,13 @@ interface AuthenticationSecondFactoryRepository {
         AuthenticationLockedOutException::class,
         AuthenticationAccountConfigurationChangedException::class,
         AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun validate(
         u2f: AuthenticationSecondFactor.U2f,
         challenge: String,
         signature: String,
-        clientData: String
+        clientData: String,
     ): ValidationResult
 
     @Throws(
@@ -55,21 +55,21 @@ interface AuthenticationSecondFactoryRepository {
         AuthenticationAccountConfigurationChangedException::class,
         AuthenticationTimeoutException::class,
         AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun validate(
-        duoPush: AuthenticationSecondFactor.DuoPush
+        duoPush: AuthenticationSecondFactor.DuoPush,
     ): ValidationResult
 
     @Throws(
         AuthenticationAccountConfigurationChangedException::class,
         AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun resendToken(emailToken: AuthenticationSecondFactor.EmailToken)
 
     data class ValidationResult(
         val registeredUserDevice: RegisteredUserDevice,
-        val authTicket: String?
+        val authTicket: String?,
     )
 }

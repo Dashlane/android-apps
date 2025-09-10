@@ -1,6 +1,10 @@
 package com.github.devnied.emvnfccard.model.enums;
 
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum CountryCodeEnum implements IKeyEnum {
 	
 	AD("Andorra", "AND", 16),

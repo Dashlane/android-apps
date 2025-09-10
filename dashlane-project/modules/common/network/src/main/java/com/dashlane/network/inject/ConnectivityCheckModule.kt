@@ -14,12 +14,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ConnectivityCheckModule {
-
     @Singleton
     @Provides
     fun getConnectivityCheck(connectivityManagerProvider: Provider<ConnectivityManager>): ConnectivityCheck {
         return object : ConnectivityCheck {
-
             private val connectivityManager: ConnectivityManager =
                 connectivityManagerProvider.get()
 

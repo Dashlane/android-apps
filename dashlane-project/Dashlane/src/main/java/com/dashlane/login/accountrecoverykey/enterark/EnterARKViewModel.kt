@@ -10,9 +10,9 @@ import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.definitions.UseKeyErrorName
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
+import com.dashlane.login.LoginRepository
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryDestination.EnterArk
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
-import com.dashlane.login.root.LoginRepository
 import com.dashlane.user.UserAccountInfo
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,9 +36,8 @@ class EnterARKViewModel @Inject constructor(
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
     private val logRepository: LogRepository,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val login = savedStateHandle.toRoute<EnterArk>().login
 
     private val stateFlow: MutableStateFlow<EnterARKState>
@@ -56,7 +55,9 @@ class EnterARKViewModel @Inject constructor(
             val formattedAccountRecoveryKey = accountRecoveryKey.replace("-", "")
             val authTicket = loginRepository.getAuthTicket()
             if (authTicket == null || !checkAccountRecoveryKeyFormat(formattedAccountRecoveryKey)) {
-                logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.ERROR, useKeyErrorName = UseKeyErrorName.WRONG_KEY_ENTERED))
+                logRepository.queueEvent(
+                    UseAccountRecoveryKey(flowStep = FlowStep.ERROR, useKeyErrorName = UseKeyErrorName.WRONG_KEY_ENTERED),
+                )
                 emit(EnterARKState.Error(stateFlow.value.data.copy(accountRecoveryKey = accountRecoveryKey)))
                 return@flow
             }
@@ -65,7 +66,9 @@ class EnterARKViewModel @Inject constructor(
                     emit(EnterARKState.KeyConfirmed(stateFlow.value.data, obfuscatedVaultKey))
                 }
                 .onFailure {
-                    logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.ERROR, useKeyErrorName = UseKeyErrorName.WRONG_KEY_ENTERED))
+                    logRepository.queueEvent(
+                        UseAccountRecoveryKey(flowStep = FlowStep.ERROR, useKeyErrorName = UseKeyErrorName.WRONG_KEY_ENTERED),
+                    )
                     emit(EnterARKState.Error(stateFlow.value.data.copy(accountRecoveryKey = accountRecoveryKey)))
                 }
         }

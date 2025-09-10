@@ -12,7 +12,7 @@ import com.dashlane.item.v3.data.SecretFormData
 import com.dashlane.item.v3.display.fields.SectionContent
 import com.dashlane.item.v3.display.fields.SectionTitle
 import com.dashlane.item.v3.viewmodels.Data
-import com.dashlane.ui.widgets.compose.SettingField
+import com.dashlane.ui.common.compose.components.SettingField
 
 @Composable
 fun SecretSettingsSection(
@@ -21,31 +21,33 @@ fun SecretSettingsSection(
     onSecuredChange: (Boolean) -> Unit,
 ) {
     if (!editMode || !data.formData.secureSettingAvailable) return
-    SectionContent(editMode = editMode) {
+    SectionContent {
         SectionTitle(
             title = stringResource(id = R.string.vault_preferences),
-            editMode = editMode
+            editMode = editMode,
         )
         SettingField(
             title = stringResource(id = R.string.vault_secret_setting_secured_title),
             description = stringResource(id = R.string.vault_secret_setting_secured_description),
             checked = data.formData.secured,
-            onCheckedChange = onSecuredChange
+            onCheckedChange = onSecuredChange,
         )
     }
 }
 
 @Preview
 @Composable
-private fun SecretSettingsSectionPreview(@PreviewParameter(BooleanProvider::class) secured: Boolean) {
+private fun SecretSettingsSectionPreview(
+    @PreviewParameter(BooleanProvider::class) secured: Boolean,
+) {
     DashlanePreview {
         SecretSettingsSection(
             data = Data(
                 commonData = CommonData(),
-                formData = SecretFormData(secured = secured)
+                formData = SecretFormData(secured = secured),
             ),
             editMode = true,
-            onSecuredChange = {}
+            onSecuredChange = {},
         )
     }
 }

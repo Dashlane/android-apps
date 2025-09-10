@@ -9,7 +9,7 @@ object SharingItemSelectionEmptyScreen {
     fun newInstance(
         context: Context,
         dataType: SyncObjectType,
-        withSearchFilter: Boolean
+        withSearchFilter: Boolean,
     ): EmptyScreenViewProvider {
         val iconResId: Int
         val line2ResId: Int
@@ -36,7 +36,7 @@ object SharingItemSelectionEmptyScreen {
             EmptyScreenConfiguration.Builder()
                 .setImage(VectorDrawableCompat.create(context.resources, iconResId, null))
                 .setLine2(context.getString(line2ResId))
-                .build()
+                .build(),
         )
     }
 }

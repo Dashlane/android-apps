@@ -3,7 +3,6 @@ package com.dashlane.navigation
 import android.net.Uri
 
 class NavigationUriBuilder private constructor(private var builder: Uri.Builder) {
-
     constructor() : this(Uri.Builder())
 
     init {

@@ -19,10 +19,9 @@ class AttachmentListDataProvider(
     val vaultItem: VaultItem<*>,
     private val dataSaver: DataSaver,
     private val dataSync: DataSync,
-    private val secureFileStorage: SecureFileStorage
+    private val secureFileStorage: SecureFileStorage,
 ) : BaseDataProvider<AttachmentListContract.Presenter>(),
     AttachmentListContract.DataProvider {
-
     override val attachments = AttachmentsParser().parse(jsonAttachments)
         .map { AttachmentItem(attachment = it) }
         .toMutableList()
@@ -48,7 +47,7 @@ class AttachmentListDataProvider(
         secureFileStorage.decipherToPublicFolder(
             attachmentItem.attachment.toSecureFile(),
             attachmentItem.attachment.type!!,
-            attachmentItem.attachment.localSize
+            attachmentItem.attachment.localSize,
         )
     }
 

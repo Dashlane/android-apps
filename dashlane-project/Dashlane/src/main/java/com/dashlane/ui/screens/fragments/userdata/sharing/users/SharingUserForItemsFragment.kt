@@ -14,10 +14,11 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SharingUserForItemsFragment : AbstractContentFragment() {
     private val viewModel by viewModels<SharingUserForItemsViewModel>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         setCurrentPageView(AnyPage.SHARING_MEMBER_DETAILS)

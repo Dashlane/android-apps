@@ -53,7 +53,7 @@ fun MenuTeamspaceIcon(modifier: Modifier = Modifier, icon: TeamspaceIcon) {
                 update = { imageView ->
                     val drawable = TeamspaceIconDrawable(imageView.context, icon.displayLetter, colorInt)
                     imageView.setImageDrawable(drawable)
-                }
+                },
             )
         }
     }

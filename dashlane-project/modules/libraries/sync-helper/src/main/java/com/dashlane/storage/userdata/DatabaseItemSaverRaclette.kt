@@ -20,7 +20,7 @@ import javax.inject.Singleton
 class DatabaseItemSaverRaclette @Inject constructor(
     private val vaultDataQuery: Lazy<VaultDataQuery>,
     private val sessionManager: SessionManager,
-    private val userDataRepository: UserDatabaseRepository
+    private val userDataRepository: UserDatabaseRepository,
 ) : DatabaseItemSaver {
     private val vaultObjectRepository: VaultObjectRepository?
         get() {
@@ -54,7 +54,7 @@ class DatabaseItemSaverRaclette @Inject constructor(
 
     override suspend fun <T : SyncObject> save(
         saveRequest: DataSaver.SaveRequest<T>,
-        oldItems: List<VaultItem<*>>
+        oldItems: List<VaultItem<*>>,
     ): List<VaultItem<T>> {
         val vaultObjectRepository = vaultObjectRepository ?: return emptyList()
         val origin = saveRequest.origin
@@ -67,7 +67,7 @@ class DatabaseItemSaverRaclette @Inject constructor(
                     val itemToSave = getItemToSave(
                         VaultItemBackupWrapper(vaultItem = item, backup = null),
                         oldItem,
-                        origin
+                        origin,
                     )
                         ?: return@forEach
                     update(itemToSave)
@@ -98,7 +98,7 @@ class DatabaseItemSaverRaclette @Inject constructor(
 
     fun getItemToSave(
         itemWrapper: VaultItemBackupWrapper<SyncObject>,
-        origin: DataSaver.SaveRequest.Origin
+        origin: DataSaver.SaveRequest.Origin,
     ): VaultItemBackupWrapper<SyncObject>? {
         val item = itemWrapper.vaultItem
         if (item.syncObject is SyncObject.DataChangeHistory) {
@@ -111,7 +111,7 @@ class DatabaseItemSaverRaclette @Inject constructor(
     private fun getItemToSave(
         itemWrapper: VaultItemBackupWrapper<SyncObject>,
         itemInDb: VaultItem<SyncObject>?,
-        origin: DataSaver.SaveRequest.Origin
+        origin: DataSaver.SaveRequest.Origin,
     ): VaultItemBackupWrapper<SyncObject>? {
         val item = itemWrapper.vaultItem
 

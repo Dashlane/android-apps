@@ -4,8 +4,7 @@ import com.dashlane.followupnotification.api.FollowUpNotificationPermissionManag
 import javax.inject.Inject
 
 class FollowUpNotificationFlagsImpl @Inject constructor(
-    private val permissionsManager: FollowUpNotificationPermissionManager
+    private val permissionsManager: FollowUpNotificationPermissionManager,
 ) : FollowUpNotificationFlags {
-
     override fun canUseFollowUpNotification(): Boolean = permissionsManager.isNotificationPermissionGranted()
 }

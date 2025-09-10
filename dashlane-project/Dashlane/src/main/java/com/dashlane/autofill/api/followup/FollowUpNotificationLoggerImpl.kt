@@ -19,16 +19,15 @@ import com.dashlane.vault.toFieldItemType
 import javax.inject.Inject
 
 class FollowUpNotificationLoggerImpl @Inject constructor(
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
 ) : FollowUpNotificationLogger {
-
     override fun showFollowUp(followUpType: FollowUpNotificationsTypes, copyField: CopyField?) {
         
         logRepository.queueEvent(
             FollowUpNotification(
                 itemType = followUpType.toItemType(),
-                action = FollowUpNotificationActions.TRIGGER
-            )
+                action = FollowUpNotificationActions.TRIGGER,
+            ),
         )
     }
 
@@ -36,8 +35,8 @@ class FollowUpNotificationLoggerImpl @Inject constructor(
         logRepository.queueEvent(
             FollowUpNotification(
                 itemType = followUpType.toItemType(),
-                action = FollowUpNotificationActions.DISMISS
-            )
+                action = FollowUpNotificationActions.DISMISS,
+            ),
         )
     }
 
@@ -46,7 +45,7 @@ class FollowUpNotificationLoggerImpl @Inject constructor(
         copiedField: CopyField,
         itemId: String,
         isProtected: Boolean,
-        domain: String?
+        domain: String?,
     ) {
         val fieldItemType = copiedField.toFieldItemType()
         logRepository.queueEvent(
@@ -54,53 +53,53 @@ class FollowUpNotificationLoggerImpl @Inject constructor(
                 field = fieldItemType.first,
                 itemId = ItemId(itemId),
                 itemType = fieldItemType.second,
-                isProtected = isProtected
-            )
+                isProtected = isProtected,
+            ),
         )
         domain?.let {
             logRepository.queueEvent(
                 CopyVaultItemFieldAnonymous(
                     field = fieldItemType.first,
                     itemType = fieldItemType.second,
-                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
-                )
+                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB),
+                ),
             )
         }
         logRepository.queueEvent(
             FollowUpNotification(
                 itemType = fieldItemType.second,
-                action = FollowUpNotificationActions.COPY
-            )
+                action = FollowUpNotificationActions.COPY,
+            ),
         )
     }
 
     override fun logDisplayDiscoveryIntroduction() {
         logRepository.queuePageView(
             component = BrowseComponent.MAIN_APP,
-            page = AnyPage.NOTIFICATION_FOLLOW_UP_NOTIFICATION_DISCOVERY
+            page = AnyPage.NOTIFICATION_FOLLOW_UP_NOTIFICATION_DISCOVERY,
         )
     }
 
     override fun logDisplayDiscoveryReminder() {
         logRepository.queuePageView(
             component = BrowseComponent.MAIN_APP,
-            page = AnyPage.NOTIFICATION_FOLLOW_UP_NOTIFICATION_REMINDER
+            page = AnyPage.NOTIFICATION_FOLLOW_UP_NOTIFICATION_REMINDER,
         )
     }
 
     override fun logDeactivateFollowUpNotification() {
         logRepository.queueEvent(
             FollowUpNotification(
-                action = FollowUpNotificationActions.DEACTIVATE_FEATURE
-            )
+                action = FollowUpNotificationActions.DEACTIVATE_FEATURE,
+            ),
         )
     }
 
     override fun logActivateFollowUpNotification() {
         logRepository.queueEvent(
             FollowUpNotification(
-                action = FollowUpNotificationActions.ACTIVATE_FEATURE
-            )
+                action = FollowUpNotificationActions.ACTIVATE_FEATURE,
+            ),
         )
     }
 
@@ -111,8 +110,9 @@ class FollowUpNotificationLoggerImpl @Inject constructor(
             FollowUpNotificationsTypes.BANK_ACCOUNT,
             FollowUpNotificationsTypes.BANK_ACCOUNT_US,
             FollowUpNotificationsTypes.BANK_ACCOUNT_GB,
-            FollowUpNotificationsTypes.BANK_ACCOUNT_MX -> ItemType.BANK_STATEMENT
-            FollowUpNotificationsTypes.DRIVERS_LICENSE -> ItemType.DRIVER_LICENCE
+            FollowUpNotificationsTypes.BANK_ACCOUNT_MX,
+            -> ItemType.BANK_STATEMENT
+            FollowUpNotificationsTypes.DRIVERS_LICENSE -> ItemType.DRIVER_LICENSE
             FollowUpNotificationsTypes.ID_CARD -> ItemType.ID_CARD
             FollowUpNotificationsTypes.PASSPORT -> ItemType.PASSPORT
             FollowUpNotificationsTypes.PAYMENTS_CARD -> ItemType.CREDIT_CARD

@@ -10,7 +10,6 @@ import javax.inject.Inject
 class BankStatementListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.BankStatement> {
-
     override fun getTitle(item: SummaryObject.BankStatement): StatusText {
         val name = item.bankAccountName
         return StatusText(if (name.isNotSemanticallyNull()) name!! else resources.getString(R.string.bank_statement))

@@ -24,14 +24,13 @@ import com.dashlane.credentialmanager.model.PasskeyPrivilegedApplications
 import com.dashlane.credentialmanager.model.PrivilegedAllowlist
 import com.dashlane.credentialsmanager.R
 import com.dashlane.session.SessionManager
-import com.squareup.moshi.Moshi
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @AndroidEntryPoint
 class DashlaneCredentialProviderService : CredentialProviderService() {
-
     @Inject
     lateinit var credentialManagerIntent: CredentialManagerIntent
 
@@ -44,13 +43,10 @@ class DashlaneCredentialProviderService : CredentialProviderService() {
     @Inject
     lateinit var sessionManager: SessionManager
 
-    @Inject
-    lateinit var moshi: Moshi
-
     override fun onBeginGetCredentialRequest(
         request: BeginGetCredentialRequest,
         cancellationSignal: CancellationSignal,
-        callback: OutcomeReceiver<BeginGetCredentialResponse, GetCredentialException>
+        callback: OutcomeReceiver<BeginGetCredentialResponse, GetCredentialException>,
     ) {
         if (!verifyOrigin(request.callingAppInfo)) {
             callback.onError(GetCredentialUnsupportedException("Unsupported origin"))
@@ -60,22 +56,22 @@ class DashlaneCredentialProviderService : CredentialProviderService() {
             
             if (!credentialManagerLocker.isLoggedIn()) {
                 callback.onResult(
-                    BeginGetCredentialResponse.Builder()
-                        .addAuthenticationAction(
+                    BeginGetCredentialResponse(
+                        authenticationActions = listOf(
                             AuthenticationAction(
-                                getString(R.string.credential_manager_locked),
-                                credentialManagerIntent.loginToDashlaneIntent()
-                            )
-                        )
-                        .build()
+                                title = getString(R.string.credential_manager_locked),
+                                pendingIntent = credentialManagerIntent.loginToDashlaneIntent(),
+                            ),
+                        ),
+                    ),
                 )
             } else {
-                val credentialEntries = credentialManagerHandler.handleGetCredentials(this, request)
-                callback.onResult(
-                    BeginGetCredentialResponse.Builder()
-                        .setCredentialEntries(credentialEntries)
-                        .build()
+                val credentialEntries = credentialManagerHandler.handleGetCredentials(
+                    context = this,
+                    request = request,
+                    username = sessionManager.session?.username,
                 )
+                callback.onResult(BeginGetCredentialResponse(credentialEntries))
             }
         } catch (e: Exception) {
             callback.onError(GetCredentialUnknownException())
@@ -85,19 +81,19 @@ class DashlaneCredentialProviderService : CredentialProviderService() {
     override fun onBeginCreateCredentialRequest(
         request: BeginCreateCredentialRequest,
         cancellationSignal: CancellationSignal,
-        callback: OutcomeReceiver<BeginCreateCredentialResponse, CreateCredentialException>
+        callback: OutcomeReceiver<BeginCreateCredentialResponse, CreateCredentialException>,
     ) {
         if (!verifyOrigin(request.callingAppInfo)) {
             callback.onError(CreateCredentialUnsupportedException("Unsupported origin"))
             return
         }
         try {
-            val createEntries = credentialManagerHandler.handleCreateCredential(this, request)
-            callback.onResult(
-                BeginCreateCredentialResponse.Builder()
-                    .setCreateEntries(createEntries)
-                    .build()
+            val createEntries = credentialManagerHandler.handleCreateCredential(
+                context = this,
+                request = request,
+                username = sessionManager.session?.username,
             )
+            callback.onResult(BeginCreateCredentialResponse(createEntries))
         } catch (e: Exception) {
             callback.onError(CreateCredentialUnknownException())
         }
@@ -106,7 +102,7 @@ class DashlaneCredentialProviderService : CredentialProviderService() {
     override fun onClearCredentialStateRequest(
         request: ProviderClearCredentialStateRequest,
         cancellationSignal: CancellationSignal,
-        callback: OutcomeReceiver<Void?, ClearCredentialException>
+        callback: OutcomeReceiver<Void?, ClearCredentialException>,
     ) {
         callback.onError(ClearCredentialUnknownException())
     }
@@ -114,9 +110,10 @@ class DashlaneCredentialProviderService : CredentialProviderService() {
     private fun verifyOrigin(callingAppInfo: CallingAppInfo?): Boolean {
         val privilegedAllowlist = PasskeyPrivilegedApplications.allowList
         return try {
-            callingAppInfo?.getOrigin(moshi.adapter(PrivilegedAllowlist::class.java).toJson(privilegedAllowlist))
+            val json = Json.encodeToString(PrivilegedAllowlist.serializer(), privilegedAllowlist)
+            callingAppInfo?.getOrigin(json)
             true
-        } catch (e: IllegalStateException) {
+        } catch (_: IllegalStateException) {
             false
         }
     }

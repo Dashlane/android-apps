@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/version_validity.json",
+  "type": "object",
+  "description": "When one of the end-of-life messages has been shown",
+  "definitions": {
+    "version_validity_status": {
+      "description": "Version validity status for which a message has been presented",
+      "type": "string",
+      "enum": [
+        "expired_version",
+        "update_recommended",
+        "update_required",
+        "update_strongly_encouraged"
+      ]
+    },
+    "is_update_possible": {
+      "description": "Indicates if the user can update the app",
+      "type": "boolean"
+    }
+  }
+}

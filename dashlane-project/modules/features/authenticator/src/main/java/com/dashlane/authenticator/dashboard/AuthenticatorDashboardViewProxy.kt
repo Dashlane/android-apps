@@ -42,7 +42,7 @@ class AuthenticatorDashboardViewProxy(
     private val viewModel: AuthenticatorDashboardViewModelContract,
     private val editBackCallback: OnBackPressedCallback,
     private val authenticatorLogger: AuthenticatorLogger,
-    copyCallback: String.() -> Unit
+    copyCallback: String.() -> Unit,
 ) {
     private val title = view.findViewById<TextView>(R.id.authenticator_dashboard_title)
     private val listContainer =
@@ -87,7 +87,7 @@ class AuthenticatorDashboardViewProxy(
                     item.domain,
                     professional = item.professional,
                     issuer = issuer,
-                    authenticatorLogger = authenticatorLogger
+                    authenticatorLogger = authenticatorLogger,
                 ) {
                     
                     viewModel.onOtpRemoved(item.id)
@@ -99,7 +99,7 @@ class AuthenticatorDashboardViewProxy(
         fragment.lifecycleScope,
         fragment,
         navigator,
-        viewModel
+        viewModel,
     )
 
     init {
@@ -109,7 +109,7 @@ class AuthenticatorDashboardViewProxy(
     private fun listenState(
         fragment: Fragment,
         viewModel: AuthenticatorDashboardViewModelContract,
-        navigator: Navigator
+        navigator: Navigator,
     ) {
         val lifecycle = fragment.lifecycle
         listenUiState(lifecycle, viewModel, navigator)
@@ -120,7 +120,7 @@ class AuthenticatorDashboardViewProxy(
     private fun listenUiState(
         lifecycle: Lifecycle,
         viewModel: AuthenticatorDashboardViewModelContract,
-        navigator: Navigator
+        navigator: Navigator,
     ) {
         lifecycle.coroutineScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -165,7 +165,7 @@ class AuthenticatorDashboardViewProxy(
 
                         is HandleUri -> viewModel.onSetupAuthenticatorFromUri(
                             state.otpUri,
-                            setupAuthenticatorResultContract
+                            setupAuthenticatorResultContract,
                         )
                     }
                 }
@@ -176,7 +176,7 @@ class AuthenticatorDashboardViewProxy(
     private fun listenEditState(
         fragment: Fragment,
         lifecycle: Lifecycle,
-        viewModel: AuthenticatorDashboardViewModelContract
+        viewModel: AuthenticatorDashboardViewModelContract,
     ) {
         lifecycle.coroutineScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -207,7 +207,7 @@ class AuthenticatorDashboardViewProxy(
                             listContainer.background = ResourcesCompat.getDrawable(
                                 fragment.resources,
                                 R.drawable.authenticator_list_background,
-                                fragment.context?.theme
+                                fragment.context?.theme,
                             )
                             editBackCallback.isEnabled = false
                             

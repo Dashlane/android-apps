@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json",
+  "type": "object",
+  "description": "Deprecated: we won't use client events to track application performance. Definitions for performance units",
+  "definitions": {
+    "measure_name": {
+      "description": "Name of the measure",
+      "type": "string",
+      "enum": [
+        "system_cpu",
+        "system_memory",
+        "time_to_app_ready",
+        "time_to_d",
+        "time_to_dropdown_webcard",
+        "time_to_init_carbon",
+        "time_to_init_persistent",
+        "time_to_init_sw",
+        "time_to_load",
+        "time_to_load_autofill",
+        "time_to_load_local",
+        "time_to_load_remote",
+        "time_to_login",
+        "time_to_prepare_webcard_data",
+        "time_to_unlock",
+        "webvitals_cls",
+        "webvitals_fid",
+        "webvitals_lcp"
+      ]
+    },
+    "measure_type": {
+      "description": "type of the mesure",
+      "type": "string",
+      "enum": [
+        "cpu",
+        "duration",
+        "memory"
+      ]
+    },
+    "value": {
+      "description": "measured value",
+      "type": "number"
+    },
+    "unit": {
+      "description": "Unit the value is",
+      "type": "string",
+      "enum": [
+        "gb",
+        "mb",
+        "milliseconds",
+        "percent",
+        "seconds"
+      ]
+    },
+    "business_domain": {
+      "description": "The business domain of the monitored task. Defined in the context of MV2 to MV3 extension switch.",
+      "type": "string",
+      "enum": [
+        "platform",
+        "sync"
+      ]
+    },
+    "feature": {
+      "description": "Name of feature that started the task. Defined in the context of MV2 to MV3 extension switch.",
+      "type": "string",
+      "pattern": "^([a-z][a-z0-9]*)(_[a-z0-9]+)*$"
+    },
+    "task_name": {
+      "description": "Name of task. Defined in the context of MV2 to MV3 extension switch.",
+      "type": "string",
+      "pattern": "^([a-z][a-z0-9]*)(_[a-z0-9]+)*$"
+    },
+    "task_date_time": {
+      "description": "The datetime at which the task started or ended. Defined in the context of MV2 to MV3 extension switch.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "service_worker_interruption_count": {
+      "description": "The number of time the service worker was interrupted during the task.  Defined in the context of MV2 to MV3 extension switch.",
+      "type": "integer"
+    },
+    "has_woken_up_service_worker": {
+      "description": "Set to true if the service worker was asleep when the task was started, and so the service worker was awoken by this task. Defined in the context of MV2 to MV3 extension switch.",
+      "type": "boolean"
+    }
+  }
+}

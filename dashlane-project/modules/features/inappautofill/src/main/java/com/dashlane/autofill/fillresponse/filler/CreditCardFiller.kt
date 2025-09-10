@@ -1,13 +1,13 @@
 package com.dashlane.autofill.fillresponse.filler
 
 import android.view.View
-import com.dashlane.autofill.fillresponse.DatasetWrapperBuilder
-import com.dashlane.autofill.model.CreditCardItemToFill
-import com.dashlane.autofill.model.ItemToFill
 import com.dashlane.autofill.api.util.AutofillValueFactory
-import com.dashlane.autofill.util.getBestEntry
+import com.dashlane.autofill.fillresponse.DatasetWrapperBuilder
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.model.CreditCardItemToFill
+import com.dashlane.autofill.model.ItemToFill
+import com.dashlane.autofill.util.getBestEntry
 import java.time.Month
 import java.time.Year
 import java.time.YearMonth
@@ -15,12 +15,11 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 internal open class CreditCardFiller(private val autofillValueFactory: AutofillValueFactory) : Filler {
-
     override fun fill(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         item: ItemToFill,
-        requireLock: Boolean
+        requireLock: Boolean,
     ): Boolean {
         val creditCardItemToFill = item as CreditCardItemToFill
         val cardNumberFieldFound = setCardNumber(dataSetBuilder, summary, creditCardItemToFill, requireLock)
@@ -34,7 +33,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         item: CreditCardItemToFill,
-        requireLock: Boolean
+        requireLock: Boolean,
     ): Boolean {
         val value = item.vaultItem?.syncObject?.cardNumber?.takeUnless { requireLock }?.toString() ?: ""
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.CREDIT_CARD_NUMBER)
@@ -44,7 +43,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         item: CreditCardItemToFill,
-        requireLock: Boolean
+        requireLock: Boolean,
     ): Boolean {
         val value = item.vaultItem?.syncObject?.securityCode?.takeUnless { requireLock }?.toString() ?: ""
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.CREDIT_CARD_SECURITY_CODE)
@@ -54,7 +53,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         item: CreditCardItemToFill,
-        requireLock: Boolean
+        requireLock: Boolean,
     ): Boolean {
         val month = if (requireLock) Month.JANUARY else item.vaultItem?.syncObject?.expireMonth
         val year = if (requireLock) Year.of(2016) else item.vaultItem?.syncObject?.expireYear
@@ -77,7 +76,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
                         dataSetBuilder,
                         entry,
                         yearMonth.minusMonths(1).lengthOfMonth(),
-                        yearMonth
+                        yearMonth,
                     ) 
                 else -> false
             }
@@ -90,7 +89,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         item: CreditCardItemToFill,
-        requireLock: Boolean
+        requireLock: Boolean,
     ): Boolean {
         val value = if (requireLock) "" else item.zipCode
         return fillIfExist(dataSetBuilder, summary, value, AutoFillHint.POSTAL_CODE)
@@ -100,7 +99,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         dataSetBuilder: DatasetWrapperBuilder,
         entry: AutoFillHintSummary.Entry,
         value: Int,
-        yearMonth: YearMonth
+        yearMonth: YearMonth,
     ): Boolean {
         return when (entry.autoFillType) {
             View.AUTOFILL_TYPE_TEXT -> {
@@ -116,7 +115,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
     private fun fillDate(
         dataSetBuilder: DatasetWrapperBuilder,
         entry: AutoFillHintSummary.Entry,
-        yearMonth: YearMonth
+        yearMonth: YearMonth,
     ): Boolean {
         when (entry.autoFillType) {
             View.AUTOFILL_TYPE_DATE -> {
@@ -140,12 +139,12 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
     private fun fillWithValueFromList(
         dataSetBuilder: DatasetWrapperBuilder,
         entry: AutoFillHintSummary.Entry,
-        value: Int
+        value: Int,
     ): Boolean {
         val index = entry.autoFillOptions.indexOfFirst {
             it == value.toString() || 
-                    (value <= 12 && it.startsWith("%02d".format(value))) || 
-                    (value > 1000 && it == (value % 100).toString()) 
+                (value <= 12 && it.startsWith("%02d".format(value))) || 
+                (value > 1000 && it == (value % 100).toString()) 
         }
         return when {
             index != -1 -> {
@@ -164,7 +163,7 @@ internal open class CreditCardFiller(private val autofillValueFactory: AutofillV
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         value: String?,
-        vararg hintsName: String
+        vararg hintsName: String,
     ): Boolean {
         if (value == null) {
             return false

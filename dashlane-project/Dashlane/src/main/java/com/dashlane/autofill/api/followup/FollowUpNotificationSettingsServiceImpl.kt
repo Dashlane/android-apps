@@ -10,9 +10,8 @@ import javax.inject.Inject
 class FollowUpNotificationSettingsServiceImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val preferencesManager: PreferencesManager,
-    private val followUpNotificationLogger: FollowUpNotificationLogger
+    private val followUpNotificationLogger: FollowUpNotificationLogger,
 ) : FollowUpNotificationSettingsService {
-
     private val userPreferencesManager: UserPreferencesManager
         get() = preferencesManager[sessionManager.session?.username]
 

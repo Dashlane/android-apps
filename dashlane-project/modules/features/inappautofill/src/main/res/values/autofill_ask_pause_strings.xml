@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autofill_do_not_show_again_paused_permanent_application_message">Autofill is now paused on this application. To resume it, go to Dashlane Settings.</string>
+    <string name="autofill_do_not_show_again_paused_permanent_website_message">Autofill is now paused on this site. To resume it, go to Dashlane Settings.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_hour_application_message">Autofill is paused for 1 hour on this application.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_hour_website_message">Autofill is paused for 1 hour on this site.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_day_application_message">Autofill is paused for 1 day on this application.</string>
+    <string name="autofill_do_not_show_again_paused_for_one_day_website_message">Autofill is paused for 1 day on this site.</string>
+    <string name="autofill_do_not_show_again_pause_error_message">Something went wrong. Please try pausing Dashlane Autofill again.</string>
+
+    
+    <string name="autofill_ask_pause_title">Pause Dashlane Autofill for</string>
+    
+    <string name="autofill_do_not_show_again_pause_for_one_hour">For 1 hour</string>
+    
+    <string name="autofill_do_not_show_again_pause_for_one_day">For 1 day</string>
+    
+    <string name="autofill_do_not_show_again_pause_permanent">Until I turn it back on</string>
+    
+    <string name="autofill_ask_pause_action_done">Done</string>
+</resources>

@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/reveal_vault_item_field.json",
+  "type": "object",
+  "description": "Reveal of a field in vault item, at detail /edit view and not at creation. Reasons : this is to compare with autofill volumes, and is not significant at creation.",
+  "metas": {
+    "area": "vault",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "reveal_vault_item_field"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "field": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/field"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+    }
+  },
+  "required": [
+    "name",
+    "domain",
+    "field",
+    "item_type"
+  ],
+  "additionalProperties": false
+}

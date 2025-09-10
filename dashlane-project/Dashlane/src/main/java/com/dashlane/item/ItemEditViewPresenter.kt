@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import com.dashlane.R
 import com.dashlane.attachment.ui.AttachmentListActivity
-import com.dashlane.authenticator.Otp
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierReplacedEvent
 import com.dashlane.events.register
@@ -16,26 +15,16 @@ import com.dashlane.events.unregister
 import com.dashlane.featureflipping.FeatureFlip.ATTACHMENT_ALL_ITEMS
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.frozenaccount.FrozenStateManager
-import com.dashlane.item.collection.CollectionSelectorActivity
-import com.dashlane.item.linkedwebsites.old.LinkedServicesActivity
-import com.dashlane.item.passwordhistory.PasswordHistoryActivity
-import com.dashlane.item.passwordhistory.PasswordHistoryActivity.Companion.FINISHED_WITH_ERROR_EXTRA
-import com.dashlane.item.subview.ItemCollectionListSubView
-import com.dashlane.item.subview.ItemCollectionListSubView.Collection
-import com.dashlane.item.subview.ItemSubViewWithActionWrapper
-import com.dashlane.item.subview.action.ItemHistoryAction
 import com.dashlane.item.subview.action.MenuAction
 import com.dashlane.item.subview.action.NewShareAction
 import com.dashlane.item.subview.action.NewShareMenuAction
 import com.dashlane.item.subview.action.ShareDetailsAction
 import com.dashlane.item.subview.action.ShowAttachmentsMenuAction
 import com.dashlane.item.subview.action.showAttachments
-import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
 import com.dashlane.securefile.extensions.hasAttachments
 import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.util.DeviceUtils
-import com.dashlane.util.getParcelableExtraCompat
 import com.dashlane.util.showToaster
 import com.dashlane.util.tryOrNull
 import com.dashlane.vault.model.SyncState
@@ -57,7 +46,6 @@ import kotlinx.coroutines.launch
 class ItemEditViewPresenter :
     BasePresenter<ItemEditViewContract.DataProvider, ItemEditViewContract.View>(),
     ItemEditViewContract.Presenter {
-
     override val isSecureNote: Boolean
         get() = tryOrNull { provider.vaultItem.syncObject is SyncObject.SecureNote } ?: false
 
@@ -88,7 +76,7 @@ class ItemEditViewPresenter :
                     finish()
                     showToaster(
                         R.string.error_type_or_uid_invalid_on_item_opening,
-                        Toast.LENGTH_SHORT
+                        Toast.LENGTH_SHORT,
                     )
                 }
             }
@@ -98,7 +86,7 @@ class ItemEditViewPresenter :
 
     private fun registerForEvents(
         options: ItemEditViewSetupOptions,
-        context: Context
+        context: Context,
     ) {
         appEvents.register<DataIdentifierReplacedEvent>(this) { event ->
             if (event.oldItemId == options.uid) {
@@ -140,17 +128,18 @@ class ItemEditViewPresenter :
         if (summaryObject.attachmentsAllowed(
                 attachmentAllItems = userFeaturesChecker.has(ATTACHMENT_ALL_ITEMS),
                 isAccountFrozen = isAccountFrozen,
-                hasCollections = false 
                 
                 
+                
+                hasCollections = false,
             )
         ) {
             allMenus.add(
                 ShowAttachmentsMenuAction(
                     action = { activity ->
                         summaryObject.showAttachments(activity)
-                    }
-                )
+                    },
+                ),
             )
         }
         
@@ -161,44 +150,34 @@ class ItemEditViewPresenter :
             if (canShare) {
                 allMenus.add(NewShareMenuAction(summaryObject, teamspaceRestrictionNotificator))
             }
-            
-            (vaultItem.syncObject as? SyncObject.Authentifiant)?.let { authentifiant ->
-                if (canReviewPasswordHistory(summaryObject, vaultItem, authentifiant, isAccountFrozen)) {
-                    allMenus.add(
-                        ItemHistoryAction {
-                            openItemHistory(authentifiant)
-                        }
-                    )
-                }
-            }
             if (provider.isEditMode) {
                 allMenus.add(
                     MenuAction(
                         R.string.dashlane_save,
                         R.drawable.save,
-                        MenuItem.SHOW_AS_ACTION_ALWAYS
+                        MenuItem.SHOW_AS_ACTION_ALWAYS,
                     ) {
                         coroutineScope.launch(Dispatchers.Main) {
                             if (provider.save(context!!, provider.getScreenConfiguration().itemSubViews)) {
                                 handleSuccess(vaultItem)
                             }
                         }
-                    }
+                    },
                 )
             } else if (sharingPolicyDataProvider.canEditItem(
                     vaultItem.toSummary(),
                     isNewItem(vaultItem),
-                    isAccountFrozen
+                    isAccountFrozen,
                 )
             ) {
                 allMenus.add(
                     MenuAction(
                         R.string.edit,
                         R.drawable.edit,
-                        MenuItem.SHOW_AS_ACTION_ALWAYS
+                        MenuItem.SHOW_AS_ACTION_ALWAYS,
                     ) {
                         setupEditMode()
-                    }
+                    },
                 )
             }
         }
@@ -215,44 +194,6 @@ class ItemEditViewPresenter :
 
     override fun deleteClicked() {
         view.showConfirmDeleteDialog(provider.vaultItem.uid, provider.vaultItem.isShared())
-    }
-
-    override fun onPasswordRestored() {
-        coroutineScope.launch(Dispatchers.Main) {
-            
-            if (provider.onPasswordRestored()) setup(context!!, currentOptions)
-        }
-    }
-
-    override fun otpRefreshed(otp: Otp) {
-        coroutineScope.launch(Dispatchers.Main) {
-            val subviews = provider.getScreenConfiguration().itemSubViews
-            
-            
-            
-            subviews.forEach {
-                when (it) {
-                    is ItemAuthenticatorEditSubView -> it.value = otp
-                    is ItemSubViewWithActionWrapper -> {
-                        if (it.itemSubView is ItemAuthenticatorEditSubView) {
-                            it.itemSubView.value = otp
-                        }
-                    }
-                }
-            }
-            provider.saveRefreshedOtp(otp)
-        }
-    }
-
-    private fun addCollection(collection: Collection) {
-        val subviews = provider.getScreenConfiguration().itemSubViews
-        subviews.forEach { subview ->
-            when (subview) {
-                is ItemCollectionListSubView -> {
-                    subview.value.value = (subview.value.value + collection).sortedBy { it.name }
-                }
-            }
-        }
     }
 
     override fun onBackPressed() {
@@ -285,16 +226,6 @@ class ItemEditViewPresenter :
             AttachmentListActivity.REQUEST_CODE_ATTACHMENT_LIST -> {
                 handleAttachmentListResult(resultCode, data)
             }
-            LinkedServicesActivity.SHOW_LINKED_SERVICES -> {
-                handleLinkedServicesResult(data, resultCode)
-            }
-            CollectionSelectorActivity.SHOW_COLLECTION_SELECTOR -> {
-                handleCollectionSelectorResult(data)
-            }
-            PasswordHistoryActivity.REQUEST_CODE -> {
-                handlePasswordHistoryResult(resultCode, data)
-            }
-            else -> view.listener.notifyPotentialBarCodeScan(requestCode, resultCode, data)
         }
     }
 
@@ -325,67 +256,6 @@ class ItemEditViewPresenter :
             
             activity!!.finish()
         }
-    }
-
-    private fun handleLinkedServicesResult(data: Intent?, resultCode: Int) {
-        
-        val linkedWebsites =
-            data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_WEBSITES)?.toList()
-        val linkedApps = data?.getStringArrayExtra(LinkedServicesActivity.RESULT_TEMPORARY_APPS)?.toList()
-        if (linkedWebsites != null || linkedApps != null) {
-            coroutineScope.launch(Dispatchers.Main) {
-                setupJob?.join()
-                refreshUi(toolbarCollapsed = currentOptions.toolbarCollapsed)
-            }
-        }
-
-        if (resultCode == LinkedServicesActivity.RESULT_DATA_SAVED) {
-            
-            view.showSaveConfirmation()
-
-            coroutineScope.launch(Dispatchers.Main) {
-                setupJob?.join()
-                
-                setup(context!!, currentOptions.copy(forceEdit = provider.isEditMode))
-            }
-        }
-    }
-
-    private fun handleCollectionSelectorResult(data: Intent?) {
-        coroutineScope.launch(Dispatchers.Main) {
-            setupJob?.join()
-            val selectedCollection =
-                data?.getParcelableExtraCompat(
-                    CollectionSelectorActivity.RESULT_TEMPORARY_COLLECTION,
-                    Collection::class.java
-                )
-            selectedCollection?.let { addCollection(it) }
-            if (!provider.isEditMode) {
-                provider.save(context!!, provider.getScreenConfiguration().itemSubViews)
-            }
-        }
-    }
-
-    private fun handlePasswordHistoryResult(resultCode: Int, data: Intent?) {
-        val isError =
-            resultCode == Activity.RESULT_CANCELED && data?.getBooleanExtra(FINISHED_WITH_ERROR_EXTRA, false) == true
-        when {
-            isError -> activity?.showToaster(
-                R.string.generic_error_message,
-                Toast.LENGTH_SHORT
-            )
-            resultCode == Activity.RESULT_OK -> {
-                view.listener.notifyRestorePassword()
-                activity?.showToaster(
-                    R.string.feedback_password_restored,
-                    Toast.LENGTH_SHORT
-                )
-            }
-        }
-    }
-
-    override fun onNewIntent(data: Intent) {
-        provider.onNewIntent(data, coroutineScope)
     }
 
     override fun isToolbarCollapsed(): Boolean {
@@ -498,23 +368,5 @@ class ItemEditViewPresenter :
                 startActivity(intent)
             }
         }
-    }
-
-    private fun canReviewPasswordHistory(
-        summaryObject: SummaryObject,
-        vaultItem: VaultItem<*>,
-        syncObject: SyncObject,
-        isAccountFrozen: Boolean,
-    ): Boolean {
-        return (
-            !provider.isEditMode &&
-                sharingPolicyDataProvider.canEditItem(summaryObject, isNewItem(vaultItem)) &&
-                (syncObject as? SyncObject.Authentifiant)?.hasDataChanges() == true &&
-                !isAccountFrozen
-            )
-    }
-
-    private fun SyncObject.Authentifiant.hasDataChanges(): Boolean {
-        return provider.hasPasswordHistory(this)
     }
 }

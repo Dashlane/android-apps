@@ -3,11 +3,11 @@ package com.dashlane.logger.utils
 import com.dashlane.debug.services.DaDaDaHermes
 import com.dashlane.hermes.ConfigurationUtil
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.util.BuildConfig
+import com.dashlane.utils.android.BuildConfig
 
 class HermesDebugUtil(
     private val dadadaHermes: DaDaDaHermes,
-    private val preferencesManager: GlobalPreferencesManager
+    private val preferencesManager: GlobalPreferencesManager,
 ) : ConfigurationUtil {
     override val allowSendLogs: Boolean
         get() = preferencesManager.allowSendLogs

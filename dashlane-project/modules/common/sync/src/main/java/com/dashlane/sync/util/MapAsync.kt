@@ -11,16 +11,16 @@ import kotlinx.coroutines.coroutineScope
 @Suppress("EXPERIMENTAL_API_USAGE")
 internal suspend inline fun <R, T> Iterable<T>.mapAsync(
     progressChannel: SendChannel<Unit>?,
-    crossinline transform: (T) -> R
+    crossinline transform: (T) -> R,
 ): List<R> = coroutineScope {
     val deferredChannel = produce<Deferred<R>> {
         for (item in this@mapAsync) {
             send(
                 async {
-                val result = transform(item)
-                progressChannel?.send(Unit)
-                result
-            }
+                    val result = transform(item)
+                    progressChannel?.send(Unit)
+                    result
+                },
             )
         }
     }

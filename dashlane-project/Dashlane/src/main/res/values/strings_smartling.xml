@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="contacting_dashlane">Connecting to Dashlane</string>
-    <string name="email_address_login_screen">Email</string>
     <string name="pin_desc2">Set a PIN to unlock the app. It\'s quick and easy to set up and keeps your data safe.</string>
-    <string name="receive_sec_code">We just sent you a verification code by email. Enter the code below to verify your identity.</string>
-    <string name="otp_enabled_token_desc">To verify your identity, enter the 2FA token provided by your authentication app.</string>
-    <string name="account_doesn_t_exist_do_you_have_an_account_with_dashlane">We couldn\'t find this account. Please check the email address.</string>
-    <string name="network_failed_notification">We were unable to connect with the Dashlane server. Please check your connection and try again.</string>
-    <string name="invalid_email">The email address you provided is invalid. Please provide a valid email address.</string>
-    <string name="search">Search</string>
-    <string name="invites">Invite your friends</string>
     <string name="personal_website">Website</string>
     <string name="date_of_birth">Date of birth</string>
     <string name="copy" tools:override="true">Copy</string>
@@ -24,25 +16,17 @@
     <string name="id_card">ID card</string>
     <string name="passport">Passport</string>
     <string name="social_security">Social Security</string>
-    <string name="login">Username</string>
     <string name="gender">Gender</string>
     <string name="county">County</string>
     <string name="creation_date_header">Created</string>
     <string name="latest_update_header">Last updated</string>
+    <string name="used_date_header">Last used</string>
     <string name="latest_update_header_for_shared_item">Modified by you</string>
     <string name="now_display_format">Just now</string>
-    <string name="checkout_dashlane">Check out Dashlane</string>
-    <string name="refferal_text">All my personal data at hand for instant shopping, logging in, registering anywhere. Try it: %1$s</string>
-    <string name="enter_pin">Unlock with your PIN</string>
     <string name="pin">Unlock Dashlane with a PIN</string>
     <string name="use_pin">Use a PIN</string>
-
-    <string name="make_sure_you_have_internet_for_refferalid">Please check your connection and try again.</string>
-    <string name="network_error">Network error</string>
     <string name="dashlane_sync_in_progress">Dashlane sync in progress</string>
     <string name="your_dashlane_account_is_beeing_synchronized">Your Dashlane account is being synchronized</string>
-    <string name="forced_logout">Your account settings have been modified from another authorized device. To continue using your account on this device, please sign in again.</string>
-    <string name="create_account">Create account</string>
     <string name="creditcard">Credit/Debit Card</string>
     <string name="bank">Bank</string>
     <string name="bankstatement">Bank account</string>
@@ -61,16 +45,6 @@
     <string name="account_number">Account Number</string>
     <string name="clabe">CLABE</string>
     <string name="other">Other</string>
-    <string name="personal_finance">Finance</string>
-    <string name="application_passwords">Application logins</string>
-    <string name="databases">Databases</string>
-    <string name="legal_documents">Legal Documents</string>
-    <string name="memberships">Memberships</string>
-    <string name="personal">Personal</string>
-    <string name="server">Server</string>
-    <string name="softwarelicences">Software Licenses</string>
-    <string name="wi_fi_passwords">Wi-Fi Passwords</string>
-    <string name="work_related">Work Related</string>
     <string name="choose">Choose</string>
     <string name="none">None</string>
     <string name="login_alt">Open</string>
@@ -81,9 +55,8 @@
     <string name="action_bar_password_generator">Generator</string>
     <string name="action_bar_password_generated">Generated passwords</string>
     <string name="action_bar_settings">Settings</string>
-    <string name="please_enter_master_password_to_edit_settings">Please enter your Master Password to change this setting.</string>
     <string name="item_deleted">Item deleted!</string>
-    <string name="creditcard_color_no_type">No type</string>
+    <string name="creditcard_color_header">Color</string>
     <string name="creditcard_color_black">Black</string>
     <string name="creditcard_color_silver">Silver</string>
     <string name="creditcard_color_white">White</string>
@@ -131,63 +104,55 @@
     <string name="tax_statement_hint_online_number">Online registration number</string>
     <string name="bank_account_hint_name">Item name</string>
     <string name="bank_account_hint_account_holder">Account holder</string>
+    <string name="credit_card_detail_section">Card details</string>
     <string name="credit_card_hint_name">Item name</string>
     <string name="credit_card_hint_number">Number</string>
     <string name="credit_card_hint_security_code">Security code</string>
     <string name="credit_card_hint_account_holder">Account holder</string>
-    <string name="credit_card_hint_issue_number">Issue number</string>
+    <string name="credit_card_hint_expiration_date">Expiry date</string>
+    <string name="credit_card_hint_note">Note content</string>
+    <string name="wifi_detail_section">Wi-Fi details</string>
+    <string name="wifi_hint_ssid">Network name (SSID)</string>
+    <string name="wifi_hint_passphrase">Password</string>
+    <string name="wifi_hint_note">Note</string>
+    <string name="wifi_show_qr_code">Show QR code</string>
+    <string name="wifi_qr_code_bottom_sheet_description">Show this QR code to someone to help them connect to this network.</string>
+    <string name="wifi_qr_code_bottom_sheet_done">DONE</string>
+    <string name="wifi_connect_to_network">Connect to this network</string>
+    <string name="wifi_connect_to_network_already_connected">Already connected to this Wi-Fi network.</string>
+    <string name="wifi_connect_to_network_result_success_added">Your device will connect when this network is available.</string>
+    <string name="wifi_connect_to_network_result_success_connected">Connected successfully</string>
+    <string name="wifi_connect_to_network_result_already_connected">You are already connected to this network.</string>
+    <string name="wifi_connect_to_network_result_already_exist">Open Wi-Fi settings to connect to the network.</string>
+    <string name="wifi_connect_to_network_result_already_exist_action">Open</string>
+    <string name="wifi_connect_to_network_result_failed">An error occurred while adding the Wi-Fi network.</string>
+    <string name="wifi_hint_name">Item name</string>
     <string name="gcmtint_token_is">Your verification code is %1$s</string>
     <string name="gcmmessage">Verification code</string>
     <string name="menu_v2_password_button">Logins</string>
     <string name="menu_v2_secure_notes_button">Secure Notes</string>
     <string name="menu_v2_contact_button">Personal info</string>
     <string name="menu_v2_ids_button">IDs</string>
-    <string name="menu_v2_secret_button">Secret</string>
+    <string name="menu_v2_secret_button">Secrets</string>
     <string name="menu_v2_payments_button">Payments</string>
     <string name="menu_v2_settings_button">Settings</string>
+
     <string name="settings_app_lock">Application lock</string>
-    <string name="settings_use_pincode">PIN lock</string>
     <string name="setting_use_pincode_description">Unlock the app with a 6-digit PIN. To use a PIN, your device must have a screen lock.</string>
     <string name="settings_change_pincode">Change PIN</string>
     <string name="settings_change_pincode_description">Use your device-specific PIN to unlock the app</string>
     <string name="settings_disable_totp2_for_device">Disable 2FA</string>
     <string name="settings_disable_totp2_for_device_description">Do not ask for 2-factor authentication (2FA) on this device at most logins</string>
-    <string name="settings_title_licenses">Licenses</string>
-    <string name="settings_use_lock_timeout">Auto-lock time</string>
-    <string name="settings_security_flag_title">Allow screenshots</string>
-    <string name="settings_clear_clipboard">Clear clipboard</string>
-    <string name="settings_clear_clipboard_description">Automatically clear the clipboard content after 30 seconds</string>
-    <string name="settings_security_flag_description">Allow screenshots (not recommended)</string>
-    <string name="setting_choose_timeout">Auto-lock timeout</string>
-    <string name="setting_debug_link">Debug menu</string>
-    <string name="settings_lock_on_exit">Auto-lock</string>
-    <string name="setting_lock_on_exit_description">Lock on exit</string>
-    <string name="setting_logs_header">Usage data</string>
-    <string name="setting_allow_logs_title">Help improve Dashlane</string>
-    <string name="setting_allow_logs_description">This setting allows us to collect information on how our tools and features are used. We use this data to make product improvements. Nothing is shared outside of Dashlane, and sensitive data is anonymized.</string>
-    <string name="setting_premium_category">Account</string>
-    <string name="setting_timeout_inf">Never</string>
-    <string name="setting_timeout_5">5 seconds</string>
-    <string name="setting_timeout_30">30 seconds</string>
-    <string name="setting_timeout_60">1 minute</string>
-    <string name="setting_timeout_180">3 minutes</string>
-    <string name="setting_timeout_300">5 minutes</string>
-    <string name="setting_timeout_900">15 minutes</string>
+
     
     <string name="setting_dashlane_labs">Dashlane Labs</string>
     
     <string name="setting_dashlane_labs_description">[INTERNAL] Help to make Dashlane better by testing new features</string>
-    
-    <string name="setting_automatically_copy_2fa">Copy 2FA token automatically</string>
-    
-    <string name="setting_automatically_copy_2fa_description">Copy 2-factor authentication (2FA) tokens generated by Dashlane automatically.</string>
-    <string name="setting_about_version">Version</string>
-    <string name="setting_send_love">Send love</string>
+
     <string name="settings_use_2fa">2-factor authentication (2FA)</string>
     <string name="settings_use_2fa_description">2FA is an extra layer of security for your account. When logging in or adding a new device, we’ll ask you to enter a 6-digit token from your authenticator app.</string>
-
-    
-    <string name="settings_social_media_header">Find us on social media</string>
+    <string name="setting_about_version">Version</string>
+    <string name="setting_send_love">Send love</string>
 
     <string name="push_token_toast_unlock_to_get_token">Please unlock to view your verification code.</string>
     <string name="menu_help_center">Help</string>
@@ -216,16 +181,14 @@
     <string name="sharing_contextual_manage_contact_pending_resend_invite">Resend your request</string>
     <string name="sharing_contextual_manage_contact_pending_cancel_invite">Cancel your request</string>
     <string name="sharing_dialog_error_premium_status_undefined_description">An error occurred. Please log out and log in again.</string>
-    <string name="empty_screen_securenotes_line1">Add secure notes</string>
-    <string name="empty_screen_securenotes_line2">Store important notes here—like WiFi passwords and access codes.</string>
-    <string name="empty_screen_vault_allitems_line1">One secure place for all your important info</string>
-    <string name="empty_screen_vault_allitems_line2">Add anything from logins to payments—and so much more!</string>
-    <string name="empty_screen_personalinfo_line1">Add Personal info</string>
-    <string name="empty_screen_personalinfo_line2">When you store personal details here, Dashlane can fill forms for you.</string>
-    <string name="empty_screen_ids_line1">Add your IDs</string>
-    <string name="empty_screen_ids_line2">Store your IDs (driver’s license, passport, etc.) in this secure space.</string>
-    <string name="empty_screen_sharing_line1">Share logins and Secure Notes</string>
-    <string name="empty_screen_sharing_line2">Encrypt and share in three easy steps.</string>
+    
+    <string name="sharing_center_empty_screen_title">Start sharing items</string>
+    
+    <string name="sharing_center_empty_screen_item_1_title">Your data, your choice</string>
+    
+    <string name="sharing_center_empty_screen_item_1_description">Securely share one or more logins and Secure Notes with others who use Dashlane. You can share with one person, multiple people, or groups.</string>
+    
+    <string name="sharing_center_empty_screen_add_login_button">Add login</string>
     <string name="sharing_confirmation_popup_title_cancel_invite">Are you sure you want to revoke access?</string>
     <string name="sharing_confirmation_popup_description_cancel_invite">This item will be deleted from the accounts of anyone it\'s shared with.</string>
     <string name="sharing_confirmation_popup_btn_confirm_cancel_invite">Revoke access</string>
@@ -253,7 +216,6 @@
     <string name="enum_sharing_permission_limited">Limited rights</string>
     <string name="enum_sharing_permission_revoked">Revoked</string>
     <string name="sharing_permission_explaination_title">Permission settings</string>
-    <string name="settings_category_sharing">Misc</string>
     <string name="fragment_credential_create_step1_input_label">Search for a website or app</string>
     <string name="fragment_credential_create_step1_add_empty_item">Add login</string>
     <string name="fragment_credential_create_step1_add_multiple_passwords">Want to import multiple logins?</string>
@@ -261,18 +223,10 @@
     <string name="fragment_credential_create_step1_suggestions">Suggestions</string>
     <string name="action_bar_title_credential_create_step1">Add a login</string>
     <string name="toolbar_menu_title_secure_note_color">Color</string>
-    <string name="toolbar_menu_title_secure_note_lock">Lock/unlock</string>
-    <string name="toolbar_menu_title_secure_note_category">Category</string>
     <string name="alphabet_indexer_grouping_numbers_0_9">0-9</string>
-    <string name="creditcard_new_label">Credit Card</string>
+    <string name="creditcard_new_label">Credit/Debit Card</string>
     <string name="dropdown_select_incentive">Select</string>
-    <string name="settings_use_lock_timeout_description">Lock the app after %1$s of inactivity</string>
-    <string name="settings_use_lock_timeout_description_never_lock">Never auto-lock the app after inactivity</string>
-    <string name="setting_send_love_description">Rate Dashlane on the Play Store</string>
-    <string name="setting_send_invites_description">Get free Dashlane Premium by inviting your friends</string>
-    <string name="setting_send_invites_description_premium_user">Like Dashlane? Share it with a friend.</string>
-    <string name="lock_force_logout_password_incorrect_too_much">You have been logged out after 3 failed authentication attempts. Please log in again.</string>
-    <string name="lock_pincode_force_logout_pin_missed_too_much">You entered the wrong PIN three times. Please log in with your Master Password.</string>
+
     <string name="loading_devices">Loading your devices...</string>
     <string name="loading_devices_error">We couldn\'t load your list of devices. Please check your network connection</string>
     <string name="delete_device">Remove device</string>
@@ -302,24 +256,12 @@
     <string name="menu_user_profile_status_premium_family">Family plan</string>
     <string name="menu_user_profile_status_premium_plus">Premium Plus plan</string>
     <string name="menu_user_profile_status_premium_plus_family">Premium Plus Family plan</string>
-    <string name="setting_use_google_fingerprint_title">Biometric unlock</string>
-    <string name="setting_use_google_fingerprint_description">Use biometrics to unlock the app</string>
+
     <string name="fragment_dialog_propose_hardware_module_google_fp_title">Unlock Dashlane with biometrics</string>
     <string name="fragment_dialog_propose_hardware_module_google_fp_desc">Instead of typing in your Master Password, use biometrics to unlock your Dashlane app quickly and securely.</string>
-    <string name="onboarding_dialog_auth_required_hardware_module_google_fp_title">Authenticate with biometric to activate it for Dashlane</string>
-    <string name="onboarding_dialog_auth_required_hardware_module_google_fp_button">Cancel</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_title">To use this feature, you need to set up biometric unlock in your phone\'s Security settings.</string>
-    <string name="onboarding_dialog_hardware_registeration_module_google_fp_button">Go</string>
-    <string name="window_biometric_unlock_hardware_module_google_fp_title">Unlock Dashlane with biometrics</string>
+
     <string name="dashlane_save">Save</string>
-    <string name="error_credential_must_have_at_least">Please add login details and either a website or item name before saving</string>
-    <string name="fragment_lock_pin_button_use_master_password">Use Master Password</string>
-    <string name="fragment_lock_master_password_button_unlock">Unlock</string>]
     <string name="error_type_or_uid_invalid_on_item_opening">Something went wrong! Please try again.</string>
-    <string name="error_during_hardware_authentication">Biometrics not recognized. Try again</string>
-    <string name="contact_system_administrator">No app available to complete this action. Contact your system administrator.</string>
-    <string name="credit_card_hint_pin_code">Notes</string>
-    <string name="lock_fingerprint_force_logout_fingerprint_incorrect_too_much">You were not recognized. Please try logging in again.</string>
     <string name="reveal_password_permission_title">You have limited rights to this login</string>
     <string name="reveal_password_permission_body">You cannot view, copy or edit it, but you can use it with auto-login for apps, the Dashlane Browser or desktop browser extensions.</string>
     <string name="teamspaces_selector_label">Space</string>
@@ -348,7 +290,6 @@
     <string name="empty_screen_user_group_items_line1">Nothing shared yet</string>
     <string name="empty_screen_user_group_items_line2">Once items are shared with the group, you\'ll see them here</string>
     <string name="user_group_edit_item_last_admin_warning_message">You cannot limit the rights of this group, as there must be at least one person or group with full rights to this item</string>
-    <string name="setting_about_crash_report_id">User Support Reporter Id</string>
     <string name="sharing_shared_shared_with_users_and_groups">Shared with %1$s, %2$s</string>
     <string name="sharing_shared_counter_groups_one">%1$d group</string>
     <string name="sharing_shared_counter_groups_other">%1$d groups</string>
@@ -356,12 +297,6 @@
     <string name="sharing_shared_counter_users_other">%1$d users</string>
     <string name="sharing_shared_shared_with">Shared with %1$s</string>
     <string name="sharing_status_pending_short">Pending</string>
-    <string name="login_token_where_is_cta">Where is my code?</string>
-    <string name="login_token_where_is_popup_title">Where is my code?</string>
-    <string name="login_token_where_is_popup_message">We sent a verification code to your primary contact email address, which may be different from the address you use to log in to Dashlane.\n\nIf you use Dashlane on another mobile device, you can also access the code in your app.</string>
-    <string name="login_token_where_is_popup_resend">Resend code</string>
-    
-    <string name="login_token_where_is_popup_close">Close</string>
     <string name="sharing_center_label_pending_invitation">Pending sharing requests</string>
     <string name="sharing_pending_invite_item_group_description">Shared by %1$s</string>
     <string name="sharing_shared_group_items_and_members">%1$s | %2$s</string>
@@ -381,71 +316,11 @@
     <string name="breach_alert_popup_change_no_passwords">You may have updated your password after the breach, but if you aren\'t sure, make sure to update it and any other similar passwords.</string>
     <string name="breach_alert_popup_close">CLOSE</string>
     <string name="breach_alert_popup_view">VIEW</string>
-    <string name="receive_sec_code_expires">Your code expires in 3 hours.</string>
-    <string name="trouble_logging_in">Login Issues?</string>
-    <string name="login_cannot_login">I cannot log in</string>
-    <string name="login_forgot_password">I forgot my password</string>
-    <string name="login_change_account">Use another account</string>
-    <string name="login_enter_mp_remember_title">We\'ll occasionally ask for your Master Password to make sure you still remember it.</string>
-    <string name="login_enter_mp_later">Ask later</string>
-    <string name="totp_failed">Incorrect or expired 2FA token Please check your token and try again.</string>
-    <string name="totp_failed_locked_out">2FA token verification failed. Please check your token or try again later.</string>
-    <string name="password_empty">Password Error. Please provide your Master Password.</string>
     <string name="login_sync_error">Sync failed. Please try again or visit our help center.</string>
-    <string name="cannot_connect_to_server">Cannot connect to server.</string>
-    <string name="offline">You are offline.</string>
-    <string name="token_failed_resend_or_try_later">Your verification code is invalid. Click \"Where is my code?\" to resend the code, or try again later.</string>
-    <string name="login_button_error">Error</string>
-    <string name="empty_screen_payments_line1">Add your payments</string>
-    <string name="empty_screen_payments_line2">Breeze through online checkouts, securely. Add the cards you use most often here.</string>
-    <string name="setting_privacy_title">Privacy and data settings</string>
-    <string name="setting_privacy_message">View and edit your privacy and data settings</string>
-    <string name="change_master_password_create_title">Create a strong and memorable Master Password</string>
-    <string name="change_master_password_confirm_title">Re-enter your new Master Password to be sure you remember it</string>
-    <string name="change_master_password_activity_label">New Master Password</string>
-    <string name="tips_change_password_title">How to create strong and memorable passwords</string>
-    <string name="tips_change_password_section1_title">General rules</string>
-    <string name="tips_change_password_section1_line1">• Avoid common sequences like “qwerty” or “12345”</string>
-    <string name="tips_change_password_section1_line2">• Avoid personal information like birth dates or pet names</string>
-    <string name="tips_change_password_section1_line3">• Aim for at least 10 characters</string>
-    <string name="tips_change_password_section1_line4">• Avoid obvious substitutions (e.g. H0use)</string>
-    <string name="tips_change_password_section2_title">The story method</string>
-    <string name="tips_change_password_section2_desc">Create a story about an interesting person in an interesting place.</string>
-    <string name="tips_change_password_section2_example">momwenttoEverestinwinter</string>
-    <string name="tips_change_password_section3_title">The series of words method</string>
-    <string name="tips_change_password_section3_desc">Choose a series of words that don’t make grammatical sense together.</string>
-    <string name="tips_change_password_section3_example">WinterMomEverestWent</string>
-    <string name="tips_change_password_section4_title">The main letters and numbers method</string>
-    <string name="tips_change_password_section4_desc">Use the main characters from a story unique to you. For example, “&lt;em&gt;&lt;strong&gt;T&lt;/strong&gt;he &lt;strong&gt;f&lt;/strong&gt;irst &lt;strong&gt;a&lt;/strong&gt;partment &lt;strong&gt;I&lt;/strong&gt; &lt;strong&gt;e&lt;/strong&gt;ver &lt;strong&gt;l&lt;/strong&gt;ived &lt;strong&gt;i&lt;/strong&gt;n &lt;strong&gt;w&lt;/strong&gt;as &lt;strong&gt;613&lt;/strong&gt; &lt;strong&gt;G&lt;/strong&gt;rove &lt;strong&gt;S&lt;/strong&gt;treet. &lt;strong&gt;R&lt;/strong&gt;ent &lt;strong&gt;w&lt;/strong&gt;as &lt;strong&gt;$5&lt;/strong&gt;00 &lt;strong&gt;p&lt;/strong&gt;er &lt;strong&gt;m&lt;/strong&gt;onth&lt;/em&gt;”</string>
-    <string name="tips_change_password_section4_example">TfaIeliw613GS.Rw$5pm</string>
-    <string name="tips_change_password_activity_label">Password tips</string>
-    <string name="change_master_password_see_tips_button">Need help? See our tips</string>
-    <string name="change_master_password_next_step_button">Next</string>
-    <string name="change_master_password_confirm_button">Confirm this change</string>
-    <string name="change_master_password_mismatch">This doesn\'t match your new Master Password. Please try again.</string>
-    <string name="change_master_password_not_strong_enough">Your password is not strong enough</string>
-    <string name="change_master_password_progress_notes">It may take a minute</string>
-    <string name="change_master_password_progress_message">Encrypting your data with this Master Password</string>
-    <string name="change_master_password_progress_success_message">Nice job on the new Master Password!</string>
-    <string name="change_master_password_new_password_hint">New Master Password</string>
-    <string name="change_mp_warning_desktop_title">This change will deauthorize your other devices</string>
-    <string name="change_mp_warning_desktop_description">It\'s not a big deal—you\'ll just need to log in to each device again with your new Master Password. You\'ll also see the introduction steps, but feel free to skip them.</string>
-    <string name="change_mp_warning_desktop_nosync_title">Only the data on this device will be saved</string>
-    <string name="change_mp_warning_desktop_nosync_description">Changing your Master Password on this device will remove any data stored on your other devices.</string>
-    <string name="change_mp_warning_desktop_positive_button">Change Master Password</string>
-    <string name="change_mp_warning_desktop_negative_button">Cancel</string>
-    <string name="unlock_message_item_master_password">Unlock this item with your Master Password</string>
-    <string name="unlock_message_item_biometrics">Unlock this item with your biometrics</string>
-    <string name="unlock_message_secure_note_master_password">Unlock this Secure Note with your Master Password</string>
-    <string name="unlock_message_secure_note_biometrics">Unlock this Secure Note with your biometrics</string>
     
     <string name="infobox_passkey_not_usable">Using Dashlane to save and sign in with passkeys is only supported on Android 14 and higher.</string>
     
     <string name="infobox_password_limit_reached_title">You’ve reached your Free plan password limit</string>
-    <plurals name="failed_attempt">
-        <item quantity="one">%1$d failed attempt</item>
-        <item quantity="other">%1$d failed attempts</item>
-    </plurals>
     <plurals name="sharing_shared_item_list_item_number_item_shared">
         <item quantity="one">%1$d shared item</item>
         <item quantity="other">%1$d shared items</item>

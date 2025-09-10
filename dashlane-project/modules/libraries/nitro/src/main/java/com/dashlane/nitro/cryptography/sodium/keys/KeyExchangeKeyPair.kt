@@ -2,7 +2,7 @@ package com.dashlane.nitro.cryptography.sodium.keys
 
 data class KeyExchangeKeyPair(
     val publicKey: ByteArray,
-    val secretKey: ByteArray
+    val secretKey: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

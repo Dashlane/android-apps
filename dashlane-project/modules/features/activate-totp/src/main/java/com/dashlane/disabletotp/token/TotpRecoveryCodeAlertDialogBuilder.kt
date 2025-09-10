@@ -6,7 +6,6 @@ import com.dashlane.activatetotp.databinding.Dialog2faRecoveryBinding
 import com.dashlane.ui.util.DialogHelper
 
 class TotpRecoveryCodeAlertDialogBuilder(val context: Activity) {
-
     private val binding = Dialog2faRecoveryBinding.inflate(context.layoutInflater)
     private var dialog: AlertDialog? = null
 
@@ -19,7 +18,7 @@ class TotpRecoveryCodeAlertDialogBuilder(val context: Activity) {
         positiveText: String,
         positiveAction: ((String) -> Unit),
         negativeText: String,
-        negativeAction: (() -> Unit)
+        negativeAction: (() -> Unit),
     ) {
         val dialogBuilder = DialogHelper().builder(context).apply {
             setView(binding.root)

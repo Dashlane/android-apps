@@ -10,12 +10,18 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.braze.ui.inappmessage.BrazeInAppMessageManager
+import com.dashlane.common.logger.KibanaLogger
+import com.dashlane.common.logger.usersupportlogger.UserSupportFileLogger
 import com.dashlane.debug.services.DaDaDaBase
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
 @HiltAndroidApp
-class DashlaneApplication : Application(), Configuration.Provider {
+open class DashlaneApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var dashlaneObserver: ApplicationObserver
 
@@ -24,6 +30,17 @@ class DashlaneApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var dadada: DaDaDaBase
+
+    @Inject
+    lateinit var kibanaLogger: KibanaLogger
+
+    @Inject
+    @ApplicationCoroutineScope
+    lateinit var applicationCoroutineScope: CoroutineScope
+
+    @Inject
+    @IoCoroutineDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -55,6 +72,16 @@ class DashlaneApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        if (BuildConfig.DEBUG) {
+        }
+            UserSupportFileLogger(
+                versionName = BuildConfig.VERSION_CODE.toString(),
+                applicationContext = this,
+                applicationScope = applicationCoroutineScope,
+                ioDispatcher = ioDispatcher,
+            ),
+        )
 
         BrazeInAppMessageManager.getInstance().ensureSubscribedToInAppMessageEvents(applicationContext)
         dadada.refreshAsync(this)

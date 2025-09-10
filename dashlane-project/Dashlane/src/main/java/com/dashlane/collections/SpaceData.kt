@@ -26,7 +26,7 @@ private fun TeamSpace.spaceData() = SpaceData(
     } else {
         R.string.and_accessibility_collection_list_item_business_teamspace
     },
-    businessSpace = teamId != null && teamId != TeamSpace.Personal.teamId
+    businessSpace = teamId != null && teamId != TeamSpace.Personal.teamId,
 )
 
 private fun spaceData(spaceId: String?, teamSpaceAccessorProvider: TeamSpaceAccessorProvider): SpaceData? {
@@ -45,5 +45,5 @@ data class SpaceData(
     val spaceLetter: Char,
     val spaceColor: SpaceColor,
     @StringRes val spaceContentDescriptionResId: Int,
-    val businessSpace: Boolean
+    val businessSpace: Boolean,
 )

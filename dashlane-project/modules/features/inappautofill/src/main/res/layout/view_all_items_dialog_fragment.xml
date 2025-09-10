@@ -51,12 +51,13 @@
             android:id="@+id/search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
             android:inputType="textFilter"
             />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.dashlane.ui.widgets.view.MultiColumnRecyclerView
+    <com.dashlane.ui.legacy.recyclerview.MultiColumnRecyclerView
         android:id="@+id/listview"
         android:layout_width="match_parent"
         android:layout_height="0dp"

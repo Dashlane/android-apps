@@ -12,21 +12,21 @@ import com.dashlane.design.component.Text
 fun DeleteVaultItemScreen(
     state: DeleteVaultItemViewModel.UiState,
     onConfirmed: () -> Unit,
-    onCancelled: () -> Unit
+    onCancelled: () -> Unit,
 ) {
     when (state.mode) {
         DeleteVaultItemViewModel.WarningMode.NORMAL -> {
             WarningConfirmDialog(
                 onConfirmed = onConfirmed,
                 onCancelled = onCancelled,
-                isDeleting = state.deleting
+                isDeleting = state.deleting,
             )
         }
         DeleteVaultItemViewModel.WarningMode.SHARING -> {
             WarningSharingDialog(
                 onConfirmed = onConfirmed,
                 onCancelled = onCancelled,
-                isDeleting = state.deleting
+                isDeleting = state.deleting,
             )
         }
         else -> Unit
@@ -37,7 +37,7 @@ fun DeleteVaultItemScreen(
 private fun WarningConfirmDialog(
     onConfirmed: () -> Unit,
     onCancelled: () -> Unit,
-    isDeleting: Boolean
+    isDeleting: Boolean,
 ) {
     DeleteDialog(
         title = R.string.delete_item,
@@ -46,7 +46,7 @@ private fun WarningConfirmDialog(
         secondaryCta = R.string.cancel,
         onConfirmed = onConfirmed,
         onCancelled = onCancelled,
-        isDeleting = isDeleting
+        isDeleting = isDeleting,
     )
 }
 
@@ -54,7 +54,7 @@ private fun WarningConfirmDialog(
 private fun WarningSharingDialog(
     onConfirmed: () -> Unit,
     onCancelled: () -> Unit,
-    isDeleting: Boolean
+    isDeleting: Boolean,
 ) {
     DeleteDialog(
         title = R.string.sharing_confirmation_popup_title_delete_from_service,
@@ -63,7 +63,7 @@ private fun WarningSharingDialog(
         secondaryCta = R.string.sharing_confirmation_popup_btn_cancel_delete_from_service,
         onConfirmed = onConfirmed,
         onCancelled = onCancelled,
-        isDeleting = isDeleting
+        isDeleting = isDeleting,
     )
 }
 
@@ -75,7 +75,7 @@ private fun DeleteDialog(
     @StringRes secondaryCta: Int,
     isDeleting: Boolean,
     onConfirmed: () -> Unit,
-    onCancelled: () -> Unit
+    onCancelled: () -> Unit,
 ) {
     if (isDeleting) {
         Dialog(

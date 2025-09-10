@@ -1,0 +1,432 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json",
+  "type": "object",
+  "description": "Definitions for the autofill",
+  "definitions": {
+    "is_manual": {
+      "description": "The user clicks on the autofill webcard themselves to fill the fields.",
+      "type": "boolean"
+    },
+    "is_field_detected_by_analysis_engine": {
+      "description": "If the 'D' is showed in the field. There are multiple scenarios in which the 'D' is not showed: when the user is logged out, if the analysis engine has labeled the field as 'other' or if it did not detect it, when autofill on the field got disabled by the user.",
+      "type": "boolean"
+    },
+    "right_click_menu_flow_step": {
+      "description": "The current step in the right click to fill field flow.",
+      "type": "string",
+      "enum": [
+        "click_dashlane",
+        "display_menu",
+        "select_vault_item"
+      ]
+    },
+    "autofill_origin": {
+      "description": "The origin of the action to fill the fields.",
+      "type": "string",
+      "enum": [
+        "automatic",
+        "context_menu",
+        "dropdown",
+        "keyboard",
+        "notification"
+      ]
+    },
+    "correction_type": {
+      "description": "The type of autofill correction performed by the user.",
+      "type": "string",
+      "enum": [
+        "change_classification",
+        "edit",
+        "erase",
+        "overwrite"
+      ]
+    },
+    "webcard_item_type": {
+      "description": "The type of webcard suggested by the autofill engine to the user. This definition won't be used anymore. we prefer to use arrays of item_types suggested in dropdown webcards which are more explicit and precise (different item types can be suggested in a single type of webcard).",
+      "type": "string",
+      "deprecated": true,
+      "enum": [
+        "address",
+        "authentication",
+        "bank_statement",
+        "company",
+        "credit_card",
+        "driver_licence",
+        "email",
+        "fiscal_statement",
+        "generated_password",
+        "id_card",
+        "identity",
+        "nothing",
+        "passport",
+        "password",
+        "paypal",
+        "phone",
+        "social_security",
+        "unknown",
+        "website"
+      ]
+    },
+    "is_autologin": {
+      "description": "Dashlane automatically submits the login form or clicks the login button. There is a distinction between manually triggered autologin (autofill dropdown or multiple accounts layer) or fully automatic autologin (the user is logged in without touching at all to his keyboard/mouse to submit the form when opening a website or from the app).",
+      "type": "boolean"
+    },
+    "is_restored_webcard": {
+      "description": "When the user does not interact (dismiss or accept) with a save/replace notification webcard and he reloads the page or submits the form, it is displayed again. We call them restored webcards.",
+      "type": "boolean"
+    },
+    "fields_count": {
+      "description": "number of fields filled",
+      "type": "integer"
+    },
+    "fields_detected_by_analysis_engine_count": {
+      "description": "number of fields in the form with a 'D'.",
+      "type": "integer"
+    },
+    "fields_filled": {
+      "type": "object",
+      "description": "The vault item types that have been injected in the form fields by the autofill engine. It also indicates the number of times that vault item type has been injected in the form.",
+      "properties": {
+        "address": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "bank_statement": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "company": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "credential": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "credit_card": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "driver_license": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "email": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "fiscal_statement": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "generated_password": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "id_card": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "identity": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "otp": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "passkey": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "passport": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "paypal": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "phone": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "secure_note": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "security_breach": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "social_security": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "website": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        },
+        "wifi": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_count"
+        }
+      }
+    },
+    "form_type": {
+      "description": "The classification of the form filled by the the autofill engine in the page.",
+      "type": "string",
+      "enum": [
+        "billing",
+        "change_password",
+        "contact",
+        "forgot_password",
+        "identity",
+        "login",
+        "newsletter",
+        "other",
+        "payment",
+        "register",
+        "search",
+        "shipping",
+        "shopping_basket"
+      ]
+    },
+    "form_type_list": {
+      "description": "The list of form classifications the autofill engine is filling in the page. On mobile platforms, there is always one type of form that is recognised while on the web, the autofill engine can classify a form with multiple types.",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_type"
+      }
+    },
+    "match_type": {
+      "description": "Match type of the form for autofill",
+      "type": "string",
+      "enum": [
+        "associated_app",
+        "associated_website",
+        "created_password",
+        "explore_passwords",
+        "regular",
+        "remembered",
+        "user_associated_website"
+      ]
+    },
+    "autofill_mechanism": {
+      "description": "Mechanism used to provide this autofill",
+      "type": "string",
+      "enum": [
+        "android_accessibility",
+        "android_autofill_api",
+        "ios_tachyon",
+        "web"
+      ]
+    },
+    "dismiss_type": {
+      "description": "",
+      "type": "string",
+      "enum": [
+        "cancel",
+        "close",
+        "close_cross",
+        "close_escape",
+        "close_security",
+        "do_not_trust",
+        "never",
+        "trust",
+        "unfocus",
+        "use_local_passkey"
+      ]
+    },
+    "is_paused": {
+      "description": "Whether the user activates/deactivates the pause",
+      "type": "boolean"
+    },
+    "save_type": {
+      "description": "The kind of action proposed by Autofill",
+      "type": "string",
+      "enum": [
+        "replace",
+        "save",
+        "save_as_new"
+      ]
+    },
+    "autofill_configuration": {
+      "description": "Whether and for which fields autofill is enabled.",
+      "type": "string",
+      "enum": [
+        "autofill_disabled",
+        "autofill_enabled",
+        "autologin_disabled",
+        "autologin_enabled",
+        "login_and_passwords_only",
+        "one_click_form_fill_disabled",
+        "one_click_form_fill_enabled",
+        "phishing_alerts_disabled",
+        "phishing_alerts_enabled"
+      ]
+    },
+    "has_modified_initially_autofilled_value": {
+      "description": "Whether a field that has been autofilled by Dashlane has been modified when a form is submitted.",
+      "type": "boolean"
+    },
+    "form_loaded_at_date_time": {
+      "description": "The datetime at which a form is loaded by a user",
+      "type": "string",
+      "format": "date-time"
+    },
+    "form_submitted_at_date_time": {
+      "description": "The datetime at which a form is submitted by a user",
+      "type": "string",
+      "format": "date-time"
+    },
+    "has_password_field": {
+      "description": "Whether a form contains a password field",
+      "type": "boolean"
+    },
+    "autofill_scope": {
+      "description": "The scope of an autofill setting (for a field, the entire website or a single page).",
+      "type": "string",
+      "enum": [
+        "field",
+        "global",
+        "page",
+        "site"
+      ]
+    },
+    "autofill_duration_setting": {
+      "description": "The duration of the autofill setting set by the user.",
+      "type": "string",
+      "enum": [
+        "once_for_this_visit",
+        "until_turned_back_off",
+        "until_turned_back_on"
+      ]
+    },
+    "disable_setting": {
+      "description": "The disable-setting for autofill behavior (either for a page, a field or site-wide).",
+      "type": "object",
+      "properties": {
+        "scope": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_scope"
+        },
+        "configuration": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_configuration"
+        },
+        "duration_setting": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_duration_setting"
+        }
+      }
+    },
+    "is_login_prefilled": {
+      "description": "If the login field was prefilled by Autofill",
+      "type": "boolean"
+    },
+    "is_password_prefilled": {
+      "description": "If the password field was prefilled by Autofill",
+      "type": "boolean"
+    },
+    "is_suggest_last_unsaved": {
+      "description": "If the save password webcard is suggesting to save last unsaved credential",
+      "type": "boolean"
+    },
+    "reactivation_selection": {
+      "description": "The button selected in an autofill reactivation webcard",
+      "type": "string",
+      "enum": [
+        "create_account",
+        "login",
+        "never_ask"
+      ]
+    },
+    "is_bulk": {
+      "description": "If the user switched on/off autofill for multiple item types at the same time",
+      "type": "boolean"
+    },
+    "item_position": {
+      "description": "The index of a selected item in an autofill suggestion list (the first item is 1) ",
+      "type": "integer"
+    },
+    "webcard_item_total_count": {
+      "description": "The number of items suggested by autofill within a webcard",
+      "type": "integer"
+    },
+    "total_form_fields_count": {
+      "description": "The number of fields available in a form, both detected ('D' showed in field) and not detected by Dashlane analysis engine",
+      "type": "integer"
+    },
+    "ms_to_analysis": {
+      "description": "The time it takes for the analysis engine to analyse a page (ms)",
+      "type": "integer"
+    },
+    "ms_to_icon": {
+      "description": "The time it takes for the analysis engine to show the 'D' icon suggestion in the relevant fields of a page (ms). Overall it is composed of the time to analyze fields available in the page, time to fetch data from the vault and transform them so that they can be suggested in the right format to the user.",
+      "type": "integer"
+    },
+    "ms_to_webcard": {
+      "description": "The time it takes for the analysis engine to display a webcard containing suggestions (ms)",
+      "type": "integer"
+    },
+    "autofill_message_type": {
+      "description": "Type of the message displayed to the user",
+      "type": "string",
+      "enum": [
+        "app_meta_incorrect_signature",
+        "duplicate_risk",
+        "free_account_password_limit_reached",
+        "http_unsecure_website",
+        "known_incorrect_signature",
+        "known_source_account_fill_mismatch",
+        "login_account_password_generation",
+        "one_signature_unknown",
+        "potential_phishing_risk",
+        "unknown_source_account_fill_mismatch",
+        "unsecure_iframe",
+        "unsecure_iframe_sandbox"
+      ]
+    },
+    "autofill_message_type_list": {
+      "description": "The list of messages displayed in a webcard",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_message_type"
+      }
+    },
+    "follow_up_notification_actions": {
+      "description": "The list of possible interactions with follow up notification feature",
+      "type": "string",
+      "enum": [
+        "activate_feature",
+        "copy",
+        "deactivate_feature",
+        "dismiss",
+        "trigger"
+      ]
+    },
+    "webcard_save_options": {
+      "description": "The options a user can accept within a save or replace webcard",
+      "type": "string",
+      "enum": [
+        "replace",
+        "save",
+        "save_as_new",
+        "trust_and_autofill",
+        "trust_and_paste"
+      ]
+    },
+    "webcard_save_options_list": {
+      "description": "The list of options a user can accept displayed in a webcard",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/webcard_save_options"
+      }
+    },
+    "autofill_button": {
+      "description": "Type of buttons related to specific autofill features the user can interact with",
+      "type": "string",
+      "enum": [
+        "add_new_item",
+        "close_cross",
+        "create_password_icon",
+        "create_password_label",
+        "dont_show_again",
+        "go_to_settings",
+        "learn_more_about_phishing",
+        "phishing_risk",
+        "reveal",
+        "see_all_passwords",
+        "show_option",
+        "shuffle"
+      ]
+    },
+    "phishing_risk": {
+      "description": "The phishing risk of the autofill action depending on the domain",
+      "type": "string",
+      "enum": [
+        "high",
+        "moderate",
+        "none"
+      ]
+    }
+  }
+}

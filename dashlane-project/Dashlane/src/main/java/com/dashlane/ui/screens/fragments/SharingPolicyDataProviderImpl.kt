@@ -1,18 +1,18 @@
 package com.dashlane.ui.screens.fragments
 
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.model.canLostAccess
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.toPermission
 import com.dashlane.sharingpolicy.SharingPolicyDataProvider
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class SharingPolicyDataProviderImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val sharingDao: SharingDao,
-    private val sharingDataProvider: SharingDataProvider
+    private val sharingDataProvider: SharingDataProvider,
 ) : SharingPolicyDataProvider {
     private fun getSharingPolicy(summaryObject: SummaryObject): Permission? {
         return if (summaryObject.isShared) {
@@ -42,7 +42,7 @@ class SharingPolicyDataProviderImpl @Inject constructor(
     override fun canEditItem(
         summaryObject: SummaryObject,
         itemIsNew: Boolean,
-        isAccountFrozen: Boolean
+        isAccountFrozen: Boolean,
     ): Boolean {
         return (itemIsNew || getSharingPolicy(summaryObject).canEdit) && !isAccountFrozen
     }
@@ -99,7 +99,7 @@ class SharingPolicyDataProviderImpl @Inject constructor(
     }
 
     override suspend fun doCancelSharingFor(
-        item: VaultItem<SyncObject>
+        item: VaultItem<SyncObject>,
     ): Boolean {
         val itemGroup: ItemGroup = sharingDao.loadItemGroupForItem(item.uid)
             ?: return false

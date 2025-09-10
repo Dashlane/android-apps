@@ -10,6 +10,6 @@ import javax.inject.Qualifier
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER,
-    AnnotationTarget.PROPERTY
+    AnnotationTarget.PROPERTY,
 )
 annotation class DefaultCoroutineDispatcher

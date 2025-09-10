@@ -29,9 +29,8 @@ import com.dashlane.xml.domain.SyncObject
 class ItemScreenConfigurationPhoneProvider(
     private val teamSpaceAccessor: TeamSpaceAccessor,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -39,12 +38,12 @@ class ItemScreenConfigurationPhoneProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.Phone>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -56,7 +55,7 @@ class ItemScreenConfigurationPhoneProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val phoneTitle = context.getString(R.string.phone)
         return ItemHeader(
@@ -73,7 +72,7 @@ class ItemScreenConfigurationPhoneProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         return listOfNotNull(
             
@@ -93,13 +92,13 @@ class ItemScreenConfigurationPhoneProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.Phone>
+        item: VaultItem<SyncObject.Phone>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             val spaceUpdate = VaultItem<*>::copyForUpdatedTeamspace
@@ -113,7 +112,7 @@ class ItemScreenConfigurationPhoneProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.Phone>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val number = item.syncObject.number
         val numberView = subViewFactory.createSubViewNumber(
@@ -121,7 +120,7 @@ class ItemScreenConfigurationPhoneProvider(
             number,
             SubViewFactory.INPUT_TYPE_PHONE,
             false,
-            VaultItem<*>::copyForUpdatedPhoneNumber
+            VaultItem<*>::copyForUpdatedPhoneNumber,
         )
         return if (numberView == null || editMode) {
             numberView
@@ -132,8 +131,8 @@ class ItemScreenConfigurationPhoneProvider(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.PhoneNumber,
                     action = {},
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -141,19 +140,19 @@ class ItemScreenConfigurationPhoneProvider(
     private fun createTypeField(
         context: Context,
         item: VaultItem<SyncObject.Phone>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*> {
         val phoneTypeHeader = context.getString(R.string.type)
         val phoneTypeList = SyncObject.Phone.Type.values().map { context.getString(it.getStringId()) }
         val selectedType = (
             item.syncObject.type
                 ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE
-            ).let { context.getString(it.getStringId()) }
+        ).let { context.getString(it.getStringId()) }
         return when {
             editMode -> ItemEditValueListSubView(
                 phoneTypeHeader,
                 selectedType,
-                phoneTypeList
+                phoneTypeList,
             ) { it, value -> it.copyForUpdatedType(context, value) }
             else -> ItemReadValueListSubView(phoneTypeHeader, selectedType, phoneTypeList)
         }
@@ -162,13 +161,13 @@ class ItemScreenConfigurationPhoneProvider(
     private fun createNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Phone>
+        item: VaultItem<SyncObject.Phone>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.phone_hint_name),
             item.syncObject.phoneName,
             false,
-            VaultItem<*>::copyForUpdatedName
+            VaultItem<*>::copyForUpdatedName,
         )
     }
 }
@@ -202,7 +201,7 @@ private fun VaultItem<*>.copyForUpdatedType(context: Context, value: String): Va
     return if (value == (
             phone
                 ?: SyncObject.Phone.Type.PHONE_TYPE_MOBILE
-            ).let { context.getString(it.getStringId()) }
+        ).let { context.getString(it.getStringId()) }
     ) {
         this
     } else {

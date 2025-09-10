@@ -5,6 +5,8 @@
     <string name="feedback_copy_login">Username copied</string>
     <string name="feedback_copy_email">Email copied</string>
     <string name="feedback_copy_secondary_login">Alternate username copied</string>
+    <string name="feedback_copy_payments_card_holder">Account holder copied</string>
+    <string name="feedback_copy_payments_card_note">Note copied</string>
     <string name="feedback_copy_payments_number">Card number copied</string>
     <string name="feedback_copy_payments_security_code">Card code copied</string>
     <string name="feedback_copy_payments_expiration_date">Card expiration date copied</string>
@@ -46,4 +48,10 @@
     <string name="feedback_copy_secret_value">Secret copied</string>
     
     <string name="feedback_copy_secret_id">Secret ID copied</string>
+    
+    <string name="feedback_copy_wifi_ssid">Wi-Fi name copied</string>
+    
+    <string name="feedback_copy_wifi_passphrase">Wi-Fi password copied</string>
+    
+    <string name="feedback_copy_wifi_note">Wi-Fi note copied</string>
 </resources>

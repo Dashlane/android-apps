@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="authorize_login_success">You logged in successfully!</string>
+</resources>

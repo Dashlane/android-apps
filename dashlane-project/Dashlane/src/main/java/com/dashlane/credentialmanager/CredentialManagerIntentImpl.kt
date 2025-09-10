@@ -10,9 +10,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class CredentialManagerIntentImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) : CredentialManagerIntent {
-
     override fun loginToDashlaneIntent(): PendingIntent {
         val intent = DashlaneIntent.newInstance(context, LoginActivity::class.java).apply {
             putExtra(NavigationConstants.LOGIN_CALLED_FROM_INAPP_LOGIN, true)
@@ -23,7 +22,7 @@ class CredentialManagerIntentImpl @Inject constructor(
             context,
             0,
             intent,
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
 }

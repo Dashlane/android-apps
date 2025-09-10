@@ -21,7 +21,7 @@ internal suspend fun updateOtp(
     dataSaver: DataSaver,
     dataSync: DataSync,
     logger: AuthenticatorLogger,
-    updateModificationDate: Boolean = false
+    updateModificationDate: Boolean = false,
 ) {
     (
         vaultDataQuery.query(
@@ -29,24 +29,24 @@ internal suspend fun updateOtp(
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)
                 specificUid(itemId)
-            }
+            },
         ) as? VaultItem<SyncObject.Authentifiant>
-        )?.let { item ->
-            val updatedItem = item.copy(
-                syncObject = item.syncObject.copy {
-                    otpUrl = otp?.url?.toSyncObfuscatedValue() ?: SyncObfuscatedValue("")
-                    otpSecret = if (otp?.isStandardOtp() == true) {
-                        otp.secret?.toSyncObfuscatedValue()
-                    } else {
-                        null
-                    } ?: SyncObfuscatedValue("")
-                }
-            ).copyWithAttrs {
-                syncState = SyncState.MODIFIED
-                if (updateModificationDate) userModificationDate = Instant.now()
-            }
-            dataSaver.save(updatedItem)
-            dataSync.sync(Trigger.SAVE)
-            logger.logUpdateCredential(updatedItem.uid)
+    )?.let { item ->
+        val updatedItem = item.copy(
+            syncObject = item.syncObject.copy {
+                otpUrl = otp?.url?.toSyncObfuscatedValue() ?: SyncObfuscatedValue("")
+                otpSecret = if (otp?.isStandardOtp() == true) {
+                    otp.secret?.toSyncObfuscatedValue()
+                } else {
+                    null
+                } ?: SyncObfuscatedValue("")
+            },
+        ).copyWithAttrs {
+            syncState = SyncState.MODIFIED
+            if (updateModificationDate) userModificationDate = Instant.now()
         }
+        dataSaver.save(updatedItem)
+        dataSync.sync(Trigger.SAVE)
+        logger.logUpdateCredential(updatedItem.uid)
+    }
 }

@@ -9,9 +9,8 @@ import android.widget.LinearLayout
 internal class IntroButtonBarLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : LinearLayout(context, attrs, defStyleAttr) {
-
     private var lastWidthSize = -1
 
     private var isStacked: Boolean

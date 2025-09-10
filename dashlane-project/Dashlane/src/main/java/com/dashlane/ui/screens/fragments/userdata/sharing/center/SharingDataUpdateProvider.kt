@@ -1,6 +1,5 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
-import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.SharingGetService
@@ -8,11 +7,12 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.SharingServerResponse
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import javax.inject.Inject
 
 class SharingDataUpdateProvider @Inject constructor(
     private val sessionManager: SessionManager,
-    private val sharingGetService: SharingGetService
+    private val sharingGetService: SharingGetService,
 ) {
     private val session: Session?
         get() = sessionManager.session
@@ -47,8 +47,8 @@ class SharingDataUpdateProvider @Inject constructor(
             SharingGetService.Request(
                 itemGroupIds = itemGroupRequests ?: emptyList(),
                 userGroupIds = userGroupRequests ?: emptyList(),
-                collectionIds = collectionRequests ?: emptyList()
-            )
+                collectionIds = collectionRequests ?: emptyList(),
+            ),
         )
         return result.data
     }

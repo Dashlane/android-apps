@@ -23,3 +23,16 @@ fun Throwable.stackTraceToSafeString(): String {
     }
     return stringWriter.toString()
 }
+
+fun Throwable.allCauseStackTraceToSafeString(): String {
+    val stringWriter = StringWriter()
+    ExceptionSafePrintWriter(stringWriter).use {
+        printStackTrace(it)
+        var currentCause = cause
+        while (currentCause != null) {
+            currentCause.printStackTrace(it)
+            currentCause = currentCause.cause
+        }
+    }
+    return stringWriter.toString()
+}

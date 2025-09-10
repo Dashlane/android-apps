@@ -4,21 +4,21 @@ import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.logs.AutofillUsageLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 internal class SaveAuthentifiantRequest(
     summary: AutoFillHintSummary,
-    usageLog: AutofillAnalyzerDef.IAutofillUsageLog,
-    databaseAccess: AutofillAnalyzerDef.DatabaseAccess
+    usageLog: AutofillUsageLog,
+    databaseAccess: AutofillAnalyzerDef.DatabaseAccess,
 ) : SaveRequest(summary, usageLog, databaseAccess) {
-
     override fun execute(
         context: Context,
         coroutineScope: CoroutineScope,
         saveCallback: SaveCallback,
-        hasInline: Boolean
+        hasInline: Boolean,
     ) {
         var username: String? = null
         var password: String? = null
@@ -29,7 +29,7 @@ internal class SaveAuthentifiantRequest(
             ) {
                 username = it.autoFillValueString
             } else if (password == null && it.hasOneOfHints(
-                    arrayOf(AutoFillHint.PASSWORD, AutoFillHint.CURRENT_PASSWORD)
+                    arrayOf(AutoFillHint.PASSWORD, AutoFillHint.CURRENT_PASSWORD),
                 )
             ) {
                 password = it.autoFillValueString
@@ -44,7 +44,7 @@ internal class SaveAuthentifiantRequest(
         username: String?,
         password: String?,
         saveCallback: SaveCallback,
-        hasInline: Boolean
+        hasInline: Boolean,
     ) {
         coroutineScope.launch(Dispatchers.Main) {
             val authentifiantCreated = databaseAccess.saveAuthentifiant(
@@ -52,7 +52,7 @@ internal class SaveAuthentifiantRequest(
                 summary.webDomain,
                 summary.packageName,
                 username,
-                password
+                password,
             )
             if (authentifiantCreated != null) {
                 saveCallback.onSuccess(isUpdate = false, vaultItem = authentifiantCreated)

@@ -76,4 +76,21 @@
 
     <string name="authenticator_multiple_matches_title">%1$d %2$s accounts available</string>
     <string name="authenticator_multiple_matches_subtitle">Select the account you want to set up 2FA for.</string>
+
+    
+    <string name="authenticator_no_login_onboarding_title">Turn on 2FA for your saved logins</string>
+    
+    <string name="authenticator_no_login_onboarding_item_1_title">Enhance account security</string>
+    
+    <string name="authenticator_no_login_onboarding_item_1_description">2-factor authentication (2FA) adds an extra layer of security to accounts.</string>
+    
+    <string name="authenticator_no_login_onboarding_item_2_title">Prevent unauthorized access</string>
+    
+    <string name="authenticator_no_login_onboarding_item_2_description">2FA helps make sure it\'s really you logging in, keeping your data protected.</string>
+    
+    <string name="authenticator_no_login_onboarding_item_3_title">Strengthen Password Health</string>
+    
+    <string name="authenticator_no_login_onboarding_item_3_description">Boost your score with 2FA-protected logins.</string>
+    
+    <string name="authenticator_no_login_onboarding_add_login_button">Add login</string>
 </resources>

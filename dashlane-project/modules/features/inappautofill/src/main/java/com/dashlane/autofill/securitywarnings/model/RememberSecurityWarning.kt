@@ -8,7 +8,7 @@ import com.dashlane.url.UrlDomain
 sealed class RememberSecurityWarning(
     open val signatureVerification: SignatureVerification,
     open val item: Item,
-    open val source: Source
+    open val source: Source,
 ) {
     fun signaturesPackageNamesMatchesSources(): Boolean =
         signatureVerification.signatureInstalled?.packageName == source.packageName
@@ -24,49 +24,49 @@ sealed class RememberSecurityWarning(
     class IncorrectAppSoftMatch(
         override val signatureVerification: SignatureVerification.Incorrect,
         override val item: Item.SoftMatchItem,
-        override val source: Source.App
+        override val source: Source.App,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 
     class IncorrectAppUrlMatch(
         override val signatureVerification: SignatureVerification.Incorrect,
         override val item: Item.UrlMatchItem,
-        override val source: Source.App
+        override val source: Source.App,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 
     class IncorrectPageSoftMatch(
         override val signatureVerification: SignatureVerification.Incorrect,
         override val item: Item.SoftMatchItem,
-        override val source: Source.Page
+        override val source: Source.Page,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 
     class IncorrectPageUrlMatch(
         override val signatureVerification: SignatureVerification.Incorrect,
         override val item: Item.UrlMatchItem,
-        override val source: Source.Page
+        override val source: Source.Page,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 
     class UnknownAppSoftMatch(
         override val signatureVerification: SignatureVerification.UnknownWithSignature,
         override val item: Item.SoftMatchItem,
-        override val source: Source.App
+        override val source: Source.App,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 
     class UnknownAppUrlMatch(
         override val signatureVerification: SignatureVerification.UnknownWithSignature,
         override val item: Item.UrlMatchItem,
-        override val source: Source.App
+        override val source: Source.App,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 
     class UnknownPageSoftMatch(
         override val signatureVerification: SignatureVerification.UnknownWithSignature,
         override val item: Item.SoftMatchItem,
-        override val source: Source.Page
+        override val source: Source.Page,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 
     class UnknownPageUrlMatch(
         override val signatureVerification: SignatureVerification.UnknownWithSignature,
         override val item: Item.UrlMatchItem,
-        override val source: Source.Page
+        override val source: Source.Page,
     ) : RememberSecurityWarning(signatureVerification, item, source)
 }
 

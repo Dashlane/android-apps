@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class AttachmentViewHolder(val v: View) : EfficientViewHolder<AttachmentItem>(v) {
-
     interface OnIconClickListener {
         fun onIconClicked(item: AttachmentItem, position: Int)
     }
@@ -45,7 +44,7 @@ class AttachmentViewHolder(val v: View) : EfficientViewHolder<AttachmentItem>(v)
                     R.string.attachment_item_description_date_size,
                     DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
                         .format(Instant.ofEpochSecond(userModificationDatetime).atZone(ZoneId.systemDefault())),
-                    Formatter.formatShortFileSize(context, item.attachment.localSize!!)
+                    Formatter.formatShortFileSize(context, item.attachment.localSize!!),
                 )
             }
         }

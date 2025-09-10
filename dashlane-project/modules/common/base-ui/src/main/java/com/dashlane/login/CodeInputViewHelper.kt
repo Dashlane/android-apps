@@ -9,7 +9,6 @@ import com.dashlane.ui.R
 import com.dashlane.util.getThemeAttrColor
 
 object CodeInputViewHelper {
-
     fun initialize(editText: EditText, width: Int) {
         val characterCount = editText.text.length
         if (width == 0) {
@@ -31,7 +30,7 @@ object CodeInputViewHelper {
                 oldLeft: Int,
                 oldTop: Int,
                 oldRight: Int,
-                oldBottom: Int
+                oldBottom: Int,
             ) {
                 val width = right - left
                 if (width < 40) return

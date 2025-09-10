@@ -1,5 +1,9 @@
 package com.github.devnied.emvnfccard.model;
 
+import androidx.annotation.Keep;
+
+
+@Keep
 public class Afl {
 
 	private int sfi;

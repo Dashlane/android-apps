@@ -4,11 +4,8 @@ import com.dashlane.authentication.AuthenticationInvalidLoginException
 import com.dashlane.authentication.AuthenticationUnknownException
 import com.dashlane.authentication.DeviceRegistrationInfo
 import com.dashlane.authentication.RemoteKeyFactory
-import com.dashlane.authentication.Settings
 import com.dashlane.authentication.SettingsFactory
 import com.dashlane.authentication.SsoServerKeyFactory
-import com.dashlane.authentication.TermsOfService
-import com.dashlane.authentication.UuidFactory
 import com.dashlane.authentication.createPasswordEncryptionEngine
 import com.dashlane.authentication.createRemoteKeyEncryptionEngine
 import com.dashlane.authentication.createSsoEncryptionEngine
@@ -17,7 +14,8 @@ import com.dashlane.authentication.encryptSettings
 import com.dashlane.authentication.encryptSharingPrivateKey
 import com.dashlane.authentication.toAuthenticationException
 import com.dashlane.authentication.toConsentsList
-import com.dashlane.authentication.toSyncObject
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyBase64Exception
 import com.dashlane.cryptography.CryptographyMarker
@@ -28,17 +26,19 @@ import com.dashlane.cryptography.SharingKeys
 import com.dashlane.cryptography.decodeBase64ToByteArray
 import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.forXml
+import com.dashlane.data.login.Settings
+import com.dashlane.data.login.TermsOfService
+import com.dashlane.data.login.toSyncObject
 import com.dashlane.server.api.DashlaneTime
 import com.dashlane.server.api.endpoints.AccountType
 import com.dashlane.server.api.endpoints.Platform
 import com.dashlane.server.api.endpoints.account.CreateAccountResult
-import com.dashlane.server.api.endpoints.account.CreateAccountService
-import com.dashlane.server.api.endpoints.account.CreateAccountSsoService
+import com.dashlane.server.api.endpoints.account.CreateUserService
+import com.dashlane.server.api.endpoints.account.CreateUserWithSSOService
 import com.dashlane.server.api.endpoints.country.GetIpCountryService
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.time.toInstantEpochSecond
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.util.uuid.UuidFactory
 import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -46,19 +46,18 @@ import com.dashlane.server.api.endpoints.account.Settings as CreateAccountSettin
 import com.dashlane.server.api.endpoints.account.SharingKeys as CreateAccountSharingKeys
 
 class AccountCreationRepositoryImpl(
-    private val createAccountService: CreateAccountService,
+    private val createUserService: CreateUserService,
     private val dashlaneTime: DashlaneTime,
     private val deviceRegistrationInfo: DeviceRegistrationInfo,
     private val settingsFactory: SettingsFactory,
     private val uuidFactory: UuidFactory,
-    private val createAccountSsoService: CreateAccountSsoService,
+    private val createUserWithSSOService: CreateUserWithSSOService,
     private val cryptography: Cryptography,
     private val sharingCryptography: SharingCryptography,
     private val remoteKeyFactory: RemoteKeyFactory,
     private val ssoServerKeyFactory: SsoServerKeyFactory,
-    private val getIpCountryService: GetIpCountryService
+    private val getIpCountryService: GetIpCountryService,
 ) : AccountCreationRepository {
-
     override suspend fun createAccount(
         login: String,
         passwordUtf8Bytes: ObfuscatedByteArray,
@@ -66,8 +65,16 @@ class AccountCreationRepositoryImpl(
         termsOfService: TermsOfService,
         withRemoteKey: Boolean,
         withLegacyCrypto: Boolean,
-        country: String?
-    ): AccountCreationRepository.Result = createAccountImpl(login, passwordUtf8Bytes, accountType, termsOfService, withRemoteKey, withLegacyCrypto, country)
+        country: String?,
+    ): AccountCreationRepository.Result = createAccountImpl(
+        login,
+        passwordUtf8Bytes,
+        accountType,
+        termsOfService,
+        withRemoteKey,
+        withLegacyCrypto,
+        country,
+    )
 
     private suspend fun createAccountImpl(
         login: String,
@@ -76,10 +83,10 @@ class AccountCreationRepositoryImpl(
         termsOfService: TermsOfService,
         withRemoteKey: Boolean,
         withLegacyCrypto: Boolean,
-        country: String?
+        country: String?,
     ): AccountCreationRepository.Result {
         val requestLogin = try {
-            CreateAccountService.Request.Login(login)
+            CreateUserService.Request.Login(login)
         } catch (e: IllegalArgumentException) {
             throw AuthenticationInvalidLoginException(cause = e)
         }
@@ -99,7 +106,7 @@ class AccountCreationRepositoryImpl(
                 sharingKeys = sharingKeys,
                 vaultKey = vaultKey,
                 termsOfService = termsOfService,
-                remoteKey = rk
+                remoteKey = rk,
             ) to rk
         } else {
             createRequest(
@@ -110,11 +117,11 @@ class AccountCreationRepositoryImpl(
                 settings = settings,
                 sharingKeys = sharingKeys,
                 vaultKey = vaultKey,
-                termsOfService = termsOfService
+                termsOfService = termsOfService,
             ) to null
         }
         val response = try {
-            createAccountService.execute(request)
+            createUserService.execute(request)
         } catch (e: DashlaneApiException) {
             throw e.toAuthenticationException()
         }
@@ -124,19 +131,19 @@ class AccountCreationRepositoryImpl(
             settings = settings.toSyncObject(),
             sharingKeys = sharingKeys,
             remoteKey = remoteKey,
-            appKey = AppKey.Password(password)
+            appKey = AppKey.Password(password),
         )
     }
 
     private fun createRequest(
         login: String,
         country: String,
-        loginRequest: CreateAccountService.Request.Login,
+        loginRequest: CreateUserService.Request.Login,
         accountType: AccountType,
         settings: Settings,
         sharingKeys: SharingKeys,
         vaultKey: VaultKey.Password,
-        termsOfService: TermsOfService
+        termsOfService: TermsOfService,
     ) = cryptography.createPasswordEncryptionEngine(vaultKey, settings).use { encryptionEngine ->
         createRequest(
             encryptionEngine = encryptionEngine,
@@ -147,20 +154,20 @@ class AccountCreationRepositoryImpl(
             loginRequest = loginRequest,
             accountType = accountType,
             termsOfService = termsOfService,
-            remoteKeys = null
+            remoteKeys = null,
         )
     }
 
     private fun createRequestWithRemoteKey(
         login: String,
         country: String,
-        loginRequest: CreateAccountService.Request.Login,
+        loginRequest: CreateUserService.Request.Login,
         accountType: AccountType,
         settings: Settings,
         sharingKeys: SharingKeys,
         vaultKey: VaultKey.Password,
         termsOfService: TermsOfService,
-        remoteKey: VaultKey.RemoteKey
+        remoteKey: VaultKey.RemoteKey,
     ) = cryptography.createRemoteKeyEncryptionEngine(remoteKey).use { encryptionEngine ->
         createRequest(
             encryptionEngine = encryptionEngine,
@@ -172,13 +179,13 @@ class AccountCreationRepositoryImpl(
             accountType = accountType,
             termsOfService = termsOfService,
             remoteKeys = listOf(
-                CreateAccountService.Request.RemoteKey(
-                    type = CreateAccountService.Request.RemoteKey.Type.MASTER_PASSWORD,
-                    uuid = CreateAccountService.Request.RemoteKey.Uuid(uuidFactory.generateUuid()),
+                CreateUserService.Request.RemoteKey(
+                    type = CreateUserService.Request.RemoteKey.Type.MASTER_PASSWORD,
+                    uuid = CreateUserService.Request.RemoteKey.Uuid(uuidFactory.generateUuid()),
                     key = cryptography.createPasswordEncryptionEngine(vaultKey, settings)
-                        .use { it.encryptRemoteKey(remoteKey) }.value
-                )
-            )
+                        .use { it.encryptRemoteKey(remoteKey) }.value,
+                ),
+            ),
         )
     }
 
@@ -188,20 +195,20 @@ class AccountCreationRepositoryImpl(
         login: String,
         country: String,
         sharingKeys: SharingKeys,
-        loginRequest: CreateAccountService.Request.Login,
+        loginRequest: CreateUserService.Request.Login,
         accountType: AccountType,
         termsOfService: TermsOfService,
-        remoteKeys: List<CreateAccountService.Request.RemoteKey>?
-    ) = CreateAccountService.Request(
+        remoteKeys: List<CreateUserService.Request.RemoteKey>?,
+    ) = CreateUserService.Request(
         settings = settings.toCreateAccountSettings(encryptionEngine),
         country = country,
         appVersion = deviceRegistrationInfo.appVersion,
-        contactEmail = CreateAccountService.Request.ContactEmail(login),
+        contactEmail = CreateUserService.Request.ContactEmail(login),
         accountType = accountType,
         origin = deviceRegistrationInfo.installOrigin,
         sharingKeys = CreateAccountSharingKeys(
             publicKey = sharingKeys.public.value,
-            privateKey = encryptionEngine.encryptSharingPrivateKey(sharingKeys.private).value
+            privateKey = encryptionEngine.encryptSharingPrivateKey(sharingKeys.private).value,
         ),
         language = deviceRegistrationInfo.language,
         login = loginRequest,
@@ -209,22 +216,22 @@ class AccountCreationRepositoryImpl(
         platform = Platform.SERVER_ANDROID,
         osCountry = deviceRegistrationInfo.osCountry,
         consents = termsOfService.toConsentsList(),
-        sdkVersion = CreateAccountService.Request.SdkVersion(SDK_VERSION),
+        sdkVersion = CreateUserService.Request.SdkVersion(SDK_VERSION),
         osLanguage = deviceRegistrationInfo.osLanguage,
-        remoteKeys = remoteKeys
+        remoteKeys = remoteKeys,
     )
 
     override suspend fun createSsoAccount(
         login: String,
         ssoToken: String,
         serviceProviderKey: String,
-        termsOfService: TermsOfService
+        termsOfService: TermsOfService,
     ) = withContext(Dispatchers.Default) {
         createSsoAccountImpl(
             login = login,
             ssoToken = ssoToken,
             serviceProviderKey = serviceProviderKey,
-            termsOfService = termsOfService
+            termsOfService = termsOfService,
         )
     }
 
@@ -232,10 +239,10 @@ class AccountCreationRepositoryImpl(
         login: String,
         ssoToken: String,
         serviceProviderKey: String,
-        termsOfService: TermsOfService
+        termsOfService: TermsOfService,
     ): AccountCreationRepository.Result {
         try {
-            CreateAccountSsoService.Request.Login(login)
+            CreateUserWithSSOService.Request.Login(login)
         } catch (e: IllegalArgumentException) {
             throw AuthenticationInvalidLoginException(cause = e)
         }
@@ -266,11 +273,11 @@ class AccountCreationRepositoryImpl(
             sharingKeys = sharingKeys,
             ssoKey = ssoKey,
             termsOfService = termsOfService,
-            ssoToken = ssoToken
+            ssoToken = ssoToken,
         )
 
         val response = try {
-            createAccountSsoService.execute(request)
+            createUserWithSSOService.execute(request)
         } catch (e: DashlaneApiException) {
             throw e.toAuthenticationException()
         }
@@ -280,7 +287,7 @@ class AccountCreationRepositoryImpl(
             settings = settings.toSyncObject(),
             sharingKeys = sharingKeys,
             remoteKey = remoteKey,
-            appKey = ssoKey
+            appKey = ssoKey,
         )
     }
 
@@ -293,45 +300,45 @@ class AccountCreationRepositoryImpl(
         sharingKeys: SharingKeys,
         ssoKey: AppKey.SsoKey,
         termsOfService: TermsOfService,
-        ssoToken: String
+        ssoToken: String,
     ) = cryptography.createRemoteKeyEncryptionEngine(remoteKey).use { encryptionEngine ->
-        CreateAccountSsoService.Request(
+        CreateUserWithSSOService.Request(
             settings = settings.toCreateAccountSettings(encryptionEngine),
             country = country,
             appVersion = deviceRegistrationInfo.appVersion,
             ssoServerKey = ssoServerKey.encodeBase64ToString(),
-            contactEmail = CreateAccountSsoService.Request.ContactEmail(login),
+            contactEmail = CreateUserWithSSOService.Request.ContactEmail(login),
             sharingKeys = CreateAccountSharingKeys(
                 publicKey = sharingKeys.public.value,
-                privateKey = encryptionEngine.encryptSharingPrivateKey(sharingKeys.private).value
+                privateKey = encryptionEngine.encryptSharingPrivateKey(sharingKeys.private).value,
             ),
             language = deviceRegistrationInfo.language,
-            login = CreateAccountSsoService.Request.Login(login),
+            login = CreateUserWithSSOService.Request.Login(login),
             deviceName = deviceRegistrationInfo.deviceName,
             platform = Platform.SERVER_ANDROID,
             osCountry = deviceRegistrationInfo.osCountry,
             remoteKeys = listOf(
-                CreateAccountSsoService.Request.RemoteKey(
-                    type = CreateAccountSsoService.Request.RemoteKey.Type.SSO,
-                    uuid = CreateAccountSsoService.Request.RemoteKey.Uuid(uuidFactory.generateUuid()),
-                    key = cryptography.createSsoEncryptionEngine(ssoKey).use { it.encryptRemoteKey(remoteKey) }.value
-                )
+                CreateUserWithSSOService.Request.RemoteKey(
+                    type = CreateUserWithSSOService.Request.RemoteKey.Type.SSO,
+                    uuid = CreateUserWithSSOService.Request.RemoteKey.Uuid(uuidFactory.generateUuid()),
+                    key = cryptography.createSsoEncryptionEngine(ssoKey).use { it.encryptRemoteKey(remoteKey) }.value,
+                ),
             ),
             consents = termsOfService.toConsentsList(),
-            sdkVersion = CreateAccountSsoService.Request.SdkVersion(SDK_VERSION),
+            sdkVersion = CreateUserWithSSOService.Request.SdkVersion(SDK_VERSION),
             ssoToken = ssoToken,
-            osLanguage = deviceRegistrationInfo.osLanguage
+            osLanguage = deviceRegistrationInfo.osLanguage,
         )
     }
 
     private suspend fun generateSettings(marker: CryptographyMarker) = settingsFactory.generateSettings(
         time = dashlaneTime.getClock().instant(),
-        cryptographyMarker = marker
+        cryptographyMarker = marker,
     )
 
     private fun Settings.toCreateAccountSettings(encryptionEngine: EncryptionEngine) = CreateAccountSettings(
         time = time.toInstantEpochSecond(),
-        content = encryptionEngine.forXml().encryptSettings(toSyncObject()).value
+        content = encryptionEngine.forXml().encryptSettings(toSyncObject()).value,
     )
 
     private suspend fun getCountry(): String =
@@ -351,7 +358,7 @@ private fun CreateAccountResult.toSuccess(
     settings: SyncObject.Settings,
     sharingKeys: SharingKeys,
     remoteKey: VaultKey.RemoteKey?,
-    appKey: AppKey
+    appKey: AppKey,
 ) = AccountCreationRepository.Result(
     login = login,
     settings = settings,
@@ -363,5 +370,5 @@ private fun CreateAccountResult.toSuccess(
     remoteKey = remoteKey,
     appKey = appKey,
     deviceAnalyticsId = deviceAnalyticsId,
-    userAnalyticsId = userAnalyticsId
+    userAnalyticsId = userAnalyticsId,
 )

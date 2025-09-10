@@ -31,9 +31,8 @@ class ItemScreenConfigurationPassportProvider(
     private val genericDataQuery: GenericDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -41,12 +40,12 @@ class ItemScreenConfigurationPassportProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.Passport>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -58,7 +57,7 @@ class ItemScreenConfigurationPassportProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val title = context.getString(R.string.passport)
         return ItemHeader(
@@ -75,7 +74,7 @@ class ItemScreenConfigurationPassportProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         
         val identitySubviews = createIdentitySubviews(
@@ -86,7 +85,7 @@ class ItemScreenConfigurationPassportProvider(
             editMode = editMode,
             listener = listener,
             item = item,
-            identityAdapter = PassportIdentityAdapter
+            identityAdapter = PassportIdentityAdapter,
         )
 
         val subviews = listOfNotNull(
@@ -104,7 +103,7 @@ class ItemScreenConfigurationPassportProvider(
                 context.getString(R.string.issue_date),
                 CopyField.PassportIssueDate,
                 VaultItem<*>::copyForUpdatedDeliveryDate,
-                vaultItemCopy
+                vaultItemCopy,
             ),
             
             createPlaceField(subViewFactory, context, item),
@@ -118,7 +117,7 @@ class ItemScreenConfigurationPassportProvider(
                 context.getString(R.string.expiery_date),
                 CopyField.PassportExpirationDate,
                 VaultItem<*>::copyForUpdatedExpireDate,
-                vaultItemCopy
+                vaultItemCopy,
             ),
             
             createTeamspaceField(subViewFactory, item),
@@ -129,7 +128,7 @@ class ItemScreenConfigurationPassportProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
 
         return identitySubviews + subviews
@@ -137,14 +136,14 @@ class ItemScreenConfigurationPassportProvider(
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.Passport>
+        item: VaultItem<SyncObject.Passport>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -154,13 +153,13 @@ class ItemScreenConfigurationPassportProvider(
     private fun createPlaceField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Passport>
+        item: VaultItem<SyncObject.Passport>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.issue_place),
             item.syncObject.deliveryPlace,
             false,
-            VaultItem<*>::copyForUpdatedDeliveryPlace
+            VaultItem<*>::copyForUpdatedDeliveryPlace,
         )
     }
 
@@ -168,14 +167,14 @@ class ItemScreenConfigurationPassportProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.Passport>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val number = item.syncObject.number
         val numberView = subViewFactory.createSubViewString(
             context.getString(R.string.passport_hint_number),
             number,
             false,
-            VaultItem<*>::copyForUpdatedNumber
+            VaultItem<*>::copyForUpdatedNumber,
         )
         return if (numberView == null || editMode) {
             numberView
@@ -186,8 +185,8 @@ class ItemScreenConfigurationPassportProvider(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.PassportNumber,
                     action = {},
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -203,7 +202,7 @@ private object PassportIdentityAdapter : IdentityAdapter<SyncObject.Passport> {
 
     override fun withGender(
         item: VaultItem<SyncObject.Passport>,
-        gender: SyncObject.Gender?
+        gender: SyncObject.Gender?,
     ): VaultItem<SyncObject.Passport> =
         item.copySyncObject { sex = gender }
 
@@ -214,8 +213,7 @@ private object PassportIdentityAdapter : IdentityAdapter<SyncObject.Passport> {
 
     override fun linkedIdentity(item: VaultItem<SyncObject.Passport>) = item.syncObject.linkedIdentity
 
-    override fun withLinkedIdentity(item: VaultItem<SyncObject.Passport>, identity: String?):
-        VaultItem<SyncObject.Passport> =
+    override fun withLinkedIdentity(item: VaultItem<SyncObject.Passport>, identity: String?): VaultItem<SyncObject.Passport> =
         item.copySyncObject { linkedIdentity = identity }
 }
 

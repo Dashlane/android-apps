@@ -16,9 +16,8 @@ class PasswordResetActivityListener @Inject constructor(
     private val sessionManager: SessionManager,
     private val sessionTrasher: SessionTrasher,
     private val syncBroadcastManager: SyncBroadcastManager,
-    private val navigator: Navigator
+    private val navigator: Navigator,
 ) : AbstractActivityLifecycleListener() {
-
     private var passResetReceiver: PasswordResetReceiver? = null
 
     override fun onActivityResumed(activity: Activity) {

@@ -14,7 +14,7 @@ fun <T : SyncObject> DataIdentifierAttrs.toVaultItem(syncObject: T): VaultItem<T
         locallyUsedCount = locallyUsedCount,
         syncState = syncState,
         hasDirtySharedField = hasDirtySharedField,
-        syncObject = syncObject
+        syncObject = syncObject,
     )
 }
 

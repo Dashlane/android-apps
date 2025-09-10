@@ -7,5 +7,6 @@ import com.dashlane.xml.domain.SyncObject
 
 interface CollectionsRepository {
     suspend fun getCollections(item: SummaryObject): List<CollectionData>
+
     suspend fun saveCollections(item: VaultItem<SyncObject>, collections: List<CollectionData>)
 }

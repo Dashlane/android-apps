@@ -8,9 +8,8 @@ import kotlinx.coroutines.launch
 
 internal class FillSuggestionToActivityResult(
     private val fillRequestHandler: FillRequestHandler,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
 ) {
-
     fun finishWithRequestResult(activity: AutoFillResponseActivity, summary: AutoFillHintSummary) {
         coroutineScope.launch(Main) {
             val response = fillRequestHandler.getFillResponse(activity, null, summary, null, null)

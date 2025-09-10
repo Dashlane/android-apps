@@ -16,23 +16,26 @@ import com.dashlane.design.component.cardBackground
 import com.dashlane.design.theme.tooling.DashlanePreview
 
 @Composable
-fun SectionContent(editMode: Boolean, content: @Composable (ColumnScope.() -> Unit)) {
+fun SectionContent(
+    showCard: Boolean = true,
+    content: @Composable (ColumnScope.() -> Unit),
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .then(
-                if (editMode) {
-                    Modifier
-                } else {
+                if (showCard) {
                     Modifier
                         .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 0.dp)
                         .cardBackground()
-                }
+                } else {
+                    Modifier
+                },
             )
             .padding(16.dp)
             .animateContentSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        content = content
+        content = content,
     )
 }
 
@@ -41,16 +44,16 @@ fun SectionContent(editMode: Boolean, content: @Composable (ColumnScope.() -> Un
 private fun SectionContentPreview() {
     DashlanePreview {
         Column {
-            SectionContent(editMode = false) {
+            SectionContent {
                 SectionTitle(
                     title = stringResource(id = R.string.vault_organisation),
-                    editMode = false
+                    editMode = false,
                 )
                 GenericField(
                     label = stringResource(id = R.string.creation_date_header),
                     data = stringResource(id = R.string.now_display_format),
                     editMode = false,
-                    onValueChanged = {}
+                    onValueChanged = {},
                 )
             }
         }

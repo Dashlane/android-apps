@@ -1,13 +1,13 @@
 package com.dashlane.storage.securestorage
 
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.cryptography.decodeUtf8ToString
 import com.dashlane.cryptography.encodeUtf8ToByteArray
-import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.user.Username
 import javax.inject.Inject
 
 class UserSecureStorageManager @Inject constructor(
-    val secureStorageManager: SecureStorageManager
+    val secureStorageManager: SecureStorageManager,
 ) {
     fun isSecretKeyStored(username: Username): Boolean =
         secureStorageManager.isKeyDataStored(username, SecureDataKey.SECRET_KEY)
@@ -15,14 +15,14 @@ class UserSecureStorageManager @Inject constructor(
     fun storeSecretKey(
         localKey: LocalKey,
         username: Username,
-        data: String
+        data: String,
     ) {
         localKey.use {
             secureStorageManager.storeKeyData(
                 data.encodeToByteArray(),
                 SecureDataKey.SECRET_KEY,
                 username,
-                it
+                it,
             )
         }
     }
@@ -33,7 +33,7 @@ class UserSecureStorageManager @Inject constructor(
                 data.encodeToByteArray(),
                 SecureDataKey.SETTINGS,
                 username,
-                it
+                it,
             )
         }
     }
@@ -49,7 +49,7 @@ class UserSecureStorageManager @Inject constructor(
                 data.encodeToByteArray(),
                 SecureDataKey.RSA_PRIVATE_KEY,
                 username,
-                it
+                it,
             )
         }
     }
@@ -65,7 +65,7 @@ class UserSecureStorageManager @Inject constructor(
                 data.encodeToByteArray(),
                 SecureDataKey.PIN_CODE,
                 username,
-                it
+                it,
             )
         }
     }
@@ -97,14 +97,14 @@ class UserSecureStorageManager @Inject constructor(
     fun storeAccountStatus(
         localKey: LocalKey,
         username: Username,
-        jsonStatus: String
+        jsonStatus: String,
     ) {
         localKey.use { lk ->
             secureStorageManager.storeKeyData(
                 keyData = jsonStatus.encodeToByteArray(),
                 keyIdentifier = SecureDataKey.ACCOUNT_STATUS_CACHE,
                 username = username,
-                localKey = lk
+                localKey = lk,
             )
         }
     }
@@ -114,7 +114,7 @@ class UserSecureStorageManager @Inject constructor(
             secureStorageManager.getKeyData(
                 keyIdentifier = SecureDataKey.ACCOUNT_STATUS_CACHE,
                 username = username,
-                localKey = lk
+                localKey = lk,
             )
         }?.decodeUtf8ToString()
 
@@ -127,7 +127,7 @@ class UserSecureStorageManager @Inject constructor(
                 keyData = id.encodeUtf8ToByteArray(),
                 keyIdentifier = SecureDataKey.DEVICE_ANALYTICS_ID,
                 username = username,
-                localKey = localKey
+                localKey = localKey,
             )
         }
     }
@@ -136,7 +136,7 @@ class UserSecureStorageManager @Inject constructor(
         return secureStorageManager.getKeyData(
             SecureDataKey.DEVICE_ANALYTICS_ID,
             username,
-            localKey
+            localKey,
         )?.decodeUtf8ToString()
     }
 
@@ -149,7 +149,7 @@ class UserSecureStorageManager @Inject constructor(
                 keyData = id.encodeUtf8ToByteArray(),
                 keyIdentifier = SecureDataKey.USER_ANALYTICS_ID,
                 username = username,
-                localKey = localKey
+                localKey = localKey,
             )
         }
     }
@@ -158,7 +158,7 @@ class UserSecureStorageManager @Inject constructor(
         return secureStorageManager.getKeyData(
             SecureDataKey.USER_ANALYTICS_ID,
             username,
-            localKey
+            localKey,
         )?.decodeUtf8ToString()
     }
 
@@ -171,7 +171,7 @@ class UserSecureStorageManager @Inject constructor(
                 id.encodeUtf8ToByteArray(),
                 SecureDataKey.USER_ACTIVITY,
                 username,
-                localKey
+                localKey,
             )
         }
     }
@@ -180,7 +180,7 @@ class UserSecureStorageManager @Inject constructor(
         return secureStorageManager.getKeyData(
             keyIdentifier = SecureDataKey.USER_ACTIVITY,
             username = username,
-            localKey = localKey
+            localKey = localKey,
         )?.decodeUtf8ToString()
     }
 
@@ -194,7 +194,7 @@ class UserSecureStorageManager @Inject constructor(
                 keyData = id.encodeUtf8ToByteArray(),
                 keyIdentifier = SecureDataKey.USER_CONTACT_EMAIL,
                 username = username,
-                localKey = localKey
+                localKey = localKey,
             )
         }
     }
@@ -203,7 +203,7 @@ class UserSecureStorageManager @Inject constructor(
         return secureStorageManager.getKeyData(
             SecureDataKey.USER_CONTACT_EMAIL,
             username,
-            localKey
+            localKey,
         )?.decodeUtf8ToString()
     }
 
@@ -212,7 +212,7 @@ class UserSecureStorageManager @Inject constructor(
             keyData = filterId.encodeUtf8ToByteArray(),
             keyIdentifier = SecureDataKey.CURRENT_SPACE_ID_FILTER,
             username = username,
-            localKey = localKey
+            localKey = localKey,
         )
     }
 
@@ -220,7 +220,7 @@ class UserSecureStorageManager @Inject constructor(
         return secureStorageManager.getKeyData(
             keyIdentifier = SecureDataKey.CURRENT_SPACE_ID_FILTER,
             username = username,
-            localKey = localKey
+            localKey = localKey,
         )?.decodeUtf8ToString()
     }
 }

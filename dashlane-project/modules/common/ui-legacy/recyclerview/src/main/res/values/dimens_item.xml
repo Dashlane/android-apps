@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="items_margin_between">8dp</dimen>
+    <dimen name="items_margin_ext">24dp</dimen>
+    <dimen name="item_width">360dp</dimen>
+</resources>

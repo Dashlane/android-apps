@@ -6,9 +6,9 @@ import com.dashlane.R
 import com.dashlane.notificationcenter.NotificationCenterDef
 import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.premium.offer.common.model.OfferType
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.drawable.CircleDrawable
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 
 interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     val title: Int
@@ -32,12 +32,12 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType<ActionItem>(
             R.layout.item_actionitem,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 
     data class PinCodeActionItem(
-        override val actionItemsRepository: NotificationCenterRepository
+        override val actionItemsRepository: NotificationCenterRepository,
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.PIN_CODE
         override val section: ActionItemSection = ActionItemSection.GETTING_STARTED
@@ -48,7 +48,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     }
 
     data class BiometricActionItem(
-        override val actionItemsRepository: NotificationCenterRepository
+        override val actionItemsRepository: NotificationCenterRepository,
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.BIOMETRIC
         override val section: ActionItemSection = ActionItemSection.GETTING_STARTED
@@ -59,7 +59,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     }
 
     data class AutoFillActionItem(
-        override val actionItemsRepository: NotificationCenterRepository
+        override val actionItemsRepository: NotificationCenterRepository,
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.AUTO_FILL
         override val section: ActionItemSection = ActionItemSection.GETTING_STARTED
@@ -69,8 +69,19 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val action: NotificationCenterDef.Presenter.() -> Unit = { startOnboardingInAppLogin() }
     }
 
+    data class ChromeAutoFillActionItem(
+        override val actionItemsRepository: NotificationCenterRepository,
+    ) : ActionItem {
+        override val type: ActionItemType = ActionItemType.CHROME_AUTO_FILL
+        override val section: ActionItemSection = ActionItemSection.GETTING_STARTED
+        override val title: Int = R.string.action_item_chrome_auto_fill_title
+        override val description: Int = R.string.action_item_chrome_auto_fill_description
+        override val icon: Int = R.drawable.ic_action_item_auto_fill
+        override val action: NotificationCenterDef.Presenter.() -> Unit = { startOnboardingChromeInAppLogin() }
+    }
+
     data class ZeroPasswordActionItem(
-        override val actionItemsRepository: NotificationCenterRepository
+        override val actionItemsRepository: NotificationCenterRepository,
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.ZERO_PASSWORD
         override val section: ActionItemSection = ActionItemSection.GETTING_STARTED
@@ -82,7 +93,6 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
 
     data class BiometricRecoveryActionItem(
         override val actionItemsRepository: NotificationCenterRepository,
-        private val hasBiometricLockType: Boolean
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.ACCOUNT_RECOVERY
         override val section: ActionItemSection = ActionItemSection.GETTING_STARTED
@@ -90,11 +100,11 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
         override val description: Int = R.string.action_item_account_recovery_description
         override val icon: Int = R.drawable.ic_action_item_account_recovery
         override val action: NotificationCenterDef.Presenter.() -> Unit =
-            { startBiometricRecoverySetup(hasBiometricLockType) }
+            { startBiometricRecoverySetup() }
     }
 
     data class FreeTrialStartedActionItem(
-        override val actionItemsRepository: NotificationCenterRepository
+        override val actionItemsRepository: NotificationCenterRepository,
     ) : ActionItem {
         override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
         override val type: ActionItemType = ActionItemType.FREE_TRIAL_STARTED
@@ -118,7 +128,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
 
     data class PasswordLimitReachedActionItem(
         override val actionItemsRepository: NotificationCenterRepository,
-        private val passwordLimit: Int
+        private val passwordLimit: Int,
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.PASSWORD_LIMIT_REACHED
         override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
@@ -134,7 +144,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     data class PasswordLimitWarningActionItem(
         override val actionItemsRepository: NotificationCenterRepository,
         private val passwordCount: Int,
-        private val passwordLimit: Int
+        private val passwordLimit: Int,
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.PASSWORD_LIMIT_WARNING
         override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
@@ -149,7 +159,7 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
 
     data class PasswordLimitExceededActionItem(
         override val actionItemsRepository: NotificationCenterRepository,
-        private val passwordLimit: Int
+        private val passwordLimit: Int,
     ) : ActionItem {
         override val type: ActionItemType = ActionItemType.PASSWORD_LIMIT_EXCEEDED
         override val section: ActionItemSection = ActionItemSection.YOUR_ACCOUNT
@@ -163,7 +173,6 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
     }
 
     class ViewHolder(view: View) : ReadStateViewHolder<ActionItem>(view) {
-
         @Suppress("SpreadOperator")
         override fun updateView(context: Context, item: ActionItem?) {
             super.updateView(context, item)
@@ -176,8 +185,8 @@ interface ActionItem : NotificationItem, DiffUtilComparator<ActionItem> {
                     context = context,
                     backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
                     drawableRes = item.icon,
-                    drawableTintColorRes = R.color.text_brand_standard
-                )
+                    drawableTintColorRes = R.color.text_brand_standard,
+                ),
             )
         }
     }

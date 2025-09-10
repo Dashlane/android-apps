@@ -1,5 +1,9 @@
 package com.github.devnied.emvnfccard.model.enums;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum ServiceCode2Enum implements IKeyEnum {
 
 	NORMAL(0, "Normal"),

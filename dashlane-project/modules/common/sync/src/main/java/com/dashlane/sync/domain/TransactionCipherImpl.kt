@@ -36,27 +36,34 @@ import javax.inject.Inject
 class TransactionCipherImpl(
     private val xmlSerialization: XmlSerialization = XmlSerialization,
     private val transactionFailureRegistry: TransactionFailureRegistry,
-    private val syncLogs: SyncLogs
+    private val syncLogs: SyncLogs,
+    @SupportedTransactionsFilter private val transactionFilter: List<String>?,
 ) : TransactionCipher {
-
     @Inject
     constructor(
         syncLogs: SyncLogs,
-        transactionFailureRegistry: TransactionFailureRegistry
+        transactionFailureRegistry: TransactionFailureRegistry,
+        @SupportedTransactionsFilter transactionFilter: List<String>?,
     ) : this(
         XmlSerialization,
         transactionFailureRegistry,
-        syncLogs
+        syncLogs,
+        transactionFilter,
     )
 
     override suspend fun decipherIncomingTransactions(
         transactions: List<SyncDownloadTransaction>,
         cryptographyEngineFactory: CryptographyEngineFactory,
         sharedIds: Set<String>,
-        progressChannel: SendChannel<Unit>?
+        progressChannel: SendChannel<Unit>?,
     ) = withContext(Dispatchers.Default) {
         cryptographyEngineFactory.createDecryptionEngine().forXml(xmlSerialization).use { decryptionEngine ->
-            decipherIncomingTransactions(transactions, progressChannel, decryptionEngine, sharedIds)
+            decipherIncomingTransactions(
+                transactions.filterSupportedTransactions(transactionFilter),
+                progressChannel,
+                decryptionEngine,
+                sharedIds,
+            )
         }
     }
 
@@ -64,7 +71,7 @@ class TransactionCipherImpl(
         transactions: List<SyncDownloadTransaction>,
         progressChannel: SendChannel<Unit>?,
         decryptionEngine: XmlDecryptionEngine,
-        sharedIds: Set<String>
+        sharedIds: Set<String>,
     ): Pair<List<IncomingTransaction>, List<Throwable>> {
         val results = transactions.mapAsync(progressChannel) {
             runCatching { decipherTransaction(it, decryptionEngine, sharedIds) }
@@ -85,7 +92,7 @@ class TransactionCipherImpl(
     private fun decipherTransaction(
         downloadTransaction: SyncDownloadTransaction,
         decryptionEngine: XmlDecryptionEngine,
-        sharedIds: Set<String>
+        sharedIds: Set<String>,
     ): IncomingTransaction? {
         val (identifier, action, _, backupDate, type, content) = downloadTransaction
 
@@ -94,7 +101,7 @@ class TransactionCipherImpl(
         val date = backupDate.toInstant()
         val transaction = Transaction(
             identifier,
-            date
+            date,
         )
 
         val isShared = sharedIds.contains(identifier)
@@ -104,24 +111,24 @@ class TransactionCipherImpl(
                 val transactionContent = content ?: throw SyncTransactionException(
                     transaction,
                     syncObjectType,
-                    "Content shouldn't be null for an update transaction. "
+                    "Content shouldn't be null for an update transaction. ",
                 )
                 val syncObject = decipherTransactionContent(
                     transactionContent,
                     decryptionEngine,
                     syncObjectType,
-                    transaction
+                    transaction,
                 )
                 IncomingTransaction.Update(
                     transaction,
                     syncObject,
-                    isShared
+                    isShared,
                 )
             }
             SyncDownloadTransaction.Action.BACKUP_REMOVE ->
                 IncomingTransaction.Delete(
                     transaction,
-                    syncObjectType
+                    syncObjectType,
                 )
         }
 
@@ -134,10 +141,10 @@ class TransactionCipherImpl(
         content: String,
         decryptionEngine: XmlDecryptionEngine,
         syncObjectType: SyncObjectType,
-        transaction: Transaction
+        transaction: Transaction,
     ): SyncObject {
         val syncTransactionXml = try {
-                decryptionEngine.decryptBase64ToXmlTransaction(content.asEncryptedBase64(), compressed = true)
+            decryptionEngine.decryptBase64ToXmlTransaction(content.asEncryptedBase64(), compressed = true)
         } catch (e: CryptographyException) {
             syncLogs.onDecipherTransactionError(syncObjectType.transactionType, transaction, e)
             
@@ -146,7 +153,7 @@ class TransactionCipherImpl(
                 transaction,
                 syncObjectType,
                 "Transaction deciphering failed. ",
-                SyncCryptographyException(cause = e, cipherPayload = cipherPayload)
+                SyncCryptographyException(cause = e, cipherPayload = cipherPayload),
             )
         } catch (e: XmlException) {
             syncLogs.onDecipherTransactionError(syncObjectType.transactionType, transaction, e)
@@ -154,7 +161,7 @@ class TransactionCipherImpl(
                 transaction,
                 syncObjectType,
                 "Transaction XML parsing failed. ",
-                e
+                e,
             )
         }
 
@@ -166,14 +173,14 @@ class TransactionCipherImpl(
                 transaction,
                 syncObjectType,
                 "XML contents invalid. ",
-                e
+                e,
             )
         }
     }
 
     override suspend fun cipherOutgoingTransactions(
         transactions: List<OutgoingTransaction>,
-        cryptographyEngineFactory: CryptographyEngineFactory
+        cryptographyEngineFactory: CryptographyEngineFactory,
     ): List<SyncUploadTransaction> = withContext(Dispatchers.Default) {
         cryptographyEngineFactory.createEncryptionEngine().forXml(xmlSerialization).use { encryptionEngine ->
             cipherOutgoingTransactions(transactions, encryptionEngine)
@@ -182,7 +189,7 @@ class TransactionCipherImpl(
 
     private suspend fun cipherOutgoingTransactions(
         transactions: List<OutgoingTransaction>,
-        encryptionEngine: XmlEncryptionEngine
+        encryptionEngine: XmlEncryptionEngine,
     ): List<SyncUploadTransaction> {
         syncLogs.onCipherTransactionsStart()
         val cipheredTransactions = coroutineScope {
@@ -198,7 +205,7 @@ class TransactionCipherImpl(
 
     private fun createOutgoingTransaction(
         encryptionEngine: XmlEncryptionEngine,
-        outgoingTransaction: OutgoingTransaction
+        outgoingTransaction: OutgoingTransaction,
     ): SyncUploadTransaction {
         val (action, cipheredContent) = when (outgoingTransaction) {
             is OutgoingTransaction.Update -> {
@@ -218,7 +225,7 @@ class TransactionCipherImpl(
             action.name,
             outgoingTransaction.syncObjectType.transactionType,
             outgoingTransaction.identifier,
-            outgoingTransaction.date
+            outgoingTransaction.date,
         )
 
         return SyncUploadTransaction(
@@ -226,7 +233,7 @@ class TransactionCipherImpl(
             action = action,
             time = outgoingTransaction.date.toInstantEpochSecond(),
             identifier = outgoingTransaction.identifier,
-            content = cipheredContent?.value
+            content = cipheredContent?.value,
         )
     }
 }

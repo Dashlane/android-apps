@@ -1,10 +1,7 @@
 package com.dashlane.ui.activities.fragments.checklist
 
 import com.dashlane.R
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.KEY_GUIDED_ONBOARDING_DWM_OPT_IN
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.KEY_GUIDED_PASSWORD_ONBOARDING_Q2_ANSWER
-import com.dashlane.guidedonboarding.widgets.QuestionnaireAnswer.Companion.fromId
-import com.dashlane.inapplogin.InAppLoginManager
+import com.dashlane.inappautofill.InAppLoginManager
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
@@ -25,9 +22,8 @@ class ChecklistDataProvider @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val inAppLoginManager: InAppLoginManager,
     private val dataCounter: DataCounter,
-    private val checklistHelper: ChecklistHelper
+    private val checklistHelper: ChecklistHelper,
 ) : ChecklistDataProviderContract {
-
     private val userPreferencesManager: UserPreferencesManager
         get() = preferencesManager[sessionManager.session?.username]
 
@@ -41,8 +37,8 @@ class ChecklistDataProvider @Inject constructor(
             CounterFilter(
                 CredentialFilter(),
                 NoSpaceFilter,
-                DefaultLockFilter
-            )
+                DefaultLockFilter,
+            ),
         )
         return count > 0
     }
@@ -74,13 +70,7 @@ class ChecklistDataProvider @Inject constructor(
         userPreferencesManager.putBoolean(KEY_CHECKLIST_DWM_ACKNOWLEDGED, true)
 
     override fun getGuidedOnBoardingAction(): Int {
-        val answer = fromId(
-            userPreferencesManager.getInt(
-                KEY_GUIDED_PASSWORD_ONBOARDING_Q2_ANSWER,
-                -1
-            )
-        )
-        return answer?.action ?: R.string.get_started_step_secure_vault_title
+        return R.string.get_started_step_secure_vault_title
     }
 
     override fun hasSeenChecklist(): Boolean = checklistHelper.hasSeenChecklist()
@@ -95,5 +85,10 @@ class ChecklistDataProvider @Inject constructor(
 
     override fun getAccountCreationDate(): Instant {
         return userPreferencesManager.accountCreationDate
+    }
+
+    
+    companion object {
+        const val KEY_GUIDED_ONBOARDING_DWM_OPT_IN = "key_guided_onboarding_dwm_opt_in"
     }
 }

@@ -1,10 +1,10 @@
 package com.dashlane.attachment.ui
 
 import com.dashlane.R
-import com.dashlane.vault.item.VaultItemLogAttachmentHelper
 import com.dashlane.securefile.Attachment
 import com.dashlane.securefile.DownloadFileContract
 import com.dashlane.securefile.FileSecurity
+import com.dashlane.vault.item.VaultItemLogAttachmentHelper
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,10 +12,9 @@ import kotlinx.coroutines.launch
 
 class DownloadAttachmentsPresenter(
     private val coroutineScope: CoroutineScope,
-    private val vaultItemLogAttachmentHelper: VaultItemLogAttachmentHelper
+    private val vaultItemLogAttachmentHelper: VaultItemLogAttachmentHelper,
 ) : BasePresenter<DownloadFileContract.DataProvider, DownloadFileContract.ViewProxy>(),
     DownloadFileContract.Presenter {
-
     override fun downloadAttachment(attachment: Attachment) {
         val context = context ?: return
 
@@ -45,7 +44,7 @@ class DownloadAttachmentsPresenter(
 
         viewOrNull?.showError(
             attachment,
-            context.getString(R.string.download_file_generic_error, attachment.filename)
+            context.getString(R.string.download_file_generic_error, attachment.filename),
         )
     }
 
@@ -54,13 +53,13 @@ class DownloadAttachmentsPresenter(
 
         viewOrNull?.showError(
             attachment,
-            context.getString(R.string.download_file_access_error)
+            context.getString(R.string.download_file_access_error),
         )
     }
 
     override fun notifyFileDownloadProgress(
         attachment: Attachment,
-        progress: Float
+        progress: Float,
     ) {
         viewOrNull?.showProgress(attachment, progress)
     }

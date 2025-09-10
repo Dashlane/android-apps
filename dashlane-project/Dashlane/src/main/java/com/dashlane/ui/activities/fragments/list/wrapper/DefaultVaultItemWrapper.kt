@@ -1,16 +1,16 @@
 package com.dashlane.ui.activities.fragments.list.wrapper
 
 import android.content.Context
-import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.securefile.extensions.hasAttachments
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.list.action.CopyItemFieldListItemAction
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.action.QuickActionsItemAction
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.adapter.ItemListContext
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.util.ViewTypeUtils
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.vault.summary.SummaryObject
@@ -27,9 +27,8 @@ open class DefaultVaultItemWrapper<D : SummaryObject>(
     override val navigator: Navigator,
     private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
     override val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
-    override val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter
+    override val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
 ) : VaultItemWrapper<D> {
-
     override var allowTeamspaceIcon: Boolean = false
     private var overrideViewType: DashlaneRecyclerAdapter.ViewType<VaultItemWrapper<out SummaryObject>>? = null
 
@@ -48,7 +47,7 @@ open class DefaultVaultItemWrapper<D : SummaryObject>(
     override fun getListItemActions(): List<ListItemAction> {
         return listOfNotNull(
             CopyItemFieldListItemAction(summaryObject, itemListContext, vaultItemCopyService),
-            QuickActionsItemAction(quickActionProvider, summaryObject, itemListContext, navigator)
+            QuickActionsItemAction(quickActionProvider, summaryObject, itemListContext, navigator),
         )
     }
 

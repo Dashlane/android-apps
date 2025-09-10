@@ -26,7 +26,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 open class NotificationDialogFragment : AbstractDialogFragment() {
-
     @Inject
     lateinit var announcementCenter: AnnouncementCenter
 
@@ -92,7 +91,7 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         
         return super.onCreateView(inflater, container, savedInstanceState)
@@ -172,7 +171,7 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
     protected open fun onCreateDialogCustomView(
         inflater: LayoutInflater?,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         return null 
     }
@@ -212,11 +211,11 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
 
     interface TwoButtonClicker {
         fun onPositiveButton()
+
         fun onNegativeButton()
     }
 
     class Builder {
-
         private var clicker: TwoButtonClicker? = null
         private var args = Bundle()
 
@@ -225,7 +224,10 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
             return this
         }
 
-        fun setTitle(context: Context, @StringRes stringRes: Int): Builder {
+        fun setTitle(
+            context: Context,
+            @StringRes stringRes: Int,
+        ): Builder {
             return setTitle(context.getString(stringRes))
         }
 
@@ -234,7 +236,10 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
             return this
         }
 
-        fun setMessage(context: Context, @StringRes stringRes: Int): Builder {
+        fun setMessage(
+            context: Context,
+            @StringRes stringRes: Int,
+        ): Builder {
             return setMessage(context.getString(stringRes))
         }
 
@@ -243,17 +248,24 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
             return this
         }
 
-        fun setCustomView(@LayoutRes layoutRes: Int): Builder {
+        fun setCustomView(
+            @LayoutRes layoutRes: Int,
+        ): Builder {
             args.putInt(ARG_CUSTOM_VIEW_RES_ID, layoutRes)
             return this
         }
 
-        fun setCustomViewWithBigIcon(@DrawableRes drawableResId: Int): Builder {
+        fun setCustomViewWithBigIcon(
+            @DrawableRes drawableResId: Int,
+        ): Builder {
             args.putInt(ARG_IMAGE_RES_ID, drawableResId)
             return setCustomView(R.layout.include_dialog_image_text)
         }
 
-        fun setNegativeButtonText(context: Context, @StringRes stringRes: Int): Builder {
+        fun setNegativeButtonText(
+            context: Context,
+            @StringRes stringRes: Int,
+        ): Builder {
             return setNegativeButtonText(context.getString(stringRes))
         }
 
@@ -267,7 +279,10 @@ open class NotificationDialogFragment : AbstractDialogFragment() {
             return this
         }
 
-        fun setPositiveButtonText(context: Context, @StringRes stringRes: Int): Builder {
+        fun setPositiveButtonText(
+            context: Context,
+            @StringRes stringRes: Int,
+        ): Builder {
             return setPositiveButtonText(context.getString(stringRes))
         }
 

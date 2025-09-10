@@ -11,7 +11,6 @@ import javax.inject.Inject
 class HomeActivityIntentCoordinator @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
 ) : PostAccountCreationCoordinator {
-
     override fun getHomeScreenAfterAccountCreationIntent(): Intent {
         return newHomeIntent()
     }

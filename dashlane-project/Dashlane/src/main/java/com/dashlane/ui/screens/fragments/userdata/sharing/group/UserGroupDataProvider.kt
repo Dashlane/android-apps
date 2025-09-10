@@ -1,6 +1,7 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.group
 
-import com.dashlane.core.sharing.SharingDao
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.getUserGroup
 import com.dashlane.sharing.model.getUserGroupMember
@@ -12,7 +13,6 @@ import com.dashlane.storage.userdata.accessor.filter.datatype.ShareableDataTypeF
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingUserGroupUser
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
@@ -24,10 +24,9 @@ class UserGroupDataProvider @Inject constructor(
     private val genericDataQuery: GenericDataQuery,
     private val sharingDataProvider: SharingDataProvider,
     @IoCoroutineDispatcher
-    private val ioCoroutineDispatcher: CoroutineDispatcher
+    private val ioCoroutineDispatcher: CoroutineDispatcher,
 ) {
-    suspend fun getItemsForUserGroup(userGroupId: String):
-        List<SharingModels.ItemUserGroup> {
+    suspend fun getItemsForUserGroup(userGroupId: String): List<SharingModels.ItemUserGroup> {
         return withContext(ioCoroutineDispatcher) {
             val acceptedCollections = sharingDataProvider.getAcceptedCollectionsForGroup(userGroupId)
             val itemGroups = sharingDao.loadAllItemGroup()
@@ -50,7 +49,7 @@ class UserGroupDataProvider @Inject constructor(
                     genericFilter {
                         dataTypeFilter = ShareableDataTypeFilter
                         specificUid(items.map { it.itemId })
-                    }
+                    },
                 )
                 val userGroup = itemGroup.getUserGroupMember(userGroupId)
                 if (userGroup == null && collectionGroup == null) return@forEach
@@ -66,8 +65,8 @@ class UserGroupDataProvider @Inject constructor(
                                 ?: collectionGroup!!.getSharingStatusResource(),
                             itemGroup = itemGroup,
                             item = it,
-                            isItemInCollection = collectionGroup != null
-                        )
+                            isItemInCollection = collectionGroup != null,
+                        ),
                     )
                 }
             }
@@ -77,7 +76,7 @@ class UserGroupDataProvider @Inject constructor(
 
     suspend fun getMembersForUserGroup(
         userGroupId: String,
-        userId: String
+        userId: String,
     ): List<SharingUserGroupUser> {
         return withContext(ioCoroutineDispatcher) {
             val userGroup = sharingDao.loadUserGroup(userGroupId)?.takeIf {

@@ -1,7 +1,6 @@
 package com.dashlane.item.subview
 
 class ValueChangeManagerImpl<T> : ValueChangeManager<T> {
-
     private val listeners = mutableSetOf<ValueChangeManager.Listener<T>>()
 
     override fun addValueChangedListener(listener: ValueChangeManager.Listener<T>) {

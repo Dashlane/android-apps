@@ -7,7 +7,6 @@ import com.dashlane.user.Username
 import javax.inject.Inject
 
 class SessionCreator @Inject constructor() {
-
     @Throws(InvalidRemoteKeyException::class)
     fun createSession(
         username: Username,

@@ -8,7 +8,6 @@ import javax.inject.Inject
 class SecretListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.Secret> {
-
     override fun getTitle(item: SummaryObject.Secret): StatusText {
         return StatusText(item.title ?: "")
     }

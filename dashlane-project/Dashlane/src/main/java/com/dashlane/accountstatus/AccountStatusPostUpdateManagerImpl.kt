@@ -20,7 +20,6 @@ class AccountStatusPostUpdateManagerImpl @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val deviceNumberUpdater: DeviceNumberUpdater,
 ) : AccountStatusPostUpdateManager {
-
     override suspend fun onUpdate(username: Username, newStatus: AccountStatus, oldStatus: AccountStatus?) {
         
         smartSpaceCategorizationManager.get().executeSync()
@@ -38,7 +37,7 @@ class AccountStatusPostUpdateManagerImpl @Inject constructor(
     private fun resetPremiumNotificationIfChanged(
         username: Username,
         newStatus: PremiumStatus,
-        lastSaved: PremiumStatus?
+        lastSaved: PremiumStatus?,
     ) {
         lastSaved ?: return
 
@@ -50,18 +49,18 @@ class AccountStatusPostUpdateManagerImpl @Inject constructor(
             preferencesManager[username].apply(
                 listOf(
                     PreferenceEntry.toRemove(
-                        ConstantsPrefs.PREMIUM_RENEWAL_FIRST_NOTIFICATION_DONE
+                        ConstantsPrefs.PREMIUM_RENEWAL_FIRST_NOTIFICATION_DONE,
                     ),
                     PreferenceEntry.toRemove(
-                        ConstantsPrefs.PREMIUM_RENEWAL_SECOND_NOTIFICATION_DONE
+                        ConstantsPrefs.PREMIUM_RENEWAL_SECOND_NOTIFICATION_DONE,
                     ),
                     PreferenceEntry.toRemove(
-                        ConstantsPrefs.PREMIUM_RENEWAL_THIRD_NOTIFICATION_DONE
+                        ConstantsPrefs.PREMIUM_RENEWAL_THIRD_NOTIFICATION_DONE,
                     ),
                     PreferenceEntry.toRemove(
-                        ConstantsPrefs.GRACE_PERIOD_END_NOTIFICATION_DONE
-                    )
-                )
+                        ConstantsPrefs.GRACE_PERIOD_END_NOTIFICATION_DONE,
+                    ),
+                ),
             )
         }
     }

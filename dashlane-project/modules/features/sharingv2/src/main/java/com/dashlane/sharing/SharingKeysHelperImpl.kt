@@ -8,9 +8,8 @@ import javax.inject.Inject
 class SharingKeysHelperImpl @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
 ) : SharingKeysHelper {
-
     override var publicKey: String?
         get() = preferencesManager[sessionManager.session?.username].publicKey
         set(value) {
@@ -20,6 +19,11 @@ class SharingKeysHelperImpl @Inject constructor(
     override var privateKey: String?
         get() = sessionManager.session?.let { userSecureStorageManager.readRsaPrivateKey(it.localKey, it.username) }
         set(value) {
-            value?.let { sessionManager.session?.let { session -> userSecureStorageManager.storeRsaPrivateKey(session.localKey, session.username, it) } }
+            value?.let {
+                sessionManager.session?.let {
+                        session ->
+                    userSecureStorageManager.storeRsaPrivateKey(session.localKey, session.username, it)
+                }
+            }
         }
 }

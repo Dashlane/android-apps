@@ -19,7 +19,7 @@ internal fun SummaryObject.Secret.toSecretFormData(
     sharingCount: SharingCount?,
     teamSpace: TeamSpace?,
     isSharedWithLimitedRight: Boolean,
-    secureSettingAvailable: Boolean
+    secureSettingAvailable: Boolean,
 ) = Data(
     commonData = CommonData(
         id = this.id,
@@ -39,5 +39,5 @@ internal fun SummaryObject.Secret.toSecretFormData(
         content = this.content,
         secureSettingAvailable = secureSettingAvailable,
         secured = this.secured ?: false,
-    )
+    ),
 )

@@ -26,9 +26,8 @@ class SyncVaultImplRaclette @Inject constructor(
     private val sessionManager: SessionManager,
     private val userSettingsSyncRepository: UserSettingsSyncRepository,
     private val dataIdentifierSyncRepository: DataIdentifierSyncRepositoryRaclette,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) : SyncVault {
-
     override var lastSyncTime: Instant?
         get() =
             Instant.ofEpochSecond(preferences.getInt(ConstantsPrefs.TIMESTAMP_LABEL, 0).toLong())
@@ -53,14 +52,14 @@ class SyncVaultImplRaclette @Inject constructor(
                     }
                 result ?: return@withContext
                     message = "statistics = ${result.statistics}\n" +
-                            "transaction = ${result.timings.transaction.duration.toMillis()}\n" +
-                            "writeItems = ${result.timings.writeItems.duration.toMillis()}\n" +
-                            "writeBackups = ${result.timings.writeBackups.duration.toMillis()}\n" +
-                            "delete = ${result.timings.delete.duration.toMillis()}\n" +
-                            "summary = ${result.timings.summary.duration.toMillis()}\n" +
-                            "applyTransaction = ${result.timings.applyTransaction.duration.toMillis()}\n" +
-                            "operationCount = ${result.statistics.updateCount + result.statistics.deleteCount}",
-                    tag = TAG
+                        "transaction = ${result.timings.transaction.duration.toMillis()}\n" +
+                        "writeItems = ${result.timings.writeItems.duration.toMillis()}\n" +
+                        "writeBackups = ${result.timings.writeBackups.duration.toMillis()}\n" +
+                        "delete = ${result.timings.delete.duration.toMillis()}\n" +
+                        "summary = ${result.timings.summary.duration.toMillis()}\n" +
+                        "applyTransaction = ${result.timings.applyTransaction.duration.toMillis()}\n" +
+                        "operationCount = ${result.statistics.updateCount + result.statistics.deleteCount}",
+                    tag = TAG,
                 )
             }
         }
@@ -117,12 +116,12 @@ class SyncVaultImplRaclette @Inject constructor(
 
     override suspend fun applyBackupDate(
         descriptors: Collection<SyncObjectDescriptor>,
-        backupTimeMillis: Instant
+        backupTimeMillis: Instant,
     ) {
         val uuids = descriptors.map { it.second }
         dataIdentifierSyncRepository.applyBackupDate(
             uuids,
-            backupTimeMillis
+            backupTimeMillis,
         )
         descriptors.find { it.first == SyncObject.Settings::class }?.also {
             userSettingsSyncRepository.applyBackupDate(backupTimeMillis)
@@ -141,26 +140,25 @@ class SyncVaultImplRaclette @Inject constructor(
 
     private inner class TransactionScopeImpl(val vaultRepositoryTransaction: VaultObjectRepository.Transaction) :
         SyncVault.TransactionScope {
-
         override fun insertOrUpdateForSync(
             identifier: String,
             value: SyncObject,
-            backupTimeMillis: Long
+            backupTimeMillis: Long,
         ) {
             when {
                 value is SyncObject.Settings ->
                     userSettingsSyncRepository.insertOrUpdateForSync(
                         value,
-                        backupTimeMillis
+                        backupTimeMillis,
                     )
 
                 value.isSupportedSyncObjectType ->
                     dataIdentifierSyncRepository.getItemToSave(
                         value.toVaultItem(
                             identifier,
-                            backupDate = Instant.ofEpochMilli(backupTimeMillis)
+                            backupDate = Instant.ofEpochMilli(backupTimeMillis),
                         ),
-                        value.toTransaction()
+                        value.toTransaction(),
                     )?.also {
                         vaultRepositoryTransaction.update(it)
                     }

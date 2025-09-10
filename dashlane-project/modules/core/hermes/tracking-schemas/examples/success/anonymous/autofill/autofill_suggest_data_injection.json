@@ -1,0 +1,38 @@
+{
+  "id": "838bf943-b9a1-4301-83e4-cb192f2e70c4",
+  "schema_version": "1.31.6",
+  "category": "anonymous",
+  "date": "2021-03-02",
+  "date_origin": "local",
+  "context": {
+    "os": {
+      "type": "linux",
+      "version": "4.1",
+      "locale": "en-US"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "saex",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "webcard",
+    "origin_page": "autofill/dropdown/suggestion"
+  },
+  "properties": {
+    "name": "autofill_suggest",
+    "domain": {
+      "type": "app",
+      "id": "1191b6d2199790c5bad2b8c3d678c2aa41a23e2809ce7aa9fbec8778bc5c2973"
+    },
+    "is_native_app": false,
+    "ms_to_webcard": 119,
+    "phishing_risk": "none",
+    "vault_type_list": [
+      "email",
+      "phone"
+    ],
+    "webcard_item_total_count": 3
+  }
+}

@@ -18,7 +18,7 @@ import java.time.Instant
 fun VaultItem<SyncObject.Authentifiant>.toChangeSet(
     oldAuthentifiant: SyncObject.Authentifiant? = null,
     userName: String,
-    removed: Boolean = this.isDeleted()
+    removed: Boolean = this.isDeleted(),
 ): SyncObject.DataChangeHistory.ChangeSet {
     val authentifiant = syncObject
     val changedProperties = ArrayList<String>()
@@ -55,7 +55,7 @@ fun SyncObject.Authentifiant.toPropertyValueMap(): Map<String, String> = mapOf(
     OTP_URL.field to (this.otpUrl?.toString() ?: ""),
     NOTE.field to (this.note ?: ""),
     URL.field to (this.url ?: ""),
-    USER_SELECTED_URL.field to (this.userSelectedUrl ?: "")
+    USER_SELECTED_URL.field to (this.userSelectedUrl ?: ""),
 )
 
 

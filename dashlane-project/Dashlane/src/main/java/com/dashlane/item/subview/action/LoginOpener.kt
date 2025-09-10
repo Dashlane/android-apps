@@ -57,7 +57,7 @@ class LoginOpener(private val activity: Activity) {
         if (defaultApplicationPackageName == null && applicationOptions.isEmpty()) {
             ToasterImpl(activity).show(
                 text = activity.getString(com.dashlane.ui.R.string.warning_no_browser_enabled_on_device),
-                duration = Toast.LENGTH_LONG
+                duration = Toast.LENGTH_LONG,
             )
             return
         }
@@ -69,11 +69,11 @@ class LoginOpener(private val activity: Activity) {
     private fun getApplicationOptions(
         url: String,
         packageNames: Set<String>,
-        defaultPackageName: String?
+        defaultPackageName: String?,
     ): List<ExternalApplication> {
         val knownApplicationProvider = EntryPointAccessors.fromApplication(
             activity,
-            KnownApplicationEntryPoint::class.java
+            KnownApplicationEntryPoint::class.java,
         ).knownApplicationProvider
         return packageNames.plus(knownApplicationProvider.getPackageNamesCanOpen(url))
             .let {
@@ -88,7 +88,7 @@ class LoginOpener(private val activity: Activity) {
         applicationOptions: List<ExternalApplication>,
         defaultApplicationFromUrl: ExternalApplication?,
         defaultIntent: Intent?,
-        listener: Listener?
+        listener: Listener?,
     ) {
         
         dialog.setContentView(layout)
@@ -107,7 +107,7 @@ class LoginOpener(private val activity: Activity) {
         options: List<ExternalApplication>,
         defaultApplication: ExternalApplication?,
         defaultIntent: Intent?,
-        listener: Listener?
+        listener: Listener?,
     ) {
         layout.removeAllViews()
         
@@ -138,11 +138,12 @@ class LoginOpener(private val activity: Activity) {
     private fun ExternalApplication.addLayoutAction(
         activity: Activity,
         layout: LinearLayout,
-        action: () -> Unit
+        action: () -> Unit,
     ) = layout.addView(ActionItemHelper().createNewActionItem(activity, drawable, false, title, null, action))
 
     interface Listener {
         fun onShowOption()
+
         fun onLogin(packageName: String)
     }
 }

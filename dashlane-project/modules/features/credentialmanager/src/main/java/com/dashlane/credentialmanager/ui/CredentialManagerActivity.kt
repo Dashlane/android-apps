@@ -10,7 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.credentialmanager.model.PasswordLimitReachedException
-import com.dashlane.limitations.PasswordLimitBottomSheet
+import com.dashlane.limitations.PasswordLimitBottomSheetFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -54,7 +54,7 @@ class CredentialManagerActivity : AppCompatActivity() {
                 
                 setResult(RESULT_CANCELED)
                 if (state.e is PasswordLimitReachedException) {
-                    PasswordLimitBottomSheet().show(supportFragmentManager, null)
+                    PasswordLimitBottomSheetFragment().show(supportFragmentManager, null)
                 } else {
                     finish()
                 }

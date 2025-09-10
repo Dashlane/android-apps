@@ -23,7 +23,7 @@ class LegacyCryptoMigrationHelper @Inject constructor(
     private val syncCryptoChanger: SyncCryptoChanger,
     private val userDataRepository: UserDataRepository,
     private val preferencesManager: PreferencesManager,
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
 ) {
     suspend fun migrateCryptoIfNeeded(session: Session) {
         val settingsManager = userDataRepository.getSettingsManager(session)
@@ -53,7 +53,7 @@ class LegacyCryptoMigrationHelper @Inject constructor(
                 authorization = session.authorization,
                 appKey = session.appKey,
                 vaultKey = session.vaultKey,
-                cryptographyMarker = CryptographyMarker.Flexible.Defaults.argon2d 
+                cryptographyMarker = CryptographyMarker.Flexible.Defaults.argon2d, 
             )
             CryptoMigrationStatus.SUCCESS
         } catch (e: SyncCryptoChangerCryptographyException) {
@@ -72,8 +72,8 @@ class LegacyCryptoMigrationHelper @Inject constructor(
                 previousCrypto = CryptoAlgorithm.KWC3,
                 newCrypto = CryptoAlgorithm.ARGON2D,
                 type = CryptoMigrationType.MIGRATE_LEGACY,
-                status = status
-            )
+                status = status,
+            ),
         )
     }
 

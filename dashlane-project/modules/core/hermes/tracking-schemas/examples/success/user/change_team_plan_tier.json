@@ -1,0 +1,39 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "os": {
+        "type": "linux",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2108.0-armeabi-v7a",
+      "platform": "saex",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "main_app",
+    "origin_page": "tac/account"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 12
+  },
+  "properties": {
+    "name": "change_team_plan_tier",
+    "current_billing_plan_tier": "team",
+    "current_plan_paid_seats_count": 7,
+    "has_promo": false,
+    "next_billing_plan_tier": "business",
+    "plan_change_step": "confirm_and_pay_cta",
+    "seat_added_count": 12
+  }
+}

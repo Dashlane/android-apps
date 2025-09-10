@@ -8,9 +8,8 @@ import com.dashlane.util.MD5Hash
 
 class UserLoggedIn(
     private val context: Context,
-    manager: SessionManager
+    manager: SessionManager,
 ) : UserPreferencesManager() {
-
     override var sharedPreferences: SharedPreferences? =
         manager.session?.username?.email?.let { context.getSharedPreferences(MD5Hash.hash(it), Context.MODE_PRIVATE) }
 }

@@ -19,6 +19,6 @@ fun SyncObject.SecureFileInfo.toAttachmentItem(): AttachmentItem {
             userModificationDatetime = this@toAttachmentItem.userModificationDatetime!!.epochSecond
             owner = this@toAttachmentItem.owner
             version = this@toAttachmentItem.version!!.toInt()
-        }
+        },
     )
 }

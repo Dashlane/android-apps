@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="collections_header_item_edit">Collections</string>
-    
-    <string name="collections_header_business_item_edit">Business Collections</string>
-    
-    <string name="collections_header_personal_item_edit">Personal Collections</string>
-    
     <string name="collection_selector_activity_title">Add a collection</string>
-    
-    <string name="collection_selector_activity_new_badge">New collection</string>
-    
-    <string name="collection_list_view_provider_add_button">Add a collection</string>
     
     <string name="menu_collections">Collections</string>
     
@@ -22,15 +12,29 @@
         <item quantity="other">%1$d items</item>
     </plurals>
     
-    <string name="collections_list_empty_state_description">Create your first collection to start organizing the items in your vault.</string>
+    <string name="collections_list_intro_screen_title">Start organizing your vault</string>
     
-    <string name="collections_list_empty_state_button">Create collection</string>
+    <string name="collections_list_intro_screen_item_add_title">Add, group, and share</string>
+    
+    <string name="collections_list_intro_screen_item_add_description">After you’ve added items to your vault, you can create Collections to group your related logins and Secure Notes together.</string>
+    
+    <string name="collections_list_intro_screen_item_group_title">Group related items</string>
+    
+    <string name="collections_list_intro_screen_item_group_description">Create your first Collection to group your related logins and Secure Notes together.</string>
+    
+    <string name="collections_list_intro_screen_item_share_title">Share securely</string>
+    
+    <string name="collections_list_intro_screen_item_share_description">You can also share your Collections with team members on your plan.</string>
+    
+    <string name="collections_list_intro_screen_add_login_button">Add logins</string>
     
     <string name="and_accessibility_collection_list_item_personal_teamspace">Personal Space</string>
     
     <string name="and_accessibility_collection_list_item_business_teamspace">Business Space</string>
     
     <string name="and_accessibility_collection_list_item_shared">Collection shared</string>
+    
+    <string name="collection_details_empty_state_title">Collection empty</string>
     
     <string name="collection_details_empty_state_description">This collection doesn’t have any items yet.</string>
     
@@ -160,4 +164,22 @@
     <string name="collection_detail_dialog_limited_title">Insufficient Permissions</string>
     
     <string name="collection_detail_dialog_limited_description">You only have limited right permission to this item. Adding this item to a shared collection requires full rights on the item.</string>
+    
+    <string name="collection_create_button">Create</string>
+    
+    <string name="collection_selector_dialog_pending_changes_title">Save changes?</string>
+    
+    <string name="collection_selector_dialog_pending_changes_description">Would you like to save your changes?</string>
+    
+    <string name="collection_selector_dialog_pending_changes_save_button">Save</string>
+    
+    <string name="collection_selector_dialog_pending_changes_discard_button">Discard</string>
+    
+    <string name="collection_selector_collection_list_header">Your collections</string>
+    
+    <string name="and_accessibility_collection_list_item_create">Create and select</string>
+    
+    <string name="and_accessibility_collection_list_item_deselection">Unselect</string>
+    
+    <string name="and_accessibility_collection_list_item_selection">Select</string>
 </resources>

@@ -2,7 +2,6 @@
 
 package com.dashlane.util
 
-import android.annotation.SuppressLint
 import com.dashlane.url.toUrlDomainOrNull
 import java.util.Locale
 import java.util.UUID
@@ -10,25 +9,25 @@ import java.util.regex.Pattern
 
 val EMAIL_ADDRESS_PATTERN: Pattern = Pattern.compile(
     "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\" +
-            ".[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9]" +
-            "(?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9]" +
-            "(?:[a-z0-9-]*[a-z0-9])?",
-    Pattern.CASE_INSENSITIVE
+        ".[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9]" +
+        "(?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9]" +
+        "(?:[a-z0-9-]*[a-z0-9])?",
+    Pattern.CASE_INSENSITIVE,
 )
 
 fun isNullOrEmpty(s: String?) = s.isNullOrEmpty()
 
 fun CharSequence?.isNotSemanticallyNull() = !isSemanticallyNull()
+
 fun CharSequence?.isSemanticallyNull() = isNullOrEmpty() || isValueNull()
+
 fun CharSequence?.isValueNull() = this?.trim() == "null"
+
 fun CharSequence?.isUrlFormat() =
     this.isNotSemanticallyNull() && this?.contains(".") == true &&
         !this.startsWith(".") && !this.endsWith(".") && !this.trim().contains(" ")
 
-@SuppressLint("DefaultLocale")
-fun String.toUpperCaseToDisplay(): String = uppercase(Locale.getDefault())
-
-@SuppressLint("DefaultLocale")
+@Suppress("DefaultLocale")
 fun String.capitalizeToDisplay(): String =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
@@ -40,19 +39,6 @@ fun String.ignoreEscapedCharacter() = this
     .replace("\n", "")
     .replace("\t", "")
     .replace("\r", "")
-
-fun String?.toItemUuidOrNull(): UUID? {
-    if (this == null) return null
-
-    return try {
-        UUID.fromString(removeSurrounding("{", "}"))
-    } catch (e: IllegalArgumentException) {
-        if (BuildConfig.DEBUG) {
-            throw(e)
-        }
-        return null
-    }
-}
 
 fun String?.matchDomain(domain: String?): Boolean {
     if (this == null || domain == null) return false

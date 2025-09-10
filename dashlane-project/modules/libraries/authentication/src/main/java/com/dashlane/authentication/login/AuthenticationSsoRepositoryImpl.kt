@@ -12,6 +12,10 @@ import com.dashlane.authentication.decryptSharingPrivateKey
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.authentication.login.AuthenticationSsoRepository.ValidateResult
 import com.dashlane.authentication.toAuthenticationException
+import com.dashlane.authentication.toAuthenticationSsoInfo
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyBase64Exception
 import com.dashlane.cryptography.CryptographyException
@@ -22,17 +26,15 @@ import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.decodeBase64ToByteArray
 import com.dashlane.cryptography.decodeBase64ToByteArrayOrNull
 import com.dashlane.cryptography.forXml
+import com.dashlane.data.login.SsoInfo
 import com.dashlane.server.api.ConnectivityCheck
-import com.dashlane.server.api.endpoints.authentication.AuthLoginService
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationAuthTicketService
 import com.dashlane.server.api.endpoints.authentication.AuthVerification
+import com.dashlane.server.api.endpoints.authentication.CompleteDeviceRegistrationWithAuthTicketService
+import com.dashlane.server.api.endpoints.authentication.GetAuthenticationMethodsForLoginService
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
 import com.dashlane.server.api.exceptions.DashlaneApiException
 import com.dashlane.server.api.time.toInstant
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.user.Username
-import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.serializer.XmlException
 import kotlinx.coroutines.Dispatchers
@@ -41,10 +43,10 @@ import kotlinx.coroutines.withContext
 class AuthenticationSsoRepositoryImpl(
     private val connectivityCheck: ConnectivityCheck,
     private val userStorage: UserStorage,
-    private val loginService: AuthLoginService,
+    private val loginService: GetAuthenticationMethodsForLoginService,
     private val authTicketHelper: AuthenticationAuthTicketHelper,
     private val authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
-    private val cryptography: Cryptography
+    private val cryptography: Cryptography,
 ) : AuthenticationSsoRepository {
     override suspend fun getSsoInfo(login: String, accessKey: String): SsoInfo = getSsoInfoImpl(login, accessKey)
 
@@ -55,17 +57,17 @@ class AuthenticationSsoRepositoryImpl(
 
         val response = try {
             loginService.execute(
-                AuthLoginService.Request(
+                GetAuthenticationMethodsForLoginService.Request(
                     login = login,
                     deviceAccessKey = accessKey,
                     profiles = listOf(
-                        AuthLoginService.Request.Profile(
+                        GetAuthenticationMethodsForLoginService.Request.Profile(
                             login = login,
-                            deviceAccessKey = accessKey
-                        )
+                            deviceAccessKey = accessKey,
+                        ),
                     ),
-                    methods = emptyList()
-                )
+                    methods = emptyList(),
+                ),
             )
         } catch (e: DashlaneApiException) {
             throw e.toAuthenticationException()
@@ -82,13 +84,13 @@ class AuthenticationSsoRepositoryImpl(
         login: String,
         ssoToken: String,
         serviceProviderKey: String,
-        accessKey: String?
+        accessKey: String?,
     ) = withContext(Dispatchers.Default) {
         validateImpl(
             login = login,
             ssoToken = ssoToken,
             serviceProviderKey = serviceProviderKey,
-            accessKey = accessKey
+            accessKey = accessKey,
         )
     }
 
@@ -96,7 +98,7 @@ class AuthenticationSsoRepositoryImpl(
         login: String,
         ssoToken: String,
         serviceProviderKey: String,
-        accessKey: String?
+        accessKey: String?,
     ): ValidateResult {
         if (connectivityCheck.isOffline) {
             throw AuthenticationOfflineException()
@@ -116,14 +118,14 @@ class AuthenticationSsoRepositoryImpl(
             validateRemote(
                 login = login,
                 ssoToken = ssoToken,
-                serviceProviderKey = decodedServiceProverKey
+                serviceProviderKey = decodedServiceProverKey,
             )
         } else {
             validateLocal(
                 login = login,
                 ssoToken = ssoToken,
                 serviceProviderKey = decodedServiceProverKey,
-                accessKey = userDevice.accessKey
+                accessKey = userDevice.accessKey,
             )
         }
     }
@@ -131,12 +133,12 @@ class AuthenticationSsoRepositoryImpl(
     private suspend fun validateRemote(
         login: String,
         ssoToken: String,
-        serviceProviderKey: ByteArray
+        serviceProviderKey: ByteArray,
     ): ValidateResult {
         val (authTicket, responseData) = try {
             authTicketHelper.verifySso(
                 login = login,
-                ssoToken = ssoToken
+                ssoToken = ssoToken,
             ).run {
                 authTicket to registerDevice()
             }
@@ -176,14 +178,14 @@ class AuthenticationSsoRepositoryImpl(
         val localKey = authenticationLocalKeyRepository.createForRemote(
             username,
             ssoKey,
-            CryptographyMarker.Flexible.Defaults.noDerivation64
+            CryptographyMarker.Flexible.Defaults.noDerivation64,
         )
         return responseData.toResult(login, ssoKey, authTicket, localKey, remoteKey, settings, sharingKeys)
     }
 
     private fun decryptRemoteKey(
         ssoKey: AppKey.SsoKey,
-        encryptedRemoteKey: EncryptedBase64String
+        encryptedRemoteKey: EncryptedBase64String,
     ) =
         cryptography.createAppDecryptionEngine(ssoKey)
             .use { it.decryptRemoteKey(encryptedRemoteKey) }
@@ -194,7 +196,7 @@ class AuthenticationSsoRepositoryImpl(
 
     private fun decryptSharingKeys(
         remoteKey: VaultKey.RemoteKey,
-        responseData: AuthRegistrationAuthTicketService.Data
+        responseData: CompleteDeviceRegistrationWithAuthTicketService.Data,
     ): SharingKeys? {
         val sharingKeys = responseData.sharingKeys ?: return null
         val encryptedPrivateKey = sharingKeys.privateKey.asEncryptedBase64()
@@ -211,12 +213,12 @@ class AuthenticationSsoRepositoryImpl(
         login: String,
         accessKey: String,
         ssoToken: String,
-        serviceProviderKey: ByteArray
+        serviceProviderKey: ByteArray,
     ): ValidateResult {
         val (authTicket, responseData) = try {
             authTicketHelper.verifySso(
                 login = login,
-                ssoToken = ssoToken
+                ssoToken = ssoToken,
             ).run {
                 authTicket to login(accessKey)
             }
@@ -250,19 +252,19 @@ class AuthenticationSsoRepositoryImpl(
             secretKey = localKeyResult.secretKey,
             localKey = localKeyResult.localKey,
             ssoKey = ssoKey,
-            authTicket = authTicket
+            authTicket = authTicket,
         )
     }
 }
 
-private fun AuthRegistrationAuthTicketService.Data.toResult(
+private fun CompleteDeviceRegistrationWithAuthTicketService.Data.toResult(
     login: String,
     ssoKey: AppKey.SsoKey,
     authTicket: String,
     localKey: LocalKey,
     remoteKey: VaultKey.RemoteKey,
     settings: SyncObject.Settings,
-    sharingKeys: SharingKeys?
+    sharingKeys: SharingKeys?,
 ): ValidateResult = ValidateResult.Remote(
     login = login,
     accessKey = deviceAccessKey,
@@ -275,5 +277,5 @@ private fun AuthRegistrationAuthTicketService.Data.toResult(
     settingsDate = this.settings.backupDate.toInstant(),
     sharingKeys = sharingKeys,
     deviceAnalyticsId = deviceAnalyticsId,
-    userAnalyticsId = userAnalyticsId
+    userAnalyticsId = userAnalyticsId,
 )

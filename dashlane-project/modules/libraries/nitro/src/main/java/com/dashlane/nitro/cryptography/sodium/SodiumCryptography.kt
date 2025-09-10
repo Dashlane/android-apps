@@ -10,53 +10,52 @@ import com.dashlane.sodium.jni.SodiumJni
 import javax.inject.Inject
 
 interface SodiumCryptography {
-
     fun generateKeyExchangeKeyPair(): KeyExchangeKeyPair?
 
     fun keyExchangeClientSessionKeys(
         clientKeyPair: KeyExchangeKeyPair,
-        serverPublicKey: ByteArray
+        serverPublicKey: ByteArray,
     ): ClientKeyPair?
 
     fun keyExchangeServerSessionKeys(
         serverKeyPair: KeyExchangeKeyPair,
-        clientPublicKey: ByteArray
+        clientPublicKey: ByteArray,
     ): ServerKeyPair?
 
     fun secretstreamXchacha20poly1305InitPush(
         state: ByteArray,
         header: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ): Boolean
 
     fun secretstreamXchacha20poly1305InitPull(
         state: ByteArray,
         header: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ): Boolean
 
     fun secretstreamXchacha20poly1305Push(
         state: ByteArray,
         message: ByteArray,
-        encrypted: ByteArray
+        encrypted: ByteArray,
     ): Boolean
 
     fun secretstreamXchacha20poly1305Pull(
         state: ByteArray,
         message: ByteArray,
-        encrypted: ByteArray
+        encrypted: ByteArray,
     ): Boolean
 
     fun secretboxEasy(
         message: ByteArray,
         nonce: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ): ByteArray?
 
     fun secretboxOpenEasy(
         cipherText: ByteArray,
         nonce: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ): ByteArray?
 
     fun randomBuf(
@@ -65,16 +64,16 @@ interface SodiumCryptography {
 
     fun genericHash(
         message: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ): ByteArray
 
     fun genericHash(
-        message: ByteArray
+        message: ByteArray,
     ): ByteArray
 
     fun sodiumMemcmp(
         key1: ByteArray,
-        key2: ByteArray
+        key2: ByteArray,
     ): Boolean
 
     companion object {
@@ -102,13 +101,13 @@ class SodiumCryptographyImpl @Inject constructor() : SodiumCryptography {
 
         return KeyExchangeKeyPair(
             publicKey = publicKey,
-            secretKey = secretKey
+            secretKey = secretKey,
         )
     }
 
     override fun keyExchangeClientSessionKeys(
         clientKeyPair: KeyExchangeKeyPair,
-        serverPublicKey: ByteArray
+        serverPublicKey: ByteArray,
     ): ClientKeyPair? {
         val rx = ByteArray(SODIUM_SESSION_KEY_BYTES)
         val tx = ByteArray(SODIUM_SESSION_KEY_BYTES)
@@ -118,7 +117,7 @@ class SodiumCryptographyImpl @Inject constructor() : SodiumCryptography {
                 tx = tx,
                 publicKey = clientKeyPair.publicKey,
                 secretKey = clientKeyPair.secretKey,
-                peerPublicKey = serverPublicKey
+                peerPublicKey = serverPublicKey,
             )
         ) {
             return null
@@ -128,7 +127,7 @@ class SodiumCryptographyImpl @Inject constructor() : SodiumCryptography {
 
     override fun keyExchangeServerSessionKeys(
         serverKeyPair: KeyExchangeKeyPair,
-        clientPublicKey: ByteArray
+        clientPublicKey: ByteArray,
     ): ServerKeyPair? {
         val rx = ByteArray(SODIUM_SESSION_KEY_BYTES)
         val tx = ByteArray(SODIUM_SESSION_KEY_BYTES)
@@ -138,7 +137,7 @@ class SodiumCryptographyImpl @Inject constructor() : SodiumCryptography {
                 tx = tx,
                 publicKey = serverKeyPair.publicKey,
                 secretKey = serverKeyPair.secretKey,
-                clientPublicKey = clientPublicKey
+                clientPublicKey = clientPublicKey,
             )
         ) {
             return null
@@ -149,49 +148,49 @@ class SodiumCryptographyImpl @Inject constructor() : SodiumCryptography {
     override fun secretstreamXchacha20poly1305InitPush(
         state: ByteArray,
         header: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ) = SodiumJni.crypto_secretstream_xchacha20poly1305_init_push(
         state = state,
         header = header,
-        key = key
+        key = key,
     )
 
     override fun secretstreamXchacha20poly1305InitPull(
         state: ByteArray,
         header: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ) =
         SodiumJni.crypto_secretstream_xchacha20poly1305_init_pull(
             state = state,
             header = header,
-            key = key
+            key = key,
         )
 
     override fun secretstreamXchacha20poly1305Push(
         state: ByteArray,
         message: ByteArray,
-        encrypted: ByteArray
+        encrypted: ByteArray,
     ): Boolean = SodiumJni.crypto_secretstream_xchacha20poly1305_push(
         state = state,
         message = message,
-        encrypted = encrypted
+        encrypted = encrypted,
     )
 
     override fun secretstreamXchacha20poly1305Pull(
         state: ByteArray,
         message: ByteArray,
-        encrypted: ByteArray
+        encrypted: ByteArray,
     ): Boolean = SodiumJni.crypto_secretstream_xchacha20poly1305_pull(
         state = state,
         message = message,
-        encrypted = encrypted
+        encrypted = encrypted,
     )
 
     override fun secretboxEasy(message: ByteArray, nonce: ByteArray, key: ByteArray): ByteArray? {
         return SodiumJni.crypto_secretbox_easy(
             message = message,
             nonce = nonce,
-            key = key
+            key = key,
         )
     }
 
@@ -199,7 +198,7 @@ class SodiumCryptographyImpl @Inject constructor() : SodiumCryptography {
         return SodiumJni.crypto_secretbox_open_easy(
             cipherText = cipherText,
             nonce = nonce,
-            key = key
+            key = key,
         )
     }
 
@@ -207,18 +206,22 @@ class SodiumCryptographyImpl @Inject constructor() : SodiumCryptography {
 
     override fun genericHash(
         message: ByteArray,
-        key: ByteArray
+        key: ByteArray,
     ): ByteArray {
         return SodiumJni.crypto_generichash(
             SODIUM_SECRET_KEY_BYTES,
             message,
             message.size.toLong(),
             key,
-            key.size
+            key.size,
         )
     }
 
-    override fun genericHash(message: ByteArray): ByteArray = SodiumJni.crypto_generichash(SODIUM_SECRET_KEY_BYTES, message, message.size.toLong())
+    override fun genericHash(message: ByteArray): ByteArray = SodiumJni.crypto_generichash(
+        SODIUM_SECRET_KEY_BYTES,
+        message,
+        message.size.toLong(),
+    )
 
     override fun sodiumMemcmp(key1: ByteArray, key2: ByteArray): Boolean = SodiumJni.sodium_memcmp(key1, key2)
 }

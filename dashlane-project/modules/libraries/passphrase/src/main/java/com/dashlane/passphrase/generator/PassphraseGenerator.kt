@@ -10,8 +10,9 @@ import javax.inject.Inject
 
 const val PASSPHRASE_LENGTH = 5
 
-class PassphraseGenerator @Inject constructor(@ApplicationContext private val context: Context) {
-
+class PassphraseGenerator @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
     fun getWordList(): List<String> {
         val raw: InputStream = context.resources.openRawResource(R.raw.eff_large_wordlist)
         val wordList: MutableList<String> = mutableListOf()

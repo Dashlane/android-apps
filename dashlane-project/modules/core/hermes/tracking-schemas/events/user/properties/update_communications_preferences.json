@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/update_communications_preferences.json",
+  "type": "object",
+  "description": "When a user changes their communications preferences in the 'Privacy and Data Settings' page. This event follows the flow of that process. Flow (start, complete): starts when user clicks on the tickbox (whether to opt in or opt out), complete when a user clicks 'save settings' after clicking on the tickbox",
+  "metas": {
+    "area": "settings"
+  },
+  "properties": {
+    "name": {
+      "const": "update_communications_preferences"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    },
+    "is_marketing_opt_in": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_creation.json#/definitions/is_marketing_opt_in"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step",
+    "is_marketing_opt_in"
+  ],
+  "additionalProperties": false
+}

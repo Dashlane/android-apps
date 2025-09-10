@@ -35,7 +35,6 @@ class NitroSsoWebViewClient(
     private val ioDispatcher: CoroutineDispatcher,
     private val coroutineScope: CoroutineScope,
 ) : WebViewClient() {
-
     private val navigationAllowList: Set<UrlDomain>
         get() = mutableSetOf(trustedDomain).apply {
             addAll(validatedDomains)
@@ -46,20 +45,20 @@ class NitroSsoWebViewClient(
             
             return
         } else if (!url.isUrlAllowed()) {
-            onError(GetSsoInfoResult.Error.UnauthorizedNavigation)
+            onError(GetSsoInfoResult.Error.ForbiddenNavigation)
             return
         }
     }
 
     override fun shouldInterceptRequest(
         view: WebView?,
-        request: WebResourceRequest?
+        request: WebResourceRequest?,
     ): WebResourceResponse? {
         return if (request?.url.toString() == redirectionUrl) {
             post {
                 view?.evaluateJavascript(
                     "javascript:${readSamlResponse(redirectionUrl = redirectionUrl, jsInterfaceName = jsInterfaceName)}",
-                    null
+                    null,
                 )
             }
             
@@ -72,10 +71,10 @@ class NitroSsoWebViewClient(
     override fun onReceivedSslError(
         view: WebView?,
         handler: SslErrorHandler?,
-        error: SslError?
+        error: SslError?,
     ) {
         handler?.cancel()
-        onError(GetSsoInfoResult.Error.UnauthorizedNavigation)
+        onError(GetSsoInfoResult.Error.ForbiddenNavigation)
     }
 
     override fun onReceivedClientCertRequest(view: WebView, request: ClientCertRequest) {

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/use_another_account.json",
+  "type": "object",
+  "description": "Users either click another account in the list or click 'use another account'",
+  "metas": {
+    "area": "authentication",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "use_another_account"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

@@ -4,13 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.account.UserAccountStorage
+import com.dashlane.authentication.twofa.Use2faSettingStateRefresher
 import com.dashlane.changemasterpassword.MasterPasswordChanger
 import com.dashlane.crypto.keys.isServerKeyNotNull
-import com.dashlane.server.api.endpoints.authentication.AuthTotpDeactivationService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationTotpService
+import com.dashlane.server.api.endpoints.authentication.DeactivateTOTPService
+import com.dashlane.server.api.endpoints.authentication.PerformTotpVerificationService
 import com.dashlane.session.SessionManager
 import com.dashlane.session.authorization
-import com.dashlane.ui.screens.settings.Use2faSettingStateRefresher
 import com.dashlane.user.UserSecuritySettings
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,14 +28,13 @@ import javax.inject.Inject
 internal class DisableTotpDeactivationViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val sessionManager: SessionManager,
-    private val authVerificationTotpService: AuthVerificationTotpService,
-    private val authTotpDeactivationService: AuthTotpDeactivationService,
+    private val performTotpVerificationService: PerformTotpVerificationService,
+    private val deactivateTOTPService: DeactivateTOTPService,
     private val userAccountStorage: UserAccountStorage,
     private val use2faSettingStateRefresher: Use2faSettingStateRefresher,
     private val masterPasswordChanger: MasterPasswordChanger,
-    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher
+    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
     private val mutableSharedFlow = MutableSharedFlow<DisableTotpDeactivationState>(replay = 1)
     val sharedFlow = mutableSharedFlow.asSharedFlow()
 
@@ -45,21 +44,23 @@ internal class DisableTotpDeactivationViewModel @Inject constructor(
             val otp = DisableTotpDeactivationFragmentArgs.fromSavedStateHandle(savedStateHandle).otp
 
             val authTicket =
-                authVerificationTotpService.execute(AuthVerificationTotpService.Request(login = session.userId, otp = otp)).data.authTicket
+                performTotpVerificationService.execute(
+                    PerformTotpVerificationService.Request(login = session.userId, otp = otp),
+                ).data.authTicket
 
             if (session.appKey.isServerKeyNotNull) {
                 
                 masterPasswordChanger.updateServerKey(newServerKey = null, authTicket)
             } else {
                 
-                authTotpDeactivationService.execute(
+                deactivateTOTPService.execute(
                     userAuthorization = session.authorization,
-                    request = AuthTotpDeactivationService.Request(authTicket = AuthTotpDeactivationService.Request.AuthTicket(authTicket))
+                    request = DeactivateTOTPService.Request(authTicket = DeactivateTOTPService.Request.AuthTicket(authTicket)),
                 )
 
                 userAccountStorage.saveSecuritySettings(
                     username = session.username,
-                    securitySettings = UserSecuritySettings(isToken = true)
+                    securitySettings = UserSecuritySettings(isToken = true),
                 )
             }
 
@@ -78,5 +79,6 @@ internal class DisableTotpDeactivationViewModel @Inject constructor(
 
 internal sealed class DisableTotpDeactivationState {
     object Success : DisableTotpDeactivationState()
+
     data class Error(val error: Throwable) : DisableTotpDeactivationState()
 }

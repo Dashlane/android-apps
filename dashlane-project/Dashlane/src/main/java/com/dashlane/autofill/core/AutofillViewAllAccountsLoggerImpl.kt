@@ -16,13 +16,12 @@ import com.dashlane.ui.adapter.ItemListContext
 import javax.inject.Inject
 
 class AutofillViewAllAccountsLoggerImpl @Inject constructor(
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
 ) : AutofillViewAllAccountsLogger {
-
     override fun onResultsLoaded() {
         logRepository.queuePageView(
             component = BrowseComponent.OS_AUTOFILL,
-            page = AnyPage.AUTOFILL_EXPLORE_PASSWORDS_SEARCH
+            page = AnyPage.AUTOFILL_EXPLORE_PASSWORDS_SEARCH,
         )
     }
 
@@ -32,7 +31,7 @@ class AutofillViewAllAccountsLoggerImpl @Inject constructor(
         webappDomain: String,
         itemUrl: String?,
         itemId: String?,
-        itemListContext: ItemListContext?
+        itemListContext: ItemListContext?,
     ) {
         itemId?.let {
             logRepository.queueEvent(
@@ -41,8 +40,8 @@ class AutofillViewAllAccountsLoggerImpl @Inject constructor(
                     itemId = ItemId(id = it),
                     itemType = ItemType.CREDENTIAL,
                     totalCount = itemListContext?.sectionCount,
-                    index = itemListContext?.positionInContainerSection?.toDouble()
-                )
+                    index = itemListContext?.positionInContainerSection?.toDouble(),
+                ),
             )
         }
     }
@@ -50,21 +49,21 @@ class AutofillViewAllAccountsLoggerImpl @Inject constructor(
     override fun onViewAllAccountOver(
         totalCount: Int,
         hasInteracted: Boolean,
-        charactersTypedCount: Int
+        charactersTypedCount: Int,
     ) {
         if (hasInteracted) {
             logRepository.queueEvent(
                 SearchVaultItem(
                     totalCount = totalCount,
                     hasInteracted = hasInteracted,
-                    charactersTypedCount = charactersTypedCount
-                )
+                    charactersTypedCount = charactersTypedCount,
+                ),
             )
         } else {
             logRepository.queueEvent(
                 AutofillDismiss(
-                    dismissType = DismissType.CLOSE
-                )
+                    dismissType = DismissType.CLOSE,
+                ),
             )
         }
     }

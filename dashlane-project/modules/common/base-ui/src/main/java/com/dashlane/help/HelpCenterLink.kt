@@ -14,15 +14,16 @@ import java.util.Locale
 
 sealed class HelpCenterLink {
     data object Base : HelpCenterLink()
+
     data class Article(
         val id: String,
-        val anchor: String? = null
+        val anchor: String? = null,
     ) : HelpCenterLink()
 
     val uri: URI
         get() = URIBuilder(
             scheme = "https",
-            authority = "support.dashlane.com"
+            authority = "support.dashlane.com",
         ).apply {
             appendPath("hc")
             appendPath(helpCenterLanguage)
@@ -54,7 +55,6 @@ sealed class HelpCenterLink {
         val ARTICLE_CSV_EXPORT_WEB = Article("202625092")
         val ARTICLE_SSO_LOGIN = Article("360015304999", "title2")
         val ARTICLE_AUTHENTICATOR = Article("115003383365")
-        val ARTICLE_AUTHENTICATOR_APP = Article("4583048536082")
         val ARTICLE_USE_RECOVERY_CODE = Article("202699101")
         val ARTICLE_MASTER_PASSWORDLESS_ACCOUNT_INFO = Article("10975547141266")
         val ARTICLE_ACCOUNT_RECOVERY_OPTIONS = Article("11282971791634")
@@ -71,7 +71,7 @@ sealed class HelpCenterLink {
 }
 
 fun HelpCenterLink.newIntent(
-    context: Context
+    context: Context,
 ): Intent {
     return CustomTabsIntent.Builder()
         .setShowTitle(true)

@@ -13,12 +13,17 @@ interface UserGroupMembersViewModelContract {
 
     sealed class UIState {
         object Loading : UIState()
+
         object Empty : UIState()
+
         object RequestLoading : UIState()
+
         object RequestSuccess : UIState()
+
         object RequestFailure : UIState()
+
         data class Data(
-            val items: List<SharingUserGroupUser> = emptyList()
+            val items: List<SharingUserGroupUser> = emptyList(),
         ) : UIState()
     }
 }

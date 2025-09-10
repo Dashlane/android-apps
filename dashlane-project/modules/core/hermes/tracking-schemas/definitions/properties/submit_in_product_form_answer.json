@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_in_product_form_answer.json",
+  "type": "object",
+  "description": "Definitions for submit_in_product_form event",
+  "definitions": {
+    "reason_to_extend_trial_answer": {
+      "description": "Deprecated. Replaced by possible_form_answer",
+      "deprecated": true,
+      "type": "string",
+      "enum": [
+        "chose_other_password_manager",
+        "familiar_with_dashlane",
+        "missing_critical_features",
+        "need_help_scim",
+        "need_help_sso",
+        "need_more_time_convince",
+        "need_more_time_team_usage",
+        "need_sales_rep",
+        "never_used_before",
+        "no_internal_usage",
+        "no_need_for_password_manager",
+        "not_aware_trial_ending",
+        "other",
+        "technical_issues",
+        "too_expensive",
+        "used_another_password_manager"
+      ]
+    },
+    "possible_form_answers": {
+      "description": "name of the possible answers to pick within the in-product forms",
+      "type": "string",
+      "enum": [
+        "chose_other_password_manager",
+        "downsized_employee_count",
+        "familiar_with_dashlane",
+        "missing_critical_features",
+        "need_help_credential_risk_detection",
+        "need_help_scim",
+        "need_help_scim_or_sso",
+        "need_help_sso",
+        "need_more_time_convince",
+        "need_more_time_team_usage",
+        "need_sales_rep",
+        "never_used_before",
+        "no_internal_usage",
+        "no_need_for_password_manager",
+        "not_aware_trial_ending",
+        "other",
+        "technical_issues",
+        "too_expensive",
+        "used_another_password_manager"
+      ]
+    },
+    "form_name": {
+      "description": "name of the form displayed in product",
+      "type": "string",
+      "enum": [
+        "familiarity_with_dashlane",
+        "reason_to_cancel_subscription",
+        "reason_to_extend_trial"
+      ]
+    },
+    "answer_list": {
+      "description": "list of the possible answers to check in the form",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_in_product_form_answer.json#/definitions/possible_form_answers"
+      }
+    },
+    "chosen_answer_list": {
+      "description": "list of the answers sent by the user",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_in_product_form_answer.json#/definitions/possible_form_answers"
+      }
+    }
+  }
+}

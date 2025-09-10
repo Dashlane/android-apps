@@ -10,7 +10,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 class BankDataProviderModule {
-
     @Provides
     fun providesBankRepository(): BankRepository = BankRepositoryImpl()
 }

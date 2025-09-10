@@ -3,17 +3,17 @@ package com.dashlane.notificationcenter.view
 import android.content.Context
 import android.view.View
 import com.dashlane.R
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
 import com.dashlane.databinding.ItemActionitemBinding
 import com.dashlane.notificationcenter.NotificationCenterDef
 import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.SharingDao
 import com.dashlane.sharing.model.getUser
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.drawable.CircleDrawable
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 import com.dashlane.vault.model.titleForList
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummaryOrNull
@@ -27,7 +27,7 @@ data class SharingActionItemItemGroup(
     override val actionItemsRepository: NotificationCenterRepository,
     override val section: ActionItemSection = ActionItemSection.SHARING,
     override val type: ActionItemType = ActionItemType.SHARING,
-    override val trackingKey: String = sharing.groupId
+    override val trackingKey: String = sharing.groupId,
 ) : NotificationItem, DiffUtilComparator<SharingActionItemItemGroup> {
     override val action: NotificationCenterDef.Presenter.() -> Unit = { startSharingRedirection() }
 
@@ -45,12 +45,11 @@ data class SharingActionItemItemGroup(
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.item_actionitem,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 
     class ViewHolder(val v: View) : ReadStateViewHolder<SharingActionItemItemGroup>(v) {
-
         private val binding = ItemActionitemBinding.bind(view)
 
         override fun updateView(context: Context, item: SharingActionItemItemGroup?) {
@@ -62,7 +61,7 @@ data class SharingActionItemItemGroup(
 
             binding.date.text = formatDateForNotification(
                 item.firstDisplayedDate.toEpochMilli(),
-                Instant.now().toEpochMilli()
+                Instant.now().toEpochMilli(),
             )
             binding.date.visibility = View.VISIBLE
             binding.title.text =
@@ -73,8 +72,8 @@ data class SharingActionItemItemGroup(
                     context = context,
                     backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
                     drawableRes = R.drawable.ic_action_item_sharing_invitation,
-                    drawableTintColorRes = R.color.text_brand_standard
-                )
+                    drawableTintColorRes = R.color.text_brand_standard,
+                ),
             )
         }
 
@@ -86,7 +85,7 @@ data class SharingActionItemItemGroup(
         private fun updateItemGroup(
             itemGroup: ItemGroup,
             actionItem: SharingActionItemItemGroup,
-            referrer: String
+            referrer: String,
         ) {
             val itemId = itemGroup.items?.firstOrNull()?.itemId ?: return
             val extraData = actionItem.sharingDao.loadItemContentExtraDataLegacy(itemId)
@@ -98,11 +97,11 @@ data class SharingActionItemItemGroup(
                     R.string
                         .action_item_sharing_invitation_item_description_password,
                     referrer,
-                    item.titleForList
+                    item.titleForList,
                 )
                 is SummaryObject.SecureNote -> context.getString(
                     R.string.action_item_sharing_invitation_item_description_secure_note,
-                    referrer
+                    referrer,
                 )
                 else -> ""
             }

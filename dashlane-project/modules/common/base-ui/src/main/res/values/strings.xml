@@ -8,14 +8,11 @@
     <string name="and_accessibility_action_expand">Expand</string>
     <string name="and_accessibility_action_collapse">Collapse</string>
     <string name="and_accessibility_back_button">Back</string>
+    <string name="and_accessibility_close">Close</string>
     
     <string name="and_accessibility_remove_category">Remove</string>
     
     <string name="and_accessibility_shared_category">Shared</string>
-    
-    <string name="and_accessibility_text_edit_reveal">Reveal</string>
-    
-    <string name="and_accessibility_text_edit_hide">Hide</string>
 
     
     <string name="generic_error_retry_button">Try again</string>
@@ -40,4 +37,22 @@
     <string name="passphrase_component_missing_word_label">Missing word</string>
     
     <string name="passphrase_component_missing_word_error">That does not match. Please try again.</string>
+
+    
+    <string name="network_failed_notification">We were unable to connect with the Dashlane server. Please check your connection and try again.</string>
+    
+    <string name="make_sure_you_have_internet_for_refferalid">Please check your connection and try again.</string>
+    
+    <string name="contact_system_administrator">No app available to complete this action. Contact your system administrator.</string>
+
+    
+    <string name="secret_transfer_settings_entry_title">Add new device</string>
+
+    
+    <string name="account_status_settings_title">Account summary</string>
+
+    
+    <string name="search">Search</string>
+
+
 </resources>

@@ -6,11 +6,11 @@ import com.dashlane.R
 
 class ShowAttachmentsMenuAction(
     enabled: Boolean = true,
-    action: (Activity) -> Unit
+    action: (Activity) -> Unit,
 ) : MenuAction(
-    text = R.string.attachments_activity_title,
-    icon = R.drawable.action_bar_menu_attach_file,
-    displayFlags = MenuItem.SHOW_AS_ACTION_ALWAYS,
-    enabled = enabled,
-    action = action
-)
+        text = R.string.attachments_activity_title,
+        icon = R.drawable.action_bar_menu_attach_file,
+        displayFlags = MenuItem.SHOW_AS_ACTION_ALWAYS,
+        enabled = enabled,
+        action = action,
+    )

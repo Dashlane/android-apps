@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_bar_settings">Settings</string>
+
+    
+    <string name="setting_premium_category">Account</string>
+    
+    <string name="account_status_settings_description">Login and contact emails</string>
+    
+    <string name="settings_category_advanced">Advanced Settings</string>
+    
+    <string name="settings_category_security_description">Application lock and other security settings</string>
+    
+    <string name="settings_category_general_description">Auto-login and other general settings</string>
+    
+    <string name="secret_transfer_settings_entry_description">Scan a QR code or complete security challenge to add a new device</string>
+    
+    <string name="invites">Invite your friends</string>
+    
+    <string name="refferal_text">All my personal data at hand for instant shopping, logging in, registering anywhere. Try it: %1$s</string>
+    
+    <string name="checkout_dashlane">Check out Dashlane</string>
+    
+    <string name="setting_send_invites_description">Get free Dashlane Premium by inviting your friends</string>
+    
+    <string name="setting_send_invites_description_premium_user">Like Dashlane? Share it with a friend.</string>
+    
+    <string name="setting_send_love">Send love</string>
+    
+    <string name="setting_send_love_description">Rate Dashlane on the Play Store</string>
+    
+    <string name="setting_about_version">Version</string>
+    
+    <string name="setting_debug_link">Debug menu</string>
+
+    
+    <string name="settings_social_media_header">Find us on social media</string>
+</resources>

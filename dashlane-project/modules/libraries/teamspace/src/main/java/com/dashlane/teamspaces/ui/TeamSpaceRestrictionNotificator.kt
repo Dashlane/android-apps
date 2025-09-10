@@ -3,23 +3,23 @@ package com.dashlane.teamspaces.ui
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.FragmentActivity
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canUseSecureNotes
 import com.dashlane.notificator.Notificator
 import com.dashlane.teamspaces.R
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
-import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.featureflipping.canUseSecureNotes
 import com.dashlane.util.inject.OptionalProvider
 import javax.inject.Inject
 
 class TeamSpaceRestrictionNotificator @Inject constructor(
     private val notificator: Notificator,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
-    private val userFeaturesChecker: UserFeaturesChecker
+    private val userFeaturesChecker: UserFeaturesChecker,
 ) {
     fun runOrNotifyTeamRestriction(
         activity: FragmentActivity,
         feature: Feature,
-        block: () -> Unit
+        block: () -> Unit,
     ) {
         val teamSpaceAccessor = teamSpaceAccessorProvider.get() ?: return
 
@@ -42,7 +42,7 @@ class TeamSpaceRestrictionNotificator @Inject constructor(
         showDialog(
             activity = activity,
             title = activity.getString(feature.titleRes),
-            description = activity.getString(feature.descriptionRes)
+            description = activity.getString(feature.descriptionRes),
         )
     }
 
@@ -52,25 +52,28 @@ class TeamSpaceRestrictionNotificator @Inject constructor(
     }
 }
 
-enum class Feature(@StringRes val titleRes: Int, @StringRes val descriptionRes: Int) {
+enum class Feature(
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int,
+) {
     SHARING_DISABLED(
         titleRes = R.string.teamspace_restrictions_sharing_title,
-        descriptionRes = R.string.teamspace_restrictions_sharing_description
+        descriptionRes = R.string.teamspace_restrictions_sharing_description,
     ),
     AUTOLOCK(
         titleRes = R.string.teamspace_restrictions_feature_lock_setting_title,
-        descriptionRes = R.string.teamspace_restrictions_feature_lock_setting_description
+        descriptionRes = R.string.teamspace_restrictions_feature_lock_setting_description,
     ),
     SECURE_NOTES_DISABLED(
         titleRes = R.string.teamspace_restrictions_secure_notes_title,
-        descriptionRes = R.string.teamspace_restrictions_secure_notes_description
+        descriptionRes = R.string.teamspace_restrictions_secure_notes_description,
     ),
     CRYPTO_FORCED_PAYLOAD(
         titleRes = R.string.teamspace_restrictions_generic_title,
-        descriptionRes = R.string.teamspace_restrictions_generic_description
+        descriptionRes = R.string.teamspace_restrictions_generic_description,
     ),
     ENFORCED_2FA(
         titleRes = R.string.teamspace_restrictions_generic_title,
-        descriptionRes = R.string.teamspace_restrictions_generic_description
-    )
+        descriptionRes = R.string.teamspace_restrictions_generic_description,
+    ),
 }

@@ -5,19 +5,19 @@ import android.view.View
 import com.dashlane.R
 import com.dashlane.design.component.compat.view.ThumbnailView
 import com.dashlane.design.component.compat.view.ThumbnailViewType
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
-import com.dashlane.ui.adapter.util.DiffUtilComparator
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 import com.dashlane.util.isValidEmail
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 abstract class SharingContactItem(
     val context: Context,
     val line1: String,
-    private val updateActionView: EfficientViewHolder<SharingContactItem>.() -> Unit = {}
+    private val updateActionView: EfficientViewHolder<SharingContactItem>.() -> Unit = {},
 ) : MultiColumnViewTypeProvider, DiffUtilComparator<SharingContactItem> {
-
     abstract fun getLine2(): String
+
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = VIEW_TYPE
 
     override fun getSpanSize(spanCount: Int): Int = 1
@@ -52,7 +52,7 @@ abstract class SharingContactItem(
         private val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<out SharingContactItem> =
             DashlaneRecyclerAdapter.ViewType(
                 R.layout.list_item_content_sharing_by_user_layout,
-                ItemViewHolder::class.java
+                ItemViewHolder::class.java,
             )
 
         fun comparator(): Comparator<SharingContactItem> = compareBy { it.line1 }

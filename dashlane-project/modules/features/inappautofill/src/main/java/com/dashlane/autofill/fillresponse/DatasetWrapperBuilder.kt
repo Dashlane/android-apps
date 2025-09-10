@@ -7,14 +7,13 @@ import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
 
 class DatasetWrapperBuilder private constructor(
-    private var removeViews: RemoteViews? = null,
+    private var remoteViews: RemoteViews? = null,
     private var authenticationIntentSender: IntentSender?,
     private val autofillIdsValues: MutableMap<AutofillId, AutofillValue>,
-    private var inlinePresentation: InlinePresentation?
+    private var inlinePresentation: InlinePresentation?,
 ) : Cloneable {
-
-    constructor(removeViews: RemoteViews?, inlinePresentation: InlinePresentation?) :
-            this(removeViews, null, mutableMapOf(), inlinePresentation)
+    constructor(remoteViews: RemoteViews?, inlinePresentation: InlinePresentation?) :
+        this(remoteViews, null, mutableMapOf(), inlinePresentation)
 
     fun setValue(id: AutofillId?, value: AutofillValue) {
         id?.let {
@@ -34,17 +33,17 @@ class DatasetWrapperBuilder private constructor(
 
     fun build() = if (autofillIdsValues.isNotEmpty()) {
         DatasetWrapper(
-            removeViews,
+            remoteViews,
             authenticationIntentSender,
             autofillIdsValues.toMutableMap(),
-            inlinePresentation
+            inlinePresentation,
         )
     } else {
         null
     }
 
     public override fun clone(): DatasetWrapperBuilder {
-        return DatasetWrapperBuilder(removeViews, authenticationIntentSender, autofillIdsValues, inlinePresentation)
+        return DatasetWrapperBuilder(remoteViews, authenticationIntentSender, autofillIdsValues, inlinePresentation)
     }
 
     private fun MutableMap<AutofillId, AutofillValue>.keysToKeep(predicate: (AutofillId) -> Boolean) {

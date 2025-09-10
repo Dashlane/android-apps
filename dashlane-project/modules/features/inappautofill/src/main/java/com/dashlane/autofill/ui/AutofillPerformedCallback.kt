@@ -25,9 +25,8 @@ class AutofillPerformedCallbackImpl @Inject constructor(
     @ApplicationContext val context: Context,
     private val sessionManager: SessionManager,
     private val preferencesManager: PreferencesManager,
-    private val totpRepository: AutofillTotpCopyService
+    private val totpRepository: AutofillTotpCopyService,
 ) : AutofillPerformedCallback {
-
     override fun onAutofillPerformed(itemToFill: ItemToFill, summary: AutoFillHintSummary?) {
         when (itemToFill) {
             is AuthentifiantItemToFill -> {
@@ -51,7 +50,7 @@ class AutofillPerformedCallbackImpl @Inject constructor(
 
     private fun onCreditCardFilled(
         creditCardVaultItem: VaultItem<SyncObject.PaymentCreditCard>?,
-        summary: AutoFillHintSummary?
+        summary: AutoFillHintSummary?,
     ) {
         if (creditCardVaultItem != null && summary != null && isCreditCardWithMissingField(summary)) {
             FollowUpNotificationEntryPoint(context).followUpNotificationApiProvider.getFollowUpNotificationApi()
@@ -64,11 +63,11 @@ class AutofillPerformedCallbackImpl @Inject constructor(
             .let {
                 it.contains(AutoFillHint.CREDIT_CARD_NUMBER) && it.contains(AutoFillHint.CREDIT_CARD_SECURITY_CODE) && (
                     it.contains(
-                        AutoFillHint.CREDIT_CARD_EXPIRATION_DATE
+                        AutoFillHint.CREDIT_CARD_EXPIRATION_DATE,
                     ) || it.contains(AutoFillHint.CREDIT_CARD_EXPIRATION_DAY) || it.contains(AutoFillHint.CREDIT_CARD_EXPIRATION_MONTH) || it.contains(
-                        AutoFillHint.CREDIT_CARD_EXPIRATION_YEAR
+                        AutoFillHint.CREDIT_CARD_EXPIRATION_YEAR,
                     )
-                    )
+                )
             }
     }
 }

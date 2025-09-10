@@ -5,10 +5,10 @@ import com.dashlane.accountstatus.premiumstatus.isPremium
 import com.dashlane.breach.BreachManager
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.session.SessionManager
+import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,15 +16,17 @@ class RefreshPremiumAfterPurchase @Inject constructor(
     private val breachManager: BreachManager,
     private val accountStatusRepository: AccountStatusRepository,
     private val sessionManager: SessionManager,
-    @MainCoroutineDispatcher private val mainCoroutineDispatcher: CoroutineDispatcher
+    @MainCoroutineDispatcher private val mainCoroutineDispatcher: CoroutineDispatcher,
+    private val sessionCoroutineScopeProvider: OptionalProvider<CoroutineScope>,
 ) {
+    private val sessionCoroutineScope: CoroutineScope?
+        get() = sessionCoroutineScopeProvider.get()
 
     val premiumStatus: PremiumStatus?
         get() = sessionManager.session?.let { accountStatusRepository[it]?.premiumStatus }
 
-    @OptIn(DelicateCoroutinesApi::class)
     fun execute(errorListener: () -> Unit) {
-        GlobalScope.launch(mainCoroutineDispatcher) {
+        sessionCoroutineScope?.launch(mainCoroutineDispatcher) {
             val session = sessionManager.session
             if (session == null) {
                 notifyError(errorListener)
@@ -41,7 +43,10 @@ class RefreshPremiumAfterPurchase @Inject constructor(
         }
     }
 
-    private fun onPremiumStatusUpdated(previousPremiumStatus: PremiumStatus?, newPremiumStatus: PremiumStatus?) {
+    private fun onPremiumStatusUpdated(
+        previousPremiumStatus: PremiumStatus?,
+        newPremiumStatus: PremiumStatus?,
+    ) {
         if (previousPremiumStatus == null || newPremiumStatus == null) {
             return
         }

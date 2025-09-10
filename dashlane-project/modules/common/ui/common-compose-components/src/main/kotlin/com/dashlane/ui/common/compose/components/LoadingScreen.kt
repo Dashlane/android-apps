@@ -17,13 +17,13 @@ import com.dashlane.design.theme.tooling.DashlanePreview
 @Composable
 fun LoadingScreen(
     modifier: Modifier = Modifier,
-    title: String
+    title: String,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         IndeterminateLoader(
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -34,7 +34,7 @@ fun LoadingScreen(
             color = DashlaneTheme.colors.textNeutralCatchy,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(top = 40.dp)
+                .padding(top = 40.dp),
         )
     }
 }

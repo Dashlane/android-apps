@@ -3,11 +3,12 @@ package com.dashlane.login.accountrecoverykey.recovery
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.authentication.login.AuthenticationPasswordRepository
+import com.dashlane.changemasterpassword.ChangeMasterPasswordRepository
 import com.dashlane.changemasterpassword.MasterPasswordChanger
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.cryptography.ObfuscatedByteArray
+import com.dashlane.data.login.RegisteredUserDevice
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
@@ -17,17 +18,17 @@ import com.dashlane.lock.LockEvent
 import com.dashlane.lock.LockManager
 import com.dashlane.lock.LockPass
 import com.dashlane.lock.LockType
+import com.dashlane.login.LoginRepository
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
-import com.dashlane.login.pages.password.LoginPasswordRepository
-import com.dashlane.login.root.LoginRepository
-import com.dashlane.notificationcenter.NotificationCenterRepositoryImpl
+import com.dashlane.login.password.LoginPasswordRepository
+import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.notificationcenter.view.ActionItemType
 import com.dashlane.pin.PinSetupRepository
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.Authorization
-import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
+import com.dashlane.server.api.endpoints.sync.UploadDataForMasterPasswordChangeService
 import com.dashlane.session.Session
 import com.dashlane.session.authorization
 import com.dashlane.user.UserAccountInfo
@@ -52,6 +53,7 @@ import javax.inject.Inject
 class RecoveryViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
+    private val changeMasterPasswordRepository: ChangeMasterPasswordRepository,
     private val authenticationPasswordRepository: AuthenticationPasswordRepository,
     private val loginPasswordRepository: LoginPasswordRepository,
     private val preferencesManager: PreferencesManager,
@@ -59,9 +61,8 @@ class RecoveryViewModel @Inject constructor(
     private val masterPasswordChanger: MasterPasswordChanger,
     private val logRepository: LogRepository,
     private val pinSetupRepository: PinSetupRepository,
-    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow<RecoveryState>(RecoveryState.Initial(progress = 0))
     val uiState = stateFlow.asStateFlow()
 
@@ -79,8 +80,8 @@ class RecoveryViewModel @Inject constructor(
     @VisibleForTesting
     fun recoverAccount() {
         flow {
-            val accountType =
-                loginAccountRecoveryKeyRepository.state.value.accountType ?: throw IllegalStateException("accountType was null at recoverAccount")
+            val accountType = loginAccountRecoveryKeyRepository.state.value.accountType
+                ?: throw IllegalStateException("accountType was null at recoverAccount")
             emit(accountType)
         }
             .flatMapMerge { accountType ->
@@ -108,14 +109,17 @@ class RecoveryViewModel @Inject constructor(
 
             val data = loginAccountRecoveryKeyRepository.state.value
             val obfuscatedVaultKey = data.obfuscatedVaultKey ?: throw IllegalStateException("obfuscatedVaultKey was null at recoverAccount")
-            val newMasterPassword = data.newMasterPassword ?: throw IllegalStateException("newMasterPassword was null at recoverAccount")
+            val newMasterPassword = changeMasterPasswordRepository.getObfuscatedMasterPassword()
+                ?: throw IllegalStateException("newMasterPassword was null at recoverAccount")
 
             emit(RecoveryState.Loading(progress = 10))
             val (session, strategy) = validatePasswordAndCreateSession(obfuscatedVaultKey, registeredUserDevice, accountType)
+                "VaultKey from ARK validated, login was successful for ${registeredUserDevice.login}",
+            )
 
             val masterPasswordChangerResult = masterPasswordChanger.updateMasterPassword(
                 newPassword = newMasterPassword,
-                uploadReason = MasterPasswordUploadService.Request.UploadReason.COMPLETE_ACCOUNT_RECOVERY
+                uploadReason = UploadDataForMasterPasswordChangeService.Request.UploadReason.COMPLETE_ACCOUNT_RECOVERY,
             )
 
             if (!masterPasswordChangerResult) {
@@ -125,6 +129,7 @@ class RecoveryViewModel @Inject constructor(
 
             unlockMP(session = session, masterPassword = newMasterPassword)
             disableARK(accountType = accountType, authorization = session.authorization)
+            changeMasterPasswordRepository.clearData()
 
             logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.COMPLETE))
             logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.LOGIN_MASTER_PASSWORD_ACCOUNT_RECOVERY_SUCCESS)
@@ -146,9 +151,11 @@ class RecoveryViewModel @Inject constructor(
 
             emit(RecoveryState.Loading(progress = 10))
             val (session, strategy) = validatePasswordAndCreateSession(obfuscatedVaultKey, registeredUserDevice, accountType)
+                "VaultKey from ARK validated, login was successful for ${registeredUserDevice.login}",
+            )
 
             setupPinAndBiometric(session = session, pin = pin.decodeUtf8ToString(), biometricEnabled = biometricEnabled)
-            disableARK(accountType = accountType, authorization = session.authorization)
+            
 
             logRepository.queueEvent(UseAccountRecoveryKey(flowStep = FlowStep.COMPLETE))
             logRepository.queuePageView(BrowseComponent.MAIN_APP, AnyPage.LOGIN_MASTER_PASSWORD_ACCOUNT_RECOVERY_SUCCESS)
@@ -199,7 +206,7 @@ class RecoveryViewModel @Inject constructor(
     suspend fun validatePasswordAndCreateSession(
         obfuscatedVaultKey: ObfuscatedByteArray,
         registeredUserDevice: RegisteredUserDevice,
-        accountType: UserAccountInfo.AccountType
+        accountType: UserAccountInfo.AccountType,
     ): Pair<Session, LoginStrategy.Strategy?> {
         val validatePasswordResult: AuthenticationPasswordRepository.Result =
             authenticationPasswordRepository.validate(registeredUserDevice, obfuscatedVaultKey)
@@ -227,7 +234,7 @@ class RecoveryViewModel @Inject constructor(
 
         if (biometricEnabled) {
             
-            NotificationCenterRepositoryImpl.setDismissed(preferencesManager[session.username], ActionItemType.BIOMETRIC.trackingKey, false)
+            NotificationCenterRepository.setDismissed(preferencesManager[session.username], ActionItemType.BIOMETRIC.trackingKey, false)
             lockManager.addLock(session.username, LockType.Biometric)
         }
     }
@@ -240,7 +247,7 @@ class RecoveryViewModel @Inject constructor(
         
         runCatching {
             lockManager.sendUnlockEvent(
-                LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword)
+                LockEvent.Unlock(reason = LockEvent.Unlock.Reason.AppAccess, lockType = LockType.MasterPassword),
             )
         }
     }

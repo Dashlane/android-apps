@@ -26,7 +26,6 @@ abstract class AbstractContentFragment :
     View.OnClickListener,
     SearchView.OnQueryTextListener,
     SearchView.OnCloseListener {
-
     @Inject
     lateinit var lockManager: LockManager
 
@@ -35,7 +34,9 @@ abstract class AbstractContentFragment :
 
     protected var searchView: SearchView? = null
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        @Suppress("DEPRECATION")
         super.onCreateOptionsMenu(menu, inflater)
         if (menu.findItem(R.id.action_search) == null && !excludedFragmentsForMenu.any { it == this::class.java }) {
             inflater.inflate(R.menu.main_menu, menu)
@@ -58,9 +59,7 @@ abstract class AbstractContentFragment :
         return true
     }
 
-    override fun onQueryTextSubmit(query: String): Boolean {
-        return true
-    }
+    override fun onQueryTextSubmit(query: String): Boolean = true
 
     override fun onClick(v: View) {
         if (v.id == R.id.ID_SEARCH_VIEW) {
@@ -68,11 +67,10 @@ abstract class AbstractContentFragment :
         }
     }
 
-    override fun onClose(): Boolean {
-        return false
-    }
+    override fun onClose(): Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -87,8 +85,8 @@ abstract class AbstractContentFragment :
             searchView.imeOptions = EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_EXTRACT_UI
             searchView.setMagIconTint(
                 requireContext().getColorOnForToolbar(
-                    requireContext().getColor(R.color.container_agnostic_neutral_standard)
-                )
+                    requireContext().getColor(R.color.container_agnostic_neutral_standard),
+                ),
             )
             this.searchView = searchView
         }
@@ -99,7 +97,7 @@ abstract class AbstractContentFragment :
             VaultFragment::class.java,
             CredentialAddStep1Fragment::class.java,
             PasswordGeneratorAndGeneratedPasswordFragment::class.java,
-            AuthenticatorDashboardFragment::class.java
+            AuthenticatorDashboardFragment::class.java,
         )
     }
 }

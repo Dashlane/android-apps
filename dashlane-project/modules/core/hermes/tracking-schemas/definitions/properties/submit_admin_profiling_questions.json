@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json",
+  "type": "object",
+  "description": "When an admin completes a step of the profiling questions",
+  "definitions": {
+    "is_profiling_complete": {
+      "description": "whether the profiling questions were all answered and sent or not",
+      "type": "boolean"
+    },
+    "profiling_familiarity_possible_answers": {
+      "description": "possible answers for familiarity profiling question",
+      "type": "string",
+      "enum": [
+        "not_familiar_at_all",
+        "not_very_familiar",
+        "somewhat_familiar",
+        "super_familiar",
+        "very_familiar"
+      ]
+    },
+    "profiling_features_possible_answers": {
+      "description": "possible answers for features profiling question",
+      "type": "string",
+      "enum": [
+        "just_in_time_provisioning",
+        "mass_deployment",
+        "not_sure",
+        "scim",
+        "siem",
+        "sso"
+      ]
+    },
+    "profiling_step": {
+      "description": "different steps of the profilinq questions",
+      "type": "string",
+      "enum": [
+        "familiarity_with_password_managers",
+        "features",
+        "team_size",
+        "use_case"
+      ]
+    },
+    "profiling_team_size_possible_answers": {
+      "description": "possible answers for team size profiling question",
+      "type": "string",
+      "enum": [
+        "fifty_one_to_two_hundred",
+        "five_hundred_one_to_one_thousand",
+        "five_thousand_one_plus",
+        "one_thousand_one_to_five_thousand",
+        "one_to_fifty",
+        "two_hundred_one_to_five_hundred"
+      ]
+    },
+    "profiling_use_case_possible_answers": {
+      "description": "possible answers for use case profiling question",
+      "type": "string",
+      "enum": [
+        "control_revoked_members_password_access",
+        "members_use_strong_passwords",
+        "none",
+        "securely_share_passwords",
+        "store_passwords_in_one_place"
+      ]
+    },
+    "admin_familiarity_answer_list": {
+      "description": "answers sent by the admin for familiarity profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_familiarity_possible_answers"
+      }
+    },
+    "admin_familiarity_choice_list": {
+      "description": "possible answers for familiarity profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_familiarity_possible_answers"
+      }
+    },
+    "features_answer_list": {
+      "description": "answers sent by the admin for features profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_features_possible_answers"
+      }
+    },
+    "features_choice_list": {
+      "description": "possible answers for features profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_features_possible_answers"
+      }
+    },
+    "team_size_answer_list": {
+      "description": "answers sent by the admin for team size profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_team_size_possible_answers"
+      }
+    },
+    "team_size_choice_list": {
+      "description": "possible answers for team size profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_team_size_possible_answers"
+      }
+    },
+    "use_case_choice_list": {
+      "description": "possible answers for use case profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_use_case_possible_answers"
+      }
+    },
+    "use_case_answer_list": {
+      "description": "answers sent by the admin for use case profiling question",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_use_case_possible_answers"
+      }
+    }
+  }
+}

@@ -6,11 +6,8 @@ import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.item.v3.builders.SecretBuilder
 import com.dashlane.item.v3.data.SecretFormData
 import com.dashlane.item.v3.loaders.SecretAsyncDataLoader
-import com.dashlane.item.v3.repositories.CollectionsRepository
 import com.dashlane.item.v3.repositories.ItemEditRepository
 import com.dashlane.item.v3.util.MenuActionHelper
-import com.dashlane.item.v3.util.SensitiveFieldLoader
-import com.dashlane.mvvm.MutableViewStateFlow
 import com.dashlane.navigation.Navigator
 import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
@@ -22,8 +19,8 @@ import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.createSecret
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 @HiltViewModel
 class SecretItemEditViewModel @Inject constructor(
@@ -35,40 +32,27 @@ class SecretItemEditViewModel @Inject constructor(
     menuActionHelper: MenuActionHelper,
     secretFormBuilder: SecretBuilder,
     vaultItemCopy: VaultItemCopyService,
-    sensitiveFieldLoader: SensitiveFieldLoader,
     frozenStateManager: FrozenStateManager,
     itemEditRepository: ItemEditRepository,
-    collectionsRepository: CollectionsRepository,
     sharingPolicyDataProvider: SharingPolicyDataProvider,
     navigator: Navigator,
     secretAsyncDataLoader: SecretAsyncDataLoader,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) : ItemEditViewModel<SecretFormData>(
-    savedStateHandle = savedStateHandle,
-    dataSync = dataSync,
-    genericDataQuery = genericDataQuery,
-    vaultDataQuery = vaultDataQuery,
-    sensitiveFieldLoader = sensitiveFieldLoader,
-    vaultItemCopy = vaultItemCopy,
-    itemEditRepository = itemEditRepository,
-    appEvents = appEvents,
-    menuActionHelper = menuActionHelper,
-    formDataBuilder = secretFormBuilder,
-    asyncDataLoader = secretAsyncDataLoader,
-    frozenStateManager = frozenStateManager,
-    collectionsRepository = collectionsRepository,
-    sharingPolicyDataProvider = sharingPolicyDataProvider,
-    navigator = navigator,
-) {
-    override val mutableUiState: MutableViewStateFlow<ItemEditState<SecretFormData>, ItemEditSideEffect> =
-        MutableViewStateFlow(
-            ItemEditState(
-                itemId = navArgs.uid ?: "",
-                isNew = navArgs.uid == null,
-                isEditMode = navArgs.forceEdit
-            )
-        )
-
+        savedStateHandle = savedStateHandle,
+        dataSync = dataSync,
+        genericDataQuery = genericDataQuery,
+        vaultDataQuery = vaultDataQuery,
+        vaultItemCopy = vaultItemCopy,
+        itemEditRepository = itemEditRepository,
+        appEvents = appEvents,
+        menuActionHelper = menuActionHelper,
+        formDataBuilder = secretFormBuilder,
+        asyncDataLoader = secretAsyncDataLoader,
+        frozenStateManager = frozenStateManager,
+        sharingPolicyDataProvider = sharingPolicyDataProvider,
+        navigator = navigator,
+    ) {
     override fun createNewItem() = createSecret(
         spaceId = teamSpaceAccessorProvider.get()?.currentBusinessTeam?.teamId,
     )

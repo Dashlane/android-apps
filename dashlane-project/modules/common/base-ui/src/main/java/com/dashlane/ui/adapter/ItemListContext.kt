@@ -10,7 +10,7 @@ data class ItemListContext(
     val container: Container = Container.NONE,
     val section: Section = Section.NONE,
     val indexInContainerSection: Int = -1,
-    val sectionCount: Int = -1
+    val sectionCount: Int = -1,
 ) : Parcelable {
     val positionInContainerSection
         get() = indexInContainerSection.takeIf { it > -1 }?.plus(1) ?: -1
@@ -28,7 +28,8 @@ data class ItemListContext(
         SHARING("sharing"),
         SEARCH("search"),
         CSV_IMPORT("csv-import"),
-        NONE("none");
+        NONE("none"),
+        ;
 
         fun asListContext(section: Section = Section.NONE): ItemListContext {
             return ItemListContext(container = this, section = section)
@@ -42,13 +43,13 @@ data class ItemListContext(
         CATEGORY("Category"),
         SEARCH_RECENT("SearchRecent"),
         SEARCH_RESULT("SearchResult"),
-        NONE("");
+        NONE(""),
     }
 
     fun copy(position: Int, count: Int): ItemListContext = copy(
         container = container,
         section = section,
         indexInContainerSection = position,
-        sectionCount = count
+        sectionCount = count,
     )
 }

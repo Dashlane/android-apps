@@ -20,9 +20,8 @@ class CollectionFilter(
     override var spaceFilter: SpaceFilter = NoSpaceFilter,
     override var uidFilter: UidFilter = NoUidFilter,
     override var lockFilter: LockFilter = DefaultLockFilter,
-    override var statusFilter: StatusFilter = DefaultStatusFilter
+    override var statusFilter: StatusFilter = DefaultStatusFilter,
 ) : BaseFilter, EditableSpaceFilter, EditableUidFilter, EditableLockFilter, EditableStatusFilter {
-
     override val dataTypes: Array<out SyncObjectType> = arrayOf(SyncObjectType.COLLECTION)
 
     override fun getSpacesRestrictions(currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter) =

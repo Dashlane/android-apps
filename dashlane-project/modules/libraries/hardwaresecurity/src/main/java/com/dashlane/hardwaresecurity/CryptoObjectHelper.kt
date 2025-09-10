@@ -20,16 +20,15 @@ private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
 private const val PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
 
 class CryptoObjectHelper @Inject constructor(
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) {
-
     @CheckResult
     fun createEncryptionKey(keyStoreKey: KeyStoreKey, isUserAuthenticationRequired: Boolean) = try {
         val keyGenerator = KeyGenerator.getInstance(ALGORITHM, ANDROID_KEY_STORE)
         keyGenerator.init(
             KeyGenParameterSpec.Builder(
                 keyStoreKey.alias(),
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
             ).apply {
                 setBlockModes(BLOCK_MODE)
                 
@@ -37,7 +36,7 @@ class CryptoObjectHelper @Inject constructor(
                 
                 setUserAuthenticationRequired(isUserAuthenticationRequired)
                 setEncryptionPaddings(PADDING)
-            }.build()
+            }.build(),
         )
         keyGenerator.generateKey()
     } catch (e: Throwable) {
@@ -66,7 +65,7 @@ class CryptoObjectHelper @Inject constructor(
         } catch (e: Throwable) {
             CryptoChallengeResult.Failure(
                 throwable = e,
-                errorMessage = "Cryptographic Key is not properly stored, Biometric Authentication can't be securely used"
+                errorMessage = "Cryptographic Key is not properly stored, Biometric Authentication can't be securely used",
             )
         }
     }
@@ -102,7 +101,7 @@ class CryptoObjectHelper @Inject constructor(
         
         if (keyStoreKey is BiometricsSeal && !preferencesManager[keyStoreKey.username].biometricSealPaddingMigrationAttempt) {
             migrateEncryptionKey(
-                keyStoreKey
+                keyStoreKey,
             )
         }
 

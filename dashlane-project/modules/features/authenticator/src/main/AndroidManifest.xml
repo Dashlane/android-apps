@@ -2,10 +2,10 @@
 
     <application>
         <activity
-            android:name=".AuthenticatorIntro"
+            android:name=".AuthenticatorBoardingActivity"
             android:theme="@style/Theme.Dashlane.Modal" />
         <activity
-            android:name=".AuthenticatorResultIntro"
+            android:name=".AuthenticatorResultActivity"
             android:theme="@style/Theme.Dashlane.Modal" />
         <activity
             android:name=".AuthenticatorMultipleMatchesResult"

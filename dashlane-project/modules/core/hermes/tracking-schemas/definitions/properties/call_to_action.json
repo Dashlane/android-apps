@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/call_to_action.json",
+  "type": "object",
+  "description": "Definition for call_to_action events",
+  "definitions": {
+    "call_to_action": {
+      "description": "name of the call to action that was displayed",
+      "type": "string",
+      "enum": [
+        "abandon_refund_request",
+        "all_offers",
+        "buy_dashlane",
+        "buy_seats",
+        "cancel",
+        "cancel_subscription",
+        "close",
+        "confirm",
+        "confirm_cancellation",
+        "confirm_refund_request",
+        "contact_customer_support",
+        "contact_phone_support",
+        "continue_cancellation",
+        "create_personal_account",
+        "dismiss",
+        "do_not_link_website",
+        "essential_offer",
+        "extend_trial",
+        "family_offer",
+        "free_offer",
+        "install_extension",
+        "keep_premium",
+        "link_website",
+        "not_now",
+        "open_chrome_web_store",
+        "open_g2_rating_website",
+        "pay_by_invoice",
+        "pay_with_credit_card",
+        "plan_details",
+        "premium_offer",
+        "redeem_offer",
+        "register_webinar",
+        "request_call",
+        "request_demo",
+        "request_upgrade",
+        "restart_premium_subscription",
+        "review_bad",
+        "review_great",
+        "review_ok",
+        "see_all_plans",
+        "see_users",
+        "send",
+        "send_email",
+        "skip",
+        "terms_of_service",
+        "unfreeze_account",
+        "unlink",
+        "upgrade_to_business",
+        "upgrade_to_business_plus"
+      ]
+    },
+    "call_to_action_list": {
+      "description": "list of the calls to action that were displayed",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/call_to_action.json#/definitions/call_to_action"
+      }
+    },
+    "has_chosen_no_action": {
+      "description": "if none of the actions displayed were chosen (closed, cancel)",
+      "type": "boolean"
+    }
+  }
+}

@@ -3,7 +3,6 @@ package com.dashlane.abtesting
 import com.dashlane.server.api.Authorization
 
 interface RemoteConfiguration {
-
     suspend fun initAndRefresh(authorization: Authorization.User) {
         val loadResult = load(authorization.login)
         if (loadResult == LoadResult.Success) {
@@ -21,6 +20,6 @@ interface RemoteConfiguration {
 
     enum class LoadResult {
         Success,
-        Failure
+        Failure,
     }
 }

@@ -1,7 +1,7 @@
 package com.dashlane.session.repository
 
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.lock.LockManager
-import com.dashlane.login.LoginInfo
 import com.dashlane.session.BySessionRepository
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
@@ -12,7 +12,6 @@ import javax.inject.Singleton
 class LockRepository @Inject constructor(
     private val lockManager: LockManager,
 ) : SessionObserver, BySessionRepository<LockManager> {
-
     @Suppress("UNUSED_PARAMETER")
     override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
         

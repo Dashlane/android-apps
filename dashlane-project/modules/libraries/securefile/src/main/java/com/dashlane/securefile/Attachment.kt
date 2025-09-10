@@ -3,7 +3,6 @@ package com.dashlane.securefile
 import com.google.gson.annotations.SerializedName
 
 class Attachment {
-
     @SerializedName("id")
     var id: String? = null
 

@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json",
+  "type": "object",
+  "description": "Definitions for b2b properties inside the team admin console",
+  "definitions": {
+    "access_path": {
+      "description": "From which button does an admin access the domain dark-web monitoring page",
+      "type": "string",
+      "enum": [
+        "main_dashboard_button",
+        "nav_left_menu_button"
+      ]
+    },
+    "audit_log_count": {
+      "description": "Number of logs downloaded when using the CSV download of the audit logs in TAC",
+      "type": "integer"
+    },
+    "audit_log_download_error": {
+      "description": "The error type for a CSV download of the audit logs in TAC",
+      "type": "string",
+      "enum": [
+        "no_csv",
+        "no_log_data",
+        "unexpected_unknown"
+      ]
+    },
+    "b2b_plan_tier": {
+      "description": "Plan tiers for b2b. Deprecated because this is a duplicate of server events that are the reference for this kind of information.",
+      "type": "string",
+      "deprecated": true,
+      "enum": [
+        "business",
+        "legacy",
+        "starter_team",
+        "team"
+      ]
+    },
+    "domain_verification_step": {
+      "description": "The domain verification (DV) step and its trigger description: starting domain verification, confirming dns information, domain verification completed and domain verification error",
+      "type": "string",
+      "enum": [
+        "domain_verification_completed",
+        "domain_verification_error",
+        "tap_continue_cta_with_domain_url",
+        "tap_verify_domain_cta_with_dns_information"
+      ]
+    },
+    "error_checkout": {
+      "description": "The error message triggered after a checkout fails",
+      "type": "string",
+      "enum": [
+        "authentication",
+        "card_declined",
+        "expired_card",
+        "unexpected_unknown"
+      ]
+    },
+    "has_clicked_cta": {
+      "description": "Whether an in-app message CTA was clicked on or not",
+      "type": "boolean"
+    },
+    "has_cta": {
+      "description": "Whether an in-app message has at least one CTA attached to it or not",
+      "type": "boolean"
+    },
+    "has_promo": {
+      "description": "Whether the admin used a promotional code on the buy_seat screen or not",
+      "type": "boolean"
+    },
+    "import_size": {
+      "description": "Number of emails imported in one file",
+      "type": "integer"
+    },
+    "initial_seat_count": {
+      "description": "Seats available before any additional seat purchase",
+      "type": "integer"
+    },
+    "invite_count": {
+      "description": "Number of invites sent through the team admin console",
+      "type": "integer"
+    },
+    "invite_failed_count": {
+      "description": "Number of immediately failed invites",
+      "type": "integer"
+    },
+    "invite_resent_count": {
+      "description": "Number of invites that triggered a re-invite",
+      "type": "integer"
+    },
+    "invite_successful_count": {
+      "description": "Number of immediately successful invites",
+      "type": "integer"
+    },
+    "is_discarded": {
+      "description": "Whether an in-app message was discarded by the admin (with or without interacting)",
+      "type": "boolean"
+    },
+    "is_domain_verification_completed": {
+      "description": "False when the event occurs during the domain verification process or prior (if not started)",
+      "type": "boolean"
+    },
+    "is_first_visit": {
+      "description": "Whether an admin is making their first visit to the domain dark web monitoring page or not",
+      "type": "boolean"
+    },
+    "is_import": {
+      "description": "Whether an import is associated with the invite process or not",
+      "type": "boolean"
+    },
+    "is_resend": {
+      "description": "Whether the invites are triggered through the resend button or not",
+      "type": "boolean"
+    },
+    "plan_change_step": {
+      "description": "The step taken in the tac/account/change_plan funnel by the admin",
+      "type": "string",
+      "enum": [
+        "change_plan_cta",
+        "confirm_and_pay_cta",
+        "select_plan_tier"
+      ]
+    },
+    "purchased_seat_count": {
+      "description": "Seats purchased during the buying process",
+      "type": "integer"
+    },
+    "risk_detection_setup_step": {
+      "description": "Possible actions during Risk Detection setup",
+      "type": "string",
+      "enum": [
+        "admin_see_crd_log_from_audit_logs",
+        "admin_see_crd_log_from_insights",
+        "cancel_rotate_token",
+        "click_chrome_admx_link",
+        "confirm_rotate_token",
+        "copy_configuration_token",
+        "copy_gpo_configuration_token",
+        "copy_intune_chrome_device_value",
+        "copy_intune_configuration_token",
+        "copy_intune_edge_device_value",
+        "copy_jamf_force_install_chrome_preference_domain",
+        "copy_jamf_force_install_chrome_property_list",
+        "copy_jamf_force_install_edge_preference_domain",
+        "copy_jamf_force_install_edge_property_list",
+        "copy_jamf_policies_chrome_preference_domain",
+        "copy_jamf_policies_edge_preference_domain",
+        "copy_jamf_policies_property_list",
+        "download_chrome_and_edge_gpo_file",
+        "download_chrome_gpo_file",
+        "download_edge_gpo_file",
+        "download_intune_script_file",
+        "download_risk_activity_csv",
+        "error_load_risk_detection_insights",
+        "export_risk_detection_csv",
+        "filter_logs_last_30_days",
+        "filter_logs_last_7_days",
+        "rotate_token",
+        "see_activity_logs",
+        "start_setup",
+        "turn_off",
+        "turn_on"
+      ]
+    },
+    "seat_added_count": {
+      "description": "Number of seats added through an invite due to lack of available seats",
+      "type": "integer"
+    },
+    "scim_setup_step": {
+      "description": "Step in the confidential SCIM setup",
+      "type": "string",
+      "enum": [
+        "activate_directory_sync",
+        "activate_group_sync",
+        "click_set_up",
+        "copy_api_token",
+        "copy_endpoint_link",
+        "deactivate_directory_sync",
+        "generate_scim_token",
+        "re_generate_token"
+      ]
+    },
+    "splunk_setup_step": {
+      "description": "Step in the splunk integration setup",
+      "type": "string",
+      "enum": [
+        "activate_splunk_integration",
+        "click_set_up",
+        "deactivate_splunk_integration",
+        "generic_error",
+        "invalid_url_error",
+        "mismatch_admin_provisioning_key_error",
+        "save_tokens",
+        "team_not_found_error"
+      ]
+    },
+    "tac_notification": {
+      "description": "Type of in-app message that is displayed to the user as detailed in the following sheet : https://docs.google.com/spreadsheets/d/13g0WI25d4PGEPgi6EEXCioKHoWdsO1nju-e4iC61HcY/edit?usp=sharing",
+      "type": "string",
+      "enum": [
+        "team_activity_download_modal_alert_error",
+        "team_directory_sync_key_error_markup",
+        "team_notifications_add_admins_markup",
+        "team_notifications_enable_account_recovery_markup",
+        "team_notifications_free_trial_d0_t15_markup",
+        "team_notifications_free_trial_d15_t30_markup",
+        "team_notifications_free_trial_d15_t30_markup_one",
+        "team_notifications_free_trial_d15_t30_markup_other",
+        "team_notifications_free_trial_d15_t30_markup_zero",
+        "team_notifications_free_trial_grace_period_markup",
+        "team_notifications_renewal_grace_period_markup",
+        "team_scim_marketing_business_homepage_body",
+        "team_scim_marketing_business_scim_body",
+        "team_scim_marketing_team_scim_body",
+        "team_tac_in_extension_notification_message_markup"
+      ]
+    }
+  }
+}

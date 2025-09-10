@@ -1,0 +1,133 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "user": {
+      "id": "b293a330-2e7c-4a69-b1c6-4f5cae8b8a9b"
+    },
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "id": "514ecc2f-2431-4b03-9f6d-dfc832e05591",
+      "os": {
+        "type": "linux",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "ios",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "page": "background"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 12
+  },
+  "properties": {
+    "name": "vault_report",
+    "scope": "personal",
+    "password_changer_compatible_credentials_count": 3,
+    "domains_without_autofill_count": 32,
+    "passwords_total_count": 98,
+    "passwords_safe_count": 45,
+    "passwords_compromised_compatible_with_password_changer_count": 2,
+    "passwords_compromised_count": 12,
+    "passwords_compromised_through_dark_web_count": 10,
+    "passwords_weak_compatible_with_password_changer_count": 3,
+    "passwords_weak_count": 34,
+    "passwords_with_autologin_disabled_count": 32,
+    "passwords_excluded_count": 600,
+    "passwords_protected_with_master_password_count": 30,
+    "security_score": 56,
+    "passwords_with_otp_count": 4,
+    "passwords_reused_compatible_with_password_changer_count": 0,
+    "passwords_reused_count": 3,
+    "security_alerts_count": 25,
+    "security_alerts_active_count": 8,
+    "dark_web_alerts_count": 10,
+    "dark_web_alerts_active_count": 5,
+    "collections_per_item_average_count": 1,
+    "collections_shared_count": 0,
+    "collections_total_count": 3,
+    "ids": {
+      "collections_count": 0,
+      "collections_shared_count": 0,
+      "multiple_collections_count": 0,
+      "multiple_collections_shared_count": 0,
+      "single_collection_count": 0,
+      "single_collection_shared_count": 0,
+      "shared_count": 0,
+      "total_count": 5
+    },
+    "items_per_collection_average_count": 3,
+    "items_shared_count": 10,
+    "items_total_count": 118,
+    "passkeys": {
+      "collections_count": 0,
+      "collections_shared_count": 0,
+      "multiple_collections_count": 0,
+      "multiple_collections_shared_count": 0,
+      "single_collection_count": 0,
+      "single_collection_shared_count": 0,
+      "shared_count": 0,
+      "total_count": 2
+    },
+    "passwords": {
+      "collections_count": 3,
+      "collections_shared_count": 0,
+      "multiple_collections_count": 0,
+      "multiple_collections_shared_count": 0,
+      "single_collection_count": 9,
+      "single_collection_shared_count": 0,
+      "shared_count": 8,
+      "total_count": 98
+    },
+    "payments": {
+      "collections_count": 0,
+      "collections_shared_count": 0,
+      "multiple_collections_count": 0,
+      "multiple_collections_shared_count": 0,
+      "single_collection_count": 0,
+      "single_collection_shared_count": 0,
+      "shared_count": 0,
+      "total_count": 5
+    },
+    "personal_info": {
+      "collections_count": 0,
+      "collections_shared_count": 0,
+      "multiple_collections_count": 0,
+      "multiple_collections_shared_count": 0,
+      "single_collection_count": 0,
+      "single_collection_shared_count": 0,
+      "shared_count": 0,
+      "total_count": 3
+    },
+    "secrets": {
+      "collections_count": 0,
+      "collections_shared_count": 0,
+      "multiple_collections_count": 0,
+      "multiple_collections_shared_count": 0,
+      "single_collection_count": 0,
+      "single_collection_shared_count": 0,
+      "shared_count": 0,
+      "total_count": 1
+    },
+    "secure_notes": {
+      "collections_count": 0,
+      "collections_shared_count": 0,
+      "multiple_collections_count": 0,
+      "multiple_collections_shared_count": 0,
+      "single_collection_count": 0,
+      "single_collection_shared_count": 0,
+      "shared_count": 2,
+      "total_count": 7
+    }
+  }
+}

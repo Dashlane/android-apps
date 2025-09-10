@@ -1,8 +1,9 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.items
 
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.model.getUser
 import com.dashlane.sharing.model.hasUserGroupsAccepted
 import com.dashlane.sharing.model.isAccepted
@@ -14,7 +15,6 @@ import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.datatype.ShareableDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
@@ -27,14 +27,13 @@ class SharingItemsDataProvider @Inject constructor(
     private val sessionManager: SessionManager,
     private val genericDataQuery: GenericDataQuery,
     @IoCoroutineDispatcher
-    private val ioCoroutineDispatcher: CoroutineDispatcher
+    private val ioCoroutineDispatcher: CoroutineDispatcher,
 ) {
     private val session: Session?
         get() = sessionManager.session
 
     @Suppress("ComplexMethod")
-    suspend fun getItemsForUser(username: String, memberLogin: String):
-        List<SharingModels.ItemUser> {
+    suspend fun getItemsForUser(username: String, memberLogin: String): List<SharingModels.ItemUser> {
         val login: String = session?.userId ?: return emptyList()
         return withContext(ioCoroutineDispatcher) {
             val itemGroups = sharingDao.loadAllItemGroup()
@@ -65,7 +64,7 @@ class SharingItemsDataProvider @Inject constructor(
                     genericFilter {
                         dataTypeFilter = ShareableDataTypeFilter
                         specificUid(items.map { it.itemId })
-                    }
+                    },
                 )
                 vaultItems.forEach {
                     result.add(
@@ -78,8 +77,8 @@ class SharingItemsDataProvider @Inject constructor(
                                 ?: collectionUser!!.getSharingStatusResource(),
                             itemGroup = itemGroup,
                             item = it,
-                            isItemInCollection = isInCollection
-                        )
+                            isItemInCollection = isInCollection,
+                        ),
                     )
                 }
             }

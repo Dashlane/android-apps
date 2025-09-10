@@ -7,7 +7,6 @@ import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 
 internal class SaveInfoWrapper(summary: AutoFillHintSummary) {
-
     val saveInfo: SaveInfo? = when {
         
         BrowserDetectionHelper.isBrowserSupported(summary.packageName) -> null
@@ -29,11 +28,11 @@ internal class SaveInfoWrapper(summary: AutoFillHintSummary) {
                     AutoFillHint.CREDIT_CARD_EXPIRATION_DATE,
                     AutoFillHint.CREDIT_CARD_EXPIRATION_DAY,
                     AutoFillHint.CREDIT_CARD_EXPIRATION_MONTH,
-                    AutoFillHint.CREDIT_CARD_EXPIRATION_YEAR
+                    AutoFillHint.CREDIT_CARD_EXPIRATION_YEAR,
                 ),
                 arrayOf(AutoFillHint.CREDIT_CARD_NUMBER),
-                arrayOf(AutoFillHint.CREDIT_CARD_SECURITY_CODE)
-            )
+                arrayOf(AutoFillHint.CREDIT_CARD_SECURITY_CODE),
+            ),
         )
     }
 
@@ -44,15 +43,15 @@ internal class SaveInfoWrapper(summary: AutoFillHintSummary) {
             
             arrayOf(
                 arrayOf(AutoFillHint.PASSWORD, AutoFillHint.CURRENT_PASSWORD),
-                arrayOf(AutoFillHint.USERNAME, AutoFillHint.EMAIL_ADDRESS)
-            )
+                arrayOf(AutoFillHint.USERNAME, AutoFillHint.EMAIL_ADDRESS),
+            ),
         )
     }
 
     private fun buildWith(
         saveType: Int,
         summary: AutoFillHintSummary,
-        hintsRequireGroups: Array<Array<String>>
+        hintsRequireGroups: Array<Array<String>>,
     ): SaveInfo? {
         val requiredIdsByGroup = hintsRequireGroups.flatMap { hints ->
             

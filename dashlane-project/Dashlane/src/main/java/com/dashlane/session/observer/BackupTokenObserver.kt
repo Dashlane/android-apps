@@ -3,10 +3,10 @@ package com.dashlane.session.observer
 import android.app.backup.BackupManager
 import com.dashlane.account.UserAccountStorage
 import com.dashlane.cryptography.encryptUtf8ToBase64String
-import com.dashlane.login.LoginInfo
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.server.api.DashlaneApi
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationExtraDeviceTokenGeneratorService
+import com.dashlane.server.api.endpoints.authentication.RequestExtraDeviceRegistrationService
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
 import com.dashlane.session.authorization
@@ -19,9 +19,8 @@ class BackupTokenObserver(
     private val userAccountStorage: UserAccountStorage,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val backupManager: BackupManager,
-    private val userCryptographyRepository: UserCryptographyRepository
+    private val userCryptographyRepository: UserCryptographyRepository,
 ) : SessionObserver {
-
     override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
         val username = session.username
         val securitySettings = userAccountStorage[username]?.securitySettings
@@ -37,12 +36,12 @@ class BackupTokenObserver(
         if (nextSyncTime.isBefore(Instant.now())) {
             
             runCatching {
-                val result = api.endpoints.authentication.authRegistrationExtraDeviceTokenGeneratorService
+                val result = api.endpoints.authentication.requestExtraDeviceRegistrationService
                     .execute(
                         session.authorization,
-                        AuthRegistrationExtraDeviceTokenGeneratorService.Request(
-                            AuthRegistrationExtraDeviceTokenGeneratorService.Request.TokenType.GOOGLEACCOUNTNEWDEVICE
-                        )
+                        RequestExtraDeviceRegistrationService.Request(
+                            RequestExtraDeviceRegistrationService.Request.TokenType.GOOGLEACCOUNTNEWDEVICE,
+                        ),
                     )
                 val cryptographyEngineFactory = userCryptographyRepository.getCryptographyEngineFactory(session)
                 val cipheredToken = cryptographyEngineFactory.createEncryptionEngine().use { encryptionEngine ->

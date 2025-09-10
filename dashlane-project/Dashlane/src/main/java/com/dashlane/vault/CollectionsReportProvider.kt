@@ -10,13 +10,13 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 class CollectionsReportProvider @Inject constructor(
-    private val collectionDataQuery: CollectionDataQuery
+    private val collectionDataQuery: CollectionDataQuery,
 ) {
     fun computeCollectionTotalCount(teamSpace: TeamSpace): Int = collectionDataQuery.count(
         collectionFilter {
             ignoreUserLock()
             specificSpace(teamSpace)
-        }
+        },
     )
 
     fun computeItemPerCollectionAverageCount(teamSpace: TeamSpace): Int =

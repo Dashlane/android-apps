@@ -1,0 +1,27 @@
+{
+  "id": "838bf943-b9a1-4301-83e4-cb192f2e70c4",
+  "schema_version": "1.31.6",
+  "category": "anonymous",
+  "date": "2021-03-02",
+  "date_origin": "local",
+  "context": {
+    "os": {
+      "type": "linux",
+      "version": "4.1",
+      "locale": "en-US"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "saex",
+      "build_type": "dev"
+    }
+  },
+  "properties": {
+    "name": "autofill_display_icons",
+    "domain": {
+      "type": "app",
+      "id": "1191b6d2199790c5bad2b8c3d678c2aa41a23e2809ce7aa9fbec8778bc5c2973"
+    },
+    "ms_to_icon": 380
+  }
+}

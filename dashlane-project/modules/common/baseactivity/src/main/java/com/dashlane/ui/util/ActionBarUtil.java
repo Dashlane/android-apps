@@ -114,7 +114,6 @@ public class ActionBarUtil {
     @SuppressLint("RestrictedApi")
     private void setToolbarToActivity() {
         if (!(mActivity.getSupportActionBar() instanceof WindowDecorActionBar)) {
-            
             mActivity.setSupportActionBar(mToolbar);
         }
     }

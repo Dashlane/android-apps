@@ -6,7 +6,6 @@ import okhttp3.Response
 
 class CloudflareNitroHeaderInterceptor(private val nitroUrlOverride: NitroUrlOverride) :
     Interceptor {
-
     override fun intercept(chain: Interceptor.Chain): Response {
         return if (!nitroUrlOverride.nitroStagingEnabled) {
             chain.proceed(chain.request())

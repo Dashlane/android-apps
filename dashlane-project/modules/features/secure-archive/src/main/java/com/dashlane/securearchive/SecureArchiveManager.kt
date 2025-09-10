@@ -52,7 +52,7 @@ class SecureArchiveManager @Inject constructor(
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
     private val dataSync: DataSync,
-    private val fileUtils: FileUtils
+    private val fileUtils: FileUtils,
 ) {
     private val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
 
@@ -103,6 +103,8 @@ class SecureArchiveManager @Inject constructor(
             if (teamSpaceAccessor?.isForcedDomainsEnabled == true) {
                 spaceFilter = SpecificSpaceFilter(listOf(TeamSpace.Personal))
             }
+            
+            onlyLocalPasskeys()
         }
         val data = vaultDataQuery.queryAll(filter)
 
@@ -118,7 +120,7 @@ class SecureArchiveManager @Inject constructor(
                 cryptography.createFlexibleArgon2dEncryptionEngine(
                     cryptographyKey,
                     fixedSalt,
-                    keyDerivation
+                    keyDerivation,
                 ).forXml()
             }
             .use { encryptionEngine ->
@@ -129,8 +131,8 @@ class SecureArchiveManager @Inject constructor(
 
         try {
             fileUtils.writeFileToPublicFolder(
-                fileName,
-                "application/octet-stream"
+                fileName = fileName,
+                type = "application/octet-stream",
             ) { outputStream ->
                 outputStream.writer().use { writer ->
                     archiveWriter.write(writer, archive)
@@ -138,8 +140,10 @@ class SecureArchiveManager @Inject constructor(
             }
         } catch (e: IllegalArgumentException) {
             
-            val newFile = fileUtils.writeFileToCacheFolder(fileName, "file_provider") { writer ->
-                archiveWriter.write(writer, archive)
+            val newFile = fileUtils.writeFileToCacheFolder(fileName, "file_provider") { outputStream ->
+                outputStream.writer().use { writer ->
+                    archiveWriter.write(writer, archive)
+                }
             }
 
             throw FallbackToSharingArchive(data, newFile, e)
@@ -168,7 +172,7 @@ class SecureArchiveManager @Inject constructor(
     class FallbackToSharingArchive(
         val data: List<VaultItem<*>>,
         val cacheFile: File,
-        val originalException: Exception
+        val originalException: Exception,
     ) : Exception()
 
     companion object {
@@ -191,7 +195,8 @@ class SecureArchiveManager @Inject constructor(
             SyncObjectType.SECURE_NOTE_CATEGORY,
             SyncObjectType.AUTHENTIFIANT,
             SyncObjectType.COLLECTION,
-            SyncObjectType.PASSKEY
+            SyncObjectType.PASSKEY,
+            SyncObjectType.WI_FI,
         )
     }
 }

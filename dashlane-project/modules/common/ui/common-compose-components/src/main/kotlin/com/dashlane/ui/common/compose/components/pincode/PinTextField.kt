@@ -37,7 +37,7 @@ fun PinTextField(
     onValueChange: (String) -> Unit,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         val keyboardController = LocalSoftwareKeyboardController.current
         val focusRequester = FocusRequester()
@@ -49,12 +49,12 @@ fun PinTextField(
             value = value,
             onValueChange = onValueChange,
             keyboardOptions = KeyboardOptions(
-                autoCorrect = false,
+                autoCorrectEnabled = false,
                 keyboardType = KeyboardType.NumberPassword,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Done,
             ),
             keyboardActions = KeyboardActions(
-                onDone = { keyboardController?.hide() }
+                onDone = { keyboardController?.hide() },
             ),
             decorationBox = {
                 Row {
@@ -81,14 +81,14 @@ fun PinTextField(
                                                 isError -> DashlaneTheme.colors.borderDangerStandardIdle
                                                 else -> DashlaneTheme.colors.borderBrandStandardActive
                                             },
-                                            shape = CircleShape
-                                        )
+                                            shape = CircleShape,
+                                        ),
                                 )
                             }
                         }
                     }
                 }
-            }
+            },
         )
 
         Text(
@@ -98,7 +98,7 @@ fun PinTextField(
                 .padding(horizontal = 4.dp),
             text = errorMessage ?: "",
             style = DashlaneTheme.typography.bodyHelperRegular,
-            color = DashlaneTheme.colors.textDangerQuiet
+            color = DashlaneTheme.colors.textDangerQuiet,
         )
     }
 }
@@ -112,7 +112,7 @@ private fun PinTextFieldPreview() {
             value = "00",
             isError = true,
             errorMessage = "Error",
-            onValueChange = {}
+            onValueChange = {},
         )
     }
 }

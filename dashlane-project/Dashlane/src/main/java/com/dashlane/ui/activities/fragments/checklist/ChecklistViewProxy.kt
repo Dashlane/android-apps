@@ -15,11 +15,8 @@ class ChecklistViewProxy(
     private val binding: FragmentChecklistBinding,
     private val lifecycle: Lifecycle,
     private val navigator: Navigator,
-    private val m2wResultLauncher: ActivityResultLauncher<Unit>
+    private val m2wResultLauncher: ActivityResultLauncher<Unit>,
 ) {
-    private val context
-        get() = binding.root.context
-
     init {
         lifecycle.coroutineScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -35,15 +32,13 @@ class ChecklistViewProxy(
             getStartedBinding = binding.checklistGroup,
             item = checklistData,
             onDismiss = ::onDismiss,
-            onImportPasswords = { navigator.goToCredentialAddStep1(expandImportOptions = true) },
-            onActivateAutofill = { navigator.goToInAppLoginIntro() },
-            onShowM2d = {
-                m2wResultLauncher.launch()
-            },
+            onImportPasswords = { navigator.goToImportLogins(showAddLoginsManually = true) },
+            onActivateAutofill = { navigator.goToInAppLogin() },
+            onShowM2d = { m2wResultLauncher.launch() },
             onShowDarkWebMonitoring = {
                 viewModel.onDWMViewScanResult()
                 navigator.goToDarkWebMonitoring()
-            }
+            },
         )
     }
 

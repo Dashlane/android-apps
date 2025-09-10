@@ -1,7 +1,6 @@
 package com.dashlane.util.time
 
 class TimeMeasurement(private val title: String) {
-
     private val ticker = TimeTicker()
     private val measures = mutableListOf<Pair<String, Long>>()
 
@@ -11,6 +10,6 @@ class TimeMeasurement(private val title: String) {
 
     override fun toString(): String {
         return "[TimeMeasurement] $title\n" +
-                measures.joinToString { "${it.first}: ${it.second}\n" }
+            measures.joinToString { "${it.first}: ${it.second}\n" }
     }
 }

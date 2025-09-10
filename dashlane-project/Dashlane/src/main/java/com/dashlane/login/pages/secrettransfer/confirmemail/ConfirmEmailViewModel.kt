@@ -6,14 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.authentication.AuthenticationSecondFactor
-import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
-import com.dashlane.authentication.UnauthenticatedUser
 import com.dashlane.authentication.login.AuthenticationEmailRepository
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
+import com.dashlane.data.login.AuthenticationSecondFactor
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SecurityFeature
+import com.dashlane.data.login.UnauthenticatedUser
+import com.dashlane.login.LoginRepository
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferDestination.ConfirmEmail
-import com.dashlane.login.root.LoginRepository
 import com.dashlane.secrettransfer.domain.SecretTransferPayload
 import com.dashlane.server.api.endpoints.authentication.RemoteKey
 import com.dashlane.user.UserSecuritySettings
@@ -37,9 +37,8 @@ class ConfirmEmailViewModel @Inject constructor(
     private val authenticationSecretTransferRepository: AuthenticationSecretTransferRepository,
     private val authenticationEmailRepository: AuthenticationEmailRepository,
     @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val login = savedStateHandle.toRoute<ConfirmEmail>().email
     private val stateFlow = MutableStateFlow<ConfirmEmailState>(ConfirmEmailState.ConfirmEmail(ConfirmEmailData(login)))
 
@@ -76,7 +75,7 @@ class ConfirmEmailViewModel @Inject constructor(
                                 login = secretTransferPayload.login,
                                 token = secretTransferPayload.token ?: throw IllegalStateException(),
                                 securityFeatures = secondFactor.securityFeatures,
-                                remoteKeyType = RemoteKey.Type.MASTER_PASSWORD
+                                remoteKeyType = RemoteKey.Type.MASTER_PASSWORD,
                             )
                             loginRepository.updateRegisteredUserDevice(registeredUserDevice)
                             emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data))
@@ -95,7 +94,7 @@ class ConfirmEmailViewModel @Inject constructor(
                         login = secretTransferPayload.login,
                         token = secretTransferPayload.token ?: throw IllegalStateException(),
                         securityFeatures = emptySet(),
-                        remoteKeyType = RemoteKey.Type.MASTER_PASSWORD
+                        remoteKeyType = RemoteKey.Type.MASTER_PASSWORD,
                     )
                     loginRepository.updateRegisteredUserDevice(registeredUserDevice)
                     emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data))
@@ -106,7 +105,7 @@ class ConfirmEmailViewModel @Inject constructor(
                         login = secretTransferPayload.login,
                         token = secretTransferPayload.token ?: throw IllegalStateException(),
                         securityFeatures = setOf(SecurityFeature.SSO),
-                        remoteKeyType = RemoteKey.Type.SSO
+                        remoteKeyType = RemoteKey.Type.SSO,
                     )
                     loginRepository.updateRegisteredUserDevice(registeredUserDevice)
                     emit(ConfirmEmailState.RegisterSuccess(stateFlow.value.data))
@@ -126,14 +125,14 @@ class ConfirmEmailViewModel @Inject constructor(
         login: String,
         token: String,
         securityFeatures: Set<SecurityFeature>,
-        remoteKeyType: RemoteKey.Type
+        remoteKeyType: RemoteKey.Type,
     ): RegisteredUserDevice.Remote {
         userAccountStorage.saveSecuritySettings(username = login, securitySettings = UserSecuritySettings(isToken = true))
         return authenticationSecretTransferRepository.register(
             login = login,
             securityFeatures = securityFeatures,
             token = token,
-            remoteKeyType = remoteKeyType
+            remoteKeyType = remoteKeyType,
         )
     }
 

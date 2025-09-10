@@ -1,8 +1,8 @@
 package com.dashlane.dagger.singleton
 
-import com.dashlane.featureflipping.FeatureFlipManager
 import com.dashlane.abtesting.RemoteAbTestManager
 import com.dashlane.abtesting.RemoteConfiguration
+import com.dashlane.featureflipping.FeatureFlipManager
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,7 +12,6 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 interface RemoteConfigurationModule {
-
     @Binds
     @IntoSet
     fun bindRemoteAbTestManager(remoteAbTestManager: RemoteAbTestManager): RemoteConfiguration

@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_creation.json",
+  "type": "object",
+  "description": "Definitions for account creation events",
+  "definitions": {
+    "is_marketing_opt_in": {
+      "description": "Whether the user opts in to the Marketing emails during account creation.",
+      "type": "boolean"
+    },
+    "account_creation_status": {
+      "description": "The status of the account creation",
+      "type": "string",
+      "enum": [
+        "error_account_already_exists",
+        "error_not_valid_email",
+        "success"
+      ]
+    },
+    "signup_flow_step": {
+      "description": "The step of the employee signup flow",
+      "type": "string",
+      "enum": [
+        "create_master_password",
+        "enter_email_address",
+        "install_extension",
+        "login_to_account",
+        "verify_email"
+      ]
+    }
+  }
+}

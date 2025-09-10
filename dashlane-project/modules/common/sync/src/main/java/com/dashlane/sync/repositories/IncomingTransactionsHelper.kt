@@ -1,7 +1,7 @@
 package com.dashlane.sync.repositories
 
 import com.dashlane.cryptography.CryptographyEngineFactory
-import com.dashlane.server.api.endpoints.sync.SyncDownloadService
+import com.dashlane.server.api.endpoints.sync.GetLatestContentService
 import com.dashlane.server.api.endpoints.sync.SyncDownloadTransaction
 import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.domain.IncomingTransaction
@@ -15,13 +15,13 @@ import javax.inject.Inject
 
 class IncomingTransactionsHelper @Inject constructor(
     private val transactionCipher: TransactionCipher,
-    private val syncLogs: SyncLogs
+    private val syncLogs: SyncLogs,
 ) {
     suspend fun readTransactions(
-        downloadData: SyncDownloadService.Data,
+        downloadData: GetLatestContentService.Data,
         cryptographyEngineFactory: CryptographyEngineFactory,
         dataSyncState: MutableSharedFlow<DataSyncState>?,
-        sharedIds: Set<String>
+        sharedIds: Set<String>,
     ): Result {
         syncLogs.onDecipherTransactionsStart()
 
@@ -35,7 +35,7 @@ class IncomingTransactionsHelper @Inject constructor(
                 cryptographyEngineFactory = cryptographyEngineFactory,
                 dataSyncState = dataSyncState,
                 ignoredErrors = transactionErrors,
-                sharedIds = sharedIds
+                sharedIds = sharedIds,
             )
 
         ignoredErrors.addAll(transactionErrors)
@@ -47,8 +47,8 @@ class IncomingTransactionsHelper @Inject constructor(
             ignoredErrors,
             SyncRepository.Result.Statistics.Incoming(
                 incomingTransactions.count { it is IncomingTransaction.Update },
-                incomingTransactions.count { it is IncomingTransaction.Delete }
-            )
+                incomingTransactions.count { it is IncomingTransaction.Delete },
+            ),
         )
     }
 
@@ -58,7 +58,7 @@ class IncomingTransactionsHelper @Inject constructor(
         cryptographyEngineFactory: CryptographyEngineFactory,
         dataSyncState: MutableSharedFlow<DataSyncState>?,
         ignoredErrors: MutableList<Throwable>,
-        sharedIds: Set<String>
+        sharedIds: Set<String>,
     ): List<IncomingTransaction> = coroutineScope {
         
         val transactionCount = transactions.size
@@ -75,7 +75,7 @@ class IncomingTransactionsHelper @Inject constructor(
                 transactions,
                 cryptographyEngineFactory,
                 sharedIds,
-                progressActor
+                progressActor,
             )
 
         progressActor.close()
@@ -88,6 +88,6 @@ class IncomingTransactionsHelper @Inject constructor(
     data class Result(
         val transactions: List<IncomingTransaction>,
         val transactionErrors: List<Throwable>,
-        val statistics: SyncRepository.Result.Statistics.Incoming
+        val statistics: SyncRepository.Result.Statistics.Incoming,
     )
 }

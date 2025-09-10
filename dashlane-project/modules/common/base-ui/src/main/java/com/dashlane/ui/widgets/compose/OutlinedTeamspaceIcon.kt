@@ -33,7 +33,7 @@ fun OutlinedTeamspaceIcon(
     @ColorInt color: Int,
     iconSize: Dp,
     modifier: Modifier = Modifier,
-    teamspaceDescription: String? = null
+    teamspaceDescription: String? = null,
 ) {
     val textMeasurer = rememberTextMeasurer()
 
@@ -62,9 +62,9 @@ fun OutlinedTeamspaceIcon(
                                 fontWeight = FontWeight(weight = 600),
                                 lineHeightStyle = LineHeightStyle(
                                     alignment = LineHeightStyle.Alignment.Center,
-                                    trim = LineHeightStyle.Trim.None
-                                )
-                            )
+                                    trim = LineHeightStyle.Trim.None,
+                                ),
+                            ),
                         )
                         measuredText.size.height
                     } > size.height * 0.8f
@@ -76,18 +76,18 @@ fun OutlinedTeamspaceIcon(
                     drawPath(
                         path = buildOutlinedPath(size.width, size.height),
                         color = Color(color),
-                        style = Fill
+                        style = Fill,
                     )
 
                     drawText(
                         textLayoutResult = measuredText,
                         topLeft = Offset(
                             x = (size.width - measuredText.size.width) * 0.5f,
-                            y = (size.height - measuredText.size.height) * 0.5f
-                        )
+                            y = (size.height - measuredText.size.height) * 0.5f,
+                        ),
                     )
                 }
-            }
+            },
     )
 }
 
@@ -120,7 +120,7 @@ private fun TeamspaceIconPreview() {
         OutlinedTeamspaceIcon(
             letter = 'E',
             color = Color.Magenta.toArgb(),
-            iconSize = 12.dp
+            iconSize = 12.dp,
         )
     }
 }
@@ -132,7 +132,7 @@ private fun TeamspaceIconLargePreview() {
         OutlinedTeamspaceIcon(
             letter = 'E',
             color = Color.Magenta.toArgb(),
-            iconSize = 72.dp
+            iconSize = 72.dp,
         )
     }
 }

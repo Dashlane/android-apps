@@ -10,13 +10,13 @@ import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 class VaultItemLogClickListener<T>(
     private val vaultItemLogger: VaultItemLogger,
     private val delegate: EfficientAdapter.OnItemClickListener<T>,
-    private val mapper: (item: T) -> VaultItemWrapper<*>?
+    private val mapper: (item: T) -> VaultItemWrapper<*>?,
 ) : EfficientAdapter.OnItemClickListener<T> {
     override fun onItemClick(
         adapter: EfficientAdapter<T>,
         view: View,
         item: T?,
-        position: Int
+        position: Int,
     ) {
         item?.let(mapper)?.run {
             val highlight = itemListContext.section.toHighlight()
@@ -29,7 +29,7 @@ class VaultItemLogClickListener<T>(
                     itemId = summaryObject.id,
                     index = itemListContext.positionInContainerSection.takeIf { trackIndex },
                     itemType = it,
-                    totalCount = itemListContext.sectionCount.takeIf { trackIndex }
+                    totalCount = itemListContext.sectionCount.takeIf { trackIndex },
                 )
             }
         }

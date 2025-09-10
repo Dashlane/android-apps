@@ -16,16 +16,15 @@ import com.dashlane.util.logPageView
 class MainDrawerToggle(
     private val activity: Activity,
     private val drawerLayout: DrawerLayout,
-    toolbar: Toolbar
+    toolbar: Toolbar,
 ) :
     ActionBarDrawerToggle(
-        activity,
-        drawerLayout,
-        toolbar,
-        R.string.and_accessibility_open_drawer_description,
-        R.string.and_accessibility_navigation_drawer_close
-    ) {
-
+            activity,
+            drawerLayout,
+            toolbar,
+            R.string.and_accessibility_open_drawer_description,
+            R.string.and_accessibility_navigation_drawer_close,
+        ) {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (drawerLayout.getDrawerLockMode(GravityCompat.START) == DrawerLayout.LOCK_MODE_LOCKED_CLOSED) {
             return false
@@ -37,7 +36,7 @@ class MainDrawerToggle(
         super.onDrawerOpened(drawerView)
         drawerView.context.announceForAccessibility(
             drawerView.context.getString(R.string.and_accessibility_navigation_drawer_open),
-            true
+            true,
         )
         DeviceUtils.hideKeyboard(drawerView)
         activity.invalidateOptionsMenu()
@@ -48,7 +47,7 @@ class MainDrawerToggle(
         super.onDrawerClosed(drawerView)
         drawerView.context.announceForAccessibility(
             drawerView.context.getString(R.string.and_accessibility_navigation_drawer_close),
-            true
+            true,
         )
         drawerLayout.requestDisallowInterceptTouchEvent(false)
         activity.invalidateOptionsMenu()

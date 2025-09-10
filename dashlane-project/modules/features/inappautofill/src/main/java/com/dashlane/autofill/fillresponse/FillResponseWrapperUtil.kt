@@ -7,74 +7,49 @@ import android.widget.inline.InlinePresentationSpec
 import com.dashlane.autofill.addPreviousEntriesFrom
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.model.ItemToFill
-import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import java.util.LinkedList
 
 internal fun FillResponseWrapper.Builder.buildCreateAccount(
     updatedEntriesSummary: AutoFillHintSummary,
-    hasDataSet: Boolean
+    hasDataSet: Boolean,
 ) {
     createAccountDataSet = dataSetCreator.createForCreateAccount(
         summary = updatedEntriesSummary,
         hasFillResponse = hasDataSet,
-        inlineSpec = inlineSpecs?.popOrLast()
+        inlineSpec = inlineSpecs?.popOrLast(),
     )
 }
 
 internal fun FillResponseWrapper.Builder.buildPinnedItem(
     updatedEntriesSummary: AutoFillHintSummary,
     hasDataSet: Boolean,
-    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     pinnedItemDataSet = dataSetCreator.createForPinnedItem(
         summary = updatedEntriesSummary,
         hasFillResponse = hasDataSet,
         inlineSpec = inlineSpecs?.popOrLast(),
-        phishingAttemptLevel = phishingAttemptLevel
     )
 }
 
 internal fun FillResponseWrapper.Builder.buildViewAllAccount(
     updatedEntriesSummary: AutoFillHintSummary,
     hasDataSet: Boolean,
-    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     viewAllAccountsDataSet = dataSetCreator.createViewAllItems(
         summary = updatedEntriesSummary,
         hasFillResponse = hasDataSet,
         inlineSpec = inlineSpecs?.popOrLast(),
-        phishingAttemptLevel = phishingAttemptLevel
-    )
-}
-
-internal fun FillResponseWrapper.Builder.buildPhishingAttempt(
-    summary: AutoFillHintSummary,
-    phishingAttemptLevel: PhishingAttemptLevel
-) {
-    
-    if (phishingAttemptLevel == PhishingAttemptLevel.NONE) return
-
-    
-    buildPinnedItem(
-        updatedEntriesSummary = summary,
-        hasDataSet = false,
-        phishingAttemptLevel = phishingAttemptLevel
-    )
-    phishingDataSet = dataSetCreator.createForPhishingWarning(
-        summary = summary,
-        inlineSpec = inlineSpecs?.popOrLast(),
-        phishingAttemptLevel = phishingAttemptLevel
     )
 }
 
 internal fun FillResponseWrapper.Builder.buildViewChangePassword(
     updatedEntriesSummary: AutoFillHintSummary,
-    hasDataSet: Boolean
+    hasDataSet: Boolean,
 ) {
     changePasswordDataSet = dataSetCreator.createForChangePassword(
         summary = updatedEntriesSummary,
         hasFillResponse = hasDataSet,
-        inlineSpec = inlineSpecs?.popOrLast()
+        inlineSpec = inlineSpecs?.popOrLast(),
     )
 }
 
@@ -83,13 +58,12 @@ internal fun FillResponseWrapper.Builder.buildResults(
     isOtp: Boolean,
     isGuidedChangePassword: Boolean,
     result: List<ItemToFill>?,
-    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     setClientState(Bundle().apply { addPreviousEntriesFrom(updatedEntriesSummary) })
     val otpItemDataSet = if (isOtp) {
         dataSetCreator.createForSmsOtp(
             summary = updatedEntriesSummary,
-            inlineSpec = inlineSpecs?.popOrLast()
+            inlineSpec = inlineSpecs?.popOrLast(),
         )
     } else {
         null
@@ -102,7 +76,6 @@ internal fun FillResponseWrapper.Builder.buildResults(
             requireLock = true,
             isGuidedChangePassword = isGuidedChangePassword,
             inlineSpec = inlineSpecs?.popOrLast(),
-            phishingAttemptLevel = phishingAttemptLevel
         )
     }
     vaultItemDataSet?.plus(otpItemDataSet)?.filterNotNull()?.let { itemDataSets.addAll(it) }
@@ -110,7 +83,7 @@ internal fun FillResponseWrapper.Builder.buildResults(
 
 internal fun FillResponseWrapper.Builder.buildOnBoardingItem(
     summary: AutoFillHintSummary,
-    sender: IntentSender
+    sender: IntentSender,
 ) {
     val autofillId = summary.focusEntry?.id ?: return
     onBoardingDataSet = dataSetCreator.createForOnBoarding(inlineSpecs?.popOrLast())?.apply {
@@ -121,7 +94,7 @@ internal fun FillResponseWrapper.Builder.buildOnBoardingItem(
 
 internal fun FillResponseWrapper.Builder.createForLogout(
     summary: AutoFillHintSummary,
-    sender: IntentSender
+    sender: IntentSender,
 ): FillResponseWrapper? {
     val inlineSpec = inlineSpecs?.popOrLast()
     val autofillId = summary.focusEntry?.id ?: return null
@@ -135,7 +108,7 @@ internal fun FillResponseWrapper.Builder.createForLogout(
     pauseDataSet = dataSetCreator.createForPause(
         summary = summary,
         hasFillResponse = false,
-        inlineSpec = inlineSpec
+        inlineSpec = inlineSpec,
     )
 
     return build()
@@ -148,7 +121,6 @@ internal fun FillResponseWrapper.Builder.buildOptionsItems(
     isOtp: Boolean,
     hasResult: Boolean,
     isViewAllAccountEnabled: Boolean,
-    phishingAttemptLevel: PhishingAttemptLevel
 ) {
     val hasItemsDataSet = hasItemDataSet()
     val hasChangePassword = hasItemsDataSet && isChangePassword
@@ -163,17 +135,15 @@ internal fun FillResponseWrapper.Builder.buildOptionsItems(
         buildViewAllAccount(
             updatedEntriesSummary = updatedEntriesSummary,
             hasDataSet = hasItemsDataSet,
-            phishingAttemptLevel = phishingAttemptLevel
         )
         buildCreateAccount(
             updatedEntriesSummary = updatedEntriesSummary,
-            hasDataSet = hasItemsDataSet
+            hasDataSet = hasItemsDataSet,
         )
     }
     buildPinnedItem(
         updatedEntriesSummary = updatedEntriesSummary,
         hasDataSet = hasItemsDataSet,
-        phishingAttemptLevel = PhishingAttemptLevel.NONE 
     )
 
     
@@ -181,7 +151,7 @@ internal fun FillResponseWrapper.Builder.buildOptionsItems(
         pauseDataSet = dataSetCreator.createForPause(
             summary = updatedEntriesSummary,
             hasFillResponse = hasResult,
-            inlineSpec = inlines?.popOrLast()
+            inlineSpec = inlines?.popOrLast(),
         )
     }
 }

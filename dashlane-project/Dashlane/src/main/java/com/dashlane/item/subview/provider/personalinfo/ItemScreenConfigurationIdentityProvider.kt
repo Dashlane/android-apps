@@ -25,9 +25,8 @@ import java.time.LocalDate
 
 class ItemScreenConfigurationIdentityProvider(
     private val teamSpaceAccessor: TeamSpaceAccessor,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -35,12 +34,12 @@ class ItemScreenConfigurationIdentityProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.Identity>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -56,7 +55,7 @@ class ItemScreenConfigurationIdentityProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         return ItemHeader(
             menuActions = createMenus(),
@@ -72,7 +71,7 @@ class ItemScreenConfigurationIdentityProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         return listOfNotNull(
             
@@ -98,20 +97,20 @@ class ItemScreenConfigurationIdentityProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.Identity>
+        item: VaultItem<SyncObject.Identity>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -121,13 +120,13 @@ class ItemScreenConfigurationIdentityProvider(
     private fun createBirthPlaceField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Identity>
+        item: VaultItem<SyncObject.Identity>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.identity_hint_place_of_birth),
             item.syncObject.birthPlace,
             false,
-            VaultItem<*>::copyForUpdatedBirthPlace
+            VaultItem<*>::copyForUpdatedBirthPlace,
         )
     }
 
@@ -135,7 +134,7 @@ class ItemScreenConfigurationIdentityProvider(
         item: VaultItem<SyncObject.Identity>,
         editMode: Boolean,
         context: Context,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ItemSubView<*> {
         val birthLocalDate = item.syncObject.birthDate
         val formattedString = birthLocalDate?.toIdentityFormat(context.resources)
@@ -145,7 +144,7 @@ class ItemScreenConfigurationIdentityProvider(
                 context.getString(R.string.date_of_birth),
                 birthLocalDate,
                 formattedString ?: "",
-                VaultItem<*>::copyForUpdatedDateOfBirth
+                VaultItem<*>::copyForUpdatedDateOfBirth,
             ).apply {
                 addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                     override fun onValueChanged(origin: Any, newValue: LocalDate?) {
@@ -160,7 +159,7 @@ class ItemScreenConfigurationIdentityProvider(
             ItemReadValueDateSubView(
                 context.getString(R.string.date_of_birth),
                 birthLocalDate,
-                formattedString ?: ""
+                formattedString ?: "",
             )
         }
     }
@@ -168,59 +167,59 @@ class ItemScreenConfigurationIdentityProvider(
     private fun createUsernameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Identity>
+        item: VaultItem<SyncObject.Identity>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.identity_hint_default_login),
             item.syncObject.pseudo,
             false,
-            VaultItem<*>::copyForUpdatedPseudo
+            VaultItem<*>::copyForUpdatedPseudo,
         )
     }
 
     private fun createMiddleNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Identity>
+        item: VaultItem<SyncObject.Identity>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.identity_hint_middle_name),
             item.syncObject.middleName,
             false,
-            VaultItem<*>::copyForUpdatedMiddleName
+            VaultItem<*>::copyForUpdatedMiddleName,
         )
     }
 
     private fun createLastNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Identity>
+        item: VaultItem<SyncObject.Identity>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.identity_hint_last_name),
             item.syncObject.lastName,
             false,
-            VaultItem<*>::copyForUpdatedLastName
+            VaultItem<*>::copyForUpdatedLastName,
         )
     }
 
     private fun createFirstNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Identity>
+        item: VaultItem<SyncObject.Identity>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.identity_hint_first_name),
             item.syncObject.firstName,
             false,
-            VaultItem<*>::copyForUpdatedFirstName
+            VaultItem<*>::copyForUpdatedFirstName,
         )
     }
 
     private fun createTitleField(
         context: Context,
         item: VaultItem<SyncObject.Identity>,
-        subViewFactory: SubViewFactory
+        subViewFactory: SubViewFactory,
     ): ItemSubView<*>? {
         
         
@@ -232,7 +231,7 @@ class ItemScreenConfigurationIdentityProvider(
             return subViewFactory.createSubviewListNonDefault(
                 context.getString(R.string.type),
                 context.getString(titleStringId),
-                allTitleCategories
+                allTitleCategories,
             ) { it, value ->
                 it.copyForUpdatedTitle(context, value)
             }

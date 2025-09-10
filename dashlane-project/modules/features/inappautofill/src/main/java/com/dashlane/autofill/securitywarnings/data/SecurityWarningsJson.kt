@@ -7,36 +7,26 @@ import com.google.gson.annotations.SerializedName
 data class SecurityWarningsJson(
     @SerializedName("securityWarningType")
     val securityWarningType: String,
-
     @SerializedName("signatures")
     private val signatures: List<String> = emptyList(),
-
     @SerializedName("itemsUrlRoot")
     private val itemsUrlRoot: List<String> = emptyList(),
-
     @SerializedName("itemsIds")
     private val itemsIds: List<String> = emptyList(),
-
     @SerializedName("apps")
     private val apps: List<String> = emptyList(),
-
     @SerializedName("pages")
     private val pages: List<List<String>> = emptyList(),
-
     @SerializedName("itemsIdApps")
     private val itemsIdApps: List<List<Int>> = emptyList(),
-
     @SerializedName("itemsIdPages")
     private val itemsIdPages: List<List<Int>> = emptyList(),
-
     @SerializedName("itemsUrlRootApps")
     private val itemsUrlRootApps: List<List<Int>> = emptyList(),
-
     @SerializedName("itemsUrlRootPages")
     private val itemsUrlRootPages: List<List<Int>> = emptyList(),
-
     @SerializedName("usedApps")
-    private val usedApps: List<List<Int>> = emptyList()
+    private val usedApps: List<List<Int>> = emptyList(),
 ) {
     fun has(signature: String, source: Source): Boolean {
         val relation = sourceRelation(signature, source) ?: return false

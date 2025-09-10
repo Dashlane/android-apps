@@ -19,10 +19,10 @@ import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.delay
 
 class VpnThirdPartyActivateAccountPresenter(
-    private val logger: VpnThirdPartyLogger
+    private val logger: VpnThirdPartyLogger,
 ) :
     BasePresenter<VpnThirdPartyActivateAccountContract.DataProvider, VpnThirdPartyActivateAccountContract.ViewProxy>(),
-    VpnThirdPartyActivateAccountContract.Presenter {
+        VpnThirdPartyActivateAccountContract.Presenter {
     private val navigator: NavController
         get() = activity!!.findNavController(R.id.nav_host_vpn_third_party_activate_account)
     private lateinit var lastEmail: String
@@ -64,7 +64,7 @@ class VpnThirdPartyActivateAccountPresenter(
             provider.saveAccount(
                 context!!.getString(R.string.vpn_third_party_hotspot_shield_name),
                 email,
-                password
+                password,
             )
             navigator.navigate(loadingToSuccess())
             logger.logActivated()

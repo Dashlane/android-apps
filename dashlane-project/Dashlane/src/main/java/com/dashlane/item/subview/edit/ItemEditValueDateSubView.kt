@@ -7,7 +7,7 @@ open class ItemEditValueDateSubView(
     val hint: String,
     override var value: LocalDate?,
     var formattedDate: String?,
-    valueUpdate: (VaultItem<*>, LocalDate?) -> VaultItem<*>?
+    valueUpdate: (VaultItem<*>, LocalDate?) -> VaultItem<*>?,
 ) : ItemEditValueSubView<LocalDate?>(valueUpdate) {
     var invisible: Boolean = false
 }

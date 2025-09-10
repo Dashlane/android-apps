@@ -7,6 +7,7 @@ import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFi
 import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
 import com.dashlane.storage.userdata.accessor.filter.lock.EditableLockFilter
 import com.dashlane.storage.userdata.accessor.filter.lock.LockFilter
+import com.dashlane.storage.userdata.accessor.filter.passkey.EditablePasskeyFilter
 import com.dashlane.storage.userdata.accessor.filter.sharing.EditableSharingPermissionFilter
 import com.dashlane.storage.userdata.accessor.filter.sharing.NoSharingFilter
 import com.dashlane.storage.userdata.accessor.filter.sharing.SharingFilter
@@ -31,18 +32,19 @@ data class VaultFilter(
     override var lockFilter: LockFilter = DefaultLockFilter,
     override var statusFilter: StatusFilter = DefaultStatusFilter,
     override var sharingFilter: SharingFilter = NoSharingFilter,
+    override var passkeyFilter: PasskeyFilter = PasskeyFilter.AllPasskeysFilter,
 ) : BaseFilter,
     EditableDataTypeFilter,
     EditableSpaceFilter,
     EditableUidFilter,
     EditableLockFilter,
     EditableStatusFilter,
-    EditableSharingPermissionFilter {
-
+    EditableSharingPermissionFilter,
+    EditablePasskeyFilter {
     constructor(uid: String, dataType: SyncObjectType? = null) :
         this(
             uidFilter = SpecificUidFilter(uid),
-            dataTypeFilter = dataType?.let { SpecificDataTypeFilter(it) } ?: AllDataTypeFilter
+            dataTypeFilter = dataType?.let { SpecificDataTypeFilter(it) } ?: AllDataTypeFilter,
         )
 
     override fun getSpacesRestrictions(currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter): Array<out TeamSpace>? =

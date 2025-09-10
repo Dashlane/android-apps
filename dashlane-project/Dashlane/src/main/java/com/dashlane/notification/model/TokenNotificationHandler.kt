@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.dashlane.BuildConfig
 import com.dashlane.R
 import com.dashlane.events.BroadcastConstants
 import com.dashlane.login.controller.LoginTokensModule
@@ -28,9 +29,8 @@ class TokenNotificationHandler(
     private val sessionManager: SessionManager,
     private val globalPreferencesManager: GlobalPreferencesManager,
     private val clock: Clock,
-    private val loginTokensModule: LoginTokensModule
-) : AbstractNotificationHandler(context, message) {
-
+    private val loginTokensModule: LoginTokensModule,
+) : AbstractNotificationHandler(BuildConfig.APPLICATION_ID, context, message) {
     private val isAlive: Boolean
         get() {
             if (hasTTL()) {
@@ -66,7 +66,6 @@ class TokenNotificationHandler(
                 token = jsonFormattedData.getString(JSON_KEY_TOKEN)
             }
         } catch (e: JSONException) {
-            warn("parseMessage exception", "", e)
         }
     }
 
@@ -105,13 +104,13 @@ class TokenNotificationHandler(
         notificationIntent.putExtra(NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION, true)
         notificationIntent.putExtra(
             NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION_USER,
-            recipientEmail
+            recipientEmail,
         )
         val session = sessionManager.session
         if (session != null && session.userId == recipientEmail) {
             notificationIntent.putExtra(
                 NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION_ALREADY_LOGGED_IN,
-                true
+                true,
             )
         }
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -120,7 +119,7 @@ class TokenNotificationHandler(
             0,
             notificationIntent,
             PendingIntent.FLAG_CANCEL_CURRENT or
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_IMMUTABLE,
         )
         val message = getNotificationMessage(context)
         val note = DashlaneNotificationBuilder(context)

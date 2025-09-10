@@ -1,9 +1,9 @@
 package com.dashlane.autofill.securitywarnings.model
 
-import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
+import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.url.UrlDomain
 import com.dashlane.url.toUrlDomainOrNull
@@ -12,12 +12,11 @@ import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
 
 class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
-    private val repository: RememberSecurityWarningsRepository
+    private val repository: RememberSecurityWarningsRepository,
 ) : RememberSecurityWarningsService {
-
     override fun remember(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        verification: SignatureVerification
+        verification: SignatureVerification,
     ): Boolean {
         val securityWarning = buildSecurityWarning(unlockedAuthentifiant, verification) ?: return false
 
@@ -26,7 +25,7 @@ class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
 
     private fun buildSecurityWarning(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        verification: SignatureVerification
+        verification: SignatureVerification,
     ): RememberSecurityWarning? {
         val item = buildItem(unlockedAuthentifiant.authentifiantSummary)
         val source = buildSource(unlockedAuthentifiant.formSource) ?: return null
@@ -67,7 +66,7 @@ class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
             },
             urlDomainFlow = {
                 Item.UrlMatchItem(it)
-            }
+            },
         )
     }
 
@@ -86,7 +85,7 @@ class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
 
     override fun isItemSourceRemembered(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        verification: SignatureVerification
+        verification: SignatureVerification,
     ): Boolean {
         val securityWarning = buildSecurityWarning(unlockedAuthentifiant, verification) ?: return false
 
@@ -95,7 +94,7 @@ class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
 
     override fun isSourceRemembered(
         unlockedAuthentifiant: UnlockedAuthentifiant,
-        verification: SignatureVerification
+        verification: SignatureVerification,
     ): Boolean {
         val securityWarning = buildSecurityWarning(unlockedAuthentifiant, verification) ?: return false
 
@@ -108,7 +107,7 @@ class ExternalRepositoryRememberSecurityWarningsService @Inject constructor(
 
     private fun SummaryObject.Authentifiant.itemOrUrlDomainFlow(
         itemFlow: (String) -> Item,
-        urlDomainFlow: (UrlDomain) -> Item
+        urlDomainFlow: (UrlDomain) -> Item,
     ): Item {
         return getUrlDomainRoot()?.let { urlDomainFlow.invoke(it) } ?: itemFlow.invoke(id)
     }

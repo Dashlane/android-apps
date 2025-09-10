@@ -6,7 +6,6 @@ import com.dashlane.ui.action.Action
 import com.dashlane.vault.model.VaultItem
 
 class ShareDetailsAction(private val vaultItem: VaultItem<*>) : Action {
-
     override val icon: Int = R.drawable.ic_info_24
 
     override val tintColorRes: Int? = null

@@ -24,7 +24,7 @@ sealed class CollectionSharingViewState {
     data class ConfirmRevoke(
         override val viewData: ViewData,
         val groupToRevoke: UserGroup? = null,
-        val userToRevoke: Individual? = null
+        val userToRevoke: Individual? = null,
     ) : CollectionSharingViewState()
 
     data class ViewData(
@@ -35,7 +35,7 @@ sealed class CollectionSharingViewState {
         val collectionName: String? = null,
         val showSearch: Boolean = false,
         val isAdmin: Boolean = false,
-        val showSharingLimit: Boolean = false
+        val showSharingLimit: Boolean = false,
     )
 
     data class UserGroup(
@@ -43,13 +43,13 @@ sealed class CollectionSharingViewState {
         val name: String,
         val membersCount: Int,
         val permission: Permission = Permission.ADMIN,
-        val selected: Boolean = false
+        val selected: Boolean = false,
     )
 
     data class Individual(
         val username: String,
         val permission: Permission = Permission.ADMIN,
         val selected: Boolean = false,
-        val accepted: Boolean = true
+        val accepted: Boolean = true,
     )
 }

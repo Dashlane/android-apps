@@ -6,5 +6,5 @@ class ItemEditValueBooleanSubView(
     val header: String,
     val description: String?,
     override var value: Boolean,
-    valueUpdate: (VaultItem<*>, Boolean) -> VaultItem<*>?
+    valueUpdate: (VaultItem<*>, Boolean) -> VaultItem<*>?,
 ) : ItemEditValueSubView<Boolean>(valueUpdate)

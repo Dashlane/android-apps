@@ -8,6 +8,7 @@ import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.OtpSetupCommand
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.SeeAllCommand
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.SeeLessCommand
+import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.UriHandledCommand
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.UriParser
@@ -42,7 +43,7 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
@@ -75,12 +76,14 @@ class AuthenticatorDashboardViewModel @Inject constructor(
         get() = frozenStateManager.isAccountFrozen
 
     var otpUri: Uri? = null
+    var latestHandledUri: Uri? = null
     private lateinit var loadedCredentials: List<CredentialItem>
 
     override val urlDomainRegistry = urlDomainRegistryFactory.create()
 
-    @OptIn(FlowPreview::class)
-    override val uiState = userCommand.receiveAsFlow()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val uiState = userCommand
+        .receiveAsFlow()
         .flatMapConcat { command ->
             when (command) {
                 is OtpSetupCommand -> flow {
@@ -91,7 +94,7 @@ class AuthenticatorDashboardViewModel @Inject constructor(
                         dataSaver,
                         dataSync,
                         logger,
-                        updateModificationDate = command.updateModificationDate
+                        updateModificationDate = command.updateModificationDate,
                     )
 
                     emit(refreshOtpCredentials())
@@ -102,13 +105,15 @@ class AuthenticatorDashboardViewModel @Inject constructor(
                 is SeeLessCommand -> flow {
                     emit(HasLogins(logins = loadedCredentials, isAccountFrozen = isAccountFrozen))
                 }
+                is UriHandledCommand -> flow {
+                    latestHandledUri = command.uri
+                    emit(refreshOtpCredentials())
+                }
             }
-        }
-        .onStart {
+        }.onStart {
             lockHelper.waitUnlock()
             emit(refreshOtpCredentials())
-        }
-        .flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, WhileSubscribed(800, 800), Progress)
 
     override val editState = MutableStateFlow<AuthenticatorDashboardEditState>(ViewLogins)
@@ -157,7 +162,7 @@ class AuthenticatorDashboardViewModel @Inject constructor(
 
     override fun onSetupAuthenticatorFromUri(
         otpUri: Uri,
-        setUpAuthenticatorResultContract: SetUpAuthenticatorResultContract
+        setUpAuthenticatorResultContract: SetUpAuthenticatorResultContract,
     ) {
         
         
@@ -165,8 +170,9 @@ class AuthenticatorDashboardViewModel @Inject constructor(
             if (uiState.value is HandleUri) {
                 setUpAuthenticatorResultContract.handleOtpResult(
                     this@AuthenticatorDashboardViewModel,
-                    UriParser.parse(otpUri)
+                    UriParser.parse(otpUri),
                 )
+                userCommand.trySend(UriHandledCommand(otpUri))
             }
         }
     }
@@ -215,24 +221,26 @@ class AuthenticatorDashboardViewModel @Inject constructor(
 
     @Suppress("UNCHECKED_CAST")
     private suspend fun getOtpCredentials(credentials: List<SummaryObject.Authentifiant>) =
-        vaultDataQuery.queryAll(
-            vaultFilter {
-                specificUid(credentials.filter { it.hasOtpUrl }.map { it.id })
-                specificDataType(SyncObjectType.AUTHENTIFIANT)
+        vaultDataQuery
+            .queryAll(
+                vaultFilter {
+                    specificUid(credentials.filter { it.hasOtpUrl }.map { it.id })
+                    specificDataType(SyncObjectType.AUTHENTIFIANT)
+                },
+            ).sortedByDescending { it.syncObject.userModificationDatetime }
+            .mapNotNull {
+                it as VaultItem<SyncObject.Authentifiant>
+                
+                val otp = it.syncObject.otp() ?: return@mapNotNull null
+                CredentialItem(
+                    it.uid,
+                    it.titleForListNormalized ?: "",
+                    it.urlDomain,
+                    it.loginForUi,
+                    it.isSpaceItem() && it.syncObject.spaceId.isNotSemanticallyNull(),
+                    otp,
+                    expanded = editMode,
+                    editMode = editMode,
+                )
             }
-        ).sortedByDescending { it.syncObject.userModificationDatetime }.mapNotNull {
-            it as VaultItem<SyncObject.Authentifiant>
-            
-            val otp = it.syncObject.otp() ?: return@mapNotNull null
-            CredentialItem(
-                it.uid,
-                it.titleForListNormalized ?: "",
-                it.urlDomain,
-                it.loginForUi,
-                it.isSpaceItem() && it.syncObject.spaceId.isNotSemanticallyNull(),
-                otp,
-                expanded = editMode,
-                editMode = editMode
-            )
-        }
 }

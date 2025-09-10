@@ -22,6 +22,7 @@ class QuickActionShare(
             id = summaryObject.id,
             fromAuthentifiant = summaryObject is SummaryObject.Authentifiant,
             fromSecureNote = summaryObject is SummaryObject.SecureNote,
+            fromSecrets = summaryObject is SummaryObject.Secret,
         )
     }
 
@@ -30,16 +31,10 @@ class QuickActionShare(
             summaryObject: SummaryObject,
             sharingPolicy: SharingPolicyDataProvider,
             navigator: Navigator,
-            isAccountFrozen: Boolean = false
+            isAccountFrozen: Boolean = false,
         ): QuickActionShare? {
-            if (sharingPolicy.canShareItem(summaryObject) && !isAccountFrozen) {
-                if (summaryObject is SummaryObject.SecureNote) {
-                    if (!summaryObject.hasAttachments()) {
-                        return QuickActionShare(summaryObject = summaryObject, navigator = navigator)
-                    }
-                } else {
-                    return QuickActionShare(summaryObject = summaryObject, navigator = navigator)
-                }
+            if (sharingPolicy.canShareItem(summaryObject) && !isAccountFrozen && !summaryObject.hasAttachments()) {
+                return QuickActionShare(summaryObject = summaryObject, navigator = navigator)
             }
             return null
         }

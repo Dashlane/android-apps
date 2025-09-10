@@ -3,30 +3,31 @@ package com.dashlane.authentication.login
 import com.dashlane.authentication.AuthenticationInvalidSsoException
 import com.dashlane.authentication.AuthenticationNetworkException
 import com.dashlane.authentication.AuthenticationUnknownException
-import com.dashlane.cryptography.SharingKeys
-import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.cryptography.SharingKeys
+import com.dashlane.data.login.SsoInfo
 import com.dashlane.xml.domain.SyncObject
 import java.time.Instant
 
 interface AuthenticationSsoRepository {
     @Throws(
         AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun getSsoInfo(login: String, accessKey: String): SsoInfo
 
     @Throws(
         AuthenticationInvalidSsoException::class,
         AuthenticationNetworkException::class,
-        AuthenticationUnknownException::class
+        AuthenticationUnknownException::class,
     )
     suspend fun validate(
         login: String,
         ssoToken: String,
         serviceProviderKey: String,
-        accessKey: String? = null
+        accessKey: String? = null,
     ): ValidateResult
 
     sealed class ValidateResult {
@@ -35,7 +36,7 @@ interface AuthenticationSsoRepository {
             val secretKey: String,
             val localKey: LocalKey,
             val ssoKey: AppKey.SsoKey,
-            val authTicket: String
+            val authTicket: String,
         ) : ValidateResult()
 
         data class Remote(
@@ -50,7 +51,7 @@ interface AuthenticationSsoRepository {
             val settingsDate: Instant,
             val sharingKeys: SharingKeys?,
             val deviceAnalyticsId: String,
-            val userAnalyticsId: String
+            val userAnalyticsId: String,
         ) : ValidateResult()
     }
 }

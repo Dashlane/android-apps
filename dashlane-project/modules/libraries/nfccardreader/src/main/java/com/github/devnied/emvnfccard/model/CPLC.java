@@ -7,6 +7,9 @@ import com.github.devnied.emvnfccard.parser.apdu.impl.DataFactory;
 import java.io.Serializable;
 import java.util.Date;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class CPLC extends AbstractByteBean<CPLC> implements Serializable {
 	
 	

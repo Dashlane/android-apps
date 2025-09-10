@@ -1,7 +1,7 @@
 package com.dashlane.vault.util
 
 import com.dashlane.regioninformation.banks.BankRepository
-import com.dashlane.util.BuildConfig
+import com.dashlane.utils.android.BuildConfig
 import com.dashlane.vault.model.BankConfiguration
 import com.dashlane.vault.model.CreditCardBank
 import com.dashlane.vault.model.CreditCardBank.Companion.US_NO_TYPE
@@ -43,7 +43,7 @@ class BankDataProvider @Inject constructor(
         val DEFAULT_BANK = BankConfiguration(
             US_NO_TYPE,
             "Other",
-            Country.UnitedStates
+            Country.UnitedStates,
         )
     }
 }

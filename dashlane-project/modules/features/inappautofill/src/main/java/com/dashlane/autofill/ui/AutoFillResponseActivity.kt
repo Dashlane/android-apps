@@ -10,18 +10,18 @@ import android.os.Parcelable
 import android.view.autofill.AutofillManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.dashlane.autofill.AutofillAnalyzerDef
-import com.dashlane.autofill.dagger.AutofillApiInternalEntryPoint
+import com.dashlane.autofill.FillRequestHandler
+import com.dashlane.autofill.fillresponse.DataSetCreator
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.internal.AutofillApiEntryPoint
+import com.dashlane.autofill.logs.AutofillUsageLog
+import com.dashlane.autofill.logs.getAutofillApiOrigin
+import com.dashlane.autofill.logs.getHermesAutofillApiOrigin
 import com.dashlane.autofill.model.AuthentifiantItemToFill
 import com.dashlane.autofill.model.CreditCardItemToFill
 import com.dashlane.autofill.model.EmailItemToFill
 import com.dashlane.autofill.model.ItemToFill
-import com.dashlane.autofill.phishing.PhishingAttemptLevel
-import com.dashlane.autofill.phishing.PhishingWarningDataProvider
-import com.dashlane.autofill.request.autofill.logger.getAutofillApiOrigin
-import com.dashlane.autofill.request.autofill.logger.getHermesAutofillApiOrigin
+import com.dashlane.autofill.request.autofill.database.ItemLoader
 import com.dashlane.autofill.viewallaccounts.AutofillViewAllAccountsLogger
 import com.dashlane.crashreport.CrashReporter
 import com.dashlane.hermes.generated.definitions.AutofillMechanism
@@ -33,14 +33,11 @@ import com.dashlane.url.UrlDomain
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.CurrentPageViewLogger
 import com.dashlane.util.getParcelableCompat
-import com.dashlane.util.getSerializableExtraCompat
-import com.dashlane.vault.model.VaultItem
-import com.dashlane.xml.domain.SyncObject
+import com.dashlane.util.inject.OptionalProvider
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.EarlyEntryPoints
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.UUID
@@ -49,18 +46,27 @@ import kotlin.reflect.KClass
 
 @AndroidEntryPoint
 abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLogger.Owner {
-
     protected val component: AutofillApiEntryPoint by lazy(LazyThreadSafetyMode.NONE) {
         AutofillApiEntryPoint(this)
     }
 
-    internal val componentInternal: AutofillApiInternalEntryPoint
-        get() = EarlyEntryPoints.get(applicationContext, AutofillApiInternalEntryPoint::class.java)
+    @Inject
+    lateinit var fillRequestHandler: FillRequestHandler
 
     @Inject
-    lateinit var phishingWarningDataProvider: PhishingWarningDataProvider
+    internal lateinit var dataSetCreator: DataSetCreator
 
-    protected val autofillUsageLog: AutofillAnalyzerDef.IAutofillUsageLog
+    @IoCoroutineDispatcher
+    @Inject
+    lateinit var ioDispatcher: CoroutineDispatcher
+
+    @Inject
+    lateinit var sessionCoroutineScopeProvider: OptionalProvider<CoroutineScope>
+
+    @Inject
+    internal lateinit var itemLoader: ItemLoader
+
+    protected val autofillUsageLog: AutofillUsageLog
         get() = component.autoFillApiUsageLog
 
     protected val viewAllAccountsLogger: AutofillViewAllAccountsLogger
@@ -75,7 +81,7 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
     protected val lockHelper: LockHelper
         get() = component.lockHelper
 
-    protected val isLoggedIn: Boolean
+    private val isLoggedIn: Boolean
         get() = sessionManager.session != null
 
     private val autofillPerformedCallback: AutofillPerformedCallback
@@ -91,19 +97,17 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
     internal val isGuidedChangePassword: Boolean
         get() = intent?.getBooleanExtra(EXTRA_IS_GUIDED_CHANGE_PASSWORD, false) ?: false
 
-    internal val phishingAttemptLevel: PhishingAttemptLevel
-        get() = intent?.getSerializableExtraCompat<PhishingAttemptLevel>(EXTRA_PHISHING_ATTEMPT_LEVEL)
-            ?: PhishingAttemptLevel.NONE
-    internal var phishingAttemptTrustedByUser = false
-
     internal var matchType: MatchType = MatchType.REGULAR
 
-    internal var isFirstRun: Boolean = false
+    private var isFirstRun: Boolean = false
         private set
 
     private var isHandlingConfigurationChange: Boolean = false
 
     override val currentPageViewLogger by lazy { CurrentPageViewLogger(this) }
+
+    private val sessionCoroutineScope: CoroutineScope?
+        get() = sessionCoroutineScopeProvider.get()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,10 +121,12 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         }
 
         isFirstRun = savedInstanceState == null
-        isHandlingConfigurationChange = savedInstanceState?.getBoolean(EXTRA_IS_HANDLING_CONFIGURATION_CHANGE) ?: false
-        summary = intent.getBundleExtra(EXTRA_SUB_BUNDLE)?.getParcelableCompat(EXTRA_AUTOFILL_HINT_SUMMARY)
+        isHandlingConfigurationChange =
+            savedInstanceState?.getBoolean(EXTRA_IS_HANDLING_CONFIGURATION_CHANGE) ?: false
+        summary = intent.getBundleExtra(EXTRA_SUB_BUNDLE)
+            ?.getParcelableCompat(EXTRA_AUTOFILL_HINT_SUMMARY)
         matchType = intent.getStringExtra(EXTRA_MATCH_TYPE)?.let { matchType ->
-            MatchType.values().firstOrNull { it.code == matchType }
+            MatchType.entries.firstOrNull { it.code == matchType }
         } ?: MatchType.REGULAR
     }
 
@@ -169,9 +175,11 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
             finish()
             return
         }
-        val fillRequestHandler = componentInternal.fillRequestHandler
 
-        FillSuggestionToActivityResult(fillRequestHandler, lifecycleScope).finishWithRequestResult(this, summary)
+        FillSuggestionToActivityResult(fillRequestHandler, lifecycleScope).finishWithRequestResult(
+            this,
+            summary,
+        )
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -201,31 +209,36 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
             packageName = packageName,
             website = website,
             matchType = matchType,
-            autofillOrigin = autofillOrigin
+            autofillOrigin = autofillOrigin,
         )
 
-        val dataset = componentInternal.dataSetCreator.create(
+        val dataset = dataSetCreator.create(
             summary,
             itemToFill,
             false,
             isGuidedChangePassword,
             null,
-            PhishingAttemptLevel.NONE
         )
         updateItemLastViewDate(itemToFill.itemId)
+        updateCredentialLastUsed(itemToFill)
         autofillPerformedCallback.onAutofillPerformed(itemToFill, summary)
         finishWithResultIntentResult(dataset?.build()?.toAndroidDataset())
     }
 
-    fun shouldDisplayPhishingWarning(vaultItem: VaultItem<SyncObject.Authentifiant>?): Boolean =
-        phishingWarningDataProvider.shouldDisplayPhishingWarning(phishingAttemptLevel, summary, vaultItem) &&
-            !phishingAttemptTrustedByUser
-
-    @OptIn(DelicateCoroutinesApi::class)
-    internal fun updateItemLastViewDate(itemId: String?) {
-        itemId ?: return
-        GlobalScope.launch(Dispatchers.IO) {
+    private fun updateItemLastViewDate(itemId: String) {
+        sessionCoroutineScope?.launch(ioDispatcher) {
             component.databaseAccess.updateLastViewDate(itemId = itemId, instant = Instant.now())
+        }
+    }
+
+    private fun updateCredentialLastUsed(itemToFill: ItemToFill) {
+        if (itemToFill is AuthentifiantItemToFill) {
+            sessionCoroutineScope?.launch(ioDispatcher) {
+                component.databaseAccess.updateLastUsed(
+                    itemId = itemToFill.itemId,
+                    instant = Instant.now(),
+                )
+            }
         }
     }
 
@@ -235,27 +248,26 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         packageName: String,
         website: UrlDomain?,
         matchType: MatchType,
-        autofillOrigin: AutofillOrigin
+        autofillOrigin: AutofillOrigin,
     ) {
         when (itemToFill) {
             is AuthentifiantItemToFill -> autofillUsageLog.onAutoFillCredentialDone(
+                itemToFill = itemToFill,
                 origin = origin,
                 packageName = packageName,
                 websiteUrlDomain = website,
-                itemUrlDomain = itemToFill.url.toUrlDomainOrNull(),
                 matchType = matchType,
                 autofillOrigin = autofillOrigin,
                 autofillMechanism = AutofillMechanism.ANDROID_AUTOFILL_API,
-                credentialId = itemToFill.itemId
             )
             is CreditCardItemToFill -> autofillUsageLog.onAutoFillCreditCardDone(
+                itemToFill = itemToFill,
                 origin = origin,
                 packageName = packageName,
                 websiteUrlDomain = website,
                 matchType = matchType,
                 autofillOrigin = autofillOrigin,
                 autofillMechanism = AutofillMechanism.ANDROID_AUTOFILL_API,
-                credentialId = itemToFill.itemId
             )
             is EmailItemToFill -> autofillUsageLog.onAutoFillEmailDone(
                 origin = origin,
@@ -264,7 +276,7 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
                 matchType = matchType,
                 autofillOrigin = autofillOrigin,
                 autofillMechanism = AutofillMechanism.ANDROID_AUTOFILL_API,
-                credentialId = itemToFill.itemId
+                credentialId = itemToFill.itemId,
             )
             else -> Unit
         }
@@ -291,8 +303,6 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         const val EXTRA_FOR_KEYBOARD_AUTOFILL = "for_keyboard_autofill"
         const val EXTRA_IS_GUIDED_CHANGE_PASSWORD = "is_guided_change_password"
         const val EXTRA_MATCH_TYPE = "extra_match_type"
-        const val EXTRA_PHISHING_ATTEMPT_LEVEL = "extra_phishing_attempt_level"
-
         const val EXTRA_IS_HANDLING_CONFIGURATION_CHANGE = "is_handling_configuration_change"
 
         
@@ -303,7 +313,7 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
         internal fun createIntent(
             context: Context,
             summary: AutoFillHintSummary,
-            klass: KClass<out AutoFillResponseActivity>
+            klass: KClass<out AutoFillResponseActivity>,
         ): Intent {
             val summaryContainerBundle = Bundle()
             summaryContainerBundle.putParcelable(EXTRA_AUTOFILL_HINT_SUMMARY, summary)
@@ -323,7 +333,7 @@ abstract class AutoFillResponseActivity : AppCompatActivity(), CurrentPageViewLo
                 context,
                 ++datasetPendingIntentId,
                 intent,
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             ).intentSender
         }
     }

@@ -17,30 +17,35 @@ import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.SessionManager
 import com.dashlane.util.Toaster
 import com.dashlane.util.isSemanticallyNull
+import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlinx.coroutines.delay
 
 class ClipboardCopyImpl @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val sessionManager: SessionManager,
     private val toaster: Toaster,
     private val workManagerProvider: Provider<WorkManager>,
-    private val clipboardManagerProvider: Provider<ClipboardManager>
+    private val clipboardManagerProvider: Provider<ClipboardManager>,
 ) : ClipboardCopy {
-
     private val workManager
         get() = workManagerProvider.get()
 
     private val clipboardManager
         get() = clipboardManagerProvider.get()
 
-    override fun copyToClipboard(data: String, sensitiveData: Boolean, autoClear: Boolean, @StringRes feedback: Int?) {
+    override fun copyToClipboard(
+        data: String,
+        sensitiveData: Boolean,
+        autoClear: Boolean,
+        showToast: Boolean,
+        @StringRes feedback: Int?,
+    ) {
         if (data.isSemanticallyNull()) {
             return
         }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        if (showToast && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             toaster.show(feedback ?: R.string.copied_, Toast.LENGTH_SHORT)
         }
 
@@ -82,7 +87,7 @@ class ClipboardCopyImpl @Inject constructor(
 
     class ClearClipboardWorker(
         appContext: Context,
-        params: WorkerParameters
+        params: WorkerParameters,
     ) : CoroutineWorker(appContext, params) {
         override suspend fun doWork(): Result {
             try {
@@ -91,7 +96,7 @@ class ClipboardCopyImpl @Inject constructor(
                 
                 
                 repeat(50) {
-                    clipboard.setPrimaryClip(ClipData.newPlainText("credential", "$it"))
+                    clipboard.setPrimaryClip(ClipData.newPlainText("credential", " ".repeat(it)))
                     
                     delay(50)
                 }

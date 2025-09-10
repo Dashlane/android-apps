@@ -9,7 +9,6 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 
 object VaultItemImageHelper {
-
     data class ThumbnailViewConfiguration(
         val type: ThumbnailViewType,
         val iconRes: Int?,
@@ -18,12 +17,12 @@ object VaultItemImageHelper {
     )
 
     fun getThumbnailViewConfiguration(
-        syncObject: SummaryObject
+        syncObject: SummaryObject,
     ) = ThumbnailViewConfiguration(
         type = syncObject.getThumbnailViewType(),
         iconRes = syncObject.syncObjectType.getThumbnailIcon(),
         colorRes = syncObject.getThumbnailColor(),
-        urlDomain = syncObject.getUrlDomain()
+        urlDomain = syncObject.getUrlDomain(),
     )
 
     fun SyncObjectType.getThumbnailIcon(): Int? = when {
@@ -38,20 +37,22 @@ object VaultItemImageHelper {
         this == SyncObjectType.ID_CARD -> R.drawable.ic_item_id_outlined
         this == SyncObjectType.IDENTITY -> R.drawable.ic_item_id_outlined
         this == SyncObjectType.PASSPORT -> R.drawable.ic_item_passport_outlined
-        this == SyncObjectType.PAYMENT_PAYPAL -> R.drawable.ic_fab_menu_paypal
         this == SyncObjectType.PERSONAL_WEBSITE -> R.drawable.ic_web_outlined
         this == SyncObjectType.PHONE -> R.drawable.ic_item_phone_mobile_outlined
         this == SyncObjectType.SOCIAL_SECURITY_STATEMENT -> R.drawable.ic_item_social_security_outlined
         this == SyncObjectType.SECRET -> R.drawable.ic_item_secret_outlined
+        this == SyncObjectType.WI_FI -> R.drawable.ic_item_wifi_outlined
         else -> null
     }
 
     private fun SummaryObject.getThumbnailViewType(): ThumbnailViewType =
         when (this) {
             is SummaryObject.Authentifiant,
-            is SummaryObject.Passkey -> ThumbnailViewType.VAULT_ITEM_DOMAIN_ICON
+            is SummaryObject.Passkey,
+            -> ThumbnailViewType.VAULT_ITEM_DOMAIN_ICON
             is SummaryObject.SecureNote,
-            is SummaryObject.PaymentCreditCard -> ThumbnailViewType.VAULT_ITEM_LEGACY_OTHER_ICON
+            is SummaryObject.PaymentCreditCard,
+            -> ThumbnailViewType.VAULT_ITEM_LEGACY_OTHER_ICON
             else -> ThumbnailViewType.VAULT_ITEM_OTHER_ICON
         }
 

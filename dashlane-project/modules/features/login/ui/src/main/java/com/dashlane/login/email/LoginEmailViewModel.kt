@@ -1,0 +1,382 @@
+package com.dashlane.login.email
+
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.dashlane.account.UserAccountStorage
+import com.dashlane.authentication.AuthenticationAccountNotFoundException
+import com.dashlane.authentication.AuthenticationContactSsoAdministratorException
+import com.dashlane.authentication.AuthenticationDeactivatedUserException
+import com.dashlane.authentication.AuthenticationEmptyEmailException
+import com.dashlane.authentication.AuthenticationExpiredVersionException
+import com.dashlane.authentication.AuthenticationInvalidEmailException
+import com.dashlane.authentication.AuthenticationNetworkException
+import com.dashlane.authentication.AuthenticationOfflineException
+import com.dashlane.authentication.AuthenticationTeamException
+import com.dashlane.authentication.login.AuthenticationEmailRepository
+import com.dashlane.authentication.login.AuthenticationEmailRepository.Result
+import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresDeviceRegistration
+import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresPassword
+import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresServerKey
+import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresSso
+import com.dashlane.common.logger.usersupportlogger.UserSupportFileUploadState
+import com.dashlane.common.logger.usersupportlogger.UserSupportFileUploader
+import com.dashlane.crashreport.CrashReporter
+import com.dashlane.data.login.AuthenticationSecondFactor
+import com.dashlane.data.login.CipheredBackupToken
+import com.dashlane.data.login.SsoInfo
+import com.dashlane.data.login.UnauthenticatedUser
+import com.dashlane.login.LoginDestination
+import com.dashlane.login.LoginLogger
+import com.dashlane.login.LoginRepository
+import com.dashlane.mvvm.State
+import com.dashlane.preference.GlobalPreferencesManager
+import com.dashlane.server.api.endpoints.AccountType
+import com.dashlane.server.api.endpoints.account.RequestAccountCreationService
+import com.dashlane.sso.login.RemoteLoginSsoActivity
+import com.dashlane.user.UserAccountInfo
+import com.dashlane.user.UserSecuritySettings
+import com.dashlane.util.clipboard.ClipboardCopy
+import com.dashlane.util.isNotSemanticallyNull
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
+import java.util.Locale
+import javax.inject.Inject
+
+private const val DIAGNOSTIC_KEY = "diagnostic"
+private const val DEBUG_KEY = "debug"
+
+@HiltViewModel
+class LoginEmailViewModel @Inject constructor(
+    private val globalPreferencesManager: GlobalPreferencesManager,
+    private val userAccountStorage: UserAccountStorage,
+    private val authenticationEmailRepository: AuthenticationEmailRepository,
+    private val logger: LoginLogger,
+    private val requestAccountCreationService: RequestAccountCreationService,
+    private val userSupportFileUploader: UserSupportFileUploader,
+    private val crashReporter: CrashReporter,
+    private val clipboardCopy: ClipboardCopy,
+    private val loginRepository: LoginRepository,
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+    private val emailRoute = savedStateHandle.toRoute<LoginDestination.Email>()
+    private val email: String? = emailRoute.login
+    private val allowSkipEmail: Boolean = emailRoute.allowSkipEmail
+
+    private val stateFlow = MutableStateFlow(LoginEmailState())
+    private val navigationStateFlow = Channel<LoginEmailNavigationState>()
+
+    val uiState = stateFlow.asStateFlow()
+    val navigationState = navigationStateFlow.receiveAsFlow()
+
+    fun viewStarted() {
+        viewModelScope.launch {
+            if (stateFlow.value.email?.text.isNotSemanticallyNull()) return@launch
+
+            val preferredEmail = email ?: globalPreferencesManager.getUserListHistory().firstOrNull()
+            stateFlow.update { state -> state.copy(email = preferredEmail?.let { TextFieldValue(it, selection = TextRange(it.length)) }) }
+
+            if (!preferredEmail.isNullOrEmpty() && allowSkipEmail) {
+                delay(500) 
+                checkEmail(preferredEmail)
+            }
+        }
+    }
+
+    fun emailChanged(email: TextFieldValue) {
+        viewModelScope.launch {
+            stateFlow.update { state -> state.copy(email = email.copy(text = email.text.filterNot { it.isWhitespace() }), error = null) }
+        }
+    }
+
+    fun onContinue() {
+        checkEmail(stateFlow.value.email?.text)
+    }
+
+    fun createAccount() {
+        viewModelScope.launch {
+            navigationStateFlow.send(
+                LoginEmailNavigationState.GoToCreateAccount(email = stateFlow.value.email?.text, skipIfPrefilled = false),
+            )
+        }
+    }
+
+    fun diagnosticConfirmed() {
+        uploadUserSupportFile()
+    }
+
+    fun diagnosticCopy() {
+        viewModelScope.launch {
+            uiState.value.crashDeviceId?.let { clipboardCopy.copyToClipboard(data = it, sensitiveData = true) }
+            stateFlow.update { state -> state.copy(showDebugSuccessDialog = false) }
+        }
+    }
+
+    fun diagnosticCancelled() {
+        viewModelScope.launch {
+            stateFlow.update { state ->
+                state.copy(
+                    showDebugConfirmationDialog = false,
+                    showDebugUploadingDialog = false,
+                    showDebugSuccessDialog = false,
+                    showDebugFailedDialog = false,
+                )
+            }
+        }
+    }
+
+    fun ssoErrorDialogCancelled() {
+        viewModelScope.launch {
+            stateFlow.update { state -> state.copy(isSSOAdminDialogShown = false) }
+        }
+    }
+
+    fun qrCode() {
+        viewModelScope.launch {
+            navigationStateFlow.send(
+                LoginEmailNavigationState.GoToSecretTransfer(email = null, showQrCode = true),
+            )
+        }
+    }
+
+    fun ssoComplete(result: RemoteLoginSsoActivity.Result) {
+        viewModelScope.launch {
+            when (result) {
+                RemoteLoginSsoActivity.Result.Success -> navigationStateFlow.send(LoginEmailNavigationState.SSOSuccess)
+                is RemoteLoginSsoActivity.Result.Error -> stateFlow.update { state -> state.copy(error = LoginEmailError.SSO(result)) }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    fun checkEmail(email: String?) {
+        flow<State> {
+            if (email.isNullOrEmpty()) {
+                emit(stateFlow.value.copy(error = LoginEmailError.InvalidEmail, isLoading = false))
+                return@flow
+            }
+
+            if (DIAGNOSTIC_KEY == email || DEBUG_KEY == email) {
+                emit(stateFlow.value.copy(showDebugConfirmationDialog = true, email = TextFieldValue(""), isLoading = false))
+                return@flow
+            }
+
+            val backupToken = globalPreferencesManager.getCipheredBackupToken(email)
+            val user = if (backupToken != null) {
+                UnauthenticatedUser(
+                    email = email,
+                    cipheredBackupToken = CipheredBackupToken(backupToken, globalPreferencesManager.getBackupTokenDate(email)),
+                )
+            } else {
+                UnauthenticatedUser(email)
+            }
+            val userStatus = try {
+                authenticationEmailRepository.getUserStatus(user)
+            } catch (e: AuthenticationAccountNotFoundException) {
+                val accountExistsResponse = checkIfAccountExist(email)
+                val ssoServiceProviderUrl = accountExistsResponse.ssoServiceProviderUrl
+                val ssoIsNitroProvider = accountExistsResponse.ssoIsNitroProvider
+                if (accountExistsResponse.sso && ssoServiceProviderUrl != null) {
+                    val ssoInfo = SsoInfo(
+                        login = email,
+                        serviceProviderUrl = ssoServiceProviderUrl,
+                        isNitroProvider = ssoIsNitroProvider ?: false,
+                        migration = null,
+                    )
+                    emit(LoginEmailNavigationState.GoToSSO(ssoInfo))
+                } else {
+                    emit(stateFlow.value.copy(isLoading = false, error = LoginEmailError.NoAccount))
+                }
+                return@flow
+            }
+
+            val state = handleUserStatus(userStatus)
+            emit(state)
+        }
+            .catch { emit(handleErrors(it)) }
+            .onStart { emit(stateFlow.value.copy(isLoading = true, error = null)) }
+            .onEach { state ->
+                when (state) {
+                    is LoginEmailState -> stateFlow.update { state }
+                    is LoginEmailNavigationState -> {
+                        stateFlow.update { it.copy(isLoading = false) }
+                        navigationStateFlow.send(state)
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    fun uploadUserSupportFile() {
+        userSupportFileUploader.startCrashLogsUpload(crashDeviceId = crashReporter.crashReporterId)
+            .flowOn(ioDispatcher)
+            .map { state ->
+                when (state) {
+                    UserSupportFileUploadState.Failed -> stateFlow.value.copy(
+                        showDebugConfirmationDialog = false,
+                        showDebugUploadingDialog = false,
+                        showDebugFailedDialog = true,
+                    )
+                    is UserSupportFileUploadState.Finished -> stateFlow.value.copy(
+                        crashDeviceId = state.crashDeviceId,
+                        showDebugConfirmationDialog = false,
+                        showDebugUploadingDialog = false,
+                        showDebugSuccessDialog = true,
+                    )
+                    UserSupportFileUploadState.Uploading -> stateFlow.value.copy(
+                        showDebugConfirmationDialog = false,
+                        showDebugUploadingDialog = true,
+                    )
+                }
+            }
+            .catch {
+                emit(
+                    stateFlow.value.copy(
+                        showDebugConfirmationDialog = false,
+                        showDebugUploadingDialog = false,
+                        showDebugFailedDialog = true,
+                    ),
+                )
+            }
+            .onEach { state ->
+                stateFlow.update { state }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    suspend fun handleUserStatus(userStatus: Result): State {
+        return when (userStatus) {
+            is RequiresDeviceRegistration -> {
+                when (userStatus) {
+                    is RequiresDeviceRegistration.SecondFactor -> handleUserRequiresDeviceRegistrationSecondFactor(userStatus)
+                    is RequiresDeviceRegistration.Sso -> {
+                        loginRepository.updateSsoInfo(userStatus.ssoInfo)
+                        LoginEmailNavigationState.GoToSSO(userStatus.ssoInfo)
+                    }
+                }
+            }
+            is RequiresServerKey -> handleUserStatusRequiresServerKey(userStatus)
+            is RequiresPassword -> {
+                loginRepository.updateRegisteredUserDevice(registeredUserDevice = userStatus.registeredUserDevice)
+                loginRepository.updateSsoInfo(userStatus.ssoInfo)
+                LoginEmailNavigationState.GoToPassword
+            }
+            is RequiresSso -> {
+                loginRepository.updateSsoInfo(userStatus.ssoInfo)
+                LoginEmailNavigationState.GoToSSO(userStatus.ssoInfo)
+            }
+        }
+    }
+
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    suspend fun handleUserRequiresDeviceRegistrationSecondFactor(userStatus: RequiresDeviceRegistration.SecondFactor): State {
+        val secondFactor = userStatus.secondFactor
+        val login = secondFactor.login
+        return when (secondFactor) {
+            is AuthenticationSecondFactor.EmailToken -> {
+                val securitySettings = UserSecuritySettings(isToken = true)
+
+                val accountType = when (userStatus.accountType) {
+                    AccountType.MASTERPASSWORD -> UserAccountInfo.AccountType.MasterPassword
+                    AccountType.INVISIBLEMASTERPASSWORD -> UserAccountInfo.AccountType.InvisibleMasterPassword
+                }
+
+                userAccountStorage.saveAccountType(username = login, accountType = accountType)
+                userAccountStorage.saveSecuritySettings(username = login, securitySettings = securitySettings)
+                if (accountType == UserAccountInfo.AccountType.InvisibleMasterPassword) {
+                    LoginEmailNavigationState.GoToSecretTransfer(email = login, showQrCode = false)
+                } else {
+                    loginRepository.updateSsoInfo(ssoInfo = userStatus.ssoInfo)
+                    LoginEmailNavigationState.GoToToken(secondFactor = secondFactor)
+                }
+            }
+
+            is AuthenticationSecondFactor.Totp -> {
+                val securitySettings = UserSecuritySettings(
+                    isTotp = true,
+                    isU2fEnabled = secondFactor.u2f != null,
+                    isDuoEnabled = secondFactor.duoPush != null,
+                )
+                userAccountStorage.saveSecuritySettings(login, securitySettings)
+                loginRepository.updateSsoInfo(ssoInfo = userStatus.ssoInfo)
+                LoginEmailNavigationState.GoToOTP(secondFactor = secondFactor)
+            }
+        }
+    }
+
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    suspend fun handleUserStatusRequiresServerKey(userStatus: RequiresServerKey): State {
+        val secondFactor = userStatus.secondFactor
+        val login = secondFactor.login
+        val securitySettings = UserSecuritySettings(
+            isTotp = true,
+            isOtp2 = true,
+            isU2fEnabled = secondFactor.u2f != null,
+            isDuoEnabled = secondFactor.duoPush != null,
+        )
+        userAccountStorage.saveSecuritySettings(login, securitySettings)
+        loginRepository.updateSsoInfo(ssoInfo = userStatus.ssoInfo)
+        return LoginEmailNavigationState.GoToOTP(secondFactor = secondFactor)
+    }
+
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    fun handleErrors(e: Throwable): State {
+        val state = stateFlow.value
+        return when (e) {
+            is AuthenticationAccountNotFoundException -> state.copy(isLoading = false, error = LoginEmailError.NoAccount)
+            is AuthenticationEmptyEmailException,
+            is IllegalArgumentException,
+            is AuthenticationInvalidEmailException,
+            -> {
+                logger.logWrongEmail()
+                state.copy(isLoading = false, error = LoginEmailError.InvalidEmail)
+            }
+            is AuthenticationContactSsoAdministratorException -> state.copy(isLoading = false, isSSOAdminDialogShown = true)
+            is AuthenticationOfflineException -> state.copy(isLoading = false, error = LoginEmailError.Offline)
+            is AuthenticationNetworkException -> state.copy(isLoading = false, error = LoginEmailError.Network)
+            is AuthenticationExpiredVersionException -> LoginEmailNavigationState.EndOfLife
+            is AuthenticationTeamException -> state.copy(isLoading = false, error = LoginEmailError.Team)
+            is AuthenticationDeactivatedUserException -> state.copy(
+                isLoading = false,
+                error = LoginEmailError.UserDeactivated,
+            )
+            else -> state.copy(isLoading = false, error = LoginEmailError.Generic)
+        }
+    }
+
+    @VisibleForTesting
+    @Suppress("kotlin:S6313") 
+    suspend fun checkIfAccountExist(email: String): RequestAccountCreationService.Data {
+        val login = RequestAccountCreationService.Request.Login(email.lowercase(Locale.US))
+        val response = requestAccountCreationService.execute(RequestAccountCreationService.Request(login = login))
+        return response.data
+    }
+}

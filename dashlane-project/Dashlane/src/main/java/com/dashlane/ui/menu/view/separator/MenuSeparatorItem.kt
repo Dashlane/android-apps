@@ -19,7 +19,7 @@ fun MenuSeparatorItem() {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .height(1.dp)
-            .background(color = DashlaneTheme.colors.borderNeutralQuietIdle)
+            .background(color = DashlaneTheme.colors.borderNeutralQuietIdle),
     )
 }
 

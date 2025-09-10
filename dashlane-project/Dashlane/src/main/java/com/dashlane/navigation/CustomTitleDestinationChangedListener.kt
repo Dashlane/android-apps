@@ -10,12 +10,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class CustomTitleDestinationChangedListener(
-    private val activity: Activity
+    private val activity: Activity,
 ) : NavController.OnDestinationChangedListener {
     override fun onDestinationChanged(
         controller: NavController,
         destination: NavDestination,
-        arguments: Bundle?
+        arguments: Bundle?,
     ) {
         val appCompatActivity = activity as? AppCompatActivity ?: return
         appCompatActivity.run {

@@ -3,43 +3,48 @@ package com.dashlane.vault
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
 import com.dashlane.autofill.pause.services.PausedFormSourcesProvider
-import com.dashlane.events.AppEvents
-import com.dashlane.events.SyncFinishedEvent
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.ext.application.KnownApplicationProvider
-import com.dashlane.feature.home.data.Filter
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.ItemTypeCounts
 import com.dashlane.hermes.generated.definitions.Scope
 import com.dashlane.hermes.generated.events.user.VaultReport
+import com.dashlane.passwordanalysis.GroupOfAuthentifiant
+import com.dashlane.passwordhealth.identitydashboard.breach.BreachLoader
+import com.dashlane.passwordhealth.identitydashboard.password.AuthentifiantSecurityEvaluator
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.preference.UserPreferencesManager
-import com.dashlane.security.identitydashboard.breach.BreachLoader
-import com.dashlane.security.identitydashboard.password.AuthentifiantSecurityEvaluator
-import com.dashlane.security.identitydashboard.password.GroupOfAuthentifiant
+import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.SessionObserver
 import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.counterFilter
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
+import com.dashlane.sync.DataSync
+import com.dashlane.sync.DataSyncState
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.xml.domain.SyncObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class VaultReportLogger @Inject constructor(
     private val sessionCoroutineScopeProvider: OptionalProvider<CoroutineScope>,
     private val sessionManager: SessionManager,
-    private val appEvents: AppEvents,
     private val preferencesManager: PreferencesManager,
     private val logRepository: LogRepository,
     private val authentifiantSecurityEvaluator: AuthentifiantSecurityEvaluator,
@@ -49,33 +54,35 @@ class VaultReportLogger @Inject constructor(
     private val pausedFormSourcesProvider: PausedFormSourcesProvider,
     private val breachLoader: BreachLoader,
     private val knownApplicationProvider: KnownApplicationProvider,
-    private val collectionsReportProvider: CollectionsReportProvider
-) {
-
+    private val collectionsReportProvider: CollectionsReportProvider,
+    private val dataSync: DataSync,
+) : SessionObserver {
     private val sessionCoroutineScope: CoroutineScope?
         get() = sessionCoroutineScopeProvider.get()
 
     private val userPreferencesManager: UserPreferencesManager
         get() = preferencesManager[sessionManager.session?.username]
 
-    fun start() {
-        appEvents.register(this, SyncFinishedEvent::class.java, false) {
-            if (it.state != SyncFinishedEvent.State.SUCCESS) return@register
+    private var vaultReportTriggerJob: Job? = null
 
-            val now = Instant.now()
-            if (now >= userPreferencesManager.vaultReportLatestTriggerTimestamp.plus(
-                    24,
-                    ChronoUnit.HOURS
-                )
-            ) {
-                userPreferencesManager.vaultReportLatestTriggerTimestamp = now
-                logVaultReports()
-            }
+    override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
+        super.sessionStarted(session, loginInfo)
+        vaultReportTriggerJob = sessionCoroutineScope?.launch {
+            dataSync.dataSyncState
+                .filter { syncState -> syncState is DataSyncState.Idle.Success }
+                .onEach {
+                    val now = Instant.now()
+                    if (now >= userPreferencesManager.vaultReportLatestTriggerTimestamp.plus(24, ChronoUnit.HOURS)) {
+                        userPreferencesManager.vaultReportLatestTriggerTimestamp = now
+                        logVaultReports()
+                    }
+                }.collect()
         }
     }
 
-    fun stop() {
-        appEvents.unregister(this, SyncFinishedEvent::class.java)
+    override suspend fun sessionEnded(session: Session, byUser: Boolean, forceLogout: Boolean) {
+        super.sessionEnded(session, byUser, forceLogout)
+        vaultReportTriggerJob?.cancel()
     }
 
     private fun logVaultReports() {
@@ -104,41 +111,41 @@ class VaultReportLogger @Inject constructor(
                     ignoreUserLock()
                     specificDataType(Filter.FILTER_PASSWORD.syncObjectTypes)
                     specificSpace(teamspace)
-                }
+                },
             )
             val totalSecureNotes = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
                     specificDataType(Filter.FILTER_SECURE_NOTE.syncObjectTypes)
                     specificSpace(teamspace)
-                }
+                },
             )
             val totalPayments = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
                     specificDataType(Filter.FILTER_PAYMENT.syncObjectTypes)
                     specificSpace(teamspace)
-                }
+                },
             )
             val totalPersonalInfo = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
                     specificDataType(Filter.FILTER_PERSONAL_INFO.syncObjectTypes)
                     specificSpace(teamspace)
-                }
+                },
             )
             val totalIds = dataCounter.count(
                 counterFilter {
                     ignoreUserLock()
                     specificDataType(Filter.FILTER_ID.syncObjectTypes)
                     specificSpace(teamspace)
-                }
+                },
             )
 
             val evaluatorResult = authentifiantSecurityEvaluator.computeResult(
                 teamSpace = teamspace,
-                ignoreUserLock = true
-            )
+                ignoreUserLock = true,
+            ).first
             val securityAlerts = breachLoader.getBreachesWrapper(ignoreUserLock = true)
             val darkWebAlerts = securityAlerts.filter { it.publicBreach.isDarkWebBreach() }
             val authentifiantsByDarkWebBreach =
@@ -175,17 +182,17 @@ class VaultReportLogger @Inject constructor(
                     collectionsCount = collectionsReportProvider.computeCollectionsWithLoginCount(teamspace),
                     singleCollectionCount = collectionsReportProvider.computeLoginsWithSingleCollectionCount(teamspace),
                     multipleCollectionsCount = collectionsReportProvider.computeLoginsWithMultipleCollectionsCount(
-                        teamspace
+                        teamspace,
                     ),
                 ),
                 secureNotes = ItemTypeCounts(totalCount = totalSecureNotes),
                 ids = ItemTypeCounts(totalCount = totalIds),
                 collectionsTotalCount = collectionsReportProvider.computeCollectionTotalCount(teamspace),
                 itemsPerCollectionAverageCount = collectionsReportProvider.computeItemPerCollectionAverageCount(
-                    teamspace
+                    teamspace,
                 ),
                 collectionsPerItemAverageCount = collectionsReportProvider.computeCollectionPerItemAverageCount(
-                    teamspace
+                    teamspace,
                 ),
             )
         }

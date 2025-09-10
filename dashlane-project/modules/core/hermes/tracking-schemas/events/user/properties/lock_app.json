@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/lock_app.json",
+  "type": "object",
+  "description": "When the user locks the extension or the webapp (by clicking on Lock button). This is possible for SAEX users having WebAuthn enabled. Lock acts like a 'Remember me', allowing users to pause their session without having to logout and re-enter their Master Password. Lock clears the session of the user (new session_id generated).",
+  "metas": {
+    "area": "authentication"
+  },
+  "properties": {
+    "name": {
+      "const": "lock_app"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

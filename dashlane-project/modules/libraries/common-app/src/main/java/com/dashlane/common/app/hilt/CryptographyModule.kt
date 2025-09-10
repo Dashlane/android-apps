@@ -36,14 +36,14 @@ object CryptographyModule {
         keyDerivationEngine: KeyDerivationEngine,
         saltGenerator: SaltGenerator,
         ivGenerator: IvGenerator,
-        paddingGenerator: PaddingGenerator
+        paddingGenerator: PaddingGenerator,
     ): Cryptography = Cryptography(
         cipherFactory,
         macFactory,
         keyDerivationEngine,
         saltGenerator,
         ivGenerator,
-        paddingGenerator
+        paddingGenerator,
     )
 
     @Provides
@@ -75,7 +75,7 @@ object CryptographyModule {
     @Provides
     fun provideAppDecryptionProvider(
         cryptography: Cryptography,
-        jniCryptography: JniCryptography
+        jniCryptography: JniCryptography,
     ): LegacyAppDecryptionProvider = LegacyAppDecryptionProvider(cryptography, jniCryptography)
 
     @Provides

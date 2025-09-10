@@ -19,7 +19,7 @@ fun DialogHelper.showAuthenticatorRemoveConfirmDialog(
     professional: Boolean,
     issuer: String?,
     authenticatorLogger: AuthenticatorLogger,
-    confirmCallback: () -> Unit
+    confirmCallback: () -> Unit,
 ): AlertDialog = builder(context, R.style.ThemeOverlay_Dashlane_DashlaneWarningDialog)
     .apply {
         setTitle(R.string.authenticator_item_edit_remove_popup_title)

@@ -17,7 +17,7 @@ class AuthentifiantListTextFactory @Inject constructor(
         return when {
             item.isPasswordEmpty -> StatusText(
                 resources.getString(R.string.incomplete_reason_missing_password_list_line_2),
-                true
+                true,
             )
             item.login.isSemanticallyNull() && item.email.isSemanticallyNull() -> default
             else -> {

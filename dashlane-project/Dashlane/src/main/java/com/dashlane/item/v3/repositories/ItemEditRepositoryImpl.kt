@@ -14,8 +14,6 @@ import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.util.ItemEditValueUpdateManager
 import com.dashlane.item.v3.util.fillDefaultValue
 import com.dashlane.item.v3.viewmodels.Data
-import com.dashlane.session.Session
-import com.dashlane.session.SessionManager
 import com.dashlane.similarpassword.SimilarPassword
 import com.dashlane.storage.userdata.accessor.DataChangeHistoryQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
@@ -63,7 +61,6 @@ class ItemEditRepositoryImpl @Inject constructor(
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val currentTeamSpaceFilter: CurrentTeamSpaceUiFilter,
     private val dataChangeHistoryQuery: DataChangeHistoryQuery,
-    private val sessionManager: SessionManager,
     private val itemEditValueUpdateManager: ItemEditValueUpdateManager,
     private val vaultItemLogger: VaultItemLogger,
     private val activityLogger: VaultActivityLogger,
@@ -71,8 +68,6 @@ class ItemEditRepositoryImpl @Inject constructor(
 ) : ItemEditRepository {
     private val teamSpaceAccessor: TeamSpaceAccessor?
         get() = teamSpaceAccessorProvider.get()
-    private val session: Session?
-        get() = sessionManager.session
 
     private val similarPassword = SimilarPassword()
 
@@ -81,11 +76,10 @@ class ItemEditRepositoryImpl @Inject constructor(
         val isNewItem = !initialVault.hasBeenSaved
 
         
-        var itemToSave = itemEditValueUpdateManager.updateWithData(data, initialVault)
-            ?: throw Error("Unsupported type: $this")
+        var (itemToSave, editedFields) = itemEditValueUpdateManager.updateWithData(data, initialVault)
 
         
-        itemToSave = itemToSave.fillDefaultValue(context, session)
+        itemToSave = itemToSave.fillDefaultValue(context)
 
         
         val updatedLinkedWebsites = itemToSave.getUpdatedLinkedWebsites(initialVault)
@@ -110,7 +104,7 @@ class ItemEditRepositoryImpl @Inject constructor(
             removedWebsites = updatedLinkedWebsites?.second,
             removedApps = removedLinkedApps,
             collectionCount = data.commonData.collections?.size,
-            editedFields = itemEditValueUpdateManager.editedFields.toList()
+            editedFields = editedFields.toList(),
         )
 
         
@@ -136,7 +130,7 @@ class ItemEditRepositoryImpl @Inject constructor(
                 } else {
                     null
                 } ?: SyncObfuscatedValue("")
-            }
+            },
         ).copyWithAttrs {
             syncState = SyncState.MODIFIED
         }
@@ -171,10 +165,16 @@ class ItemEditRepositoryImpl @Inject constructor(
         }?.sortedByDescending { it.modificationDate } ?: return false
 
         return changeSets.filterIndexed { index, item ->
-            
-            (index == 0 && item.password != authentifiant.syncObject.password.toString() && item.password != null && item.modificationDate != null) ||
+            when (index) {
                 
-                (index != 0 && item.password != null && changeSets[index - 1].modificationDate != null)
+                0 -> {
+                    item.password != authentifiant.syncObject.password.toString() &&
+                        item.password != null &&
+                        item.modificationDate != null
+                }
+                
+                else -> item.password != null && changeSets[index - 1].modificationDate != null
+            }
         }.isNotEmpty()
     }
 
@@ -194,7 +194,7 @@ class ItemEditRepositoryImpl @Inject constructor(
             vaultItem.copyWithAttrs {
                 locallyViewedDate = Instant.now()
                 locallyUsedCount = vaultItem.locallyUsedCount + 1
-            }
+            },
         )
     }
 
@@ -205,7 +205,7 @@ class ItemEditRepositoryImpl @Inject constructor(
         removedWebsites: List<String>?,
         removedApps: List<String>?,
         collectionCount: Int?,
-        editedFields: List<Field>?
+        editedFields: List<Field>?,
     ) {
         vaultItemLogger.logUpdate(
             action = action,
@@ -218,7 +218,7 @@ class ItemEditRepositoryImpl @Inject constructor(
             addedWebsites = addedWebsites,
             removedWebsites = removedWebsites,
             removedApps = removedApps,
-            collectionCount = collectionCount
+            collectionCount = collectionCount,
         )
         activityLogger.sendAuthentifiantActivityLog(vaultItem = item, action = action)
     }

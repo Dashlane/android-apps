@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/user_change_login_email.json",
+  "type": "object",
+  "description": "When a user performs specific actions throughout the Change Login Email funnel",
+  "metas": {
+    "area": "settings"
+  },
+  "properties": {
+    "name": {
+      "const": "user_change_login_email"
+    },
+    "change_login_email_flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_login_email.json#/definitions/change_login_email_flow_step"
+    },
+    "error_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_login_email.json#/definitions/change_login_error"
+    }
+  },
+  "required": [
+    "name",
+    "change_login_email_flow_step"
+  ],
+  "additionalProperties": false
+}

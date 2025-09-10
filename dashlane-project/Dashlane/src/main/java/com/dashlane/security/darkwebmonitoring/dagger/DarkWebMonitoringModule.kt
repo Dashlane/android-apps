@@ -3,6 +3,7 @@ package com.dashlane.security.darkwebmonitoring.dagger
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import com.dashlane.breach.BreachWrapper
 import com.dashlane.security.darkwebmonitoring.DarkWebMonitoringAlertViewModel
 import com.dashlane.security.darkwebmonitoring.DarkWebMonitoringContract
 import com.dashlane.security.darkwebmonitoring.DarkWebMonitoringDataProvider
@@ -12,7 +13,6 @@ import com.dashlane.security.darkwebmonitoring.detail.BreachAlertDetailDataProvi
 import com.dashlane.security.darkwebmonitoring.detail.BreachAlertDetailFragmentArgs
 import com.dashlane.security.darkwebmonitoring.detail.BreachAlertDetailLogger
 import com.dashlane.security.darkwebmonitoring.detail.BreachAlertDetailPresenter
-import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -22,7 +22,6 @@ import dagger.hilt.android.components.FragmentComponent
 @Module
 @InstallIn(FragmentComponent::class)
 abstract class DarkWebMonitoringModule {
-
     @Binds
     abstract fun bindDWMPresenter(presenter: DarkWebMonitoringPresenter): DarkWebMonitoringContract.Presenter
 
@@ -39,7 +38,6 @@ abstract class DarkWebMonitoringModule {
     abstract fun bindBreachAlertDetailPresenter(presenter: BreachAlertDetailPresenter): BreachAlertDetail.Presenter
 
     companion object {
-
         @Provides
         fun provideDWMAlertViewModel(fragment: Fragment): DarkWebMonitoringAlertViewModel =
             ViewModelProvider(fragment)[DarkWebMonitoringAlertViewModel::class.java]

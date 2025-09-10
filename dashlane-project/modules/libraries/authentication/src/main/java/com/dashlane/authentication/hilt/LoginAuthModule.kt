@@ -16,18 +16,18 @@ import com.dashlane.authentication.login.AuthenticationSsoRepositoryImpl
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.server.api.ConnectivityCheck
 import com.dashlane.server.api.DashlaneTime
-import com.dashlane.server.api.endpoints.authentication.Auth2faUnauthenticatedSettingsService
-import com.dashlane.server.api.endpoints.authentication.AuthLoginAuthTicketService
-import com.dashlane.server.api.endpoints.authentication.AuthLoginService
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationAuthTicketService
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationEmailService
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationExtraDeviceService
-import com.dashlane.server.api.endpoints.authentication.AuthSendEmailTokenService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationDuoPushService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationEmailTokenService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationSsoService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationTotpService
-import com.dashlane.server.api.endpoints.authentication.AuthVerificationU2fService
+import com.dashlane.server.api.endpoints.authentication.CompleteDeviceRegistrationWithAuthTicketService
+import com.dashlane.server.api.endpoints.authentication.CompleteExtraDeviceRegistrationWithTokenService
+import com.dashlane.server.api.endpoints.authentication.CompleteLoginWithAuthTicketService
+import com.dashlane.server.api.endpoints.authentication.Get2FAStatusUnauthenticatedService
+import com.dashlane.server.api.endpoints.authentication.GetAuthenticationMethodsForDeviceService
+import com.dashlane.server.api.endpoints.authentication.GetAuthenticationMethodsForLoginService
+import com.dashlane.server.api.endpoints.authentication.PerformDuoPushVerificationService
+import com.dashlane.server.api.endpoints.authentication.PerformEmailTokenVerificationService
+import com.dashlane.server.api.endpoints.authentication.PerformSsoVerificationService
+import com.dashlane.server.api.endpoints.authentication.PerformTotpVerificationService
+import com.dashlane.server.api.endpoints.authentication.PerformU2FVerificationService
+import com.dashlane.server.api.endpoints.authentication.RequestEmailTokenVerificationService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,88 +38,88 @@ import dagger.hilt.android.components.ViewModelComponent
 object LoginAuthModule {
     @Provides
     fun provideEmailRepository(
-        authRegistrationEmailService: AuthRegistrationEmailService,
+        getAuthenticationMethodsForDeviceService: GetAuthenticationMethodsForDeviceService,
         userStorage: UserStorage,
-        authLoginService: AuthLoginService,
-        authSendEmailTokenService: AuthSendEmailTokenService,
-        unauthenticated2faSettingsService: Auth2faUnauthenticatedSettingsService,
+        getAuthenticationMethodsForLoginService: GetAuthenticationMethodsForLoginService,
+        requestEmailTokenVerificationService: RequestEmailTokenVerificationService,
+        get2FAStatusUnauthenticatedService: Get2FAStatusUnauthenticatedService,
         connectivityCheck: ConnectivityCheck,
-        dashlaneTime: DashlaneTime
+        dashlaneTime: DashlaneTime,
     ): AuthenticationEmailRepository = AuthenticationEmailRepositoryImpl(
         userStorage,
-        authRegistrationEmailService,
-        authLoginService,
-        authSendEmailTokenService,
-        unauthenticated2faSettingsService,
+        getAuthenticationMethodsForDeviceService,
+        getAuthenticationMethodsForLoginService,
+        requestEmailTokenVerificationService,
+        get2FAStatusUnauthenticatedService,
         connectivityCheck,
-        dashlaneTime
+        dashlaneTime,
     )
 
     @Provides
     fun provideSecondFactorRepository(
-        sendEmailTokenService: AuthSendEmailTokenService,
+        requestEmailTokenVerificationService: RequestEmailTokenVerificationService,
         connectivityCheck: ConnectivityCheck,
         userStorage: UserStorage,
-        authTicketHelper: AuthenticationAuthTicketHelper
+        authTicketHelper: AuthenticationAuthTicketHelper,
     ): AuthenticationSecondFactoryRepository = AuthenticationSecondFactoryRepositoryImpl(
         userStorage,
-        sendEmailTokenService,
+        requestEmailTokenVerificationService,
         connectivityCheck,
-        authTicketHelper
+        authTicketHelper,
     )
 
     @Provides
     fun providePasswordRepository(
         userStorage: UserStorage,
         authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
-        loginService: AuthLoginService,
-        authRegistrationExtraDeviceService: AuthRegistrationExtraDeviceService,
+        getAuthenticationMethodsForLoginService: GetAuthenticationMethodsForLoginService,
+        completeExtraDeviceRegistrationWithTokenService: CompleteExtraDeviceRegistrationWithTokenService,
         deviceRegistrationInfo: DeviceRegistrationInfo,
-        cryptography: Cryptography
+        cryptography: Cryptography,
     ): AuthenticationPasswordRepository = AuthenticationPasswordRepositoryImpl(
         userStorage,
         authenticationLocalKeyRepository,
-        loginService,
-        authRegistrationExtraDeviceService,
+        getAuthenticationMethodsForLoginService,
+        completeExtraDeviceRegistrationWithTokenService,
         deviceRegistrationInfo,
-        cryptography
+        cryptography,
     )
 
     @Provides
     fun provideSsoRepository(
         connectivityCheck: ConnectivityCheck,
         userStorage: UserStorage,
-        loginService: AuthLoginService,
+        getAuthenticationMethodsForLoginService: GetAuthenticationMethodsForLoginService,
         authTicketHelper: AuthenticationAuthTicketHelper,
         authenticationLocalKeyRepository: AuthenticationLocalKeyRepository,
-        cryptography: Cryptography
+        cryptography: Cryptography,
     ): AuthenticationSsoRepository = AuthenticationSsoRepositoryImpl(
         connectivityCheck,
         userStorage,
-        loginService,
+        getAuthenticationMethodsForLoginService,
         authTicketHelper,
         authenticationLocalKeyRepository,
-        cryptography
+        cryptography,
     )
 
     @Provides
     fun provideAuthTicketHelper(
         deviceRegistrationInfo: DeviceRegistrationInfo,
-        verificationEmailTokenService: AuthVerificationEmailTokenService,
-        verificationTotpService: AuthVerificationTotpService,
-        verificationU2fService: AuthVerificationU2fService,
-        verificationDuoPushService: AuthVerificationDuoPushService,
-        verificationSsoService: AuthVerificationSsoService,
-        registrationAuthTicketService: AuthRegistrationAuthTicketService,
-        loginAuthTicketService: AuthLoginAuthTicketService
+        performEmailTokenVerificationService: PerformEmailTokenVerificationService,
+        performTotpVerificationService: PerformTotpVerificationService,
+        performU2FVerificationService: PerformU2FVerificationService,
+        performDuoPushVerificationService: PerformDuoPushVerificationService,
+        performSsoVerificationService: PerformSsoVerificationService,
+        completeDeviceRegistrationWithAuthTicketService: CompleteDeviceRegistrationWithAuthTicketService,
+        completeLoginWithAuthTicketService: CompleteLoginWithAuthTicketService,
     ): AuthenticationAuthTicketHelper = AuthenticationAuthTicketHelperImpl(
         deviceRegistrationInfo,
-        verificationEmailTokenService,
-        verificationTotpService,
-        verificationU2fService,
-        verificationDuoPushService,
-        verificationSsoService,
-        registrationAuthTicketService,
-        loginAuthTicketService
+        performEmailTokenVerificationService,
+        performTotpVerificationService,
+        performU2FVerificationService,
+        performDuoPushVerificationService,
+        performSsoVerificationService,
+        completeDeviceRegistrationWithAuthTicketService,
+        completeLoginWithAuthTicketService,
     )
 }

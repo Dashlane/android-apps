@@ -1,12 +1,8 @@
 package com.dashlane.collections.sharing.item
 
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.sharing.SharingItemUpdater
 import com.dashlane.core.sharing.handleCollectionSharingResult
-import com.dashlane.core.sharing.toItemForEmailing
-import com.dashlane.core.sharing.toSharedVaultItemLite
 import com.dashlane.core.xmlconverter.DataIdentifierSharingXmlConverter
-import com.dashlane.session.authorization
 import com.dashlane.securefile.extensions.hasAttachments
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.AddItemGroupsToCollectionService
@@ -19,10 +15,14 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.RemoveItemGroupsFromC
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.server.api.pattern.UuidFormat
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.internal.builder.request.SharingRequestRepository
 import com.dashlane.sharing.internal.model.ItemToShare
+import com.dashlane.sharing.toItemForEmailing
+import com.dashlane.sharing.toSharedVaultItemLite
 import com.dashlane.sharing.util.AuditLogHelper
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataUpdateProvider
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
@@ -40,7 +40,7 @@ class CollectionSharingItemDataProvider @Inject constructor(
     private val addItemGroupsToCollectionService: AddItemGroupsToCollectionService,
     private val removeItemGroupsFromCollectionService: RemoveItemGroupsFromCollectionService,
     private val sharingDao: SharingDao,
-    private val auditLogHelper: AuditLogHelper
+    private val auditLogHelper: AuditLogHelper,
 ) {
     private val authorization: Authorization.User
         get() = sessionManager.session!!.authorization
@@ -49,7 +49,7 @@ class CollectionSharingItemDataProvider @Inject constructor(
 
     suspend fun addItemToSharedCollections(
         sharedCollections: List<Collection>,
-        item: SummaryObject
+        item: SummaryObject,
     ): Boolean {
         if (item.syncObjectType !in allowedTypesForCollectionSharing) return false
         if (sharedCollections.isEmpty()) return true
@@ -68,7 +68,7 @@ class CollectionSharingItemDataProvider @Inject constructor(
             val response = addItemsGroupsToCollection(
                 sharedCollection = collection,
                 itemGroups = listOf(itemGroup),
-                userGroups = userGroups
+                userGroups = userGroups,
             )?.also { (collections, groups) ->
                 sharingItemUpdater.handleCollectionSharingResult(collections, groups)
             }
@@ -101,13 +101,15 @@ class CollectionSharingItemDataProvider @Inject constructor(
             if (!hasFailure) hasFailure = existingItemGroup == null
             existingItemGroup ?: return@forEach
 
-            val itemGroupAuditLogs = auditLogHelper.buildAuditLogDetails(existingItemGroup)?.let { auditLogDetails ->
-                listOf(
-                    RemoveItemGroupsFromCollectionService.Request.ItemGroupAuditLog(
-                        auditLogDetails = auditLogDetails,
-                        uuid = UuidFormat(existingItemGroup.groupId)
+            val itemGroupAuditLogs = existingItemGroup.items?.singleOrNull()?.let { item ->
+                auditLogHelper.buildAuditLogDetail(authorization, item.itemId)?.let { auditLogDetails ->
+                    listOf(
+                        RemoveItemGroupsFromCollectionService.Request.ItemGroupAuditLog(
+                            auditLogDetails = auditLogDetails,
+                            uuid = UuidFormat(existingItemGroup.groupId),
+                        ),
                     )
-                )
+                }
             }
 
             val response = runCatching {
@@ -117,8 +119,8 @@ class CollectionSharingItemDataProvider @Inject constructor(
                         collectionId = UuidFormat(collectionToRemove.uuid),
                         itemGroupAuditLogs = itemGroupAuditLogs,
                         itemGroupsIds = listOf(UuidFormat(existingItemGroup.groupId)),
-                        revision = collectionToRemove.revision
-                    )
+                        revision = collectionToRemove.revision,
+                    ),
                 )
             }.onFailure {
             }.getOrNull()?.also { collectionResponse ->
@@ -130,7 +132,7 @@ class CollectionSharingItemDataProvider @Inject constructor(
         sharingDataUpdateProvider.getUpdatedItemGroups(updatedItemGroups).let { groups ->
             sharingItemUpdater.handleCollectionSharingResult(
                 collections = updatedCollections,
-                updatedItemGroups = groups
+                updatedItemGroups = groups,
             )
         }
         return hasFailure
@@ -139,13 +141,15 @@ class CollectionSharingItemDataProvider @Inject constructor(
     suspend fun addItemsGroupsToCollection(
         sharedCollection: Collection,
         itemGroups: List<ItemGroup>,
-        userGroups: List<UserGroup>
+        userGroups: List<UserGroup>,
     ): Pair<List<Collection>, List<ItemGroup>>? {
         return runCatching {
             val request = sharingRequestRepository.createAddItemGroupsToCollectionRequest(
+                username = login,
+                authorization = authorization,
                 collection = sharedCollection,
                 itemGroups = itemGroups,
-                userGroups = userGroups
+                userGroups = userGroups,
             )
             addItemGroupsToCollectionService.execute(authorization, request).let {
                 sharingDataUpdateProvider.getUpdatedItemGroups(itemGroups).let { updatedGroups ->
@@ -169,22 +173,23 @@ class CollectionSharingItemDataProvider @Inject constructor(
             sharingDao.getItemWithExtraData(item.id, item.syncObjectType)
         return runCatching {
             val request = sharingRequestRepository.createItemGroupRequest(
-                users = emptyList(), 
+                username = login,
+                users = emptyList(),
                 groups = emptyList(),
                 item = ItemToShare(
                     item.id,
                     xmlConverter.toXml(dataIdentifierWithExtraData)!!,
-                    item.syncObjectType.toItemUploadItemType()
+                    item.syncObjectType.toItemUploadItemType(),
                 ),
                 itemForEmailing = item.toSharedVaultItemLite().toItemForEmailing(),
-                auditLogs = null
+                auditLogs = null,
             )
             createItemGroupService.execute(authorization, request)
             
             
         }.onFailure {
                 "ItemGroup can't be created for ${item.id}",
-                throwable = it
+                throwable = it,
             )
         }.getOrNull()?.data?.itemGroups?.first()
     }
@@ -199,26 +204,29 @@ class CollectionSharingItemDataProvider @Inject constructor(
             return emptyList()
         }
         return runCatching {
+            val itemIds = items.map { it.id }
+            val auditLogs = auditLogHelper.buildAuditLogDetails(authorization, itemIds)
             val itemsForSharing = items.map {
+                val auditLog = auditLogs.firstOrNull { (itemId, _) -> itemId == it.id }?.second
                 val itemExtraData = sharingDao.getItemWithExtraData(it.id, it.syncObjectType)
                 val itemToShare = ItemToShare(
                     it.id,
                     xmlConverter.toXml(itemExtraData)!!,
-                    it.syncObjectType.toItemUploadItemType()
+                    it.syncObjectType.toItemUploadItemType(),
                 )
                 val itemForEmailing = it.toSharedVaultItemLite().toItemForEmailing()
-                itemToShare to itemForEmailing
+                Triple(itemToShare, itemForEmailing, auditLog)
             }
             val request = sharingRequestRepository.createMultipleItemGroupsRequest(
-                users = emptyList(), 
+                username = login,
+                users = emptyList(),
                 groups = emptyList(),
                 items = itemsForSharing,
-                auditLogs = null
             )
             createMultipleItemGroupsService.execute(authorization, request)
         }.onFailure {
                 "ItemGroups can't be created for ${items.map { it.id }}",
-                throwable = it
+                throwable = it,
             )
         }.getOrNull()?.data?.itemGroups ?: emptyList()
     }
@@ -229,7 +237,7 @@ class CollectionSharingItemDataProvider @Inject constructor(
     private fun findItemGroupInCollection(
         itemGroups: List<ItemGroup>,
         collection: Collection,
-        itemUid: String
+        itemUid: String,
     ) = itemGroups.firstOrNull { group ->
         group.collections?.any { it.uuid == collection.uuid } == true &&
             group.items?.any { sharedItem -> sharedItem.itemId == itemUid } == true

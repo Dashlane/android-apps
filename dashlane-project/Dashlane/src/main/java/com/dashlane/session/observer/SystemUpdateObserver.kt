@@ -1,7 +1,7 @@
 package com.dashlane.session.observer
 
 import android.os.Build
-import com.dashlane.login.LoginInfo
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver

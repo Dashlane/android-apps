@@ -41,7 +41,7 @@ fun <T : SyncObject> createIdentitySubviews(
     listener: ItemEditViewContract.View.UiUpdateListener,
     item: VaultItem<T>,
     identityAdapter: IdentityAdapter<T>,
-    fullNameOnly: Boolean = false
+    fullNameOnly: Boolean = false,
 ): List<ItemSubView<*>> = with(identityAdapter) {
     val list = mutableListOf<ItemSubView<*>?>()
     val isNew = !item.hasBeenSaved
@@ -50,7 +50,7 @@ fun <T : SyncObject> createIdentitySubviews(
         genericDataQuery.queryFirst(
             genericFilter {
                 specificDataType(SyncObjectType.IDENTITY)
-            }
+            },
         )?.id
     } else {
         linkedIdentity(item)?.takeUnless { it.isSemanticallyNull() }
@@ -77,7 +77,7 @@ fun <T : SyncObject> createIdentitySubviews(
         fullNameView = fullNameView,
         listener = listener,
         genderView = genderView,
-        birthDateView = birthDateView
+        birthDateView = birthDateView,
     )?.also {
         list.add(it)
     }
@@ -96,7 +96,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldFullName(
     context: Context,
     subViewFactory: SubViewFactory,
     item: VaultItem<T>,
-    isOther: Boolean
+    isOther: Boolean,
 ): ItemSubView<String>? {
     return subViewFactory.createSubViewString(
         context.getString(R.string.abstact_ids_hint_full_name),
@@ -105,7 +105,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldFullName(
         { it, value ->
             val vaultItem = it as VaultItem<T>
             vaultItem.copyForUpdatedFullName(this, value)
-        }
+        },
     )
         .apply { (this as? ItemEditValueTextSubView)?.invisible = !isOther }
 }
@@ -115,7 +115,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldGender(
     item: VaultItem<T>,
     editMode: Boolean,
     isOther: Boolean,
-    listener: ItemEditViewContract.View.UiUpdateListener
+    listener: ItemEditViewContract.View.UiUpdateListener,
 ): ItemSubViewImpl<String>? {
     val genderHeader = context.getString(R.string.gender)
     val possibleGenders = SyncObject.Gender.values().toSet()
@@ -129,7 +129,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldGender(
         editMode -> ItemEditValueListSubView(
             genderHeader,
             selectedGender,
-            if (!hasGender) listOf(selectLabel) + genders else genders
+            if (!hasGender) listOf(selectLabel) + genders else genders,
         ) { it, value -> it.copyForUpdatedGender(this, context, possibleGenders, value) }
             .apply {
                 invisible = !isOther
@@ -151,7 +151,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldGender(
         else -> ItemReadValueListSubView(
             genderHeader,
             selectedGender,
-            genders
+            genders,
         )
     }
 }
@@ -161,7 +161,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
     item: VaultItem<T>,
     editMode: Boolean,
     isOther: Boolean,
-    listener: ItemEditViewContract.View.UiUpdateListener
+    listener: ItemEditViewContract.View.UiUpdateListener,
 ): ItemSubViewImpl<LocalDate?>? {
     val birthDateHint = context.getString(R.string.date_of_birth)
     val birthDateLocalDate = birthDate(item)
@@ -171,7 +171,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
         editMode -> ItemEditValueDateSubView(
             birthDateHint,
             birthDateLocalDate,
-            birthDateFormatted
+            birthDateFormatted,
         ) { it, value -> it.copyForUpdatedBirthDate(this, value) }
             .apply {
                 invisible = !isOther
@@ -189,7 +189,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldBirthDate(
         else -> ItemReadValueDateSubView(
             birthDateHint,
             birthDateLocalDate,
-            birthDateFormatted
+            birthDateFormatted,
         )
     }
 }
@@ -203,7 +203,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
     fullNameView: ItemSubView<String>?,
     listener: ItemEditViewContract.View.UiUpdateListener,
     genderView: ItemSubViewImpl<String>?,
-    birthDateView: ItemSubViewImpl<LocalDate?>?
+    birthDateView: ItemSubViewImpl<LocalDate?>?,
 ): ItemSubViewImpl<String>? {
     val otherLabel = context.getString(R.string.other)
     val linkedIdentityHeader = context.getString(R.string.identity)
@@ -211,7 +211,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
         vaultDataQuery.queryAllLegacy(
             vaultFilter {
                 specificDataType(SyncObjectType.IDENTITY)
-            }
+            },
         ).fold(mutableMapOf()) { acc, identity ->
             val id = identity as VaultItem<SyncObject.Identity>
             val fullName = id.toSummary<SummaryObject.Identity>().fullName
@@ -231,7 +231,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
         ItemEditValueListSubView(
             linkedIdentityHeader,
             selectedFullName,
-            fullNames
+            fullNames,
         ) { it, value -> it.copyForUpdatedLinkedIdentity(this, fullNameToIdentity, value) }
             .apply {
                 addValueChangedListener(object : ValueChangeManager.Listener<String> {
@@ -267,7 +267,7 @@ private fun <T : SyncObject> IdentityAdapter<T>.createFieldLinkedIdentity(
         ItemReadValueListSubView(
             linkedIdentityHeader,
             selectedFullName,
-            fullNames
+            fullNames,
         )
     }
 }
@@ -281,7 +281,7 @@ fun <T : SyncObject> createIdDateField(
     dateHint: String,
     copyField: CopyField,
     valueUpdate: (VaultItem<*>, LocalDate?) -> VaultItem<*>?,
-    vaultItemCopy: VaultItemCopyService
+    vaultItemCopy: VaultItemCopyService,
 ): ItemSubView<*>? {
     val issueDateFormatted = dateLocalDate?.toIdentityFormat(context.resources)
     return when {
@@ -289,7 +289,7 @@ fun <T : SyncObject> createIdDateField(
             dateHint,
             dateLocalDate,
             issueDateFormatted,
-            valueUpdate
+            valueUpdate,
         ).apply {
             addValueChangedListener(object : ValueChangeManager.Listener<LocalDate?> {
                 override fun onValueChanged(origin: Any, newValue: LocalDate?) {
@@ -306,9 +306,9 @@ fun <T : SyncObject> createIdDateField(
             ItemReadValueDateSubView(
                 dateHint,
                 dateLocalDate,
-                issueDateFormatted
+                issueDateFormatted,
             ),
-            CopyAction(summaryObject = item.toSummary(), copyField = copyField, vaultItemCopy = vaultItemCopy)
+            CopyAction(summaryObject = item.toSummary(), copyField = copyField, vaultItemCopy = vaultItemCopy),
         )
     }
 }
@@ -317,7 +317,7 @@ fun <T : SyncObject> createIdDateField(
 private fun <T : SyncObject> VaultItem<*>.copyForUpdatedLinkedIdentity(
     adapter: IdentityAdapter<T>,
     fullNameToIdentity: Map<String, VaultItem<SyncObject.Identity>>,
-    value: String
+    value: String,
 ): VaultItem<T> {
     this as VaultItem<T>
     val newLinkedIdentity = fullNameToIdentity[value]?.uid
@@ -331,7 +331,7 @@ private fun <T : SyncObject> VaultItem<*>.copyForUpdatedLinkedIdentity(
 @Suppress("UNCHECKED_CAST")
 private fun <T : SyncObject> VaultItem<*>.copyForUpdatedBirthDate(
     adapter: IdentityAdapter<T>,
-    value: LocalDate?
+    value: LocalDate?,
 ): VaultItem<T> {
     this as VaultItem<T>
     return if (adapter.birthDate(this) == value) {
@@ -346,7 +346,7 @@ private fun <T : SyncObject> VaultItem<*>.copyForUpdatedGender(
     adapter: IdentityAdapter<T>,
     context: Context,
     possibleGenders: Set<SyncObject.Gender>,
-    value: String
+    value: String,
 ): VaultItem<T> {
     this as VaultItem<T>
     val newGender = possibleGenders.firstOrNull { context.getString(it.getLabelId()) == value }
@@ -359,7 +359,7 @@ private fun <T : SyncObject> VaultItem<*>.copyForUpdatedGender(
 
 private fun <T : SyncObject> VaultItem<T>.copyForUpdatedFullName(
     adapter: IdentityAdapter<T>,
-    value: String
+    value: String,
 ): VaultItem<T> {
     return if (adapter.fullName(this).orEmpty() == value) {
         this

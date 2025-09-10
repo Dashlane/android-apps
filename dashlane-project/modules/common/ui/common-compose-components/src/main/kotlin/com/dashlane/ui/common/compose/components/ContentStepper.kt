@@ -25,13 +25,13 @@ import com.dashlane.design.theme.DashlaneTheme
 @Composable
 fun ContentStepper(
     modifier: Modifier = Modifier,
-    content: List<CharSequence>
+    content: List<CharSequence>,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .cardBackground()
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         content.forEachIndexed { index, string ->
             val step = index + 1
@@ -39,7 +39,7 @@ fun ContentStepper(
             Row(modifier = Modifier.padding(bottom = bottomPadding)) {
                 ContentStepCircle(
                     text = step.toString(),
-                    modifier = Modifier.align(Alignment.Top)
+                    modifier = Modifier.align(Alignment.Top),
                 )
                 when (string) {
                     is AnnotatedString -> {
@@ -49,7 +49,7 @@ fun ContentStepper(
                             color = DashlaneTheme.colors.textNeutralCatchy,
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
-                                .padding(start = 12.dp)
+                                .padding(start = 12.dp),
                         )
                     }
                     is String -> {
@@ -59,7 +59,7 @@ fun ContentStepper(
                             color = DashlaneTheme.colors.textNeutralCatchy,
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
-                                .padding(start = 12.dp)
+                                .padding(start = 12.dp),
                         )
                     }
                 }
@@ -71,14 +71,14 @@ fun ContentStepper(
 @Composable
 private fun ContentStepCircle(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
             .size(ContentStepCircleSize)
             .background(DashlaneTheme.colors.containerExpressiveBrandQuietIdle, CircleShape)
             .padding(4.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             modifier = Modifier
@@ -88,7 +88,7 @@ private fun ContentStepCircle(
             style = DashlaneTheme.typography.bodyStandardRegular,
             color = DashlaneTheme.colors.textBrandStandard,
             textAlign = TextAlign.Center,
-            overflow = TextOverflow.Visible
+            overflow = TextOverflow.Visible,
         )
     }
 }

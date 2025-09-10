@@ -24,9 +24,8 @@ internal class NitroApiProxyClientImpl(
     private val nitroSecretStreamClient: NitroSecretStreamClient,
     private val secretStreamStates: SecretStreamStates,
     private val coroutineDispatcher: CoroutineDispatcher,
-    private val tunnelId: String
+    private val tunnelId: String,
 ) : NitroApiClient(apiClient.gson) {
-
     override suspend fun <ResponseDataT> execute(
         path: String,
         request: Any,
@@ -34,7 +33,7 @@ internal class NitroApiProxyClientImpl(
         businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
         clock: DashlaneTime.SynchronizedClock,
         appAuthorization: Authorization.App,
-        userAuthorization: Authorization.User
+        userAuthorization: Authorization.User,
     ): Response<ResponseDataT> = withContext(coroutineDispatcher) {
         val encryptedRequest = createRequest(request, tunnelId)
         val response: Response<JsonObject> = apiClient.execute(
@@ -43,7 +42,7 @@ internal class NitroApiProxyClientImpl(
             businessExceptions = businessExceptions,
             clock = clock,
             appAuthorization = appAuthorization,
-            userAuthorization = userAuthorization
+            userAuthorization = userAuthorization,
         )
         decryptResponse(response, responseDataClass)
     }
@@ -54,7 +53,7 @@ internal class NitroApiProxyClientImpl(
         responseDataClass: Class<ResponseDataT>,
         businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
         clock: DashlaneTime.SynchronizedClock,
-        appAuthorization: Authorization.App
+        appAuthorization: Authorization.App,
     ): Response<ResponseDataT> = withContext(coroutineDispatcher) {
         val encryptedRequest = createRequest(request, tunnelId)
         val response: Response<JsonObject> = apiClient.execute(
@@ -62,7 +61,7 @@ internal class NitroApiProxyClientImpl(
             request = encryptedRequest,
             businessExceptions = businessExceptions,
             clock = clock,
-            appAuthorization = appAuthorization
+            appAuthorization = appAuthorization,
         )
         decryptResponse(response, responseDataClass)
     }
@@ -71,13 +70,13 @@ internal class NitroApiProxyClientImpl(
         path: String,
         request: Any,
         responseDataClass: Class<ResponseDataT>,
-        businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>
+        businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
     ): Response<ResponseDataT> = withContext(coroutineDispatcher) {
         val encryptedRequest = createRequest(request, tunnelId)
         val response: Response<JsonObject> = apiClient.execute(
             path = path,
             request = encryptedRequest,
-            businessExceptions = businessExceptions
+            businessExceptions = businessExceptions,
         )
         decryptResponse(response, responseDataClass)
     }
@@ -87,13 +86,13 @@ internal class NitroApiProxyClientImpl(
             synchronized(secretStreamStates) {
                 nitroSecretStreamClient.encryptSecretStream(
                     states = secretStreamStates,
-                    message = gson.toJson(request).encodeUtf8ToByteArray()
+                    message = gson.toJson(request).encodeUtf8ToByteArray(),
                 )
             }.encodeHex()
         } catch (e: Throwable) {
             throw DashlaneApiJsonException(
                 message = "Failed to craft secret stream request",
-                cause = e
+                cause = e,
             )
         }
         return ProxyRequest(secretStreamRequestData, tunnelId)
@@ -101,7 +100,7 @@ internal class NitroApiProxyClientImpl(
 
     private fun <ResponseDataT> decryptResponse(
         response: Response<JsonObject>,
-        responseDataClass: Class<ResponseDataT>
+        responseDataClass: Class<ResponseDataT>,
     ): Response<ResponseDataT> {
         val responseData = try {
             gson.fromJson(
@@ -109,21 +108,21 @@ internal class NitroApiProxyClientImpl(
                     nitroSecretStreamClient.decryptSecretStream(
                         states = secretStreamStates,
                         encrypted = response.data["encryptedData"].asString.decodeHex()
-                            .toByteArray()
+                            .toByteArray(),
                     )
                 }.decodeUtf8ToString(),
-                responseDataClass
+                responseDataClass,
             )
         } catch (e: Throwable) {
             throw DashlaneApiJsonException(
                 message = "Failed to read secret stream response",
-                cause = e
+                cause = e,
             )
         }
 
         return Response(
             requestId = response.requestId,
-            data = responseData
+            data = responseData,
         )
     }
 
@@ -131,6 +130,6 @@ internal class NitroApiProxyClientImpl(
         @SerializedName("encryptedData")
         val encryptedData: String,
         @SerializedName("tunnelUuid")
-        val tunnelUuid: String
+        val tunnelUuid: String,
     )
 }

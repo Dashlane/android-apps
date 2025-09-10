@@ -4,20 +4,20 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.dashlane.authentication.RegisteredUserDevice
 import com.dashlane.createaccount.passwordless.MplessDestination.BiometricsSetup
 import com.dashlane.createaccount.passwordless.MplessDestination.PinSetup
 import com.dashlane.createaccount.passwordless.biometrics.BiometricsSetupScreen
+import com.dashlane.data.login.RegisteredUserDevice
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.VerificationMode
-import com.dashlane.login.LoginIntents
+import com.dashlane.login.LocalLoginDestination
+import com.dashlane.login.LoginDestination
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryDestination.Totp
 import com.dashlane.login.pages.secrettransfer.LoginSecretTransferDestination.Authorize
@@ -33,9 +33,7 @@ import com.dashlane.login.pages.secrettransfer.confirmemail.ConfirmEmailScreen
 import com.dashlane.login.pages.secrettransfer.help.RecoveryHelpScreen
 import com.dashlane.login.pages.secrettransfer.help.lostkey.LostKeyScreen
 import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroScreen
-import com.dashlane.login.pages.totp.compose.LoginTotpScreen
-import com.dashlane.login.root.LocalLoginDestination
-import com.dashlane.login.root.LoginDestination
+import com.dashlane.login.totp.LoginTotpScreen
 import com.dashlane.pin.setup.PinSetupScreen
 import com.dashlane.secrettransfer.qrcode.QrCodeScreen
 import com.dashlane.user.UserAccountInfo
@@ -48,24 +46,11 @@ fun LoginSecretTransferNavigation(
     contentPadding: PaddingValues = PaddingValues(),
     startDestination: LoginSecretTransferDestination,
     email: String?,
+    goToArk: (RegisteredUserDevice, UserAccountInfo.AccountType) -> Unit,
     onSuccess: (LoginStrategy.Strategy) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     val navController = rememberNavController()
-    val context = LocalContext.current
-
-    val goToArk: (RegisteredUserDevice) -> Unit = { registeredUserDevice ->
-        context.startActivity(
-            LoginIntents.createAccountRecoveryKeyIntent(
-                context = context,
-                registeredUserDevice = registeredUserDevice,
-                accountType = UserAccountInfo.AccountType.InvisibleMasterPassword,
-                authTicket = null
-            )
-        )
-        onCancel()
-    }
-
     val onSuccessWithLog: (LoginStrategy.Strategy) -> Unit = { strategy ->
         loginSecretTransferViewModel.logPageView(AnyPage.SETTINGS_ADD_NEW_DEVICE_SUCCESS)
         onSuccess(strategy)
@@ -73,7 +58,7 @@ fun LoginSecretTransferNavigation(
 
     NavHost(
         startDestination = startDestination,
-        navController = navController
+        navController = navController,
     ) {
         composable<ChooseType> {
             loginSecretTransferViewModel.logPageView(AnyPage.LOGIN_DEVICE_TRANSFER)
@@ -83,7 +68,7 @@ fun LoginSecretTransferNavigation(
                 email = email,
                 onGoToUniversal = { email -> navController.navigate(UniversalIntro(email)) },
                 onGoToQr = { email -> navController.navigate(QrCode(email)) },
-                onGoToHelp = { email -> navController.navigate(RecoveryHelp(email)) }
+                onGoToHelp = { email -> navController.navigate(RecoveryHelp(email)) },
             )
         }
         composable<UniversalIntro> { backStackEntry ->
@@ -96,7 +81,7 @@ fun LoginSecretTransferNavigation(
                     loginSecretTransferViewModel.payloadFetched(secretTransferPayload)
                     navController.navigate(Authorize)
                 },
-                onGoToHelp = { email -> navController.navigate(RecoveryHelp(email)) }
+                onGoToHelp = { email -> navController.navigate(RecoveryHelp(email)) },
             )
         }
         composable<RecoveryHelp> { backStackEntry ->
@@ -105,8 +90,10 @@ fun LoginSecretTransferNavigation(
                 modifier = Modifier.padding(contentPadding),
                 viewModel = hiltViewModel(),
                 email = backStackEntry.toRoute<RecoveryHelp>().email,
-                onStartRecoveryClicked = goToArk,
-                onLostKeyClicked = { navController.navigate(LostKey) }
+                onStartRecoveryClicked = { registeredUserDevice ->
+                    goToArk(registeredUserDevice, UserAccountInfo.AccountType.InvisibleMasterPassword)
+                },
+                onLostKeyClicked = { navController.navigate(LostKey) },
             )
         }
         composable<LostKey> { LostKeyScreen() }
@@ -119,11 +106,11 @@ fun LoginSecretTransferNavigation(
                     loginSecretTransferViewModel.payloadFetched(secretTransferPayload)
                     navController.navigate(ConfirmEmail(secretTransferPayload.login))
                 },
-                onGoToARK = goToArk,
+                onGoToARK = { registeredUserDevice -> goToArk(registeredUserDevice, UserAccountInfo.AccountType.InvisibleMasterPassword) },
                 onGoToUniversalD2D = { email ->
                     navController.navigateAndPopupToStart(UniversalIntro(email))
                 },
-                onCancelled = onCancel
+                onCancelled = onCancel,
             )
         }
         composable<ConfirmEmail> { backStackEntry ->
@@ -136,7 +123,7 @@ fun LoginSecretTransferNavigation(
                 secretTransferPayload = payload,
                 goToTOTP = { navController.navigate(Totp(confirmEmail)) },
                 onCancelled = onCancel,
-                onLoginSuccess = { navController.navigate(Authorize) }
+                onLoginSuccess = { navController.navigate(Authorize) },
             )
         }
         composable<Totp> {
@@ -144,7 +131,7 @@ fun LoginSecretTransferNavigation(
                 modifier = Modifier.padding(contentPadding),
                 viewModel = hiltViewModel(),
                 verificationMode = VerificationMode.OTP2,
-                goToNext = { navController.navigate(Authorize) }
+                goToNext = { navController.navigate(Authorize) },
             )
         }
         composable<Authorize> {
@@ -159,7 +146,7 @@ fun LoginSecretTransferNavigation(
                         UserAccountInfo.AccountType.MasterPassword ->
                             onSuccessWithLog(LoginStrategy.Strategy.NoStrategy)
                     }
-                }
+                },
             )
         }
         composable<PinSetup> {
@@ -170,7 +157,7 @@ fun LoginSecretTransferNavigation(
                 onPinChosen = { pin ->
                     loginSecretTransferViewModel.pinSetup(pin)
                     navController.navigate(BiometricsSetup)
-                }
+                },
             )
         }
         composable<BiometricsSetup> {
@@ -190,7 +177,7 @@ fun LoginSecretTransferNavigation(
                     loginSecretTransferViewModel.onEnableBiometrics()
                     loginSecretTransferViewModel.logCompleteTransfer(biometricsEnabled = true)
                     onSuccessWithLog(LoginStrategy.Strategy.MplessD2D)
-                }
+                },
             )
         }
     }
@@ -198,8 +185,9 @@ fun LoginSecretTransferNavigation(
 
 fun NavGraphBuilder.remoteLoginSecretTransferNavigation(
     contentPadding: PaddingValues = PaddingValues(),
+    goToArk: (RegisteredUserDevice?, UserAccountInfo.AccountType) -> Unit,
     onSuccess: (LoginStrategy.Strategy) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     composable<LoginDestination.SecretTransfer> { backStackEntry ->
         val args = backStackEntry.toRoute<LoginDestination.SecretTransfer>()
@@ -207,16 +195,18 @@ fun NavGraphBuilder.remoteLoginSecretTransferNavigation(
             startDestination = if (args.showQrCode) QrCode(null) else ChooseType,
             contentPadding = contentPadding,
             email = args.login,
+            goToArk = { registeredUserDevice, accountType -> goToArk(registeredUserDevice, accountType) },
             onSuccess = onSuccess,
-            onCancel = onCancel
+            onCancel = onCancel,
         )
     }
 }
 
 fun NavGraphBuilder.localLoginSecretTransferNavigation(
     contentPadding: PaddingValues = PaddingValues(),
+    goToArk: (UserAccountInfo.AccountType) -> Unit,
     onSuccess: (LoginStrategy.Strategy) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     composable<LocalLoginDestination.SecretTransfer> { backStackEntry ->
         val args = backStackEntry.toRoute<LocalLoginDestination.SecretTransfer>()
@@ -224,8 +214,9 @@ fun NavGraphBuilder.localLoginSecretTransferNavigation(
             startDestination = ChooseType,
             contentPadding = contentPadding,
             email = args.login,
+            goToArk = { _, accountType -> goToArk(accountType) },
             onSuccess = onSuccess,
-            onCancel = onCancel
+            onCancel = onCancel,
         )
     }
 }

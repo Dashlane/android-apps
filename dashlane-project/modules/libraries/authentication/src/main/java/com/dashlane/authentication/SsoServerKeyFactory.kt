@@ -8,7 +8,7 @@ interface SsoServerKeyFactory {
 }
 
 class SsoServerKeyFactoryImpl @Inject constructor(
-    private val cryptographyKeyGenerator: CryptographyKeyGenerator
+    private val cryptographyKeyGenerator: CryptographyKeyGenerator,
 ) : SsoServerKeyFactory {
     override fun generateSsoServerKey() = cryptographyKeyGenerator.generateRaw64().use { it.toByteArray() }
 }

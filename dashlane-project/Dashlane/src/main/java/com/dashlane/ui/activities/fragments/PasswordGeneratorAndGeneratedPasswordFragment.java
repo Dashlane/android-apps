@@ -1,6 +1,5 @@
 package com.dashlane.ui.activities.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,6 @@ import com.dashlane.ui.activities.DashlaneActivity;
 import com.dashlane.ui.activities.MenuContainer;
 import com.dashlane.ui.fragments.PasswordGenerationCallback;
 import com.dashlane.ui.fragments.PasswordGeneratorFragment;
-import com.dashlane.ui.screens.activities.GeneratedPasswordHistoryActivity;
 import com.dashlane.ui.util.ActionBarUtil;
 import com.dashlane.util.PageViewUtil;
 import com.dashlane.vault.model.VaultItem;
@@ -93,6 +91,6 @@ public class PasswordGeneratorAndGeneratedPasswordFragment extends AbstractConte
 
     @Override
     public void showPreviouslyGenerated() {
-        startActivity(new Intent(getActivity(), GeneratedPasswordHistoryActivity.class));
+        navigator.goToGeneratedPasswordHistoryFromPasswordGenerator();
     }
 }

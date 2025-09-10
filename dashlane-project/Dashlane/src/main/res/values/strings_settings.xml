@@ -1,19 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="settings_category_advanced">Advanced Settings</string>
-    <string name="settings_category_security">Security</string>
-    <string name="settings_category_security_description">Application lock and other security settings</string>
-    <string name="settings_category_general">General</string>
-    <string name="settings_category_general_description">Auto-login, sync, and other general settings</string>
-    <string name="settings_category_help">Help</string>
-    <string name="settings_category_help_description">Get help using Dashlane</string>
-    <string name="settings_help_troubleshooting">Troubleshooting</string>
-    <string name="settings_help_troubleshooting_description">Consult the help center to answer your questions</string>
-
-    
-    <string name="setting_in_app_login_category">Autofill</string>
-    <string name="setting_in_app_login_enabled_title">Autofill</string>
-    <string name="setting_in_app_login_enabled_description">Fill forms using your data stored in Dashlane</string>
     
     <string name="setting_in_app_login_frozen_state_description">Your account is read-only. Autofill is unavailable.</string>
     
@@ -28,31 +14,7 @@
     <string name="settings_general_backup_export_restriction_description">Exporting items stored in Dashlane is restricted, contact your Admin for more information.</string>
 
     
-    <string name="setting_change_master_password_title">Change Master Password</string>
-    <string name="setting_change_master_password_description">Change the Master Password you use to access Dashlane</string>
-    <string name="setting_manage_devices_title">Manage activity</string>
-    <string name="setting_manage_devices_description">Manage devices connected to your Dashlane account</string>
-    
-    <string name="setting_show_rich_icons_title">Show rich icons for logins</string>
-    
-    <string name="setting_show_rich_icons_description">Dashlane will download and display rich icons on your logins</string>
-    
     <string name="setting_rich_icons_force_title">Policy is Disabled</string>
     
     <string name="setting_rich_icons_force_description">Your company policy requires you to disable rich icons for logins. For more information, contact your plan admin</string>
-
-    
-    <string name="settings_cryptography">Key derivation function</string>
-    <string name="settings_cryptography_description">Use %1$s for the key derivation</string>
-    <string name="settings_cryptography_dialog_title">You cannot edit this setting</string>
-    <string name="settings_cryptography_dialog_description_b2c">Please visit the Security settings on the web application to edit your key derivation function.</string>
-    <string name="settings_cryptography_dialog_description_b2b">Your account admin requires the use of this key derivation function as a result of company policy.</string>
-    
-    <string name="settings_cryptography_description_compatibility">AES-256 with PBKDF2 10,204</string>
-    <string name="settings_cryptography_description_argon2">AES-256 with Argon2d</string>
-    <string name="settings_cryptography_description_pbkdf2">AES-256 with PBKDF2 200,000</string>
-    
-    <string name="settings_anti_phishing">Phishing alerts</string>
-    
-    <string name="settings_anti_phishing_description">Display phishing alerts when autofilling your login details</string>
 </resources>

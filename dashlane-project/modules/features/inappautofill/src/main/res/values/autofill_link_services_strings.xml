@@ -14,4 +14,13 @@
     <string name="autofill_link_app">Link App</string>
     
     <string name="autofill_cancel">Maybe later</string>
+
+    
+    <string name="autofill_link_website_title">Add this website to your login?</string>
+    
+    <string name="autofill_link_website_description">Make sure this website’s URL is correct:</string>
+    
+    <string name="autofill_link_app_title">Link to existing login?</string>
+    
+    <string name="autofill_link_app_description">To autofill your &lt;strong&gt;%1$s&lt;/strong&gt; login details on &lt;strong&gt;%2$s&lt;/strong&gt;, add this app to your existing login:</string>
 </resources>

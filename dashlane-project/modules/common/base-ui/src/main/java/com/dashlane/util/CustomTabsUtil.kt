@@ -1,5 +1,6 @@
 package com.dashlane.util
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -15,8 +16,6 @@ import android.widget.Toast
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import com.dashlane.design.theme.color.darkColors
 import com.dashlane.design.theme.color.lightColors
 import com.dashlane.ui.R
@@ -32,7 +31,7 @@ fun TextView.setTextWithLinks(resId: Int, resIdArgToLinks: List<Pair<Int, Uri>>)
 fun TextView.setTextWithLinks(
     fullText: SpannableString,
     stringArgToLinks: List<Pair<String, Uri>>,
-    viewToDisable: View? = null
+    viewToDisable: View? = null,
 ) {
     stringArgToLinks.forEach { pair ->
         val paramText = pair.first
@@ -49,7 +48,7 @@ fun TextView.setTextWithLinks(
                 clickSpan,
                 startIndex,
                 startIndex + paramText.length,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
             )
         }
         movementMethod = LinkMovementMethod.getInstance()
@@ -60,13 +59,19 @@ fun TextView.setTextWithLinks(
 fun Context.launchUrl(url: String) =
     launchUrl(Uri.parse(url))
 
+@SuppressLint("QueryPermissionsNeeded")
 fun Context.launchUrl(uri: Uri) {
     try {
-        CustomTabsIntent.Builder().setShowTitle(true).applyAppTheme().build().launchUrl(this, uri)
-    } catch (e: ActivityNotFoundException) {
+        CustomTabsIntent
+            .Builder()
+            .setShowTitle(true)
+            .applyAppTheme()
+            .build()
+            .launchUrl(this, uri)
+    } catch (_: ActivityNotFoundException) {
         val fallback = Intent(Intent.ACTION_VIEW, uri)
         if (fallback.resolveActivity(packageManager) != null) {
-            ContextCompat.startActivity(this, fallback, null)
+            startActivity(fallback, null)
         } else {
             displayNoBrowserWarning(this)
         }
@@ -76,40 +81,31 @@ fun Context.launchUrl(uri: Uri) {
 fun CustomTabsIntent.Builder.applyAppTheme() = setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
     .setColorSchemeParams(
         CustomTabsIntent.COLOR_SCHEME_DARK,
-        CustomTabColorSchemeParams.Builder()
+        CustomTabColorSchemeParams
+            .Builder()
             .setToolbarColor(darkColors.containerAgnosticNeutralStandard.toArgb())
             .setNavigationBarColor(darkColors.textNeutralCatchy.value.toArgb())
-            .build()
-    )
-    .setColorSchemeParams(
+            .build(),
+    ).setColorSchemeParams(
         CustomTabsIntent.COLOR_SCHEME_LIGHT,
-        CustomTabColorSchemeParams.Builder()
+        CustomTabColorSchemeParams
+            .Builder()
             .setToolbarColor(lightColors.containerAgnosticNeutralStandard.toArgb())
             .setNavigationBarColor(lightColors.textNeutralCatchy.value.toArgb())
-            .build()
+            .build(),
     )
 
-fun Intent.fallbackCustomTab(packageManager: PackageManager): Intent {
-    return if (resolveActivity(packageManager) != null) {
-        this
-    } else {
-        Intent(Intent.ACTION_VIEW, data)
-    }
+@SuppressLint("QueryPermissionsNeeded")
+fun Intent.fallbackCustomTab(packageManager: PackageManager): Intent = if (resolveActivity(packageManager) != null) {
+    this
+} else {
+    Intent(Intent.ACTION_VIEW, data)
 }
 
 fun Context.safelyStartBrowserActivity(intent: Intent) {
     try {
         startActivity(intent)
-    } catch (e: ActivityNotFoundException) {
-        displayNoBrowserWarning(this)
-    }
-}
-
-@Suppress("DEPRECATION")
-fun FragmentActivity.safelyStartBrowserActivityForResult(intent: Intent, requestCode: Int) {
-    try {
-        startActivityForResult(intent, requestCode)
-    } catch (e: ActivityNotFoundException) {
+    } catch (_: ActivityNotFoundException) {
         displayNoBrowserWarning(this)
     }
 }
@@ -117,6 +113,6 @@ fun FragmentActivity.safelyStartBrowserActivityForResult(intent: Intent, request
 private fun displayNoBrowserWarning(context: Context) {
     ToasterImpl(context).show(
         text = context.getString(R.string.warning_no_browser_enabled_on_device),
-        duration = Toast.LENGTH_LONG
+        duration = Toast.LENGTH_LONG,
     )
 }

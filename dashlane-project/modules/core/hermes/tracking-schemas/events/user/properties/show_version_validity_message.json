@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/show_version_validity_message.json",
+  "type": "object",
+  "description": "Sent every time when an end-of-life of apps message has been shown to the user.",
+  "metas": {
+    "area": "technical"
+  },
+  "properties": {
+    "name": {
+      "const": "show_version_validity_message"
+    },
+    "is_update_possible": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/version_validity.json#/definitions/is_update_possible"
+    },
+    "version_validity_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/version_validity.json#/definitions/version_validity_status"
+    }
+  },
+  "required": [
+    "name",
+    "is_update_possible",
+    "version_validity_status"
+  ],
+  "additionalProperties": false
+}

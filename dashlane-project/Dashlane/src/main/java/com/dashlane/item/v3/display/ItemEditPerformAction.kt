@@ -1,13 +1,18 @@
 package com.dashlane.item.v3.display
 
 import android.content.Context
+import android.content.Intent
+import android.net.wifi.WifiNetworkSuggestion
+import android.provider.Settings.ACTION_WIFI_SETTINGS
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import com.dashlane.R
-import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState
+import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.HasLogins.CredentialItem
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.Text
@@ -34,19 +39,22 @@ fun PerformAction(
     itemAction: ItemAction,
     viewModel: ItemEditViewModel<out FormData>,
     navigator: Navigator,
-    activity: AppCompatActivity
+    activity: AppCompatActivity,
 ) {
     when (itemAction) {
         ItemAction.ConfirmSaveChanges -> {
-            SaveConfirmationDialog(
+            SaveDialog(
+                title = stringResource(id = R.string.save_item_),
+                description = stringResource(id = R.string.would_you_like_to_save_the_item_),
+                secondaryAction = stringResource(id = R.string.discart),
                 onActionPerformed = { viewModel.actionHandled() },
-                onSave = { viewModel.saveData() },
-                onDiscard = { viewModel.onCloseClicked(true) }
+                onSave = { viewModel.onSave() },
+                onSecondary = { viewModel.onCloseClicked(true) },
             )
         }
         ItemAction.SaveError -> {
             ErrorSaveDialog(
-                onActionPerformed = { viewModel.actionHandled() }
+                onActionPerformed = { viewModel.actionHandled() },
             )
         }
         ItemAction.OpenNoRights -> {
@@ -56,31 +64,50 @@ fun PerformAction(
         }
         ItemAction.ConfirmRemove2FA -> {
             ConfirmRemove2FADialog(
-                data.commonData.name,
+                data.commonData.name ?: "",
                 onPositive = {
                     (viewModel as CredentialItemEditViewModel).actionRemoveTwoFactorConfirmed()
                     viewModel.actionHandled()
                 },
-                onNegative = { viewModel.actionHandled() }
+                onNegative = { viewModel.actionHandled() },
             )
         }
         ItemAction.Close -> {
             DeviceUtils.hideKeyboard(activity)
             navigator.popBackStack()
         }
+        is ItemAction.SavePendingChangesToEditCollection -> {
+            SaveDialog(
+                title = stringResource(id = R.string.save_item_),
+                description = stringResource(id = R.string.save_item_to_proceed_description),
+                secondaryAction = stringResource(id = R.string.cancel),
+                onActionPerformed = { viewModel.actionHandled() },
+                onSave = {
+                    viewModel.onSaveToEditCollection()
+                },
+                onSecondary = { },
+            )
+        }
     }
 }
 
-@SuppressWarnings("LongMethod")
+@Suppress(
+    "LongMethod",
+    
+    "kotlin:S107",
+)
 fun performSideEffect(
     context: Context,
     sideEffect: ItemEditSideEffect,
     navigator: Navigator,
-    resultLauncherAuthenticator: ActivityResultLauncher<AuthenticatorSuggestionsUiState.HasLogins.CredentialItem>,
+    resultLauncherAuthenticator: ActivityResultLauncher<CredentialItem>,
     resultLauncherAttachments: ActivityResultLauncher<SummaryObject>,
+    resultLauncherConnectToWiFiNetwork: ActivityResultLauncher<WifiNetworkSuggestion>,
     activity: AppCompatActivity,
     snackbarState: SnackbarHostState,
-    snackScope: CoroutineScope
+    snackScope: CoroutineScope,
+    creditCardSecurityCodeFocusRequested: FocusRequester,
+    creditCardNumberFocusRequested: FocusRequester,
 ) {
     when (sideEffect) {
         is ItemEditSideEffect.ConfirmDelete -> {
@@ -88,14 +115,14 @@ fun performSideEffect(
         }
         is ItemEditSideEffect.GoToSetup2FA -> {
             resultLauncherAuthenticator.launch(
-                AuthenticatorSuggestionsUiState.HasLogins.CredentialItem(
+                CredentialItem(
                     id = sideEffect.credentialId,
                     title = sideEffect.credentialName,
                     domain = sideEffect.topDomain,
                     username = null,
                     packageName = sideEffect.packageName,
                     professional = sideEffect.proSpace,
-                )
+                ),
             )
         }
         is ItemEditSideEffect.OpenWebsite -> {
@@ -105,7 +132,7 @@ fun performSideEffect(
             navigator.goToShareUsersForItems(sideEffect.id)
         }
         is ItemEditSideEffect.OpenPasswordHistory -> {
-            navigator.goToItemHistory(sideEffect.id)
+            navigator.goToItemHistoryFromItemEdit(sideEffect.id)
         }
         is ItemEditSideEffect.OpenLinkedServices -> {
             navigator.goToLinkedWebsites(
@@ -114,17 +141,11 @@ fun performSideEffect(
                 addNew = sideEffect.addNew,
                 temporaryWebsites = sideEffect.temporaryWebsites,
                 temporaryApps = sideEffect.temporaryApps,
-                urlDomain = sideEffect.url
+                urlDomain = sideEffect.url,
             )
         }
         is ItemEditSideEffect.OpenCollection -> {
-            navigator.goToCollectionSelectorFromItemEdit(
-                fromViewOnly = false,
-                temporaryPrivateCollectionsName = sideEffect.temporaryPrivateCollectionsName,
-                temporarySharedCollectionsId = sideEffect.temporarySharedCollectionsId,
-                spaceId = sideEffect.spaceId,
-                isLimited = sideEffect.isLimited
-            )
+            navigator.goToCollectionSelectorFromItemEdit(itemId = sideEffect.itemId)
         }
         is ItemEditSideEffect.OpenPasswordGenerator -> {
             DeviceUtils.hideKeyboard(activity)
@@ -132,14 +153,18 @@ fun performSideEffect(
 
             
             activity.supportFragmentManager.findFragmentByTag(DIALOG_PASSWORD_GENERATOR_TAG) as? PasswordGeneratorDialog
-                ?: PasswordGeneratorDialog.newInstance(activity, sideEffect.origin, sideEffect.domainAsking)
+                ?: PasswordGeneratorDialog.newInstance(
+                    activity,
+                    sideEffect.origin,
+                    sideEffect.domainAsking,
+                )
                     .show(activity.supportFragmentManager, DIALOG_PASSWORD_GENERATOR_TAG)
         }
         is ItemEditSideEffect.GuidedPasswordChange -> {
             navigator.goToGuidedPasswordChangeFromCredential(
                 sideEffect.id,
                 sideEffect.website,
-                sideEffect.userName
+                sideEffect.userName,
             )
         }
         is ItemEditSideEffect.PasswordRestoreResult -> {
@@ -147,14 +172,22 @@ fun performSideEffect(
                 displaySnackbarMessage(
                     snackbarState,
                     snackScope,
-                    context.getString(R.string.feedback_password_restored)
+                    context.getString(R.string.feedback_password_restored),
                 )
             } else {
-                displaySnackbarMessage(snackbarState, snackScope, context.getString(R.string.generic_error_message))
+                displaySnackbarMessage(
+                    snackbarState,
+                    snackScope,
+                    context.getString(R.string.generic_error_message),
+                )
             }
         }
         ItemEditSideEffect.Saved -> {
-            displaySnackbarMessage(snackbarState, snackScope, context.getString(R.string.vault_saved))
+            displaySnackbarMessage(
+                snackbarState,
+                snackScope,
+                context.getString(R.string.vault_saved),
+            )
             DeviceUtils.hideKeyboard(activity)
         }
         ItemEditSideEffect.Close -> {
@@ -169,24 +202,92 @@ fun performSideEffect(
         ItemEditSideEffect.FrozenPaywall -> {
             navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
         }
+        ItemEditSideEffect.CreditCardSecurityCodeRequestFocus -> {
+            creditCardSecurityCodeFocusRequested.requestFocus()
+        }
+        ItemEditSideEffect.CreditCardNumberRequestFocus -> {
+            creditCardNumberFocusRequested.requestFocus()
+        }
+        is ItemEditSideEffect.ConnectToWiFiNetwork -> {
+            resultLauncherConnectToWiFiNetwork.launch(
+                sideEffect.network,
+            )
+        }
+        is ItemEditSideEffect.ConnectToWiFiNetworkResult -> {
+            when (sideEffect) {
+                ItemEditSideEffect.ConnectToWiFiNetworkResult.Added ->
+                    displaySnackbarMessage(
+                        snackbarState = snackbarState,
+                        snackScope = snackScope,
+                        message = context.getString(R.string.wifi_connect_to_network_result_success_added),
+                    )
+
+                ItemEditSideEffect.ConnectToWiFiNetworkResult.Connected ->
+                    displaySnackbarMessage(
+                        snackbarState = snackbarState,
+                        snackScope = snackScope,
+                        message = context.getString(R.string.wifi_connect_to_network_result_success_connected),
+                    )
+
+                ItemEditSideEffect.ConnectToWiFiNetworkResult.AlreadyExists ->
+                    displaySnackbarMessage(
+                        snackbarState = snackbarState,
+                        snackScope = snackScope,
+                        message = context.getString(R.string.wifi_connect_to_network_result_already_exist),
+                        actionLabel = context.getString(R.string.wifi_connect_to_network_result_already_exist_action),
+                        actionPerformed = {
+                            context.startActivity(Intent(ACTION_WIFI_SETTINGS))
+                        },
+                    )
+
+                ItemEditSideEffect.ConnectToWiFiNetworkResult.AlreadyConnected ->
+                    displaySnackbarMessage(
+                        snackbarState = snackbarState,
+                        snackScope = snackScope,
+                        message = context.getString(R.string.wifi_connect_to_network_result_already_connected),
+                    )
+
+                ItemEditSideEffect.ConnectToWiFiNetworkResult.Failed ->
+                    displaySnackbarMessage(
+                        snackbarState = snackbarState,
+                        snackScope = snackScope,
+                        message = context.getString(R.string.wifi_connect_to_network_result_failed),
+                    )
+            }
+        }
     }
 }
 
 private fun displaySnackbarMessage(
     snackbarState: SnackbarHostState,
     snackScope: CoroutineScope,
-    message: String
+    message: String,
+    actionLabel: String? = null,
+    actionPerformed: () -> Unit = {},
+    actionDismissed: () -> Unit = {},
 ) {
     snackScope.launch {
-        snackbarState.showSnackbar(message)
+        val result = snackbarState.showSnackbar(
+            message = message,
+            actionLabel = actionLabel,
+        )
+
+        if (result == SnackbarResult.ActionPerformed) {
+            actionPerformed()
+        } else if (result == SnackbarResult.Dismissed) {
+            actionDismissed()
+        }
     }
 }
 
 @Composable
-private fun SaveConfirmationDialog(
+private fun SaveDialog(
+    title: String,
+    description: String,
+    secondaryAction: String,
     onActionPerformed: () -> Unit,
     onSave: () -> Unit,
-    onDiscard: () -> Unit
+    onSecondary: () -> Unit,
 ) {
     Dialog(
         onDismissRequest = {
@@ -199,19 +300,19 @@ private fun SaveConfirmationDialog(
         },
         additionalActionClick = {
             onActionPerformed()
-            onDiscard()
+            onSecondary()
         },
-        additionalActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.discart)),
-        title = stringResource(id = R.string.save_item_),
+        additionalActionLayout = ButtonLayout.TextOnly(secondaryAction),
+        title = title,
         description = {
-            Text(text = stringResource(id = R.string.would_you_like_to_save_the_item_))
-        }
+            Text(text = description)
+        },
     )
 }
 
 @Composable
 private fun ErrorSaveDialog(
-    onActionPerformed: () -> Unit
+    onActionPerformed: () -> Unit,
 ) {
     Dialog(
         onDismissRequest = {
@@ -224,7 +325,7 @@ private fun ErrorSaveDialog(
         title = stringResource(id = R.string.error),
         description = {
             Text(text = stringResource(id = R.string.error_cannot_add_empty_item))
-        }
+        },
     )
 }
 
@@ -241,7 +342,7 @@ private fun LimitedRightDialog(onDone: () -> Unit) {
         title = stringResource(id = R.string.reveal_password_permission_title),
         description = {
             Text(text = stringResource(id = R.string.reveal_password_permission_body))
-        }
+        },
     )
 }
 
@@ -250,7 +351,12 @@ private fun ConfirmRemove2FADialog(name: String, onPositive: () -> Unit, onNegat
     Dialog(
         title = stringResource(id = R.string.authenticator_item_edit_remove_popup_title),
         description = {
-            Text(text = stringResource(id = R.string.authenticator_item_edit_remove_popup_body, name))
+            Text(
+                text = stringResource(
+                    id = R.string.authenticator_item_edit_remove_popup_body,
+                    name,
+                ),
+            )
         },
         mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.authenticator_item_edit_remove_popup_positive_button)),
         mainActionClick = {

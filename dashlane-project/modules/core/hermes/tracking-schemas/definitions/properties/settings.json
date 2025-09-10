@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/settings.json",
+  "type": "object",
+  "description": "Definition for the settings events",
+  "definitions": {
+    "setting_level": {
+      "type": "string",
+      "description": "Scope of items the setting is impacting",
+      "enum": [
+        "credentials",
+        "global",
+        "ids",
+        "payments",
+        "secure_notes"
+      ]
+    },
+    "is_analytics_enabled": {
+      "description": "The user disabled or enabled sending of tracking data",
+      "type": "boolean"
+    },
+    "device_appearance": {
+      "type": "string",
+      "description": "The device appearance selected by the user (default: light)",
+      "enum": [
+        "dark",
+        "debug",
+        "light",
+        "match_system"
+      ]
+    }
+  }
+}

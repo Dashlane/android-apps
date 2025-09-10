@@ -4,7 +4,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.dashlane.ui.adapter.util.populateItemsAsync
+import com.dashlane.ui.legacy.recyclerview.util.populateItemsAsync
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingBaseViewProxy
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
 import com.dashlane.ui.screens.fragments.userdata.sharing.onSuccess
@@ -19,7 +19,6 @@ class UserGroupMembersViewProxy(
     view: View,
     private val viewModel: UserGroupMembersViewModelContract,
 ) : SharingBaseViewProxy(fragment, view) {
-
     init {
         refreshLayout.setup { viewModel.pullToRefresh() }
         coroutineScope.launch {

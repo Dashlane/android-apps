@@ -8,7 +8,7 @@ import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
 class IdentityNameHolderServiceImpl @Inject constructor(
-    private val genericDataQuery: GenericDataQuery
+    private val genericDataQuery: GenericDataQuery,
 ) : IdentityNameHolderService {
     private fun getIdentityFullName(identityUid: String?, fallbackName: String?): String {
         if (identityUid.isNotSemanticallyNull()) {

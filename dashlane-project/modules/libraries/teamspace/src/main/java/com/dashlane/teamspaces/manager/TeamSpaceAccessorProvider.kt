@@ -7,15 +7,14 @@ import javax.inject.Inject
 
 class TeamSpaceAccessorProvider @Inject constructor(
     private val sessionManager: SessionManager,
-    private val accountStatusRepository: AccountStatusRepository
+    private val accountStatusRepository: AccountStatusRepository,
 ) : OptionalProvider<TeamSpaceAccessor> {
-
     override fun get(): TeamSpaceAccessor? {
         val session = sessionManager.session ?: return null
 
         return TeamSpaceAccessorImpl(
             session = session,
-            accountStatusRepository = accountStatusRepository
+            accountStatusRepository = accountStatusRepository,
         )
     }
 }

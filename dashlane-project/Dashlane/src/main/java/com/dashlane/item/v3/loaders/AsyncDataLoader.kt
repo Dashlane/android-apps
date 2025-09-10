@@ -1,19 +1,25 @@
 package com.dashlane.item.v3.loaders
 
+import com.dashlane.item.v3.ItemEditFragmentArgs
 import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.FormData
+import com.dashlane.item.v3.loaders.common.CollectionLoader
 import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.vault.summary.SummaryObject
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KFunction1
 
 interface AsyncDataLoader<T : FormData> {
+    val collectionLoader: CollectionLoader<T>?
+        get() = null
+
     fun loadAsync(
         initialSummaryObject: SummaryObject,
         isNewItem: Boolean,
+        navArgs: ItemEditFragmentArgs,
         scope: CoroutineScope,
         additionalDataLoadedFunction: KFunction1<(Data<T>) -> Data<T>, Unit>,
-        onAllDataLoaded: suspend () -> Unit
+        onAllDataLoaded: suspend () -> Unit,
     )
 
     fun cancelAll()

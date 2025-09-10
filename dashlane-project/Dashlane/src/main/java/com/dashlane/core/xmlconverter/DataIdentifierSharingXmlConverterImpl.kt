@@ -13,7 +13,6 @@ import com.dashlane.xml.serializer.XmlSerialization
 import javax.inject.Inject
 
 class DataIdentifierSharingXmlConverterImpl @Inject constructor() : DataIdentifierSharingXmlConverter {
-
     private val xmlMarshaller: XmlSerialization = XmlSerialization
 
     override fun fromXml(identifier: String, xml: String?): DataIdentifierExtraDataWrapper<out SyncObject>? {

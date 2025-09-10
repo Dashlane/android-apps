@@ -4,16 +4,16 @@ import com.dashlane.event.AppEvent
 
 data class SyncFinishedEvent(
     val state: State,
-    val trigger: Trigger
+    val trigger: Trigger,
 ) : AppEvent {
     enum class State {
         SUCCESS,
         ERROR,
-        OFFLINE
+        OFFLINE,
     }
 
     enum class Trigger {
         BY_USER,
-        OTHER
+        OTHER,
     }
 }

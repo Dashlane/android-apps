@@ -7,9 +7,8 @@ import com.dashlane.util.inject.OptionalProvider
 import javax.inject.Inject
 
 class SharingUserDataUtils @Inject constructor(
-    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) {
-
     fun isMemberOfUserGroupTeam(userGroup: UserGroup): Boolean {
         val userGroupTeamId = userGroup.teamId ?: return true
         return teamSpaceAccessorProvider.get()?.get(userGroupTeamId.toString()) is TeamSpace.Business.Current

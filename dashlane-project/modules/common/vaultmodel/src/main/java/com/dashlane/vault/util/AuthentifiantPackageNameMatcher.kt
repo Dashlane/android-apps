@@ -15,28 +15,27 @@ import javax.inject.Inject
 interface AuthentifiantPackageNameMatcher {
     fun matchPackageName(
         item: VaultItem<SyncObject.Authentifiant>,
-        packageName: String
+        packageName: String,
     ): Boolean = matchPackageName(item.toSummary(), packageName)
 
     fun matchPackageName(
         item: SummaryObject.Authentifiant,
-        packageName: String
+        packageName: String,
     ): Boolean
 }
 
 class AuthentifiantPackageNameMatcherImpl @Inject constructor(
     @ApplicationContext val context: Context,
-    private val packageNameSignatureHelper: PackageNameSignatureHelper
+    private val packageNameSignatureHelper: PackageNameSignatureHelper,
 ) : AuthentifiantPackageNameMatcher {
-
     override fun matchPackageName(
         item: SummaryObject.Authentifiant,
-        packageName: String
+        packageName: String,
     ): Boolean {
         return (
             item.matchByPackageNameInVault(packageName) ||
                 item.matchByPackageNameKeywords(context, packageName)
-            ) &&
+        ) &&
             item.isNotIncorrectApplicationSignatureWith(packageNameSignatureHelper, packageName)
     }
 
@@ -45,7 +44,7 @@ class AuthentifiantPackageNameMatcherImpl @Inject constructor(
 
     private fun SummaryObject.Authentifiant.matchByPackageNameKeywords(
         context: Context,
-        packageName: String
+        packageName: String,
     ): Boolean {
         val keywords = PackageUtilities.getKeywords(context, packageName)
         return matchKeywords(keywords)

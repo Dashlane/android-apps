@@ -12,7 +12,7 @@ fun Attachment.toSecureFile(): SecureFile {
         downloadKey,
         filename!!,
         cryptoKey!!.decodeBase64ToByteArray(),
-        null
+        null,
     )
 }
 

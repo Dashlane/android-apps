@@ -5,10 +5,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.dashlane.biometricrecovery.BiometricRecoveryIntroActivity
-import com.dashlane.biometricrecovery.MasterPasswordResetIntroActivity
+import com.dashlane.breach.BreachWrapper
+import com.dashlane.breach.events.BreachStatusChangedEvent
 import com.dashlane.events.AppEvents
-import com.dashlane.events.BreachStatusChangedEvent
 import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.notificationcenter.alerts.BreachDataHelper
@@ -19,20 +18,19 @@ import com.dashlane.notificationcenter.view.NotificationItem
 import com.dashlane.pin.settings.PinSettingsActivity
 import com.dashlane.premium.offer.common.model.OfferType
 import com.dashlane.security.DashlaneIntent
-import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.ui.activities.HomeActivity
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.ui.screens.settings.item.SensibleSettingsClickHelper
 import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
 import com.dashlane.xml.domain.SyncObject
 import com.skocken.presentation.presenter.BasePresenter
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class NotificationCenterPresenter @Inject constructor(
     fragment: Fragment,
@@ -43,10 +41,9 @@ class NotificationCenterPresenter @Inject constructor(
     private val breachesDataProvider: BreachDataHelper,
     private val sensibleSettingsClickHelper: SensibleSettingsClickHelper,
     private val appEvents: AppEvents,
-    private val navigator: Navigator
+    private val navigator: Navigator,
 ) : BasePresenter<NotificationCenterDef.DataProvider, NotificationCenterDef.View>(),
     NotificationCenterDef.Presenter {
-
     var section: ActionItemSection? = null
 
     init {
@@ -109,17 +106,21 @@ class NotificationCenterPresenter @Inject constructor(
     }
 
     override fun startBiometricSetup() {
-        runWhenUnlocked { context?.let { navigator.goToBiometricOnboarding(it) } }
+        runWhenUnlocked(forceMasterPassword = true) { context?.let { navigator.goToBiometricOnboarding(it) } }
     }
 
     override fun startOnboardingInAppLogin() {
         navigator.goToInAppLogin()
     }
 
+    override fun startOnboardingChromeInAppLogin() {
+        navigator.goToChromeInAppLogin()
+    }
+
     override fun startAddOnePassword() {
         navigator.goToCredentialAddStep1(
             expandImportOptions = true,
-            successIntent = DashlaneIntent.newInstance(context, HomeActivity::class.java)
+            successIntent = DashlaneIntent.newInstance(context, HomeActivity::class.java),
         )
     }
 
@@ -135,17 +136,9 @@ class NotificationCenterPresenter @Inject constructor(
         navigator.goToPasswordSharingFromActionCenter()
     }
 
-    override fun startBiometricRecoverySetup(hasBiometricLockType: Boolean) {
-        runWhenUnlocked {
-            context?.run {
-                val intent = if (hasBiometricLockType) {
-                    MasterPasswordResetIntroActivity.newIntent(this)
-                } else {
-                    BiometricRecoveryIntroActivity.newIntent(this)
-                }
-
-                startActivity(intent)
-            }
+    override fun startBiometricRecoverySetup() {
+        runWhenUnlocked(forceMasterPassword = true) {
+            context?.let { navigator.goToBiometricRecoveryOnboarding(it) }
         }
     }
 
@@ -165,14 +158,14 @@ class NotificationCenterPresenter @Inject constructor(
         navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
     }
 
-    private fun runWhenUnlocked(onUnlock: () -> Unit) {
+    private fun runWhenUnlocked(forceMasterPassword: Boolean = false, onUnlock: () -> Unit) {
         context?.run {
-            sensibleSettingsClickHelper.perform(context = this, onUnlock = onUnlock)
+            sensibleSettingsClickHelper.perform(context = this, onUnlock = onUnlock, forceMasterPassword = forceMasterPassword)
         }
     }
 
     private suspend fun markAllBreachesAsViewed(list: List<NotificationItem>) {
-        list.filterIsInstance(AlertActionItem::class.java)
+        list.filterIsInstance<AlertActionItem>()
             .mapIndexed { _, item ->
                 item.breachWrapper
             }.run {
@@ -195,9 +188,8 @@ class NotificationCenterPresenter @Inject constructor(
     override fun groupActionItemsBySection(
         list: List<NotificationItem>,
         displaySectionHeader: Boolean,
-        breachAlertCount: Int?
-    ):
-        List<DashlaneRecyclerAdapter.MultiColumnViewTypeProvider> {
+        breachAlertCount: Int?,
+    ): List<DashlaneRecyclerAdapter.MultiColumnViewTypeProvider> {
         return if (displaySectionHeader) {
             list.groupBy { it.section }
                 .toSortedMap()
@@ -209,7 +201,7 @@ class NotificationCenterPresenter @Inject constructor(
                         startSectionDetails(headerSection)
                     }
                     listOf(header) + items.sortedByDescending { providerOrNull?.getCreationDate(it) }.take(
-                        SECTION_CAPPING_THRESHOLD
+                        SECTION_CAPPING_THRESHOLD,
                     )
                 }.flatten()
         } else {

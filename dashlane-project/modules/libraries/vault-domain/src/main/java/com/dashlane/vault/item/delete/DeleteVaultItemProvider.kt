@@ -25,9 +25,9 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummaryOrNull
 import com.dashlane.vault.toItemType
 import com.dashlane.xml.domain.SyncObject
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class DeleteVaultItemProvider @Inject constructor(
     private val vaultDataQuery: VaultDataQuery,
@@ -37,9 +37,9 @@ class DeleteVaultItemProvider @Inject constructor(
     private val activityLogger: VaultActivityLogger,
     private val deleteFileManager: DeleteFileManager,
     private val sharingPolicy: SharingPolicyDataProvider,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
+    private val remoteContentDeleter: RemoteContentDeleter,
 ) {
-
     suspend fun deleteItem(itemId: String): Boolean {
         val itemFilter = vaultFilter {
             specificUid(itemId)
@@ -48,17 +48,22 @@ class DeleteVaultItemProvider @Inject constructor(
             collectionDataQuery.queryAll(
                 collectionFilter {
                     withVaultItemId = itemId
-                }
-            ).map { it.id }
+                },
+            ).map { it.id },
         ).map { syncCollection ->
             syncCollection.copy(
                 syncObject = syncCollection.syncObject.copy {
                     vaultItems = vaultItems?.filterNot { it.id == itemId }
-                }
+                },
             )
         }
 
         vaultDataQuery.query(itemFilter)?.let { item ->
+            try {
+                remoteContentDeleter.deleteFor(syncObject = item.syncObject, ignoreFailures = false)
+            } catch (e: RemoteContentDeletionException) {
+                return false
+            }
             val deletedItem = item.copyWithAttrs { syncState = SyncState.DELETED }
             val isDeleted = if (item.isShared()) {
                 saveItems(removedFromCollections)
@@ -80,7 +85,7 @@ class DeleteVaultItemProvider @Inject constructor(
                         ?.toSummaryOrNull<SummaryObject.Authentifiant>()?.urlForGoToWebsite,
                     addedWebsites = null,
                     removedWebsites = null,
-                    removedApps = null
+                    removedApps = null,
                 )
                 activityLogger.sendAuthentifiantActivityLog(vaultItem = item, action = action)
                 

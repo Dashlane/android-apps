@@ -37,9 +37,8 @@ class ItemScreenConfigurationSocialSecurityProvider(
     private val vaultDataQuery: VaultDataQuery,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -47,12 +46,12 @@ class ItemScreenConfigurationSocialSecurityProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.SocialSecurityStatement>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -64,7 +63,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val title = context.getString(R.string.social_security)
         return ItemHeader(
@@ -81,7 +80,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         
         val identitySubviews = createIdentitySubviews(
@@ -92,7 +91,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
             editMode = editMode,
             listener = listener,
             item = item,
-            identityAdapter = SocialSecurityStatementIdentityAdapter
+            identityAdapter = SocialSecurityStatementIdentityAdapter,
         )
 
         val subviews = listOfNotNull(
@@ -109,7 +108,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
 
         return identitySubviews + subviews
@@ -117,14 +116,14 @@ class ItemScreenConfigurationSocialSecurityProvider(
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.SocialSecurityStatement>
+        item: VaultItem<SyncObject.SocialSecurityStatement>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                valueUpdate = VaultItem<*>::copyForUpdatedTeamspace
+                valueUpdate = VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -135,7 +134,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.SocialSecurityStatement>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val socialSecurityNumber = item.syncObject.socialSecurityNumber?.toString()
         val itemSubView = subViewFactory.createSubViewString(
@@ -143,7 +142,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
             socialSecurityNumber,
             true,
             VaultItem<*>::copyForUpdatedNumber,
-            protectedStateListener = { numberShown -> if (numberShown) logRevealNumber(item) }
+            protectedStateListener = { numberShown -> if (numberShown) logRevealNumber(item) },
         )
         return if (editMode) {
             itemSubView
@@ -155,8 +154,8 @@ class ItemScreenConfigurationSocialSecurityProvider(
                         summaryObject = item.toSummary(),
                         copyField = CopyField.SocialSecurityNumber,
                         action = {},
-                        vaultItemCopy = vaultItemCopy
-                    )
+                        vaultItemCopy = vaultItemCopy,
+                    ),
                 )
             }
         }
@@ -179,7 +178,7 @@ class ItemScreenConfigurationSocialSecurityProvider(
 
         override fun withGender(
             item: VaultItem<SyncObject.SocialSecurityStatement>,
-            gender: SyncObject.Gender?
+            gender: SyncObject.Gender?,
         ): VaultItem<SyncObject.SocialSecurityStatement> =
             item.copySyncObject { sex = gender }
 

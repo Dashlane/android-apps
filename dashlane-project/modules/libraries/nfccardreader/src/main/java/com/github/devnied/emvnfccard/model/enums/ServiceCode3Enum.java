@@ -1,5 +1,9 @@
 package com.github.devnied.emvnfccard.model.enums;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum ServiceCode3Enum implements IKeyEnum {
 
 	NO_RESTRICTION_PIN_REQUIRED(0, "No restrictions", "PIN required"),

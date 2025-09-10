@@ -1,5 +1,6 @@
 package com.dashlane.item.v3.loaders.common
 
+import com.dashlane.item.v3.data.CollectionData
 import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.repositories.CollectionsRepository
 import com.dashlane.item.v3.viewmodels.Data
@@ -12,18 +13,21 @@ import javax.inject.Inject
 import kotlin.reflect.KFunction1
 
 class CollectionLoader<T : FormData> @Inject constructor(
-    private val collectionsRepository: CollectionsRepository
+    private val collectionsRepository: CollectionsRepository,
 ) {
     fun loadAsync(
         scope: CoroutineScope,
         initialSummaryObject: SummaryObject,
-        additionalDataLoadedFunction: KFunction1<(Data<T>) -> Data<T>, Unit>
+        additionalDataLoadedFunction: KFunction1<(Data<T>) -> Data<T>, Unit>,
     ): Deferred<Unit> = scope.async(start = CoroutineStart.LAZY) {
-        val collections = collectionsRepository.getCollections(initialSummaryObject)
+        val collections = load(initialSummaryObject)
         additionalDataLoadedFunction {
             it.copyCommonData {
                 it.copy(collections = collections)
             }
         }
     }
+
+    suspend fun load(initialSummaryObject: SummaryObject): List<CollectionData> =
+        collectionsRepository.getCollections(initialSummaryObject)
 }

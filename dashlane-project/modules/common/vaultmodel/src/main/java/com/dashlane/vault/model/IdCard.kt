@@ -11,7 +11,7 @@ fun createIdCard(
     sex: SyncObject.Gender? = null,
     dateOfBirth: LocalDate? = null,
     number: String? = null,
-    linkedIdentity: String? = null
+    linkedIdentity: String? = null,
 ): VaultItem<SyncObject.IdCard> {
     return dataIdentifier.toVaultItem(
         SyncObject.IdCard {
@@ -24,11 +24,10 @@ fun createIdCard(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
-fun VaultItem<SyncObject.IdCard>.copySyncObject(builder: SyncObject.IdCard.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.IdCard> {
+fun VaultItem<SyncObject.IdCard>.copySyncObject(builder: SyncObject.IdCard.Builder.() -> Unit = {}): VaultItem<SyncObject.IdCard> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

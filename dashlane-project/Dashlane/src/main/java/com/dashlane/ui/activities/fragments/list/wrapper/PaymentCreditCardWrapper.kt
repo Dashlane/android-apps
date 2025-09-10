@@ -1,7 +1,7 @@
 package com.dashlane.ui.activities.fragments.list.wrapper
 
-import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.navigation.Navigator
+import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.adapter.ItemListContext
@@ -17,14 +17,14 @@ class PaymentCreditCardWrapper(
     dataIdentifierListTextResolver: DataIdentifierListTextResolver,
     navigator: Navigator,
     teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
-    currentSpaceFilterRepository: CurrentTeamSpaceUiFilter
+    currentSpaceFilterRepository: CurrentTeamSpaceUiFilter,
 ) : DefaultVaultItemWrapper<SummaryObject.PaymentCreditCard>(
-    vaultItemCopyService,
-    quickActionProvider,
-    summaryObject,
-    itemListContext,
-    navigator,
-    dataIdentifierListTextResolver,
-    teamSpaceAccessorProvider,
-    currentSpaceFilterRepository
-)
+        vaultItemCopyService,
+        quickActionProvider,
+        summaryObject,
+        itemListContext,
+        navigator,
+        dataIdentifierListTextResolver,
+        teamSpaceAccessorProvider,
+        currentSpaceFilterRepository,
+    )

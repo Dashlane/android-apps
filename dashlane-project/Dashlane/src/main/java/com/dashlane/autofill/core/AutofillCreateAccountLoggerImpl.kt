@@ -12,42 +12,41 @@ import com.dashlane.hermes.generated.events.anonymous.AutofillDismissAnonymous
 import com.dashlane.hermes.generated.events.user.AutofillAccept
 import com.dashlane.hermes.generated.events.user.AutofillDismiss
 import com.dashlane.hermes.generated.events.user.UpdateVaultItem
-import com.dashlane.vault.model.VaultItem
 import com.dashlane.teamspaces.getTeamSpaceLog
+import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import javax.inject.Inject
 
 class AutofillCreateAccountLoggerImpl @Inject constructor(
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
 ) : AutofillCreateAccountLogger {
-
     override fun onCancel(domainWrapper: DomainWrapper) {
         val dismissType = DismissType.CLOSE
 
         logRepository.queueEvent(
             AutofillDismiss(
-                dismissType = dismissType
-            )
+                dismissType = dismissType,
+            ),
         )
         logRepository.queueEvent(
             AutofillDismissAnonymous(
                 dismissType = dismissType,
                 domain = domainWrapper.domain,
-                isNativeApp = domainWrapper.isNativeApp
-            )
+                isNativeApp = domainWrapper.isNativeApp,
+            ),
         )
     }
 
     override fun logSave(
         domainWrapper: DomainWrapper,
-        credential: VaultItem<SyncObject.Authentifiant>
+        credential: VaultItem<SyncObject.Authentifiant>,
     ) {
         val dataType = listOf(ItemType.CREDENTIAL)
         logRepository.queueEvent(
-            AutofillAccept(dataTypeList = dataType)
+            AutofillAccept(dataTypeList = dataType),
         )
         logRepository.queueEvent(
-            AutofillAcceptAnonymous(domain = domainWrapper.domain)
+            AutofillAcceptAnonymous(domain = domainWrapper.domain),
         )
         logRepository.queueEvent(
             UpdateVaultItem(
@@ -55,7 +54,7 @@ class AutofillCreateAccountLoggerImpl @Inject constructor(
                 itemType = ItemType.CREDENTIAL,
                 action = Action.ADD,
                 space = credential.getTeamSpaceLog(),
-            )
+            ),
         )
     }
 }

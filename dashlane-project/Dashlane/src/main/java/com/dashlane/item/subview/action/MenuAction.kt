@@ -12,9 +12,8 @@ open class MenuAction(
     val checked: Boolean = false,
     val color: Int? = null,
     val enabled: Boolean = true,
-    private val action: (Activity) -> Unit = {}
+    private val action: (Activity) -> Unit = {},
 ) : Action {
-
     override val tintColorRes: Int? = null
 
     override fun onClickAction(activity: AppCompatActivity) {

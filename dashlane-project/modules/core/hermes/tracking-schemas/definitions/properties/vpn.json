@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vpn.json",
+  "type": "object",
+  "description": "Definition for the VPN events",
+  "definitions": {
+    "activate_vpn_error": {
+      "description": "Details on an error returned during the VPN activation.",
+      "type": "string",
+      "enum": [
+        "email_already_in_use",
+        "server_error"
+      ]
+    }
+  }
+}

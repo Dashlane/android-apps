@@ -19,9 +19,8 @@ import com.dashlane.xml.domain.SyncObject
 
 class ItemScreenConfigurationCompanyProvider(
     private val teamSpaceAccessor: TeamSpaceAccessor,
-    private val dateTimeFieldFactory: DateTimeFieldFactory
+    private val dateTimeFieldFactory: DateTimeFieldFactory,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -29,7 +28,7 @@ class ItemScreenConfigurationCompanyProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.Company>
         return ScreenConfiguration(
@@ -39,9 +38,9 @@ class ItemScreenConfigurationCompanyProvider(
                 subViewFactory = subViewFactory,
                 canDelete = canDelete,
                 listener = listener,
-                editMode = editMode
+                editMode = editMode,
             ),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -54,7 +53,7 @@ class ItemScreenConfigurationCompanyProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val companyTitle = context.getString(R.string.company)
         return ItemHeader(
@@ -71,7 +70,7 @@ class ItemScreenConfigurationCompanyProvider(
         subViewFactory: SubViewFactory,
         canDelete: Boolean,
         listener: ItemEditViewContract.View.UiUpdateListener,
-        editMode: Boolean
+        editMode: Boolean,
     ): List<ItemSubView<*>> {
         return listOfNotNull(
             
@@ -87,20 +86,20 @@ class ItemScreenConfigurationCompanyProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.Company>
+        item: VaultItem<SyncObject.Company>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -110,26 +109,26 @@ class ItemScreenConfigurationCompanyProvider(
     private fun createJobTitleField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Company>
+        item: VaultItem<SyncObject.Company>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.company_hint_job),
             item.syncObject.jobTitle,
             false,
-            VaultItem<*>::copyForUpdatedTitle
+            VaultItem<*>::copyForUpdatedTitle,
         )
     }
 
     private fun createCompanyNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Company>
+        item: VaultItem<SyncObject.Company>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.company_hint_company),
             item.syncObject.name,
             false,
-            VaultItem<*>::copyForUpdatedName
+            VaultItem<*>::copyForUpdatedName,
         )
     }
 }

@@ -5,7 +5,6 @@ import javax.inject.Singleton
 
 @Singleton
 class TransactionFailureRegistry @Inject constructor() {
-
     private val summaryItems = mutableSetOf<SyncSummaryItem>()
 
     fun getAll(): Set<SyncSummaryItem> =

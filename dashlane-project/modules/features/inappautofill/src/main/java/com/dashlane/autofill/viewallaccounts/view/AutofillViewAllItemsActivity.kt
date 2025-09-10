@@ -13,25 +13,22 @@ import com.dashlane.autofill.createaccount.domain.AutofillCreateAccountErrors
 import com.dashlane.autofill.createaccount.domain.AutofillCreateAccountResultHandler
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.linkservices.model.FormSourcesDataProvider
+import com.dashlane.autofill.logs.getAutofillApiOrigin
 import com.dashlane.autofill.model.toItemToFill
 import com.dashlane.autofill.navigation.AutofillBottomSheetNavigator
 import com.dashlane.autofill.navigation.AutofillBottomSheetNavigatorImpl
 import com.dashlane.autofill.navigation.AutofillNavigatorImpl
-import com.dashlane.autofill.phishing.AutofillPhishingWarningFragment
-import com.dashlane.autofill.phishing.PhishingAttemptLevel
-import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProvider
-import com.dashlane.autofill.request.autofill.logger.getAutofillApiOrigin
 import com.dashlane.autofill.ui.AutoFillResponseActivity
 import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.viewallaccounts.services.ViewAllAccountSelectionNotifier
 import com.dashlane.bottomnavigation.NavigableBottomSheetDialogFragment
 import com.dashlane.hermes.generated.definitions.MatchType
-import com.dashlane.limitations.PasswordLimitBottomSheet
+import com.dashlane.limitations.PasswordLimitBottomSheetFragment
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.util.runIfNull
 import com.dashlane.vault.model.VaultItem
-import com.dashlane.vault.model.urlForUI
 import com.dashlane.vault.model.urlForUsageLog
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,7 +42,6 @@ class AutofillViewAllItemsActivity :
     AutofillCreateAccountResultHandler,
     CoroutineScope,
     AutoFillResponseActivity() {
-
     @Inject
     lateinit var formSourcesDataProvider: FormSourcesDataProvider
 
@@ -64,7 +60,7 @@ class AutofillViewAllItemsActivity :
         get() = lifecycleScope.coroutineContext
 
     private val securityWarningsViewProxy: ViewAllItemsSecurityWarningsViewProxy by lazy(
-        LazyThreadSafetyMode.NONE
+        LazyThreadSafetyMode.NONE,
     ) {
         ViewAllItemsSecurityWarningsViewProxy(
             this,
@@ -75,27 +71,8 @@ class AutofillViewAllItemsActivity :
             component.autofillFormSourcesStrings,
             component.toaster,
             viewAllAccountSelectionNotifier,
-            formSourcesDataProvider
+            formSourcesDataProvider,
         )
-    }
-
-    init {
-        
-        supportFragmentManager.setFragmentResultListener(
-            AutofillPhishingWarningFragment.PHISHING_WARNING_RESULT,
-            this
-        ) { _, bundle ->
-            val result = bundle.getInt(AutofillPhishingWarningFragment.PHISHING_WARNING_PARAMS_RESULT)
-            if (result == RESULT_OK) {
-                phishingAttemptTrustedByUser = true
-                finishWithResult(
-                    itemToFill = authentifiant.toItemToFill(),
-                    matchType = MatchType.EXPLORE_PASSWORDS
-                )
-            } else {
-                finish()
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,15 +88,26 @@ class AutofillViewAllItemsActivity :
 
     override fun onNavigateToCreateAuthentifiant(autofillBottomSheetNavigator: AutofillBottomSheetNavigator) {
         if (passwordLimiter.isPasswordLimitReached()) {
-            PasswordLimitBottomSheet().show(supportFragmentManager, null)
+            PasswordLimitBottomSheetFragment().show(supportFragmentManager, null)
         } else {
-            autofillBottomSheetNavigator.goToCreateAccountFromAllAccounts(summaryWebDomain, summaryPackageName)
+            autofillBottomSheetNavigator.goToCreateAccountFromAllAccounts(
+                summaryWebDomain,
+                summaryPackageName,
+            )
         }
     }
 
-    override fun onNavigateToLinkService(formSource: AutoFillFormSource, itemId: String) {
+    override fun onNavigateToLinkService(
+        formSource: AutoFillFormSource,
+        itemId: String,
+        itemWebsite: String?,
+    ) {
         getNavigableFragment()?.findNavController()?.let {
-            AutofillBottomSheetNavigatorImpl(it).goToLinkServiceFromAllAccounts(formSource, itemId)
+            AutofillBottomSheetNavigatorImpl(it).goToLinkServiceFromAllAccounts(
+                formSource = formSource,
+                itemId = itemId,
+                itemWebsite = itemWebsite,
+            )
         }
     }
 
@@ -150,13 +138,13 @@ class AutofillViewAllItemsActivity :
     override fun onAuthentifiantDialogResponse(
         authentifiant: VaultItem<SyncObject.Authentifiant>?,
         itemListContext: ItemListContext?,
-        searchQuery: String
+        searchQuery: String,
     ) {
         val resultCount = itemListContext?.sectionCount ?: 0
         viewAllAccountsLogger.onViewAllAccountOver(
             totalCount = resultCount,
             hasInteracted = authentifiant != null,
-            searchQuery.length
+            searchQuery.length,
         )
         if (authentifiant == null) {
             finish()
@@ -171,37 +159,30 @@ class AutofillViewAllItemsActivity :
                 webappDomain = summaryWebDomain,
                 itemUrl = authentifiant.urlForUsageLog,
                 itemId = authentifiant.syncObject.id,
-                itemListContext = itemListContext
+                itemListContext = itemListContext,
             )
-            if (shouldDisplayPhishingWarning(authentifiant)) {
-                AutofillPhishingWarningFragment.create(
-                    summary,
-                    authentifiant.urlForUI(),
-                    authentifiant.uid,
-                    phishingAttemptLevel
-                ).show(supportFragmentManager, SECURITY_WARNING_DIALOG_TAG)
-            } else {
-                securityWarningsViewProxy.dealWithSecurityBeforeFill(
-                    UnlockedAuthentifiant(formSource, authentifiant.toItemToFill())
-                )
-            }
+            securityWarningsViewProxy.dealWithSecurityBeforeFill(
+                UnlockedAuthentifiant(formSource, authentifiant.toItemToFill()),
+            )
         }
     }
 
     override fun onFinishWithResult(result: VaultItem<SyncObject.Authentifiant>) {
         finishWithResult(
             itemToFill = result.toItemToFill(),
-            matchType = MatchType.CREATED_PASSWORD 
+            
+            matchType = MatchType.CREATED_PASSWORD,
         )
     }
 
     override fun onError(error: AutofillCreateAccountErrors) {
         when (error) {
             AutofillCreateAccountErrors.USER_LOGGED_OUT,
-            AutofillCreateAccountErrors.DATABASE_ERROR -> {
+            AutofillCreateAccountErrors.DATABASE_ERROR,
+            -> {
                 component.toaster.show(
                     error.message,
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 )
             }
             else -> Unit
@@ -215,7 +196,6 @@ class AutofillViewAllItemsActivity :
     companion object {
         const val LINK_SERVICE_REQUEST_KEY = "LINK_SERVICE_REQUEST_KEY"
         const val LINK_SERVICE_SHOULD_AUTOFILL = "LINK_SERVICE_SHOULD_AUTOFILL"
-        const val LINK_SERVICE_SHOULD_LINK = "LINK_SERVICE_SHOULD_LINK"
         private const val EXTRA_HAD_CREDENTIALS = "extra_had_credentials"
 
         internal fun getAuthIntentSenderForViewAllItems(
@@ -223,20 +203,18 @@ class AutofillViewAllItemsActivity :
             summary: AutoFillHintSummary,
             hadCredentials: Boolean,
             forKeyboard: Boolean,
-            phishingAttemptLevel: PhishingAttemptLevel
         ): IntentSender {
             val intent =
                 createIntent(
                     context,
                     summary,
-                    AutofillViewAllItemsActivity::class
+                    AutofillViewAllItemsActivity::class,
                 )
             intent.putExtra(EXTRA_HAD_CREDENTIALS, hadCredentials)
             intent.putExtra(EXTRA_FOR_KEYBOARD_AUTOFILL, forKeyboard)
-            intent.putExtra(EXTRA_PHISHING_ATTEMPT_LEVEL, phishingAttemptLevel)
             return createIntentSender(
                 context,
-                intent
+                intent,
             )
         }
     }

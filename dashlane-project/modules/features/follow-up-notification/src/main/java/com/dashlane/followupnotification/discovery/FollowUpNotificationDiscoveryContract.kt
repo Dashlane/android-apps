@@ -6,6 +6,7 @@ import com.skocken.presentation.definition.Base
 interface FollowUpNotificationDiscoveryContract {
     interface ViewProxy : Base.IView {
         fun setScreenContent(content: ScreenContent)
+
         fun setOnButtonClick(onClick: () -> Unit)
     }
 
@@ -18,9 +19,13 @@ interface FollowUpNotificationDiscoveryContract {
     }
 }
 
-data class ScreenContent(val hasTopIcon: Boolean, @StringRes val title: Int, @StringRes val description: Int)
+data class ScreenContent(
+    val hasTopIcon: Boolean,
+    @StringRes val title: Int,
+    @StringRes val description: Int,
+)
 
 enum class ScreenConfiguration {
     INTRODUCTION,
-    REMINDER
+    REMINDER,
 }

@@ -10,9 +10,8 @@ import com.dashlane.databinding.IncludeImportMethodItemBinding
 class ImportMethodItem @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : LinearLayout(context, attrs, defStyleAttr) {
-
     private var binding: IncludeImportMethodItemBinding
 
     init {

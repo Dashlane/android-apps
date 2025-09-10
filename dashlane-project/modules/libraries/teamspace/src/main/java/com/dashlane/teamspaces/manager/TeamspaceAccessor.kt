@@ -2,9 +2,14 @@ package com.dashlane.teamspaces.manager
 
 import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.accountstatus.getB2bStatus
+import com.dashlane.accountstatus.hasEnforcedTeamSpace
+import com.dashlane.accountstatus.isB2bUser
+import com.dashlane.accountstatus.isVaultExportEnabled
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.B2bStatus.CurrentTeam.TeamInfo.TwoFAEnforced
 import com.dashlane.session.Session
+import com.dashlane.teamspaces.export.ExportVaultStatus
 import com.dashlane.teamspaces.model.TeamSpace
 
 interface TeamSpaceAccessor {
@@ -47,22 +52,21 @@ interface TeamSpaceAccessor {
 
 class TeamSpaceAccessorImpl(
     private val session: Session,
-    val accountStatusRepository: AccountStatusRepository
+    val accountStatusRepository: AccountStatusRepository,
 ) : TeamSpaceAccessor {
-
     private val accountStatus: AccountStatus
         get() = accountStatusRepository[session] ?: AccountStatusRepository.DEFAULT_ACCOUNT_STATUS
 
     private val b2bStatus: PremiumStatus.B2bStatus?
-        get() = accountStatus.premiumStatus.b2bStatus
+        get() = accountStatus.getB2bStatus()
 
     override val pastBusinessTeams: List<TeamSpace.Business.Past>
         get() = b2bStatus?.pastTeams?.map { TeamSpace.Business.Past(it) } ?: listOf()
 
     override val currentBusinessTeam: TeamSpace.Business.Current?
-        get() = b2bStatus?.currentTeam?.let { TeamSpace.Business.Current(it) }
+        get() = b2bStatus?.getCurrentTeam()
 
-    override val hasEnforcedTeamSpace: Boolean = b2bStatus?.currentTeam?.teamInfo?.personalSpaceEnabled == false
+    override val hasEnforcedTeamSpace: Boolean = accountStatus.hasEnforcedTeamSpace()
 
     override val enforcedSpace: TeamSpace.Business.Current?
         get() = if (hasEnforcedTeamSpace) {
@@ -83,9 +87,9 @@ class TeamSpaceAccessorImpl(
     override val isLockOnExitEnabled: Boolean
         get() = currentBusinessTeam?.isLockOnExitEnabled == true
     override val isForcedDomainsEnabled: Boolean
-        get() = currentBusinessTeam?.isForcedDomainsEnabled == true
+        get() = accountStatus.isForcedDomainsEnabled()
     override val isVaultExportEnabled: Boolean
-        get() = b2bStatus?.currentTeam?.teamInfo?.vaultExportEnabled != false
+        get() = accountStatus.isVaultExportEnabled()
 
     override val canChangeTeamspace: Boolean = currentBusinessTeam != null && !hasEnforcedTeamSpace
 
@@ -93,11 +97,7 @@ class TeamSpaceAccessorImpl(
         get() = currentBusinessTeam?.space?.teamMembership?.isSSOUser == true
 
     override val is2FAEnforced: Boolean
-        get() = when (currentBusinessTeam?.space?.teamInfo?.twoFAEnforced) {
-            TwoFAEnforced.LOGIN,
-            TwoFAEnforced.NEWDEVICE -> true
-            else -> false
-        }
+        get() = accountStatus.is2FAEnforced()
 
     override val isB2bUser: Boolean
         get() = b2bStatus?.currentTeam != null
@@ -123,5 +123,31 @@ class TeamSpaceAccessorImpl(
         return allBusinessSpaces.firstOrNull {
             it.teamId == teamId
         }
+    }
+}
+
+fun AccountStatus.isForcedDomainsEnabled(): Boolean = getCurrentTeam()?.isForcedDomainsEnabled == true
+
+fun PremiumStatus.B2bStatus.getCurrentTeam(): TeamSpace.Business.Current? = this.currentTeam?.let { TeamSpace.Business.Current(it) }
+
+fun AccountStatus.getCurrentTeam(): TeamSpace.Business.Current? = getB2bStatus()?.getCurrentTeam()
+
+fun AccountStatus.getCryptoForcedPayload(): String? = getB2bStatus()?.getCurrentTeam()?.cryptoForcedPayload
+
+fun AccountStatus.is2FAEnforced(): Boolean = when (getCurrentTeam()?.space?.teamInfo?.twoFAEnforced) {
+    TwoFAEnforced.LOGIN,
+    TwoFAEnforced.NEWDEVICE,
+    -> true
+    else -> false
+}
+
+fun AccountStatus.exportVaultStatus(): ExportVaultStatus {
+    if (!isB2bUser()) return ExportVaultStatus.COMPLETE
+    return when {
+        hasEnforcedTeamSpace() -> {
+            if (isVaultExportEnabled()) ExportVaultStatus.COMPLETE else ExportVaultStatus.DISABLED
+        }
+        isForcedDomainsEnabled() -> ExportVaultStatus.LIMITED
+        else -> ExportVaultStatus.COMPLETE
     }
 }

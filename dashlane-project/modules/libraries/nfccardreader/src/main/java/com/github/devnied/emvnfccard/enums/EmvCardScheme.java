@@ -6,6 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Pattern;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum EmvCardScheme {
 
     VISA("VISA", "^4[0-9]{6,}$", "A0 00 00 00 03", "A0 00 00 00 03 10 10", "A0 00 00 00 98 08 48"), 

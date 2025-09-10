@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.authentication.sso.GetSsoInfoResult
 import com.dashlane.authentication.sso.utils.UserSsoInfo
 import com.dashlane.nitro.Nitro
-import com.dashlane.server.api.NitroApi
+import com.dashlane.nitro.hilt.NitroLegacy
 import com.dashlane.server.api.endpoints.authentication.ConfirmLogin2Service
 import com.dashlane.server.api.endpoints.authentication.ConfirmLogin2Service.Request.DomainName
 import com.dashlane.server.api.endpoints.authentication.ConfirmLogin2Service.Request.TeamUuid
@@ -14,29 +14,35 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NitroSsoInfoViewModel @Inject constructor(private val nitro: Nitro) : ViewModel() {
-
-    private lateinit var nitroApi: NitroApi
-
+class NitroSsoInfoViewModel @Inject constructor(
+    @NitroLegacy private val nitroLegacy: Nitro,
+) : ViewModel() {
     private var _nitroState = MutableStateFlow<NitroState>(NitroState.Default)
     val nitroState: StateFlow<NitroState> = _nitroState.asStateFlow()
 
-    internal fun authenticate(nitroUrl: String, login: String) {
-        viewModelScope.launch {
-            _nitroState.emit(NitroState.Loading)
-            nitroApi = nitro.authenticate(nitroUrl, false)
-            _nitroState.emit(
-                NitroState.Init(
-                    nitroApi.endpoints.authentication.requestLogin2Service.execute(
-                        RequestLogin2Service.Request(login = login)
-                    ).data
-                )
-            )
+    internal fun authenticate(nitroHost: String, login: String) {
+        flow {
+            emit(NitroState.Loading)
+            nitroLegacy.authenticate(newNitroHost = nitroHost)
+            val request = RequestLogin2Service.Request(login = login)
+            val response = nitroLegacy.execute<RequestLogin2Service.Data> {
+                endpoints.authentication.requestLogin2Service.execute(request)
+            }
+            emit(NitroState.Init(response.data))
         }
+            .catch {
+                emit(NitroState.LoginResult(GetSsoInfoResult.Error.Unknown))
+            }
+            .onEach { _nitroState.emit(it) }
+            .launchIn(viewModelScope)
     }
 
     internal fun onWebviewReady() {
@@ -49,21 +55,20 @@ class NitroSsoInfoViewModel @Inject constructor(private val nitro: Nitro) : View
         teamUuid: String,
         samlResponse: String,
         email: String,
-        domainName: String
+        domainName: String,
     ) {
         viewModelScope.launch {
-            _nitroState.emit(
-                NitroState.Loading
-            )
+            _nitroState.emit(NitroState.Loading)
 
-            val confirmLoginResponseData =
-                nitroApi.endpoints.authentication.confirmLogin2Service.execute(
+            val confirmLoginResponseData = nitroLegacy.execute<ConfirmLogin2Service.Data> {
+                endpoints.authentication.confirmLogin2Service.execute(
                     ConfirmLogin2Service.Request(
                         TeamUuid(teamUuid),
                         samlResponse,
-                        DomainName(domainName)
-                    )
-            ).data
+                        DomainName(domainName),
+                    ),
+                )
+            }.data
 
             _nitroState.emit(
                 NitroState.LoginResult(
@@ -73,22 +78,22 @@ class NitroSsoInfoViewModel @Inject constructor(private val nitro: Nitro) : View
                             key = confirmLoginResponseData.userServiceProviderKey,
                             login = email,
                             ssoToken = confirmLoginResponseData.ssoToken,
-                            exists = confirmLoginResponseData.exists
-                        )
-                    )
-                )
+                            exists = confirmLoginResponseData.exists,
+                        ),
+                    ),
+                ),
             )
         }
     }
 
     sealed class NitroState {
-        object Default : NitroState()
+        data object Default : NitroState()
 
         data class Init(val data: RequestLogin2Service.Data) : NitroState()
 
-        object Ready : NitroState()
+        data object Ready : NitroState()
 
-        object Loading : NitroState()
+        data object Loading : NitroState()
 
         data class LoginResult(val result: GetSsoInfoResult) : NitroState()
     }

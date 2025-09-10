@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/mass_deployment.json",
+  "type": "object",
+  "description": "Definitions for mass deployment events",
+  "definitions": {
+    "is_protected_by_credential_risk_detection": {
+      "description": "If the device is protected by Credential Risk Detection or not",
+      "type": "boolean"
+    },
+    "mass_deployment_access_key": {
+      "description": "Team access key generated during the Mass deployment configuration",
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$"
+    },
+    "mass_deployment_device_id": {
+      "description": "Unique id generated at the device level for mass deployed devices only",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$"
+    }
+  }
+}

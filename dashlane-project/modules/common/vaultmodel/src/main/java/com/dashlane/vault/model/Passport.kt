@@ -12,7 +12,7 @@ fun createPassport(
     sex: SyncObject.Gender? = null,
     dateOfBirth: LocalDate? = null,
     deliveryPlace: String? = null,
-    linkedIdentity: String? = null
+    linkedIdentity: String? = null,
 ): VaultItem<SyncObject.Passport> {
     return dataIdentifier.toVaultItem(
         SyncObject.Passport {
@@ -26,11 +26,10 @@ fun createPassport(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
-fun VaultItem<SyncObject.Passport>.copySyncObject(builder: SyncObject.Passport.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.Passport> {
+fun VaultItem<SyncObject.Passport>.copySyncObject(builder: SyncObject.Passport.Builder.() -> Unit = {}): VaultItem<SyncObject.Passport> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

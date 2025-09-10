@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_import_logins"
+    app:startDestination="@id/import_logins">
+    <fragment
+        android:id="@+id/import_logins"
+        android:name="com.dashlane.importlogins.ImportLoginsFragment"
+        android:label="@string/import_logins_action_bar_title">
+        <argument
+            android:name="showAddLoginManually"
+            android:defaultValue="true"
+            app:argType="boolean" />
+    </fragment>
+</navigation>

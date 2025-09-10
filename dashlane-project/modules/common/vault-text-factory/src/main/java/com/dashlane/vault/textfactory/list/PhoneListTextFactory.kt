@@ -9,14 +9,13 @@ import javax.inject.Inject
 class PhoneListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.Phone> {
-
     override fun getTitle(item: SummaryObject.Phone): StatusText {
         return StatusText(
             if (item.phoneName.isSemanticallyNull()) {
                 resources.getString(R.string.phone)
             } else {
                 item.phoneName!!
-            }
+            },
         )
     }
 

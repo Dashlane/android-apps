@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sso_complete_login_message">Logging you in…</string>
+    <string name="sso_lock_topic_default">Unlock with SSO</string>
+    <string name="sso_error_not_correct">Invalid SSO. Please try again.</string>
+    
+    <string name="sso_error_forbidden_navigation">SSO redirection blocked. Contact your account admin.</string>
+    
+    <string name="sso_error_saml_not_found">SSO response not found. Contact your account admin.</string>
+    
+    <string name="sso_error_service_provider_not_found">No service provider found. Contact your account admin.</string>
+
+    
+    <string name="sso_member_migration_intro_title">Your company has enabled single sign-on (SSO)</string>
+    <string name="sso_member_migration_intro_description">Authenticate securely with multiple websites by logging in just once with your company SSO credentials.</string>
+    <string name="sso_member_migration_intro_link">Learn more about SSO.</string>
+    <string name="sso_member_migration_intro_cta_positive">Continue with SSO</string>
+    <string name="sso_member_migration_intro_cta_negative">Logout</string>
+    <string name="sso_member_migration_message">Encrypting your data</string>
+</resources>

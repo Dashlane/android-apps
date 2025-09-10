@@ -4,11 +4,10 @@ import android.content.Context
 import android.view.View
 import android.widget.TextView
 import com.dashlane.R
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 data class DarkWebHeaderItem(private val text: String) : DashlaneRecyclerAdapter.ViewTypeProvider {
-
     override fun getViewType() = VIEW_TYPE
 
     class ViewHolder(val v: View) : EfficientViewHolder<DarkWebHeaderItem>(v) {
@@ -20,7 +19,7 @@ data class DarkWebHeaderItem(private val text: String) : DashlaneRecyclerAdapter
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType<DarkWebHeaderItem>(
             R.layout.item_header,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 }

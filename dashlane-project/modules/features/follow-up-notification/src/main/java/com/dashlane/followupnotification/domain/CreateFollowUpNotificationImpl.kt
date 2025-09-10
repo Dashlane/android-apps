@@ -22,15 +22,15 @@ class CreateFollowUpNotificationImpl @Inject constructor(
     private val vaultItemContentDisplayService: VaultItemContentService,
     private val vaultDataQuery: VaultDataQuery,
 ) : CreateFollowUpNotification {
-
     override fun createFollowUpNotification(
         summaryObject: SummaryObject,
-        copyField: CopyField?
+        copyField: CopyField?,
     ): FollowUpNotification? {
         val vaultItem = vaultDataQuery.queryLegacy(vaultFilter { specificUid(summaryObject.id) })
         if (!isFollowUpNotificationNeeded(summaryObject, copyField)) return null
         val followUpNotificationsType =
-            summaryObject.getFollowUpType(context, vaultItem?.syncObject?.localeFormat) ?: return null
+            summaryObject.getFollowUpType(context, vaultItem?.syncObject?.localeFormat)
+                ?: return null
         val copyFields = if (credentialHasBothLoginAndEmail(summaryObject)) {
             followUpNotificationsType.copyField.toList().minus(CopyField.Email)
         } else {
@@ -52,7 +52,9 @@ class CreateFollowUpNotificationImpl @Inject constructor(
         } ?: return null
 
         val followUpNotificationName = summaryObject.getItemName()
-            ?: followUpNotificationsStrings.getFollowUpNotificationsTypesLabels(followUpNotificationsType)
+            ?: followUpNotificationsStrings.getFollowUpNotificationsTypesLabels(
+                followUpNotificationsType,
+            )
         val followUpNotificationId = followUpNotificationDynamicData.generateRandomUUIDString()
 
         return FollowUpNotification(
@@ -62,11 +64,14 @@ class CreateFollowUpNotificationImpl @Inject constructor(
             name = followUpNotificationName,
             fields = followUpNotificationFields,
             isItemProtected = summaryObject.isProtected,
-            itemDomain = (summaryObject as? SummaryObject.Authentifiant)?.urlForUsageLog
+            itemDomain = (summaryObject as? SummaryObject.Authentifiant)?.urlForUsageLog,
         )
     }
 
-    private fun isFollowUpNotificationNeeded(summaryObject: SummaryObject, copyField: CopyField?): Boolean {
+    private fun isFollowUpNotificationNeeded(
+        summaryObject: SummaryObject,
+        copyField: CopyField?,
+    ): Boolean {
         if (summaryObject is SummaryObject.Authentifiant) {
             
             if (copyField == CopyField.Password && !summaryObject.hasOtpUrl) {
@@ -89,18 +94,18 @@ class CreateFollowUpNotificationImpl @Inject constructor(
             currentNotification.name,
             currentNotification.fields,
             currentNotification.isItemProtected,
-            currentNotification.itemDomain
+            currentNotification.itemDomain,
         )
     }
 
     private fun credentialHasBothLoginAndEmail(summaryObject: SummaryObject): Boolean =
         vaultItemContentDisplayService.getContent(
             summaryObject,
-            CopyField.Login
+            CopyField.Login,
         )?.displayValue.isNotSemanticallyNull() &&
             vaultItemContentDisplayService.getContent(
                 summaryObject,
-                CopyField.Email
+                CopyField.Email,
             )?.displayValue.isNotSemanticallyNull()
 
     private fun SummaryObject.getItemName(): String? = when (this) {
@@ -111,25 +116,25 @@ class CreateFollowUpNotificationImpl @Inject constructor(
         is SummaryObject.Email -> this.emailName
         is SummaryObject.PaymentCreditCard -> this.name
         is SummaryObject.Collection -> name
-        is SummaryObject.PaymentPaypal,
         is SummaryObject.AuthCategory,
-        is SummaryObject.SecureNoteCategory,
-        is SummaryObject.SecureNote,
+        is SummaryObject.DataChangeHistory,
         is SummaryObject.DriverLicence,
         is SummaryObject.FiscalStatement,
+        is SummaryObject.GeneratedPassword,
         is SummaryObject.IdCard,
         is SummaryObject.Identity,
+        is SummaryObject.Passkey,
         is SummaryObject.Passport,
         is SummaryObject.PersonalWebsite,
         is SummaryObject.Phone,
-        is SummaryObject.SocialSecurityStatement,
+        is SummaryObject.Secret,
         is SummaryObject.SecureFileInfo,
+        is SummaryObject.SecureNote,
+        is SummaryObject.SecureNoteCategory,
         is SummaryObject.SecurityBreach,
-        is SummaryObject.GeneratedPassword,
-        is SummaryObject.DataChangeHistory,
-        is SummaryObject.Passkey -> null
-        
-        is SummaryObject.Secret -> null
+        is SummaryObject.SocialSecurityStatement,
+        is SummaryObject.WiFi,
+        -> null
     }.takeIf { it.isNotSemanticallyNull() }
 
     private fun List<CopyField>.filterFieldsWithLimitedPermissions(summaryObject: SummaryObject): List<CopyField> =

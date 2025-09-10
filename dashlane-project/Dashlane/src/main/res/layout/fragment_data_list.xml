@@ -28,7 +28,7 @@
                 app:mood="brand"
                 app:title="@string/collection_item_share_permission_explanation_title" />
 
-            <com.dashlane.ui.widgets.view.MultiColumnRecyclerView
+            <com.dashlane.ui.legacy.recyclerview.MultiColumnRecyclerView
                 android:id="@+id/recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

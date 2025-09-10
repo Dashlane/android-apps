@@ -13,7 +13,7 @@ import com.dashlane.xml.domain.SyncObject
 import okio.ByteString.Companion.decodeBase64
 
 internal fun Iterable<CsvAuthentifiant>.filterNew(
-    existing: List<SyncObject.Authentifiant>
+    existing: List<SyncObject.Authentifiant>,
 ): List<CsvAuthentifiant> =
     (this.associateBy { it.toIdentifier() } - existing.map { it.toIdentifier() })
         .values
@@ -23,19 +23,19 @@ private fun SyncObject.Authentifiant.toIdentifier(): AuthentifiantIdentifier = A
     url = url,
     username = email.takeUnless { it.isSemanticallyNull() }
         ?: login.takeUnless { it.isSemanticallyNull() },
-    password = password?.toString()
+    password = password?.toString(),
 )
 
 private fun CsvAuthentifiant.toIdentifier(): AuthentifiantIdentifier = AuthentifiantIdentifier(
     url = deprecatedUrl,
     username = email ?: login,
-    password = password
+    password = password,
 )
 
 private data class AuthentifiantIdentifier(
     private val url: String?,
     private val username: String?,
-    private val password: String?
+    private val password: String?,
 )
 
 internal fun newCsvAuthentifiant(
@@ -43,7 +43,7 @@ internal fun newCsvAuthentifiant(
     knownApplicationProvider: KnownApplicationProvider,
     fields: List<String>,
     types: List<CsvSchema.FieldType?>,
-    appNameFromPackage: (String) -> String?
+    appNameFromPackage: (String) -> String?,
 ): CsvAuthentifiant? {
     var url: String? = null
     var username: String? = null
@@ -70,7 +70,7 @@ internal fun newCsvAuthentifiant(
             url,
             username,
             password,
-            appNameFromPackage
+            appNameFromPackage,
         )
     } else {
         newAuthentifiantForWebsite(url, username, password)
@@ -83,7 +83,7 @@ private fun newAuthentifiantForApp(
     url: String,
     username: String,
     password: String,
-    appNameFromPackage: (String) -> String?
+    appNameFromPackage: (String) -> String?,
 ): CsvAuthentifiant {
     val (signature, packageName) = url.drop(10) 
         .dropLast(1) 
@@ -101,14 +101,14 @@ private fun newAuthentifiantForApp(
         deprecatedUrl = website,
         login = username,
         password = password,
-        title = website ?: appNameFromPackage(packageName)
+        title = website ?: appNameFromPackage(packageName),
     )
 }
 
 private fun newAuthentifiantForWebsite(
     url: String,
     username: String,
-    password: String
+    password: String,
 ): CsvAuthentifiant {
     val (login, email) = if (username.isValidEmail()) {
         null to username
@@ -120,7 +120,7 @@ private fun newAuthentifiantForWebsite(
         deprecatedUrl = url,
         email = email,
         login = login,
-        password = password
+        password = password,
     )
 }
 
@@ -131,5 +131,5 @@ internal fun CsvAuthentifiant.toVaultItem(helper: ImportAuthentifiantHelper): Va
         email = email,
         login = login,
         password = SyncObfuscatedValue(password ?: ""),
-        title = title
+        title = title,
     )

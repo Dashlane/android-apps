@@ -15,11 +15,11 @@ fun View.onInitializeAccessibilityNodeInfo(onInitializeAccessibilityNodeInfo: (A
     ViewCompat.setAccessibilityDelegate(
         this,
         object : AccessibilityDelegateCompat() {
-        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
-            super.onInitializeAccessibilityNodeInfo(host, info)
-            onInitializeAccessibilityNodeInfo.invoke(info)
-        }
-    }
+            override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                onInitializeAccessibilityNodeInfo.invoke(info)
+            }
+        },
     )
 }
 

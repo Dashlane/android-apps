@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/authenticator_add_otp_code.json",
+  "type": "object",
+  "description": "When the user successfully adds an OTP code to the Authenticator app",
+  "metas": {
+    "area": "authenticator_app"
+  },
+  "properties": {
+    "name": {
+      "const": "authenticator_add_otp_code"
+    },
+    "otp_addition_mode": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/otp_addition_mode"
+    }
+  },
+  "required": [
+    "name",
+    "otp_addition_mode"
+  ],
+  "additionalProperties": false
+}

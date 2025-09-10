@@ -6,7 +6,6 @@ import okhttp3.Response
 import java.io.IOException
 
 internal class MoreDetailedExceptionRequestInterceptor : Interceptor {
-
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         try {
@@ -17,7 +16,6 @@ internal class MoreDetailedExceptionRequestInterceptor : Interceptor {
     }
 
     class OkHttpRequestException(message: String, cause: Throwable) : IOException(message, cause) {
-
         constructor(request: Request, cause: Throwable) : this(toMessage(request), cause)
 
         companion object {

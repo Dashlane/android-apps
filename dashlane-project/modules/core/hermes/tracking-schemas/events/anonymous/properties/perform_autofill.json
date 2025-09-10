@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/perform_autofill.json",
+  "type": "object",
+  "description": "Autofill by Dashlane, for anonymous side",
+  "metas": {
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "perform_autofill"
+    },
+    "autofill_mechanism": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_mechanism"
+    },
+    "autofill_origin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_origin"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "fields_filled": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_filled"
+    },
+    "form_type_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_type_list"
+    },
+    "is_autologin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_autologin"
+    },
+    "is_manual": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_manual"
+    },
+    "is_native_app": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+    },
+    "match_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/match_type"
+    },
+    "mobile_browser_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/mobile_browser_name"
+    },
+    "password_filled_health": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/credential_security_status"
+    }
+  },
+  "required": [
+    "name",
+    "autofill_mechanism",
+    "autofill_origin",
+    "domain",
+    "is_autologin",
+    "is_manual",
+    "is_native_app",
+    "match_type"
+  ],
+  "additionalProperties": false
+}

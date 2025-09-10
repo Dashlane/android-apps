@@ -31,7 +31,7 @@ class NewSharePeopleViewProxy(
     private val fragment: Fragment,
     view: View,
     private val viewModel: NewSharePeopleViewModelContract,
-    lockManager: LockManager
+    lockManager: LockManager,
 ) {
     private val coroutineScope: CoroutineScope
         get() = fragment.lifecycle.coroutineScope
@@ -80,19 +80,19 @@ class NewSharePeopleViewProxy(
                         onSuccessForResult()
                     NewSharePeopleViewModelContract.UIState.ERROR ->
                         showErrorDialog(
-                            R.string.sharing_dialog_error_premium_status_undefined_description
+                            R.string.sharing_dialog_error_premium_status_undefined_description,
                         )
                     NewSharePeopleViewModelContract.UIState.ERROR_FIND_USERS ->
                         showErrorDialog(
-                            R.string.ui_sharing_error_network_or_server_error
+                            R.string.ui_sharing_error_network_or_server_error,
                         )
                     NewSharePeopleViewModelContract.UIState.ERROR_ALREADY_ACCESS ->
                         showErrorDialog(
-                            R.string.ui_sharing_error_cannot_share_with_only_you
+                            R.string.ui_sharing_error_cannot_share_with_only_you,
                         )
                     NewSharePeopleViewModelContract.UIState.ERROR_NOT_INTERNAL ->
                         showErrorDialog(
-                            R.string.ui_sharing_error_internal_only
+                            R.string.ui_sharing_error_internal_only,
                         )
                     else -> showLoadingDialog(false)
                 }
@@ -126,7 +126,7 @@ class NewSharePeopleViewProxy(
         val adapter = SharingContactFilteredArrayAdapter(
             context,
             R.layout.list_item_sharing_contact_chips,
-            data
+            data,
         )
         emailAddresses.setAdapter(adapter)
     }
@@ -136,7 +136,7 @@ class NewSharePeopleViewProxy(
         if (show) {
             SharingPermissionSelectionDialogFragment.newInstance(
                 context,
-                viewModel.permission.value.toSharingPermission()
+                viewModel.permission.value.toSharingPermission(),
             ).show(fragmentManager, SharingPermissionSelectionDialogFragment.TAG)
         }
     }
@@ -154,7 +154,7 @@ class NewSharePeopleViewProxy(
                 false,
                 context.getString(R.string.contacting_dashlane),
                 context.getString(R.string.contacting_dashlane),
-                fragmentManager
+                fragmentManager,
             )
         }
     }
@@ -163,7 +163,9 @@ class NewSharePeopleViewProxy(
         WaiterDialogFragment.dismissWaiter(fragmentManager)
     }
 
-    private fun showErrorDialog(@StringRes descriptionResId: Int) {
+    private fun showErrorDialog(
+        @StringRes descriptionResId: Int,
+    ) {
         WaiterDialogFragment.dismissWaiter(fragmentManager)
         DialogHelper()
             .builder(context)

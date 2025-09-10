@@ -4,6 +4,7 @@ import com.dashlane.password.generator.PasswordGenerator
 import com.dashlane.passwordstrength.PasswordStrengthCache
 import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.cache
+import com.dashlane.passwordstrength.passwordStrengthEvaluator
 import com.dashlane.util.inject.qualifiers.Cache
 import dagger.Module
 import dagger.Provides
@@ -14,14 +15,16 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object PasswordModule {
-
     @Provides
     @Cache
-    fun providePasswordStrengthEvaluatorCached(evaluator: PasswordStrengthEvaluator, cache: PasswordStrengthCache): PasswordStrengthEvaluator =
+    fun providePasswordStrengthEvaluatorCached(
+        evaluator: PasswordStrengthEvaluator,
+        cache: PasswordStrengthCache,
+    ): PasswordStrengthEvaluator =
         evaluator.cache(cache)
 
     @Provides
-    fun providePasswordStrengthEvaluator(): PasswordStrengthEvaluator = PasswordStrengthEvaluator()
+    fun providePasswordStrengthEvaluator(): PasswordStrengthEvaluator = passwordStrengthEvaluator()
 
     @Provides
     @Singleton

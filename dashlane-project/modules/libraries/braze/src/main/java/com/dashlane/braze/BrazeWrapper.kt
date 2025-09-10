@@ -17,7 +17,7 @@ import com.dashlane.util.notification.NotificationHelper
 class BrazeWrapper(
     private val braze: Braze,
     private val inAppManager: BrazeInAppMessageManager,
-    inAppMessageSubscriber: BrazeInAppMessageSubscriber
+    inAppMessageSubscriber: BrazeInAppMessageSubscriber,
 ) {
     private var userId: String? = null
 
@@ -57,7 +57,6 @@ class BrazeWrapper(
     }
 
     private object NotificationFactory : IBrazeNotificationFactory {
-
         override fun createNotification(payload: BrazeNotificationPayload): Notification? {
             val notificationExtras = payload.notificationExtras
 
@@ -73,7 +72,7 @@ class BrazeWrapper(
             if (!channelExists) {
                 notificationExtras.putString(
                     Constants.BRAZE_PUSH_NOTIFICATION_CHANNEL_ID_KEY,
-                    defaultChannel.id
+                    defaultChannel.id,
                 )
             }
 
@@ -82,8 +81,8 @@ class BrazeWrapper(
                     context = payload.context,
                     configurationProvider = payload.configurationProvider,
                     notificationExtras = payload.notificationExtras,
-                    brazeExtras = payload.brazeExtras
-                )
+                    brazeExtras = payload.brazeExtras,
+                ),
             )?.build()
         }
     }

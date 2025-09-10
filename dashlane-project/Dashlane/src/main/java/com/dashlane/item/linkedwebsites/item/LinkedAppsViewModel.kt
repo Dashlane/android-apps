@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.dashlane.R
 import com.dashlane.item.linkedwebsites.LinkedServicesFragmentArgs
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.getAppIcon
 import com.dashlane.util.getAppName
@@ -16,16 +16,16 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 @HiltViewModel
 class LinkedAppsViewModel @Inject constructor(
     private val packageManager: PackageManager,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     val state: StateFlow<LinkedAppsUIState>
         get() = _state.asStateFlow()
@@ -35,8 +35,8 @@ class LinkedAppsViewModel @Inject constructor(
             showEmptyState = false,
             actionOpenApp = null,
             actionOpenStore = null,
-            actionOpenWebsite = null
-        )
+            actionOpenWebsite = null,
+        ),
     )
     private var vaultItem: VaultItem<SyncObject.Authentifiant>? = null
     private var isEditMode = false
@@ -77,8 +77,8 @@ class LinkedAppsViewModel @Inject constructor(
                     isMain = true,
                     isEditable = false,
                     isPageEditMode = isEditMode,
-                    openWebsiteListener = this::openMainWebsite
-                )
+                    openWebsiteListener = this::openMainWebsite,
+                ),
             )
         } ?: emptyList()
     }
@@ -108,8 +108,8 @@ class LinkedAppsViewModel @Inject constructor(
                     openAppListener = ::openApp,
                     isEditable = true,
                     isAppInstalled = appName != null && appDrawable != null,
-                    isPageEditMode = isEditMode
-                )
+                    isPageEditMode = isEditMode,
+                ),
             )
         }
         return items
@@ -137,7 +137,7 @@ class LinkedAppsViewModel @Inject constructor(
                 openAppListener = ::openApp,
                 isEditable = false,
                 isAppInstalled = appName != null && appDrawable != null,
-                isPageEditMode = isEditMode
+                isPageEditMode = isEditMode,
             )
         }?.sortedByDescending { it.isAppInstalled }?.let { items.addAll(it) }
         return items
@@ -170,8 +170,8 @@ class LinkedAppsViewModel @Inject constructor(
             it.copy(
                 actionOpenWebsite = LinkedWebsitesViewModel.LinkedWebsitesUIState.LinkedWebsitesUIStateLoginOpener(
                     item.defaultUrl.toUrlOrNull()?.toString(),
-                    packageNames
-                )
+                    packageNames,
+                ),
             )
         }
     }
@@ -187,6 +187,6 @@ class LinkedAppsViewModel @Inject constructor(
         val showEmptyState: Boolean,
         val actionOpenApp: String?,
         val actionOpenStore: String?,
-        val actionOpenWebsite: LinkedWebsitesViewModel.LinkedWebsitesUIState.LinkedWebsitesUIStateLoginOpener?
+        val actionOpenWebsite: LinkedWebsitesViewModel.LinkedWebsitesUIState.LinkedWebsitesUIStateLoginOpener?,
     )
 }
