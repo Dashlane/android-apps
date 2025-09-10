@@ -24,9 +24,9 @@ class DataIdentifierListTextResolverImpl @Inject constructor(
     private val secretFactory: SecretListTextFactory,
     private val secureNoteFactory: SecureNoteListTextFactory,
     private val socialSecurityStatementFactory: SocialSecurityStatementListTextFactory,
+    private val wifiFactory: WiFiListTextFactory,
     private val emptyFactory: EmptyListTextFactory,
 ) : DataIdentifierListTextResolver {
-
     override fun getLine1(item: SummaryObject): StatusText =
         when (item) {
             is SummaryObject.Address -> addressFactory.getTitle(item)
@@ -46,14 +46,15 @@ class DataIdentifierListTextResolverImpl @Inject constructor(
             is SummaryObject.Secret -> secretFactory.getTitle(item)
             is SummaryObject.SecureNote -> secureNoteFactory.getTitle(item)
             is SummaryObject.SocialSecurityStatement -> socialSecurityStatementFactory.getTitle(item)
-            is SummaryObject.PaymentPaypal,
+            is SummaryObject.WiFi -> wifiFactory.getTitle(item)
             is SummaryObject.AuthCategory,
             is SummaryObject.Collection,
             is SummaryObject.DataChangeHistory,
             is SummaryObject.GeneratedPassword,
             is SummaryObject.SecureFileInfo,
             is SummaryObject.SecureNoteCategory,
-            is SummaryObject.SecurityBreach -> emptyFactory.getTitle(item)
+            is SummaryObject.SecurityBreach,
+            -> emptyFactory.getTitle(item)
         }
 
     override fun getLine2(item: SummaryObject): StatusText {
@@ -71,20 +72,27 @@ class DataIdentifierListTextResolverImpl @Inject constructor(
             is SummaryObject.Identity -> identityFactory.getDescription(item, default)
             is SummaryObject.Passkey -> passkeyFactory.getDescription(item, default)
             is SummaryObject.Passport -> passportFactory.getDescription(item, default)
-            is SummaryObject.PaymentCreditCard -> paymentCreditCardFactory.getDescription(item, default)
+            is SummaryObject.PaymentCreditCard -> paymentCreditCardFactory.getDescription(
+                item,
+                default,
+            )
             is SummaryObject.PersonalWebsite -> personalWebsiteFactory.getDescription(item, default)
             is SummaryObject.Phone -> phoneFactory.getDescription(item, default)
             is SummaryObject.Secret -> secretFactory.getDescription(item, default)
             is SummaryObject.SecureNote -> secureNoteFactory.getDescription(item, default)
-            is SummaryObject.SocialSecurityStatement -> socialSecurityStatementFactory.getDescription(item, default)
-            is SummaryObject.PaymentPaypal,
+            is SummaryObject.SocialSecurityStatement -> socialSecurityStatementFactory.getDescription(
+                item,
+                default,
+            )
+            is SummaryObject.WiFi -> wifiFactory.getDescription(item, default)
             is SummaryObject.AuthCategory,
             is SummaryObject.Collection,
             is SummaryObject.DataChangeHistory,
             is SummaryObject.GeneratedPassword,
             is SummaryObject.SecureFileInfo,
             is SummaryObject.SecureNoteCategory,
-            is SummaryObject.SecurityBreach -> emptyFactory.getDescription(item, default)
+            is SummaryObject.SecurityBreach,
+            -> emptyFactory.getDescription(item, default)
         }
     }
 }

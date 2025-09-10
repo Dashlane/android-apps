@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/ask_authentication.json",
+  "type": "object",
+  "description": "When we display an authentication screen within the app",
+  "metas": {
+    "area": "authentication",
+    "is_event_triggering_session": true,
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "ask_authentication"
+    },
+    "mode": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/mode"
+    },
+    "reason": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/reason"
+    },
+    "verification_mode": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/verification_mode"
+    }
+  },
+  "required": [
+    "name",
+    "mode",
+    "reason"
+  ],
+  "additionalProperties": false
+}

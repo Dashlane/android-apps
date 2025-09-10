@@ -17,7 +17,7 @@ object SnackbarUtils {
         anchorView: View,
         text: CharSequence,
         duration: Int = Snackbar.LENGTH_LONG,
-        block: (Snackbar.() -> Unit)? = null
+        block: (Snackbar.() -> Unit)? = null,
     ): Snackbar = Snackbar.make(anchorView, text, duration).apply {
         
         view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text).run {
@@ -27,7 +27,7 @@ object SnackbarUtils {
         setActionTextColor(context.getColor(R.color.text_neutral_standard))
         val backgroundColor = ColorUtils.compositeColors(
             context.getColor(R.color.container_expressive_neutral_quiet_idle),
-            context.getColor(R.color.container_agnostic_neutral_quiet)
+            context.getColor(R.color.container_agnostic_neutral_quiet),
         )
         setBackgroundTint(backgroundColor)
         block?.invoke(this)
@@ -38,12 +38,12 @@ object SnackbarUtils {
         activity: Activity,
         text: CharSequence,
         duration: Int = Snackbar.LENGTH_LONG,
-        block: (Snackbar.() -> Unit)? = null
+        block: (Snackbar.() -> Unit)? = null,
     ): Snackbar = showSnackbar(
         activity.findContentParent(),
         text,
         duration,
-        block
+        block,
     )
 
     @JvmStatic
@@ -51,11 +51,11 @@ object SnackbarUtils {
         anchorView: View,
         text: CharSequence,
         duration: Int = Snackbar.LENGTH_LONG,
-        onGoToSettings: View.OnClickListener? = null
+        onGoToSettings: View.OnClickListener? = null,
     ): Snackbar = showSnackbar(
         anchorView,
         text,
-        duration
+        duration,
     ) {
         setAction(R.string.settings) {
             onGoToSettings?.onClick(it)
@@ -71,12 +71,12 @@ object SnackbarUtils {
         activity: Activity,
         text: CharSequence,
         duration: Int = Snackbar.LENGTH_LONG,
-        onGoToSettings: View.OnClickListener? = null
+        onGoToSettings: View.OnClickListener? = null,
     ) = showPermissionSnackbar(
         activity.findContentParent(),
         text,
         duration,
-        onGoToSettings
+        onGoToSettings,
     )
 
     @JvmStatic

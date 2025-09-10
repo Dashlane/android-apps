@@ -1,18 +1,17 @@
 package com.dashlane.sync.repositories.strategies
 
-import com.dashlane.server.api.endpoints.sync.SyncDownloadService
-import com.dashlane.server.api.endpoints.sync.SyncUploadService
+import com.dashlane.server.api.endpoints.sync.GetLatestContentService
+import com.dashlane.server.api.endpoints.sync.UploadContentService
 import com.dashlane.sync.repositories.ServerCredentials
 
 interface SyncServices {
-
     suspend fun download(
         serverCredentials: ServerCredentials,
-        request: SyncDownloadService.Request
-    ): SyncDownloadService.Data
+        request: GetLatestContentService.Request,
+    ): GetLatestContentService.Data
 
     suspend fun upload(
         serverCredentials: ServerCredentials,
-        request: SyncUploadService.Request
-    ): SyncUploadService.Data
+        request: UploadContentService.Request,
+    ): UploadContentService.Data
 }

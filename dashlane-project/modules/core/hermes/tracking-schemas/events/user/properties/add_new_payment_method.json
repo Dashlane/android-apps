@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/add_new_payment_method.json",
+  "type": "object",
+  "description": "When an admin decides to add a credit card as secondary payment method in the Team Admin Console.",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "add_new_payment_method"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step"
+  ],
+  "additionalProperties": false
+}

@@ -3,7 +3,9 @@ package com.dashlane.ui.menu.domain
 import com.dashlane.accountstatus.AccountStatus
 import com.dashlane.accountstatus.premiumstatus.isTrial
 import com.dashlane.accountstatus.premiumstatus.remainingDays
-import com.dashlane.notification.badge.NotificationBadgeActor
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.canShowVpn
+import com.dashlane.featureflipping.canUpgradeToGetVpn
 import com.dashlane.premium.offer.common.UserBenefitStatusProvider
 import com.dashlane.premium.offer.common.model.UserBenefitStatus
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
@@ -14,23 +16,19 @@ import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.checklist.ChecklistHelper
-import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.featureflipping.canShowVpn
-import com.dashlane.featureflipping.canUpgradeToGetVpn
 import com.dashlane.util.inject.OptionalProvider
 import java.time.Clock
 import javax.inject.Inject
 
 class MenuConfigurationProvider @Inject constructor(
     private val checklistHelper: ChecklistHelper,
-    private val notificationBadgeActor: NotificationBadgeActor,
     private val accountStatusProvider: OptionalProvider<AccountStatus>,
     private val sessionManager: SessionManager,
     private val userFeaturesChecker: UserFeaturesChecker,
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
     private val userBenefitStatusProvider: UserBenefitStatusProvider,
-    private val clock: Clock
+    private val clock: Clock,
 ) {
     private val accountStatus: AccountStatus?
         get() = accountStatusProvider.get()
@@ -70,9 +68,6 @@ class MenuConfigurationProvider @Inject constructor(
     private val isPersonalPlanVisible: Boolean
         get() = checklistHelper.shouldDisplayChecklist()
 
-    private val hasUnReadActionItems: Boolean
-        get() = notificationBadgeActor.hasUnReadActionItems
-
     private val isTrial: Boolean
         get() = premiumStatus?.isTrial == true
 
@@ -95,7 +90,7 @@ class MenuConfigurationProvider @Inject constructor(
         else -> true
     }
 
-    fun getConfiguration(teamspaceSelectionMode: Boolean): MenuConfiguration =
+    fun getConfiguration(teamspaceSelectionMode: Boolean, hasUnReadActionItems: Boolean): MenuConfiguration =
         MenuConfiguration(
             userAlias = userAlias,
             teamspaceSelectionMode = teamspaceSelectionMode,
@@ -111,7 +106,7 @@ class MenuConfigurationProvider @Inject constructor(
             selectableTeamspaces = selectableTeamspaces,
             userPremiumStatusType = userPremiumStatusType,
             canUpgradePremium = canUpgradePremium(),
-            enforcedTeamspace = enforcedTeamspace
+            enforcedTeamspace = enforcedTeamspace,
         )
 }
 
@@ -130,5 +125,5 @@ data class MenuConfiguration(
     val selectableTeamspaces: List<TeamSpace>?,
     val userPremiumStatusType: UserBenefitStatus.Type,
     val canUpgradePremium: Boolean,
-    val enforcedTeamspace: TeamSpace? = null
+    val enforcedTeamspace: TeamSpace? = null,
 )

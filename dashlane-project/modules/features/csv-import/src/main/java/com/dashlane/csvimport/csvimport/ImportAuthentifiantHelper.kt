@@ -12,10 +12,10 @@ interface ImportAuthentifiantHelper {
         login: String? = "",
         password: SyncObfuscatedValue? = null,
         title: String? = null,
-        teamId: String? = null
+        teamId: String? = null,
     ): VaultItem<SyncObject.Authentifiant>
 
     suspend fun addAuthentifiants(
-        authentifiants: List<VaultItem<SyncObject.Authentifiant>>
+        authentifiants: List<VaultItem<SyncObject.Authentifiant>>,
     ): Int
 }

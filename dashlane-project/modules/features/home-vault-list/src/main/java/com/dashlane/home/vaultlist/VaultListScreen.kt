@@ -32,6 +32,5 @@ private fun VaultListScreen(
         onLongClick = viewModel::onLongClick,
         onCopyClicked = viewModel::onCopyClicked,
         onMoreClicked = viewModel::onMoreClicked,
-        loadItemExtraContent = viewModel::loadItemExtraContent,
     )
 }

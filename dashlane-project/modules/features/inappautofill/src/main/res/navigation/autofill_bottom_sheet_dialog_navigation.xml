@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation android:id="@+id/all_accounts_navigation"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/all_accounts_navigation"
     app:startDestination="@id/nav_all_accounts">
 
     <fragment
@@ -74,13 +74,16 @@
 
     <fragment
         android:id="@+id/nav_link_service"
-        android:name="com.dashlane.autofill.rememberaccount.view.AutofillLinkServiceFragment"
-        tools:layout="@layout/bottom_sheet_link_service">
+        android:name="com.dashlane.autofill.linkservices.AutofillLinkServiceFragment">
         <argument
             android:name="form_source"
             app:argType="com.dashlane.autofill.formdetector.model.AutoFillFormSource" />
         <argument
             android:name="item_id"
             app:argType="string" />
+        <argument
+            android:name="item_website"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 </navigation>

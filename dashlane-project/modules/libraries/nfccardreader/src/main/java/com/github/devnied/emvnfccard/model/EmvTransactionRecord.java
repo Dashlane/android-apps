@@ -10,6 +10,9 @@ import com.github.devnied.emvnfccard.parser.apdu.impl.DataFactory;
 import java.io.Serializable;
 import java.util.Date;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class EmvTransactionRecord extends AbstractByteBean<EmvTransactionRecord> implements Serializable {
 
 	private static final long serialVersionUID = -7050737312961921452L;

@@ -4,6 +4,7 @@ import com.dashlane.url.toUrlOrNull
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 
+@SuppressWarnings("kotlin:S107") 
 fun createPasskey(
     itemId: String = generateUniqueIdentifier(),
     dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(uid = itemId),
@@ -15,7 +16,8 @@ fun createPasskey(
     itemName: String? = null,
     userHandle: String? = null,
     userDisplayName: String? = null,
-    keyAlgorithm: Long = 0
+    keyAlgorithm: Long = 0,
+    cloudPasskey: SyncObject.Passkey.CloudPasskey? = null,
 ): VaultItem<SyncObject.Passkey> {
     return dataIdentifier.toVaultItem(
         SyncObject.Passkey {
@@ -29,7 +31,8 @@ fun createPasskey(
             this.userHandle = userHandle
             this.userDisplayName = userDisplayName
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+            this.cloudPasskey = cloudPasskey
+        },
     )
 }
 
@@ -52,7 +55,22 @@ private fun getTitle(itemName: String?, rpId: String?): String? =
     itemName?.removeSurrounding("\"")?.takeIf { it.isNotSemanticallyNull() }
         ?: rpId?.toUrlOrNull()?.host?.takeIf { it.isNotSemanticallyNull() }
 
-fun VaultItem<SyncObject.Passkey>.copySyncObject(builder: SyncObject.Passkey.Builder.() -> Unit = {}):
-    VaultItem<SyncObject.Passkey> {
+fun VaultItem<SyncObject.Passkey>.copySyncObject(builder: SyncObject.Passkey.Builder.() -> Unit = {}): VaultItem<SyncObject.Passkey> {
     return this.copy(syncObject = this.syncObject.copy(builder))
+}
+
+data class CloudPasskeyData(val passkeyId: String, val keyId: String, val key: String) {
+    companion object {
+        fun fromPasskey(passkey: SyncObject.Passkey): CloudPasskeyData? = passkey.cloudPasskey?.let {
+            val passkeyId = it.passkeyId ?: return@let null
+            val keyId = it.passkeyEncryptionKeyId ?: return@let null
+            val key = it.passkeyEncryptionKey ?: return@let null
+
+            CloudPasskeyData(
+                passkeyId = passkeyId,
+                keyId = keyId,
+                key = key,
+            )
+        }
+    }
 }

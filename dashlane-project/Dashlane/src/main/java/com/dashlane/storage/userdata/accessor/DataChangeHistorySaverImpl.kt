@@ -9,12 +9,14 @@ import javax.inject.Singleton
 
 @Singleton
 class DataChangeHistorySaverImpl @Inject constructor(
-    private val databaseItemSaver: Lazy<DatabaseItemSaver>
+    private val databaseItemSaver: Lazy<DatabaseItemSaver>,
 ) : DataChangeHistorySaver {
-    override suspend fun save(dataChangeHistory: List<VaultItem<SyncObject.DataChangeHistory>>): List<VaultItem<SyncObject.DataChangeHistory>> {
+    override suspend fun save(
+        dataChangeHistory: List<VaultItem<SyncObject.DataChangeHistory>>,
+    ): List<VaultItem<SyncObject.DataChangeHistory>> {
         if (dataChangeHistory.isEmpty()) return emptyList()
         val saveRequest = DataSaver.SaveRequest(
-            itemsToSave = dataChangeHistory
+            itemsToSave = dataChangeHistory,
         )
         return databaseItemSaver.get().save(saveRequest, emptyList())
     }

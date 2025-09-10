@@ -8,21 +8,18 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -34,18 +31,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuHost
@@ -59,34 +53,31 @@ import com.dashlane.collections.RevokeToDeleteDialog
 import com.dashlane.collections.SearchableTopAppBarTitle
 import com.dashlane.collections.SpaceData
 import com.dashlane.collections.details.DialogBusinessMemberLimit
-import com.dashlane.design.component.ButtonLarge
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
+import com.dashlane.design.component.DashlaneSnackbarWrapper
 import com.dashlane.design.component.DropdownItem
 import com.dashlane.design.component.DropdownMenu
 import com.dashlane.design.component.Icon
 import com.dashlane.design.component.ListItem
 import com.dashlane.design.component.ListItemActions
-import com.dashlane.design.component.Text
+import com.dashlane.design.component.ThumbnailType
 import com.dashlane.design.component.cardBackground
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
-import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.design.theme.typography.withSearchHighlight
 import com.dashlane.teamspaces.model.SpaceColor
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
+import com.dashlane.ui.common.compose.components.IntroScreenContent
 import com.dashlane.ui.widgets.compose.OutlinedTeamspaceIcon
-import com.dashlane.util.SnackbarUtils
-import com.dashlane.util.getBaseActivity
 import com.dashlane.util.hideSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 @Suppress("LargeClass")
 class CollectionsListFragment : AbstractContentFragment() {
-
     private val fabSize = 56.dp
 
     private lateinit var actionBarView: ComposeView
@@ -94,7 +85,7 @@ class CollectionsListFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         actionBarView = ComposeView(requireContext())
         return ComposeView(requireContext()).apply {
@@ -111,13 +102,14 @@ class CollectionsListFragment : AbstractContentFragment() {
         (actionBarView.parent as? ViewGroup)?.removeView(actionBarView)
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "kotlin:S3776")
     @Composable
     private fun CollectionsListScreen(viewModel: CollectionsListViewModel = viewModel()) {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val showSearch = remember { mutableStateOf(false) }
         val searchQuery = remember { mutableStateOf("") }
         val isSearching = remember { mutableStateOf(false) }
+        val snackbarState = remember { SnackbarHostState() }
         var displayBusinessMemberLimitDialog by rememberSaveable { mutableStateOf(false) }
         val menuHost: MenuHost = requireActivity()
         val menuProvider = remember {
@@ -154,70 +146,84 @@ class CollectionsListFragment : AbstractContentFragment() {
             menuHost.addMenuProvider(menuProvider, viewLifecycleOwner)
         }
         SearchableActionBar(showSearch, searchQuery, isSearching)
-        Scaffold(
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = {
-                        navigator.goToCollectionAddFromCollectionsList()
-                    },
-                    modifier = Modifier.size(fabSize),
-                    backgroundColor = DashlaneTheme.colors.containerExpressiveBrandCatchyIdle,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(16.dp),
-                        token = IconTokens.actionAddOutlined,
-                        contentDescription = null,
-                        tint = DashlaneTheme.colors.textInverseCatchy
+        Box {
+            val state = uiState
+            when (state) {
+                is ViewState.List,
+                is ViewState.RevokeAccessPrompt,
+                is ViewState.SharedCollectionDeleteError,
+                -> {
+                    val context = LocalContext.current
+                    LaunchedEffect(key1 = uiState) {
+                        if (uiState !is ViewState.SharedCollectionDeleteError) return@LaunchedEffect
+                        snackbarState.showSnackbar(
+                            context.getString(R.string.collection_delete_shared_error_generic),
+                        )
+                    }
+                    CollectionsList(
+                        uiState.viewData,
+                        searchQuery.value,
+                    ) { value -> displayBusinessMemberLimitDialog = value }
+                    menuHost.invalidateMenu()
+                    if (displayBusinessMemberLimitDialog) {
+                        DialogBusinessMemberLimit {
+                            displayBusinessMemberLimitDialog = false
+                        }
+                    }
+                    if (state is ViewState.RevokeAccessPrompt) {
+                        RevokeToDeleteDialog(
+                            onDismiss = {
+                                viewModel.dismissDialogClicked()
+                            },
+                            onConfirm = {
+                                navigator.goToCollectionSharedAccessFromCollectionsList(collectionId = state.collectionId)
+                            },
+                        )
+                    }
+                }
+
+                is ViewState.Empty -> {
+                    EmptyState(
+                        items = state.items,
+                        showAddLogin = state.showAddLogin,
+                        goToAddLogin = { navigator.goToCredentialAddStep1(expandImportOptions = true) },
                     )
+                    menuHost.invalidateMenu()
+                }
+
+                is ViewState.Loading -> {
+                    CollectionLoading()
+                    menuHost.invalidateMenu()
                 }
             }
-        ) {
-            Box(modifier = Modifier.padding(it)) {
-                when (uiState) {
-                    is ViewState.List,
-                    is ViewState.RevokeAccessPrompt,
-                    is ViewState.SharedCollectionDeleteError -> {
-                        val context = LocalContext.current
-                        LaunchedEffect(key1 = uiState) {
-                            if (uiState !is ViewState.SharedCollectionDeleteError) return@LaunchedEffect
-                            context.getBaseActivity()?.let { activity ->
-                                SnackbarUtils.showSnackbar(
-                                    activity,
-                                    context.getString(R.string.collection_delete_shared_error_generic)
-                                )
-                            }
-                        }
-                        CollectionsList(
-                            uiState.viewData,
-                            searchQuery.value
-                        ) { value -> displayBusinessMemberLimitDialog = value }
-                        menuHost.invalidateMenu()
-                        if (displayBusinessMemberLimitDialog) {
-                            DialogBusinessMemberLimit {
-                                displayBusinessMemberLimitDialog = false
-                            }
-                        }
-                        val state = uiState
-                        if (state is ViewState.RevokeAccessPrompt) {
-                            RevokeToDeleteDialog(
-                                onDismiss = {
-                                    viewModel.dismissDialogClicked()
-                                },
-                                onConfirm = {
-                                    navigator.goToCollectionSharedAccessFromCollectionsList(collectionId = state.collectionId)
-                                }
-                            )
-                        }
-                    }
-
-                    is ViewState.Empty -> {
-                        EmptyState()
-                        menuHost.invalidateMenu()
-                    }
-
-                    is ViewState.Loading -> {
-                        CollectionLoading()
-                        menuHost.invalidateMenu()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+            ) {
+                DashlaneSnackbarWrapper {
+                    SnackbarHost(
+                        hostState = snackbarState,
+                    )
+                }
+                if (!(state is ViewState.Empty && state.showAddLogin)) {
+                    FloatingActionButton(
+                        onClick = {
+                            navigator.goToCollectionAddFromCollectionsList()
+                        },
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(end = 16.dp, bottom = 16.dp)
+                            .size(fabSize),
+                        contentColor = DashlaneTheme.colors.textInverseCatchy.value,
+                        containerColor = DashlaneTheme.colors.containerExpressiveBrandCatchyIdle,
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(16.dp),
+                            token = IconTokens.actionAddOutlined,
+                            contentDescription = null,
+                            tint = DashlaneTheme.colors.textInverseCatchy,
+                        )
                     }
                 }
             }
@@ -228,7 +234,7 @@ class CollectionsListFragment : AbstractContentFragment() {
     private fun SearchableActionBar(
         showSearch: MutableState<Boolean>,
         searchQuery: MutableState<String>,
-        isSearching: MutableState<Boolean>
+        isSearching: MutableState<Boolean>,
     ) {
         LaunchedEffect(key1 = showSearch.value) {
             actionBarView.setContent {
@@ -238,7 +244,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                         searchLabel = stringResource(R.string.collection_list_search_hint),
                         title = stringResource(R.string.collections_list_title),
                         searchQuery = searchQuery,
-                        isSearching = isSearching
+                        isSearching = isSearching,
                     )
                 }
             }
@@ -252,7 +258,7 @@ class CollectionsListFragment : AbstractContentFragment() {
     private fun CollectionsList(
         viewData: ViewData,
         searchQuery: String,
-        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit
+        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
     ) {
         val filteredCollections = remember(searchQuery, viewData.collections) {
             if (searchQuery.isEmpty()) {
@@ -265,12 +271,13 @@ class CollectionsListFragment : AbstractContentFragment() {
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 top = 16.dp,
-                bottom = 16.dp + fabSize
-            ) 
+                
+                bottom = 16.dp + fabSize,
+            ),
         ) {
             itemsIndexed(
                 items = filteredCollections,
-                key = { _, item -> item.id }
+                key = { _, item -> item.id },
             ) { index, collection ->
                 CollectionItem(
                     item = collection,
@@ -284,39 +291,50 @@ class CollectionsListFragment : AbstractContentFragment() {
     }
 
     @Composable
-    private fun EmptyState() {
-        Column(
-            modifier = Modifier.padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                modifier = Modifier
-                    .size(96.dp)
-                    .focusable(false),
-                painter = painterResource(IconTokens.folderOutlined.resource),
-                colorFilter = ColorFilter.tint(DashlaneTheme.colors.textNeutralQuiet.value),
-                contentDescription = null
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = stringResource(id = R.string.collections_list_empty_state_description),
-                style = DashlaneTheme.typography.bodyStandardRegular,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            ButtonLarge(
-                onClick = {
-                    navigator.goToCollectionAddFromCollectionsList()
-                },
-                layout = ButtonLayout.IconLeading(
-                    iconToken = IconTokens.actionAddOutlined,
-                    text = stringResource(id = R.string.collections_list_empty_state_button)
-                ),
-                mood = Mood.Brand,
-                intensity = Intensity.Catchy
-            )
-        }
+    private fun EmptyState(
+        items: Set<ViewState.Empty.Item>,
+        showAddLogin: Boolean,
+        goToAddLogin: () -> Unit,
+    ) {
+        IntroScreenContent(
+            iconToken = IconTokens.collectionOutlined,
+            title = stringResource(R.string.collections_list_intro_screen_title),
+            items = items.map { item ->
+                when (item) {
+                    ViewState.Empty.Item.ADD_LOGIN -> {
+                        IntroScreenContent.Item(
+                            icon = IconTokens.collectionOutlined,
+                            title = stringResource(R.string.collections_list_intro_screen_item_add_title),
+                            description = stringResource(R.string.collections_list_intro_screen_item_add_description),
+                        )
+                    }
+
+                    ViewState.Empty.Item.GROUP -> {
+                        IntroScreenContent.Item(
+                            icon = IconTokens.collectionOutlined,
+                            title = stringResource(R.string.collections_list_intro_screen_item_group_title),
+                            description = stringResource(R.string.collections_list_intro_screen_item_group_description),
+                        )
+                    }
+
+                    ViewState.Empty.Item.SHARE -> {
+                        IntroScreenContent.Item(
+                            icon = IconTokens.actionSortOutlined,
+                            title = stringResource(R.string.collections_list_intro_screen_item_share_title),
+                            description = stringResource(R.string.collections_list_intro_screen_item_share_description),
+                        )
+                    }
+                }
+            },
+            action = if (showAddLogin) {
+                IntroScreenContent.Action(
+                    text = stringResource(R.string.collections_list_intro_screen_add_login_button),
+                    onClick = goToAddLogin,
+                )
+            } else {
+                null
+            },
+        )
     }
 
     @Composable
@@ -326,7 +344,7 @@ class CollectionsListFragment : AbstractContentFragment() {
         isFirst: Boolean,
         isLast: Boolean,
         searchQuery: String,
-        viewModel: CollectionsListViewModel = viewModel()
+        viewModel: CollectionsListViewModel = viewModel(),
     ) {
         var expanded by remember { mutableStateOf(false) }
         CollectionItem(
@@ -337,7 +355,7 @@ class CollectionsListFragment : AbstractContentFragment() {
             expandMenu = expanded,
             onExpandMenuChange = { expanded = it },
             onDeleteClicked = viewModel::deleteClicked,
-            onDisplayBusinessMemberLimitDialogChange = onDisplayBusinessMemberLimitDialogChange
+            onDisplayBusinessMemberLimitDialogChange = onDisplayBusinessMemberLimitDialogChange,
         )
     }
 
@@ -370,7 +388,9 @@ class CollectionsListFragment : AbstractContentFragment() {
                     start = 8.dp,
                     end = 8.dp,
                 ),
-            thumbnailType = null,
+            thumbnailType = ThumbnailType.Icon(
+                token = IconTokens.collectionOutlined,
+            ),
             title = item.name.withSearchHighlight(match = searchQuery, ignoreCase = true),
             titleExtraContent = {
                 if (showSpaceIndicator) {
@@ -391,7 +411,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                     Icon(
                         token = IconTokens.sharedOutlined,
                         modifier = Modifier.size(12.dp),
-                        contentDescription = context?.getString(R.string.and_accessibility_collection_list_item_shared)
+                        contentDescription = context?.getString(R.string.and_accessibility_collection_list_item_shared),
                     )
                 }
             },
@@ -399,22 +419,20 @@ class CollectionsListFragment : AbstractContentFragment() {
                 pluralStringResource(
                     id = R.plurals.collections_list_collection_item_count,
                     count = item.itemCount,
-                    item.itemCount
-                )
+                    item.itemCount,
+                ),
             ),
             actions = buildCollectionActionsMenu(
                 onExpandMenuChange = onExpandMenuChange,
                 expandMenu = expandMenu,
                 item = item,
                 onDisplayBusinessMemberLimitDialogChange = onDisplayBusinessMemberLimitDialogChange,
-                onDisplayDeleteDialogChange = { displayDeleteDialog = it }
-            )
+                onDisplayDeleteDialogChange = { displayDeleteDialog = it },
+            ),
         ) {
             navigator.goToCollectionDetailsFromCollectionsList(
                 collectionId = item.id,
-                businessSpace = item.spaceData?.businessSpace ?: false,
                 sharedCollection = item.shared,
-                shareAllowed = item.shareAllowed
             )
         }
 
@@ -426,7 +444,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                 onConfirm = {
                     onDeleteClicked(item.id, item.shared)
                     displayDeleteDialog = false
-                }
+                },
             )
         }
     }
@@ -437,7 +455,7 @@ class CollectionsListFragment : AbstractContentFragment() {
         expandMenu: Boolean,
         item: CollectionViewData,
         onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
-        onDisplayDeleteDialogChange: (Boolean) -> Unit
+        onDisplayDeleteDialogChange: (Boolean) -> Unit,
     ): ListItemActions {
         val shareLabel = stringResource(id = R.string.collections_list_item_menu_share)
         val sharedAccessLabel = stringResource(id = R.string.collections_list_item_menu_shared_access)
@@ -513,7 +531,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                 }
                 if (item.shareEnabled && item.shared) {
                     val sharedAccessAction = CustomAccessibilityAction(
-                        label = sharedAccessLabel
+                        label = sharedAccessLabel,
                     ) {
                         onSharedAccessClicked(item)
                         true
@@ -545,7 +563,7 @@ class CollectionsListFragment : AbstractContentFragment() {
 
     private fun onShareClicked(
         item: CollectionViewData,
-        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit
+        onDisplayBusinessMemberLimitDialogChange: (Boolean) -> Unit,
     ) {
         if (!item.shareAllowed) return
         if (item.shareLimitedByTeam) {
@@ -576,14 +594,14 @@ class CollectionsListFragment : AbstractContentFragment() {
                         spaceLetter = 'E',
                         spaceColor = SpaceColor.TeamColor(Color.Magenta.toArgb()),
                         spaceContentDescriptionResId = R.string.and_accessibility_collection_list_item_business_teamspace,
-                        businessSpace = true
+                        businessSpace = true,
                     ),
                     shared = true,
                     shareEnabled = true,
                     shareAllowed = true,
                     shareLimitedByTeam = true,
                     editAllowed = true,
-                    deleteAllowed = true
+                    deleteAllowed = true,
                 ),
                 isFirst = false,
                 isLast = false,
@@ -591,7 +609,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                 expandMenu = false,
                 onExpandMenuChange = {},
                 onDeleteClicked = { _, _ -> },
-                onDisplayBusinessMemberLimitDialogChange = {}
+                onDisplayBusinessMemberLimitDialogChange = {},
             )
         }
     }
@@ -609,14 +627,14 @@ class CollectionsListFragment : AbstractContentFragment() {
                         spaceLetter = 'E',
                         spaceColor = SpaceColor.TeamColor(Color.Magenta.toArgb()),
                         spaceContentDescriptionResId = R.string.and_accessibility_collection_list_item_business_teamspace,
-                        businessSpace = true
+                        businessSpace = true,
                     ),
                     shared = true,
                     shareEnabled = true,
                     shareAllowed = true,
                     shareLimitedByTeam = false,
                     editAllowed = true,
-                    deleteAllowed = true
+                    deleteAllowed = true,
                 ),
                 isFirst = false,
                 isLast = false,
@@ -624,7 +642,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                 expandMenu = false,
                 onExpandMenuChange = {},
                 onDeleteClicked = { _, _ -> },
-                onDisplayBusinessMemberLimitDialogChange = {}
+                onDisplayBusinessMemberLimitDialogChange = {},
             )
         }
     }
@@ -644,7 +662,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                     shareAllowed = false,
                     shareLimitedByTeam = false,
                     editAllowed = false,
-                    deleteAllowed = false
+                    deleteAllowed = false,
                 ),
                 isFirst = false,
                 isLast = false,
@@ -652,7 +670,7 @@ class CollectionsListFragment : AbstractContentFragment() {
                 expandMenu = false,
                 onExpandMenuChange = {},
                 onDeleteClicked = { _, _ -> },
-                onDisplayBusinessMemberLimitDialogChange = {}
+                onDisplayBusinessMemberLimitDialogChange = {},
             )
         }
     }
@@ -661,7 +679,15 @@ class CollectionsListFragment : AbstractContentFragment() {
     @Composable
     private fun PreviewEmptyState() {
         DashlanePreview {
-            EmptyState()
+            EmptyState(
+                items = setOf(
+                    ViewState.Empty.Item.ADD_LOGIN,
+                    ViewState.Empty.Item.GROUP,
+                    ViewState.Empty.Item.SHARE,
+                ),
+                showAddLogin = true,
+                goToAddLogin = {},
+            )
         }
     }
 }

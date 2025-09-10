@@ -25,7 +25,7 @@ fun SocialMediaBar(
     items: List<DashlaneSocialMedia>,
 ) {
     FlowRow(
-        Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         items.forEach { socialMedia ->
             ButtonMedium(
@@ -35,7 +35,7 @@ fun SocialMediaBar(
                 mood = Mood.Neutral,
                 layout = ButtonLayout.IconOnly(
                     iconToken = socialMedia.iconToken,
-                    contentDescription = stringResource(socialMedia.titleId)
+                    contentDescription = stringResource(socialMedia.titleId),
                 ),
             )
         }
@@ -48,7 +48,7 @@ private fun SettingSocialMediaLinkPreview() {
     DashlanePreview {
         SocialMediaBar(
             onClick = {},
-            items = DashlaneSocialMedia.entries
+            items = DashlaneSocialMedia.entries,
         )
     }
 }
@@ -60,7 +60,7 @@ private fun SettingSocialMediaLinkLimitedWidthPreview() {
         Box(Modifier.width(230.dp)) {
             SocialMediaBar(
                 onClick = {},
-                items = DashlaneSocialMedia.entries
+                items = DashlaneSocialMedia.entries,
             )
         }
     }

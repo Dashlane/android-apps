@@ -1,8 +1,7 @@
 package com.dashlane.accountstatus
 
-import android.util.Log
 import com.dashlane.accountstatus.AccountStatusRepository.Companion.DEFAULT_ACCOUNT_STATUS
-import com.dashlane.login.LoginInfo
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.server.api.endpoints.premium.SubscriptionInfo
 import com.dashlane.server.api.endpoints.premium.SubscriptionInfo.B2cSubscription
@@ -18,7 +17,6 @@ import java.io.IOException
 import javax.inject.Inject
 
 interface AccountStatusRepository : SessionObserver, BySessionRepository<AccountStatus> {
-
     val accountStatusState: StateFlow<Map<Session, AccountStatus>>
 
     suspend fun refreshFor(session: Session): Boolean
@@ -31,21 +29,21 @@ interface AccountStatusRepository : SessionObserver, BySessionRepository<Account
             b2cStatus = PremiumStatus.B2cStatus(
                 autoRenewal = false,
                 isTrial = false,
-                statusCode = PremiumStatus.B2cStatus.StatusCode.FREE
-            )
+                statusCode = PremiumStatus.B2cStatus.StatusCode.FREE,
+            ),
         )
         val DEFAULT_SUBSCRIPTION_INFO = SubscriptionInfo(
             b2cSubscription = B2cSubscription(
                 autoRenewInfo = AutoRenewInfo(
                     reality = false,
-                    theory = false
+                    theory = false,
                 ),
-                hasInvoices = false
-            )
+                hasInvoices = false,
+            ),
         )
         val DEFAULT_ACCOUNT_STATUS = AccountStatus(
             premiumStatus = DEFAULT_PREMIUM_STATUS,
-            subscriptionInfo = DEFAULT_SUBSCRIPTION_INFO
+            subscriptionInfo = DEFAULT_SUBSCRIPTION_INFO,
         )
     }
 }
@@ -53,9 +51,8 @@ interface AccountStatusRepository : SessionObserver, BySessionRepository<Account
 class AccountStatusRepositoryImpl @Inject constructor(
     private val accountStatusStorage: AccountStatusStorage,
     private val accountStatusService: AccountStatusService,
-    private val accountStatusListener: AccountStatusPostUpdateManager
+    private val accountStatusListener: AccountStatusPostUpdateManager,
 ) : AccountStatusRepository {
-
     private val _accountStatusState = MutableStateFlow<Map<Session, AccountStatus>>(mapOf())
     override val accountStatusState = _accountStatusState.asStateFlow()
 
@@ -77,7 +74,6 @@ class AccountStatusRepositoryImpl @Inject constructor(
             }
             updateAccountStatusForSession(session, accountStatus)
         }.onFailure {
-            Log.d("ACCOUNT_STATUS", "Failed to fetch a valid AccountStatus\n${it.anonymize()}")
             
             reloadStatus(session)
         }.isSuccess
@@ -94,7 +90,7 @@ class AccountStatusRepositoryImpl @Inject constructor(
         _accountStatusState.emit(
             _accountStatusState.value.toMutableMap().also {
                 it.remove(session)
-            }.toMap()
+            }.toMap(),
         )
     }
 
@@ -104,7 +100,7 @@ class AccountStatusRepositoryImpl @Inject constructor(
         _accountStatusState.emit(
             _accountStatusState.value.toMutableMap().also {
                 it[session] = accountStatus
-            }.toMap()
+            }.toMap(),
         )
     }
 }

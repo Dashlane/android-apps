@@ -56,11 +56,11 @@ fun MenuItem(item: MenuItemModel.NavigationItem) {
                     Modifier.background(color = DashlaneTheme.colors.containerExpressiveNeutralSupershyActive)
                 } else {
                     Modifier
-                }
+                },
             )
             .padding(all = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier
@@ -68,35 +68,35 @@ fun MenuItem(item: MenuItemModel.NavigationItem) {
                 .padding(end = 4.dp),
             token = if (item.isSelected) item.iconTokenSelected else item.iconToken,
             contentDescription = null,
-            tint = if (item.isSelected) DashlaneTheme.colors.textBrandStandard else DashlaneTheme.colors.textNeutralCatchy
+            tint = if (item.isSelected) DashlaneTheme.colors.textBrandStandard else DashlaneTheme.colors.textNeutralCatchy,
         )
         Column(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(1f),
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 text = stringResource(id = item.titleResId),
                 style = DashlaneTheme.typography.titleBlockMedium,
-                color = DashlaneTheme.colors.textNeutralCatchy
+                color = DashlaneTheme.colors.textNeutralCatchy,
             )
             when (item.premiumTag) {
                 MenuItemModel.NavigationItem.PremiumTag.PremiumOnly -> {
                     Badge(
                         text = stringResource(id = R.string.menu_v3_upgrade),
                         mood = Mood.Brand,
-                        intensity = Intensity.Supershy
+                        intensity = Intensity.Supershy,
                     )
                 }
                 is MenuItemModel.NavigationItem.PremiumTag.Trial -> {
                     Text(
                         text = stringResource(
                             id = R.string.menu_v3_remaining_days,
-                            item.premiumTag.remainingDays
+                            item.premiumTag.remainingDays,
                         ),
                         style = DashlaneTheme.typography.bodyHelperRegular,
-                        color = DashlaneTheme.colors.textWarningQuiet
+                        color = DashlaneTheme.colors.textWarningQuiet,
                     )
                 }
                 null -> Unit
@@ -111,15 +111,15 @@ fun MenuItem(item: MenuItemModel.NavigationItem) {
                         .size(10.dp)
                         .background(
                             color = DashlaneTheme.colors.textDangerQuiet.value,
-                            shape = CircleShape
-                        )
+                            shape = CircleShape,
+                        ),
                 )
             }
             is MenuItemModel.NavigationItem.EndIcon.NewLabel -> {
                 Badge(
                     text = stringResource(id = R.string.menu_v3_new_label),
                     mood = Mood.Brand,
-                    intensity = Intensity.Quiet
+                    intensity = Intensity.Quiet,
                 )
             }
         }
@@ -137,7 +137,7 @@ private fun MenuItemPreview() {
                 iconTokenSelected = IconTokens.homeFilled,
                 titleResId = R.string.menu_v2_home,
                 isSelected = isSelected,
-            ) { isSelected = !isSelected }
+            ) { isSelected = !isSelected },
         )
     }
 }

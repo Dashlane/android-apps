@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/session.json",
+  "type": "object",
+  "description": "Definition for the Session section.",
+  "definitions": {
+    "session_id": {
+      "description": "The session ID, generated client-side. The session is reseted after 5 minutes without a page view. : UUIDv4 - xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (RFC4122)",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$"
+    },
+    "sequence_number": {
+      "description": "The index of the log within this session. Each new log will increment this value, and it will be reset on the new Session",
+      "type": "integer"
+    },
+    "service_worker_start_date_time": {
+      "description": "The service worker timestamp, generated client-side when the web service worker is created. It may change during a session, eg when the service worker is killed (MV3). The id is computed from the creation timestamp and is unique per user.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "session": {
+      "type": "object",
+      "description": "Session object. Used to group events together, within a UI context.",
+      "properties": {
+        "id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/session.json#/definitions/session_id"
+        },
+        "sequence_number": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/session.json#/definitions/sequence_number"
+        },
+        "service_worker_start_date_time": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/session.json#/definitions/service_worker_start_date_time"
+        }
+      },
+      "required": [
+        "id",
+        "sequence_number"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

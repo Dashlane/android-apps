@@ -6,10 +6,9 @@ import retrofit2.http.GET
 import retrofit2.http.Url
 
 interface GetFileBreachesService {
-
     @GET
     suspend fun execute(
-        @Url url: String
+        @Url url: String,
     ): Response
 
     data class Response(

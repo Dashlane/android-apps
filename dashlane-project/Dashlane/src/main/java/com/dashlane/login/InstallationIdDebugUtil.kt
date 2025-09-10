@@ -14,7 +14,7 @@ object InstallationIdDebugUtil {
     fun showInstallationId(
         context: Context?,
         text: KMutableProperty0<String>,
-        installationIdProvider: () -> String
+        installationIdProvider: () -> String,
     ): Boolean {
         if (text.get() != TEST_INPUT) return false
 

@@ -14,7 +14,6 @@ class DriverLicenceListTextFactory @Inject constructor(
     private val identityNameHolderService: IdentityNameHolderService,
     private val clock: Clock,
 ) : DataIdentifierListTextFactory<SummaryObject.DriverLicence> {
-
     override fun getTitle(item: SummaryObject.DriverLicence): StatusText {
         val title = identityNameHolderService.getOwner(item)
         return StatusText(if (title.isNotSemanticallyNull()) title else resources.getString(R.string.driver_license))
@@ -25,6 +24,6 @@ class DriverLicenceListTextFactory @Inject constructor(
             resources = resources,
             number = item.number,
             default = default,
-            clock = clock
+            clock = clock,
         ) ?: default
 }

@@ -4,6 +4,8 @@
     <string name="autofill_incorrect_warning_message">Some of this app’s security details don’t look legitimate.\nWe recommend you only autofill in apps you trust.</string>
 
     <string name="autofill_mismatch_warning_title">You’re about to autofill your “%1$s” account in the %2$s app</string>
+    
+    <string name="autofill_mismatch_warning_app_label">App</string>
 
     <string name="autofill_unknown_warning_title">This app isn’t familiar to us</string>
     <string name="autofill_unknown_warning_message">We recommend you only autofill in apps you trust. Do you want to autofill here?</string>

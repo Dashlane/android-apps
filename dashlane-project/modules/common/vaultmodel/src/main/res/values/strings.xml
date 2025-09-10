@@ -46,6 +46,7 @@
     <string name="floor">Floor</string>
     <string name="appartment">Apartment</string>
     <string name="creditcard">Credit/Debit Card</string>
+    <string name="wifi">Wi-Fi</string>
     <string name="driver_license">Driver\'s License</string>
     <string name="fiscal_statement">Tax number</string>
     <string name="id_card">ID card</string>
@@ -73,4 +74,16 @@
     <string name="datatype_secure_note_category">Secure Note category</string>
     <string name="datatype_bank_statement">Bank accounts</string>
     <string name="datatype_passkey">Passkey</string>
+    
+    <string name="creditcard_color_no_type">No type</string>
+    <string name="creditcard_color_black">Black</string>
+    <string name="creditcard_color_silver">Silver</string>
+    <string name="creditcard_color_white">White</string>
+    <string name="creditcard_color_red">Red</string>
+    <string name="creditcard_color_orange">Orange</string>
+    <string name="creditcard_color_gold">Gold</string>
+    <string name="creditcard_color_blue">Blue</string>
+    <string name="creditcard_color_dark_blue">Dark blue</string>
+    <string name="creditcard_color_green">Green</string>
+    <string name="creditcard_color_amex_green">AmEx Green</string>
 </resources>

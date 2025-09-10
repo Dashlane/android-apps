@@ -7,19 +7,18 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Scroller
 import androidx.viewpager.widget.ViewPager
-import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.endoflife.EndOfLife
+import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.clearTop
 import com.dashlane.util.getParcelableExtraCompat
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class WelcomeActivity : DashlaneActivity() {
-
     @Inject
     lateinit var endOfLife: EndOfLife
 
@@ -54,14 +53,14 @@ class WelcomeActivity : DashlaneActivity() {
                 scroller.set(
                     this@run,
                     object : Scroller(context, DecelerateInterpolator()) {
-                    override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int) {
-                        super.startScroll(startX, startY, dx, dy, scrollDuration)
-                    }
+                        override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int) {
+                            super.startScroll(startX, startY, dx, dy, scrollDuration)
+                        }
 
-                    override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
-                        super.startScroll(startX, startY, dx, dy, scrollDuration)
-                    }
-                }
+                        override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
+                            super.startScroll(startX, startY, dx, dy, scrollDuration)
+                        }
+                    },
                 )
             }
 
@@ -87,7 +86,7 @@ class WelcomeActivity : DashlaneActivity() {
         fun newIntent(
             context: Context,
             loginIntent: Intent,
-            createAccountIntent: Intent
+            createAccountIntent: Intent,
         ): Intent = Intent(context, WelcomeActivity::class.java)
             .putExtra(EXTRA_LOGIN_INTENT, loginIntent)
             .putExtra(EXTRA_CREATE_ACCOUNT_INTENT, createAccountIntent)

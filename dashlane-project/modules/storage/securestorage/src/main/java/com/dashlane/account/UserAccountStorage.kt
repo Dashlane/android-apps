@@ -6,7 +6,6 @@ import com.dashlane.user.UserSecuritySettings
 import com.dashlane.user.Username
 
 interface UserAccountStorage {
-
     operator fun get(username: String): UserAccountInfo? =
         Username.ofEmailOrNull(username)?.let(::get)
 
@@ -16,7 +15,7 @@ interface UserAccountStorage {
         userAccountInfo: UserAccountInfo,
         localKey: LocalKey,
         secretKey: String,
-        allowOverwriteAccessKey: Boolean
+        allowOverwriteAccessKey: Boolean,
     )
 
     fun saveSecuritySettings(username: String, securitySettings: UserSecuritySettings) =

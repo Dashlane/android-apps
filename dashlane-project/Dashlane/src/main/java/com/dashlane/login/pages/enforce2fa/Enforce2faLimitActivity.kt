@@ -1,43 +1,34 @@
 package com.dashlane.login.pages.enforce2fa
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import com.dashlane.R
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.login.LoginActivity
+import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class Enforce2faLimitActivity : DashlaneActivity() {
-
-    @Inject
-    lateinit var presenter: Enforce2faLimitPresenter
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_intro)
-        presenter.setView(IntroScreenViewProxy(activity = this))
+
+        setContent {
+            DashlaneTheme {
+                Enforce2faLimitScreen(
+                    viewModel = hiltViewModel(),
+                    goToLogin = ::goToLogin,
+                )
+            }
+        }
     }
 
-    override fun onStart() {
-        super.onStart()
-        presenter.onViewStarted()
-    }
-
-    override fun onResume() {
-        presenter.onViewResumed()
-        super.onResume()
-    }
-
-    override fun onPause() {
-        presenter.onViewPaused()
-        super.onPause()
-    }
-
-    @Deprecated("Deprecated in Java")
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        
+    private fun goToLogin() {
+        val loginIntent = DashlaneIntent.newInstance(this, LoginActivity::class.java)
+        startActivity(loginIntent)
+        finishAffinity()
     }
 }

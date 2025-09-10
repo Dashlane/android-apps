@@ -6,18 +6,17 @@ import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.announcements.AnnouncementCenter
 import com.dashlane.announcements.AnnouncementTags
+import com.dashlane.autofillapi.ChromeAutofillDetector
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierDeletedEvent
-import com.dashlane.events.SyncFinishedEvent
-import com.dashlane.feature.home.data.Filter
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.featureflipping.canUseSecrets
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.frozenaccount.tracking.FrozenStateLogger
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.inapplogin.InAppLoginManager
+import com.dashlane.inappautofill.InAppLoginManager
 import com.dashlane.limitations.PasswordLimitationLogger
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.limitations.PasswordLimiter.Companion.PASSWORD_LIMIT_LOOMING
@@ -25,19 +24,27 @@ import com.dashlane.lock.LockManager
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.paywall.PaywallIntroType
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.preference.UserPreferencesManager
 import com.dashlane.session.SessionManager
+import com.dashlane.sync.DataSync
+import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.getAgnosticMessageFeedback
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.MainCoroutineDispatcher
+import com.dashlane.vault.Filter
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -61,13 +68,18 @@ class VaultPresenter @Inject constructor(
     private val accountStatusRepository: AccountStatusRepository,
     private val frozenStateManager: FrozenStateManager,
     private val userFeaturesChecker: UserFeaturesChecker,
+    private val dataSync: DataSync,
+    private val preferencesManager: PreferencesManager,
+    private val chromeAutofillDetector: ChromeAutofillDetector,
 ) : BasePresenter<Vault.DataProvider, Vault.View>(),
     Vault.Presenter {
-
     override val filter = MutableStateFlow(Filter.ALL_VISIBLE_VAULT_ITEM_TYPES)
 
     private val requireContext: Context
         get() = context!!
+
+    private val userPreferencesManager: UserPreferencesManager
+        get() = preferencesManager[sessionManager.session?.username]
 
     init {
         
@@ -101,11 +113,14 @@ class VaultPresenter @Inject constructor(
     }
 
     override fun onStartFragment() {
-        appEvents.register(this, SyncFinishedEvent::class.java, false) {
-            
-            mayShowAnnouncement()
-            onSyncFinished(it)
-        }
+        dataSync.dataSyncState
+            .filter { syncState -> syncState is DataSyncState.Idle.Success }
+            .onEach {
+                
+                mayShowAnnouncement()
+                onSyncFinished(it)
+            }
+            .launchIn(fragmentLifecycleCoroutineScope)
         appEvents.register(this, DataIdentifierDeletedEvent::class.java, false) {
             
             mayShowAnnouncement()
@@ -114,7 +129,6 @@ class VaultPresenter @Inject constructor(
     }
 
     override fun onStopFragment() {
-        appEvents.unregister(this, SyncFinishedEvent::class.java)
         appEvents.unregister(this, DataIdentifierDeletedEvent::class.java)
         announcementCenter.fragment(null)
     }
@@ -190,6 +204,20 @@ class VaultPresenter @Inject constructor(
         navigator.goToInAppLogin()
     }
 
+    private fun onAutofillAnnouncementDismissed() {
+        userPreferencesManager.canShowAutofillAnnouncement = false
+        view.clearAnnouncements()
+    }
+
+    private fun onChromeAutofillAnnouncementClicked() {
+        navigator.goToChromeInAppLogin()
+    }
+
+    private fun onChromeAutofillAnnouncementDismissed() {
+        userPreferencesManager.canShowChromeAnnouncement = false
+        view.clearAnnouncements()
+    }
+
     private fun onPasswordLimitAnnouncementClicked() {
         passwordLimitationLogger.upgradeFromBanner()
         navigator.goToOffers()
@@ -200,13 +228,14 @@ class VaultPresenter @Inject constructor(
         navigator.goToPaywall(PaywallIntroType.FROZEN_ACCOUNT)
     }
 
-    private fun onSyncFinished(syncFinishedEvent: SyncFinishedEvent) {
+    private fun onSyncFinished(dataSyncState: DataSyncState) {
         if (activity == null) {
             return
         }
         refresh()
-        syncFinishedEvent.getAgnosticMessageFeedback()?.let { message ->
-            viewOrNull?.showSnackbar(stringRes = message)
+        if (dataSyncState is DataSyncState.Idle.Failure) {
+            dataSyncState.getAgnosticMessageFeedback()
+                ?.let { message -> viewOrNull?.showSnackbar(stringRes = message) }
         }
     }
 
@@ -219,6 +248,7 @@ class VaultPresenter @Inject constructor(
         else -> null
     }
 
+    @Suppress("LongMethod")
     private fun mayShowAnnouncement() {
         when {
             frozenStateManager.isAccountFrozen -> {
@@ -227,10 +257,10 @@ class VaultPresenter @Inject constructor(
                     title = requireContext.getString(R.string.vault_announcement_frozen_account_title),
                     description = requireContext.getString(
                         R.string.vault_announcement_frozen_account_description,
-                        passwordLimiter.passwordLimitCount.toString()
+                        passwordLimiter.passwordLimitCount.toString(),
                     ),
                     mood = Mood.Danger,
-                    onClick = this::onAccountFrozenAnnouncementClicked
+                    onClick = this::onAccountFrozenAnnouncementClicked,
                 )
             }
             passwordLimiter.isPasswordLimitReached() -> {
@@ -238,7 +268,7 @@ class VaultPresenter @Inject constructor(
                     iconToken = IconTokens.premiumOutlined,
                     description = requireContext.getString(R.string.vault_announcement_password_limit_title),
                     mood = Mood.Warning,
-                    onClick = this::onPasswordLimitAnnouncementClicked
+                    onClick = this::onPasswordLimitAnnouncementClicked,
                 )
             }
             passwordLimiter.passwordRemainingBeforeLimit() in 0..PASSWORD_LIMIT_LOOMING -> {
@@ -246,23 +276,37 @@ class VaultPresenter @Inject constructor(
                     iconToken = IconTokens.premiumOutlined,
                     description = requireContext.getString(
                         R.string.vault_announcement_password_limit_remaining_title,
-                        passwordLimiter.passwordRemainingBeforeLimit()
+                        passwordLimiter.passwordRemainingBeforeLimit(),
                     ),
                     mood = Mood.Brand,
-                    onClick = this::onPasswordLimitAnnouncementClicked
+                    onClick = this::onPasswordLimitAnnouncementClicked,
                 )
             }
-            inAppLoginManager.isDisabledForApp() -> {
-                view.showAnnouncement(
+            userPreferencesManager.canShowAutofillAnnouncement && inAppLoginManager.isDisabledForApp() -> {
+                view.showAutofillAnnouncement(
                     iconToken = IconTokens.featureAutofillOutlined,
-                    description = requireContext.getString(R.string.vault_announcement_autofill_title),
-                    mood = Mood.Neutral,
-                    onClick = this::onAutofillAnnouncementClicked
+                    title = requireContext.getString(R.string.vault_announcement_autofill_title),
+                    description = requireContext.getString(R.string.vault_announcement_autofill_description),
+                    positiveButton = requireContext.getString(R.string.vault_announcement_autofill_positive_button),
+                    negativeButton = requireContext.getString(R.string.vault_announcement_autofill_negative_button),
+                    onPositiveClick = this::onAutofillAnnouncementClicked,
+                    onNegativeClick = this::onAutofillAnnouncementDismissed,
                 )
             }
-            else -> {
-                view.clearAnnouncements()
+            userPreferencesManager.canShowChromeAnnouncement &&
+                inAppLoginManager.isEnableForApp() &&
+                chromeAutofillDetector.isThirdPartyAutofillDeactivated(requireContext.contentResolver, requireContext.packageManager) -> {
+                view.showAutofillAnnouncement(
+                    iconToken = IconTokens.featureAutofillOutlined,
+                    title = requireContext.getString(R.string.vault_announcement_chrome_autofill_title),
+                    description = requireContext.getString(R.string.vault_announcement_chrome_autofill_description),
+                    positiveButton = requireContext.getString(R.string.vault_announcement_chrome_autofill_positive_button),
+                    negativeButton = requireContext.getString(R.string.vault_announcement_chrome_autofill_negative_button),
+                    onPositiveClick = this::onChromeAutofillAnnouncementClicked,
+                    onNegativeClick = this::onChromeAutofillAnnouncementDismissed,
+                )
             }
+            else -> view.clearAnnouncements()
         }
     }
 
@@ -279,4 +323,5 @@ private fun Filter.toPage(): AnyPage = when (this) {
     Filter.FILTER_PERSONAL_INFO -> AnyPage.ITEM_PERSONAL_INFO_LIST
     Filter.FILTER_ID -> AnyPage.ITEM_ID_LIST
     Filter.FILTER_SECRET -> AnyPage.ITEM_SECRET_LIST
+    Filter.FILTER_WIFI -> AnyPage.ITEM_WIFI
 }

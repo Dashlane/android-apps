@@ -9,7 +9,7 @@ import com.dashlane.cryptography.SharingCryptography
 import com.dashlane.cryptography.asEncryptedBase64
 import com.dashlane.cryptography.decryptBase64ToUtf8String
 import com.dashlane.cryptography.encryptUtf8ToBase64String
-import com.dashlane.server.api.endpoints.sync.SyncDownloadService
+import com.dashlane.server.api.endpoints.sync.GetLatestContentService
 import com.dashlane.sharing.SharingKeysHelper
 import com.dashlane.sync.DataSyncState
 import com.dashlane.sync.domain.SyncCryptographyException
@@ -23,7 +23,7 @@ import com.dashlane.server.api.endpoints.account.SharingKeys as ApiSharingKeys
 open class SharingSyncHelper @Inject constructor(
     private val sharingCryptography: SharingCryptography,
     private val sharingKeysHelper: SharingKeysHelper,
-    private val sharingSync: SharingSync
+    private val sharingSync: SharingSync,
 ) {
     val shouldRequestSharingKeys: Boolean
         get() = sharingKeysHelper.publicKey == null
@@ -31,7 +31,7 @@ open class SharingSyncHelper @Inject constructor(
     suspend fun syncSharing(
         serverCredentials: ServerCredentials,
         sharingKeys: ApiSharingKeys?,
-        sharingSummary: SyncDownloadService.Data.SharingSummary,
+        sharingSummary: GetLatestContentService.Data.SharingSummary,
         cryptographyEngineFactory: CryptographyEngineFactory,
         dataSyncState: MutableSharedFlow<DataSyncState>?,
     ) {
@@ -60,13 +60,13 @@ open class SharingSyncHelper @Inject constructor(
 
     fun encryptPrivateKey(
         privateKey: String,
-        encryptionEngine: EncryptionEngine
+        encryptionEngine: EncryptionEngine,
     ): EncryptedBase64String =
         encryptionEngine.encryptUtf8ToBase64String(privateKey, compressed = false)
 
     private fun decryptPrivateKey(
         privateKey: EncryptedBase64String,
-        decryptionEngine: DecryptionEngine
+        decryptionEngine: DecryptionEngine,
     ): String =
         decryptionEngine.decryptBase64ToUtf8String(privateKey, compressed = false)
 

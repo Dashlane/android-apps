@@ -4,7 +4,6 @@ import android.util.Log
 import com.dashlane.network.ServerUrlOverride
 import com.dashlane.network.tools.CloudflareHeaderInterceptor
 import com.dashlane.network.tools.MoreDetailedExceptionRequestInterceptor
-import com.dashlane.network.webservices.DashlaneUrls.URL_API
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.ConnectivityCheck
 import com.dashlane.server.api.DashlaneApi
@@ -40,18 +39,24 @@ fun interface HttpModule {
     companion object {
         @Singleton
         @Provides
-        fun getOkHttpClient(userAgent: UserAgent, serverUrlOverride: Optional<ServerUrlOverride>): OkHttpClient {
+        fun getOkHttpClient(
+            userAgent: UserAgent,
+            serverUrlOverride: Optional<ServerUrlOverride>,
+        ): OkHttpClient {
             return OkHttpClient.Builder()
                 .readTimeout(20, TimeUnit.SECONDS)
                 .addInterceptor(MoreDetailedExceptionRequestInterceptor())
                 .addInterceptor(userAgent.interceptor)
                 .addInterceptor(LongPollingInterceptor())
-                .apply { serverUrlOverride.getOrNull()?.let { addInterceptor(CloudflareHeaderInterceptor(it)) } }
+                .apply {
+                    serverUrlOverride.getOrNull()
+                        ?.let { addInterceptor(CloudflareHeaderInterceptor(it)) }
+                }
                 
                 .addInterceptor(
                     HttpLoggingInterceptor { message -> Log.v("HTTP", message) }.apply {
                         level = HttpLoggingInterceptor.Level.BODY
-                    }
+                    },
                 )
                 .build()
         }
@@ -65,17 +70,17 @@ fun interface HttpModule {
             callFactory: OkHttpClient,
             authorization: Authorization.App,
             connectivityCheck: ConnectivityCheck,
-            serverUrlOverride: Optional<ServerUrlOverride>
-        ) =
-            DashlaneApi(
-                client = DashlaneApiClient(
-                    callFactory = callFactory,
-                    connectivityCheck = connectivityCheck,
-                    host = serverUrlOverride.getOrNull()?.apiUrl ?: URL_API
-                ),
-                appAuthorization = authorization,
-                clock = SystemClockElapsedRealTime()
-            )
+            serverUrlOverride: Optional<ServerUrlOverride>,
+            @BaseUrl baseUrl: String,
+        ) = DashlaneApi(
+            client = DashlaneApiClient(
+                callFactory = callFactory,
+                connectivityCheck = connectivityCheck,
+                host = serverUrlOverride.getOrNull()?.apiUrl ?: baseUrl,
+            ),
+            appAuthorization = authorization,
+            clock = SystemClockElapsedRealTime(),
+        )
 
         @Singleton
         @Provides
@@ -83,20 +88,15 @@ fun interface HttpModule {
             dashlaneApi: DashlaneApi,
             okHttpClient: OkHttpClient,
             connectivityCheck: ConnectivityCheck,
-            analyticsAuthorization: Authorization.Analytics
-        ):
-                AnalyticsApi {
+            analyticsAuthorization: Authorization.Analytics,
+        ): AnalyticsApi {
             return AnalyticsApi(
                 client = AnalyticsApiClient(
-                    callFactory = okHttpClient.newBuilder()
-                        
-                        
-                        .readTimeout(3, TimeUnit.MINUTES)
-                        .build(),
-                    connectivityCheck = connectivityCheck
+                    callFactory = okHttpClient,
+                    connectivityCheck = connectivityCheck,
                 ),
                 analyticsAuthorization = analyticsAuthorization,
-                dashlaneApi = dashlaneApi
+                dashlaneApi = dashlaneApi,
             )
         }
 
@@ -109,8 +109,8 @@ fun interface HttpModule {
         }
 
         abstract class SimpleClock(private val zone: ZoneId) : Clock() {
-
             override fun instant(): Instant = Instant.ofEpochMilli(millis())
+
             override fun getZone(): ZoneId = zone
 
             override fun withZone(zone: ZoneId): Clock =

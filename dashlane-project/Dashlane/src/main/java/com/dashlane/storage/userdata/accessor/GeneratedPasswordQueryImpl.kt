@@ -16,13 +16,13 @@ class GeneratedPasswordQueryImpl @Inject constructor(
     private val genericDataQuery: GenericDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private val credentialDataQuery: CredentialDataQuery,
-    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) : GeneratedPasswordQuery {
-    override fun queryAllNotRevoked(): List<VaultItem<SyncObject.GeneratedPassword>> {
+    override suspend fun queryAllNotRevoked(): List<VaultItem<SyncObject.GeneratedPassword>> {
         val generatedPasswordIds = genericDataQuery.queryAll(
             genericFilter {
                 specificDataType(SyncObjectType.GENERATED_PASSWORD)
-            }
+            },
         ).map { it.id }
 
         
@@ -48,7 +48,7 @@ class GeneratedPasswordQueryImpl @Inject constructor(
             .queryAll(credentialFilter)
             .map { it.id }
 
-        val forbiddenPasswords = vaultDataQuery.queryAllLegacy(vaultFilter { specificUid(forbiddenAuthentifiantId) })
+        val forbiddenPasswords = vaultDataQuery.queryAll(vaultFilter { specificUid(forbiddenAuthentifiantId) })
             .filterIsInstance<VaultItem<SyncObject.Authentifiant>>()
             .map { it.syncObject.password }
 
@@ -57,12 +57,12 @@ class GeneratedPasswordQueryImpl @Inject constructor(
         }
     }
 
-    private fun getGeneratedPassword(ids: List<String>): List<VaultItem<SyncObject.GeneratedPassword>> {
+    private suspend fun getGeneratedPassword(ids: List<String>): List<VaultItem<SyncObject.GeneratedPassword>> {
         val vaultFilter = vaultFilter {
             specificUid(ids)
         }
 
-        return vaultDataQuery.queryAllLegacy(vaultFilter)
+        return vaultDataQuery.queryAll(vaultFilter)
             .filterIsInstance<VaultItem<SyncObject.GeneratedPassword>>()
     }
 }

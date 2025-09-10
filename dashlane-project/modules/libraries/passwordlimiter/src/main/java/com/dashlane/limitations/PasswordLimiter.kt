@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class PasswordLimiter @Inject constructor(
     private val dataCounter: DataCounter,
-    private val userFeatureChecker: UserFeaturesChecker
+    private val userFeatureChecker: UserFeaturesChecker,
 ) {
     val hasPasswordLimit: Boolean
         get() = userFeatureChecker.has(PremiumStatus.PremiumCapability.Capability.PASSWORDSLIMIT)
@@ -21,7 +21,7 @@ class PasswordLimiter @Inject constructor(
         USER_NO_LIMIT,
         USER_APPROACHING_LIMIT,
         USER_LIMIT_REACHED,
-        USER_LIMIT_EXCEEDED;
+        USER_LIMIT_EXCEEDED,
     }
 
     fun isPasswordLimitReached() = checkUserLimit() in
@@ -55,7 +55,7 @@ class PasswordLimiter @Inject constructor(
         counterFilter {
             ignoreUserLock()
             specificDataType(SyncObjectType.AUTHENTIFIANT)
-        }
+        },
     )
 
     companion object {

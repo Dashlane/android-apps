@@ -5,6 +5,5 @@ import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 
 object NoRestrictionSpaceFilter : SpaceFilter {
-
     override fun getSpacesRestrictions(currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter): Array<out TeamSpace>? = null
 }

@@ -3,10 +3,8 @@ package com.dashlane.dagger.singleton
 import android.content.Context
 import android.os.Build
 import com.dashlane.BuildConfig
-import com.dashlane.common.logger.DeveloperInfoLogger
 import com.dashlane.cryptography.CryptographyAppKeyStore
 import com.dashlane.debug.services.DaDaDaHermes
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.hermes.AnalyticsIdRepository
 import com.dashlane.hermes.AppInfo
 import com.dashlane.hermes.LogFlush
@@ -24,10 +22,9 @@ import com.dashlane.hermes.storage.SecureFileLogStorage
 import com.dashlane.logger.ActivityLogErrorReporterImpl
 import com.dashlane.logger.AnalyticsErrorReporterImpl
 import com.dashlane.logger.utils.HermesDebugUtil
-import com.dashlane.network.ServerUrlOverride
 import com.dashlane.nitro.Nitro
+import com.dashlane.nitro.hilt.NitroProxy
 import com.dashlane.preference.GlobalPreferencesManager
-import com.dashlane.server.api.DashlaneApi
 import com.dashlane.server.api.analytics.AnalyticsApi
 import com.dashlane.useractivity.InMemoryLogStorage
 import com.dashlane.useractivity.TestLogChecker
@@ -42,9 +39,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import java.io.File
 import java.time.Clock
-import java.util.Optional
 import java.util.UUID
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -62,7 +57,7 @@ open class TrackingModule {
         logFlush: LogFlush,
         hermesDebugUtil: HermesDebugUtil,
         logErrorReporter: AnalyticsErrorReporter,
-        activityLogErrorReporter: ActivityLogErrorReporter
+        activityLogErrorReporter: ActivityLogErrorReporter,
     ): LogRepository = TrackingRepository(
         coroutineScope = applicationCoroutineScope,
         analyticsLogService = analyticsLogService,
@@ -76,15 +71,19 @@ open class TrackingModule {
         clock = Clock.systemUTC(),
         configurationUtil = hermesDebugUtil,
         errorReporter = logErrorReporter,
-        activityLogErrorReporter = activityLogErrorReporter
+        activityLogErrorReporter = activityLogErrorReporter,
     )
 
     @Provides
-    open fun provideLogFlush(@ApplicationContext context: Context) = LogFlush(context)
+    open fun provideLogFlush(
+        @ApplicationContext context: Context,
+    ) = LogFlush(context)
 
     @Provides
     @Singleton
-    open fun provideLogStorage(@ApplicationContext context: Context): LogStorage {
+    open fun provideLogStorage(
+        @ApplicationContext context: Context,
+    ): LogStorage {
         val logDirectory = context.filesDir
         val keyStoreDirectory = File(context.dataDir, "keyStore")
         if (!keyStoreDirectory.mkdirs() && !keyStoreDirectory.exists()) {
@@ -104,46 +103,43 @@ open class TrackingModule {
 
     @Provides
     open fun provideActivityLogService(
-        nitro: Nitro,
-        userFeaturesChecker: Provider<UserFeaturesChecker>,
-        serverUrlOverride: Optional<ServerUrlOverride>,
-        dashlaneApi: DashlaneApi,
-        @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher
-    ): ActivityLogService = com.dashlane.analytics.ActivityLogService(
-        nitro,
-        userFeaturesChecker,
-        dashlaneApi.endpoints.teams.storeActivityLogs,
-        serverUrlOverride,
-        ioDispatcher
-    )
+        @NitroProxy nitroProxy: Nitro,
+        @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher,
+    ): ActivityLogService {
+        val activityLogService = com.dashlane.analytics.ActivityLogService(
+            nitroProxy = nitroProxy,
+            ioDispatcher = ioDispatcher,
+        )
+        return activityLogService
+    }
 
     @Provides
     open fun provideAnalyticsIdRepository(globalPreferencesManager: GlobalPreferencesManager) =
         AnalyticsIdRepository(UUID.fromString(globalPreferencesManager.installationTrackingId))
 
     @Provides
-    open fun provideOSInfo(@ApplicationContext context: Context) = OsInfo(
+    open fun provideOSInfo(
+        @ApplicationContext context: Context,
+    ) = OsInfo(
         context.resources.configuration.locales[0].toString().replace("_", "-"),
-        Build.VERSION.RELEASE
+        Build.VERSION.RELEASE,
     )
 
     @Provides
     open fun provideHermesDebugUtil(
         dadadaHermes: DaDaDaHermes,
-        globalPreferencesManager: GlobalPreferencesManager
+        globalPreferencesManager: GlobalPreferencesManager,
     ) = HermesDebugUtil(dadadaHermes, globalPreferencesManager)
 
     @Provides
-    open fun provideActivityLogErrorReporter(developerInfoLogger: DeveloperInfoLogger): ActivityLogErrorReporter =
-        ActivityLogErrorReporterImpl()
+    open fun provideActivityLogErrorReporter(): ActivityLogErrorReporter = ActivityLogErrorReporterImpl()
 
     @Provides
-    open fun provideLogErrorReporter(developerInfoLogger: DeveloperInfoLogger): AnalyticsErrorReporter =
-        AnalyticsErrorReporterImpl()
+    open fun provideLogErrorReporter(): AnalyticsErrorReporter = AnalyticsErrorReporterImpl()
 
     private fun appInfo() = AppInfo(
         if (BuildConfig.VERSION_NAME == "dev_build_dev") "0-dev_build" else BuildConfig.VERSION_NAME,
         if (BuildConfig.PLAYSTORE_BUILD) AppInfo.Build.PRODUCTION else AppInfo.Build.DEV,
-        AppInfo.App.MAIN
+        AppInfo.App.MAIN,
     )
 }

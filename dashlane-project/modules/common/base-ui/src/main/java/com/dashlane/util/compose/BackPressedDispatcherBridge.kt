@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.core.view.MenuProvider
 
 object BackPressedDispatcherBridge {
-
     fun getMenuProvider(activity: ComponentActivity) = object : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             

@@ -9,15 +9,14 @@ import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
 import com.dashlane.user.UserAccountInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class LoginAccountRecoveryKeyViewModel @Inject constructor(
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
 ) : ViewModel() {
-
     fun onBackPressed() {
         logRepository.queueEvent(UseAccountRecoveryKey(FlowStep.CANCEL))
     }
@@ -31,12 +30,6 @@ class LoginAccountRecoveryKeyViewModel @Inject constructor(
     fun vaultKeyDecrypted(obfuscatedVaultKey: ObfuscatedByteArray) {
         viewModelScope.launch {
             loginAccountRecoveryKeyRepository.updateObfuscatedVaultKey(obfuscatedVaultKey)
-        }
-    }
-
-    fun masterPasswordChanged(newMasterPassword: ObfuscatedByteArray) {
-        viewModelScope.launch {
-            loginAccountRecoveryKeyRepository.updateNewMasterPassword(newMasterPassword)
         }
     }
 

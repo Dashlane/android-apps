@@ -7,12 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.design.iconography.IconToken
 import com.dashlane.design.iconography.IconTokens
-import com.dashlane.feature.home.data.Filter
-import com.dashlane.feature.home.data.VaultItemsRepository
-import com.dashlane.home.vaultlist.comparator.alphabeticComparator
-import com.dashlane.home.vaultlist.comparator.categoryComparator
-import com.dashlane.home.vaultlist.comparator.getComparableField
-import com.dashlane.home.vaultlist.comparator.mostRecentAccessTimeComparator
+import com.dashlane.home.vaultlist.ListItemState.VaultItemState
 import com.dashlane.navigation.Navigator
 import com.dashlane.quickaction.QuickActionProvider
 import com.dashlane.securefile.extensions.hasAttachments
@@ -20,19 +15,27 @@ import com.dashlane.sync.DataSync
 import com.dashlane.sync.DataSyncState
 import com.dashlane.ui.adapter.ItemListContext
 import com.dashlane.ui.adapter.ItemListContext.Container
+import com.dashlane.ui.adapter.util.toHighlight
 import com.dashlane.util.clipboard.vault.CopyField
 import com.dashlane.util.clipboard.vault.VaultItemCopyService
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
+import com.dashlane.vault.Filter
+import com.dashlane.vault.VaultItemLogger
+import com.dashlane.vault.VaultItemsRepository
 import com.dashlane.vault.item.VaultListItemState
 import com.dashlane.vault.item.VaultListItemStateFactory
+import com.dashlane.vault.item.comparator.alphabeticComparator
+import com.dashlane.vault.item.comparator.mostRecentAccessTimeComparator
+import com.dashlane.vault.item.comparator.summaryObjectTypeComparator
+import com.dashlane.vault.item.header.getAlphabeticalHeader
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.textfactory.identity.IdentityNameHolderService
+import com.dashlane.vault.toItemType
 import com.dashlane.vault.util.isProtected
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.Locale
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +49,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @Suppress("LargeClass")
@@ -62,10 +66,13 @@ class VaultListViewModel @Inject constructor(
     private val dataSync: DataSync,
     @DefaultCoroutineDispatcher
     private val defaultDispatcher: CoroutineDispatcher,
+    private val vaultItemLogger: VaultItemLogger,
 ) : ViewModel() {
+    private val filter: Filter by lazy {
+        savedStateHandle[EXTRA_FILTER] ?: Filter.ALL_VISIBLE_VAULT_ITEM_TYPES
+    }
 
-    private val filter: Filter by lazy { savedStateHandle[EXTRA_FILTER] ?: Filter.ALL_VISIBLE_VAULT_ITEM_TYPES }
-
+    private val extraContentJobs = mutableMapOf<String, Job>()
     private val _state = MutableStateFlow(VaultListState())
     val state: StateFlow<VaultListState> = _state.asStateFlow()
 
@@ -77,7 +84,8 @@ class VaultListViewModel @Inject constructor(
         vaultItemsRepository.vaultItems
             .onStart { _state.update { it.copy(isLoading = true) } }
             .mapLatest { items ->
-                items.filter { filter.contains(it.syncObjectType) }
+                items.asSequence()
+                    .filter { filter.contains(it.syncObjectType) }
             }
             .onEach { _state.update { it.copy(isRefreshing = false) } }
             .distinctUntilChanged()
@@ -85,11 +93,14 @@ class VaultListViewModel @Inject constructor(
                 items.buildVaultListItem()
             }
             .catch {
-                it.printStackTrace()
-                
+                    tag = "VAULT_LIST",
+                    message = "Error loading vault items",
+                    throwable = it,
+                )
             }
             .onEach { items ->
-                val isSyncRunning = dataSync.dataSyncState.replayCache.firstOrNull() is DataSyncState.Active
+                val isSyncRunning =
+                    dataSync.dataSyncState.replayCache.firstOrNull() is DataSyncState.Active
 
                 if (items.isEmpty()) {
                     
@@ -113,8 +124,13 @@ class VaultListViewModel @Inject constructor(
                         isLoading = false,
                         isRefreshing = false,
                         items = items,
-                        emptyState = null
+                        emptyState = null,
                     )
+                }
+                items.forEach {
+                    if (it is VaultItemState) {
+                        loadItemExtraContent(it.summaryObject)
+                    }
                 }
             }
             .flowOn(defaultDispatcher)
@@ -131,10 +147,18 @@ class VaultListViewModel @Inject constructor(
         }
     }
 
-    fun onItemClick(summaryItemId: String) {
+    fun onItemClick(summaryItemId: String, itemListContext: ItemListContext) {
         viewModelScope.launch {
             getSummaryObject(summaryItemId)
                 ?.let { summaryObject ->
+                    vaultItemLogger.logSelect(
+                        highlight = itemListContext.section.toHighlight(),
+                        itemId = summaryObject.id,
+                        index = itemListContext.positionInContainerSection,
+                        itemType = summaryObject.syncObjectType.toItemType(),
+                        totalCount = itemListContext.sectionCount,
+                    )
+
                     navigator.goToItem(summaryItemId, summaryObject.syncObjectType.xmlObjectName)
                 }
         }
@@ -163,8 +187,9 @@ class VaultListViewModel @Inject constructor(
         }
     }
 
-    fun loadItemExtraContent(item: SummaryObject) {
-        viewModelScope.launch(defaultDispatcher) {
+    private fun loadItemExtraContent(item: SummaryObject) {
+        extraContentJobs[item.id]?.cancel()
+        extraContentJobs[item.id] = viewModelScope.launch(defaultDispatcher) {
             val isAttachmentIconVisible = item.hasAttachments()
             val isSharedIconVisible = item.isShared
             val isLockIconVisible = item.isProtected
@@ -175,7 +200,7 @@ class VaultListViewModel @Inject constructor(
             _state.update { state ->
                 state.copy(
                     items = state.items.map {
-                        if (it is ListItemState.VaultItemState && it.summaryObject?.id == item.id) {
+                        if (it is VaultItemState && it.summaryObject.id == item.id) {
                             it.copy(
                                 vaultItemState = it.vaultItemState.copy(
                                     isAttachmentIconVisible = isAttachmentIconVisible,
@@ -185,13 +210,13 @@ class VaultListViewModel @Inject constructor(
                                     isCopyButtonVisible = isCopyButtonVisible,
                                     isMoreButtonVisible = isMoreButtonVisible,
                                     extraContentLoaded = true,
-                                )
+                                ),
                             )
                         } else {
                             it
                         }
-                    }
-                )
+                    },
+                ).also { extraContentJobs.remove(item.id) }
             }
         }
     }
@@ -200,7 +225,7 @@ class VaultListViewModel @Inject constructor(
         vaultItemsRepository.vaultItems.firstOrNull()
             ?.firstOrNull { it.id == summaryItemId }
 
-    private fun List<SummaryObject>.buildVaultListItem(): List<ListItemState> {
+    private fun Sequence<SummaryObject>.buildVaultListItem(): List<ListItemState> {
         val baseItemListContext = ItemListContext(
             container = when (filter) {
                 Filter.ALL_VISIBLE_VAULT_ITEM_TYPES -> Container.ALL_ITEMS
@@ -210,18 +235,22 @@ class VaultListViewModel @Inject constructor(
                 Filter.FILTER_PERSONAL_INFO -> Container.PERSONAL_INFO_LIST
                 Filter.FILTER_ID -> Container.IDS_LIST
                 Filter.FILTER_SECRET -> Container.SECRETS_LIST
+                Filter.FILTER_WIFI -> Container.NONE
             },
         )
 
         val sortMode = getAppropriateSortMode(count(), filter)
         val grouped = when (sortMode) {
             VaultListMode.ALPHABETICAL ->
-                sortedWith(alphabeticComparator(filter, identityNameHolderService))
-                    .groupBy { getAlphabeticalHeader(it) }
+                sortedWith(alphabeticComparator(identityNameHolderService))
+                    .groupBy { it.getAlphabeticalHeader(identityNameHolderService) }
 
             VaultListMode.CATEGORY ->
-                sortedWith(categoryComparator())
+                sortedWith(summaryObjectTypeComparator())
                     .groupBy { getCategoryHeader(it) }
+                    .mapValues { (_, items) ->
+                        items.sortedWith(alphabeticComparator(identityNameHolderService))
+                    }
 
             VaultListMode.MOST_RECENT ->
                 sortedWith(mostRecentAccessTimeComparator())
@@ -235,22 +264,25 @@ class VaultListViewModel @Inject constructor(
                 VaultListMode.MOST_RECENT -> ItemListContext.Section.MOST_RECENT
             },
         )
+
         val listItemState = grouped
             .map { (header, items) ->
                 buildList {
                     add(ListItemState.HeaderItemState(title = header))
                     addAll(
                         items.mapIndexed { index, summaryObject ->
-                            ListItemState.VaultItemState(
+                            VaultItemState(
                                 key = summaryObject.id,
-                                vaultItemState = vaultListItemStateFactory.buildVaultListItemState(summaryObject),
+                                vaultItemState = vaultListItemStateFactory.buildVaultListItemState(
+                                    summaryObject,
+                                ),
                                 summaryObject = summaryObject,
                                 itemListContext = listBaseItemListContext.copy(
                                     indexInContainerSection = index,
                                     sectionCount = items.size,
                                 ),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -259,8 +291,8 @@ class VaultListViewModel @Inject constructor(
         return buildHighlightedList(baseItemListContext) + listItemState
     }
 
-    private fun List<SummaryObject>.buildHighlightedList(baseItemListContext: ItemListContext): List<ListItemState> {
-        if (count() <= ITEM_COUNT_THRESHOLD) {
+    private fun Sequence<SummaryObject>.buildHighlightedList(baseItemListContext: ItemListContext): List<ListItemState> {
+        if (count() < ITEM_COUNT_THRESHOLD) {
             return emptyList()
         }
 
@@ -270,13 +302,14 @@ class VaultListViewModel @Inject constructor(
             HighlightedListMode.MOST_RECENT -> getRecentList(highlightedListMode.limit)
         }
 
-        val highlightedListSortedAndGrouped = highlightedList.sortedWith(mostRecentAccessTimeComparator())
-            .groupBy {
-                when (highlightedListMode) {
-                    HighlightedListMode.SUGGESTED -> vaultListResourceProvider.vaultListSuggestedHeader
-                    HighlightedListMode.MOST_RECENT -> vaultListResourceProvider.vaultListMostRecentHeader
+        val highlightedListSortedAndGrouped =
+            highlightedList.sortedWith(mostRecentAccessTimeComparator())
+                .groupBy {
+                    when (highlightedListMode) {
+                        HighlightedListMode.SUGGESTED -> vaultListResourceProvider.vaultListSuggestedHeader
+                        HighlightedListMode.MOST_RECENT -> vaultListResourceProvider.vaultListMostRecentHeader
+                    }
                 }
-            }
 
         val highlightedBaseItemListContext = baseItemListContext.copy(
             section = when (highlightedListMode) {
@@ -291,16 +324,18 @@ class VaultListViewModel @Inject constructor(
                     add(ListItemState.HeaderItemState(title = header))
                     addAll(
                         items.mapIndexed { index, summaryObject ->
-                            ListItemState.VaultItemState(
+                            VaultItemState(
                                 key = "highlighted_${summaryObject.id}",
-                                vaultItemState = vaultListItemStateFactory.buildVaultListItemState(summaryObject),
+                                vaultItemState = vaultListItemStateFactory.buildVaultListItemState(
+                                    summaryObject,
+                                ),
                                 summaryObject = summaryObject,
                                 itemListContext = highlightedBaseItemListContext.copy(
                                     indexInContainerSection = index,
-                                    sectionCount = items.size
-                                )
+                                    sectionCount = items.size,
+                                ),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -315,10 +350,13 @@ class VaultListViewModel @Inject constructor(
                 Filter.ALL_VISIBLE_VAULT_ITEM_TYPES,
                 Filter.FILTER_PASSWORD,
                 Filter.FILTER_SECURE_NOTE,
-                Filter.FILTER_SECRET -> VaultListMode.ALPHABETICAL
+                Filter.FILTER_SECRET,
+                Filter.FILTER_WIFI,
+                -> VaultListMode.ALPHABETICAL
                 Filter.FILTER_PAYMENT,
                 Filter.FILTER_PERSONAL_INFO,
-                Filter.FILTER_ID -> VaultListMode.CATEGORY
+                Filter.FILTER_ID,
+                -> VaultListMode.CATEGORY
             }
         }
 
@@ -328,49 +366,53 @@ class VaultListViewModel @Inject constructor(
             else -> HighlightedListMode.MOST_RECENT
         }
 
-    private fun List<SummaryObject>.getSuggestedList(limit: Int): List<SummaryObject> {
-        val mostUsed = filter { it.locallyUsedCount > 0 }.sortedByDescending { it.locallyUsedCount }
+    private fun Sequence<SummaryObject>.getSuggestedList(limit: Int): Sequence<SummaryObject> {
+        val mostUsed = filter { it.locallyUsedCount > 0 }
+            .sortedByDescending { it.locallyUsedCount }
+            .take(limit.div(2))
         val mostRecent = sortedWith(mostRecentAccessTimeComparator())
-        val suggestedList = mutableSetOf<SummaryObject>().run {
-            addAll(mostUsed.take(limit.div(2)))
-            addAll(mostRecent.take(limit))
-            take(limit)
+            .take(limit - mostUsed.count())
+
+        val suggestedList = buildSet {
+            addAll(mostUsed)
+            addAll(mostRecent)
         }
 
-        return suggestedList.filterByLocalUsage(limit)
+        return suggestedList.asSequence().filterByLocalUsage(limit)
     }
 
-    private fun List<SummaryObject>.getRecentList(limit: Int): List<SummaryObject> =
+    private fun Sequence<SummaryObject>.getRecentList(limit: Int): Sequence<SummaryObject> =
         sortedWith(mostRecentAccessTimeComparator()).take(limit).filterByLocalUsage(limit)
 
-    private fun List<SummaryObject>.filterByLocalUsage(limit: Int): List<SummaryObject> {
+    private fun Sequence<SummaryObject>.filterByLocalUsage(limit: Int): Sequence<SummaryObject> {
         
-        val localUpdatedDateRecent = filter { it.locallyUsedCount > 0 }.sortedByDescending { it.locallyViewedDate }
+        val localUpdatedDateRecent =
+            filter { it.locallyUsedCount > 0 }.sortedByDescending { it.locallyViewedDate }
 
         
-        if (localUpdatedDateRecent.isEmpty()) {
+        if (localUpdatedDateRecent.count() == 0) {
             return this
         }
 
         
-        if (localUpdatedDateRecent.size > limit) {
+        if (localUpdatedDateRecent.count() > limit) {
             return localUpdatedDateRecent.take(limit)
         }
 
         
         
-        return (localUpdatedDateRecent + this).toSet().take(limit)
+        return (localUpdatedDateRecent + this).distinct().take(limit)
     }
 
     
     private fun buildEmptyState(): VaultListEmptyState = when (filter) {
         Filter.ALL_VISIBLE_VAULT_ITEM_TYPES -> VaultListEmptyState(
-            icon = IconTokens.protectionOutlined,
+            icon = IconTokens.itemLoginOutlined,
             title = vaultListResourceProvider.vaultListEmptyAllTitle,
             description = vaultListResourceProvider.vaultListEmptyAllDescription,
         )
         Filter.FILTER_PASSWORD -> VaultListEmptyState(
-            icon = IconTokens.lockOutlined,
+            icon = IconTokens.itemLoginOutlined,
             title = vaultListResourceProvider.vaultListEmptyPasswordTitle,
             description = vaultListResourceProvider.vaultListEmptyPasswordDescription,
         )
@@ -399,22 +441,11 @@ class VaultListViewModel @Inject constructor(
             title = vaultListResourceProvider.vaultListEmptySecretTitle,
             description = vaultListResourceProvider.vaultListEmptySecretDescription,
         )
-    }
-
-    private fun getAlphabeticalHeader(summaryObject: SummaryObject): String {
-        val text = summaryObject.getComparableField(identityNameHolderService)
-        val emptyTextCategory = "..."
-        val firstLetter = try {
-            text?.substring(0, 1)?.uppercase(Locale.US)?.takeUnless { it.isEmpty() }
-        } catch (e: Exception) {
-            null
-        } ?: " "
-
-        return when (firstLetter[0]) {
-            ' ' -> emptyTextCategory
-            in '0'..'9' -> "0-9"
-            else -> firstLetter
-        }
+        Filter.FILTER_WIFI -> VaultListEmptyState(
+            icon = IconTokens.itemWifiOutlined,
+            title = vaultListResourceProvider.vaultListEmptyWiFiTitle,
+            description = vaultListResourceProvider.vaultListEmptyWiFiDescription,
+        )
     }
 
     private fun getCategoryHeader(summaryObject: SummaryObject): String =
@@ -463,7 +494,7 @@ sealed class ListItemState {
     data class VaultItemState(
         val vaultItemState: VaultListItemState,
         val itemListContext: ItemListContext,
-        val summaryObject: SummaryObject?,
+        val summaryObject: SummaryObject,
         override val key: String,
     ) : ListItemState()
 }

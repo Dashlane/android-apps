@@ -21,7 +21,7 @@ public final class TlvUtil {
 
 
 
-    private static ITag searchTagById(final int tagId) {
+    protected static ITag searchTagById(final int tagId) {
         return EmvTags.getNotNull(getTagAsBytes(tagId));
     }
 

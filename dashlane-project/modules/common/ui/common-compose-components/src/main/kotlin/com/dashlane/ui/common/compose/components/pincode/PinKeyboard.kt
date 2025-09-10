@@ -30,22 +30,22 @@ fun PinKeyboard(
 ) {
     @Composable
     fun PinKeyboardKeyDigit(
-        digit: String
+        digit: String,
     ) {
         PinKeyboardKey(
             modifier = Modifier.clickable(role = Role.Button) {
                 onValueChange(value + digit)
-            }
+            },
         ) {
             Text(
                 text = digit,
-                style = DashlaneTheme.typography.specialtyMonospaceMedium
+                style = DashlaneTheme.typography.specialtyMonospaceMedium,
             )
         }
     }
 
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             PinKeyboardKeyDigit(digit = "1")
@@ -73,12 +73,12 @@ fun PinKeyboard(
                     if (value.isNotEmpty()) {
                         onValueChange(value.dropLast(1))
                     }
-                }
+                },
             ) {
                 @Suppress("DEPRECATION")
                 Icon(
                     painter = painterResource(R.drawable.backspace),
-                    contentDescription = stringResource(id = R.string.and_accessibility_pin_keyboard_action_text_clear)
+                    contentDescription = stringResource(id = R.string.and_accessibility_action_text_clear),
                 )
             }
         }
@@ -88,12 +88,12 @@ fun PinKeyboard(
 @Composable
 private fun PinKeyboardKey(
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Box(
         modifier = modifier
             .size(pinKeyboardKeySize),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         content()
     }
@@ -106,10 +106,10 @@ private fun PinKeyboardPreview() {
         PinKeyboard(
             Modifier.size(
                 width = 500.dp,
-                height = 400.dp
+                height = 400.dp,
             ),
             value = "1234",
-            onValueChange = {}
+            onValueChange = {},
         )
     }
 }

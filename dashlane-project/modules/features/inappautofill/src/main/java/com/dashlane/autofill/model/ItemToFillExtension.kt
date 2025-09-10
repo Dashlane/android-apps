@@ -13,20 +13,21 @@ import com.dashlane.xml.domain.SyncObject
 
 fun SummaryObject.Authentifiant.toItemToFill(
     matchType: MatchType? = null,
-    oldPassword: SyncObfuscatedValue? = null
+    oldPassword: SyncObfuscatedValue? = null,
 ) = AuthentifiantItemToFill(
     itemId = id,
+    spaceId = spaceId,
     matchType = matchType,
     lastUsedDate = locallyViewedDate,
     title = titleForListNormalized,
     login = loginForUi,
     url = urlForUI() ?: "",
-    oldPassword = oldPassword
+    oldPassword = oldPassword,
 )
 
 fun VaultItem<SyncObject.Authentifiant>.toItemToFill(
     matchType: MatchType? = null,
-    oldPassword: SyncObfuscatedValue? = null
+    oldPassword: SyncObfuscatedValue? = null,
 ) = toSummary<SummaryObject.Authentifiant>().toItemToFill(matchType, oldPassword).also {
     it.vaultItem = this
     it.isSharedWithLimitedRight = sharingPermission != null && sharingPermission != UserPermission.ADMIN
@@ -34,16 +35,17 @@ fun VaultItem<SyncObject.Authentifiant>.toItemToFill(
 
 fun SummaryObject.PaymentCreditCard.toItemToFill(
     matchType: MatchType? = null,
-    zipCode: String?
+    zipCode: String?,
 ) = CreditCardItemToFill(
     itemId = id,
+    spaceId = spaceId,
     matchType = matchType,
     lastUsedDate = locallyViewedDate,
     name = name,
     bankName = bank,
     cardNumberObfuscate = cardNumberObfuscate?.let { smallerCardNumber(it) } ?: "",
     zipCode = zipCode,
-    color = color
+    color = color,
 )
 
 fun smallerCardNumber(cardNumber: String): String {
@@ -57,11 +59,18 @@ fun smallerCardNumber(cardNumber: String): String {
 
 fun VaultItem<SyncObject.PaymentCreditCard>.toItemToFill(
     matchType: MatchType? = null,
-    zipCode: String?
+    zipCode: String?,
 ) = toSummary<SummaryObject.PaymentCreditCard>().toItemToFill(matchType, zipCode).also {
     it.vaultItem = this
 }
 
 fun SummaryObject.Email.toItemToFill(
-    matchType: MatchType? = null
-) = EmailItemToFill(id, matchType, locallyViewedDate, emailName, email)
+    matchType: MatchType? = null,
+) = EmailItemToFill(
+    itemId = id,
+    spaceId = spaceId,
+    matchType = matchType,
+    lastUsedDate = locallyViewedDate,
+    name = emailName,
+    email = email,
+)

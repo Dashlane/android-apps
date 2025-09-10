@@ -3,18 +3,11 @@ package com.dashlane.autofill.util
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.IntentSender
-import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 
 interface AutofillNavigationService {
-
     fun navigateToAutofillSettings(activity: Activity, startAsNewTask: Boolean = false)
 
     fun navigateToPasswordSection(activity: Activity, startAsNewTask: Boolean = false)
-
-    fun navigateToPausedAutofillSection(
-        activity: Activity,
-        autofillFormSource: AutoFillFormSource
-    )
 
     fun navigateToFrozenAccountPaywall(activity: Activity)
 

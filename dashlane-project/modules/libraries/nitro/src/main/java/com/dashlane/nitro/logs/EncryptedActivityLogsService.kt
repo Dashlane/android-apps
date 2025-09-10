@@ -1,56 +1,72 @@
 package com.dashlane.nitro.logs
 
 import com.dashlane.hermes.service.ActivityLogService
-import com.dashlane.network.ServerUrlOverride
-import com.dashlane.network.webservices.DashlaneUrls.URL_API
 import com.dashlane.nitro.Nitro
+import com.dashlane.nitro.Nitro.NitroInitializationException
+import com.dashlane.nitro.hilt.NitroProxy
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.NitroApi
 import com.dashlane.server.api.endpoints.logs.StoreAuditLogs
+import com.dashlane.server.api.endpoints.logs.exceptions.ClientIdentifierNotFoundException
+import com.dashlane.server.api.endpoints.logs.exceptions.ClientSessionNotParsedException
+import com.dashlane.server.api.endpoints.logs.exceptions.ClientStateinNotFoundException
+import com.dashlane.server.api.endpoints.logs.exceptions.SecureTunnelMustBeReopenedException
 import com.dashlane.server.api.endpoints.logs.exceptions.TunnelUuidNotFoundException
 import com.dashlane.server.api.endpoints.teams.ActivityLog
+import com.dashlane.server.api.exceptions.DashlaneApiHttp400BusinessException
 import com.dashlane.server.api.exceptions.DashlaneApiIoException
-import com.dashlane.util.tryAsSuccess
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.Optional
-import kotlin.jvm.optionals.getOrNull
 
 class EncryptedActivityLogsService(
-    private val nitro: Nitro,
-    private val serverUrlOverride: Optional<ServerUrlOverride>,
-    private val ioDispatcher: CoroutineDispatcher
+    @NitroProxy private val nitroProxy: Nitro,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : ActivityLogService {
-
     private var nitroApi: NitroApi? = null
 
     override suspend fun sendLogs(
         authorization: Authorization.User,
-        logBatch: List<ActivityLog>
+        logBatch: List<ActivityLog>,
     ) = withContext(ioDispatcher) {
         return@withContext sendToNitro(logBatch, authorization).invalidAuditLogs
     }
 
+    @Throws(NitroInitializationException::class)
     private suspend fun sendToNitro(
         logs: List<ActivityLog>,
-        authorization: Authorization.User
+        authorization: Authorization.User,
     ): StoreAuditLogs.Data {
         val request = StoreAuditLogs.Request(logs)
-        if (nitroApi == null) {
-            val nitroUrl = (serverUrlOverride.getOrNull()?.apiUrl ?: URL_API)
-                .replaceFirst("/v1/", "/v1-nitro-encryption-service/")
-            tryAsSuccess { nitro.authenticate(nitroUrl, true).let { nitroApi = it } }
+        
+        
+        return try {
+            nitroProxy.execute<StoreAuditLogs.Data> {
+                endpoints.logs.storeAuditLogs.execute(
+                    userAuthorization = authorization,
+                    request = request,
+                )
+            }.data
+        } catch (e: DashlaneApiHttp400BusinessException) {
+            throw handleLogErrors(e)
         }
+    }
+
+    private fun handleLogErrors(e: DashlaneApiHttp400BusinessException) = when (e) {
         
+        is TunnelUuidNotFoundException,
+        is ClientIdentifierNotFoundException,
+        is ClientSessionNotParsedException,
+        is ClientStateinNotFoundException,
         
-        return nitroApi?.let { api ->
-            try {
-                api.endpoints.logs.storeAuditLogs.execute(authorization, request).data
-            } catch (e: TunnelUuidNotFoundException) {
-                
-                nitroApi = null
-                throw DashlaneApiIoException("Nitro Tunnel is closed")
-            }
-        } ?: throw DashlaneApiIoException("Nitro API not initialized")
+        is SecureTunnelMustBeReopenedException,
+        -> {
+            
+            nitroApi = null
+                message = "Nitro Tunnel is closed and will be reopened and logs will be sent later",
+                throwable = e,
+            )
+            DashlaneApiIoException("Nitro Tunnel is closed")
+        }
+        else -> e
     }
 }

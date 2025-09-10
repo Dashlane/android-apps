@@ -10,14 +10,13 @@ import javax.inject.Inject
 class PersonalWebsiteListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.PersonalWebsite> {
-
     override fun getTitle(item: SummaryObject.PersonalWebsite): StatusText {
         return StatusText(
             if (item.name.isNotSemanticallyNull()) {
                 item.name!!
             } else {
                 resources.getString(R.string.personal_website)
-            }
+            },
         )
     }
 

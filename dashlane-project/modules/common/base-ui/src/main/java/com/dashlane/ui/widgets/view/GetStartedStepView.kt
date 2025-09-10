@@ -1,5 +1,6 @@
 package com.dashlane.ui.widgets.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.TypedArray
@@ -32,17 +33,17 @@ import com.dashlane.ui.R
 import com.dashlane.util.TextColorTransition
 import com.google.android.material.shape.MaterialShapeDrawable
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 
 class GetStartedStepView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.getStartedStepViewStyle
+    defStyleAttr: Int = R.attr.getStartedStepViewStyle,
 ) : ConstraintLayout(
-    ContextThemeWrapper(context, R.style.ThemeOverlay_Dashlane_Shape),
-    attrs,
-    defStyleAttr
-) {
-
+        ContextThemeWrapper(context, R.style.ThemeOverlay_Dashlane_Shape),
+        attrs,
+        defStyleAttr,
+    ) {
     val title: TextView
     val subtitle: TextView
     val completionDuration = resources.getInteger(android.R.integer.config_longAnimTime).toLong()
@@ -94,7 +95,7 @@ class GetStartedStepView @JvmOverloads constructor(
             superState = super.onSaveInstanceState(),
             expanded = expanded,
             completion = completion,
-            sceneRootIdRes = sceneRootIdRes
+            sceneRootIdRes = sceneRootIdRes,
         )
     }
 
@@ -136,14 +137,15 @@ class GetStartedStepView @JvmOverloads constructor(
                         completion = true
                         requestLayout()
                     },
-                    completionStartDelay
+                    completionStartDelay,
                 )
             }
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setNumber(value: Int) {
-        number.text = String.format("%02d", value)
+        number.text = "%02d".format(Locale.getDefault(), value)
     }
 
     private fun init(attrs: AttributeSet?, defStyleAttr: Int) {
@@ -151,7 +153,7 @@ class GetStartedStepView @JvmOverloads constructor(
             attrs,
             R.styleable.GetStartedStepView,
             defStyleAttr,
-            R.style.Widget_Dashlane_GetStartedStepView
+            R.style.Widget_Dashlane_GetStartedStepView,
         ) {
             completionColor = getColorStateListOrThrow(R.styleable.GetStartedStepView_stepCompletionColor)
             check.imageTintList = completionColor
@@ -254,7 +256,7 @@ class GetStartedStepView @JvmOverloads constructor(
                 context,
                 attrs,
                 R.attr.getStartedStepViewStyle,
-                R.style.Widget_Dashlane_GetStartedStepView
+                R.style.Widget_Dashlane_GetStartedStepView,
             )
         val backgroundTint =
             typedArray.getColorStateListOrThrow(R.styleable.GetStartedStepView_stepBackgroundTint)
@@ -271,7 +273,7 @@ class GetStartedStepView @JvmOverloads constructor(
 
     private fun buildCompletionTransition(
         startListener: (() -> Unit)? = null,
-        endListener: (() -> Unit)? = null
+        endListener: (() -> Unit)? = null,
     ): Transition {
         return AutoTransition().apply {
             addTransition(TextColorTransition())
@@ -306,6 +308,6 @@ class GetStartedStepView @JvmOverloads constructor(
         val superState: Parcelable?,
         val expanded: Boolean,
         val completion: Boolean,
-        @IdRes val sceneRootIdRes: Int?
+        @IdRes val sceneRootIdRes: Int?,
     ) : Parcelable
 }

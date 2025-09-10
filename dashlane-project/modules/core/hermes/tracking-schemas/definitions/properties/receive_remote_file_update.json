@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/receive_remote_file_update.json",
+  "type": "object",
+  "description": "Definitions for the remote file update process.",
+  "definitions": {
+    "remote_file_update_error": {
+      "description": "The type of error that occurs when the remote file update fails",
+      "type": "string",
+      "enum": [
+        "decipher_error",
+        "download_error",
+        "local_storage_error",
+        "other_error",
+        "server_error"
+      ]
+    },
+    "package_source": {
+      "description": "The Dashlane extension package from which the event is fired",
+      "type": "string",
+      "enum": [
+        "carbon",
+        "graphene"
+      ]
+    }
+  }
+}

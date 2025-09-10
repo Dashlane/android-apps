@@ -10,7 +10,7 @@ fun createSecureNote(
     type: SyncObject.SecureNoteType = SyncObject.SecureNoteType.BLUE,
     category: String? = null,
     content: String? = null,
-    isSecured: Boolean = false
+    isSecured: Boolean = false,
 ): VaultItem<SyncObject.SecureNote> {
     return dataIdentifier.toVaultItem(
         SyncObject.SecureNote {
@@ -21,7 +21,7 @@ fun createSecureNote(
             this.secured = isSecured
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 

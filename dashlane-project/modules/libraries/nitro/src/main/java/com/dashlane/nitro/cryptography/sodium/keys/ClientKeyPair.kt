@@ -2,7 +2,7 @@ package com.dashlane.nitro.cryptography.sodium.keys
 
 data class ClientKeyPair(
     val rx: ByteArray,
-    val tx: ByteArray
+    val tx: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

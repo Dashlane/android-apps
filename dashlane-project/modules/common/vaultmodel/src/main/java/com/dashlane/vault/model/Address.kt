@@ -21,7 +21,7 @@ fun createAddress(
     floor: String? = null,
     door: String? = null,
     digitCode: String? = null,
-    linkedPhone: String? = null
+    linkedPhone: String? = null,
 ): VaultItem<SyncObject.Address> {
     return dataIdentifier.toVaultItem(
         SyncObject.Address {
@@ -44,11 +44,10 @@ fun createAddress(
             this.linkedPhone = linkedPhone
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
-fun VaultItem<SyncObject.Address>.copySyncObject(builder: SyncObject.Address.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.Address> {
+fun VaultItem<SyncObject.Address>.copySyncObject(builder: SyncObject.Address.Builder.() -> Unit = {}): VaultItem<SyncObject.Address> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

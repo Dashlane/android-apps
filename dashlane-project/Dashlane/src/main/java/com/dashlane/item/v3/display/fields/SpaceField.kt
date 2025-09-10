@@ -14,7 +14,6 @@ import com.dashlane.R
 import com.dashlane.collections.edit.SpacePicker
 import com.dashlane.design.component.DisplayField
 import com.dashlane.design.theme.tooling.DashlanePreview
-import com.dashlane.item.v3.data.CommonData
 import com.dashlane.teamspaces.model.SpaceColor
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.stringName
@@ -22,39 +21,36 @@ import com.dashlane.ui.widgets.compose.OutlinedTeamspaceIcon
 
 @Composable
 fun SpaceField(
-    commonData: CommonData,
+    space: TeamSpace,
+    availableSpaces: List<TeamSpace>,
     editMode: Boolean,
     isEditable: Boolean,
-    onSpaceSelected: (TeamSpace) -> Unit
+    onSpaceSelected: (TeamSpace) -> Unit,
 ) {
-    if (commonData.space == null) {
-        
-        return
-    }
     if (editMode) {
-        if (commonData.availableSpaces.isNotEmpty()) {
+        if (availableSpaces.isNotEmpty()) {
             SpacePicker(
                 modifier = Modifier.fillMaxWidth(),
-                spaces = commonData.availableSpaces,
+                spaces = availableSpaces,
                 onSpaceSelected = { onSpaceSelected(it) },
-                selectedSpace = commonData.space,
-                readOnly = isEditable.not()
+                selectedSpace = space,
+                readOnly = isEditable.not(),
             )
         }
     } else {
         DisplayField(
             label = stringResource(id = R.string.teamspaces_selector_label),
-            value = commonData.space.stringName(LocalContext.current),
+            value = space.stringName(LocalContext.current),
             advancedLeadingIcon = {
                 OutlinedTeamspaceIcon(
-                    letter = commonData.space.displayLetter,
-                    color = when (val color = commonData.space.color) {
+                    letter = space.displayLetter,
+                    color = when (val color = space.color) {
                         is SpaceColor.FixColor -> colorResource(color.colorRes).toArgb()
                         is SpaceColor.TeamColor -> color.color
                     },
                     iconSize = 16.dp,
                 )
-            }
+            },
         )
     }
 }
@@ -62,23 +58,31 @@ fun SpaceField(
 @Preview
 @Composable
 private fun SpaceFieldPreview() {
-    val commonData = CommonData(
-        space = TeamSpace.Personal,
-        availableSpaces = listOf(
-            TeamSpace.Personal
-        )
-    )
+    val space = TeamSpace.Personal
+    val availableSpaces = listOf(TeamSpace.Personal)
     DashlanePreview {
         Column {
-            SpaceField(commonData = commonData, editMode = false, isEditable = true) {
-                
-            }
-            SpaceField(commonData = commonData, editMode = true, isEditable = false) {
-                
-            }
-            SpaceField(commonData = commonData, editMode = true, isEditable = true) {
-                
-            }
+            SpaceField(
+                space = space,
+                availableSpaces = availableSpaces,
+                editMode = false,
+                isEditable = true,
+                onSpaceSelected = {},
+            )
+            SpaceField(
+                space = space,
+                availableSpaces = availableSpaces,
+                editMode = true,
+                isEditable = false,
+                onSpaceSelected = {},
+            )
+            SpaceField(
+                space = space,
+                availableSpaces = availableSpaces,
+                editMode = true,
+                isEditable = true,
+                onSpaceSelected = {},
+            )
         }
     }
 }

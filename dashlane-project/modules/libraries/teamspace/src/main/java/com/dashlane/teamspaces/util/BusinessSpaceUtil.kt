@@ -10,7 +10,7 @@ object BusinessSpaceUtil {
     fun createCurrentSpace(
         name: String,
         teamId: Long,
-        color: String
+        color: String,
     ): TeamSpace.Business.Current {
         val space = CurrentTeam(
             teamName = name,
@@ -20,7 +20,7 @@ object BusinessSpaceUtil {
                 isGroupManager = false,
                 teamAdmins = listOf(),
                 isTeamAdmin = false,
-                billingAdmins = listOf()
+                billingAdmins = listOf(),
             ),
             planName = "",
             teamInfo = CurrentTeam.TeamInfo(
@@ -41,7 +41,8 @@ object BusinessSpaceUtil {
         teamId: Long = 1234,
         domains: List<String>? = null,
         forceDomain: Boolean? = null,
-        removeForcedContent: Boolean? = null
+        removeForcedContent: Boolean? = null,
+        personalSpaceEnabled: Boolean? = null,
     ): TeamSpace.Business.Past {
         val space = PastTeam(
             teamName = name,
@@ -51,20 +52,21 @@ object BusinessSpaceUtil {
                 isGroupManager = false,
                 teamAdmins = listOf(),
                 isTeamAdmin = false,
-                billingAdmins = listOf()
+                billingAdmins = listOf(),
             ),
             teamInfo = PastTeam.TeamInfo(
                 membersNumber = 1,
                 planType = "",
                 teamDomains = domains,
                 forcedDomainsEnabled = forceDomain,
-                removeForcedContentEnabled = removeForcedContent
+                removeForcedContentEnabled = removeForcedContent,
+                personalSpaceEnabled = personalSpaceEnabled,
             ),
             joinDateUnix = InstantEpochSecond(0),
             teamId = teamId,
             planFeature = PastTeam.PlanFeature.TEAM,
             revokeDateUnix = InstantEpochSecond(0),
-            status = Status.REVOKED
+            status = Status.REVOKED,
         )
         return TeamSpace.Business.Past(space)
     }

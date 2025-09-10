@@ -7,9 +7,8 @@ import com.dashlane.ui.M2xIntentFactory
 import javax.inject.Inject
 
 class M2wActivityResultContract @Inject constructor(
-    private val m2xIntentFactory: M2xIntentFactory
+    private val m2xIntentFactory: M2xIntentFactory,
 ) : ActivityResultContract<Unit, M2WResult>() {
-
     override fun createIntent(context: Context, input: Unit): Intent =
         m2xIntentFactory.buildM2xConnect()
 

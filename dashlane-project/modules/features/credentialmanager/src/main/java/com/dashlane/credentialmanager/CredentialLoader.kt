@@ -1,6 +1,6 @@
 package com.dashlane.credentialmanager
 
-import com.dashlane.credentialmanager.model.PasskeyRequestOptions
+import com.dashlane.credentialmanager.model.fido.request.PasskeyRequestOptions
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
@@ -16,7 +16,7 @@ interface CredentialLoader {
 
     fun loadPasskeyCredentials(
         rpId: String,
-        allowedCredentials: List<PasskeyRequestOptions.AllowCredentials>
+        allowedCredentials: List<PasskeyRequestOptions.AllowCredentials>,
     ): List<SummaryObject.Passkey>
 
     fun loadSyncObject(itemId: String): VaultItem<SyncObject>?
@@ -43,13 +43,13 @@ class CredentialLoaderImpl @Inject constructor(
 
     override fun loadPasskeyCredentials(
         rpId: String,
-        allowedCredentials: List<PasskeyRequestOptions.AllowCredentials>
+        allowedCredentials: List<PasskeyRequestOptions.AllowCredentials>,
     ): List<SummaryObject.Passkey> {
         return genericDataQuery.queryAll(
             vaultFilter {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.PASSKEY)
-            }
+            },
         )
             .filterIsInstance(SummaryObject.Passkey::class.java)
             .filter { allowedCredentials.isEmpty() || it.credentialId in allowedCredentials.map { allowed -> allowed.id } }
@@ -60,7 +60,7 @@ class CredentialLoaderImpl @Inject constructor(
         return vaultDataQuery.queryLegacy(
             vaultFilter {
                 specificUid(itemId)
-            }
+            },
         )
     }
 
@@ -69,7 +69,7 @@ class CredentialLoaderImpl @Inject constructor(
             vaultFilter {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.PASSKEY)
-            }
+            },
         ).size
     }
 
@@ -78,7 +78,7 @@ class CredentialLoaderImpl @Inject constructor(
             vaultFilter {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)
-            }
+            },
         ).size
     }
 }

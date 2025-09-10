@@ -1,9 +1,9 @@
 package com.dashlane.dagger
 
 import android.content.Context
-import com.dashlane.session.authorization
 import com.dashlane.server.api.DashlaneApi
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.url.icon.v2.UrlDomainIconDataStore
 import com.dashlane.url.icon.v2.UrlDomainIconDatabase
 import com.dashlane.url.icon.v2.UrlDomainIconRepository
@@ -21,7 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 @Module
 @InstallIn(ViewModelComponent::class)
 object ViewModelModule {
-
     @ViewModelScoped
     @Provides
     fun provideUrlDomainIconV2Repository(
@@ -30,17 +29,15 @@ object ViewModelModule {
         @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher,
         dashlaneApi: DashlaneApi,
         sessionManager: SessionManager,
-    ): UrlDomainIconRepository {
-        return UrlDomainIconRepository(
-            coroutineScope = applicationCoroutineScope,
-            dashlaneTime = dashlaneApi.dashlaneTime,
-            dataStore = UrlDomainIconDataStore(UrlDomainIconDatabase.invoke(context)),
-            getIconService = dashlaneApi.endpoints.icons.getIconService,
-            requestIconService = dashlaneApi.endpoints.icons.requestIconService,
-            ioDispatcher = ioDispatcher,
-            userAuthorizationProvider = {
-                requireNotNull(sessionManager.session?.authorization)
-            }
-        )
-    }
+    ) = UrlDomainIconRepository(
+        coroutineScope = applicationCoroutineScope,
+        dashlaneTime = dashlaneApi.dashlaneTime,
+        dataStore = UrlDomainIconDataStore(UrlDomainIconDatabase.invoke(context)),
+        getIconService = dashlaneApi.endpoints.icons.getIconService,
+        requestIconService = dashlaneApi.endpoints.icons.requestIconService,
+        ioDispatcher = ioDispatcher,
+        userAuthorizationProvider = {
+            requireNotNull(sessionManager.session?.authorization)
+        },
+    )
 }

@@ -9,13 +9,13 @@ class CustomItemSelectSpinner : AppCompatSpinner {
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
-        mode: Int
+        mode: Int,
     ) : super(context, attrs, defStyleAttr, mode)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
-        defStyleAttr
+        defStyleAttr,
     )
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)

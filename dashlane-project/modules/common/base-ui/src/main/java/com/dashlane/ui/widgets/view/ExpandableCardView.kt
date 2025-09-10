@@ -18,12 +18,12 @@ import kotlinx.parcelize.Parcelize
 class ExpandableCardView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = R.attr.expandableCardViewStyle
+    defStyleAttr: Int = R.attr.expandableCardViewStyle,
 ) : CardView(
-    ContextThemeWrapper(context, R.style.ThemeOverlay_Dashlane_Shape),
-    attrs,
-    defStyleAttr
-) {
+        ContextThemeWrapper(context, R.style.ThemeOverlay_Dashlane_Shape),
+        attrs,
+        defStyleAttr,
+    ) {
     var expanded: Boolean = false
         private set
     private val contentLayout: ViewGroup
@@ -40,7 +40,7 @@ class ExpandableCardView @JvmOverloads constructor(
     override fun onSaveInstanceState(): Parcelable {
         return SaveState(
             superState = super.onSaveInstanceState(),
-            expanded = expanded
+            expanded = expanded,
         )
     }
 
@@ -61,7 +61,7 @@ class ExpandableCardView @JvmOverloads constructor(
             attrs,
             R.styleable.ExpandableCardView,
             defStyleAttr,
-            R.style.Widget_Dashlane_ExpandableCardView
+            R.style.Widget_Dashlane_ExpandableCardView,
         ) {
             val headerId = getResourceIdOrThrow(R.styleable.ExpandableCardView_headerLayout)
             inflate(context, headerId, contentLayout)
@@ -103,6 +103,6 @@ class ExpandableCardView @JvmOverloads constructor(
     @Parcelize
     private data class SaveState(
         val superState: Parcelable?,
-        val expanded: Boolean
+        val expanded: Boolean,
     ) : Parcelable
 }

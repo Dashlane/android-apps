@@ -14,9 +14,8 @@ open class CopyAction(
     private val copyField: CopyField,
     private val action: (Activity) -> Unit = {},
     private val itemListContext: ItemListContext? = null,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : Action {
-
     override val icon: Int = -1
 
     override val tintColorRes: Int? = null
@@ -32,8 +31,7 @@ open class CopyAction(
             vaultItemCopy.handleCopy(
                 item = summaryObject,
                 copyField = copyField,
-                updateLocalUsage = true,
-                updateFrequentSearch = true
+                updateFrequentSearch = true,
             )
         } else {
             vaultItemCopy.handleCopy(item = summaryObject, copyField = copyField)

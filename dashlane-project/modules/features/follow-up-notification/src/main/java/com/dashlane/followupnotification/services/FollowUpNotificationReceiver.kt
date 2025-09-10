@@ -19,7 +19,6 @@ object FollowUpNotificationReceiver {
 
 @AndroidEntryPoint
 class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
-
     @Inject
     lateinit var followUpNotificationApiProvider: FollowUpNotificationApiProvider
 
@@ -35,7 +34,7 @@ class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
     companion object {
         fun getDismissPendingIntent(
             context: Context,
-            followUpNotificationId: String
+            followUpNotificationId: String,
         ): PendingIntent {
             val requestCode = FollowUpNotificationReceiver.NOTIFICATION_REQUEST_CODE
 
@@ -45,10 +44,10 @@ class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
                 Intent(context, FollowUpNotificationDismissReceiver::class.java).apply {
                     putExtra(
                         FollowUpNotificationReceiver.NOTIFICATION_FOLLOW_UP_NOTIFICATION_ID_EXTRA,
-                        followUpNotificationId
+                        followUpNotificationId,
                     )
                 },
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
     }
@@ -56,7 +55,6 @@ class FollowUpNotificationDismissReceiver : BroadcastReceiver() {
 
 @AndroidEntryPoint
 class FollowUpNotificationCopyReceiver : AppCompatActivity() {
-
     @Inject
     lateinit var followUpNotificationApiProvider: FollowUpNotificationApiProvider
 
@@ -79,7 +77,7 @@ class FollowUpNotificationCopyReceiver : AppCompatActivity() {
         fun getCopyPendingIntent(
             context: Context,
             followUpNotificationId: String,
-            copyFieldIndex: Int
+            copyFieldIndex: Int,
         ): PendingIntent {
             val requestCode =
                 FollowUpNotificationReceiver.NOTIFICATION_REQUEST_CODE + copyFieldIndex
@@ -90,15 +88,15 @@ class FollowUpNotificationCopyReceiver : AppCompatActivity() {
                 Intent(context, FollowUpNotificationCopyReceiver::class.java).apply {
                     putExtra(
                         FollowUpNotificationReceiver.NOTIFICATION_FOLLOW_UP_NOTIFICATION_ID_EXTRA,
-                        followUpNotificationId
+                        followUpNotificationId,
                     )
                     putExtra(
                         FollowUpNotificationReceiver.NOTIFICATION_COPY_FIELD_INDEX_EXTRA,
-                        copyFieldIndex
+                        copyFieldIndex,
                     )
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 },
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
     }

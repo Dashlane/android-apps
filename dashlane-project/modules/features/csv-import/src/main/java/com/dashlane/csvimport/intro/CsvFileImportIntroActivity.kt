@@ -5,34 +5,40 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.launch
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import com.dashlane.csvimport.R
 import com.dashlane.csvimport.csvimport.view.CsvImportActivity
 import com.dashlane.csvimport.utils.Intents
 import com.dashlane.csvimport.utils.localBroadcastManager
+import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.help.HelpCenterCoordinator
 import com.dashlane.help.HelpCenterLink
+import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.BackupFileType
+import com.dashlane.hermes.generated.definitions.TransferDataSource
+import com.dashlane.hermes.generated.definitions.TransferDataStatus
+import com.dashlane.hermes.generated.definitions.TransferDataStep
+import com.dashlane.hermes.generated.events.user.ImportData
 import com.dashlane.navigation.NavigationHelper
 import com.dashlane.navigation.NavigationUriBuilder
 import com.dashlane.navigation.Navigator
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.ui.activities.intro.IntroScreenContract
-import com.dashlane.ui.activities.intro.IntroScreenViewProxy
 import com.dashlane.ui.util.DialogHelper
-import com.dashlane.util.ActivityResultContractCompat
 import com.dashlane.util.setCurrentPageView
-import com.skocken.presentation.presenter.BasePresenter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class CsvFileImportIntroActivity : DashlaneActivity() {
-
     @Inject
     lateinit var navigator: Navigator
+
+    @Inject
+    lateinit var logRepository: LogRepository
 
     private val csvImportReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -48,7 +54,7 @@ class CsvFileImportIntroActivity : DashlaneActivity() {
                                 data = NavigationUriBuilder()
                                     .host(NavigationHelper.Destination.MainPath.PASSWORDS)
                                     .build()
-                            }
+                            },
                     )
                 }
 
@@ -69,30 +75,22 @@ class CsvFileImportIntroActivity : DashlaneActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_intro)
-
-        val page = if (intent.getBooleanExtra(EXTRA_FROM_COMPETITOR, false)) {
-            AnyPage.IMPORT_PASSWORD_MANAGER
-        } else {
-            AnyPage.IMPORT_CSV
+        val fromCompetitor = intent.getBooleanExtra(EXTRA_FROM_COMPETITOR, false)
+        setContent {
+            DashlaneTheme {
+                CsvFileImportIntroScreen(
+                    fromCompetitor = fromCompetitor,
+                    goToCsvImport = ::goToCsvImport,
+                    onCancelClick = ::onCancelClick,
+                    onSelectFileClicked = ::logImportStarted,
+                )
+            }
         }
 
+        val page = if (fromCompetitor) AnyPage.IMPORT_PASSWORD_MANAGER else AnyPage.IMPORT_CSV
         setCurrentPageView(page)
-
-        val getContentResultLauncher = registerForActivityResult(object : ActivityResultContractCompat<Unit>() {
-            override fun createIntent(context: Context, input: Unit): Intent =
-                Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = "\1/*"
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    putExtra(Intent.EXTRA_LOCAL_ONLY, true)
-                }
-        }) { (resultCode, intent) ->
-            onGetContentResult(resultCode, intent)
-        }
-        val view = IntroScreenViewProxy(this)
-        Presenter(getContentResultLauncher).setView(view)
 
         localBroadcastManager.registerReceiver(csvImportReceiver, IntentFilter(Intents.ACTION_CSV_IMPORT))
     }
@@ -100,13 +98,6 @@ class CsvFileImportIntroActivity : DashlaneActivity() {
     override fun onDestroy() {
         super.onDestroy()
         runCatching { localBroadcastManager.unregisterReceiver(csvImportReceiver) }
-    }
-
-    private fun onGetContentResult(resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            val uri = data?.data!!
-            startActivity(CsvImportActivity.newIntent(this, uri))
-        }
     }
 
     private fun showErrorDialog() {
@@ -127,53 +118,26 @@ class CsvFileImportIntroActivity : DashlaneActivity() {
         HelpCenterCoordinator.openLink(this, HelpCenterLink.ARTICLE_CSV_IMPORT)
     }
 
-    private class Presenter(private val getContentResultLauncher: ActivityResultLauncher<Unit>) :
-        BasePresenter<IntroScreenContract.DataProvider, IntroScreenContract.ViewProxy>(),
-        IntroScreenContract.Presenter {
+    private fun goToCsvImport(uri: Uri) {
+        startActivity(CsvImportActivity.newIntent(this, uri))
+    }
 
-        override fun onViewChanged() {
-            super.onViewChanged()
+    private fun onCancelClick() {
+        setResult(Activity.RESULT_CANCELED)
+        finish()
+    }
 
-            viewOrNull?.run {
-                val fromCompetitor = activity?.intent?.getBooleanExtra(EXTRA_FROM_COMPETITOR, false)
-                    ?: false
-
-                val description = if (fromCompetitor) {
-                    listOf(
-                        R.string.csv_file_import_description_competitor_line1,
-                        R.string.csv_file_import_description_competitor_line2,
-                        R.string.csv_file_import_description_competitor_line3
-                    )
-                } else {
-                    listOf(
-                        R.string.csv_file_import_description_line1,
-                        R.string.csv_file_import_description_line2,
-                        R.string.csv_file_import_description_line3
-                    )
-                }.joinToString("\n") { context.getString(it) }
-
-                setImageResource(if (fromCompetitor) R.drawable.ic_csv_file_import_competitor else R.drawable.ic_csv_file_import)
-                setTitle(if (fromCompetitor) R.string.csv_file_import_title_competitor else R.string.csv_file_import_title)
-                setDescription(description)
-                setPositiveButton(if (fromCompetitor) R.string.csv_file_import_competitor_primary_cta else R.string.csv_file_import_primary_cta)
-                setNegativeButton(if (fromCompetitor) R.string.csv_file_import_competitor_secondary_cta else R.string.csv_file_import_secondary_cta)
-            }
-        }
-
-        override fun onClickPositiveButton() {
-            getContentResultLauncher.launch()
-        }
-
-        override fun onClickNegativeButton() {
-            activity?.run {
-                setResult(Activity.RESULT_CANCELED)
-                finish()
-            }
-        }
-
-        override fun onClickNeutralButton() = Unit
-
-        override fun onClickLink(position: Int, label: Int) = Unit
+    private fun logImportStarted() {
+        
+        logRepository.queueEvent(
+            ImportData(
+                backupFileType = BackupFileType.CSV,
+                importDataStatus = TransferDataStatus.START,
+                importSource = TransferDataSource.SOURCE_OTHER,
+                importDataStep = TransferDataStep.SELECT_FILE,
+                isDirectImport = false,
+            ),
+        )
     }
 
     companion object {

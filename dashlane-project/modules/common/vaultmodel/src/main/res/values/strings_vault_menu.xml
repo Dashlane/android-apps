@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_v2_password_button">Logins</string>
+    <string name="menu_v2_secure_notes_button">Secure Notes</string>
+    <string name="menu_v2_contact_button">Personal info</string>
+    <string name="menu_v2_ids_button">IDs</string>
+    <string name="menu_v2_secret_button">Secrets</string>
+    <string name="menu_v2_payments_button">Payments</string>
+    <string name="menu_v2_settings_button">Settings</string>
+    <string name="menu_v2_wifi_button">Wi-Fi</string>
+</resources>

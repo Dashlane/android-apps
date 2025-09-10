@@ -14,7 +14,6 @@ class VpnThirdPartyActivateAccountActivity :
     CurrentPageViewLogger.Owner,
     VpnThirdPartyActivateAccountErrorListener,
     VpnThirdPartySetupEmailFragment.Listener {
-
     override val currentPageViewLogger by lazy { CurrentPageViewLogger(this) }
     private var presenter: VpnThirdPartyActivateAccountPresenter? = null
     private var errorType = -1

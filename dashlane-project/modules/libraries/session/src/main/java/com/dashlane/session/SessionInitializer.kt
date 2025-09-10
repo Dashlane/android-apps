@@ -1,15 +1,14 @@
 package com.dashlane.session
 
-import com.dashlane.user.UserAccountInfo
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.crypto.keys.VaultKey
-import com.dashlane.login.LoginMode
+import com.dashlane.data.login.LoginMode
+import com.dashlane.user.UserAccountInfo
 import com.dashlane.user.Username
 import com.dashlane.xml.domain.SyncObject
 
 interface SessionInitializer {
-
     @Suppress("kotlin:S107") 
     suspend fun createSession(
         username: Username,
@@ -24,6 +23,6 @@ interface SessionInitializer {
         deviceAnalyticsId: String,
         userAnalyticsId: String,
         loginMode: LoginMode,
-        accountType: UserAccountInfo.AccountType
+        accountType: UserAccountInfo.AccountType,
     ): SessionResult
 }

@@ -44,7 +44,7 @@ class AppShortcutsUtil @Inject constructor(
             MainPath.SEARCH,
             context.getString(R.string.search),
             IconTokens.actionSearchOutlined,
-            shortcuts.size
+            shortcuts.size,
         )
         shortcuts.add(searchShortcut)
 
@@ -54,7 +54,7 @@ class AppShortcutsUtil @Inject constructor(
             MainPath.PASSWORD_GENERATOR,
             context.getString(R.string.action_bar_password_generator),
             IconTokens.featurePasswordGeneratorOutlined,
-            shortcuts.size
+            shortcuts.size,
         )
         shortcuts.add(passwordGeneratorShortcut)
 
@@ -64,7 +64,7 @@ class AppShortcutsUtil @Inject constructor(
             MainPath.SHARING_CENTER,
             context.getString(R.string.menu_v3_section_sharing_center),
             IconTokens.actionShareOutlined,
-            shortcuts.size
+            shortcuts.size,
         )
         shortcuts.add(sharingCenterShortcut)
 
@@ -74,7 +74,7 @@ class AppShortcutsUtil @Inject constructor(
             MainPath.PASSWORD_HEALTH,
             context.getString(R.string.menu_v3_section_security_dashboard),
             IconTokens.featurePasswordHealthOutlined,
-            shortcuts.size
+            shortcuts.size,
         )
         shortcuts.add(passwordHealthShortcut)
     }
@@ -85,14 +85,14 @@ class AppShortcutsUtil @Inject constructor(
         path: String,
         label: String,
         icon: IconToken,
-        rank: Int
+        rank: Int,
     ) = ShortcutInfoCompat.Builder(context, id)
         .setShortLabel(label)
         .setLongLabel(label)
         .setIcon(IconCompat.createWithBitmap(createIcon(context, icon)))
         .setRank(rank)
         .setIntent(
-            createIntent(NavigationUriBuilder().appendPath(path).build())
+            createIntent(NavigationUriBuilder().appendPath(path).build()),
         )
         .build()
 
@@ -103,7 +103,7 @@ class AppShortcutsUtil @Inject constructor(
 
     private fun createIntent(uri: Uri) = Intent(
         Intent.ACTION_VIEW,
-        uri
+        uri,
     ) 
         
         

@@ -18,7 +18,6 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 
 class AttachmentListViewProxy(val activity: DashlaneActivity) :
     BaseViewProxy<AttachmentListContract.Presenter>(activity), AttachmentListContract.ViewProxy {
-
     override var selectedAttachments = 0
     private val adapter = AttachmentAdapter()
     private val recyclerView: RecyclerView = activity.findViewById(R.id.attachment_list)
@@ -111,7 +110,7 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
             title = resources.getQuantityString(
                 R.plurals.file_selected_quantity,
                 selectedAttachments,
-                selectedAttachments
+                selectedAttachments,
             )
             activity.actionBarUtil.setActionBarColor(context.getThemeAttrColor(R.attr.colorSurface))
         }
@@ -136,7 +135,7 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
         SnackbarUtils.showSnackbar(
             coordinatorLayout,
             context.getString(R.string.export_public_folder_done),
-            Snackbar.LENGTH_INDEFINITE
+            Snackbar.LENGTH_INDEFINITE,
         ).apply {
             setAction(R.string.open_public_folder) {
                 
@@ -157,11 +156,13 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
         showError(R.string.storage_error)
     }
 
-    private fun showError(@StringRes exportError: Int) {
+    private fun showError(
+        @StringRes exportError: Int,
+    ) {
         SnackbarUtils.showSnackbar(
             coordinatorLayout,
             context.getString(exportError),
-            Snackbar.LENGTH_LONG
+            Snackbar.LENGTH_LONG,
         )
     }
 
@@ -170,7 +171,7 @@ class AttachmentListViewProxy(val activity: DashlaneActivity) :
         SnackbarUtils.showPermissionSnackbar(
             coordinatorLayout,
             SnackbarUtils.getStoragePermissionText(context),
-            Snackbar.LENGTH_INDEFINITE
+            Snackbar.LENGTH_INDEFINITE,
         )
     }
 }

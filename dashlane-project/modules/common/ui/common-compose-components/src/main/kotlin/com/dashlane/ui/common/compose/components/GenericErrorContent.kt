@@ -1,6 +1,5 @@
 package com.dashlane.ui.common.compose.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,15 +9,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.ButtonMediumBar
+import com.dashlane.design.component.Icon
 import com.dashlane.design.component.Text
+import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.tooling.DashlanePreview
@@ -32,27 +31,27 @@ fun GenericErrorContent(
     textPrimary: String,
     textSecondary: String? = null,
     onClickPrimary: () -> Unit,
-    onClickSecondary: (() -> Unit)? = null
+    onClickSecondary: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         Spacer(modifier = Modifier.weight(1f))
 
-        Image(
-            painter = painterResource(R.drawable.ic_error_state),
-            colorFilter = ColorFilter.tint(DashlaneTheme.colors.textDangerQuiet.value),
-            contentDescription = ""
+        Icon(
+            IconTokens.feedbackFailOutlined,
+            tint = DashlaneTheme.colors.textDangerQuiet,
+            contentDescription = "",
         )
         title?.let {
             Text(
                 text = title,
                 style = DashlaneTheme.typography.titleSectionLarge,
                 color = DashlaneTheme.colors.textNeutralCatchy,
-                modifier = Modifier.padding(top = 32.dp)
+                modifier = Modifier.padding(top = 32.dp),
             )
         }
         message?.let {
@@ -60,7 +59,7 @@ fun GenericErrorContent(
                 text = message,
                 style = DashlaneTheme.typography.bodyStandardRegular,
                 color = DashlaneTheme.colors.textNeutralStandard,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
             )
         }
 
@@ -71,14 +70,14 @@ fun GenericErrorContent(
                 primaryText = textPrimary,
                 secondaryText = textSecondary,
                 onPrimaryButtonClick = onClickPrimary,
-                onSecondaryButtonClick = onClickSecondary
+                onSecondaryButtonClick = onClickSecondary,
             )
         } else {
             ButtonMedium(
                 modifier = Modifier.align(Alignment.End),
                 onClick = onClickPrimary,
                 intensity = Intensity.Catchy,
-                layout = ButtonLayout.TextOnly(text = textPrimary)
+                layout = ButtonLayout.TextOnly(text = textPrimary),
             )
         }
     }
@@ -94,7 +93,7 @@ private fun GenericErrorContentPreview() {
             textPrimary = "Primary",
             textSecondary = "Secondary",
             onClickPrimary = {},
-            onClickSecondary = {}
+            onClickSecondary = {},
         )
     }
 }

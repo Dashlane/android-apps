@@ -20,9 +20,8 @@ import javax.inject.Singleton
 class DeviceInfoRepositoryImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val telephonyManagerProvider: Provider<TelephonyManager>
+    private val telephonyManagerProvider: Provider<TelephonyManager>,
 ) : DeviceInfoRepository {
-
     companion object {
         private const val DEVICEID_FILENAME = "dev.id"
         private const val ANONYMOUS_DEVICEID_FILENAME = "adev.id"
@@ -68,9 +67,9 @@ class DeviceInfoRepositoryImpl @Inject constructor(
         return installDeviceId(file)
     }
 
-    private fun installDeviceId(file: File): String {
+    private fun installDeviceId(file: File): String? {
         val deviceId = MD5Hash.hash(generateUniqueIdentifier())
-        file.sink().buffer().use { it.writeUtf8(deviceId) }
+        deviceId?.let { file.sink().buffer().use { it.writeUtf8(deviceId) } }
         return deviceId
     }
 

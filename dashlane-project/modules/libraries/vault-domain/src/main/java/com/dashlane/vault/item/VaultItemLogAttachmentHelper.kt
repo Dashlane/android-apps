@@ -8,7 +8,7 @@ import com.dashlane.vault.toItemTypeOrNull
 
 class VaultItemLogAttachmentHelper(
     private val vaultItemLogger: VaultItemLogger,
-    item: VaultItem<*>
+    item: VaultItem<*>,
 ) {
     private val itemIdForLog = item.uid
     private val itemType = item.syncObjectType.toItemTypeOrNull()
@@ -22,7 +22,7 @@ class VaultItemLogAttachmentHelper(
         onLogConditionsFulfilled { itemId, itemType ->
             vaultItemLogger.logAttachmentDownload(
                 itemId = itemId,
-                itemType = itemType
+                itemType = itemType,
             )
         }
     }
@@ -32,7 +32,7 @@ class VaultItemLogAttachmentHelper(
             vaultItemLogger.logAttachmentUpdate(
                 action = action,
                 itemId = itemId,
-                itemType = itemType
+                itemType = itemType,
             )
         }
     }
@@ -41,7 +41,7 @@ class VaultItemLogAttachmentHelper(
         onLogConditionsFulfilled { itemId, itemType ->
             vaultItemLogger.logAttachmentView(
                 itemId = itemId,
-                itemType = itemType
+                itemType = itemType,
             )
         }
     }

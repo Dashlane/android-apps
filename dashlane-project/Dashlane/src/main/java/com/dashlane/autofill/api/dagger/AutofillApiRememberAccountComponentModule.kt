@@ -5,10 +5,10 @@ import com.dashlane.autofill.api.rememberaccount.AutofillApiRememberAccountToast
 import com.dashlane.autofill.api.rememberaccount.WebDomainFormSourceAuthentifiantPreferencesLinker
 import com.dashlane.autofill.api.rememberaccount.linkedservices.ApplicationFormSourceAuthentifiantLinker
 import com.dashlane.autofill.api.rememberaccount.linkedservices.WebDomainFormSourceAuthentifiantLinker
-import com.dashlane.autofill.rememberaccount.AutofillApiRememberedAccountToaster
-import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProvider
-import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProviderImpl
-import com.dashlane.autofill.rememberaccount.services.FormSourceAuthentifiantLinker
+import com.dashlane.autofill.linkservices.AutofillApiRememberedAccountToaster
+import com.dashlane.autofill.linkservices.model.FormSourcesDataProvider
+import com.dashlane.autofill.linkservices.model.FormSourcesDataProviderImpl
+import com.dashlane.autofill.linkservices.services.FormSourceAuthentifiantLinker
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -22,22 +22,30 @@ internal abstract class AutofillApiRememberAccountComponentModule {
     @Singleton
     @Binds
     @Named("ApplicationLinkedPreference")
-    abstract fun bindsApplicationFormSourceAuthentifiantPreferencesDataLinker(impl: ApplicationFormSourceAuthentifiantPreferencesLinker): FormSourceAuthentifiantLinker
+    abstract fun bindsApplicationFormSourceAuthentifiantPreferencesDataLinker(
+        impl: ApplicationFormSourceAuthentifiantPreferencesLinker,
+    ): FormSourceAuthentifiantLinker
 
     @Singleton
     @Binds
     @Named("WebDomainLinkedPreference")
-    abstract fun bindsWebDomainFormSourceAuthentifiantPreferencesDataLinker(impl: WebDomainFormSourceAuthentifiantPreferencesLinker): FormSourceAuthentifiantLinker
+    abstract fun bindsWebDomainFormSourceAuthentifiantPreferencesDataLinker(
+        impl: WebDomainFormSourceAuthentifiantPreferencesLinker,
+    ): FormSourceAuthentifiantLinker
 
     @Singleton
     @Binds
     @Named("ApplicationDataLinked")
-    abstract fun bindsApplicationFormSourceAuthentifiantDataLinker(impl: ApplicationFormSourceAuthentifiantLinker): FormSourceAuthentifiantLinker
+    abstract fun bindsApplicationFormSourceAuthentifiantDataLinker(
+        impl: ApplicationFormSourceAuthentifiantLinker,
+    ): FormSourceAuthentifiantLinker
 
     @Singleton
     @Binds
     @Named("WebDomainDataLinked")
-    abstract fun bindsWebDomainFormSourceAuthentifiantDataLinker(impl: WebDomainFormSourceAuthentifiantLinker): FormSourceAuthentifiantLinker
+    abstract fun bindsWebDomainFormSourceAuthentifiantDataLinker(
+        impl: WebDomainFormSourceAuthentifiantLinker,
+    ): FormSourceAuthentifiantLinker
 
     @Singleton
     @Binds

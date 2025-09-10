@@ -4,6 +4,9 @@ import com.github.devnied.emvnfccard.model.enums.ApplicationStepEnum;
 
 import java.util.List;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class Application extends AbstractData implements Comparable<Application> {
 
 	private static final long serialVersionUID = 2917341864815087679L;

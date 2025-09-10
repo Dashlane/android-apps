@@ -3,12 +3,13 @@ package com.dashlane.autofill
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import com.dashlane.autofill.formdetector.AutoFillFormType
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.logs.AutofillUsageLog
 import com.dashlane.autofill.request.save.SaveAuthentifiantRequest
 import com.dashlane.autofill.request.save.SaveCallback
 import com.dashlane.autofill.request.save.SaveCreditCardRequest
 import com.dashlane.autofill.util.copyPlusEntries
-import com.dashlane.autofill.formdetector.AutoFillFormType
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -20,15 +21,14 @@ internal interface SaveRequestHandler {
         clientState: Bundle?,
         summary: AutoFillHintSummary,
         saveCallback: SaveCallback,
-        forKeyboard: Boolean
+        forKeyboard: Boolean,
     )
 }
 
 internal class SaveRequestHandlerImpl @Inject constructor(
     private val databaseAccess: AutofillAnalyzerDef.DatabaseAccess,
-    private val logger: AutofillAnalyzerDef.IAutofillUsageLog
+    private val logger: AutofillUsageLog,
 ) : SaveRequestHandler {
-
     @SuppressLint("SwitchIntDef")
     override fun onSaveRequest(
         context: Context,
@@ -36,7 +36,7 @@ internal class SaveRequestHandlerImpl @Inject constructor(
         clientState: Bundle?,
         summary: AutoFillHintSummary,
         saveCallback: SaveCallback,
-        forKeyboard: Boolean
+        forKeyboard: Boolean,
     ) {
         clientState?.apply {
             setClassLoaderInDashlane()
@@ -47,12 +47,12 @@ internal class SaveRequestHandlerImpl @Inject constructor(
             AutoFillFormType.CREDENTIAL -> SaveAuthentifiantRequest(
                 updatedEntriesSummary,
                 logger,
-                databaseAccess
+                databaseAccess,
             )
             AutoFillFormType.CREDIT_CARD -> SaveCreditCardRequest(
                 updatedEntriesSummary,
                 logger,
-                databaseAccess
+                databaseAccess,
             )
             else -> {
                 saveCallback.onFailure("FormType $formType not supported")

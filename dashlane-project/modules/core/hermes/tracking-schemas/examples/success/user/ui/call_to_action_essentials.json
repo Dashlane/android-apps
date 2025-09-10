@@ -1,0 +1,39 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "os": {
+        "type": "linux",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2108.0-armeabi-v7a",
+      "platform": "android",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "main_app",
+    "page": "trial_upgrade_suggestion",
+    "origin_page": "menu"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 12
+  },
+  "properties": {
+    "name": "call_to_action",
+    "call_to_action_list": [
+      "essential_offer"
+    ],
+    "chosen_action": "essential_offer",
+    "has_chosen_no_action": false
+  }
+}

@@ -7,7 +7,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
-import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Scene
@@ -19,8 +18,9 @@ import com.dashlane.databinding.FragmentDarkwebMonitoringBinding
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.security.darkwebmonitoring.item.DarkWebEmailItem
 import com.dashlane.security.darkwebmonitoring.item.DarkWebEmailPlaceholderItem
+import com.dashlane.security.darkwebmonitoring.view.DarkWebMonitoringInactiveContentView
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setCurrentPageView
@@ -29,9 +29,8 @@ import com.skocken.presentation.viewproxy.BaseViewProxy
 
 class DarkWebMonitoringViewProxy(
     private val binding: FragmentDarkwebMonitoringBinding,
-    val activity: DashlaneActivity
+    val activity: DashlaneActivity,
 ) : BaseViewProxy<DarkWebMonitoringContract.Presenter>(binding.root), DarkWebMonitoringContract.ViewProxy {
-
     private val darkWebEmailsAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
     private val sceneContainer: FrameLayout
         get() = binding.sceneContainer
@@ -46,7 +45,7 @@ class DarkWebMonitoringViewProxy(
     override fun setItems(
         pendingItems: List<DashlaneRecyclerAdapter.ViewTypeProvider>,
         resolvedItems: List<DashlaneRecyclerAdapter.ViewTypeProvider>,
-        emails: List<DarkWebEmailItem>
+        emails: List<DarkWebEmailItem>,
     ) {
         if (pendingItems.isEmpty() && resolvedItems.isEmpty() && emails.isEmpty()) {
             activity.setCurrentPageView(AnyPage.TOOLS_DARK_WEB_MONITORING)
@@ -66,15 +65,8 @@ class DarkWebMonitoringViewProxy(
         val inactiveScene = transitionIfNeeded(R.layout.item_dark_web_inactive)
         val sceneRoot = inactiveScene.sceneRoot
         
-        sceneRoot.findViewById<Button>(R.id.dark_web_cta)?.setOnClickListener {
-            presenter.onInactiveDarkwebCtaClick()
-        }
-
-        
-        ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.title), true)
-        ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.header_1), true)
-        ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.header_2), true)
-        ViewCompat.setAccessibilityHeading(sceneRoot.findViewById(R.id.header_3), true)
+        sceneRoot.findViewById<DarkWebMonitoringInactiveContentView>(R.id.dark_web_monitoring_inactive)
+            ?.onStartMonitoring = { presenter.onInactiveDarkwebCtaClick() }
     }
 
     override fun goToPendingTab() {
@@ -113,7 +105,7 @@ class DarkWebMonitoringViewProxy(
             title = resources.getQuantityString(
                 R.plurals.dwm_breaches_selected,
                 presenter.selectedItems.size,
-                presenter.selectedItems.size
+                presenter.selectedItems.size,
             )
             activity.actionBarUtil.setActionBarColor(context.getThemeAttrColor(R.attr.colorSurface))
             activity.actionBarUtil.drawerToggle.isDrawerIndicatorEnabled = false
@@ -158,7 +150,7 @@ class DarkWebMonitoringViewProxy(
                 subtitle.text = context.resources.getQuantityString(
                     R.plurals.dwm_emails_monitored_subtitle_pending,
                     pendingCount,
-                    pendingCount
+                    pendingCount,
                 )
                 indicator.imageTintList = ColorStateList.valueOf(context.getColor(R.color.text_warning_quiet))
             }
@@ -181,7 +173,9 @@ class DarkWebMonitoringViewProxy(
         }
     }
 
-    private fun transitionIfNeeded(@LayoutRes layout: Int): Scene {
+    private fun transitionIfNeeded(
+        @LayoutRes layout: Int,
+    ): Scene {
         TransitionManager.endTransitions(sceneContainer)
         val oldScene = Scene.getCurrentScene(sceneContainer)
         val newScene = Scene.getSceneForLayout(sceneContainer, layout, context)
@@ -197,7 +191,7 @@ class DarkWebMonitoringViewProxy(
     override fun showDeleteCompleted(breachesDeleted: Int) {
         SnackbarUtils.showSnackbar(
             activity,
-            activity.resources.getQuantityString(R.plurals.dwm_breaches_deleted, breachesDeleted, breachesDeleted)
+            activity.resources.getQuantityString(R.plurals.dwm_breaches_deleted, breachesDeleted, breachesDeleted),
         )
     }
 

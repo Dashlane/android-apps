@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
+    <queries>
+        <package android:name="com.chrome.dev" />
+        <package android:name="com.chrome.canary" />
+        <package android:name="com.chrome.beta" />
+        <package android:name="com.android.chrome" />
+    </queries>
     <application>
         <activity
             android:name="com.dashlane.autofill.passwordendpoint.SettingsRedirectionActivity"
@@ -17,11 +24,11 @@
 
         <activity
             android:name="com.dashlane.autofill.ui.SmsOtpAutofillActivity"
-            android:theme="@style/Theme.Dashlane.Transparent.NoAnimation" />
+            android:theme="@style/Theme.Dashlane.Transparent.ComposeModal" />
         <activity
             android:name="com.dashlane.autofill.frozenautofill.FrozenAutofillActivity"
             android:exported="false"
-            android:theme="@style/Theme.Dashlane.Transparent.Modal.NoAnimation" />
+            android:theme="@style/Theme.Dashlane.Transparent.ComposeModal" />
 
         <service
             android:name="com.dashlane.autofillapi.AutoFillAPIService"
@@ -41,11 +48,7 @@
 
         <activity
             android:name="com.dashlane.autofill.pause.view.AutofillPauseActivity"
-            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
-
-        <activity
-            android:name="com.dashlane.autofill.phishing.PhishingWarningActivity"
-            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+            android:theme="@style/Theme.Dashlane.Transparent.ComposeModal" />
 
         <activity
             android:name="com.dashlane.autofill.createaccount.view.AutofillCreateAccountActivity"
@@ -62,15 +65,10 @@
         <activity
             android:name="com.dashlane.autofill.actionssources.view.ActionsSourcesActivity"
             android:theme="@style/Theme.Dashlane.TransparentSystemBars"
-            android:label="@string/autofill_pause_resume_settings_title" />
-
-        <activity
-            android:name="com.dashlane.autofill.pausedautofillsettings.PausedAutofillActivity"
-            android:theme="@style/Theme.Dashlane.TransparentSystemBars"
-            android:label="@string/autofill_revert_actions_title" />
+            android:label="@string/autofill_actioned_sources_paused_title" />
 
         <activity
             android:name="com.dashlane.autofill.emptywebsitewarning.view.EmptyWebsiteWarningActivity"
-            android:theme="@style/Theme.Dashlane.Transparent.Cancelable" />
+            android:theme="@style/Theme.Dashlane.Transparent.ComposeModal" />
     </application>
 </manifest>

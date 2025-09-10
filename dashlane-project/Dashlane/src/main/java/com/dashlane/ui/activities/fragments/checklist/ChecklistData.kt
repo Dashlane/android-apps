@@ -18,7 +18,7 @@ import com.dashlane.ui.widgets.view.GetStartedStepView
 data class ChecklistItem(
     val type: ChecklistData.ItemType,
     val state: ChecklistData.ItemState,
-    @StringRes val actionLabelId: Int? = null
+    @StringRes val actionLabelId: Int? = null,
 ) {
     var onChecklistItemAcknowledge: (() -> Unit)? = null
 }
@@ -29,9 +29,10 @@ data class ChecklistData(
     val activatedAutofill: ChecklistItem,
     val m2d: ChecklistItem?,
     val isDismissible: Boolean,
-    val hasSeenChecklist: Boolean
+    val hasSeenChecklist: Boolean,
 ) {
     enum class ItemType { DARK_WEB_MONITORING, ADD_CREDENTIAL, AUTOFILL, M2D; }
+
     enum class ItemState { TO_COMPLETE, COMPLETED, COMPLETED_AND_ACKNOWLEDGED; }
 
     companion object {
@@ -50,7 +51,7 @@ object ChecklistViewSetup {
         onImportPasswords: () -> Unit,
         onActivateAutofill: () -> Unit,
         onShowM2d: () -> Unit,
-        onShowDarkWebMonitoring: () -> Unit
+        onShowDarkWebMonitoring: () -> Unit,
     ) {
         item ?: return
 
@@ -84,7 +85,7 @@ object ChecklistViewSetup {
                 onImportPasswords = onImportPasswords,
                 onActivateAutofill = onActivateAutofill,
                 onShowM2d = onShowM2d,
-                onShowDarkWebMonitoring = onShowDarkWebMonitoring
+                onShowDarkWebMonitoring = onShowDarkWebMonitoring,
             )
         }
 
@@ -110,7 +111,7 @@ object ChecklistViewSetup {
 
     private fun getStep1(
         item: ChecklistData,
-        getStartedBinding: ItemGetstartedBinding
+        getStartedBinding: ItemGetstartedBinding,
     ) = if (item.addCredential != null) {
         getStartedBinding.step1.apply {
             getStartedBinding.step1Dwm.visibility = View.GONE
@@ -125,7 +126,7 @@ object ChecklistViewSetup {
     @SuppressWarnings("SpreadOperator")
     private fun getNextStepToHighlight(
         getStartedBinding: ItemGetstartedBinding,
-        steps: Map<ChecklistItem, GetStartedStepView>
+        steps: Map<ChecklistItem, GetStartedStepView>,
     ): GetStartedStepView? {
         val nextStep = steps.keys.firstOrNull { it.state == TO_COMPLETE }
         val completedStepIds =
@@ -137,7 +138,7 @@ object ChecklistViewSetup {
     private fun setupDismissButton(
         dismissButton: Button,
         item: ChecklistData,
-        onDismiss: () -> Unit
+        onDismiss: () -> Unit,
     ) {
         dismissButton.paintFlags = dismissButton.paintFlags or Paint.UNDERLINE_TEXT_FLAG
         dismissButton.setOnClickListener {
@@ -160,7 +161,7 @@ object ChecklistViewSetup {
         onImportPasswords: () -> Unit,
         onActivateAutofill: () -> Unit,
         onShowM2d: () -> Unit,
-        onShowDarkWebMonitoring: () -> Unit
+        onShowDarkWebMonitoring: () -> Unit,
     ) {
         val ctaClickListener = View.OnClickListener {
             onChecklistItemCtaClick(
@@ -168,7 +169,7 @@ object ChecklistViewSetup {
                 importPasswords = onImportPasswords,
                 activateAutofill = onActivateAutofill,
                 showM2d = onShowM2d,
-                showDarkWebMonitoring = onShowDarkWebMonitoring
+                showDarkWebMonitoring = onShowDarkWebMonitoring,
             )
         }
         stepView.setCtaOnClickListener(ctaClickListener)
@@ -190,7 +191,7 @@ object ChecklistViewSetup {
     private fun setCompleteState(
         stepView: GetStartedStepView,
         acknowledgeListener: (() -> Unit)?,
-        highlightNextStepUnit: (() -> Unit)?
+        highlightNextStepUnit: (() -> Unit)?,
     ) {
         stepView.visibility = View.VISIBLE
         stepView.animateCompletion(highlightNextStepUnit, acknowledgeListener)

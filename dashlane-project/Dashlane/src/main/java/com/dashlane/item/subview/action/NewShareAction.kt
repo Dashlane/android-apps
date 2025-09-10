@@ -11,7 +11,7 @@ import com.dashlane.vault.summary.SummaryObject
 
 open class NewShareAction(
     private val summaryObject: SummaryObject,
-    private val restrictionNotificator: TeamSpaceRestrictionNotificator
+    private val restrictionNotificator: TeamSpaceRestrictionNotificator,
 ) : Action {
     override val text: Int = R.string.share_from_services_menu_title
 
@@ -23,7 +23,7 @@ open class NewShareAction(
         (activity.getBaseActivity() as? FragmentActivity)?.let {
             restrictionNotificator.runOrNotifyTeamRestriction(
                 activity = it,
-                feature = Feature.SHARING_DISABLED
+                feature = Feature.SHARING_DISABLED,
             ) {
                 summaryObject.showSharing(NEW_SHARE_REQUEST_CODE, activity, true)
             }

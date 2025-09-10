@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/toggle_analytics.json",
+  "type": "object",
+  "description": "Analytics logs sending setting modified.",
+  "metas": {
+    "area": "settings"
+  },
+  "properties": {
+    "name": {
+      "const": "toggle_analytics"
+    },
+    "is_analytics_enabled": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/settings.json#/definitions/is_analytics_enabled"
+    }
+  },
+  "required": [
+    "name",
+    "is_analytics_enabled"
+  ],
+  "additionalProperties": false
+}

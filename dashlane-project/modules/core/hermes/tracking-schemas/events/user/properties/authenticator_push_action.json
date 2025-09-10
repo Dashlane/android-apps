@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/authenticator_push_action.json",
+  "type": "object",
+  "description": "When the user interacts with a push notification on the Authenticator app",
+  "metas": {
+    "area": "authenticator_app"
+  },
+  "properties": {
+    "name": {
+      "const": "authenticator_push_action"
+    },
+    "authenticator_push_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authenticator_app.json#/definitions/authenticator_push_status"
+    },
+    "authenticator_push_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authenticator_app.json#/definitions/authenticator_push_type"
+    }
+  },
+  "required": [
+    "name",
+    "authenticator_push_status",
+    "authenticator_push_type"
+  ],
+  "additionalProperties": false
+}

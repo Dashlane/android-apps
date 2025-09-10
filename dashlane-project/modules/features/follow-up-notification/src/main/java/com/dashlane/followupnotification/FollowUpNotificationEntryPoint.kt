@@ -15,7 +15,7 @@ interface FollowUpNotificationEntryPoint {
     companion object {
         operator fun invoke(context: Context) = EntryPointAccessors.fromApplication(
             context,
-            FollowUpNotificationEntryPoint::class.java
+            FollowUpNotificationEntryPoint::class.java,
         )
     }
 }

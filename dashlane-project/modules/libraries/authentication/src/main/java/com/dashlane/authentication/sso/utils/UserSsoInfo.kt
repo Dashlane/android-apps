@@ -5,11 +5,11 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class UserSsoInfo internal constructor(
+data class UserSsoInfo(
     val key: String,
     val login: String,
     val ssoToken: String,
-    val exists: Boolean
+    val exists: Boolean,
 ) : Parcelable
 
 internal fun Uri.toUserSsoInfo(): UserSsoInfo? {
@@ -21,6 +21,6 @@ internal fun Uri.toUserSsoInfo(): UserSsoInfo? {
         key = key,
         login = login,
         ssoToken = ssoToken,
-        exists = getBooleanQueryParameter("exists", false)
+        exists = getBooleanQueryParameter("exists", false),
     )
 }

@@ -23,5 +23,5 @@ data class DeviceInformation(
     @SerializedName("autofillEnabled")
     var autofillEnabled: String?,
     @SerializedName("racletteDatabase")
-    var racletteDatabase: String?
+    var racletteDatabase: String?,
 )

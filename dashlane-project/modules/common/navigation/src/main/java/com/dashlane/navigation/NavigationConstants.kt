@@ -13,4 +13,9 @@ object NavigationConstants {
     const val SESSION_RESTORED_FROM_BOOT = "sessionRestoredFromBoot"
     const val INSTALL_REFERRER_EXTRA = "referrer"
     const val INSTALL_REFERRER_NAME_EXTRA = "referrer_name"
+    const val EXTRA_DOMAIN = "extra_domain"
+
+    const val EXTRA_MONOBUCKET_UNREGISTRATION = "monobucket_unregistration"
+
+    const val EXTRA_DEVICE_SYNC_LIMIT_UNREGISTRATION = "extra_device_sync_limit_unregistration"
 }

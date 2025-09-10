@@ -1,23 +1,15 @@
 package com.dashlane.ui.screens.settings
 
-import android.content.Context
 import android.content.res.AssetManager
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.dashlane.R
+import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.ui.activities.DashlaneActivity
+import com.dashlane.ui.screens.settings.licences.License
+import com.dashlane.ui.screens.settings.licences.LicensesScreen
 import com.dashlane.util.UiConstants
 import com.dashlane.util.applyAppTheme
 import com.dashlane.util.fallbackCustomTab
@@ -28,55 +20,29 @@ import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 
 class LicensesActivity : DashlaneActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_licenses)
 
-        val coordinatorLayout = findViewById<CoordinatorLayout>(R.id.view_coordinator_layout)
-        ViewCompat.setOnApplyWindowInsetsListener(coordinatorLayout) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top
-                leftMargin = insets.left
-                bottomMargin = insets.bottom
-                rightMargin = insets.right
-            }
-            WindowInsetsCompat.CONSUMED
-        }
-
-        actionBarUtil.setup()
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowHomeEnabled(true)
-            title = getString(R.string.activity_title_licenses)
-        }
-
-        val licenses = loadLicenses()
-
-        findViewById<RecyclerView>(R.id.view_list).apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = LicensesRecyclerView(
-                licenses.values.toList(),
-                layoutInflater,
-                CachedLicenseAssets(assets)
+        val licensesInfo = loadLicenses().values.toList()
+        val licenseAssets = CachedLicenseAssets(assets)
+        val licenses = licensesInfo.map { license ->
+            License(
+                title = license.name,
+                description = license.getCopyright(licenseAssets),
+                websiteUrl = license.url,
+                licenseUrl = license.licenseUrl,
             )
-            addItemDecoration(object : RecyclerView.ItemDecoration() {
-                override fun getItemOffsets(
-                    outRect: Rect,
-                    view: View,
-                    parent: RecyclerView,
-                    state: RecyclerView.State
-                ) {
-                    super.getItemOffsets(outRect, view, parent, state)
-                    val position = parent.getChildAdapterPosition(view)
-                    if (position == 0) {
-                        outRect.top += resources.getDimensionPixelOffset(R.dimen.spacing_small)
-                    } else if (position == parent.adapter!!.itemCount - 1) {
-                        outRect.bottom += resources.getDimensionPixelOffset(R.dimen.spacing_small)
-                    }
-                }
-            })
+        }
+
+        setContent {
+            DashlaneTheme {
+                LicensesScreen(
+                    onNavigateUp = { onNavigateUp() },
+                    licences = licenses,
+                    openUrl = ::openUrl,
+                )
+            }
         }
     }
 
@@ -84,62 +50,25 @@ class LicensesActivity : DashlaneActivity() {
         Gson().fromJson<Map<String, License>>(reader, object : TypeToken<Map<String, License>>() {}.type)
     }
 
-    private class LicensesRecyclerView(
-        private val licenses: List<License>,
-        private val layoutInflater: LayoutInflater,
-        private val licenseAssets: CachedLicenseAssets
-    ) : RecyclerView.Adapter<LicenseViewHolder>() {
-
-        override fun getItemCount() = licenses.size
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LicenseViewHolder {
-            val view = layoutInflater.inflate(R.layout.item_license, parent, false)
-            return LicenseViewHolder(view)
+    private fun openUrl(url: String) {
+        val browserIntent = CustomTabsIntent.Builder().apply {
+            applyAppTheme()
+            setShowTitle(true)
+            setExitAnimations(
+                this@LicensesActivity,
+                UiConstants.ANIMATION.ANIMATION_IN_SLIDE,
+                UiConstants.ANIMATION.ANIMATION_OUT_SLIDE,
+            )
+        }.build().intent.apply {
+            data = Uri.parse(url)
+            fallbackCustomTab(packageManager)
         }
-
-        override fun onBindViewHolder(holder: LicenseViewHolder, position: Int) {
-            val license = licenses[position]
-            holder.bind(license, licenseAssets)
-        }
-    }
-
-    private class LicenseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val titleView = itemView.findViewById(R.id.view_title) as TextView
-        private val detailsView = itemView.findViewById(R.id.view_details) as TextView
-        private val urlButton = itemView.findViewById(R.id.view_button_license) as View
-        private val websiteButton = itemView.findViewById(R.id.view_button_website) as View
-
-        fun bind(license: License, licenseAssets: CachedLicenseAssets) {
-            titleView.text = license.name
-            detailsView.text = license.getCopyright(licenseAssets)
-
-            urlButton.setOnClickListener {
-                openUrl(itemView.context, Uri.parse(license.licenseUrl))
-            }
-            websiteButton.setOnClickListener {
-                openUrl(itemView.context, Uri.parse(license.url))
-            }
-        }
-
-        private fun openUrl(context: Context, url: Uri) {
-            val browserIntent = CustomTabsIntent.Builder().apply {
-                applyAppTheme()
-                setShowTitle(true)
-                setExitAnimations(
-                    context,
-                    UiConstants.ANIMATION.ANIMATION_IN_SLIDE,
-                    UiConstants.ANIMATION.ANIMATION_OUT_SLIDE
-                )
-            }.build().intent.apply {
-                data = url
-                fallbackCustomTab(context.packageManager)
-            }
-            context.safelyStartBrowserActivity(browserIntent)
-        }
+        safelyStartBrowserActivity(browserIntent)
     }
 
     private class CachedLicenseAssets(private val assets: AssetManager) {
         private val assetCache = mutableMapOf<String, String>()
+
         operator fun get(fileName: String) =
             assetCache.getOrPut(fileName) { assets.readString("licenses/$fileName") }
     }
@@ -156,13 +85,12 @@ class LicensesActivity : DashlaneActivity() {
         @SerializedName("url")
         val url: String,
         @SerializedName("license")
-        val licenseUrl: String
+        val licenseUrl: String,
     ) {
         fun getCopyright(licenseAssets: CachedLicenseAssets) =
             copyright
                 ?: copyrightTemplate?.let {
-                    val licenseType = it.type
-                    val asset = when (licenseType) {
+                    val asset = when (val licenseType = it.type) {
                         "apache" -> "template_apache.txt"
                         "mit" -> "template_mit.txt"
                         "bsd3" -> "template_bsd_3_clause.txt"
@@ -181,6 +109,6 @@ class LicensesActivity : DashlaneActivity() {
         @SerializedName("author")
         val author: String,
         @SerializedName("type")
-        val type: String
+        val type: String,
     )
 }

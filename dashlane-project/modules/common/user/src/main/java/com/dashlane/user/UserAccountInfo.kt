@@ -8,13 +8,13 @@ data class UserAccountInfo(
     val otp2: Boolean,
     val securitySettings: UserSecuritySettings? = null,
     val accessKey: String,
-    val accountType: AccountType
+    val accountType: AccountType,
 ) {
     val sso: Boolean get() = securitySettings?.isSso == true
 
     sealed class AccountType {
-
         object MasterPassword : AccountType()
+
         object InvisibleMasterPassword : AccountType()
 
         companion object {
@@ -22,7 +22,7 @@ data class UserAccountInfo(
                 return when (string) {
                     MASTER_PASSWORD -> MasterPassword
                     INVISIBLE_MASTER_PASSWORD -> InvisibleMasterPassword
-                    else -> throw IllegalStateException()
+                    else -> error("invalid string for AccountType: $string")
                 }
             }
         }

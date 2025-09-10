@@ -14,22 +14,21 @@ import javax.inject.Singleton
 class SessionCoroutineScopeRepository @Inject constructor() :
     SessionObserver,
     BySessionRepository<CoroutineScope> {
+        private val coroutineScopePerSession = mutableMapOf<Session, CoroutineScope>()
 
-    private val coroutineScopePerSession = mutableMapOf<Session, CoroutineScope>()
+        fun sessionInitializing(session: Session) {
+            coroutineScopePerSession[session] = InternalCoroutineScope(SupervisorJob())
+        }
 
-    fun sessionInitializing(session: Session) {
-        coroutineScopePerSession[session] = InternalCoroutineScope(SupervisorJob())
+        override suspend fun sessionEnded(session: Session, byUser: Boolean, forceLogout: Boolean) {
+            coroutineScopePerSession.remove(session)?.cancel()
+        }
+
+        override fun get(session: Session?): CoroutineScope? = session?.let { getCoroutineScope(it) }
+
+        fun getCoroutineScope(session: Session) = coroutineScopePerSession[session]
+
+        private class InternalCoroutineScope(job: Job) : CoroutineScope {
+            override val coroutineContext = job
+        }
     }
-
-    override suspend fun sessionEnded(session: Session, byUser: Boolean, forceLogout: Boolean) {
-        coroutineScopePerSession.remove(session)?.cancel()
-    }
-
-    override fun get(session: Session?): CoroutineScope? = session?.let { getCoroutineScope(it) }
-
-    fun getCoroutineScope(session: Session) = coroutineScopePerSession[session]
-
-    private class InternalCoroutineScope(job: Job) : CoroutineScope {
-        override val coroutineContext = job
-    }
-}

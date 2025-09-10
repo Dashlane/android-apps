@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AutofillDemoActivity : DashlaneActivity(), CurrentPageViewLogger.Owner {
-
     @Inject
     lateinit var presenter: AutofillDemo.Presenter
 
@@ -59,6 +58,7 @@ class AutofillDemoActivity : DashlaneActivity(), CurrentPageViewLogger.Owner {
         private const val PARAM_URL = "url"
         private const val PARAM_LOGIN = "login"
         private const val PARAM_PASSWORD = "password"
+
         fun newIntent(origin: Activity, url: String, login: String, password: SyncObfuscatedValue) =
             Intent(origin, AutofillDemoActivity::class.java).apply {
                 putExtra(PARAM_URL, url)

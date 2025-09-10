@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class BrazeBroadcastReceiver : BroadcastReceiver() {
-
     @Inject
     lateinit var brazeWrapper: BrazeWrapper
 
@@ -39,8 +38,8 @@ class BrazeBroadcastReceiver : BroadcastReceiver() {
         val uriIntent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink))
         uriIntent.flags = (
             Intent.FLAG_ACTIVITY_NEW_TASK
-            or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                or Intent.FLAG_ACTIVITY_SINGLE_TOP
         )
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addNextIntent(uriIntent)

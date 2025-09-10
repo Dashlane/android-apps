@@ -7,154 +7,140 @@ import javax.inject.Inject
 
 @Suppress("EXPERIMENTAL_API_USAGE")
 class SyncLogsImpl @Inject constructor() : SyncLogs {
-
-    override fun onSyncBegin() = info(Tag.SYNC) { "Start Type=Full" }
+    override fun onSyncBegin() = info(message = "Start Type=Full", tag = Tag.SYNC)
 
     override fun onSyncChronologicalStart(
         syncTime: Instant?,
         updateCount: Int,
-        deleteCount: Int
-    ) =
-        info(Tag.SYNC_CHRONO) { "Start Timestamp: $syncTime Update=$updateCount Delete=$deleteCount" }
+        deleteCount: Int,
+    ) = info(
+        message = "Start Timestamp: $syncTime Update=$updateCount Delete=$deleteCount",
+        tag = Tag.SYNC_CHRONO,
+    )
 
     override fun onDownloadRequest(
         syncTime: Instant?,
         lock: Boolean,
-        sharingKeys: Boolean
-    ) =
-        debug(Tag.SYNC_DOWNLOAD) { "Request Host=API Timestamp=$syncTime Lock=$lock SharingKeys=$sharingKeys" }
+        sharingKeys: Boolean,
+    ) = debug("Request Host=API Timestamp=$syncTime Lock=$lock SharingKeys=$sharingKeys", Tag.SYNC_DOWNLOAD)
 
     override fun onDownloadResponse(
         syncTime: Instant?,
         updateCount: Int?,
-        deleteCount: Int?
-    ) = debug(Tag.SYNC_DOWNLOAD) {
-        "Success Timestamp=$syncTime Update=$updateCount Delete=$deleteCount"
-    }
+        deleteCount: Int?,
+    ) = debug(message = "Success Timestamp=$syncTime Update=$updateCount Delete=$deleteCount", tag = Tag.SYNC_DOWNLOAD)
 
     override fun onDownloadError(throwable: Throwable) =
-        warn(Tag.SYNC_DOWNLOAD, throwable) { "Error Cause=${throwable::class.java.simpleName}" }
+        warn(
+            message = "Error Cause=${throwable::class.java.simpleName}",
+            tag = Tag.SYNC_DOWNLOAD,
+            throwable = throwable,
+        )
 
     override fun onUploadRequest(updateCount: Int, deleteCount: Int) =
-        debug(Tag.SYNC_UPLOAD) { "Request Host=API Update=$updateCount Delete=$deleteCount" }
+        debug(message = "Request Host=API Update=$updateCount Delete=$deleteCount", tag = Tag.SYNC_UPLOAD)
 
     override fun onUploadResponse(syncTime: Instant?) =
-        debug(Tag.SYNC_UPLOAD) { "Success Timestamp=$syncTime" }
+        debug(message = "Success Timestamp=$syncTime", tag = Tag.SYNC_UPLOAD)
 
     override fun onUploadError(throwable: Throwable) =
-        debug(Tag.SYNC_UPLOAD) { "Error ${throwable::class.java.simpleName}" }
+        debug(message = "Error ${throwable::class.java.simpleName}", tag = Tag.SYNC_UPLOAD)
 
-    override fun onDecipherTransactionsStart() = verbose(Tag.SYNC_DECIPHER_TRANSACTIONS) { "Start" }
+    override fun onDecipherTransactionsStart() = verbose(message = "Start", tag = Tag.SYNC_DECIPHER_TRANSACTIONS)
 
     override fun onDecipherTransaction(
         action: String,
         type: String,
         identifier: String,
-        date: Instant
-    ) =
-        verbose(Tag.SYNC_DECIPHER_TRANSACTIONS) { "Transaction Action=$action Type=$type Id=$identifier Date=$date" }
+        date: Instant,
+    ) = verbose(
+        message = "Transaction Action=$action Type=$type Id=$identifier Date=$date",
+        tag = Tag.SYNC_DECIPHER_TRANSACTIONS,
+    )
 
     override fun onDecipherTransactionError(
         type: String,
         transaction: Transaction,
-        throwable: Throwable
-    ) = warn(Tag.SYNC_DECIPHER_TRANSACTIONS, throwable) {
-        "Error Type=$type Id=${transaction.identifier} Date=${transaction.date} Cause=${throwable::class.java}"
-    }
+        throwable: Throwable,
+    ) = warn(
+        message = "Error Type=$type Id=${transaction.identifier} Date=${transaction.date} Cause=${throwable::class.java}",
+        tag = Tag.SYNC_DECIPHER_TRANSACTIONS,
+        throwable = throwable,
+    )
 
     override fun onDecipherTransactionsDone(count: Int, errors: Int) =
-        debug(Tag.SYNC_DECIPHER_TRANSACTIONS) { "Done Transactions=$count Errors=$errors" }
+        debug(message = "Done Transactions=$count Errors=$errors", tag = Tag.SYNC_DECIPHER_TRANSACTIONS)
 
-    override fun onCipherTransactionsStart() = verbose(Tag.SYNC_CIPHER_TRANSACTIONS) { "Start" }
+    override fun onCipherTransactionsStart() = verbose(message = "Start", tag = Tag.SYNC_CIPHER_TRANSACTIONS)
 
-    override fun onCipherTransaction(
-        action: String,
-        type: String,
-        identifier: String,
-        date: Instant
-    ) = verbose(Tag.SYNC_CIPHER_TRANSACTIONS) { "Transaction Type=$type Id=$identifier Date=$date" }
+    override fun onCipherTransaction(action: String, type: String, identifier: String, date: Instant) =
+        verbose(message = "Transaction Type=$type Id=$identifier Date=$date", tag = Tag.SYNC_CIPHER_TRANSACTIONS)
 
-    override fun onCipherTransactionsDone() = debug(Tag.SYNC_CIPHER_TRANSACTIONS) { "Done" }
+    override fun onCipherTransactionsDone() = debug(message = "Done", tag = Tag.SYNC_CIPHER_TRANSACTIONS)
 
-    override fun onSyncChronologicalDone() = debug(Tag.SYNC_CHRONO) { "Done" }
+    override fun onSyncChronologicalDone() = debug(message = "Done", tag = Tag.SYNC_CHRONO)
 
-    override fun onTreatProblemStart() = debug(Tag.SYNC_TREAT_PROBLEM) { "Start" }
+    override fun onTreatProblemStart() = debug(message = "Start", tag = Tag.SYNC_TREAT_PROBLEM)
 
     override fun onTreatProblemSummaryBegin(localCount: Int, remoteCount: Int) =
-        debug(Tag.SYNC_TREAT_PROBLEM_SUMMARY) { "Start Local=$localCount Remote=$remoteCount" }
+        debug(message = "Start Local=$localCount Remote=$remoteCount", tag = Tag.SYNC_TREAT_PROBLEM_SUMMARY)
 
-    override fun onTreatProblemSummaryUpToDate(item: List<SyncSummaryItem>) =
-        verbose(Tag.SYNC_TREAT_PROBLEM_SUMMARY) {
-            "Comparison Result=UpToDate ${item.toDetailMessage()}"
-        }
+    override fun onTreatProblemSummaryUpToDate(item: List<SyncSummaryItem>) = verbose(
+        message = "Comparison Result=UpToDate ${item.toDetailMessage()}",
+        tag = Tag.SYNC_TREAT_PROBLEM_SUMMARY,
+    )
 
-    override fun onTreatProblemSummaryUploadMissing(
-        item: List<SyncSummaryItem>
-    ) = verbose(Tag.SYNC_TREAT_PROBLEM_SUMMARY) {
-        "Comparison Result=Upload Cause=Missing ${item.toDetailMessage()}"
-    }
+    override fun onTreatProblemSummaryUploadMissing(item: List<SyncSummaryItem>) = verbose(
+        message = "Comparison Result=Upload Cause=Missing ${item.toDetailMessage()}",
+        tag = Tag.SYNC_TREAT_PROBLEM_SUMMARY,
+    )
 
-    override fun onTreatProblemSummaryUploadOutOfDate(
-        item: List<SyncSummaryItem>
-    ) = verbose(Tag.SYNC_TREAT_PROBLEM_SUMMARY) {
-        "Comparison Result=Upload Cause=OutOfDate ${item.toDetailMessage()}"
-    }
+    override fun onTreatProblemSummaryUploadOutOfDate(item: List<SyncSummaryItem>) = verbose(
+        message = "Comparison Result=Upload Cause=OutOfDate ${item.toDetailMessage()}",
+        tag = Tag.SYNC_TREAT_PROBLEM_SUMMARY,
+    )
 
-    override fun onTreatProblemSummaryDownloadMissing(
-        item: List<SyncSummaryItem>
-    ) = debug(Tag.SYNC_TREAT_PROBLEM_SUMMARY) {
-        "Comparison Result=Download Cause=Missing ${item.toDetailMessage()}"
-    }
+    override fun onTreatProblemSummaryDownloadMissing(item: List<SyncSummaryItem>) = debug(
+        message = "Comparison Result=Download Cause=Missing ${item.toDetailMessage()}",
+        tag = Tag.SYNC_TREAT_PROBLEM_SUMMARY,
+    )
 
-    override fun onTreatProblemSummaryDownloadOutOfDate(
-        item: List<SyncSummaryItem>
-    ) = debug(Tag.SYNC_TREAT_PROBLEM_SUMMARY) {
-        "Comparison Result=Download Cause=OutOfDate ${item.toDetailMessage()}"
-    }
+    override fun onTreatProblemSummaryDownloadOutOfDate(item: List<SyncSummaryItem>) =
+        debug(
+            message = "Comparison Result=Download Cause=OutOfDate ${item.toDetailMessage()}",
+            tag = Tag.SYNC_TREAT_PROBLEM_SUMMARY,
+        )
 
     override fun onTreatProblemSummaryDone() =
-        verbose(Tag.SYNC_TREAT_PROBLEM_SUMMARY) { "Done" }
+        verbose(message = "Done", tag = Tag.SYNC_TREAT_PROBLEM_SUMMARY)
 
     override fun onTreatProblemNotNeeded() =
-        info(Tag.SYNC_TREAT_PROBLEM) { "Diff UpToDate, TreatProblem not needed" }
+        info(message = "Diff UpToDate, TreatProblem not needed", tag = Tag.SYNC_TREAT_PROBLEM)
 
     override fun onTreatProblemUpload(uploadCount: Int) =
-        warn(Tag.SYNC_TREAT_PROBLEM) { "Diff Upload=$uploadCount" }
+        warn(message = "Diff Upload=$uploadCount", tag = Tag.SYNC_TREAT_PROBLEM)
 
     override fun onTreatProblemDownload(downloadCount: Int) =
-        warn(Tag.SYNC_TREAT_PROBLEM) { "Diff Download=$downloadCount" }
+        warn(message = "Diff Download=$downloadCount", tag = Tag.SYNC_TREAT_PROBLEM)
 
     override fun onTreatProblemApplyDownloadedTransactionsLocally(t: Throwable) {
         warn(
-            Tag.SYNC_TREAT_PROBLEM,
-            throwable = t
-        ) { "onTreatProblemApplyDownloadedTransactionsLocally" }
+            message = "onTreatProblemApplyDownloadedTransactionsLocally",
+            tag = Tag.SYNC_TREAT_PROBLEM,
+            throwable = t,
+        )
     }
 
-    override fun onTreatProblemDone() =
-        info(Tag.SYNC_TREAT_PROBLEM) { "Done" }
+    override fun onTreatProblemDone() = info(message = "Done", tag = Tag.SYNC_TREAT_PROBLEM)
 
-    override fun onTreatProblemDownloadEmpty() =
-        warn(Tag.SYNC_TREAT_PROBLEM) { "Downloaded transactions are empty" }
+    override fun onTreatProblemDownloadEmpty() = warn(message = "Downloaded transactions are empty", tag = Tag.SYNC_TREAT_PROBLEM)
 
     override fun onTreatProblemDownloadMissed() =
-        warn(Tag.SYNC_TREAT_PROBLEM) { "Downloaded transactions doesn't match requested" }
+        warn(message = "Downloaded transactions doesn't match requested", tag = Tag.SYNC_TREAT_PROBLEM)
 
-    override fun onSyncDone() =
-        info(Tag.SYNC) { "Done" }
+    override fun onSyncDone() = info(message = "Done", tag = Tag.SYNC)
 
-    override fun onSyncError(t: Throwable) =
-        error(Tag.SYNC, t) { "Failed." }
-
-    private inline fun verbose(tag: String, lazyMessage: () -> String) =
-
-    private inline fun debug(tag: String, lazyMessage: () -> String) =
-
-    private inline fun info(tag: String, lazyMessage: () -> String) =
-
-    private inline fun warn(tag: String, throwable: Throwable? = null, lazyMessage: () -> String) =
-
-    private inline fun error(tag: String, throwable: Throwable? = null, lazyMessage: () -> String) =
+    override fun onSyncError(t: Throwable) = error(message = "Failed.", tag = Tag.SYNC, throwable = t)
 
     private fun List<SyncSummaryItem>.toDetailMessage() = if (isEmpty()) {
         "Empty"

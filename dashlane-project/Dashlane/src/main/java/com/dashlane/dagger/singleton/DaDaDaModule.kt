@@ -7,6 +7,7 @@ import com.dashlane.debug.services.DaDaDaBilling
 import com.dashlane.debug.services.DaDaDaFeatures
 import com.dashlane.debug.services.DaDaDaHermes
 import com.dashlane.debug.services.DaDaDaLogin
+import com.dashlane.debug.services.DaDaDaNotification
 import com.dashlane.debug.services.DaDaDaSecurity
 import com.dashlane.debug.services.DaDaDaTheme
 import com.dashlane.debug.services.DaDaDaVersion
@@ -52,4 +53,7 @@ interface DaDaDaModule {
 
     @Binds
     fun bindsThemeDaDaDa(impl: DaDaDa): DaDaDaTheme
+
+    @Binds
+    fun bindsNotificationCompanion(impl: DaDaDa): DaDaDaNotification
 }

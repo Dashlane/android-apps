@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/create_account.json",
+  "type": "object",
+  "description": "When users click on \"create account\" to finalize account creation (or if an error occurs during account creation). Offline errors from change_master_password events will not be tracked.",
+  "metas": {
+    "area": "account",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "create_account"
+    },
+    "android_marketing": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/android"
+    },
+    "ios_marketing": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/ios"
+    },
+    "is_marketing_opt_in": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_creation.json#/definitions/is_marketing_opt_in"
+    },
+    "status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_creation.json#/definitions/account_creation_status"
+    },
+    "web_marketing": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/web_account_creation"
+    }
+  },
+  "required": [
+    "name",
+    "is_marketing_opt_in",
+    "status"
+  ],
+  "additionalProperties": false
+}

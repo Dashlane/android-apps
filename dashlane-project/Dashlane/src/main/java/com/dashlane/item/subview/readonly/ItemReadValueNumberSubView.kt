@@ -8,5 +8,5 @@ class ItemReadValueNumberSubView(
     @ColorInt
     val textColorResId: Int = 0,
     val protected: Boolean = false,
-    val protectedStateListener: (Boolean) -> Unit = {}
+    val protectedStateListener: (Boolean) -> Unit = {},
 ) : ItemReadValueSubView<String>()

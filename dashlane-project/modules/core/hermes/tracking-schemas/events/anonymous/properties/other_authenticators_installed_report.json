@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/other_authenticators_installed_report.json",
+  "type": "object",
+  "description": "When the user launches the Authenticator app for the first time, collect the other authenticator app installed. Sent only at first launch and strictly only once",
+  "metas": {
+    "area": "authenticator_app"
+  },
+  "properties": {
+    "name": {
+      "const": "other_authenticators_installed_report"
+    },
+    "other_authenticator_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authenticator_app.json#/definitions/other_authenticator_list"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

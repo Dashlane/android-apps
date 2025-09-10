@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 
 @Suppress("SharedPreferencesSecurity")
 class CompatibilityPreferencesManager internal constructor(private val sharedPreferences: SharedPreferences) {
-
     internal fun obfuscateStringIfNeeded(label: String, obfuscatedLabel: String) {
         if (sharedPreferences.contains(label)) {
             val data = sharedPreferences.getString(label, "")

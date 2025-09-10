@@ -1,12 +1,10 @@
 package com.dashlane.core
 
-import com.dashlane.async.SyncBroadcastManager
 import com.dashlane.breach.BreachManager
-import com.dashlane.core.sync.PaymentPaypalMigrationHelper
+import com.dashlane.data.login.LoginInfo
+import com.dashlane.data.login.LoginMode
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Trigger
-import com.dashlane.login.LoginInfo
-import com.dashlane.login.LoginMode
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionObserver
@@ -15,6 +13,7 @@ import com.dashlane.session.repository.SessionCoroutineScopeRepository
 import com.dashlane.sync.DataSync
 import com.dashlane.sync.DataSyncHelper
 import com.dashlane.sync.DataSyncState
+import com.dashlane.sync.OfflineException
 import com.dashlane.sync.repositories.SyncProgress
 import com.dashlane.teamspaces.db.SmartSpaceCategorizationManager
 import com.dashlane.teamspaces.manager.SpaceDeletedNotifier
@@ -58,9 +57,7 @@ class DataSyncImpl @Inject constructor(
     private val breachManager: BreachManager,
     private val dataSyncNotification: DataSyncNotification,
     private val logRepository: LogRepository,
-    private val syncBroadcastManager: SyncBroadcastManager,
     private val userActivitySender: UserActivitySender,
-    private val paymentPaypalMigrationHelper: PaymentPaypalMigrationHelper
 ) : SessionObserver, DataSync {
     private var syncBlocked = false
 
@@ -88,7 +85,7 @@ class DataSyncImpl @Inject constructor(
         merge(
             
             commandsFlow.throttleLatest(SYNC_REFRESH_INTERVAL),
-            forceCommandsFlow
+            forceCommandsFlow,
         )
             .flatMapMerge(concurrency = 1) { command -> syncFlow(command) }
             .onStart {
@@ -102,7 +99,7 @@ class DataSyncImpl @Inject constructor(
                 
                 maySync()
             }
-            .catch { error -> emit(DataSyncState.Idle.Failure(error)) }
+            .catch { error -> emit(DataSyncState.Idle.Failure(error, Trigger.LOGIN)) }
             .onEach { state ->
                 _dataSyncState.emit(state) 
             }
@@ -150,14 +147,14 @@ class DataSyncImpl @Inject constructor(
             onSyncSuccess(session)
             emit(DataSyncState.Idle.Success)
         }.onFailure { throwable ->
-            onSyncFailure(throwable, (command as? Command.Sync)?.trigger ?: Trigger.LOGIN)
-            emit(DataSyncState.Idle.Failure(throwable))
+            onSyncFailure()
+            emit(DataSyncState.Idle.Failure(throwable, (command as? Command.Sync)?.trigger ?: Trigger.LOGIN))
         }
     }
 
     private suspend fun syncInternal(
         session: Session,
-        origin: Trigger
+        origin: Trigger,
     ): Result<Unit> = if (networkStateProvider.isOn()) {
         runSync(session, origin)
     } else {
@@ -166,7 +163,7 @@ class DataSyncImpl @Inject constructor(
 
     private suspend fun syncInternalInitial(
         session: Session,
-        dataSyncState: MutableSharedFlow<DataSyncState>
+        dataSyncState: MutableSharedFlow<DataSyncState>,
     ): Result<Unit> = if (networkStateProvider.isOn()) {
         runCatching {
             syncHelper.runInitialSync(session, dataSyncState)
@@ -175,7 +172,7 @@ class DataSyncImpl @Inject constructor(
         Result.failure(OfflineException)
     }
 
-    private suspend fun runSync(session: Session, origin: Trigger) =
+    private suspend fun runSync(session: Session, origin: Trigger): Result<Unit> =
         runCatching {
             lastSyncDuration = measureTime {
                 syncHelper.runSync(session, origin)
@@ -184,7 +181,6 @@ class DataSyncImpl @Inject constructor(
 
     private suspend fun onSyncSuccess(session: Session) {
         
-        paymentPaypalMigrationHelper.migratePaymentPaypal()
         smartSpaceCategorizationManager.executeSync()
         spaceDeletedNotifier.sendIfNeeded(session)
         breachManager.refreshIfNecessary(false)
@@ -193,15 +189,10 @@ class DataSyncImpl @Inject constructor(
         logRepository.flushLogs(session.authorization)
     }
 
-    private suspend fun onSyncFailure(exception: Throwable, origin: Trigger) {
+    private suspend fun onSyncFailure() {
         dataSyncNotification.hideSyncNotification()
-        if (exception is OfflineException) {
-            syncBroadcastManager.sendOfflineSyncFailedBroadcast(origin)
-        }
         logRepository.flushLogs(null)
     }
-
-    object OfflineException : Exception()
 
     companion object {
         private val SYNC_REFRESH_INTERVAL = 5.minutes 

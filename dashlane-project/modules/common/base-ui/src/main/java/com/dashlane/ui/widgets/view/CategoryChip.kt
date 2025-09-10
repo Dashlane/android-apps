@@ -3,90 +3,49 @@ package com.dashlane.ui.widgets.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.dashlane.design.component.Icon
-import com.dashlane.design.component.Text
+import com.dashlane.design.component.Tag
+import com.dashlane.design.component.TagLeadingIcon
+import com.dashlane.design.component.TagTrailingIcon
 import com.dashlane.design.iconography.IconTokens
-import com.dashlane.design.theme.DashlaneTheme
-import com.dashlane.design.theme.tooling.BooleanProvider
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.ui.R
 
 @Composable
-fun CategoryChip(
+fun CollectionTag(
     label: String,
     modifier: Modifier = Modifier,
-    editMode: Boolean = false,
     shared: Boolean = false,
-    onClick: () -> Unit = {}
 ) {
-    DashlaneTheme {
-        InputChip(
-            onClick = onClick,
-            selected = false,
-            label = {
-                Text(
-                    label,
-                    color = DashlaneTheme.colors.textNeutralStandard,
-                    style = DashlaneTheme.typography.bodyStandardRegular
-                )
-                if (shared) {
-                    Icon(
-                        token = IconTokens.sharedOutlined,
-                        contentDescription = stringResource(id = R.string.and_accessibility_shared_category),
-                        modifier = Modifier
-                            .size(14.dp)
-                            .padding(start = 2.dp),
-                        tint = DashlaneTheme.colors.textNeutralQuiet
-                    )
-                }
-            },
-            trailingIcon = {
-                if (editMode) {
-                    Icon(
-                        token = IconTokens.actionCloseOutlined,
-                        contentDescription = stringResource(id = R.string.and_accessibility_remove_category),
-                        modifier = Modifier.size(12.dp)
-                    )
-                }
-            },
-            modifier = modifier,
-            colors = InputChipDefaults.inputChipColors(
-                containerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-            ),
-            shape = RoundedCornerShape(12.dp),
-            border = InputChipDefaults.inputChipBorder(
-                borderColor = DashlaneTheme.colors.borderNeutralQuietIdle,
-                selectedBorderColor = DashlaneTheme.colors.borderNeutralQuietIdle,
-                disabledBorderColor = DashlaneTheme.colors.borderNeutralQuietIdle,
-                disabledSelectedBorderColor = DashlaneTheme.colors.borderNeutralQuietIdle,
-                borderWidth = 1.dp,
-                selectedBorderWidth = 1.dp,
-                enabled = true,
-                selected = false
+    Tag(
+        modifier = modifier,
+        label = label,
+        leadingIcon = TagLeadingIcon.Token(
+            token = IconTokens.collectionOutlined,
+            contentDescription = null,
+        ),
+        trailingIcon = if (shared) {
+            TagTrailingIcon(
+                token = IconTokens.sharedOutlined,
+                contentDescription = stringResource(id = R.string.and_accessibility_shared_category),
             )
-        )
-    }
+        } else {
+            null
+        },
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CategoryChipList(modifier: Modifier = Modifier, content: @Composable (() -> Unit) = { }) {
+fun CollectionTagList(modifier: Modifier = Modifier, content: @Composable (() -> Unit) = { }) {
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         content()
     }
@@ -94,27 +53,26 @@ fun CategoryChipList(modifier: Modifier = Modifier, content: @Composable (() -> 
 
 @Composable
 @Preview
-private fun PreviewCategoryChip() {
+private fun PreviewCollectionTag() {
     DashlanePreview {
-        CategoryChip("Finance")
+        CollectionTag("Finance")
     }
 }
 
 @Composable
 @Preview
-private fun TextTooLongPreview() {
+private fun CollectionTagTextTooLongPreview() {
     DashlanePreview {
-        CategoryChip(
+        CollectionTag(
             label = """This item is way too long to be displayed on 1 line. 
 Unfortunately when it spans over multiple lines the trailing icon is not visible anymore 😢""",
-            editMode = true
         )
     }
 }
 
 @Composable
 @Preview
-private fun PreviewCategoryGroup(@PreviewParameter(BooleanProvider::class) editMode: Boolean) {
+private fun PreviewCollectionTagList() {
     val categories = listOf(
         "Finance",
         "Business",
@@ -123,12 +81,12 @@ private fun PreviewCategoryGroup(@PreviewParameter(BooleanProvider::class) editM
         "Fashion",
         "Shopping",
         "Literature",
-        "Amazing Stuff"
+        "Amazing Stuff",
     )
     DashlanePreview {
-        CategoryChipList {
+        CollectionTagList {
             categories.forEach {
-                CategoryChip(label = it, onClick = {}, editMode = editMode)
+                CollectionTag(label = it)
             }
         }
     }
@@ -136,8 +94,8 @@ private fun PreviewCategoryGroup(@PreviewParameter(BooleanProvider::class) editM
 
 @Composable
 @Preview
-private fun PreviewCategoryGroupShared(@PreviewParameter(BooleanProvider::class) editMode: Boolean) {
-    val categories = listOf(
+private fun PreviewCollectionTagShared() {
+    val collections = listOf(
         "Finance",
         "Business",
         "Gaming",
@@ -145,12 +103,12 @@ private fun PreviewCategoryGroupShared(@PreviewParameter(BooleanProvider::class)
         "Fashion",
         "Shopping",
         "Literature",
-        "Amazing Stuff"
+        "Amazing Stuff",
     ).mapIndexed { index, name -> name to (index < 4) }
     DashlanePreview {
-        CategoryChipList {
-            categories.forEach { (name, shared) ->
-                CategoryChip(label = name, onClick = {}, shared = shared, editMode = editMode)
+        CollectionTagList {
+            collections.forEach { (name, shared) ->
+                CollectionTag(label = name, shared = shared)
             }
         }
     }

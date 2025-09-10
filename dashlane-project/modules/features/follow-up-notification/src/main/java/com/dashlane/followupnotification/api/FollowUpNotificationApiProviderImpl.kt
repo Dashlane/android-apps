@@ -9,9 +9,8 @@ class FollowUpNotificationApiProviderImpl @Inject constructor(
     private val followUpNotificationFlags: FollowUpNotificationFlags,
     private val followUpNotificationSettings: FollowUpNotificationSettings,
     @Named("activeFollowUp") private val activeFollowUpNotificationApi: FollowUpNotificationApi,
-    @Named("noOperationFollowUp") private val noOperationFollowUpNotificationApi: FollowUpNotificationApi
+    @Named("noOperationFollowUp") private val noOperationFollowUpNotificationApi: FollowUpNotificationApi,
 ) : FollowUpNotificationApiProvider {
-
     override fun getFollowUpNotificationApi(): FollowUpNotificationApi {
         return if (followUpNotificationFlags.canUseFollowUpNotification() && isActive()) {
             activeFollowUpNotificationApi

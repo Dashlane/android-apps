@@ -5,7 +5,7 @@ import android.os.Parcelable
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.Companion.DEFAULT_ITEMS_SHOWN
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.R
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import kotlinx.parcelize.Parcelize
 
 sealed class AuthenticatorDashboardUiState {
@@ -16,7 +16,7 @@ sealed class AuthenticatorDashboardUiState {
     data class HasLogins(
         val logins: List<CredentialItem>,
         val nbItemsShown: Int = DEFAULT_ITEMS_SHOWN,
-        val isAccountFrozen: Boolean
+        val isAccountFrozen: Boolean,
     ) : AuthenticatorDashboardUiState() {
         @Parcelize
         data class CredentialItem(
@@ -27,11 +27,11 @@ sealed class AuthenticatorDashboardUiState {
             val professional: Boolean,
             val otp: Otp,
             var expanded: Boolean = false,
-            var editMode: Boolean = false
+            var editMode: Boolean = false,
         ) : DashlaneRecyclerAdapter.ViewTypeProvider, Parcelable {
             override fun getViewType() = DashlaneRecyclerAdapter.ViewType(
                 R.layout.authenticator_credential_item_otp,
-                AuthenticatorDashboardCredentialItemViewHolder::class.java
+                AuthenticatorDashboardCredentialItemViewHolder::class.java,
             )
         }
     }

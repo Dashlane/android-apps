@@ -23,7 +23,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class DarkWebMonitoringFragment : AbstractContentFragment() {
-
     @Inject
     lateinit var presenter: DarkWebMonitoringContract.Presenter
 
@@ -52,6 +51,7 @@ class DarkWebMonitoringFragment : AbstractContentFragment() {
         val viewProxy: DarkWebMonitoringContract.ViewProxy =
             DarkWebMonitoringViewProxy(binding, requireActivity() as DashlaneActivity)
         presenter.setView(viewProxy)
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
         return binding.root
     }
@@ -62,9 +62,8 @@ class DarkWebMonitoringFragment : AbstractContentFragment() {
         presenter.onCreateOptionsMenu(inflater, menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return presenter.onOptionsItemSelected(item)
-    }
+    @Deprecated("Deprecated in Java")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = presenter.onOptionsItemSelected(item)
 
     override fun onStart() {
         super.onStart()

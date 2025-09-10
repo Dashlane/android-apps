@@ -5,9 +5,8 @@ import com.dashlane.hermes.generated.events.user.GeneratePassword
 import com.dashlane.password.generator.PasswordGeneratorCriteria
 
 class PasswordGeneratorLogger(
-    private val trackingLogRepository: LogRepository
+    private val trackingLogRepository: LogRepository,
 ) {
-
     fun logPasswordGenerate(criteria: PasswordGeneratorCriteria) {
         trackingLogRepository.queueEvent(
             GeneratePassword(
@@ -15,8 +14,8 @@ class PasswordGeneratorLogger(
                 hasLetters = criteria.letters,
                 length = criteria.length,
                 hasSymbols = criteria.symbols,
-                hasDigits = criteria.digits
-            )
+                hasDigits = criteria.digits,
+            ),
         )
     }
 }

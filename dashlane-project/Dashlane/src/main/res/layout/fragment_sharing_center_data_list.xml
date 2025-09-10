@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshable_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <com.dashlane.design.component.compat.view.InfoboxMediumView
+                android:id="@+id/permission_infobox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="2dp"
+                android:paddingEnd="12dp"
+                android:paddingStart="12dp"
+                android:paddingTop="12dp"
+                android:visibility="gone"
+                app:description="@string/collection_item_share_permission_explanation_text"
+                app:mood="brand"
+                app:title="@string/collection_item_share_permission_explanation_title" />
+
+            <com.dashlane.ui.screens.fragments.userdata.sharing.center.view.SharingCenterEmptyContentView
+                android:id="@+id/sharing_center_empty_screen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                />
+
+            <com.dashlane.ui.legacy.recyclerview.MultiColumnRecyclerView
+                android:id="@+id/recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:fastScrollEnabled="true"
+                app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb_selector"
+                app:fastScrollHorizontalTrackDrawable="@drawable/fastscroll_line_selector"
+                app:fastScrollVerticalThumbDrawable="@drawable/fastscroll_thumb_selector"
+                app:fastScrollVerticalTrackDrawable="@drawable/fastscroll_line_selector" />
+        </LinearLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <FrameLayout
+        android:id="@+id/fab_menu_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?scrimBackground"
+        android:clickable="true"
+        android:elevation="@dimen/ab_elevation"
+        android:focusable="true"
+        android:visibility="gone" />
+
+    <com.dashlane.ui.widgets.view.RecyclerViewFloatingActionButton
+        android:id="@+id/data_list_floating_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="@dimen/floating_button_bottom_margin_bottom"
+        android:layout_marginRight="@dimen/floating_button_bottom_margin_right"
+        android:contentDescription="@string/and_accessibility_add_button"
+        android:src="@drawable/fab_plus_icon" />
+
+    <ProgressBar
+        android:id="@+id/data_list_loading"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="visible" />
+
+</FrameLayout>

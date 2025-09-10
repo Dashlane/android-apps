@@ -14,7 +14,7 @@ class NotificatorImpl @Inject constructor(private val toaster: Toaster) : Notifi
         activity: FragmentActivity?,
         topic: String?,
         message: String?,
-        shouldCloseCaller: Boolean
+        shouldCloseCaller: Boolean,
     ) {
         
         if (activity != null && !activity.isFinishing) {

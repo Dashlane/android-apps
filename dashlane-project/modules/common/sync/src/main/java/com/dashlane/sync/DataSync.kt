@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.SharedFlow
 sealed class DataSyncState {
     sealed class Idle : DataSyncState() {
         data object Init : Idle()
-        class Failure(val exception: Throwable) : Idle()
+
+        class Failure(val exception: Throwable, val trigger: Trigger = Trigger.LOGIN) : Idle()
+
         data object Success : Idle()
     }
 
@@ -15,7 +17,6 @@ sealed class DataSyncState {
 }
 
 interface DataSync {
-
     val dataSyncState: SharedFlow<DataSyncState>
 
     fun sync(origin: Trigger = Trigger.SAVE)
@@ -27,5 +28,8 @@ interface DataSync {
     fun maySync(): Boolean
 
     fun markSyncAllowed()
+
     fun markSyncNotAllowed()
 }
+
+object OfflineException : Exception()

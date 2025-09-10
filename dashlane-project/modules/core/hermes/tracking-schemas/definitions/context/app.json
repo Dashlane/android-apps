@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/context/app.json",
+  "type": "object",
+  "description": "Definition for the app context",
+  "definitions": {
+    "version": {
+      "description": "Build version. Pattern starts with V.MMYY.X, with V, M, Y and X numbers, then accepts anything after. For example: 6.2041.0.39937, 6.2108.0-armeabi-v7a, 6.2024.1",
+      "type": "string",
+      "pattern": "^[0-9]{1,3}(\\.[0-9X]{0,4}){0,2}([\\.-].*)?$"
+    },
+    "platform": {
+      "description": "Platform emitting the event. This is not the OS emitting it, only the 'binary' format. For legacy reasons, some Dashlane Password Manager platforms sound like OS but the field is more describing the way these apps are distributed. New apps different than Dashlane Password Manager should be prefixed by the app name.",
+      "type": "string",
+      "enum": [
+        "android",
+        "authenticator_android",
+        "authenticator_ios",
+        "catalyst",
+        "ios",
+        "saex",
+        "safari",
+        "tac",
+        "wearable_android",
+        "wearable_ios",
+        "web"
+      ]
+    },
+    "build_type": {
+      "description": "Type of build (QA, Dev, Prod…)",
+      "type": "string",
+      "enum": [
+        "alpha",
+        "beta",
+        "dev",
+        "nightly",
+        "production",
+        "qa"
+      ]
+    },
+    "app": {
+      "description": "Definition for the app context",
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/app.json#/definitions/version"
+        },
+        "platform": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/app.json#/definitions/platform"
+        },
+        "build_type": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/app.json#/definitions/build_type"
+        }
+      },
+      "required": [
+        "build_type",
+        "platform",
+        "version"
+      ]
+    }
+  }
+}

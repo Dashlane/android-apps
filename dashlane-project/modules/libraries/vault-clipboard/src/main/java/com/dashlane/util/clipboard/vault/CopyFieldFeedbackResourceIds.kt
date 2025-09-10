@@ -8,6 +8,8 @@ fun CopyField.getFeedback() = when (this) {
     CopyField.Login, CopyField.PasskeyDisplayName -> R.string.feedback_copy_login
     CopyField.Email -> R.string.feedback_copy_email
     CopyField.SecondaryLogin -> R.string.feedback_copy_secondary_login
+    CopyField.PaymentsCardHolder -> R.string.feedback_copy_payments_card_holder
+    CopyField.PaymentsCardNote -> R.string.feedback_copy_payments_card_note
     CopyField.PaymentsNumber -> R.string.feedback_copy_payments_number
     CopyField.PaymentsSecurityCode -> R.string.feedback_copy_payments_security_code
     CopyField.PaymentsExpirationDate -> R.string.feedback_copy_payments_expiration_date
@@ -50,4 +52,7 @@ fun CopyField.getFeedback() = when (this) {
     CopyField.TaxOnlineNumber -> R.string.feedback_copy_tax_online_number
     CopyField.SecretValue -> R.string.feedback_copy_secret_value
     CopyField.SecretId -> R.string.feedback_copy_secret_id
+    CopyField.WiFiSsid -> R.string.feedback_copy_wifi_ssid
+    CopyField.WiFiPassphrase -> R.string.feedback_copy_wifi_passphrase
+    CopyField.WiFiNote -> R.string.feedback_copy_wifi_note
 }

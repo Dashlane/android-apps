@@ -4,13 +4,12 @@ import androidx.navigation.NavBackStackEntry
 import com.dashlane.xml.domain.SyncObjectType
 
 object SchemeUtils {
-
     private val HOME_FILTER = listOf(
         NavigationHelper.Destination.MainPath.PASSWORDS,
         NavigationHelper.Destination.MainPath.NOTES,
         NavigationHelper.Destination.MainPath.PAYMENTS,
         NavigationHelper.Destination.MainPath.PERSONAL_INFO,
-        NavigationHelper.Destination.MainPath.ID_DOCUMENT
+        NavigationHelper.Destination.MainPath.ID_DOCUMENT,
     )
 
     @JvmStatic
@@ -28,11 +27,11 @@ object SchemeUtils {
             NavigationHelper.Destination.MainPath.IDENTITIES -> SyncObjectType.IDENTITY
             NavigationHelper.Destination.MainPath.PASSPORTS -> SyncObjectType.PASSPORT
             NavigationHelper.Destination.MainPath.CREDIT_CARDS -> SyncObjectType.PAYMENT_CREDIT_CARD
-            NavigationHelper.Destination.MainPath.PAYPAL_ACCOUNTS -> SyncObjectType.PAYMENT_PAYPAL
             NavigationHelper.Destination.MainPath.PHONES -> SyncObjectType.PHONE
             NavigationHelper.Destination.MainPath.NOTES -> SyncObjectType.SECURE_NOTE
             NavigationHelper.Destination.MainPath.SOCIAL_SECURITY_NUMBERS -> SyncObjectType.SOCIAL_SECURITY_STATEMENT
             NavigationHelper.Destination.MainPath.WEBSITES -> SyncObjectType.PERSONAL_WEBSITE
+            NavigationHelper.Destination.MainPath.SECRETS -> SyncObjectType.SECRET
             else -> null
         }
     }

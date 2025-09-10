@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 open class BaseDialogFragment : DialogFragment() {
-
     @Inject
     lateinit var crashReporter: CrashReporter
 

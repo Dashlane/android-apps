@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="import_methods_empty_state_title">Add your logins</string>
-    <string name="import_methods_empty_state_description">Start adding logins to your Dashlane vault.</string>
-    <string name="empty_screen_vault_allitems_line1">One secure place for all your important info</string>
-    <string name="empty_screen_vault_allitems_line2">Add anything from logins to payments—and so much more!</string>
-    <string name="empty_screen_securenotes_line1">Add secure notes</string>
-    <string name="empty_screen_securenotes_line2">Store important notes here—like WiFi passwords and access codes.</string>
-    <string name="empty_screen_personalinfo_line1">Add Personal info</string>
-    <string name="empty_screen_personalinfo_line2">When you store personal details here, Dashlane can fill forms for you.</string>
-    <string name="empty_screen_ids_line1">Add your IDs</string>
-    <string name="empty_screen_ids_line2">Store your IDs (driver’s license, passport, etc.) in this secure space.</string>
+    <string name="import_methods_empty_state_title">Start adding logins</string>
+    <string name="import_methods_empty_state_description">Manage your logins securely in one place.</string>
+    <string name="empty_screen_vault_allitems_line1">Start adding items</string>
+    <string name="empty_screen_vault_allitems_line2">Securely store and access all your logins, notes, payment info, IDs, and more in one place.</string>
+    <string name="empty_screen_securenotes_line1">Secure your notes</string>
+    <string name="empty_screen_securenotes_line2">Store sensitive information and securely share them with others who use Dashlane.</string>
+    <string name="empty_screen_personalinfo_line1">Store personal information</string>
+    <string name="empty_screen_personalinfo_line2">Safely store and quickly access your personal details, making autofilling forms easier.</string>
+    <string name="empty_screen_ids_line1">Store IDs securely</string>
+    <string name="empty_screen_ids_line2">Store your important identification documents here for easy and safe access.</string>
     
-    <string name="empty_screen_secret_line1">Add secrets</string>
+    <string name="empty_screen_secret_line1">Keep your secrets safe</string>
     
-    <string name="empty_screen_secret_line2">Protect infrastructure secrets like API keys and encryption codes here, and retrieve them securely using our command-line interface (CLI) capabilities.</string>
-    <string name="empty_screen_payments_line1">Add your payments</string>
-    <string name="empty_screen_payments_line2">Breeze through online checkouts, securely. Add the cards you use most often here.</string>
+    <string name="empty_screen_secret_line2">Securely store and manage sensitive information.</string>
+    
+    <string name="empty_screen_wifi_line1">Store Wi-Fi credentials</string>
+    
+    <string name="empty_screen_wifi_line2">Securely store your Wi-Fi credentials and easily share them using a QR code.</string>
+    <string name="empty_screen_payments_line1">Manage your payments</string>
+    <string name="empty_screen_payments_line2">Securely store your credit card and bank account information for easy access during online transactions.</string>
     <string name="vault_header_suggested">Suggested</string>
     <string name="vault_header_most_recent">Most recent</string>
 </resources>

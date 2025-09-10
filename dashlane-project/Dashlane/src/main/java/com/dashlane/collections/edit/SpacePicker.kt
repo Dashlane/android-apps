@@ -2,8 +2,10 @@ package com.dashlane.collections.edit
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.colorResource
@@ -27,23 +29,24 @@ fun SpacePicker(
     spaces: List<TeamSpace>,
     onSpaceSelected: (TeamSpace) -> Unit,
     selectedSpace: TeamSpace,
-    readOnly: Boolean = false
+    readOnly: Boolean = false,
 ) {
-    val expandedState = remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     DropdownField(
         modifier = modifier,
         label = stringResource(id = R.string.collection_add_collection_space_field_label),
         value = selectedSpace.displayName,
         readOnly = readOnly,
-        expandedState = expandedState,
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
     ) {
         spaces.forEach { space ->
             DropdownSpaceItem(
                 space = space,
                 onClick = {
                     onSpaceSelected(space)
-                    expandedState.value = false
-                }
+                    expanded = false
+                },
             )
         }
     }
@@ -52,7 +55,7 @@ fun SpacePicker(
 @Composable
 private fun DropdownSpaceItem(
     space: TeamSpace,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     DropdownItem(
         content = {
@@ -61,13 +64,13 @@ private fun DropdownSpaceItem(
                     OutlinedTeamspaceIcon(
                         letter = space.displayLetter,
                         color = space.displayColor,
-                        iconSize = 24.dp
+                        iconSize = 24.dp,
                     )
                 },
-                text = space.displayName
+                text = space.displayName,
             )
         },
-        onClick = onClick
+        onClick = onClick,
     )
 }
 
@@ -88,7 +91,7 @@ private val TeamSpace.displayColor
 private val upshiftTeamForPreview = BusinessSpaceUtil.createCurrentSpace(
     name = "Upshift",
     teamId = 1234,
-    color = "#20B422"
+    color = "#20B422",
 )
 
 @Preview
@@ -99,10 +102,10 @@ private fun SpacePickerPreview() {
             modifier = Modifier.fillMaxWidth(),
             spaces = listOf(
                 TeamSpace.Personal,
-                upshiftTeamForPreview
+                upshiftTeamForPreview,
             ),
             onSpaceSelected = {},
-            selectedSpace = TeamSpace.Personal
+            selectedSpace = TeamSpace.Personal,
         )
     }
 }
@@ -115,11 +118,11 @@ private fun ReadOnlySpacePickerPreview() {
             modifier = Modifier.fillMaxWidth(),
             spaces = listOf(
                 TeamSpace.Personal,
-                upshiftTeamForPreview
+                upshiftTeamForPreview,
             ),
             onSpaceSelected = {},
             selectedSpace = TeamSpace.Personal,
-            readOnly = true
+            readOnly = true,
         )
     }
 }
@@ -130,7 +133,7 @@ private fun SpaceItemPreview() {
     DashlanePreview {
         DropdownSpaceItem(
             space = upshiftTeamForPreview,
-            onClick = {}
+            onClick = {},
         )
     }
 }

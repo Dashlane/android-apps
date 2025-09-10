@@ -24,7 +24,7 @@ fun RecoveryScreen(
     modifier: Modifier = Modifier,
     viewModel: RecoveryViewModel,
     onSuccess: (LoginStrategy.Strategy?) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     BackHandler {
         
@@ -53,14 +53,14 @@ fun RecoveryScreen(
                 textPrimary = stringResource(id = R.string.generic_error_retry_button),
                 textSecondary = stringResource(id = R.string.generic_error_cancel_button),
                 onClickPrimary = viewModel::retry,
-                onClickSecondary = onCancel
+                onClickSecondary = onCancel,
             )
         }
         else -> {
             RecoveryContent(
                 modifier = modifier,
                 progress = uiState.progress,
-                hasFinishedLoading = uiState is RecoveryState.Finish
+                hasFinishedLoading = uiState is RecoveryState.Finish,
             )
         }
     }
@@ -70,7 +70,7 @@ fun RecoveryScreen(
 fun RecoveryContent(
     modifier: Modifier = Modifier,
     progress: Int?,
-    hasFinishedLoading: Boolean
+    hasFinishedLoading: Boolean,
 ) {
     DashlaneSyncProgress(
         modifier = modifier.fillMaxSize(),
@@ -80,7 +80,7 @@ fun RecoveryContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         progress = progress,
         progressText = stringResource(id = R.string.login_account_recovery_key_enter_progress_title),
-        successText = stringResource(id = R.string.login_account_recovery_key_enter_success_title)
+        successText = stringResource(id = R.string.login_account_recovery_key_enter_success_title),
     )
 }
 
@@ -90,7 +90,7 @@ private fun RecoveryContentPreview() {
     DashlanePreview {
         RecoveryContent(
             progress = 75,
-            hasFinishedLoading = false
+            hasFinishedLoading = false,
         )
     }
 }

@@ -1,27 +1,27 @@
 package com.dashlane.credentialmanager.model
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonClass(generateAdapter = true)
+@Serializable
 data class PrivilegedAllowlist(
-    @Json(name = "apps") val apps: List<PrivilegedAllowlistType>
+    @SerialName("apps") val apps: List<PrivilegedAllowlistType>,
 ) {
-    @JsonClass(generateAdapter = true)
+    @Serializable
     data class PrivilegedAllowlistType(
-        @Json(name = "type") val type: String,
-        @Json(name = "info") val info: PrivilegedAllowlistApp
+        @SerialName("type") val type: String,
+        @SerialName("info") val info: PrivilegedAllowlistApp,
     )
 
-    @JsonClass(generateAdapter = true)
+    @Serializable
     data class PrivilegedAllowlistApp(
-        @Json(name = "package_name") val packageName: String,
-        @Json(name = "signatures") val signatures: List<PrivilegedAllowlistSignature>
+        @SerialName("package_name") val packageName: String,
+        @SerialName("signatures") val signatures: List<PrivilegedAllowlistSignature>,
     )
 
-    @JsonClass(generateAdapter = true)
+    @Serializable
     data class PrivilegedAllowlistSignature(
-        @Json(name = "build") val build: String,
-        @Json(name = "cert_fingerprint_sha256") val sha256: String
+        @SerialName("build") val build: String,
+        @SerialName("cert_fingerprint_sha256") val sha256: String,
     )
 }

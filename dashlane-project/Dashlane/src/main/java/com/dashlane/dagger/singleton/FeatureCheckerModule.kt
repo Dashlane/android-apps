@@ -2,10 +2,10 @@ package com.dashlane.dagger.singleton
 
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.featureflipping.FeatureFlipManager
-import com.dashlane.preference.PreferencesManager
-import com.dashlane.session.SessionManager
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.featureflipping.UserFeaturesCheckerImpl
+import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.SessionManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,7 +21,7 @@ open class FeatureCheckerModule {
         sessionManager: SessionManager,
         accountStatusRepository: AccountStatusRepository,
         userFeature: FeatureFlipManager,
-        preferencesManager: PreferencesManager
+        preferencesManager: PreferencesManager,
     ): UserFeaturesChecker {
         return UserFeaturesCheckerImpl(sessionManager, accountStatusRepository, userFeature, preferencesManager)
     }

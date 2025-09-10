@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Meta schema for properties validation.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "const": "http://json-schema.org/draft-07/schema#"
+    },
+    "$id": {
+      "type": "string",
+      "format": "uri",
+      "oneOf": [
+        {
+          "pattern": "^https://track-production.service.kwift.eu/1.31.6/events/user/properties/.*$"
+        },
+        {
+          "pattern": "^https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/.*$"
+        }
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the event and of when it should be reported."
+    },
+    "type": {
+      "const": "object"
+    },
+    "deprecated": {
+      "type": "boolean"
+    },
+    "metas": {
+      "type": "object",
+      "properties": {
+        "priority": {
+          "type": "boolean",
+          "description": "Whether this property should trigger the send of logs",
+          "default": false
+        },
+        "area": {
+          "type": "string",
+          "description": "The area of this event. Used as a logical container for documentation",
+          "default": false
+        },
+        "is_event_triggering_session": {
+          "type": "boolean",
+          "description": "Whether this event should trigger the initialisation of a session",
+          "default": false
+        },
+        "should_track_flow": {
+          "type": "boolean",
+          "description": "Whether this event should have flow tracking",
+          "default": false
+        }
+      },
+      "required": [
+        "area"
+      ],
+      "additionalProperties": false
+    },
+    "properties": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "object",
+          "description": "A unique short but meaningful string identifier of the event.",
+          "properties": {
+            "const": {
+              "type": "string",
+              "pattern": "^[a-z]+[_a-z0-9]+$"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "patternProperties": {
+        "^(?!name)([a-z][a-z]*)(_[a-z]+)*$": {
+          "type": "object",
+          "description": "A property whose type is a reference to a definition.",
+          "properties": {
+            "deprecated": {
+              "type": "boolean"
+            },
+            "$ref": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://track-production.service.kwift.eu/1.31.6/definitions/.*$"
+            }
+          },
+          "required": [
+            "$ref"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "oneOf": {
+      "type": "array"
+    },
+    "required": {
+      "type": "array",
+      "allOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        {
+          "contains": {
+            "const": "name"
+          }
+        }
+      ]
+    },
+    "additionalProperties": {
+      "const": false
+    }
+  },
+  "required": [
+    "$schema",
+    "$id",
+    "description",
+    "metas",
+    "type",
+    "properties",
+    "required",
+    "additionalProperties"
+  ],
+  "additionalProperties": false
+}

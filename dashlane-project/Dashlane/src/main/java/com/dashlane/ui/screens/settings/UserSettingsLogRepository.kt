@@ -1,8 +1,8 @@
 package com.dashlane.ui.screens.settings
 
-import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.hardwaresecurity.BiometricRecovery
 import com.dashlane.hermes.generated.events.user.UserSettings
-import com.dashlane.inapplogin.InAppLoginManager
+import com.dashlane.inappautofill.InAppLoginManager
 import com.dashlane.lock.LockManager
 import com.dashlane.lock.LockType
 import com.dashlane.preference.ConstantsPrefs
@@ -16,7 +16,7 @@ class UserSettingsLogRepository @Inject constructor(
     private val lockManager: LockManager,
     private val inAppLoginManager: InAppLoginManager,
     private val biometricRecovery: BiometricRecovery,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) {
     fun get(username: Username): UserSettings {
         val locks = lockManager.getLocks(username)
@@ -28,12 +28,12 @@ class UserSettingsLogRepository @Inject constructor(
             hasAuthenticationWithPin = LockType.PinCode in locks,
             hasAuthenticationWithBiometrics = hasBiometrics,
             hasAutofillActivated = inAppLoginManager.isEnableForApp(),
-            hasMasterPasswordBiometricReset = hasBiometrics && biometricRecovery.isFeatureEnabled,
+            hasMasterPasswordBiometricReset = hasBiometrics && biometricRecovery.isFeatureEnabled(),
             hasUnlockItemWithBiometric = hasBiometrics,
             hasLockOnExit = lockManager.isLockOnExit(),
             lockAutoTimeout = lockManager.lockTimeout?.seconds?.toInt(),
             hasClearClipboard = userPreferencesManager.getBoolean(ConstantsPrefs.CLEAR_CLIPBOARD_ON_TIMEOUT),
-            hasAutomaticTwoFactorAuthenticationTokenCopy = userPreferencesManager.getBoolean(ConstantsPrefs.HAS_AUTOMATIC_2FA_TOKEN_COPY)
+            hasAutomaticTwoFactorAuthenticationTokenCopy = userPreferencesManager.getBoolean(ConstantsPrefs.HAS_AUTOMATIC_2FA_TOKEN_COPY),
         )
     }
 }

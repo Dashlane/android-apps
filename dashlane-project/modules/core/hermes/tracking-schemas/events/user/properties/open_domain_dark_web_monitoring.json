@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/open_domain_dark_web_monitoring.json",
+  "type": "object",
+  "description": "When an admin opens the domain dark-web monitoring feature in TAC, also internally called Business Breach Report.",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "open_domain_dark_web_monitoring"
+    },
+    "access_path": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/access_path"
+    },
+    "is_first_visit": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/is_first_visit"
+    }
+  },
+  "required": [
+    "name",
+    "access_path",
+    "is_first_visit"
+  ],
+  "additionalProperties": false
+}

@@ -10,11 +10,11 @@ import com.dashlane.server.api.endpoints.teams.ActivityLog
 import com.dashlane.server.api.endpoints.teams.ActivityLog.LogType.USER_CREATED_CREDENTIAL
 import com.dashlane.server.api.endpoints.teams.ActivityLog.LogType.USER_DELETED_CREDENTIAL
 import com.dashlane.server.api.endpoints.teams.ActivityLog.LogType.USER_MODIFIED_CREDENTIAL
+import com.dashlane.server.api.endpoints.teams.Properties
 import com.dashlane.server.api.time.toInstant
-import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.shouldCaptureActivityLog
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.util.isNotSemanticallyNull
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.summary.SummaryObject
@@ -27,7 +27,7 @@ import javax.inject.Singleton
 @Singleton
 class VaultActivityLogger @Inject constructor(
     private val logRepository: LogRepository,
-    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) {
     
     
@@ -38,7 +38,7 @@ class VaultActivityLogger @Inject constructor(
         sendActivityLog(
             summary = collection,
             logType = ActivityLog.LogType.USER_CREATED_COLLECTION,
-            properties = ActivityLog.Properties(collection_name = collection.name)
+            properties = Properties(collectionName = collection.name),
         )
     }
 
@@ -46,7 +46,7 @@ class VaultActivityLogger @Inject constructor(
         sendActivityLog(
             summary = collection,
             logType = ActivityLog.LogType.USER_DELETED_COLLECTION,
-            properties = ActivityLog.Properties(collection_name = collection.name)
+            properties = Properties(collectionName = collection.name),
         )
     }
 
@@ -54,7 +54,7 @@ class VaultActivityLogger @Inject constructor(
         sendActivityLog(
             summary = collection,
             logType = ActivityLog.LogType.USER_RENAMED_COLLECTION,
-            properties = ActivityLog.Properties(collection_name = collection.name, old_collection_name = previousName)
+            properties = Properties(collectionName = collection.name, oldCollectionName = previousName),
         )
     }
 
@@ -63,10 +63,10 @@ class VaultActivityLogger @Inject constructor(
             sendActivityLog(
                 summary = collection,
                 logType = ActivityLog.LogType.USER_ADDED_CREDENTIAL_TO_COLLECTION,
-                properties = ActivityLog.Properties(
-                    collection_name = collection.name,
-                    domain_url = item.urlDomain ?: ""
-                )
+                properties = Properties(
+                    collectionName = collection.name,
+                    domainUrl = item.urlDomain ?: "",
+                ),
             )
         }
     }
@@ -76,10 +76,10 @@ class VaultActivityLogger @Inject constructor(
             sendActivityLog(
                 summary = collection,
                 logType = ActivityLog.LogType.USER_REMOVED_CREDENTIAL_FROM_COLLECTION,
-                properties = ActivityLog.Properties(
-                    collection_name = collection.name,
-                    domain_url = item.urlDomain ?: ""
-                )
+                properties = Properties(
+                    collectionName = collection.name,
+                    domainUrl = item.urlDomain ?: "",
+                ),
             )
         }
     }
@@ -94,44 +94,43 @@ class VaultActivityLogger @Inject constructor(
             Action.EXCLUDE_ITEM_FROM_PASSWORD_HEALTH,
             Action.ADD_CUSTOM_FIELD,
             Action.DELETE_CUSTOM_FIELD,
-            Action.EDIT_CUSTOM_FIELD ->
+            Action.EDIT_CUSTOM_FIELD,
+            Action.CONNECT,
+            Action.DISPLAY_QR_CODE,
+            ->
                 
                 return
         }
-        val properties = ActivityLog.Properties(domain_url = authentifiant.urlDomain ?: "")
+        val properties = Properties(domainUrl = authentifiant.urlDomain ?: "")
 
         if (logType == lastSentActivityLog?.logType &&
             properties == lastSentActivityLog?.properties &&
             Instant.now().isBefore(lastSentActivityLog?.dateTime?.toInstant()?.plusSeconds(5))
         ) {
             
-            debug("Potential duplicate Activity log detected, skipping it...")
             return
         }
 
         sendActivityLog(
             summary = authentifiant,
             logType = logType,
-            properties = properties
+            properties = properties,
         )
     }
 
     private fun sendActivityLog(
         summary: SummaryObject,
         logType: ActivityLog.LogType,
-        properties: ActivityLog.Properties
+        properties: Properties,
     ) {
         val teamSpaceAccessor = teamSpaceAccessorProvider.get() ?: return
         if (!summary.shouldCaptureActivityLog(teamSpaceAccessor)) return
 
         val log = activityLog(
             logType = logType,
-            properties = properties
+            properties = properties,
         )
         logRepository.queueEvent(log)
         lastSentActivityLog = log
     }
-
-    private fun SummaryObject.shouldCaptureActivityLog(teamspaceAccessor: TeamSpaceAccessor) =
-        isSpaceItem() && spaceId.isNotSemanticallyNull() && teamspaceAccessor.get(spaceId)?.isCollectSensitiveDataActivityLogsEnabled ?: false
 }

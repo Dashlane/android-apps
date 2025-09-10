@@ -16,15 +16,15 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class UserGroupItemsFragment : AbstractContentFragment() {
-
     @Inject
     lateinit var itemWrapperProvider: ItemWrapperProvider
 
     private val viewModel by viewModels<UserGroupItemsViewModel>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         setCurrentPageView(AnyPage.SHARING_MEMBER_DETAILS)
@@ -36,6 +36,7 @@ class UserGroupItemsFragment : AbstractContentFragment() {
 
     companion object {
         const val ARGS_GROUP_ID = "args_group_id"
+
         fun newInstance(groupId: String): UserGroupItemsFragment {
             return UserGroupItemsFragment().also {
                 it.arguments = bundleOf(ARGS_GROUP_ID to groupId)

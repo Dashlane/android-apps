@@ -50,7 +50,7 @@ class CsvImportManager @Inject constructor(
                         knownApplicationProvider,
                         it,
                         schema.fieldTypes,
-                        appNameFromPackage
+                        appNameFromPackage,
                     )
                 }
                 .toList()
@@ -104,20 +104,20 @@ class CsvImportManager @Inject constructor(
                 null,
                 CsvSchema.FieldType.URL,
                 CsvSchema.FieldType.USERNAME,
-                CsvSchema.FieldType.PASSWORD
-            )
+                CsvSchema.FieldType.PASSWORD,
+            ),
         )
 
         
         val emptySchema = CsvSchema(
             hasHeader = false,
             separator = ',',
-            fieldTypes = emptyList()
+            fieldTypes = emptyList(),
         )
 
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         val firstLineToSchema = mapOf(
-            "name,url,username,password" to chromeSchema
+            "name,url,username,password" to chromeSchema,
         )
     }
 }

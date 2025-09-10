@@ -10,5 +10,5 @@ internal fun DeviceRegistrationInfo.toAuthRegistrationDevice() = AuthRegistratio
     appVersion = appVersion,
     deviceName = deviceName,
     platform = Platform.SERVER_ANDROID,
-    osLanguage = osLanguage
+    osLanguage = osLanguage,
 )

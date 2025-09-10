@@ -14,23 +14,32 @@ import javax.inject.Inject
 
 internal interface RemoteViewProvider {
     fun forItem(item: ItemToFill): RemoteViews?
+
     fun forOtp(): RemoteViews
+
     fun forLogout(): RemoteViews
+
     fun forViewAllItems(): RemoteViews
+
     fun forViewAllItemsOnEmptyResults(): RemoteViews
+
     fun forPause(): RemoteViews
+
     fun forCreateAccount(): RemoteViews
+
     fun forChangePassword(): RemoteViews
+
     fun forScrolling(): RemoteViews
+
     fun forEmptyWebsite(item: AuthentifiantItemToFill): RemoteViews?
+
     fun emptyView(): RemoteViews
 }
 
 internal open class RemoteViewProviderImpl @Inject constructor(
     @ApplicationContext
-    private val applicationContext: Context
+    private val applicationContext: Context,
 ) : RemoteViewProvider {
-
     override fun forItem(item: ItemToFill): RemoteViews? {
         return when (item) {
             is AuthentifiantItemToFill -> forAuthentifiant(item)

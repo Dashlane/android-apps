@@ -18,22 +18,22 @@ import com.dashlane.item.v3.display.fields.SectionTitle
 fun SharedAccessSection(
     commonData: CommonData,
     editMode: Boolean,
-    onSharedClick: () -> Unit
+    onSharedClick: () -> Unit,
 ) {
     val isShared = commonData.sharingCount.userCount > 0 || commonData.sharingCount.groupCount > 0
     if (editMode || !isShared) return
-    SectionContent(editMode = editMode) {
+    SectionContent {
         SectionTitle(title = stringResource(id = R.string.vault_shared_access), editMode = editMode)
 
         GenericField(
             label = stringResource(id = R.string.vault_shared_with),
             data = getSharingCount(sharingCount = commonData.sharingCount),
             editMode = false,
-            onValueChanged = {}
+            onValueChanged = {},
         )
         LinkButton(
             text = stringResource(id = R.string.vault_view_all_shared_users),
-            destinationType = LinkButtonDestinationType.INTERNAL
+            destinationType = LinkButtonDestinationType.INTERNAL,
         ) {
             onSharedClick()
         }
@@ -45,12 +45,12 @@ private fun getSharingCount(sharingCount: FormData.SharingCount): String {
     val userCount = pluralStringResource(
         R.plurals.sharing_shared_counter_users,
         sharingCount.userCount,
-        sharingCount.userCount
+        sharingCount.userCount,
     )
     val groupCount = pluralStringResource(
         R.plurals.sharing_shared_counter_groups,
         sharingCount.groupCount,
-        sharingCount.groupCount
+        sharingCount.groupCount,
     )
     return if (sharingCount.userCount != 0 && sharingCount.groupCount != 0) {
         stringResource(R.string.sharing_shared_shared_with_users_and_groups, userCount, groupCount)
@@ -63,7 +63,7 @@ private fun getSharingCount(sharingCount: FormData.SharingCount): String {
 
 private val previewCommonData = CommonData(
     sharingCount = FormData.SharingCount(3, 1),
-    isEditable = true
+    isEditable = true,
 )
 
 @Preview
@@ -71,9 +71,9 @@ private val previewCommonData = CommonData(
 private fun SharedAccessSectionPreview() {
     DashlanePreview {
         SharedAccessSection(
-           commonData = previewCommonData,
+            commonData = previewCommonData,
             editMode = false,
-            onSharedClick = {}
+            onSharedClick = {},
         )
     }
 }
@@ -85,7 +85,7 @@ private fun SharedAccessSectionEditPreview() {
         SharedAccessSection(
             commonData = previewCommonData,
             editMode = true,
-            onSharedClick = {}
+            onSharedClick = {},
         )
     }
 }

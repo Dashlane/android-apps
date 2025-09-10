@@ -1,23 +1,25 @@
 package com.dashlane.session.observer
 
-import com.dashlane.autofill.linkedservices.AppMetaDataToLinkedAppsMigration
-import com.dashlane.autofill.linkedservices.RememberToLinkedAppsMigration
-import com.dashlane.login.LoginInfo
+import com.dashlane.autofill.linkservices.services.migration.AppMetaDataToLinkedAppsMigration
+import com.dashlane.autofill.linkservices.services.migration.RememberToLinkedAppsMigration
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.session.Session
 import com.dashlane.session.SessionObserver
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import com.dashlane.util.inject.OptionalProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class LinkedAppsMigrationObserver @Inject constructor(
     private val appMetaDataToLinkedAppsMigration: AppMetaDataToLinkedAppsMigration,
-    private val rememberToLinkedAppsMigration: RememberToLinkedAppsMigration
+    private val rememberToLinkedAppsMigration: RememberToLinkedAppsMigration,
+    private val sessionCoroutineScopeProvider: OptionalProvider<CoroutineScope>,
 ) : SessionObserver {
+    private val sessionCoroutineScope: CoroutineScope?
+        get() = sessionCoroutineScopeProvider.get()
 
-    @OptIn(DelicateCoroutinesApi::class)
     override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
-        GlobalScope.launch {
+        sessionCoroutineScope?.launch {
             appMetaDataToLinkedAppsMigration.migrate()
             rememberToLinkedAppsMigration.migrate()
         }

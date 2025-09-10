@@ -9,9 +9,13 @@ import javax.inject.Inject
 
 interface FollowUpNotificationDiscoveryService {
     fun canDisplayDiscoveryScreen(syncObjectType: SyncObjectType): Boolean
+
     fun setHasSeenIntroductionScreen()
+
     fun canDisplayReminderScreen(itemId: String?): Boolean
+
     fun setHasAcknowledgedReminderScreen()
+
     fun updateLastNotificationItem(itemId: String, notificationId: String, hasInteracted: Boolean)
 }
 
@@ -19,9 +23,8 @@ class FollowUpNotificationDiscoveryServiceImpl @Inject constructor(
     private val followUpNotificationFlags: FollowUpNotificationFlags,
     private val sessionManager: SessionManager,
     private val preferencesManager: PreferencesManager,
-    private val followUpNotificationRepository: FollowUpNotificationRepository
+    private val followUpNotificationRepository: FollowUpNotificationRepository,
 ) : FollowUpNotificationDiscoveryService {
-
     private val supportedTypes = FollowUpNotificationsTypes.values().map { it.syncObjectType }
 
     override fun canDisplayDiscoveryScreen(syncObjectType: SyncObjectType): Boolean {

@@ -18,7 +18,12 @@ import java.time.Instant
 fun createAuthentifiant(
     itemId: String = generateUniqueIdentifier(),
     spaceId: String? = null,
-    dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(uid = itemId, teamSpaceId = spaceId),
+    creationDate: Instant? = null,
+    dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(
+        uid = itemId,
+        teamSpaceId = spaceId,
+        creationDate = creationDate,
+    ),
     title: String? = null,
     deprecatedUrl: String? = null,
     userSelectedUrl: String? = null,
@@ -39,7 +44,7 @@ fun createAuthentifiant(
     passwordModificationDate: Instant? = null,
     isChecked: Boolean = false,
     linkedServices: SyncObject.Authentifiant.LinkedServices? = null,
-    isFavorite: Boolean = false
+    isFavorite: Boolean = false,
 ): VaultItem<SyncObject.Authentifiant> {
     return dataIdentifier.toVaultItem(
         SyncObject.Authentifiant {
@@ -67,7 +72,7 @@ fun createAuthentifiant(
             this.spaceId = spaceId
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
@@ -91,7 +96,7 @@ val SummaryObject.Authentifiant.loginForUi
     get() = getLoginForUi(email = email, login = login)
 
 private fun getLoginForUi(email: String?, login: String?): String? =
-        login.takeIf { it.isNotSemanticallyNull() } ?: email.takeIf { it.isNotSemanticallyNull() }
+    login.takeIf { it.isNotSemanticallyNull() } ?: email.takeIf { it.isNotSemanticallyNull() }
 
 val SummaryObject.Authentifiant.urlDomain: String?
     get() = urlForGoToWebsite?.toUrlOrNull()?.root
@@ -132,11 +137,12 @@ val SummaryObject.Authentifiant.urlForGoToWebsite: String?
 val String.getUrlDisplayName: String?
     get() = toUrlOrNull(false)?.root
 
-fun SummaryObject.Authentifiant.urlForUI(): String? = if (useFixedUrl == true && userSelectedUrl.isNotSemanticallyNull()) {
-    userSelectedUrl
-} else {
-    url
-}
+fun SummaryObject.Authentifiant.urlForUI(): String? =
+    if (useFixedUrl == true && userSelectedUrl.isNotSemanticallyNull()) {
+        userSelectedUrl
+    } else {
+        url
+    }
 
 fun VaultItem<SyncObject.Authentifiant>.urlForUI(): String? =
     toSummary<SummaryObject.Authentifiant>().urlForUI()

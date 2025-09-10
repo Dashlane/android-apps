@@ -8,18 +8,18 @@ const val COLLECTION_NAME_MAX_LENGTH = 100
 fun createCollection(
     dataIdentifier: CommonDataIdentifierAttrs = CommonDataIdentifierAttrsImpl(),
     name: String? = null,
-    vaultItems: List<SyncObject.Collection.VaultItems>
+    vaultItems: List<SyncObject.Collection.VaultItems>,
 ) = dataIdentifier.toVaultItem(
     SyncObject.Collection {
         this.name = name
         this.vaultItems = vaultItems
 
         this.setCommonDataIdentifierAttrs(dataIdentifier)
-    }
+    },
 )
 
 fun VaultItem<SyncObject.Collection>.copySyncObject(builder: SyncObject.Collection.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.Collection> {
+    VaultItem<SyncObject.Collection> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }
 

@@ -14,6 +14,6 @@ interface UserDataRepository : BySessionRepository<SettingsManager> {
         session: Session,
         userSettings: SyncObject.Settings?,
         accountType: UserAccountInfo.AccountType,
-        allowOverwriteAccessKey: Boolean
+        allowOverwriteAccessKey: Boolean,
     )
 }

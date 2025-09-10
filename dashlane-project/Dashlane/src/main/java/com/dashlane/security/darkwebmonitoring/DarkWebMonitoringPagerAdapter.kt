@@ -8,17 +8,16 @@ import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
 import com.dashlane.R
 import com.dashlane.security.darkwebmonitoring.item.DarkWebBreachItem
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.MultiColumnRecyclerView
 
 class DarkWebMonitoringPagerAdapter(
     private val activity: Activity,
     private val context: Context,
     private val presenter: DarkWebMonitoringContract.Presenter,
     private val pendingItems: List<DashlaneRecyclerAdapter.ViewTypeProvider>,
-    private val resolvedItems: List<DashlaneRecyclerAdapter.ViewTypeProvider>
+    private val resolvedItems: List<DashlaneRecyclerAdapter.ViewTypeProvider>,
 ) : PagerAdapter() {
-
     private val pendingAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
     private val resolvedAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
 
@@ -94,11 +93,11 @@ class DarkWebMonitoringPagerAdapter(
     override fun getPageTitle(position: Int): CharSequence = when (position) {
         0 -> context.getString(
             R.string.dwm_status_pending,
-            pendingItems.filterIsInstance<DarkWebBreachItem>().size.toString()
+            pendingItems.filterIsInstance<DarkWebBreachItem>().size.toString(),
         )
         else -> context.getString(
             R.string.dwm_status_resolved,
-            resolvedItems.filterIsInstance<DarkWebBreachItem>().size.toString()
+            resolvedItems.filterIsInstance<DarkWebBreachItem>().size.toString(),
         )
     }
 }

@@ -1,24 +1,22 @@
 package com.dashlane.lock
 
-import android.os.SystemClock
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.user.Username
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
-import java.time.Duration
-import java.time.Instant
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.Instant
+import javax.inject.Inject
 
 class LockTimeManagerImpl @Inject constructor(
     @ApplicationCoroutineScope
     private val applicationCoroutineScope: CoroutineScope,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) : LockTimeManager {
-
     override var lockTimeout: Duration = LockTimeManager.LOCK_TIMEOUT_DEFAULT_VALUE
 
     override var lastUnlock: Instant? = null
@@ -56,7 +54,7 @@ class LockTimeManagerImpl @Inject constructor(
     }
 
     override fun setLastActionTimestampToNow() {
-        lastAction = Instant.ofEpochMilli(SystemClock.elapsedRealtime())
+        lastAction = Instant.now()
     }
 
     override fun stopAutoLockGracePeriod() {
@@ -64,7 +62,9 @@ class LockTimeManagerImpl @Inject constructor(
         autoLockJob = null
     }
 
+    override fun elapsedDuration(instant: Instant): Duration = Duration.between(instant, Instant.now())
+
     override fun setUnlockTimestampToNow() {
-        lastUnlock = Instant.ofEpochMilli(SystemClock.elapsedRealtime())
+        lastUnlock = Instant.now()
     }
 }

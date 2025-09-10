@@ -30,7 +30,7 @@ fun SectionTitle(title: String, editMode: Boolean) {
             DashlaneTheme.typography.titleBlockMedium
         },
         overflow = TextOverflow.Ellipsis,
-        enforceAllCaps = editMode || LocalDashlaneAllCaps.current
+        enforceAllCaps = editMode || LocalDashlaneAllCaps.current,
     )
 }
 

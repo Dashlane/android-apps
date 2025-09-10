@@ -27,18 +27,11 @@
             android:id="@+id/deeplink_personal_plan"
             app:uri="dashlane:///personal-plan" />
     </fragment>
-    <fragment
-        android:id="@+id/nav_account_status"
-        android:name="com.dashlane.ui.screens.fragments.account.AccountStatusFragment"
-        android:label="@string/account_status_settings_title">
-        <action
-            android:id="@+id/change_contact_email"
-            app:destination="@id/nav_change_contact_email" />
-    </fragment>
-    <fragment
-        android:id="@+id/nav_change_contact_email"
-        android:name="com.dashlane.ui.screens.fragments.account.ChangeContactEmailFragment"
-        android:label="@string/account_status_account_verification" />
+    <activity
+        android:id="@+id/nav_account_summary"
+        android:name="com.dashlane.accountsummary.AccountSummaryActivity"
+        android:label="@string/account_summary_settings_title">
+    </activity>
     <fragment
         android:id="@+id/nav_notif_center"
         android:name="com.dashlane.notificationcenter.NotificationCenterFragment"
@@ -77,6 +70,9 @@
         <deepLink
             android:id="@+id/deeplink_password_generator"
             app:uri="dashlane:///password-generator" />
+        <action
+            android:id="@+id/go_to_generated_password_history"
+            app:destination="@id/nav_generated_password_history" />
     </fragment>
     <fragment
         android:id="@+id/nav_action_center_section_details"
@@ -144,49 +140,13 @@
             app:argType="com.dashlane.authenticator.Otp"
             app:nullable="true" />
     </activity>
-    <activity
-        android:id="@+id/nav_collection_selector"
-        android:name="com.dashlane.item.collection.CollectionSelectorActivity">
-        <argument
-            android:name="temporaryPrivateCollectionsName"
-            app:argType="string[]"
-            app:nullable="false" />
-        <argument
-            android:name="temporarySharedCollectionsId"
-            app:argType="string[]"
-            app:nullable="false" />
-        <argument
-            android:name="fromView"
-            app:argType="boolean"
-            app:nullable="false" />
-        <argument
-            android:name="spaceId"
-            app:argType="string"
-            app:nullable="false" />
-    </activity>
     <fragment
         android:id="@+id/nav_collection_selector_fragment"
         android:name="com.dashlane.item.collection.CollectionSelectorFragment"
         android:label="@string/collection_selector_activity_title">
         <argument
-            android:name="temporaryPrivateCollectionsName"
-            app:argType="string[]"
-            app:nullable="false" />
-        <argument
-            android:name="temporarySharedCollectionsId"
-            app:argType="string[]"
-            app:nullable="false" />
-        <argument
-            android:name="fromView"
-            app:argType="boolean"
-            app:nullable="false" />
-        <argument
-            android:name="spaceId"
+            android:name="itemId"
             app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="isLimited"
-            app:argType="boolean"
             app:nullable="false" />
     </fragment>
     <action
@@ -214,12 +174,14 @@
     </activity>
     <activity
         android:id="@+id/nav_in_app_login"
-        android:name="com.dashlane.autofill.onboarding.OnboardingInAppLoginActivity"
-        tools:layout="@layout/activity_onboarding_in_app_login">
+        android:name="com.dashlane.ui.activities.onboarding.InAppLoginIntroActivity">
         <deepLink
             android:id="@+id/deeplink_in_app_login"
             app:uri="dashlane:///in-app-login" />
     </activity>
+    <activity
+        android:id="@+id/nav_chrome_in_app_login"
+        android:name="com.dashlane.ui.activities.onboarding.ChromeInAppLoginIntroActivity" />
     <fragment
         android:id="@+id/nav_password_analysis"
         android:name="com.dashlane.security.identitydashboard.password.PasswordAnalysisFragment"
@@ -293,8 +255,20 @@
             app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
     <fragment
+        android:id="@+id/nav_new_share_item_selection"
+        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.itemselection.NewShareItemSelectionFragment"
+        android:label="@string/menu_v3_section_sharing_center">
+        <action
+            android:id="@+id/new_share_item_selection_to_people_selection"
+            app:destination="@id/nav_share_people_selection"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
         android:id="@+id/nav_new_share"
-        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.itemselection.SharingItemSelectionTabFragment"
+        android:name="com.dashlane.ui.screens.fragments.userdata.sharing.itemselection.old.SharingItemSelectionTabFragment"
         android:label="@string/menu_v3_section_sharing_center"
         tools:layout="@layout/fragment_tablayout_viewpager2_with_fab">
         <action
@@ -347,6 +321,9 @@
             android:name="argsSecureNotesUIDs"
             app:argType="string[]" />
         <argument
+            android:name="argsSecretsUIDs"
+            app:argType="string[]" />
+        <argument
             android:name="from"
             app:argType="string"
             app:nullable="true" />
@@ -359,54 +336,17 @@
             app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
     <fragment
-        android:id="@+id/nav_settings"
-        android:name="com.dashlane.ui.screens.settings.SettingsFragment"
+        android:id="@+id/nav_settings_compose"
+        android:name="com.dashlane.settings.SettingsComposeFragment"
         android:label="@string/action_bar_settings">
-        <argument
-            android:name="id"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
-        <deepLink
-            android:id="@+id/deeplink_settings"
-            app:uri="dashlane:///settings" />
-        <deepLink
-            android:id="@+id/deeplink_settings_id"
-            app:uri="dashlane:///settings/{id}" />
-        <action
-            android:id="@+id/settings_to_autofill_paused_and_linked"
-            app:destination="@id/nav_autofill_paused_and_linked"
-            app:enterAnim="@anim/fadein_activity"
-            app:exitAnim="@anim/fadeout_activity"
-            app:popEnterAnim="@anim/fadein_activity"
-            app:popExitAnim="@anim/fadeout_activity" />
-        <action
-            android:id="@+id/settings_to_manage_devices"
-            app:destination="@id/nav_manage_devices" />
-        <action
-            android:id="@+id/settings_to_dashlane_labs"
-            app:destination="@id/nav_dashlane_labs" />
-        <action
-            android:id="@+id/settings_to_guided_web_csv_export"
-            app:destination="@id/nav_guided_web_csv_export" />
-        <action
-            android:id="@+id/settings_to_account_status"
-            app:destination="@id/nav_account_status" />
     </fragment>
     <fragment
         android:id="@+id/nav_vpn_third_party"
         android:name="com.dashlane.vpn.thirdparty.VpnThirdPartyFragment"
-        android:label="@string/action_bar_title_vpn_third_party"
-        tools:layout="@layout/fragment_vpn_third_party">
+        android:label="@string/action_bar_title_vpn_third_party">
         <deepLink
             android:id="@+id/deeplink_vpn"
             app:uri="dashlane:///vpn" />
-        <action
-            android:id="@+id/go_to_get_started_from_vpn_third_party"
-            app:destination="@id/nav_vpn_third_party_get_started_dialog" />
-        <action
-            android:id="@+id/go_to_learn_more_about_vpn_from_vpn_third_party"
-            app:destination="@id/nav_vpn_third_party_learn_more_dialog" />
         <action
             android:id="@+id/go_to_activate_account_from_vpn_third_party"
             app:destination="@id/nav_vpn_third_party_activate_account"
@@ -481,7 +421,7 @@
         tools:layout="@layout/fragment_breach_alert_detail">
         <argument
             android:name="breach"
-            app:argType="com.dashlane.security.identitydashboard.breach.BreachWrapper" />
+            app:argType="com.dashlane.breach.BreachWrapper" />
     </fragment>
     <activity
         android:id="@+id/nav_csv_import"
@@ -496,8 +436,7 @@
     </activity>
     <activity
         android:id="@+id/nav_csv_import_intro"
-        android:name="com.dashlane.csvimport.intro.CsvFileImportIntroActivity"
-        tools:layout="@layout/activity_intro">
+        android:name="com.dashlane.csvimport.intro.CsvFileImportIntroActivity">
         <argument
             android:name="fromCompetitor"
             android:defaultValue="false"
@@ -505,12 +444,10 @@
     </activity>
     <activity
         android:id="@+id/nav_m2w_intro"
-        android:name="com.dashlane.m2w.M2wIntroActivity"
-        tools:layout="@layout/activity_intro" />
+        android:name="com.dashlane.m2w.M2wIntroActivity" />
     <activity
         android:id="@+id/nav_autofill_paused_and_linked"
-        android:name="com.dashlane.autofill.actionssources.view.ActionsSourcesActivity"
-        tools:layout="@layout/activity_autofill_actions_sources">
+        android:name="com.dashlane.autofill.actionssources.view.ActionsSourcesActivity">
         <deepLink
             android:id="@+id/deeplink_autofill_paused_and_linked"
             app:uri="dashlane:///paused-and-linked" />
@@ -539,9 +476,13 @@
             app:uri="dashlane:///search?q={args_query}" />
     </fragment>
     <activity
+        android:id="@+id/nav_search_compose"
+        android:name="com.dashlane.settings.SettingsSearchActivity"
+        android:label="@string/search">
+    </activity>
+    <activity
         android:id="@+id/nav_in_app_login_intro"
-        android:name="com.dashlane.ui.activities.onboarding.InAppLoginIntroActivity"
-        tools:layout="@layout/activity_intro" />
+        android:name="com.dashlane.ui.activities.onboarding.InAppLoginIntroActivity" />
     <fragment
         android:id="@+id/nav_credential_add_step_1"
         android:name="com.dashlane.ui.screens.fragments.userdata.CredentialAddStep1Fragment"
@@ -634,10 +575,6 @@
             android:defaultValue="true"
             app:argType="boolean" />
     </activity>
-    <fragment
-        android:id="@+id/nav_dashlane_labs"
-        android:name="com.dashlane.labs.DashlaneLabsFragment"
-        android:label="@string/setting_dashlane_labs" />
     <activity
         android:id="@+id/nav_collection_shared_access"
         android:name="com.dashlane.collections.sharing.access.CollectionSharedAccessActivity"
@@ -648,14 +585,8 @@
     </activity>
     <activity
         android:id="@+id/nav_guided_web_csv_export"
-        android:name="com.dashlane.csvexport.intro.CsvExportFromWebActivity"
+        android:name="com.dashlane.csvexport.CsvExportActivity"
         android:label="@string/csv_export_on_web_app_bar_title" />
-    <dialog
-        android:id="@+id/nav_vpn_third_party_get_started_dialog"
-        android:name="com.dashlane.vpn.thirdparty.GetStartedVpnBottomSheetDialogFragment" />
-    <dialog
-        android:id="@+id/nav_vpn_third_party_learn_more_dialog"
-        android:name="com.dashlane.vpn.thirdparty.LearnMoreAboutVpnBottomSheetDialogFragment" />
     <dialog
         android:id="@+id/nav_quick_action_dialog"
         android:name="com.dashlane.ui.quickactions.QuickActionsBottomSheetFragment">
@@ -737,14 +668,8 @@
             app:popEnterAnim="@anim/fadein_activity"
             app:popExitAnim="@anim/fadeout_activity" />
         <argument
-            android:name="shareAllowed"
-            app:argType="boolean" />
-        <argument
             android:name="collectionId"
             app:argType="string" />
-        <argument
-            android:name="businessSpace"
-            app:argType="boolean" />
         <argument
             android:name="sharedCollection"
             app:argType="boolean" />
@@ -757,6 +682,10 @@
             android:name="uid"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_generated_password_history"
+        android:name="com.dashlane.item.passwordhistory.PasswordHistoryFragment"
+        android:label="@string/action_bar_password_generated" />
     <action
         android:id="@+id/go_to_home"
         app:destination="@id/nav_home"
@@ -851,7 +780,7 @@
             android:id="@+id/action_nav_new_item_edit_to_nav_collection_selector_fragment"
             app:destination="@id/nav_collection_selector_fragment" />
         <action
-            android:id="@+id/action_nav_new_item_edit_to_nav_password_history"
+            android:id="@+id/go_to_password_history_from_item_edit"
             app:destination="@id/nav_password_history" />
     </fragment>
     <fragment
@@ -907,8 +836,8 @@
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim" />
     <action
-        android:id="@+id/go_to_settings"
-        app:destination="@id/nav_settings"
+        android:id="@+id/go_to_settings_compose"
+        app:destination="@id/nav_settings_compose"
         app:enterAnim="@anim/nav_default_enter_anim"
         app:exitAnim="@anim/nav_default_exit_anim"
         app:popEnterAnim="@anim/nav_default_enter_anim"
@@ -956,6 +885,20 @@
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim" />
     <action
+        android:id="@+id/go_to_search_compose"
+        app:destination="@id/nav_search_compose"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
+        android:id="@+id/go_to_new_share_item_selection"
+        app:destination="@id/nav_new_share_item_selection"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
+    <action
         android:id="@+id/go_to_new_share"
         app:destination="@id/nav_new_share"
         app:enterAnim="@anim/nav_default_enter_anim"
@@ -973,15 +916,15 @@
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim" />
     <action
-        android:id="@+id/go_to_in_app_login_intro"
-        app:destination="@id/nav_in_app_login_intro"
+        android:id="@+id/go_to_in_app_login"
+        app:destination="@id/nav_in_app_login"
         app:enterAnim="@anim/fadein_activity"
         app:exitAnim="@anim/fadeout_activity"
         app:popEnterAnim="@anim/fadein_activity"
         app:popExitAnim="@anim/fadeout_activity" />
     <action
-        android:id="@+id/go_to_in_app_login"
-        app:destination="@id/nav_in_app_login"
+        android:id="@+id/go_to_chrome_in_app_login"
+        app:destination="@id/nav_chrome_in_app_login"
         app:enterAnim="@anim/fadein_activity"
         app:exitAnim="@anim/fadeout_activity"
         app:popEnterAnim="@anim/fadein_activity"
@@ -1049,6 +992,11 @@
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim">
         <argument
+            android:name="settingsId"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
             android:name="id"
             android:defaultValue="@null"
             app:argType="string"
@@ -1067,12 +1015,12 @@
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim" />
     <action
-        android:id="@+id/go_item_edit_view_to_collection_selector"
-        app:destination="@id/nav_collection_selector"
-        app:enterAnim="@anim/fadein_activity"
-        app:exitAnim="@anim/fadeout_activity"
-        app:popEnterAnim="@anim/fadein_activity"
-        app:popExitAnim="@anim/fadeout_activity" />
+        android:id="@+id/go_to_account_summary"
+        app:destination="@id/nav_account_summary"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim" />
     <action
         android:id="@+id/go_to_collections_list"
         app:destination="@id/nav_collections_list"
@@ -1080,6 +1028,17 @@
         app:exitAnim="@anim/nav_default_exit_anim"
         app:popEnterAnim="@anim/nav_default_enter_anim"
         app:popExitAnim="@anim/nav_default_exit_anim" />
-
+    <action
+        android:id="@+id/go_to_import_logins"
+        app:destination="@id/nav_import_logins"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_enter_anim"
+        app:popExitAnim="@anim/nav_default_exit_anim">
+        <argument
+            android:name="showAddLoginManually"
+            app:argType="boolean" />
+    </action>
     <include app:graph="@navigation/secret_transfer_navigation" />
+    <include app:graph="@navigation/import_logins_navigation" />
 </navigation>

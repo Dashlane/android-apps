@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dashlane.design.component.Thumbnail
 import com.dashlane.design.component.ThumbnailSize
 import com.dashlane.design.component.ThumbnailType
@@ -38,7 +38,9 @@ private fun BaseThumbnailDomainIcon(
     modifier: Modifier,
     urlDomain: String?,
     size: ThumbnailSize,
-    viewModel: ThumbnailDomainIconViewModel = viewModel<ThumbnailDomainIconViewModel>(key = "domain:$urlDomain")
+    viewModel: ThumbnailDomainIconViewModel = hiltViewModel<ThumbnailDomainIconViewModel>(
+        key = "domain:$urlDomain",
+    ),
 ) {
     val urlDomainIcon by viewModel.urlDomainIcon.collectAsStateWithLifecycle(initialValue = null)
     LaunchedEffect(viewModel) {

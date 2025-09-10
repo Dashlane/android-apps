@@ -7,7 +7,7 @@ import com.dashlane.util.safelyStartBrowserActivity
 object HelpCenterCoordinator {
     fun openLink(
         context: Context,
-        helpCenterLink: HelpCenterLink
+        helpCenterLink: HelpCenterLink,
     ) {
         val intent: Intent = helpCenterLink.newIntent(context = context)
         context.safelyStartBrowserActivity(intent)

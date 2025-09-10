@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dashlane.R
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.data.login.RegisteredUserDevice
 import com.dashlane.ui.widgets.compose.GenericInfoContent
 
 @Composable
@@ -15,8 +15,8 @@ fun RecoveryHelpScreen(
     modifier: Modifier = Modifier,
     viewModel: RecoveryHelpViewModel,
     email: String?,
-    onStartRecoveryClicked: (RegisteredUserDevice) -> Unit,
-    onLostKeyClicked: () -> Unit
+    onStartRecoveryClicked: (RegisteredUserDevice.Local) -> Unit,
+    onLostKeyClicked: () -> Unit,
 ) {
     LaunchedEffect(viewModel) {
         viewModel.viewStarted(email)
@@ -46,6 +46,6 @@ fun RecoveryHelpScreen(
         textPrimary = stringResource(id = R.string.login_universal_d2d_recovery_help_primary_button),
         onClickPrimary = viewModel::arkClicked,
         textSecondary = stringResource(id = R.string.login_universal_d2d_recovery_help_secondary_button),
-        onClickSecondary = viewModel::lostKeyClicked
+        onClickSecondary = viewModel::lostKeyClicked,
     )
 }

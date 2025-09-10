@@ -4,8 +4,8 @@ import android.content.Context
 import com.dashlane.csvimport.csvimport.ImportAuthentifiantHelper
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.Trigger
-import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.DataSaver
+import com.dashlane.storage.userdata.accessor.copyWithDefaultValue
 import com.dashlane.sync.DataSync
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
@@ -13,7 +13,6 @@ import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.createAuthentifiant
 import com.dashlane.vault.model.formatTitle
-import com.dashlane.vault.util.copyWithDefaultValue
 import com.dashlane.vpn.thirdparty.VpnThirdPartyAuthentifiantHelper
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
@@ -27,11 +26,9 @@ class AccountStorageImpl @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val dataSaver: DataSaver,
-    private val sessionManager: SessionManager,
     private val dataSync: DataSync,
-    private val activityLogger: VaultActivityLogger
+    private val activityLogger: VaultActivityLogger,
 ) : ImportAuthentifiantHelper, VpnThirdPartyAuthentifiantHelper {
-
     @Suppress("UNCHECKED_CAST")
     override fun newAuthentifiant(
         linkedServices: SyncObject.Authentifiant.LinkedServices?,
@@ -40,7 +37,7 @@ class AccountStorageImpl @Inject constructor(
         login: String?,
         password: SyncObfuscatedValue?,
         title: String?,
-        teamId: String?
+        teamId: String?,
     ): VaultItem<SyncObject.Authentifiant> {
         val timestamp = Instant.now()
         return createAuthentifiant(
@@ -48,7 +45,7 @@ class AccountStorageImpl @Inject constructor(
                 teamSpaceId = teamId,
                 syncState = SyncState.MODIFIED,
                 creationDate = timestamp,
-                userModificationDate = timestamp
+                userModificationDate = timestamp,
             ),
             title = SyncObject.Authentifiant.formatTitle(title),
             deprecatedUrl = deprecatedUrl,
@@ -57,10 +54,9 @@ class AccountStorageImpl @Inject constructor(
             password = password,
             autoLogin = "true",
             passwordModificationDate = timestamp,
-            linkedServices = linkedServices
+            linkedServices = linkedServices,
         ).copyWithDefaultValue(
             context,
-            sessionManager.session
         ) as VaultItem<SyncObject.Authentifiant>
     }
 
@@ -68,12 +64,12 @@ class AccountStorageImpl @Inject constructor(
         title: String,
         deprecatedUrl: String,
         email: String,
-        password: SyncObfuscatedValue
+        password: SyncObfuscatedValue,
     ): VaultItem<SyncObject.Authentifiant> = createAuthentifiant(
         title = title,
         deprecatedUrl = deprecatedUrl,
         email = email,
-        password = password
+        password = password,
     )
 
     override suspend fun addAuthentifiant(authentifiant: VaultItem<SyncObject.Authentifiant>) {
@@ -81,13 +77,13 @@ class AccountStorageImpl @Inject constructor(
     }
 
     override suspend fun addAuthentifiants(
-        authentifiants: List<VaultItem<SyncObject.Authentifiant>>
+        authentifiants: List<VaultItem<SyncObject.Authentifiant>>,
     ): Int {
         val savedAuthentifiants = dataSaver.save(
             DataSaver.SaveRequest(
                 itemsToSave = authentifiants,
-                mode = DataSaver.SaveRequest.Mode.INSERT_ONLY
-            )
+                mode = DataSaver.SaveRequest.Mode.INSERT_ONLY,
+            ),
         )
         savedAuthentifiants.forEach {
             activityLogger.sendAuthentifiantActivityLog(vaultItem = it, action = Action.ADD)

@@ -5,26 +5,26 @@ import kotlin.reflect.KProperty
 
 fun DashlanePreferencesManager.stringPreference(
     key: String,
-    defaultValue: String? = null
+    defaultValue: String? = null,
 ): ReadWriteProperty<Any, String?> =
     PreferenceProperty(
         this,
         key,
         defaultValue,
         DashlanePreferencesManager::getString,
-        DashlanePreferencesManager::putString
+        DashlanePreferencesManager::putString,
     )
 
 fun DashlanePreferencesManager.booleanPreference(
     key: String,
-    defaultValue: Boolean = false
+    defaultValue: Boolean = false,
 ): ReadWriteProperty<Any, Boolean> =
     PreferenceProperty(
         this,
         key,
         defaultValue,
         DashlanePreferencesManager::getBoolean,
-        DashlanePreferencesManager::putBoolean
+        DashlanePreferencesManager::putBoolean,
     )
 
 fun DashlanePreferencesManager.intPreference(key: String, defaultValue: Int = 0): ReadWriteProperty<Any, Int> =
@@ -33,7 +33,7 @@ fun DashlanePreferencesManager.intPreference(key: String, defaultValue: Int = 0)
         key,
         defaultValue,
         DashlanePreferencesManager::getInt,
-        DashlanePreferencesManager::putInt
+        DashlanePreferencesManager::putInt,
     )
 
 fun DashlanePreferencesManager.longPreference(key: String, defaultValue: Long = 0L): ReadWriteProperty<Any, Long> =
@@ -42,7 +42,7 @@ fun DashlanePreferencesManager.longPreference(key: String, defaultValue: Long = 
         key,
         defaultValue,
         DashlanePreferencesManager::getLong,
-        DashlanePreferencesManager::putLong
+        DashlanePreferencesManager::putLong,
     )
 
 private class PreferenceProperty<T>(
@@ -50,9 +50,8 @@ private class PreferenceProperty<T>(
     val key: String,
     val defaultValue: T,
     val readValue: DashlanePreferencesManager.(String, T) -> T,
-    val writeValue: DashlanePreferencesManager.(String, T) -> Any
+    val writeValue: DashlanePreferencesManager.(String, T) -> Any,
 ) : ReadWriteProperty<Any, T> {
-
     override fun getValue(thisRef: Any, property: KProperty<*>): T {
         return preferencesManager.readValue(key, defaultValue)
     }

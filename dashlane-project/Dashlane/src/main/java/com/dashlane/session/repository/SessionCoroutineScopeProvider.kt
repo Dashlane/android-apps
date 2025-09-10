@@ -10,7 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class SessionCoroutineScopeProvider @Inject constructor(
     val sessionManager: SessionManager,
-    val sessionCoroutineScopeRepository: BySessionRepository<CoroutineScope>
+    val sessionCoroutineScopeRepository: BySessionRepository<CoroutineScope>,
 ) : OptionalProvider<CoroutineScope> {
     override fun get(): CoroutineScope? = sessionCoroutineScopeRepository[sessionManager.session]
 }

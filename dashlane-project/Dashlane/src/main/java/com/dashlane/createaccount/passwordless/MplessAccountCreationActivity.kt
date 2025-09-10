@@ -4,20 +4,20 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.dashlane.createaccount.CreateAccountSuccessIntentFactory
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.endoflife.EndOfLifeObserver
+import com.dashlane.hardwaresecurity.BiometricAuthModule
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.Toaster
-import com.dashlane.hardwaresecurity.BiometricAuthModule
 import com.dashlane.util.launchUrl
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MplessAccountCreationActivity : DashlaneActivity() {
-
     companion object {
         const val EXTRA_USER_LOGIN = "user_login"
     }
@@ -39,6 +39,7 @@ class MplessAccountCreationActivity : DashlaneActivity() {
     override var requireUserUnlock: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val login = intent.getStringExtra(EXTRA_USER_LOGIN)
@@ -57,7 +58,7 @@ class MplessAccountCreationActivity : DashlaneActivity() {
                     onAccountCreated = ::onAccountCreated,
                     displayErrorMessage = ::displayErrorMessage,
                     displayExpirationErrorMessage = ::displayExpirationMessage,
-                    onOpenHelpCenterPage = ::onOpenHelpCenterPage
+                    onOpenHelpCenterPage = ::onOpenHelpCenterPage,
                 )
             }
         }

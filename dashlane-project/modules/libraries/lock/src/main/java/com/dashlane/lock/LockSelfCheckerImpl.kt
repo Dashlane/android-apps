@@ -10,7 +10,6 @@ class LockSelfCheckerImpl @Inject constructor(
     private val lockTypeManager: LockTypeManager,
     private val sessionCredentialsSaver: SessionCredentialsSaver,
 ) : LockSelfChecker {
-
     var isCredentialsEmpty = false
         private set
 
@@ -45,9 +44,7 @@ class LockSelfCheckerImpl @Inject constructor(
 
     private fun verification(session: Session) {
         if (sessionCredentialsSaver.areCredentialsSaved(session.username)) {
-            logSuccess()
         } else {
-            logFailure()
             lockTypeManager.removeLock(session.username, LockType.PinCode)
             lockTypeManager.removeLock(session.username, LockType.Biometric)
         }
@@ -55,11 +52,5 @@ class LockSelfCheckerImpl @Inject constructor(
 
     private fun resetIsCredentialsEmpty() {
         isCredentialsEmpty = false
-    }
-
-    private fun logSuccess() {
-    }
-
-    private fun logFailure() {
     }
 }

@@ -14,10 +14,14 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object KnownApplicationModule {
     @Provides
-    fun provideWhiteListApplication(@ApplicationContext context: Context): WhitelistApplication =
+    fun provideWhiteListApplication(
+        @ApplicationContext context: Context,
+    ): WhitelistApplication =
         WhitelistApplicationImpl(context)
 
     @Provides
-    fun provideKnownApplicationProvider(@ApplicationContext context: Context): KnownApplicationProvider =
+    fun provideKnownApplicationProvider(
+        @ApplicationContext context: Context,
+    ): KnownApplicationProvider =
         KnownApplicationProvider(provideWhiteListApplication(context))
 }

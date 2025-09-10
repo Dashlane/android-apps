@@ -32,7 +32,7 @@ fun DeleteItemField(canDelete: Boolean, editMode: Boolean, label: String, onDele
         ButtonMedium(
             onClick = onDeleteAction,
             layout = ButtonLayout.TextOnly(
-                text = label
+                text = label,
             ),
             mood = Mood.Danger,
             intensity = Intensity.Catchy,

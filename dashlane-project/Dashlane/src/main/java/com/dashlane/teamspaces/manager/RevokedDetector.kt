@@ -24,12 +24,11 @@ class RevokedDetector @Inject constructor(
     private val navigator: Lazy<Navigator>, 
     private val userAccountStorage: UserAccountStorage,
     private val sessionManager: SessionManager,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) {
-
     fun onStatusChanged(
         newStatus: AccountStatus,
-        oldStatus: AccountStatus?
+        oldStatus: AccountStatus?,
     ) {
         val previousTeam = oldStatus?.premiumStatus?.currentTeam ?: return
         val pastTeams = newStatus.premiumStatus.pastTeams
@@ -48,7 +47,7 @@ class RevokedDetector @Inject constructor(
         }
         preferencesManager[sessionManager.session?.username].putString(
             ConstantsPrefs.NEED_POPUP_SPACE_REVOKED_FOR,
-            previousTeam.teamId.toString()
+            previousTeam.teamId.toString(),
         )
     }
 
@@ -61,14 +60,14 @@ class RevokedDetector @Inject constructor(
         }
         toaster.show(
             context.getString(R.string.space_revoked_popup_title, revokedTeam.teamName),
-            Toast.LENGTH_LONG
+            Toast.LENGTH_LONG,
         )
         return true
     }
 
     private fun isSpaceJustRevoked(
         oldCurrentTeam: CurrentTeam?,
-        pastTeams: List<PastTeam>?
+        pastTeams: List<PastTeam>?,
     ): Boolean {
         return pastTeams?.map { it.teamId }?.contains(oldCurrentTeam?.teamId) == true
     }

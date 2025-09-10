@@ -117,7 +117,7 @@ class BreachAlertDetailViewProxy(rootView: View, activityLifecycleScope: Lifecyc
                 } else {
                     
                     passwordEditText.setText(
-                        context.getString(R.string.breach_alert_popup_dark_web_password_hidden_placeholder)
+                        context.getString(R.string.breach_alert_popup_dark_web_password_hidden_placeholder),
                     )
                 }
             }
@@ -156,15 +156,19 @@ class BreachAlertDetailViewProxy(rootView: View, activityLifecycleScope: Lifecyc
                 shouldEnable,
                 if (!breachAlertAdvice.resolved) breachAlertAdvice.buttonText else null,
                 if (breachAlertAdvice.resolved && advices.size > 1) R.drawable.ic_modal_done else null,
-                if (!breachAlertAdvice.resolved && advices.size > 1) String.format("%02d", index + 1) else null,
-                breachAlertAdvice.buttonAction
+                if (!breachAlertAdvice.resolved && advices.size > 1) {
+                    "%02d".format(context.resources.configuration.locales[0], index + 1)
+                } else {
+                    null
+                },
+                breachAlertAdvice.buttonAction,
             )
             if (!breachAlertAdvice.resolved) {
                 shouldEnable = false
             }
             infoBox.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.WRAP_CONTENT,
             ).apply {
                 topMargin = context.dpToPx(8F).toInt()
             }
@@ -175,7 +179,7 @@ class BreachAlertDetailViewProxy(rootView: View, activityLifecycleScope: Lifecyc
     override fun showUndoDeletion(activity: Activity, onRestore: () -> Unit) {
         SnackbarUtils.showSnackbar(
             activity,
-            activity.getString(R.string.dwm_breach_delete_undo_desc)
+            activity.getString(R.string.dwm_breach_delete_undo_desc),
         ) {
             setAction(activity.getString(R.string.dwm_breach_delete_undo_cta)) {
                 onRestore()

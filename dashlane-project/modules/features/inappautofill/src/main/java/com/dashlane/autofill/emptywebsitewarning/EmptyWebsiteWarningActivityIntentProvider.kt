@@ -15,7 +15,7 @@ class EmptyWebsiteWarningActivityIntentProvider @Inject constructor() : EmptyWeb
         itemId: String,
         summary: AutoFillHintSummary,
         matchType: MatchType,
-        isAccountFrozen: Boolean
+        isAccountFrozen: Boolean,
     ): IntentSender {
         if (isAccountFrozen) {
             return FrozenAutofillActivity.getPendingIntent(context, summary)
@@ -25,7 +25,7 @@ class EmptyWebsiteWarningActivityIntentProvider @Inject constructor() : EmptyWeb
             context,
             itemId,
             summary,
-            matchType
+            matchType,
         )
     }
 }

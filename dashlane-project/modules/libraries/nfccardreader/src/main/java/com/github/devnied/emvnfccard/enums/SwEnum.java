@@ -2,6 +2,10 @@ package com.github.devnied.emvnfccard.enums;
 
 import com.github.devnied.emvnfccard.utils.BytesUtils;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum SwEnum {
 
     SW_61("61",

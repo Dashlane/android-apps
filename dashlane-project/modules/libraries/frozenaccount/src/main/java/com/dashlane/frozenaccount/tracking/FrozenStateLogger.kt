@@ -17,8 +17,8 @@ class FrozenStateLogger @Inject constructor(private val logRepository: LogReposi
         logRepository.queueEvent(
             Click(
                 Button.UNFREEZE_ACCOUNT,
-                clickOrigin = ClickOrigin.BANNER_FROZEN_ACCOUNT
-            )
+                clickOrigin = ClickOrigin.BANNER_FROZEN_ACCOUNT,
+            ),
         )
     }
 
@@ -26,7 +26,7 @@ class FrozenStateLogger @Inject constructor(private val logRepository: LogReposi
     fun logAutofillPaywallDisplayed() {
         logRepository.queuePageView(
             component = BrowseComponent.OS_AUTOFILL,
-            page = AnyPage.AUTOFILL_NOTIFICATION_FROZEN_ACCOUNT
+            page = AnyPage.AUTOFILL_NOTIFICATION_FROZEN_ACCOUNT,
         )
     }
 
@@ -35,8 +35,8 @@ class FrozenStateLogger @Inject constructor(private val logRepository: LogReposi
             CallToAction(
                 callToActionList = listOf(UNFREEZE_ACCOUNT, NOT_NOW),
                 chosenAction = NOT_NOW,
-                hasChosenNoAction = false
-            )
+                hasChosenNoAction = false,
+            ),
         )
     }
 
@@ -45,8 +45,8 @@ class FrozenStateLogger @Inject constructor(private val logRepository: LogReposi
             CallToAction(
                 callToActionList = listOf(UNFREEZE_ACCOUNT, NOT_NOW),
                 chosenAction = UNFREEZE_ACCOUNT,
-                hasChosenNoAction = false
-            )
+                hasChosenNoAction = false,
+            ),
         )
     }
 }

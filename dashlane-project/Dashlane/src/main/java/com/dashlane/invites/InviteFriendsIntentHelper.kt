@@ -25,7 +25,7 @@ object InviteFriendsIntentHelper {
                 val response = sharingLinkService.execute(
                     request = GetSharingLinkService.Request(
                         userKey = subscriptionCode,
-                    )
+                    ),
                 )
 
                 val sharingId = response.data.sharingId

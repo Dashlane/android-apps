@@ -9,9 +9,8 @@ import javax.inject.Inject
 
 class SocialSecurityStatementListTextFactory @Inject constructor(
     private val resources: Resources,
-    private val identityNameHolderService: IdentityNameHolderService
+    private val identityNameHolderService: IdentityNameHolderService,
 ) : DataIdentifierListTextFactory<SummaryObject.SocialSecurityStatement> {
-
     override fun getTitle(item: SummaryObject.SocialSecurityStatement): StatusText {
         return StatusText(resources.getString(R.string.social_security))
     }

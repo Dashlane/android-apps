@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/open_pricing_page.json",
+  "type": "object",
+  "description": "In the B2C subscription management space, when the user clicks on a button that leads to the pricing page of Dashlane website.",
+  "metas": {
+    "area": "plan"
+  },
+  "properties": {
+    "name": {
+      "const": "open_pricing_page"
+    },
+    "call_to_action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/call_to_action.json#/definitions/call_to_action"
+    }
+  },
+  "required": [
+    "name",
+    "call_to_action"
+  ],
+  "additionalProperties": false
+}

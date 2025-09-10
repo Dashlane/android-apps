@@ -10,12 +10,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.passwordhealth.identitydashboard.IdentityDashboardDataProvider
+import com.dashlane.passwordhealth.identitydashboard.IdentityDashboardPresenter
+import com.dashlane.passwordhealth.identitydashboard.IdentityDashboardViewProxy
 import com.dashlane.session.SessionManager
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
-import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.util.setCurrentPageView
+import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -60,7 +63,7 @@ class IdentityDashboardFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         this.setCurrentPageView(AnyPage.TOOLS_PASSWORD_HEALTH_OVERVIEW)
         val view = inflater.inflate(R.layout.fragment_dashboard_identity, container, false)

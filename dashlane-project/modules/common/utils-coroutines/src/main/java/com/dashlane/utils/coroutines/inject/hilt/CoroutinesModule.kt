@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 @Module
 @InstallIn(SingletonComponent::class)
 object CoroutinesModule {
-
     @Provides
     @MainCoroutineDispatcher
     fun provideMainDispatcher(): CoroutineDispatcher =

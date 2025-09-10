@@ -2,13 +2,13 @@ package com.dashlane.autofill.api
 
 import android.content.Context
 import com.dashlane.R
+import com.dashlane.autofill.core.AutoFillDataBaseAccess
 import com.dashlane.autofill.createaccount.domain.AutofillCreateAccountService
 import com.dashlane.autofill.createaccount.domain.CredentialInfo
-import com.dashlane.autofill.core.AutoFillDataBaseAccess
-import com.dashlane.sync.DataSync
 import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.storage.userdata.EmailSuggestionProvider
+import com.dashlane.sync.DataSync
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -19,7 +19,7 @@ class AutofillCreateAccountServiceImpl @Inject constructor(
     private val autoFillDataBaseAccess: AutoFillDataBaseAccess,
     private val emailSuggestionProvider: EmailSuggestionProvider,
     private val dataSync: DataSync,
-    private val knownApplicationProvider: KnownApplicationProvider
+    private val knownApplicationProvider: KnownApplicationProvider,
 ) : AutofillCreateAccountService {
     override suspend fun saveNewAuthentifiant(credential: CredentialInfo): VaultItem<SyncObject.Authentifiant>? {
         val res = autoFillDataBaseAccess.createNewAuthentifiantFromAutofill(
@@ -29,7 +29,7 @@ class AutofillCreateAccountServiceImpl @Inject constructor(
             credential.login,
             credential.password,
             credential.packageName,
-            credential.spaceId
+            credential.spaceId,
         )
         
         if (res != null) dataSync.sync(Trigger.SAVE)

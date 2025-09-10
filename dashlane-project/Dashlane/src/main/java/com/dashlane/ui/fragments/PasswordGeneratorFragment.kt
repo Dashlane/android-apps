@@ -18,16 +18,22 @@ import com.dashlane.R
 import com.dashlane.databinding.FragmentPasswordGeneratorBinding
 import com.dashlane.databinding.IncludeFragmentPasswordGeneratorHeaderBinding
 import com.dashlane.design.component.compat.view.ButtonMediumView
+import com.dashlane.featureflipping.FeatureFlip
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.LogRepository
 import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.password.generator.PasswordGeneratorCriteria
-import com.dashlane.passwordgenerator.PasswordGeneratorWrapper
-import com.dashlane.passwordgenerator.criteria
+import com.dashlane.password.generator.PasswordGeneratorWrapper
+import com.dashlane.password.generator.ui.PasswordGeneratorConfigurationView
+import com.dashlane.password.generator.ui.PasswordGeneratorConfigurationView.ConfigurationChangeListener
+import com.dashlane.password.generator.utils.PasswordScrambler
 import com.dashlane.passwordstrength.PasswordStrength
+import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.passwordstrength.PasswordStrengthScore
 import com.dashlane.passwordstrength.borderColorRes
+import com.dashlane.passwordstrength.getPasswordStrengthScore
 import com.dashlane.passwordstrength.getStrengthDescription
 import com.dashlane.passwordstrength.isSafeEnoughForSpecialMode
 import com.dashlane.session.SessionManager
@@ -36,16 +42,11 @@ import com.dashlane.storage.userdata.accessor.filter.CounterFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
 import com.dashlane.storage.userdata.accessor.filter.space.NoSpaceFilter
-import com.dashlane.ui.PasswordGeneratorConfigurationView
-import com.dashlane.ui.PasswordGeneratorConfigurationView.ConfigurationChangeListener
 import com.dashlane.ui.credential.passwordgenerator.PasswordGeneratorLogger
-import com.dashlane.featureflipping.FeatureFlip
-import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.util.clipboard.ClipboardCopy
 import com.dashlane.util.colorpassword.ColorTextWatcher
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.setProgressDrawablePrimaryTrack
-import com.dashlane.utils.PasswordScrambler
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -62,9 +63,11 @@ import javax.inject.Inject
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
 class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener {
-
     @Inject
     lateinit var passwordGeneratorWrapper: PasswordGeneratorWrapper
+
+    @Inject
+    lateinit var passwordStrengthEvaluator: PasswordStrengthEvaluator
 
     @Inject
     lateinit var userFeaturesChecker: UserFeaturesChecker
@@ -126,7 +129,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     private var generatorActor =
         lifecycle.coroutineScope.actor(
             context = Dispatchers.Main,
-            capacity = Channel.CONFLATED
+            capacity = Channel.CONFLATED,
         ) {
             consumeEach {
                 
@@ -152,11 +155,12 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
         updateHeaderWith(null, null)
         restoreDefaultPreferences(
             resources.getInteger(R.integer.password_generator_min_length_generated_password),
-            resources.getInteger(R.integer.password_generator_max_length_generated_password)
+            resources.getInteger(R.integer.password_generator_max_length_generated_password),
         )
         
         binding.generatorConfiguration.listener = this
         binding.passwordGeneratorHeader.generatedPassword.addTextChangedListener(ColorTextWatcher(requireContext()))
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
         setMenuVisibility(false)
         setFrozenStateIfRequired()
@@ -175,10 +179,12 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
         refreshPreviouslyGeneratedPasswordButton()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.password_history_menu, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         passwordGenerationCallback?.showPreviouslyGenerated()
         return true
@@ -257,17 +263,18 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
         val filter = CounterFilter(
             SpecificDataTypeFilter(SyncObjectType.GENERATED_PASSWORD),
             NoSpaceFilter,
-            DefaultLockFilter
+            DefaultLockFilter,
         )
         return dataCounter.count(filter)
     }
 
-    private suspend fun generatePassword(configuration: PasswordGeneratorCriteria) {
-        logger.logPasswordGenerate(configuration)
+    private suspend fun generatePassword(criteria: PasswordGeneratorCriteria) {
+        logger.logPasswordGenerate(criteria)
         passwordStrengthView.animate()?.alpha(0.0f)
         copyPasswordButton.isClickable = false
-        val result = passwordGeneratorWrapper.generatePassword(configuration)
-        onPasswordGenerated(result.password, result.passwordStrength)
+        val password = passwordGeneratorWrapper.generatePassword(sessionManager.session?.userId, criteria)
+        val passwordStrength = passwordStrengthEvaluator.getPasswordStrengthScore(password)
+        onPasswordGenerated(password, passwordStrength)
     }
 
     private fun updateHeaderWith(password: String?, strength: PasswordStrengthScore?) {
@@ -279,7 +286,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             Triple(
                 strength.getStrengthDescription(context),
                 context.getColor(strength.borderColorRes),
-                strength.percentValue
+                strength.percentValue,
             )
         }
         
@@ -297,7 +304,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             passwordStrengthBar,
             passwordStrengthBar.progress.toFloat(),
             progress.toFloat(),
-            color
+            color,
         )
         anim.duration = 300
         passwordStrengthBar.startAnimation(anim)
@@ -331,13 +338,14 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
     }
 
     private fun restoreDefaultPreferences(minLength: Int, maxLength: Int) {
-        val defaultConfig = passwordGeneratorWrapper.criteria
+        val defaultConfig = passwordGeneratorWrapper.getCriteria(sessionManager.session?.userId)
         generatorConfiguration.setNewConfiguration(minLength, maxLength, defaultConfig)
         generatorActor.trySend(defaultConfig)
     }
 
     private fun saveAsDefaultPreferences(criteria: PasswordGeneratorCriteria) {
-        passwordGeneratorWrapper.criteria = criteria
+        val userId = sessionManager.session?.userId ?: return
+        passwordGeneratorWrapper.saveCriteria(userId, criteria)
     }
 
     fun setToolbarRef(toolbarRef: Toolbar?) {
@@ -354,7 +362,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             passwordGeneratorWrapper.saveToPasswordHistory(
                 password,
                 domain.orEmpty(),
-                getString(R.string.empty_str)
+                getString(R.string.empty_str),
             )
         }
         if (canCopyToClipboard) {
@@ -368,7 +376,7 @@ class PasswordGeneratorFragment : BaseUiFragment(), ConfigurationChangeListener 
             val passwordStrength = if (tag is PasswordStrength) tag else null
             passwordGenerationCallback?.passwordSaved(
                 savedGeneratedPassword,
-                passwordStrength
+                passwordStrength,
             )
         }
     }

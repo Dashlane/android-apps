@@ -23,7 +23,7 @@ fun createPaymentCreditCard(
     issueNumber: String? = null,
     color: SyncObject.PaymentCreditCard.Color = SyncObject.PaymentCreditCard.Color.BLUE_1, 
     billingAddress: String? = null,
-    bank: CreditCardBank? = null
+    bank: CreditCardBank? = null,
 ): VaultItem<SyncObject.PaymentCreditCard> {
     return dataIdentifier.toVaultItem(
         SyncObject.PaymentCreditCard {
@@ -41,7 +41,7 @@ fun createPaymentCreditCard(
             this.linkedBillingAddress = billingAddress
             this.bank = bank?.bankDescriptor
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
@@ -99,6 +99,6 @@ var SyncObject.PaymentCreditCard.Builder.issueDate: YearMonth?
     }
 
 fun VaultItem<SyncObject.PaymentCreditCard>.copySyncObject(builder: SyncObject.PaymentCreditCard.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.PaymentCreditCard> {
+    VaultItem<SyncObject.PaymentCreditCard> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

@@ -15,7 +15,7 @@ object Intents {
         CSV_IMPORT_RESULT_SUCCESS,
         CSV_IMPORT_RESULT_FAILURE,
         CSV_IMPORT_RESULT_CANCEL,
-        CSV_IMPORT_RESULT_ADD_INDIVIDUALLY
+        CSV_IMPORT_RESULT_ADD_INDIVIDUALLY,
     )
     internal annotation class CsvImportResult
 }

@@ -12,7 +12,6 @@ class QuickActionOpenWebsite(
     private val linkedServices: SummaryObject.LinkedServices?,
     private val navigator: Navigator,
 ) : Action {
-
     override val icon: Int = R.drawable.ic_action_open_external_link_outlined
 
     override val text: Int = R.string.quick_action_open_website
@@ -23,7 +22,7 @@ class QuickActionOpenWebsite(
         linkedServices.getAllLinkedPackageName().let { packageNames ->
             navigator.openWebsite(
                 url = url.toUrlOrNull()?.toString(),
-                packageNames = packageNames
+                packageNames = packageNames,
             )
         }
     }

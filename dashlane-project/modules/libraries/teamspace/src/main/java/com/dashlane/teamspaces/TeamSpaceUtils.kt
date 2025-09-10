@@ -14,7 +14,6 @@ import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.SyncObjectTypeUtils
 
 object TeamSpaceUtils {
-
     fun getTeamSpaceId(item: VaultItem<*>): String? {
         return getTeamSpaceIdOrDefault(item.syncObject.spaceId)
     }
@@ -36,6 +35,7 @@ val SyncObjectType.isSpaceSupported: Boolean
     }
 
 fun VaultItem<*>.isSpaceItem() = syncObjectType.isSpaceSupported
+
 fun SummaryObject.isSpaceItem() = syncObjectType.isSpaceSupported
 
 fun TeamSpaceAccessor.hasValidSpace(item: SummaryObject): Boolean = get(TeamSpaceUtils.getTeamSpaceId(item)) != null
@@ -52,3 +52,13 @@ fun TeamSpace.stringName(context: Context) = when (val name = name) {
     is SpaceName.TeamName -> name.value
     is SpaceName.FixName -> context.getString(name.nameRes)
 }
+
+fun SummaryObject.shouldCaptureActivityLog(teamspaceAccessor: TeamSpaceAccessor) =
+    isSpaceItem() &&
+        spaceId.isNotSemanticallyNull() &&
+        teamspaceAccessor.get(spaceId)?.isCollectSensitiveDataActivityLogsEnabled ?: false
+
+fun VaultItem<*>.shouldCaptureActivityLog(teamspaceAccessor: TeamSpaceAccessor) =
+    isSpaceItem() &&
+        syncObject.spaceId.isNotSemanticallyNull() &&
+        teamspaceAccessor.get(syncObject.spaceId)?.isCollectSensitiveDataActivityLogsEnabled ?: false

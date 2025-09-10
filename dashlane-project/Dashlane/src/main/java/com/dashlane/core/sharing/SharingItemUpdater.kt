@@ -6,7 +6,6 @@ import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.events.AppEvents
 import com.dashlane.events.DataIdentifierReplacedEvent
 import com.dashlane.exception.NotLoggedInException
-import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.DeleteItemGroupService
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemContent
@@ -17,6 +16,14 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.UserDownload
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
+import com.dashlane.sharing.AutoAcceptItemGroup
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingDaoMemoryDataAccess
+import com.dashlane.sharing.SharingDaoMemoryDataAccessProvider
+import com.dashlane.sharing.SharingInvitePublicKeyUser
+import com.dashlane.sharing.SharingItemUpdaterRequest
+import com.dashlane.sharing.getSharableItem
 import com.dashlane.sharing.model.getCollectionDownloads
 import com.dashlane.sharing.model.getMaxPermission
 import com.dashlane.sharing.model.getMaxStatus
@@ -29,7 +36,6 @@ import com.dashlane.sharing.model.isAcceptedOrPending
 import com.dashlane.sharing.model.isAlone
 import com.dashlane.sharing.util.GroupKeyLazy
 import com.dashlane.sharing.util.GroupVerification
-import com.dashlane.sharing.util.ProposeSignatureVerification
 import com.dashlane.sharing.util.SharingCryptographyHelper
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.xml.domain.objectType
@@ -55,8 +61,7 @@ class SharingItemUpdater @Inject constructor(
     private val autoAcceptItemGroup: AutoAcceptItemGroup,
     private val sharingInvitePublicKeyUser: SharingInvitePublicKeyUser,
     private val deleteItemGroupService: DeleteItemGroupService,
-    private val proposeSignatureVerification: ProposeSignatureVerification,
-    private val appEvents: AppEvents
+    private val appEvents: AppEvents,
 ) {
     private val mutex = Mutex()
 
@@ -73,7 +78,6 @@ class SharingItemUpdater @Inject constructor(
         val groupVerification = GroupVerification(
             session.userId,
             sharingCryptographyHelper,
-            proposeSignatureVerification
         )
         mutex.withLock {
             withContext(Dispatchers.IO) {
@@ -92,7 +96,7 @@ class SharingItemUpdater @Inject constructor(
         request: SharingItemUpdaterRequest,
         session: Session,
         groupVerification: GroupVerification,
-        iteration: Int = 0
+        iteration: Int = 0,
     ) {
         if (iteration > 5) {
             
@@ -118,21 +122,29 @@ class SharingItemUpdater @Inject constructor(
             groupVerification,
             request.itemGroupUpdates,
             myUserGroups,
-            myCollections
+            myCollections,
         )
         sharingDao.deleteItemGroups(memory, request.itemGroupsDeletionIds)
 
         val itemContents = request.itemContentUpdates
         val itemGroupsFilter = getItemGroupsToUpdate(memory, itemContents, itemGroups)
 
-        val updatedGroups1 = itemGroupsFilter.map {
-            it.updateItemsWithinItemGroup(
-                memory,
-                itemContents,
-                myUserGroups,
-                myCollections,
-                session
-            )
+        val updatedGroups1 = itemGroupsFilter.mapNotNull {
+            try {
+                it.updateItemsWithinItemGroup(
+                    memory,
+                    itemContents,
+                    myUserGroups,
+                    myCollections,
+                    session,
+                )
+            } catch (e: Exception) {
+                    message = "Error in syncSharing with one itemGroup update. ItemGroup is ignored",
+                    throwable = e,
+                )
+                
+                null
+            }
         }
 
         
@@ -149,7 +161,7 @@ class SharingItemUpdater @Inject constructor(
             val newRequest = SharingItemUpdaterRequest(
                 itemGroupUpdates = itemGroupsUpdated,
                 userGroupUpdates = userGroupsUpdated,
-                collectionUpdates = collectionsUpdated
+                collectionUpdates = collectionsUpdated,
             )
             update(memory, newRequest, session, groupVerification, iteration + 1)
         }
@@ -160,7 +172,7 @@ class SharingItemUpdater @Inject constructor(
         itemContentsToUpdate: List<ItemContent>,
         myUserGroups: List<UserGroup>,
         myCollections: List<Collection>,
-        session: Session
+        session: Session,
     ): Pair<List<ItemGroup>, List<UserGroup>> {
         val login = session.userId
         val userDownload = getUser(login)
@@ -174,7 +186,8 @@ class SharingItemUpdater @Inject constructor(
 
         
         
-        if (isAlone(login) && Permission.ADMIN == getUserPermission(login)) {
+        
+        if (isAlone(login) && Permission.ADMIN == getUserPermission(login) && Status.ACCEPTED == userDownload?.status) {
             
             
             deleteItemGroupRemotelyAndKeepItems(memory, session)
@@ -187,14 +200,14 @@ class SharingItemUpdater @Inject constructor(
             itemContentsToUpdate,
             userDownload,
             myUserGroups,
-            myCollections
+            myCollections,
         )
     }
 
     private fun ItemGroup.isNotForMe(
         myUserGroups: List<UserGroup>,
         userDownload: UserDownload?,
-        myCollections: List<Collection>
+        myCollections: List<Collection>,
     ) = !hasUserGroupsAcceptedOrPending(myUserGroups) &&
         (userDownload == null || !userDownload.isAcceptedOrPending) &&
         !hasCollectionsAcceptedOrPending(myCollections)
@@ -205,7 +218,7 @@ class SharingItemUpdater @Inject constructor(
         itemContentsToUpdate: List<ItemContent>,
         userDownload: UserDownload?,
         myUserGroups: List<UserGroup>,
-        myCollections: List<Collection>
+        myCollections: List<Collection>,
     ): Pair<List<ItemGroup>, List<UserGroup>> {
         if (userDownload == null && myUserGroups.isEmpty() && myCollections.isEmpty()) {
             return emptyPairListGroup()
@@ -216,7 +229,7 @@ class SharingItemUpdater @Inject constructor(
             login,
             myUserGroups,
             myCollections,
-            sharingCryptographyHelper
+            sharingCryptographyHelper,
         ) ?: return emptyPairListGroup()
 
         val myUserGroupsMember = getUserGroupMembers(myUserGroups)
@@ -253,7 +266,7 @@ class SharingItemUpdater @Inject constructor(
         item: ItemGroup.Item,
         groupKeyLazy: GroupKeyLazy,
         maxPermission: Permission,
-        maxStatus: Status
+        maxStatus: Status,
     ): Boolean {
         val groupKey = groupKeyLazy.get() ?: return false
         var updatedItem = false
@@ -273,17 +286,17 @@ class SharingItemUpdater @Inject constructor(
         item: ItemGroup.Item,
         groupKey: CryptographyKey.Raw32,
         userPermission: Permission,
-        userStatus: Status
+        userStatus: Status,
     ): Boolean {
         val itemId = item.itemId
         val itemKey = sharingCryptographyHelper.decryptItemKey(
             item.itemKey,
-            groupKey
+            groupKey,
         ) ?: return false
 
         val extraData = sharingCryptographyHelper.decryptItemContent(
             content,
-            itemKey
+            itemKey,
         )
 
         if (extraData.isNullOrEmpty()) {
@@ -315,7 +328,7 @@ class SharingItemUpdater @Inject constructor(
     private suspend fun insertOrUpdate(
         memory: SharingDaoMemoryDataAccess,
         itemUid: String,
-        permission: Permission
+        permission: Permission,
     ) {
         val vaultItem = genericDataQuery.getSharableItem(itemUid)
         if (vaultItem == null) {
@@ -332,26 +345,27 @@ class SharingItemUpdater @Inject constructor(
 
     private suspend fun ItemGroup.autoAcceptIfNecessary(
         session: Session,
-        myUserGroups: List<UserGroup>
+        myUserGroups: List<UserGroup>,
     ): Pair<List<ItemGroup>, List<UserGroup>> {
-        return autoAcceptItemGroup.execute(session, this, myUserGroups)
+        return autoAcceptItemGroup.execute(session.userId, session.authorization, this, myUserGroups)
     }
 
     private suspend fun invitePublicKeyUsers(
         session: Session,
         itemGroups: List<ItemGroup>,
         myUserGroupsAcceptedOrPending: List<UserGroup>,
-        myCollectionsAcceptedOrPending: List<Collection>
+        myCollectionsAcceptedOrPending: List<Collection>,
     ) = sharingInvitePublicKeyUser.execute(
-        session,
+        session.userId,
+        session.authorization,
         itemGroups,
         myUserGroupsAcceptedOrPending,
-        myCollectionsAcceptedOrPending
+        myCollectionsAcceptedOrPending,
     )
 
     private suspend fun ItemGroup.deleteItemGroupRemotelyAndKeepItems(
         memory: SharingDaoMemoryDataAccess,
-        session: Session
+        session: Session,
     ) {
         items?.forEach { item ->
             val itemId = item.itemId
@@ -374,15 +388,15 @@ class SharingItemUpdater @Inject constructor(
             session.authorization,
             DeleteItemGroupService.Request(
                 groupId = DeleteItemGroupService.Request.GroupId(groupId),
-                revision = revision
-            )
+                revision = revision,
+            ),
         )
     }
 
     private fun saveUserGroupsDownload(
         memory: SharingDaoMemoryDataAccess,
         groupVerification: GroupVerification,
-        list: List<UserGroup>
+        list: List<UserGroup>,
     ): List<UserGroup> {
         return list.filter { userGroup ->
             groupVerification.isValid(userGroup)
@@ -393,7 +407,7 @@ class SharingItemUpdater @Inject constructor(
         memory: SharingDaoMemoryDataAccess,
         groupVerification: GroupVerification,
         myUserGroups: List<UserGroup>,
-        list: List<Collection>
+        list: List<Collection>,
     ): List<Collection> {
         return list.filter { collection ->
             groupVerification.isValid(collection, myUserGroups)
@@ -405,7 +419,7 @@ class SharingItemUpdater @Inject constructor(
         groupVerification: GroupVerification,
         itemGroups: List<ItemGroup>,
         myUserGroups: List<UserGroup>,
-        myCollections: List<Collection>
+        myCollections: List<Collection>,
     ): List<ItemGroup> {
         return itemGroups.filter { itemGroup ->
             groupVerification.isValid(itemGroup, myUserGroups, myCollections)
@@ -415,7 +429,7 @@ class SharingItemUpdater @Inject constructor(
     private fun getItemGroupsToUpdate(
         memory: SharingDaoMemoryDataAccess,
         itemContentsToSave: List<ItemContent>,
-        itemGroupsToSave: List<ItemGroup>
+        itemGroupsToSave: List<ItemGroup>,
     ): List<ItemGroup> {
         return if (itemContentsToSave.isEmpty()) {
             itemGroupsToSave
@@ -441,7 +455,7 @@ class SharingItemUpdater @Inject constructor(
 
     private fun loadMyUserGroups(
         memory: SharingDaoMemoryDataAccess,
-        userId: String
+        userId: String,
     ): List<UserGroup> {
         return memory.loadUserGroupsAcceptedOrPending(userId)
     }
@@ -449,7 +463,7 @@ class SharingItemUpdater @Inject constructor(
     private fun loadMyCollections(
         memory: SharingDaoMemoryDataAccess,
         userId: String,
-        myUserGroupsAcceptedOrPending: List<UserGroup>
+        myUserGroupsAcceptedOrPending: List<UserGroup>,
     ): List<Collection> {
         return memory.loadCollectionsAcceptedOrPending(userId, myUserGroupsAcceptedOrPending)
     }

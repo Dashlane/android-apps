@@ -3,20 +3,20 @@ package com.dashlane.login.pages.secrettransfer.universal.intro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dashlane.account.UserAccountStorage
-import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
 import com.dashlane.authentication.login.AuthenticationSecretTransferRepository
 import com.dashlane.cryptography.decodeBase64ToByteArray
 import com.dashlane.cryptography.decodeUtf8ToString
 import com.dashlane.cryptography.encodeBase64ToString
 import com.dashlane.cryptography.encodeUtf8ToByteArray
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SecurityFeature
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.login.LoginRepository
 import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.Initial
 import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.LoadingAccount
 import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.LoadingPassphrase
 import com.dashlane.login.pages.secrettransfer.universal.intro.UniversalIntroState.View.PassphraseVerification
-import com.dashlane.login.root.LoginRepository
 import com.dashlane.mvvm.MutableViewStateFlow
 import com.dashlane.mvvm.ViewStateFlow
 import com.dashlane.nitro.cryptography.sodium.SodiumCryptography
@@ -34,10 +34,7 @@ import com.dashlane.server.api.endpoints.secrettransfer.TransferType
 import com.dashlane.server.api.exceptions.DashlaneApiHttp504Exception
 import com.dashlane.user.UserSecuritySettings
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
-import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.jetbrains.annotations.VisibleForTesting
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -48,6 +45,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import org.jetbrains.annotations.VisibleForTesting
+import javax.inject.Inject
 
 @HiltViewModel
 class UniversalIntroViewModel @Inject constructor(
@@ -61,11 +61,9 @@ class UniversalIntroViewModel @Inject constructor(
     private val deviceInfoRepository: DeviceInfoRepository,
     private val userAccountStorage: UserAccountStorage,
     private val authenticationSecretTransferRepository: AuthenticationSecretTransferRepository,
-    private val moshi: Moshi,
     private val secretTransferAnalytics: SecretTransferAnalytics,
-    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
     private val _stateFlow =
         MutableViewStateFlow<UniversalIntroState.View, UniversalIntroState.SideEffect>(Initial)
 
@@ -105,7 +103,7 @@ class UniversalIntroViewModel @Inject constructor(
 
             val receiverSessionKeys = sodiumCryptography.keyExchangeClientSessionKeys(
                 clientKeyPair = keyPair,
-                serverPublicKey = senderPublicKey.decodeBase64ToByteArray()
+                serverPublicKey = senderPublicKey.decodeBase64ToByteArray(),
             ) ?: run {
                 throw IllegalStateException()
             }
@@ -115,7 +113,7 @@ class UniversalIntroViewModel @Inject constructor(
                 sodiumCryptography = sodiumCryptography,
                 sessionKey = receiverSessionKeys.rx,
                 login = email,
-                transferId = transferId
+                transferId = transferId,
             )
 
             secretTransferAnalytics.pageView(AnyPage.LOGIN_DEVICE_TRANSFER_SECURITY_CHALLENGE)
@@ -132,14 +130,14 @@ class UniversalIntroViewModel @Inject constructor(
                 transferId = transferId,
                 receiverSessionKeys = receiverSessionKeys,
                 encryptedData = startTransferData.encryptedData,
-                nonce = startTransferData.nonce
+                nonce = startTransferData.nonce,
             )
 
             val registeredUserDevice = registrationWithAuthTicket(
                 login = secretTransferPayload.login,
                 token = secretTransferPayload.token ?: throw IllegalStateException(),
                 securityFeatures = emptySet(),
-                remoteKeyType = RemoteKey.Type.MASTER_PASSWORD
+                remoteKeyType = RemoteKey.Type.MASTER_PASSWORD,
             )
             loginRepository.updateRegisteredUserDevice(registeredUserDevice = registeredUserDevice)
             _stateFlow.send(UniversalIntroState.SideEffect.Success(secretTransferPayload = secretTransferPayload))
@@ -164,7 +162,7 @@ class UniversalIntroViewModel @Inject constructor(
         val transfer = RequestTransferService.Request.Transfer(
             transferType = TransferType.UNIVERSAL,
             receiverDeviceName = deviceInfoRepository.deviceName,
-            login = email
+            login = email,
         )
         val request = RequestTransferService.Request(transfer)
         return requestTransferService.execute(request).data
@@ -196,17 +194,17 @@ class UniversalIntroViewModel @Inject constructor(
         transferId: String,
         receiverSessionKeys: ClientKeyPair,
         encryptedData: String,
-        nonce: String
+        nonce: String,
     ): SecretTransferPayload {
         val message = "${SodiumCryptography.ENCRYPTION_KEY_HEADER}${email.length}$email$transferId".encodeUtf8ToByteArray()
         val receiverSecretKey = sodiumCryptography.genericHash(message, receiverSessionKeys.rx)
         val decryptedData = sodiumCryptography.secretboxOpenEasy(
             cipherText = encryptedData.decodeBase64ToByteArray(),
             nonce = nonce.decodeBase64ToByteArray(),
-            key = receiverSecretKey
+            key = receiverSecretKey,
         )?.decodeUtf8ToString() ?: throw Exception()
 
-        return moshi.adapter(SecretTransferPayload::class.java).fromJson(decryptedData) ?: throw Exception()
+        return Json.decodeFromString<SecretTransferPayload>(decryptedData)
     }
 
     @VisibleForTesting
@@ -214,14 +212,14 @@ class UniversalIntroViewModel @Inject constructor(
         login: String,
         token: String,
         securityFeatures: Set<SecurityFeature>,
-        remoteKeyType: RemoteKey.Type
+        remoteKeyType: RemoteKey.Type,
     ): RegisteredUserDevice.Remote {
         userAccountStorage.saveSecuritySettings(username = login, securitySettings = UserSecuritySettings(isToken = true))
         return authenticationSecretTransferRepository.register(
             login = login,
             securityFeatures = securityFeatures,
             token = token,
-            remoteKeyType = remoteKeyType
+            remoteKeyType = remoteKeyType,
         )
     }
 }

@@ -9,7 +9,7 @@ fun ProgressBar.tintProgressDrawable(
     @ColorInt
     foregroundTintColor: Int,
     @ColorInt
-    backgroundTintColor: Int = context.getColor(R.color.border_neutral_quiet_idle)
+    backgroundTintColor: Int = context.getColor(R.color.border_neutral_quiet_idle),
 ) {
     val progressDrawable = progressDrawable ?: return
     if (progressDrawable !is LayerDrawable) return

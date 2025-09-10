@@ -7,7 +7,8 @@ inline fun <T> tryOrNull(block: () -> T): T? = try {
 }
 
 inline fun tryAsSuccess(block: () -> Unit): Boolean = try {
-    block(); true
+    block()
+    true
 } catch (ignored: Exception) {
     false
 }

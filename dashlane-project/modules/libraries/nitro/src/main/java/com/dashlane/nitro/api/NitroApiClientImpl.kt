@@ -22,9 +22,8 @@ internal class NitroApiClientImpl(
     private val apiClient: DashlaneApiClient,
     private val nitroSecretStreamClient: NitroSecretStreamClient,
     private val secretStreamStates: SecretStreamStates,
-    private val coroutineDispatcher: CoroutineDispatcher
+    private val coroutineDispatcher: CoroutineDispatcher,
 ) : NitroApiClient(apiClient.gson) {
-
     
     
     override suspend fun <ResponseDataT> execute(
@@ -34,7 +33,7 @@ internal class NitroApiClientImpl(
         businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
         clock: DashlaneTime.SynchronizedClock,
         appAuthorization: Authorization.App,
-        userAuthorization: Authorization.User
+        userAuthorization: Authorization.User,
     ): Response<ResponseDataT> = execute(path, request, responseDataClass, businessExceptions)
 
     override suspend fun <ResponseDataT> execute(
@@ -43,20 +42,20 @@ internal class NitroApiClientImpl(
         responseDataClass: Class<ResponseDataT>,
         businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
         clock: DashlaneTime.SynchronizedClock,
-        appAuthorization: Authorization.App
+        appAuthorization: Authorization.App,
     ): Response<ResponseDataT> = execute(path, request, responseDataClass, businessExceptions)
 
     override suspend fun <ResponseDataT> execute(
         path: String,
         request: Any,
         responseDataClass: Class<ResponseDataT>,
-        businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>
+        businessExceptions: Map<String, (String?, Throwable?, String, String?) -> DashlaneApiHttp400BusinessException>,
     ): Response<ResponseDataT> = withContext(coroutineDispatcher) {
         val encryptedRequest = createRequest(request)
         val response: Response<String> = apiClient.execute(
             path = path,
             request = encryptedRequest,
-            businessExceptions = businessExceptions
+            businessExceptions = businessExceptions,
         )
         decryptResponse(response, responseDataClass)
     }
@@ -66,13 +65,13 @@ internal class NitroApiClientImpl(
             synchronized(secretStreamStates) {
                 nitroSecretStreamClient.encryptSecretStream(
                     states = secretStreamStates,
-                    message = gson.toJson(request).encodeUtf8ToByteArray()
+                    message = gson.toJson(request).encodeUtf8ToByteArray(),
                 )
             }.encodeHex()
         } catch (e: Throwable) {
             throw DashlaneApiJsonException(
                 message = "Failed to craft secret stream request",
-                cause = e
+                cause = e,
             )
         }
         return Request(secretStreamRequestData)
@@ -80,33 +79,33 @@ internal class NitroApiClientImpl(
 
     private fun <ResponseDataT> decryptResponse(
         response: Response<String>,
-        responseDataClass: Class<ResponseDataT>
+        responseDataClass: Class<ResponseDataT>,
     ): Response<ResponseDataT> {
         val responseData = try {
             gson.fromJson(
                 synchronized(secretStreamStates) {
                     nitroSecretStreamClient.decryptSecretStream(
                         states = secretStreamStates,
-                        encrypted = response.data.decodeHex().toByteArray()
+                        encrypted = response.data.decodeHex().toByteArray(),
                     )
                 }.decodeUtf8ToString(),
-                responseDataClass
+                responseDataClass,
             )
         } catch (e: Throwable) {
             throw DashlaneApiJsonException(
                 message = "Failed to read secret stream response",
-                cause = e
+                cause = e,
             )
         }
 
         return Response(
             requestId = response.requestId,
-            data = responseData
+            data = responseData,
         )
     }
 
     private data class Request(
         @SerializedName("data")
-        val data: String
+        val data: String,
     )
 }

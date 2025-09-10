@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Dashlane.Transparent.Separator" parent="Theme.Dashlane.Transparent">
+        <item name="android:windowBackground">?dividerHorizontal</item>
+    </style>
+</resources>

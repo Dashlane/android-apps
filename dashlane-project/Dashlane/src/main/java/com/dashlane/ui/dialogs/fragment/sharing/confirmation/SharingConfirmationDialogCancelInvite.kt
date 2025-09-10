@@ -11,7 +11,6 @@ import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 class SharingConfirmationDialogCancelInvite :
     NotificationDialogFragment(),
     NotificationDialogFragment.TwoButtonClicker {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         clicker = this
         return super.onCreateDialog(savedInstanceState)
@@ -20,7 +19,7 @@ class SharingConfirmationDialogCancelInvite :
     override fun onPositiveButton() {
         setFragmentResult(
             REQUEST_KEY,
-            requireArguments()
+            requireArguments(),
         )
     }
 
@@ -57,20 +56,20 @@ class SharingConfirmationDialogCancelInvite :
                 bundleOf(
                     CANCEL_ITEM_GROUP_ID to itemGroupId,
                     CANCEL_FOR_USER_ID to userId,
-                    CANCEL_FOR_USER_GROUP_ID to userGroupId
-                )
+                    CANCEL_FOR_USER_GROUP_ID to userGroupId,
+                ),
             ).setTitle(context, R.string.sharing_confirmation_popup_title_cancel_invite)
                 .setMessage(
                     context,
-                    R.string.sharing_confirmation_popup_description_cancel_invite
+                    R.string.sharing_confirmation_popup_description_cancel_invite,
                 )
                 .setPositiveButtonText(
                     context,
-                    R.string.sharing_confirmation_popup_btn_confirm_cancel_invite
+                    R.string.sharing_confirmation_popup_btn_confirm_cancel_invite,
                 )
                 .setNegativeButtonText(
                     context,
-                    R.string.sharing_confirmation_popup_btn_cancel_cancel_invite
+                    R.string.sharing_confirmation_popup_btn_cancel_cancel_invite,
                 )
                 .build(SharingConfirmationDialogCancelInvite())
         }

@@ -1,10 +1,11 @@
 package com.dashlane.notification.model
 
 import android.content.Context
-import com.dashlane.sync.DataSync
+import com.dashlane.BuildConfig
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.notification.FcmMessage
 import com.dashlane.session.SessionManager
+import com.dashlane.sync.DataSync
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -12,9 +13,9 @@ class SyncNotificationHandler(
     context: Context,
     message: FcmMessage,
     val dataSync: DataSync,
-    val sessionManager: SessionManager
+    val sessionManager: SessionManager,
 ) :
-    AbstractNotificationHandler(context, message) {
+    AbstractNotificationHandler(BuildConfig.APPLICATION_ID, context, message) {
     private var deviceId: String? = null
 
     init {
@@ -33,7 +34,6 @@ class SyncNotificationHandler(
             val jsonFormattedData = JSONObject(gcmData)
             deviceId = jsonFormattedData.optString(JSON_KEY_DEVICE_ID)
         } catch (e: JSONException) {
-            warn("parseMessage exception", "", e)
         }
     }
 

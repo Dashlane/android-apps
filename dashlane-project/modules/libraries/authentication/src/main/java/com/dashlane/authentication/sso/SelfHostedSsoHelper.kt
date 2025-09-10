@@ -6,11 +6,10 @@ import com.dashlane.authentication.sso.utils.toIdpUrl
 import com.dashlane.authentication.sso.utils.toUserSsoInfo
 
 object SelfHostedSsoHelper {
-
     fun getServiceProviderIntent(serviceProviderUrl: String, login: String): Intent? {
         return Intent(
             Intent.ACTION_VIEW,
-            serviceProviderUrl.toIdpUrl(login)
+            serviceProviderUrl.toIdpUrl(login),
         )
     }
 

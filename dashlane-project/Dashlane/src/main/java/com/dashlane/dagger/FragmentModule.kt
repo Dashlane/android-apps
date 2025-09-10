@@ -12,7 +12,6 @@ import dagger.hilt.android.components.FragmentComponent
 @Module
 @InstallIn(FragmentComponent::class)
 object FragmentModule {
-
     @Provides
     @FragmentLifecycleCoroutineScope
     fun provideLifecycleCoroutineScope(fragment: Fragment): LifecycleCoroutineScope =

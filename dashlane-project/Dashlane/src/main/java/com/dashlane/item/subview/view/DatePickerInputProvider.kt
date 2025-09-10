@@ -14,7 +14,6 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 object DatePickerInputProvider {
-
     const val DATE_PICKER_DIALOG_TAG = "date_picker_dialog"
 
     fun create(activity: AppCompatActivity, lockManager: LockManager, header: String, value: String?): TextInputLayout {
@@ -25,7 +24,7 @@ object DatePickerInputProvider {
         activity: AppCompatActivity,
         textInputLayout: TextInputLayout,
         originalDate: LocalDate?,
-        dateSetAction: (LocalDate) -> Unit
+        dateSetAction: (LocalDate) -> Unit,
     ) {
         val clickListener = View.OnClickListener {
             val date = originalDate ?: LocalDate.now()

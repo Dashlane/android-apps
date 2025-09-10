@@ -4,6 +4,9 @@ import com.github.devnied.emvnfccard.model.Application;
 
 import java.util.List;
 
+import androidx.annotation.Keep;
+
+@Keep
 public enum ApplicationStepEnum implements IKeyEnum {
 
 	NOT_SELECTED(0),

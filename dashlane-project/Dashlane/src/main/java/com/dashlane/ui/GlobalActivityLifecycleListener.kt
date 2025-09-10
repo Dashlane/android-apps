@@ -13,9 +13,9 @@ import com.dashlane.announcements.AnnouncementsActivityLifecycle
 import com.dashlane.applinkfetcher.AuthentifiantAppLinkDownloader
 import com.dashlane.breach.BreachManagerActivityListener
 import com.dashlane.collections.sharing.CollectionSharingResultActivityListener
+import com.dashlane.csvexport.CSVExportResultActivityListener
 import com.dashlane.hermes.LogFlush
 import com.dashlane.hermes.LogFlushLifecycleObserver
-import com.dashlane.limitations.DeviceLimitActivityListener
 import com.dashlane.limitations.Enforce2faLimiter
 import com.dashlane.locking.controllers.LockManagerActivityListener
 import com.dashlane.locking.controllers.LockSelfCheckActivityListener
@@ -25,12 +25,10 @@ import com.dashlane.login.controller.TokenReceiverActivityListener
 import com.dashlane.navigation.Navigator
 import com.dashlane.notification.LocalNotificationCenterActivityListener
 import com.dashlane.notification.badge.NotificationBadgeActivityListener
-import com.dashlane.securearchive.BackupCoordinatorImpl
 import com.dashlane.security.HideOverlayWindowActivityListener
 import com.dashlane.security.TouchFilterActivityListener
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.update.AppUpdateNeededActivityListener
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,7 +38,6 @@ class GlobalActivityLifecycleListener @Inject constructor(
     announcementsActivityLifecycle: AnnouncementsActivityLifecycle,
     lockManagerActivityListener: LockManagerActivityListener,
     applicationForegroundChecker: ApplicationForegroundChecker,
-    backupIntentCoordinator: BackupCoordinatorImpl,
     tokenReceiverActivityListener: TokenReceiverActivityListener,
     numberOfRunsActivityListener: NumberOfRunsActivityListener,
     authentifiantAppLinkDownloader: AuthentifiantAppLinkDownloader,
@@ -48,9 +45,7 @@ class GlobalActivityLifecycleListener @Inject constructor(
     notificationBadgeActivityListener: NotificationBadgeActivityListener,
     localNotificationCenterActivityListener: LocalNotificationCenterActivityListener,
     breachManagerActivityListener: BreachManagerActivityListener,
-    appUpdateNeededActivityListener: AppUpdateNeededActivityListener,
     lockSelfCheckActivityListener: LockSelfCheckActivityListener,
-    deviceLimitActivityListener: DeviceLimitActivityListener,
     touchFilterActivityListener: TouchFilterActivityListener,
     hideOverlayWindowActivityListener: HideOverlayWindowActivityListener,
     collectionSharingResultActivityListener: CollectionSharingResultActivityListener,
@@ -58,8 +53,8 @@ class GlobalActivityLifecycleListener @Inject constructor(
     navigator: Navigator,
     enforce2faLimiter: Enforce2faLimiter,
     accountRecoveryKeyEnforcer: AccountRecoveryKeyEnforcer,
+    csvExportResultActivityListener: CSVExportResultActivityListener,
 ) : ActivityLifecycleListener {
-
     private val activityLifecycleListeners = mutableListOf<ActivityLifecycleListener>()
 
     private val allListeners: Array<ActivityLifecycleListener>
@@ -83,7 +78,6 @@ class GlobalActivityLifecycleListener @Inject constructor(
         register(lockManagerActivityListener)
         register(ActivityLifecycleLoggerListener())
         register(applicationForegroundChecker)
-        register(backupIntentCoordinator.activityLifecycleListener)
         register(tokenReceiverActivityListener)
         register(numberOfRunsActivityListener)
         register(authentifiantAppLinkDownloader)
@@ -91,13 +85,12 @@ class GlobalActivityLifecycleListener @Inject constructor(
         register(notificationBadgeActivityListener)
         register(localNotificationCenterActivityListener)
         register(breachManagerActivityListener)
-        register(appUpdateNeededActivityListener)
         register(lockSelfCheckActivityListener)
         register(navigator as ActivityLifecycleListener)
-        register(deviceLimitActivityListener)
         register(enforce2faLimiter)
         register(collectionSharingResultActivityListener)
         register(accountRecoveryKeyEnforcer)
+        register(csvExportResultActivityListener)
     }
 
     override fun register(application: Application) {
@@ -187,9 +180,8 @@ class GlobalActivityLifecycleListener @Inject constructor(
     }
 
     private class ApplicationProcessLifecycleObserver(
-        private val globalActivityLifecycleListener: GlobalActivityLifecycleListener
+        private val globalActivityLifecycleListener: GlobalActivityLifecycleListener,
     ) : LifecycleEventObserver {
-
         override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
             when (event) {
                 Lifecycle.Event.ON_CREATE -> globalActivityLifecycleListener.onFirstActivityCreated()

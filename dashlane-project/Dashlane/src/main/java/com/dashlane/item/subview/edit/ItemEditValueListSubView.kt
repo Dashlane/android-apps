@@ -6,7 +6,7 @@ class ItemEditValueListSubView(
     var title: String,
     override var value: String,
     var values: List<String>,
-    valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?
+    valueUpdate: (VaultItem<*>, String) -> VaultItem<*>?,
 ) : ItemEditValueSubView<String>(valueUpdate) {
     var invisible: Boolean = false
 }

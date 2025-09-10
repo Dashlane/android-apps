@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/download_user_data.json",
+  "type": "object",
+  "description": "When an admin downloads user logins data from TAC (if they have item visibility enabled).",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "download_user_data"
+    },
+    "data_source": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/data_source"
+    },
+    "file_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/backup_file_type"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    }
+  },
+  "required": [
+    "name",
+    "data_source",
+    "file_type",
+    "flow_step"
+  ],
+  "additionalProperties": false
+}

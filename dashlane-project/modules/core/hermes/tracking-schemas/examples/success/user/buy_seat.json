@@ -1,0 +1,40 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "os": {
+        "type": "linux",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2108.0-armeabi-v7a",
+      "platform": "saex",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "tac",
+    "origin_page": "tac"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 12
+  },
+  "properties": {
+    "name": "buy_seat",
+    "error_checkout": "authentication",
+    "flow_step": "start",
+    "has_promo": true,
+    "initial_seat_count": 5,
+    "price_amount_cents": 100,
+    "price_currency_code": "gbp",
+    "purchased_seat_count": 3
+  }
+}

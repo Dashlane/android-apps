@@ -8,13 +8,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class StrengthLevelUpdater(private val coroutineScope: CoroutineScope) {
-
     private var lastJob: Job? = null
 
     fun updateWith(
         passwordEvaluator: PasswordStrengthEvaluator,
         password: String,
-        action: (PasswordStrength) -> Unit
+        action: (PasswordStrength) -> Unit,
     ) {
         lastJob?.cancel()
         lastJob = coroutineScope.launch(Dispatchers.Main) {

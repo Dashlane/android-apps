@@ -12,23 +12,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import com.dashlane.R
-import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.crashreport.CrashReporterManager
 import com.dashlane.events.AppEvents
 import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.followupnotification.services.FollowUpNotificationDiscoveryService
 import com.dashlane.frozenaccount.FrozenStateManager
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.item.nfc.NfcHelper
 import com.dashlane.item.subview.ViewFactory
 import com.dashlane.lock.LockManager
 import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.SchemeUtils.getDataType
-import com.dashlane.passwordstrength.PasswordStrengthEvaluator
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
 import com.dashlane.sharingpolicy.SharingPolicyDataProvider
-import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.teamspaces.ui.TeamSpaceRestrictionNotificator
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.Toaster
@@ -39,8 +35,8 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.util.PresenterOwner
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ItemEditViewActivity :
@@ -62,16 +58,7 @@ class ItemEditViewActivity :
     lateinit var crashReporterManager: CrashReporterManager
 
     @Inject
-    lateinit var authenticatorLogger: AuthenticatorLogger
-
-    @Inject
     lateinit var toaster: Toaster
-
-    @Inject
-    lateinit var passwordStrengthEvaluator: PasswordStrengthEvaluator
-
-    @Inject
-    lateinit var vaultDataQuery: VaultDataQuery
 
     @Inject
     lateinit var lockManager: LockManager
@@ -99,14 +86,12 @@ class ItemEditViewActivity :
     lateinit var navigator: Navigator
 
     lateinit var presenterOwner: PresenterOwner<ItemEditViewPresenter, ItemEditViewContract.View>
-    lateinit var nfcHelper: NfcHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         presenterOwner = PresenterOwner(this)
         onCreateDelegate(savedInstanceState)
         setupPresenter(savedInstanceState)
-        nfcHelper = NfcHelper(this)
 
         val coordinatorLayout = findViewById<CoordinatorLayout>(R.id.view_coordinator_layout)
         ViewCompat.setOnApplyWindowInsetsListener(coordinatorLayout) { v, windowInsets ->
@@ -126,20 +111,9 @@ class ItemEditViewActivity :
         presenterOwner.presenter.onStart()
     }
 
-    override fun onResume() {
-        super.onResume()
-        nfcHelper.enableDispatch()
-    }
-
     override fun onPause() {
         super.onPause()
         presenter.onPause()
-        nfcHelper.disableDispatch()
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        presenter.onNewIntent(intent)
     }
 
     @Suppress("DEPRECATION")
@@ -186,7 +160,7 @@ class ItemEditViewActivity :
                 super@ItemEditViewActivity.startActivityForResult(
                     intent,
                     requestCode,
-                    options
+                    options,
                 )
             }
         })
@@ -197,7 +171,7 @@ class ItemEditViewActivity :
             override fun onCompletion() {
                 super@ItemEditViewActivity.startActivity(
                     intent,
-                    options
+                    options,
                 )
             }
         })
@@ -207,7 +181,7 @@ class ItemEditViewActivity :
         return presenter.createMenu(
             menu = menu,
             teamspaceRestrictionNotificator = teamspaceRestrictionNotificator,
-            openItemHistory = ::openItemHistory
+            openItemHistory = ::openItemHistory,
         )
     }
 
@@ -238,9 +212,6 @@ class ItemEditViewActivity :
             viewFactory = ViewFactory(this, toaster, lockManager),
             lifecycleOwner = this,
             navigator = navigator,
-            authenticatorLogger = authenticatorLogger,
-            passwordStrengthEvaluator = passwordStrengthEvaluator,
-            vaultDataQuery = vaultDataQuery
         )
     }
 
@@ -291,7 +262,7 @@ class ItemEditViewActivity :
             args.successIntent,
             screenConfig,
             additionalData,
-            args.otp
+            args.otp,
         )
         presenter.setup(this, screenOptions)
 
@@ -323,7 +294,7 @@ class ItemEditViewActivity :
     }
 
     private fun openItemHistory(authentifiant: SyncObject.Authentifiant) {
-        navigator.goToItemHistory(authentifiant.id!!)
+        navigator.goToItemHistoryFromItemEdit(authentifiant.id!!)
     }
 
     companion object {
@@ -332,6 +303,7 @@ class ItemEditViewActivity :
         private const val PARAM_TOOLBAR_COLLAPSED = "param_toolbar_collapsed"
         private const val PARAM_SCREEN_CONFIGURATION = "param_screen_configuration"
         private const val PARAM_ADDITIONAL_DATA = "param_additional_data"
+
         private fun getDetailPage(dataType: SyncObjectType): AnyPage? {
             return when (dataType) {
                 SyncObjectType.AUTHENTIFIANT -> AnyPage.ITEM_CREDENTIAL_DETAILS

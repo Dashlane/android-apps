@@ -24,20 +24,24 @@ interface SharingUsersForItemViewModelContract {
     fun onChangePermission(
         itemGroup: ItemGroup,
         newPermission: Permission,
-        memberLogin: String
+        memberLogin: String,
     )
 
     fun onChangePermissionUserGroup(
         itemGroup: ItemGroup,
         newPermission: Permission,
-        userGroupId: String
+        userGroupId: String,
     )
 
     sealed class UIState {
         object Loading : UIState()
+
         object RequestLoading : UIState()
+
         object RequestSuccess : UIState()
+
         object RequestFailure : UIState()
+
         data class Data(val items: List<SharingModels> = emptyList()) : UIState()
     }
 }

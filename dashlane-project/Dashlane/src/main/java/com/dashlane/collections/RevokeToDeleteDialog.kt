@@ -12,7 +12,7 @@ import com.dashlane.design.theme.tooling.DashlanePreview
 @Composable
 fun RevokeToDeleteDialog(
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -23,7 +23,7 @@ fun RevokeToDeleteDialog(
         title = stringResource(id = R.string.collections_revoke_to_delete_dialog_title),
         description = {
             Text(text = stringResource(id = R.string.collections_revoke_to_delete_dialog_text))
-        }
+        },
     )
 }
 
@@ -33,7 +33,7 @@ private fun RevokeToDeleteDialogPreview() {
     DashlanePreview {
         RevokeToDeleteDialog(
             onDismiss = {},
-            onConfirm = {}
+            onConfirm = {},
         )
     }
 }

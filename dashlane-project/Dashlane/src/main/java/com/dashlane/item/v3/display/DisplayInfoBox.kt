@@ -24,14 +24,11 @@ import com.dashlane.ui.model.getText
 @Suppress("LongMethod")
 fun LazyListScope.displayInfoBox(
     infoBoxes: List<InfoBoxData>,
-    editMode: Boolean,
-    onInfoBoxActionClicked: (InfoBoxData.Button.Action) -> Unit
+    onInfoBoxActionClicked: (InfoBoxData.Button.Action) -> Unit,
 ) {
-    if (editMode) return
-
     items(
         items = infoBoxes,
-        key = { it.hashCode() }
+        key = { it.hashCode() },
     ) {
         when (it.infoboxStyle) {
             InfoboxStyle.LARGE -> {
@@ -47,7 +44,7 @@ fun LazyListScope.displayInfoBox(
                             text = button.text.getText(),
                             onClick = { onInfoBoxActionClicked(button.action) },
                         )
-                    }
+                    },
                 )
             }
             InfoboxStyle.MEDIUM -> {
@@ -57,7 +54,7 @@ fun LazyListScope.displayInfoBox(
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                     title = it.title.getText(),
                     description = it.description?.getText(),
-                    mood = it.mood
+                    mood = it.mood,
                 )
             }
         }
@@ -70,11 +67,9 @@ private fun InfoBoxPreview() {
     DashlanePreview {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             displayInfoBox(
-                editMode = false,
                 infoBoxes = generatePreviewInfoBoxes(),
-            ) {
-                
-            }
+                onInfoBoxActionClicked = {},
+            )
         }
     }
 }
@@ -84,9 +79,9 @@ private fun generatePreviewInfoBoxes() = listOf(
         title = TextResource.StringText(R.string.frozen_account_item_edit_banner_title),
         description = TextResource.StringText(
             stringRes = R.string.frozen_account_item_edit_banner_description,
-            arg = TextResource.Arg.StringArg("25")
+            arg = TextResource.Arg.StringArg("25"),
         ),
-        mood = Mood.Danger
+        mood = Mood.Danger,
     ),
     InfoBoxData(
         title = TextResource.StringText(R.string.weak_password_info_title),
@@ -95,7 +90,7 @@ private fun generatePreviewInfoBoxes() = listOf(
         button = InfoBoxData.Button(
             text = TextResource.StringText(R.string.weak_password_info_action),
             action = InfoBoxData.Button.Action.LAUNCH_GUIDED_CHANGE,
-        )
+        ),
     ),
     InfoBoxData(
         title = TextResource.StringText(R.string.compromised_password_info_title),
@@ -104,7 +99,7 @@ private fun generatePreviewInfoBoxes() = listOf(
         button = InfoBoxData.Button(
             text = TextResource.StringText(R.string.compromised_password_info_action),
             action = InfoBoxData.Button.Action.LAUNCH_GUIDED_CHANGE,
-        )
+        ),
     ),
     InfoBoxData(
         title = TextResource.StringText(R.string.reused_password_info_title),
@@ -112,28 +107,28 @@ private fun generatePreviewInfoBoxes() = listOf(
         mood = Mood.Warning,
         button = InfoBoxData.Button(
             text = TextResource.StringText(R.string.weak_password_info_action),
-            action = InfoBoxData.Button.Action.LAUNCH_GUIDED_CHANGE
-        )
+            action = InfoBoxData.Button.Action.LAUNCH_GUIDED_CHANGE,
+        ),
     ),
     InfoBoxData(
         title = TextResource.StringText(R.string.vault_limited_rights_infobox_title),
         description = TextResource.StringText(R.string.vault_limited_rights_infobox_content),
-        mood = Mood.Neutral
+        mood = Mood.Neutral,
     ),
     InfoBoxData(
         title = TextResource.StringText(R.string.vault_limited_rights_infobox_title),
         description = TextResource.StringText(R.string.vault_limited_rights_secure_note_infobox_content),
         mood = Mood.Neutral,
-        infoboxStyle = InfoboxStyle.MEDIUM
+        infoboxStyle = InfoboxStyle.MEDIUM,
     ),
     InfoBoxData(
         title = TextResource.StringText(R.string.secure_note_attachments_restriction_infobox_title),
         mood = Mood.Neutral,
-        infoboxStyle = InfoboxStyle.MEDIUM
+        infoboxStyle = InfoboxStyle.MEDIUM,
     ),
     InfoBoxData(
         title = TextResource.StringText(R.string.secure_note_sharing_and_collection_restriction_infobox_title),
         mood = Mood.Neutral,
-        infoboxStyle = InfoboxStyle.MEDIUM
-    )
+        infoboxStyle = InfoboxStyle.MEDIUM,
+    ),
 )

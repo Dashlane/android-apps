@@ -1,0 +1,232 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json",
+  "type": "object",
+  "description": "Definitions for passkeys",
+  "definitions": {
+    "ceremony_status": {
+      "description": "The outcome of the passkey registration/authentication ceremony. In the context of a passkey registration ceremony, it starts when the 'Create a new passkey' webcard is displayed and ends as soon as the user cancels the suggestion, encounters an error or successfully register a new passkey. A passkey authentication ceremony starts when the user is suggested to log in with a passkey and ends as soon as the user cancels the suggestion, encounters an error or successfully logs in with a new passkey",
+      "type": "string",
+      "enum": [
+        "cancelled",
+        "failure",
+        "success"
+      ]
+    },
+    "attempt_count": {
+      "description": "Attempt number in user verification flow or similar process.",
+      "type": "integer"
+    },
+    "authentication_mediation_type": {
+      "description": "The way passkeys have been suggested to the user to login on an account (multiple items webcard, automatic login notification, etc.)",
+      "type": "string",
+      "enum": [
+        "conditional",
+        "optional",
+        "required",
+        "silent"
+      ]
+    },
+    "has_credentials_allowed": {
+      "description": "If the website allows credentials",
+      "type": "boolean"
+    },
+    "is_registered_with_dashlane": {
+      "description": "If the user chose to register the passkey with Dashlane",
+      "type": "boolean"
+    },
+    "is_authenticated_with_dashlane": {
+      "description": "If the user chose to login with a passkey registered in Dashlane",
+      "type": "boolean"
+    },
+    "passkey_registration_error_type": {
+      "description": "Type of passkey registration errors that Dashlane throws when a request is not valid",
+      "type": "string",
+      "enum": [
+        "invalid_state",
+        "not_allowed",
+        "not_supported",
+        "security",
+        "unknown"
+      ]
+    },
+    "passkey_authentication_error_type": {
+      "description": "Type of passkey authentication errors that Dashlane throws when a request is not valid",
+      "type": "string",
+      "enum": [
+        "invalid_state",
+        "not_allowed",
+        "not_supported",
+        "security",
+        "unknown"
+      ]
+    },
+    "passkey_type": {
+      "description": "Type of passkey created or used for authentication",
+      "type": "string",
+      "enum": [
+        "cloud",
+        "legacy"
+      ]
+    },
+    "ms_to_complete_registration": {
+      "description": "Time taken by the user to register a passkey",
+      "type": "integer"
+    },
+    "ms_to_complete_authentication": {
+      "description": "Time taken by the user to authentication with a passkey",
+      "type": "integer"
+    },
+    "ms_to_complete_registration_timeout": {
+      "description": "Maximum amount of time allowed to complete the passkey registration ceremony",
+      "type": "integer"
+    },
+    "ms_to_complete_authentication_timeout": {
+      "description": "Maximum amount of time allowed to complete the passkey authentication ceremony",
+      "type": "integer"
+    },
+    "algorithms_supported": {
+      "description": "Encryption algorithm supported by the website",
+      "type": "string",
+      "enum": [
+        "a_128_gcm",
+        "a_128_kw",
+        "a_192_gcm",
+        "a_192_kw",
+        "a_256_gcm",
+        "a_256_kw",
+        "aes_ccm_16_128_128",
+        "aes_ccm_16_128_256",
+        "aes_ccm_16_64_128",
+        "aes_ccm_16_64_256",
+        "aes_ccm_64_128_128",
+        "aes_ccm_64_128_256",
+        "aes_ccm_64_64_128",
+        "aes_ccm_64_64_256",
+        "aes_mac_128_128",
+        "aes_mac_128_64",
+        "aes_mac_256_128",
+        "aes_mac_256_64",
+        "cha_cha_20_poly_1305",
+        "direct",
+        "direct_hkdf_aes_128",
+        "direct_hkdf_aes_256",
+        "direct_hkdf_sha_256",
+        "direct_hkdf_sha_512",
+        "ecdh_es_a128_kw",
+        "ecdh_es_a192_kw",
+        "ecdh_es_a256_kw",
+        "ecdh_es_hkdf_256",
+        "ecdh_es_hkdf_512",
+        "ecdh_ss_a128_kw",
+        "ecdh_ss_a192_kw",
+        "ecdh_ss_a256_kw",
+        "ecdh_ss_hkdf_256",
+        "ecdh_ss_hkdf_512",
+        "ed_dsa",
+        "es_256",
+        "es_256_k",
+        "es_384",
+        "es_512",
+        "hmac_256_256",
+        "hmac_256_64",
+        "hmac_384_384",
+        "hmac_512_512",
+        "hss_lms",
+        "iv_generation",
+        "ps_256",
+        "ps_384",
+        "ps_512",
+        "reserved",
+        "rs_1",
+        "rs_256",
+        "rs_384",
+        "rs_512",
+        "rsaes_oaep_with_rfc_8017",
+        "rsaes_oaep_with_sha_256",
+        "rsaes_oaep_with_sha_512",
+        "sha_1",
+        "sha_256",
+        "sha_256_64",
+        "sha_384",
+        "sha_512",
+        "sha_512_256",
+        "shake_128",
+        "shake_256",
+        "unassigned",
+        "walnut_dsa"
+      ]
+    },
+    "algorithms_supported_list": {
+      "description": "List of encryption algorithms supported by the website",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/algorithms_supported"
+      }
+    },
+    "webauthn_extension_id": {
+      "description": "Extension supported by the authenticator",
+      "type": "string",
+      "enum": [
+        "appid",
+        "appid_exclude",
+        "authn_sel",
+        "cred_blob",
+        "cred_props",
+        "cred_protect",
+        "exts",
+        "hmac_secret",
+        "large_blob",
+        "large_blob_key",
+        "min_pin_length",
+        "tx_auth_generic",
+        "tx_auth_simple",
+        "uvi",
+        "uvm"
+      ]
+    },
+    "webauthn_extension_supported_list": {
+      "description": "List of extensions supported by the authenticator",
+      "type": "array",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/webauthn_extension_id"
+      }
+    },
+    "authenticator_attachment": {
+      "description": "Eligible authenticator. The value “platform” indicates a platform authenticator, such as Windows Hello. The “cross-platform“, value indicates a roaming authenticator, such as a security key. ",
+      "type": "string",
+      "enum": [
+        "cross_platform",
+        "platform"
+      ]
+    },
+    "authenticator_resident_key": {
+      "description": "The private key and associated metadata is stored in persistent memory on the authenticator, instead of encrypted and stored on the relying party server",
+      "type": "string",
+      "enum": [
+        "discouraged",
+        "preferred",
+        "required"
+      ]
+    },
+    "authenticator_user_verification": {
+      "description": "The authenticator verifies that the user is authorized to use the authenticator, and signals to the Relying Party (organization responsible for registering and authenticating the user) whether user verification was successful",
+      "type": "string",
+      "enum": [
+        "discouraged",
+        "preferred",
+        "required"
+      ]
+    },
+    "authenticator_user_verification_source": {
+      "description": "For when user verification is made, indicates the source.",
+      "type": "string",
+      "enum": [
+        "autofill",
+        "copy_vault_item",
+        "passkey_login",
+        "passkey_registration"
+      ]
+    }
+  }
+}

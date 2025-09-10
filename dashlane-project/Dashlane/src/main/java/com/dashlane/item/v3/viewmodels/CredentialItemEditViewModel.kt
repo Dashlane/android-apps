@@ -13,16 +13,17 @@ import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.ItemAction
 import com.dashlane.item.v3.data.getItemLinkedServices
 import com.dashlane.item.v3.loaders.CredentialAsyncDataLoader
-import com.dashlane.item.v3.repositories.CollectionsRepository
 import com.dashlane.item.v3.repositories.ItemEditRepository
 import com.dashlane.item.v3.repositories.PasswordHealthRepository
 import com.dashlane.item.v3.util.MenuActionHelper
 import com.dashlane.item.v3.util.SensitiveField
 import com.dashlane.item.v3.util.SensitiveFieldLoader
 import com.dashlane.item.v3.util.buildInfoBoxToDisplay
+import com.dashlane.item.v3.util.revealPassword
 import com.dashlane.item.v3.util.updateFormData
-import com.dashlane.mvvm.MutableViewStateFlow
 import com.dashlane.navigation.Navigator
+import com.dashlane.server.api.endpoints.teams.ActivityLog
+import com.dashlane.server.api.endpoints.teams.Properties
 import com.dashlane.sharingpolicy.SharingPolicyDataProvider
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
@@ -43,12 +44,12 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
+import javax.inject.Inject
 
 @HiltViewModel
 class CredentialItemEditViewModel @Inject constructor(
@@ -64,47 +65,70 @@ class CredentialItemEditViewModel @Inject constructor(
     private val sensitiveFieldLoader: SensitiveFieldLoader,
     private val vaultItemLogger: VaultItemLogger,
     private val itemEditRepository: ItemEditRepository,
-    collectionsRepository: CollectionsRepository,
     private val passwordHealthRepository: PasswordHealthRepository,
     sharingPolicyDataProvider: SharingPolicyDataProvider,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     frozenStateManager: FrozenStateManager,
     navigator: Navigator,
 ) : ItemEditViewModel<CredentialFormData>(
-    savedStateHandle = savedStateHandle,
-    dataSync = dataSync,
-    genericDataQuery = genericDataQuery,
-    vaultDataQuery = vaultDataQuery,
-    sensitiveFieldLoader = sensitiveFieldLoader,
-    vaultItemCopy = vaultItemCopy,
-    itemEditRepository = itemEditRepository,
-    appEvents = appEvents,
-    menuActionHelper = menuActionHelper,
-    formDataBuilder = credentialBuilder,
-    asyncDataLoader = asyncDataLoader,
-    frozenStateManager = frozenStateManager,
-    navigator = navigator,
-    collectionsRepository = collectionsRepository,
-    sharingPolicyDataProvider = sharingPolicyDataProvider
-) {
-    override val mutableUiState: MutableViewStateFlow<ItemEditState<CredentialFormData>, ItemEditSideEffect> =
-        MutableViewStateFlow(
-            ItemEditState(
-                itemId = navArgs.uid ?: "",
-                isNew = navArgs.uid == null,
-                isEditMode = navArgs.forceEdit
-            )
-        )
-
+        savedStateHandle = savedStateHandle,
+        dataSync = dataSync,
+        genericDataQuery = genericDataQuery,
+        vaultDataQuery = vaultDataQuery,
+        vaultItemCopy = vaultItemCopy,
+        itemEditRepository = itemEditRepository,
+        appEvents = appEvents,
+        menuActionHelper = menuActionHelper,
+        formDataBuilder = credentialBuilder,
+        asyncDataLoader = asyncDataLoader,
+        frozenStateManager = frozenStateManager,
+        navigator = navigator,
+        sharingPolicyDataProvider = sharingPolicyDataProvider,
+    ) {
     private var passwordHealthJob: Job? = null
+
+    @Suppress(
+        
+        "kotlin:S6313",
+    )
+    override suspend fun goToEditMode(state: ItemEditState<CredentialFormData>): ItemEditState<CredentialFormData> {
+        return super.goToEditMode(state)
+            .loadSensitiveField(SensitiveField.PASSWORD)
+    }
+
+    @Suppress(
+        
+        "kotlin:S6313",
+    )
+    override suspend fun ItemEditState<CredentialFormData>.loadSensitiveField(
+        field: SensitiveField,
+    ): ItemEditState<CredentialFormData> {
+        
+        val id = this.itemId ?: return this
+        val formData = this.datas?.current?.formData ?: return this
+        
+        return when (field) {
+            SensitiveField.PASSWORD -> {
+                vaultItemLogger.activityLogRevealField(
+                    spaceId = this.datas.current.commonData.space?.teamId,
+                    login = formData.email ?: formData.login,
+                    domain = formData.url,
+                    propertyField = Properties.Field.PASSWORD,
+                    logType = ActivityLog.LogType.USER_COPIED_CREDENTIAL_FIELD,
+                )
+                this.revealPassword(sensitiveFieldLoader, id, field)
+            }
+            else -> this
+        }
+    }
 
     fun updatePassword(password: String, generatedPasswordId: String? = null) {
         mutableUiState.updateFormData {
             it.copy(
                 password = CredentialFormData.Password(
                     SyncObfuscatedValue(password),
-                    generatedPasswordId
-                )
+                    generatedPasswordId,
+                ),
             )
         }
         updateMenuActions()
@@ -120,7 +144,7 @@ class CredentialItemEditViewModel @Inject constructor(
                 mutableUiState.update {
                     it.buildInfoBoxToDisplay(
                         isFrozenState = frozenStateManager.isAccountFrozen,
-                        passwordLimitCount = frozenStateManager.passwordLimitCount
+                        passwordLimitCount = frozenStateManager.passwordLimitCount,
                     )
                 }
             }
@@ -130,12 +154,12 @@ class CredentialItemEditViewModel @Inject constructor(
     fun handlePasswordRestoreResult(success: Boolean) {
         viewModelScope.launch {
             mutableUiState.send(ItemEditSideEffect.PasswordRestoreResult(success))
-        }
-        if (success) {
-            val password = mutableUiState.value.itemId?.let { itemId ->
-                sensitiveFieldLoader.getSensitiveField(itemId, SensitiveField.PASSWORD)
-            }?.toString() ?: return
-            updatePassword(password)
+            if (success) {
+                val password = mutableUiState.value.itemId?.let { itemId ->
+                    sensitiveFieldLoader.getSensitiveField(itemId, SensitiveField.PASSWORD)
+                }?.toString() ?: return@launch
+                updatePassword(password)
+            }
         }
     }
 
@@ -150,8 +174,8 @@ class CredentialItemEditViewModel @Inject constructor(
                 mutableUiState.send(
                     ItemEditSideEffect.OpenPasswordGenerator(
                         origin = origin,
-                        domainAsking = it.formData.url ?: ""
-                    )
+                        domainAsking = it.formData.url ?: "",
+                    ),
                 )
             }
         }
@@ -189,15 +213,15 @@ class CredentialItemEditViewModel @Inject constructor(
             it.copy(
                 linkedServices = it.linkedServices.copy(
                     addedByUserDomains = linkedWebsites ?: it.linkedServices.addedByUserDomains,
-                    addedByUserApps = linkedApplications ?: it.linkedServices.addedByUserApps
-                )
+                    addedByUserApps = linkedApplications ?: it.linkedServices.addedByUserApps,
+                ),
             )
         }.also { updateMenuActions() }
 
     fun reloadLinkedServices() {
         viewModelScope.launch {
             val summaryObject = loadSummaryObject(
-                mutableUiState.value.itemId
+                mutableUiState.value.itemId,
             ) as? SummaryObject.Authentifiant ?: return@launch
             mutableUiState.updateFormData {
                 it.copy(linkedServices = summaryObject.getItemLinkedServices())
@@ -211,7 +235,8 @@ class CredentialItemEditViewModel @Inject constructor(
             val state = mutableUiState.value
             if (state.datas == null || state.itemId == null) return@launch
             val goToWebsiteUrl =
-                (loadSummaryObject(state.itemId) as? SummaryObject.Authentifiant)?.urlForGoToWebsite ?: return@launch
+                (loadSummaryObject(state.itemId) as? SummaryObject.Authentifiant)?.urlForGoToWebsite
+                    ?: return@launch
             val loginListener = object : LoginOpener.Listener {
                 override fun onShowOption() = Unit
 
@@ -219,7 +244,7 @@ class CredentialItemEditViewModel @Inject constructor(
                     vaultItemLogger.logOpenExternalLink(
                         itemId = state.itemId,
                         packageName = packageName,
-                        url = goToWebsiteUrl
+                        url = goToWebsiteUrl,
                     )
                 }
             }
@@ -229,8 +254,8 @@ class CredentialItemEditViewModel @Inject constructor(
                 ItemEditSideEffect.OpenWebsite(
                     goToWebsiteUrl,
                     packageNames,
-                    loginListener
-                )
+                    loginListener,
+                ),
             )
         }
     }
@@ -244,7 +269,11 @@ class CredentialItemEditViewModel @Inject constructor(
                 val url = summary.urlForGoToWebsite ?: return@let
                 mutableUiState.value.datas?.current?.let {
                     mutableUiState.send(
-                        ItemEditSideEffect.GuidedPasswordChange(it.commonData.id, url, summary.loginForUi)
+                        ItemEditSideEffect.GuidedPasswordChange(
+                            it.commonData.id,
+                            url,
+                            summary.loginForUi,
+                        ),
                     )
                 }
             }
@@ -261,8 +290,8 @@ class CredentialItemEditViewModel @Inject constructor(
                         addNew = addNew,
                         temporaryWebsites = it.formData.linkedServices.addedByUserDomains,
                         temporaryApps = it.formData.linkedServices.addedByUserApps,
-                        url = it.formData.url
-                    )
+                        url = it.formData.url,
+                    ),
                 )
             }
         }
@@ -275,12 +304,15 @@ class CredentialItemEditViewModel @Inject constructor(
             val vaultItem = loadVaultItem(state.itemId)
             mutableUiState.send(
                 ItemEditSideEffect.GoToSetup2FA(
-                    credentialName = state.datas.current.commonData.name,
+                    credentialName = state.datas.current.commonData.name ?: "",
                     credentialId = state.datas.current.commonData.id,
                     topDomain = state.datas.current.formData.url?.toUrlDomainOrNull()?.root.toString(),
-                    packageName = (state.datas.current.formData.linkedServices.addedByUserApps + state.datas.current.formData.linkedServices.addedByDashlaneApps).firstOrNull(),
-                    proSpace = vaultItem != null && vaultItem.isSpaceItem() && vaultItem.syncObject.spaceId.isNotSemanticallyNull()
-                )
+                    packageName = (
+                        state.datas.current.formData.linkedServices.addedByUserApps +
+                            state.datas.current.formData.linkedServices.addedByDashlaneApps
+                    ).firstOrNull(),
+                    proSpace = vaultItem != null && vaultItem.isSpaceItem() && vaultItem.syncObject.spaceId.isNotSemanticallyNull(),
+                ),
             )
         }
     }
@@ -306,6 +338,6 @@ class CredentialItemEditViewModel @Inject constructor(
         title = SyncObject.Authentifiant.getDefaultName(navArgs.url),
         deprecatedUrl = navArgs.url,
         autoLogin = "true",
-        passwordModificationDate = Instant.now()
+        passwordModificationDate = Instant.now(),
     )
 }

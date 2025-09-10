@@ -2,24 +2,26 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.center
 
 import android.content.Context
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.dashlane.R
+import com.dashlane.sharing.SharingContact
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.ViewTypeProvider
-import com.dashlane.ui.adapter.HeaderItem
-import com.dashlane.ui.adapter.util.populateItemsAsync
 import com.dashlane.ui.dialogs.fragment.sharing.confirmation.SharingConfirmationDeclineGroupInvite
 import com.dashlane.ui.dialogs.fragment.sharing.confirmation.SharingConfirmationDialogDeclineUserGroupInvite
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter.ViewTypeProvider
+import com.dashlane.ui.legacy.recyclerview.HeaderItem
+import com.dashlane.ui.legacy.recyclerview.util.populateItemsAsync
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingBaseViewProxy
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingContactItem
+import com.dashlane.ui.screens.fragments.userdata.sharing.center.view.SharingCenterEmptyContentView
 import com.dashlane.ui.screens.fragments.userdata.sharing.onSuccess
 import com.dashlane.ui.screens.fragments.userdata.sharing.showErrorDialog
 import com.dashlane.ui.screens.fragments.userdata.sharing.showLoadingDialog
 import com.dashlane.ui.setup
-import com.dashlane.ui.widgets.view.empty.SharingCenterEmptyScreen
 import com.dashlane.util.SnackbarUtils
 import com.skocken.efficientadapter.lib.adapter.EfficientAdapter
 import kotlinx.coroutines.launch
@@ -28,8 +30,10 @@ class SharingCenterViewProxy(
     private val fragment: Fragment,
     view: View,
     private val viewModel: SharingCenterViewModelContract,
-    private val itemWrapperProvider: ItemWrapperProvider
+    private val itemWrapperProvider: ItemWrapperProvider,
 ) : SharingBaseViewProxy(fragment, view) {
+    val emptyContentView: SharingCenterEmptyContentView = view.findViewById(R.id.sharing_center_empty_screen)
+
     init {
         fabButton.apply {
             visibility = View.VISIBLE
@@ -46,12 +50,12 @@ class SharingCenterViewProxy(
         fragment.apply {
             setFragmentResultListener(SharingConfirmationDeclineGroupInvite.REQUEST_KEY) { _, bundle ->
                 viewModel.declineItemGroup(
-                    bundle.getString(SharingConfirmationDeclineGroupInvite.DECLINE_ITEM_GROUP_ID)!!
+                    bundle.getString(SharingConfirmationDeclineGroupInvite.DECLINE_ITEM_GROUP_ID)!!,
                 )
             }
             setFragmentResultListener(SharingConfirmationDialogDeclineUserGroupInvite.REQUEST_KEY) { _, bundle ->
                 viewModel.declineUserGroup(
-                    bundle.getString(SharingConfirmationDialogDeclineUserGroupInvite.DECLINE_USER_GROUP_ID)!!
+                    bundle.getString(SharingConfirmationDialogDeclineUserGroupInvite.DECLINE_USER_GROUP_ID)!!,
                 )
             }
         }
@@ -62,25 +66,27 @@ class SharingCenterViewProxy(
                 viewModel.uiState.collect { state ->
                     when (state) {
                         SharingCenterViewModelContract.UIState.Loading ->
-                            showLoadingState()
-                        is SharingCenterViewModelContract.UIState.Data ->
+                            showSharingCenterLoadingState()
+                        is SharingCenterViewModelContract.UIState.Data -> {
                             displayData(state)
-                        SharingCenterViewModelContract.UIState.Empty -> {
-                            displayEmptyView()
-                            showEmptyState()
+                            showListState()
+                        }
+                        is SharingCenterViewModelContract.UIState.Empty -> {
+                            displayEmptyView(state.showAddLogin)
+                            showSharingCenterEmptyState()
                         }
                         SharingCenterViewModelContract.UIState.RequestFailure -> fragmentManager.showErrorDialog(
-                            context
+                            context,
                         )
                         SharingCenterViewModelContract.UIState.RequestLoading -> fragmentManager.showLoadingDialog(
-                            context
+                            context,
                         )
                         is SharingCenterViewModelContract.UIState.RequestSuccess -> {
                             fragmentManager.onSuccess()
                             state.acceptedItemName?.let {
                                 SnackbarUtils.showSnackbar(
                                     view,
-                                    context.getString(R.string.sharing_invite_item_accepted, it)
+                                    context.getString(R.string.sharing_invite_item_accepted, it),
                                 )
                             }
                         }
@@ -140,7 +146,7 @@ class SharingCenterViewProxy(
                 onClickDecline = {
                     SharingConfirmationDialogDeclineUserGroupInvite.newInstance(
                         context,
-                        invite.userGroup.groupId
+                        invite.userGroup.groupId,
                     ).show(fragmentManager, SharingConfirmationDialogDeclineUserGroupInvite.TAG)
                 },
             )
@@ -167,7 +173,7 @@ class SharingCenterViewProxy(
             onClickDecline = {
                 SharingConfirmationDeclineGroupInvite.newInstance(
                     context,
-                    invite.itemGroup.groupId
+                    invite.itemGroup.groupId,
                 ).show(fragmentManager, SharingConfirmationDeclineGroupInvite.TAG)
             },
         )
@@ -181,11 +187,9 @@ class SharingCenterViewProxy(
         SharingCenterUserItem(context, it)
     }.sortedWith(SharingContactItem.comparator())
 
-    private fun displayEmptyView() {
-        list.adapter?.apply {
-            clear()
-            add(SharingCenterEmptyScreen.newInstance(context))
-        }
+    private fun displayEmptyView(showAddLogin: Boolean) {
+        emptyContentView.showAddLogin = showAddLogin
+        emptyContentView.onAddLoginClick = { viewModel.onAddLoginClick() }
     }
 
     private fun getHeaderInvites(context: Context) =
@@ -196,4 +200,23 @@ class SharingCenterViewProxy(
 
     private fun getHeaderGroup(context: Context) =
         HeaderItem(context.getString(R.string.sharing_center_label_groups))
+
+    private fun showSharingCenterLoadingState() {
+        showLoadingState()
+        emptyContentView.isVisible = false
+    }
+
+    private fun showListState() {
+        loadingView.visibility = View.GONE
+        refreshLayout.isRefreshing = false
+        list.visibility = View.VISIBLE
+        permissionInfobox.isVisible = false
+        emptyContentView.isVisible = false
+    }
+
+    private fun showSharingCenterEmptyState() {
+        showEmptyState()
+        list.visibility = View.INVISIBLE
+        emptyContentView.isVisible = true
+    }
 }

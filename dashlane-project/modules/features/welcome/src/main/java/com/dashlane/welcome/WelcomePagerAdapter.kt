@@ -89,7 +89,7 @@ internal class WelcomePagerAdapter : PagerAdapter(), ViewPager.OnPageChangeListe
         @StringRes val title: Int,
         @StringRes val description: Int,
         val mainAnimation: AnimationDesc,
-        val backgroundAnimation: AnimationDesc? = null
+        val backgroundAnimation: AnimationDesc? = null,
     )
 
     private sealed class AnimationDesc {
@@ -97,12 +97,12 @@ internal class WelcomePagerAdapter : PagerAdapter(), ViewPager.OnPageChangeListe
         abstract val res: Int
 
         class Loop(
-            @RawRes override val res: Int
+            @RawRes override val res: Int,
         ) : AnimationDesc()
 
         class Progress(
             @RawRes override val res: Int,
-            val midMarker: String? = null
+            val midMarker: String? = null,
         ) : AnimationDesc()
     }
 
@@ -113,44 +113,44 @@ internal class WelcomePagerAdapter : PagerAdapter(), ViewPager.OnPageChangeListe
                 title = R.string.welcome_trust_title,
                 description = R.string.welcome_trust_description,
                 mainAnimation = AnimationDesc.Loop(
-                    res = R.raw.lottie_welcome_trust
+                    res = R.raw.lottie_welcome_trust,
                 ),
                 backgroundAnimation = AnimationDesc.Progress(
-                    res = R.raw.lottie_welcome_trust_background
-                )
+                    res = R.raw.lottie_welcome_trust_background,
+                ),
             ),
             Item(
                 title = R.string.welcome_vault_title,
                 description = R.string.welcome_vault_description,
                 mainAnimation = AnimationDesc.Progress(
                     res = R.raw.lottie_welcome_vault,
-                    midMarker = "stop"
+                    midMarker = "stop",
                 ),
                 backgroundAnimation = AnimationDesc.Loop(
-                    res = R.raw.lottie_welcome_vault_background
-                )
+                    res = R.raw.lottie_welcome_vault_background,
+                ),
             ),
             Item(
                 title = R.string.welcome_autofill_title,
                 description = R.string.welcome_autofill_description,
                 mainAnimation = AnimationDesc.Loop(
-                    res = R.raw.lottie_welcome_autofill
-                )
+                    res = R.raw.lottie_welcome_autofill,
+                ),
             ),
             Item(
                 title = R.string.welcome_alert_title,
                 description = R.string.welcome_alert_description,
                 mainAnimation = AnimationDesc.Loop(
-                    res = R.raw.lottie_welcome_alert
-                )
+                    res = R.raw.lottie_welcome_alert,
+                ),
             ),
             Item(
                 title = R.string.welcome_encryption_title,
                 description = R.string.welcome_encryption_description,
                 mainAnimation = AnimationDesc.Progress(
-                    res = R.raw.lottie_welcome_encryption
-                )
-            )
+                    res = R.raw.lottie_welcome_encryption,
+                ),
+            ),
         )
     }
 }

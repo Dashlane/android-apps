@@ -9,7 +9,7 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface AccountRecoveryModule {
+abstract class AccountRecoveryModule {
     @Binds
-    fun bindsAccountRecoveryKeyRepository(impl: AccountRecoveryKeyRepositoryImpl): AccountRecoveryKeyRepository
+    abstract fun bindsAccountRecoveryKeyRepository(impl: AccountRecoveryKeyRepositoryImpl): AccountRecoveryKeyRepository
 }

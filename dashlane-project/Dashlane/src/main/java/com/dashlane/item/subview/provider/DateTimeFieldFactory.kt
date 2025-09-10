@@ -12,12 +12,12 @@ import java.time.Instant
 
 class DateTimeFieldFactory(
     private val clock: Clock,
-    private val relativeDateFormatter: RelativeDateFormatter
+    private val relativeDateFormatter: RelativeDateFormatter,
 ) {
     fun createCreationDateField(
         editMode: Boolean,
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemMetaReadValueDateTimeSubView? {
         if (editMode) {
             return null
@@ -28,7 +28,7 @@ class DateTimeFieldFactory(
             return ItemMetaReadValueDateTimeSubView(
                 header = context.getString(R.string.creation_date_header),
                 value = creationDateInstant,
-                formattedDate = formattedString
+                formattedDate = formattedString,
             )
         }
         return null
@@ -38,7 +38,7 @@ class DateTimeFieldFactory(
         editMode: Boolean,
         shared: Boolean = false,
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemMetaReadValueDateTimeSubView? {
         if (editMode) {
             return null
@@ -50,7 +50,7 @@ class DateTimeFieldFactory(
                 header = context.getString(R.string.latest_update_header).takeUnless { shared }
                     ?: context.getString(R.string.latest_update_header_for_shared_item),
                 value = modificationDatetimeInstant,
-                formattedDate = formattedString
+                formattedDate = formattedString,
             )
         }
         return null

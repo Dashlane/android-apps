@@ -38,9 +38,8 @@ class ItemScreenConfigurationPasskeyProvider(
     private val teamSpaceAccessor: TeamSpaceAccessor,
     private val vaultItemLogger: VaultItemLogger,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     private var isLoginCopied = false
 
     @Suppress("UNCHECKED_CAST")
@@ -50,17 +49,17 @@ class ItemScreenConfigurationPasskeyProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.Passkey>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(item)
+            createHeader(item),
         )
     }
 
     private fun createHeader(
-        item: VaultItem<SyncObject.Passkey>
+        item: VaultItem<SyncObject.Passkey>,
     ): ItemHeader {
         val passkeySyncObject = item.syncObject
         val menuActions = mutableListOf<MenuAction>().apply {
@@ -80,19 +79,19 @@ class ItemScreenConfigurationPasskeyProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         val websiteView = createWebsiteField(editMode, item, context)
         val loginView = createLoginFieldReadOnly(
             editMode,
             context.getString(R.string.authentifiant_hint_login),
             item.syncObject.userDisplayName,
-            item
+            item,
         )
         val teamspaceView = createTeamspaceField(
             subViewFactory = subViewFactory,
             item = item,
-            views = listOfNotNull(loginView, websiteView)
+            views = listOfNotNull(loginView, websiteView),
         )
 
         return listOfNotNull(
@@ -112,16 +111,16 @@ class ItemScreenConfigurationPasskeyProvider(
             dateTimeFieldFactory.createCreationDateField(
                 editMode = editMode,
                 context = context,
-                item = item
+                item = item,
             ),
             
             dateTimeFieldFactory.createLatestUpdateDateField(
                 editMode = editMode,
                 context = context,
-                item = item
+                item = item,
             ),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
@@ -132,7 +131,7 @@ class ItemScreenConfigurationPasskeyProvider(
         if (!editMode && Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             return ItemInfoboxSubView(
                 value = context.getString(R.string.infobox_passkey_not_usable),
-                mood = Mood.Brand
+                mood = Mood.Brand,
             )
         }
         return null
@@ -142,14 +141,14 @@ class ItemScreenConfigurationPasskeyProvider(
         editMode: Boolean,
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Passkey>
+        item: VaultItem<SyncObject.Passkey>,
     ): ItemSubView<*>? {
         return if (editMode) {
             subViewFactory.createSubViewString(
                 context.getString(R.string.authentifiant_hint_name),
                 item.syncObject.title,
                 false,
-                ::copyForUpdatedItemName
+                ::copyForUpdatedItemName,
             )
         } else {
             null
@@ -160,14 +159,14 @@ class ItemScreenConfigurationPasskeyProvider(
         editMode: Boolean,
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Passkey>
+        item: VaultItem<SyncObject.Passkey>,
     ): ItemSubView<*>? {
         return if (editMode) {
             subViewFactory.createSubViewString(
                 header = context.getString(R.string.authentifiant_hint_note),
                 value = item.syncObject.note,
                 valueUpdate = ::copyForUpdatedNote,
-                multiline = true
+                multiline = true,
             )
         } else {
             
@@ -175,7 +174,7 @@ class ItemScreenConfigurationPasskeyProvider(
                 subViewFactory.createSubViewString(
                     header = context.getString(R.string.authentifiant_hint_note),
                     value = item.syncObject.note,
-                    multiline = true
+                    multiline = true,
                 )
             } else {
                 null
@@ -187,7 +186,7 @@ class ItemScreenConfigurationPasskeyProvider(
         editMode: Boolean,
         header: String,
         value: String?,
-        item: VaultItem<SyncObject.Passkey>
+        item: VaultItem<SyncObject.Passkey>,
     ): ItemSubView<String> {
         return ItemReadValueTextSubView(header, value ?: "").let {
             if (editMode) {
@@ -201,8 +200,8 @@ class ItemScreenConfigurationPasskeyProvider(
                         action = {
                             isLoginCopied = true
                         },
-                        vaultItemCopy = vaultItemCopy
-                    )
+                        vaultItemCopy = vaultItemCopy,
+                    ),
                 )
             }
         }
@@ -211,7 +210,7 @@ class ItemScreenConfigurationPasskeyProvider(
     private fun createWebsiteField(
         editMode: Boolean,
         item: VaultItem<SyncObject.Passkey>,
-        context: Context
+        context: Context,
     ): ItemSubView<String> {
         val loginListener = object : LoginOpener.Listener {
             override fun onShowOption() = Unit
@@ -220,7 +219,7 @@ class ItemScreenConfigurationPasskeyProvider(
                 vaultItemLogger.logOpenExternalLink(
                     itemId = item.uid,
                     packageName = packageName,
-                    url = item.syncObject.urlForGoToWebsite
+                    url = item.syncObject.urlForGoToWebsite,
                 )
             }
         }
@@ -240,14 +239,14 @@ class ItemScreenConfigurationPasskeyProvider(
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.Passkey>,
-        views: List<ItemSubView<String>>
+        views: List<ItemSubView<String>>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 views,
-                ::copyForUpdatedTeamspace
+                ::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -258,7 +257,7 @@ class ItemScreenConfigurationPasskeyProvider(
 @Suppress("UNCHECKED_CAST")
 private fun copyForUpdatedTeamspace(
     item: VaultItem<*>,
-    value: TeamSpace
+    value: TeamSpace,
 ): VaultItem<SyncObject.Passkey> {
     item as VaultItem<SyncObject.Passkey>
     val authentifiant = item.syncObject
@@ -273,7 +272,7 @@ private fun copyForUpdatedTeamspace(
 @Suppress("UNCHECKED_CAST")
 private fun ItemScreenConfigurationPasskeyProvider.copyForUpdatedNote(
     item: VaultItem<*>,
-    value: String
+    value: String,
 ): VaultItem<SyncObject.Passkey> {
     item as VaultItem<SyncObject.Passkey>
     val passkey = item.syncObject
@@ -287,7 +286,7 @@ private fun ItemScreenConfigurationPasskeyProvider.copyForUpdatedNote(
 @Suppress("UNCHECKED_CAST")
 private fun ItemScreenConfigurationPasskeyProvider.copyForUpdatedItemName(
     item: VaultItem<*>,
-    value: String
+    value: String,
 ): VaultItem<SyncObject.Passkey> {
     item as VaultItem<SyncObject.Passkey>
     val authentifiant = item.syncObject

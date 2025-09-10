@@ -3,13 +3,9 @@ package com.dashlane.collections.details
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.MenuItem
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.IconButton
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,15 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +40,7 @@ import com.dashlane.collections.CollectionLoading
 import com.dashlane.collections.DeleteConfirmationDialog
 import com.dashlane.collections.RevokeToDeleteDialog
 import com.dashlane.design.component.ButtonLayout
+import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Dialog
 import com.dashlane.design.component.DropdownItem
 import com.dashlane.design.component.DropdownMenu
@@ -58,14 +52,14 @@ import com.dashlane.design.component.ThumbnailType
 import com.dashlane.design.component.cardBackground
 import com.dashlane.design.iconography.IconTokens
 import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.sharing.UserPermission
 import com.dashlane.teamspaces.model.SpaceColor
+import com.dashlane.ui.common.compose.components.EmptyContent
 import com.dashlane.ui.thumbnail.ThumbnailDomainIcon
 import com.dashlane.ui.widgets.compose.OutlinedTeamspaceIcon
-import com.dashlane.util.SnackbarUtils
-import com.dashlane.util.getBaseActivity
-import com.dashlane.sharing.UserPermission
 import com.dashlane.vault.model.getColorId
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectXmlName
@@ -73,16 +67,17 @@ import com.dashlane.xml.domain.SyncObjectXmlName
 @Composable
 fun CollectionDetailsScreen(
     uiState: ViewState,
+    snackbarHostState: SnackbarHostState,
     onDismissDialog: () -> Unit,
     onDeleteConfirmed: () -> Unit,
     onRevokeToDeleteClicked: () -> Unit,
     onBack: () -> Unit,
     goToItem: (String, String) -> Unit,
-    removeItem: (String, Boolean) -> Unit
+    removeItem: (String, Boolean) -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (uiState.viewData.spaceData?.businessSpace == true) {
             InfoBoxSharingLimit(uiState.viewData.collectionLimit)
@@ -92,16 +87,14 @@ fun CollectionDetailsScreen(
             is ViewState.DeletePrompt,
             is ViewState.SharedCollectionDeleteError,
             is ViewState.RevokeAccessPrompt,
-            is ViewState.SharingWithAttachmentError -> {
+            is ViewState.SharingWithAttachmentError,
+            -> {
                 val context = LocalContext.current
                 LaunchedEffect(key1 = uiState) {
                     if (uiState !is ViewState.SharedCollectionDeleteError) return@LaunchedEffect
-                    context.getBaseActivity()?.let { activity ->
-                        SnackbarUtils.showSnackbar(
-                            activity,
-                            context.getString(R.string.collection_delete_shared_error_generic)
-                        )
-                    }
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.collection_delete_shared_error_generic),
+                    )
                 }
                 ItemsList(
                     viewData = uiState.viewData,
@@ -111,7 +104,7 @@ fun CollectionDetailsScreen(
                     onDeleteConfirmed = onDeleteConfirmed,
                     onRevokeToDeleteClicked = onRevokeToDeleteClicked,
                     goToItem = goToItem,
-                    removeItem = removeItem
+                    removeItem = removeItem,
                 )
             }
             is ViewState.Empty -> EmptyState()
@@ -127,22 +120,22 @@ private fun InfoBoxSharingLimit(collectionLimit: CollectionLimiter.UserLimit) {
         CollectionLimiter.UserLimit.APPROACHING_LIMIT -> Triple(
             Mood.Brand,
             R.string.collections_limiter_approaching_title,
-            R.string.collections_limiter_approaching_description
+            R.string.collections_limiter_approaching_description,
         )
         CollectionLimiter.UserLimit.REACHED_LIMIT -> Triple(
             Mood.Warning,
             R.string.collections_limiter_reached_title,
-            R.string.collections_limiter_right_limit_description
+            R.string.collections_limiter_right_limit_description,
         )
         CollectionLimiter.UserLimit.REACHED_LIMIT_EXISTING_ITEM -> Triple(
             Mood.Warning,
             R.string.collections_limiter_reached_title,
-            R.string.collections_limiter_right_limit_existing_item_description
+            R.string.collections_limiter_right_limit_existing_item_description,
         )
         CollectionLimiter.UserLimit.BUSINESS_TRIAL -> Triple(
             Mood.Brand,
             R.string.collections_limiter_business_trial_title,
-            R.string.collections_limiter_business_trial_description
+            R.string.collections_limiter_business_trial_description,
         )
         else -> return
     }
@@ -151,7 +144,7 @@ private fun InfoBoxSharingLimit(collectionLimit: CollectionLimiter.UserLimit) {
             start = 16.dp,
             top = 16.dp,
             end = 12.dp,
-            bottom = 8.dp
+            bottom = 8.dp,
         ),
         mood = mode,
         title = stringResource(id = title),
@@ -161,7 +154,7 @@ private fun InfoBoxSharingLimit(collectionLimit: CollectionLimiter.UserLimit) {
 
 fun MenuItem.updateStateAndTitleColor(
     enabled: Boolean,
-    disabledColor: androidx.compose.ui.graphics.Color
+    disabledColor: androidx.compose.ui.graphics.Color,
 ) {
     isEnabled = enabled
     val coloredTitle = if (!isEnabled) {
@@ -187,7 +180,7 @@ fun CollectionDetailScreenToolbar(uiState: ViewState) {
                 style = DashlaneTheme.typography.titleSectionMedium,
                 color = DashlaneTheme.colors.textNeutralCatchy,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             val spaceData = uiState.viewData.spaceData
             if (spaceData != null) {
@@ -199,7 +192,7 @@ fun CollectionDetailScreenToolbar(uiState: ViewState) {
                         is SpaceColor.TeamColor -> color.color
                     },
                     iconSize = 12.dp,
-                    modifier = Modifier.padding(top = 5.dp)
+                    modifier = Modifier.padding(top = 5.dp),
                 )
             }
 
@@ -210,7 +203,7 @@ fun CollectionDetailScreenToolbar(uiState: ViewState) {
                     modifier = Modifier
                         .size(16.dp)
                         .padding(top = 6.dp),
-                    contentDescription = stringResource(R.string.and_accessibility_collection_list_item_shared)
+                    contentDescription = stringResource(R.string.and_accessibility_collection_list_item_shared),
                 )
             }
         }
@@ -218,29 +211,13 @@ fun CollectionDetailScreenToolbar(uiState: ViewState) {
 }
 
 @Composable
-private fun ColumnScope.EmptyState() {
-    Column(
-        modifier = Modifier
-            .padding(32.dp)
-            .weight(1f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            modifier = Modifier
-                .size(96.dp)
-                .focusable(false),
-            painter = painterResource(IconTokens.folderOutlined.resource),
-            colorFilter = ColorFilter.tint(DashlaneTheme.colors.textNeutralQuiet.value),
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = stringResource(id = R.string.collection_details_empty_state_description),
-            style = DashlaneTheme.typography.bodyStandardRegular,
-            textAlign = TextAlign.Center
-        )
-    }
+private fun EmptyState() {
+    EmptyContent(
+        modifier = Modifier.fillMaxSize(),
+        iconToken = IconTokens.folderOutlined,
+        title = stringResource(id = R.string.collection_details_empty_state_title),
+        description = stringResource(id = R.string.collection_details_empty_state_description),
+    )
 }
 
 @Composable
@@ -252,11 +229,11 @@ private fun ItemsList(
     onDeleteConfirmed: () -> Unit,
     onRevokeToDeleteClicked: () -> Unit,
     goToItem: (String, String) -> Unit,
-    removeItem: (String, Boolean) -> Unit
+    removeItem: (String, Boolean) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 16.dp)
+        contentPadding = PaddingValues(vertical = 16.dp),
     ) {
         viewData.sections.forEach { section ->
             item {
@@ -267,7 +244,7 @@ private fun ItemsList(
                     item,
                     viewData.shared,
                     goToItem,
-                    removeItem
+                    removeItem,
                 )
             }
             item {
@@ -282,7 +259,7 @@ private fun ItemsList(
             },
             onConfirm = {
                 onDeleteConfirmed()
-            }
+            },
         )
     }
     if (showRevokePrompt) {
@@ -292,7 +269,7 @@ private fun ItemsList(
             },
             onConfirm = {
                 onRevokeToDeleteClicked()
-            }
+            },
         )
     }
 }
@@ -309,7 +286,7 @@ private fun Header(title: String) {
         Text(
             text = title,
             color = DashlaneTheme.colors.textNeutralCatchy,
-            style = DashlaneTheme.typography.titleBlockMedium
+            style = DashlaneTheme.typography.titleBlockMedium,
         )
     }
 }
@@ -358,7 +335,7 @@ private fun VaultItemView(
             .fillMaxWidth()
             .clickable { goToItem(item.id, item.type) }
             .padding(horizontal = 16.dp)
-            .cardBackground(isTop = false, isBottom = false)
+            .cardBackground(isTop = false, isBottom = false),
     ) {
         Row(
             modifier = Modifier
@@ -366,7 +343,7 @@ private fun VaultItemView(
                 .clickable { goToItem(item.id, item.type) }
                 .padding(vertical = 8.dp)
                 .padding(start = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             VaultItemThumbnailView(item)
             Spacer(modifier = Modifier.width(16.dp))
@@ -377,7 +354,7 @@ private fun VaultItemView(
                     style = DashlaneTheme.typography.bodyReducedRegular,
                     color = DashlaneTheme.colors.textNeutralQuiet,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 VaultItemSharedPermission(item, shared)
             }
@@ -388,9 +365,14 @@ private fun VaultItemView(
                         onExpandMenuChange(false)
                     },
                     anchor = {
-                        IconButton(onClick = { onExpandMenuChange(true) }) {
-                            Icon(token = IconTokens.actionMoreOutlined, contentDescription = null)
-                        }
+                        ButtonMedium(
+                            onClick = { onExpandMenuChange(true) },
+                            intensity = Intensity.Supershy,
+                            layout = ButtonLayout.IconOnly(
+                                iconToken = IconTokens.actionMoreOutlined,
+                                contentDescription = stringResource(R.string.and_accessibility_quick_action),
+                            ),
+                        )
                     },
                 ) {
                     DropdownItem(
@@ -399,7 +381,7 @@ private fun VaultItemView(
                         onClick = {
                             onExpandMenuChange(false)
                             onRemoveItemClicked(item.id, shared)
-                        }
+                        },
                     )
                 }
             }
@@ -414,7 +396,7 @@ private fun VaultItemThumbnailView(
     when (item.thumbnail) {
         is ThumbnailData.UrlThumbnail -> {
             ThumbnailDomainIcon(
-                urlDomain = item.thumbnail.url
+                urlDomain = item.thumbnail.url,
             )
         }
         is ThumbnailData.SecureNoteThumbnail -> {
@@ -422,7 +404,7 @@ private fun VaultItemThumbnailView(
                 type = ThumbnailType.VaultItem.LegacyOtherIcon(
                     token = IconTokens.itemSecureNoteOutlined,
                     color = colorResource(id = item.thumbnail.secureNoteType.getColorId()),
-                )
+                ),
             )
         }
     }
@@ -431,7 +413,7 @@ private fun VaultItemThumbnailView(
 @Composable
 private fun VaultItemTitle(
     item: SummaryForUi,
-    shared: Boolean
+    shared: Boolean,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -440,7 +422,7 @@ private fun VaultItemTitle(
             style = DashlaneTheme.typography.bodyStandardRegular,
             color = DashlaneTheme.colors.textNeutralCatchy,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
 
         if (item.spaceData != null) {
@@ -452,7 +434,7 @@ private fun VaultItemTitle(
                     is SpaceColor.TeamColor -> color.color
                 },
                 iconSize = 12.dp,
-                teamspaceDescription = stringResource(id = item.spaceData.spaceContentDescriptionResId)
+                teamspaceDescription = stringResource(id = item.spaceData.spaceContentDescriptionResId),
             )
         }
 
@@ -461,7 +443,7 @@ private fun VaultItemTitle(
             Icon(
                 token = IconTokens.sharedOutlined,
                 modifier = Modifier.size(12.dp),
-                contentDescription = stringResource(R.string.and_accessibility_collection_list_item_shared)
+                contentDescription = stringResource(R.string.and_accessibility_collection_list_item_shared),
             )
         }
     }
@@ -480,7 +462,7 @@ private fun VaultItemSharedPermission(item: SummaryForUi, shared: Boolean) {
             style = DashlaneTheme.typography.bodyReducedRegular,
             color = DashlaneTheme.colors.textNeutralQuiet,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -495,7 +477,7 @@ fun DialogBusinessMemberLimit(
         mainActionLayout = ButtonLayout.TextOnly(stringResource(id = R.string.collections_limiter_member_cta)),
         title = stringResource(id = R.string.collections_limiter_member_title),
         description = { Text(text = stringResource(id = R.string.collections_limiter_member_description)) },
-        isDestructive = false
+        isDestructive = false,
     )
 }
 
@@ -533,13 +515,23 @@ private fun PreviewContainer() {
                     secondLine = ContentLine2.Text("second line"),
                     thumbnail = ThumbnailData.UrlThumbnail(null),
                     sharingPermission = null,
-                    spaceData = null
+                    spaceData = null,
                 ),
                 shared = false,
                 goToItem = { _, _ -> },
-                removeItem = { _, _ -> }
+                removeItem = { _, _ -> },
             )
             BottomBackground()
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewEmptyState() {
+    DashlanePreview {
+        Column {
+            EmptyState()
         }
     }
 }
@@ -558,11 +550,11 @@ private fun PreviewContainerSecureNote() {
                     secondLine = ContentLine2.Text("second line"),
                     thumbnail = ThumbnailData.SecureNoteThumbnail(secureNoteType = SyncObject.SecureNoteType.BLUE),
                     sharingPermission = null,
-                    spaceData = null
+                    spaceData = null,
                 ),
                 shared = false,
                 goToItem = { _, _ -> },
-                removeItem = { _, _ -> }
+                removeItem = { _, _ -> },
             )
             BottomBackground()
         }

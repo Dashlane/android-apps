@@ -17,12 +17,12 @@ import javax.inject.Inject
 class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
     private val secureDataStorageFactory: SecureDataStorage.Factory,
     private val cryptography: Cryptography,
-    private val saltGenerator: SaltGenerator
+    private val saltGenerator: SaltGenerator,
 ) {
     fun migrateLocalKeyIfNeeded(
         appKey: AppKey,
         username: Username,
-        cryptographyMarker: CryptographyMarker
+        cryptographyMarker: CryptographyMarker,
     ) {
         val secureDataStorage =
             secureDataStorageFactory.create(username, SecureDataStorage.Type.MASTER_PASSWORD_PROTECTED)
@@ -45,12 +45,12 @@ class SecureStorageLocalKeyCryptographyMarkerMigration @Inject constructor(
 
     private fun createEncryptionEngine(
         key: AppKey,
-        marker: CryptographyMarker
+        marker: CryptographyMarker,
     ) = key.cryptographyKey.use {
         cryptography.createEncryptionEngine(
             marker,
             it,
-            saltGenerator.generateFixedSalt(marker)
+            saltGenerator.generateFixedSalt(marker),
         )
     }
 

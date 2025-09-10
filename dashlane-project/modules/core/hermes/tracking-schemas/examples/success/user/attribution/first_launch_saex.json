@@ -1,0 +1,56 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "os": {
+        "type": "mac_os",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "web",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "main_app",
+    "origin_page": "login"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 1
+  },
+  "properties": {
+    "name": "first_launch",
+    "is_marketing_opt_in": true,
+    "web": {
+      "gclid": "Cj0KCQjw9ZGYBhCEARIsAEUXITWezcaygO9yOMzeDVEd6ySDQtBaAGi0bsmthqRRUKrvbahtP8q6A4MaAvRHEALw_wcB",
+      "has_cookie": true,
+      "heap_identity": "'kw_1662980348718-37926",
+      "everflow_transaction_id": "af189e77650e4e908af797b61b03ac0b",
+      "utm_campaign": "1771573900",
+      "utm_content": "1",
+      "utm_last_click_campaign": "",
+      "utm_last_click_content": "",
+      "utm_last_click_medium": "",
+      "utm_last_click_pathname": "",
+      "utm_last_click_referrer": "",
+      "utm_last_click_source": "",
+      "utm_last_click_term": "",
+      "utm_last_click_visit_timestamp": 1653036507409,
+      "utm_medium": "",
+      "utm_pathname": "",
+      "utm_referrer": "",
+      "utm_source": "",
+      "utm_term": "",
+      "utm_visit_timestamp": 1653036507409
+    }
+  }
+}

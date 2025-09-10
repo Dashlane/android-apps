@@ -12,7 +12,7 @@ class ChangeMasterPasswordFeatureAccessChecker @Inject constructor(
     private val sessionManager: SessionManager,
     private val userAccountStorage: UserAccountStorage,
     private val userDatabaseRepository: UserDatabaseRepository,
-    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) {
     @JvmOverloads
     fun canAccessFeature(fromMigrationToMasterPasswordUser: Boolean = false): Boolean {

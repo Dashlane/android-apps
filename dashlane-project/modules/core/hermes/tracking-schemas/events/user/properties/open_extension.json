@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/open_extension.json",
+  "type": "object",
+  "description": "Open the extension",
+  "metas": {
+    "area": "authentication"
+  },
+  "properties": {
+    "name": {
+      "const": "open_extension"
+    },
+    "authentication_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/authentication_status"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

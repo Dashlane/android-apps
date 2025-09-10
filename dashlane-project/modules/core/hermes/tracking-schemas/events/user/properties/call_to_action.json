@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/call_to_action.json",
+  "type": "object",
+  "description": "User call to action. The event was introduced for trial awareness but could be reused",
+  "metas": {
+    "area": "ui"
+  },
+  "properties": {
+    "name": {
+      "const": "call_to_action"
+    },
+    "call_to_action_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/call_to_action.json#/definitions/call_to_action_list"
+    },
+    "chosen_action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/call_to_action.json#/definitions/call_to_action"
+    },
+    "has_chosen_no_action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/call_to_action.json#/definitions/has_chosen_no_action"
+    },
+    "toast_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/ui.json#/definitions/toast_name"
+    }
+  },
+  "required": [
+    "name",
+    "has_chosen_no_action"
+  ],
+  "additionalProperties": false
+}

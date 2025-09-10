@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.design.component.compat.view.ThumbnailViewType
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
@@ -32,7 +32,7 @@ class DomainItem(val domain: String) : DashlaneRecyclerAdapter.ViewTypeProvider 
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.autocomplete_textview_websites_adapter,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 }

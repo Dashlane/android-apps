@@ -1,26 +1,25 @@
 package com.dashlane.account
 
-import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.preference.ConstantsPrefs
 import com.dashlane.preference.PreferencesManager
-import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.UserSecureStorageManager
 import com.dashlane.user.UserAccountInfo
 import com.dashlane.user.UserSecuritySettings
+import com.dashlane.user.Username
 import javax.inject.Inject
 
 class UserAccountStorageImpl @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val userSecureStorageManager: UserSecureStorageManager,
-    private val deviceInfoRepository: DeviceInfoRepository
+    private val deviceInfoRepository: DeviceInfoRepository,
 ) : UserAccountStorage {
-
     override fun saveUserAccountInfo(
         userAccountInfo: UserAccountInfo,
         localKey: LocalKey,
         secretKey: String,
-        allowOverwriteAccessKey: Boolean
+        allowOverwriteAccessKey: Boolean,
     ) {
         val username = userAccountInfo.username
         val preferences = preferencesManager[username]
@@ -66,14 +65,13 @@ class UserAccountStorageImpl @Inject constructor(
                 "account info for '$username'," +
                     " userIsOTP2: $userIsOTP2, " +
                     "null accessKey in preferences? ${preferences.accessKey == null}",
-                logToUserSupportFile = true
             )
             UserAccountInfo(
                 username = username.email,
                 otp2 = userIsOTP2,
                 securitySettings = securitySettings,
                 accessKey = accessKey,
-                accountType = accountType ?: UserAccountInfo.AccountType.MasterPassword
+                accountType = accountType ?: UserAccountInfo.AccountType.MasterPassword,
             )
         } else {
             null

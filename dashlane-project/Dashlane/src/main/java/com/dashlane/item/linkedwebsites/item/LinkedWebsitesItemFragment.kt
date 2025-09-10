@@ -12,15 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dashlane.item.subview.action.LoginOpener
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LinkedWebsitesItemFragment : AbstractContentFragment() {
-
     private val viewModel: LinkedWebsitesViewModel by viewModels(
-        ownerProducer = { requireParentFragment() }
+        ownerProducer = { requireParentFragment() },
     )
     private val websiteAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
     private lateinit var recyclerView: RecyclerView

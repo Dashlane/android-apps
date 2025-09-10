@@ -8,7 +8,7 @@ interface PermissionsManager {
         activity: Activity,
         permissionCode: Int,
         handler: OnPermissionResponseHandler?,
-        permission: String
+        permission: String,
     )
 
     fun isAllowed(permission: String): Boolean
@@ -17,12 +17,14 @@ interface PermissionsManager {
         activity: Activity,
         permissions: Array<out String>,
         requestCode: Int,
-        grantResults: IntArray
+        grantResults: IntArray,
     )
 
     interface OnPermissionResponseHandler {
         fun onApproval()
+
         fun onAlwaysDisapproved()
+
         fun onDisapproval()
     }
 

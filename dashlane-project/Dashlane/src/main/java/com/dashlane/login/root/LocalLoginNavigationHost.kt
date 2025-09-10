@@ -3,9 +3,6 @@ package com.dashlane.login.root
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,91 +12,78 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.design.component.BaseDialog
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.lock.LockSetting
 import com.dashlane.lock.LockType
-import com.dashlane.login.LoginIntents
+import com.dashlane.login.LocalLoginDestination
+import com.dashlane.login.LocalLoginDestination.Biometric
+import com.dashlane.login.LocalLoginDestination.LostKey
+import com.dashlane.login.LocalLoginDestination.LostKey.toLocalLoginDestination
+import com.dashlane.login.LocalLoginDestination.Otp2
+import com.dashlane.login.LocalLoginDestination.Password
+import com.dashlane.login.LocalLoginDestination.Pin
+import com.dashlane.login.LocalLoginDestination.PinRecovery
+import com.dashlane.login.LocalLoginDestination.Sso
 import com.dashlane.login.LoginStrategy
-import com.dashlane.login.pages.biometric.compose.LoginBiometricFallback
-import com.dashlane.login.pages.biometric.compose.LoginBiometricScreen
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination.Biometric.toBiometricRecoveryDestination
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination.ChangeMp
-import com.dashlane.login.pages.biometric.recovery.BiometricRecoveryDestination.Recovery
-import com.dashlane.login.pages.biometric.recovery.biometricRecoveryNavigation
-import com.dashlane.login.pages.password.compose.LoginPasswordScreen
-import com.dashlane.login.pages.pin.compose.LoginPinFallback
-import com.dashlane.login.pages.pin.compose.LoginPinScreen
+import com.dashlane.login.biometric.LoginBiometricFallback
+import com.dashlane.login.biometric.LoginBiometricScreen
+import com.dashlane.login.biometric.recovery.BiometricRecoveryDestination
+import com.dashlane.login.biometric.recovery.BiometricRecoveryDestination.ChangeMp
+import com.dashlane.login.biometric.recovery.BiometricRecoveryDestination.Recovery
+import com.dashlane.login.biometric.recovery.biometricRecoveryNavigation
+import com.dashlane.login.biometric.recovery.toBiometricRecoveryDestination
 import com.dashlane.login.pages.secrettransfer.help.RecoveryHelpScreen
 import com.dashlane.login.pages.secrettransfer.help.lostkey.LostKeyScreen
 import com.dashlane.login.pages.secrettransfer.localLoginSecretTransferNavigation
-import com.dashlane.login.pages.sso.compose.LoginSsoScreen
-import com.dashlane.login.pages.totp.compose.LoginTotpScreen
-import com.dashlane.login.root.LocalLoginDestination.Biometric
-import com.dashlane.login.root.LocalLoginDestination.LostKey
-import com.dashlane.login.root.LocalLoginDestination.LostKey.toLocalLoginDestination
-import com.dashlane.login.root.LocalLoginDestination.Otp2
-import com.dashlane.login.root.LocalLoginDestination.Password
-import com.dashlane.login.root.LocalLoginDestination.Pin
-import com.dashlane.login.root.LocalLoginDestination.PinRecovery
-import com.dashlane.login.root.LocalLoginDestination.Sso
+import com.dashlane.login.password.LoginPasswordScreen
+import com.dashlane.login.pin.LoginPinFallback
+import com.dashlane.login.pin.LoginPinScreen
+import com.dashlane.login.sso.LoginSsoScreen
+import com.dashlane.login.totp.LoginTotpScreen
 import com.dashlane.user.UserAccountInfo
 import java.io.Serializable
 
-@Suppress("LongMethod", "kotlin:S3776")
+
+@Suppress("LongMethod", "kotlin:S3776", "kotlin:S107")
 @Composable
 fun LocalLoginNavigationHost(
-    registeredUserDevice: RegisteredUserDevice,
+    contentPadding: PaddingValues = PaddingValues(),
     userAccountInfo: UserAccountInfo,
     lockSetting: LockSetting,
     startDestination: LocalLoginDestination,
+    showSnackBar: (String) -> Unit,
     onSuccess: (LoginStrategy.Strategy) -> Unit,
     onCancel: () -> Unit,
     onChangeAccount: (String?) -> Unit,
     onLogout: (String?) -> Unit,
     onLogoutMPLess: (String) -> Unit,
+    goToArk: (UserAccountInfo.AccountType) -> Unit,
 ) {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    var backgroundState by rememberSaveable { mutableStateOf(LocalLoginBackgroundState(lockSetting.shouldThemeAsDialog, isTransparent = false)) }
+    var backgroundState by rememberSaveable {
+        mutableStateOf(LocalLoginBackgroundState(lockSetting.shouldThemeAsDialog, isTransparent = false))
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(navBackStackEntry) {
         val biometricRecoveryDestination = navBackStackEntry?.toBiometricRecoveryDestination()
         backgroundState = when (biometricRecoveryDestination) {
             ChangeMp, Recovery -> LocalLoginBackgroundState()
-            BiometricRecoveryDestination.Biometric ->
-                LocalLoginBackgroundState(isDialog = false, isTransparent = true)
+            BiometricRecoveryDestination.Biometric -> LocalLoginBackgroundState(isDialog = false, isTransparent = true)
             else -> when (navBackStackEntry?.toLocalLoginDestination()) {
                 PinRecovery, LocalLoginDestination.SecretTransfer, Otp2 -> LocalLoginBackgroundState()
-                Sso, Password, Pin ->
-                    LocalLoginBackgroundState(isDialog = lockSetting.shouldThemeAsDialog)
+                Sso, Password, Pin -> LocalLoginBackgroundState(isDialog = lockSetting.shouldThemeAsDialog)
                 Biometric -> LocalLoginBackgroundState(isDialog = false, isTransparent = true)
                 else -> backgroundState
             }
         }
-    }
-
-    val goToArk: () -> Unit = {
-        context.startActivity(
-            LoginIntents.createAccountRecoveryKeyIntent(
-                context = context,
-                registeredUserDevice = registeredUserDevice,
-                accountType = UserAccountInfo.AccountType.InvisibleMasterPassword,
-                authTicket = null
-            )
-        )
-        onCancel()
     }
 
     val modifier = if (lockSetting.shouldThemeAsDialog) {
@@ -109,23 +93,23 @@ fun LocalLoginNavigationHost(
     }
 
     LocalLoginContent(
+        contentPadding = contentPadding,
         backgroundState = backgroundState,
-        onDialogDismissed = onCancel
-    ) { contentPadding ->
+        onDialogDismissed = onCancel,
+    ) {
         NavHost(
             startDestination = startDestination,
-            navController = navController
+            navController = navController,
         ) {
             composable<Otp2> {
                 LoginTotpScreen(
-                    modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     verificationMode = VerificationMode.OTP2,
                     goToNext = { locks ->
                         val destination = when {
                             lockSetting.isMasterPasswordReset -> Password
                             LockType.PinCode in locks -> Pin(userAccountInfo.username)
-                            LockType.Biometric in locks -> Biometric
+                            LockType.Biometric in locks -> Biometric(userAccountInfo.username)
                             else -> Password
                         }
                         navController.navigate(route = destination)
@@ -134,10 +118,11 @@ fun LocalLoginNavigationHost(
             }
             composable<Pin> {
                 LoginPinScreen(
-                    modifier = modifier.padding(contentPadding),
+                    modifier = modifier,
                     viewModel = hiltViewModel(),
                     userAccountInfo = userAccountInfo,
                     lockSetting = lockSetting,
+                    showSnackBar = showSnackBar,
                     onSuccess = { onSuccess(LoginStrategy.Strategy.Unlock) },
                     onCancel = { fallback ->
                         when (fallback) {
@@ -154,15 +139,16 @@ fun LocalLoginNavigationHost(
                     goToSecretTransfer = { email ->
                         navController.navigate(route = LocalLoginDestination.SecretTransfer(email))
                     },
-                    goToRecovery = { navController.navigate(route = PinRecovery) }
+                    goToRecovery = { navController.navigate(route = PinRecovery) },
                 )
             }
             composable<Biometric> {
                 LoginBiometricScreen(
-                    modifier = modifier.padding(contentPadding),
+                    modifier = modifier,
                     viewModel = hiltViewModel(),
                     userAccountInfo = userAccountInfo,
                     lockSetting = lockSetting,
+                    showSnackBar = showSnackBar,
                     onSuccess = { onSuccess(LoginStrategy.Strategy.Unlock) },
                     onCancel = { onCancel() },
                     onFallback = { fallback ->
@@ -185,15 +171,16 @@ fun LocalLoginNavigationHost(
                     onLogout = { email, _ ->
                         navController.popBackStack()
                         onLogout(email)
-                    }
+                    },
                 )
             }
             composable<Sso> {
                 LoginSsoScreen(
-                    modifier = modifier.padding(contentPadding),
+                    modifier = modifier,
                     viewModel = hiltViewModel(),
                     userAccountInfo = userAccountInfo,
                     lockSetting = lockSetting,
+                    showSnackBar = showSnackBar,
                     onSuccess = { onSuccess(LoginStrategy.Strategy.Unlock) },
                     onCancel = onCancel,
                     changeAccount = onChangeAccount,
@@ -201,14 +188,14 @@ fun LocalLoginNavigationHost(
             }
             composable<Password> {
                 LoginPasswordScreen(
-                    modifier = modifier.padding(contentPadding),
+                    modifier = modifier,
                     viewModel = hiltViewModel(),
                     lockSetting = lockSetting,
                     onSuccess = { strategy, _ -> onSuccess(strategy) },
                     onCancel = onCancel,
                     onFallback = {
                         val destination = when {
-                            LockType.Biometric in lockSetting.locks -> Biometric
+                            LockType.Biometric in lockSetting.locks -> Biometric(userAccountInfo.username)
                             LockType.PinCode in lockSetting.locks -> Pin(userAccountInfo.username)
                             else -> null
                         }
@@ -222,36 +209,35 @@ fun LocalLoginNavigationHost(
                     },
                     changeAccount = onChangeAccount,
                     logout = onLogout,
-                    biometricRecovery = { navController.navigate(BiometricRecoveryDestination.Biometric) },
+                    biometricRecovery = { navController.navigate(BiometricRecoveryDestination.Biometric(userAccountInfo.username)) },
+                    goToArk = goToArk,
                 )
             }
             composable<PinRecovery> {
                 RecoveryHelpScreen(
-                    modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     email = userAccountInfo.username,
-                    onStartRecoveryClicked = { goToArk() },
-                    onLostKeyClicked = { navController.navigate(LostKey) }
+                    onStartRecoveryClicked = { goToArk(UserAccountInfo.AccountType.InvisibleMasterPassword) },
+                    onLostKeyClicked = { navController.navigate(LostKey) },
                 )
             }
             composable<LostKey> {
-                LostKeyScreen(
-                    modifier = Modifier.padding(contentPadding),
-                )
+                LostKeyScreen()
             }
             localLoginSecretTransferNavigation(
-                contentPadding = contentPadding,
+                goToArk = goToArk,
                 onSuccess = { strategy -> onSuccess(strategy) },
-                onCancel = onCancel
+                onCancel = onCancel,
             )
             biometricRecoveryNavigation(
                 navController = navController,
                 contentPadding = contentPadding,
                 userAccountInfo = userAccountInfo,
                 lockSetting = lockSetting.copy(isLockCancelable = true),
+                showSnackBar = showSnackBar,
                 onSuccess = onSuccess,
                 onCancel = { navController.navigateUp() },
-                onLogout = { onLogout(null) }
+                onLogout = { onLogout(null) },
             )
         }
     }
@@ -259,35 +245,31 @@ fun LocalLoginNavigationHost(
 
 @Composable
 fun LocalLoginContent(
+    contentPadding: PaddingValues,
     backgroundState: LocalLoginBackgroundState,
     onDialogDismissed: () -> Unit,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable () -> Unit,
 ) {
     if (backgroundState.isDialog) {
-        Dialog(
-            onDismissRequest = onDialogDismissed
+        BaseDialog(
+            onDismissRequest = onDialogDismissed,
+            contentPadding = contentPadding,
         ) {
-            Surface(
-                shape = RoundedCornerShape(size = 12.dp),
-                color = DashlaneTheme.colors.containerAgnosticNeutralSupershy,
-                tonalElevation = 1.dp,
-            ) {
-                content(PaddingValues())
-            }
+            content()
         }
     } else if (backgroundState.isTransparent) {
-        Scaffold(
-            modifier = Modifier.safeDrawingPadding(),
-            containerColor = Color.Transparent,
-        ) { contentPadding ->
-            content(contentPadding)
+        Surface(
+            modifier = Modifier.padding(contentPadding),
+            color = Color.Transparent,
+        ) {
+            content()
         }
     } else {
-        Scaffold(
-            modifier = Modifier.safeDrawingPadding(),
-            containerColor = DashlaneTheme.colors.containerAgnosticNeutralSupershy,
-        ) { contentPadding ->
-            content(contentPadding)
+        Surface(
+            modifier = Modifier.padding(contentPadding),
+            color = DashlaneTheme.colors.containerAgnosticNeutralSupershy,
+        ) {
+            content()
         }
     }
 }

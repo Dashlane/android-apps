@@ -2,17 +2,16 @@ package com.dashlane.login.accountrecoverykey.intro
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.data.login.RegisteredUserDevice
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.FlowStep
 import com.dashlane.hermes.generated.definitions.UseKeyErrorName
 import com.dashlane.hermes.generated.events.user.UseAccountRecoveryKey
+import com.dashlane.login.LoginRepository
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryKeyRepository
-import com.dashlane.login.root.LoginRepository
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,15 +22,15 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class IntroViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
     private val loginAccountRecoveryKeyRepository: LoginAccountRecoveryKeyRepository,
     private val logRepository: LogRepository,
-    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow<IntroState>(IntroState.Initial)
     val uiState = stateFlow.asStateFlow()
 
@@ -67,7 +66,8 @@ class IntroViewModel @Inject constructor(
                 is RegisteredUserDevice.Local -> {
                     when (loginAccountRecoveryKeyRepository.get2FAStatusForRecovery(registeredUserDevice)) {
                         AuthSecurityType.TOTP_LOGIN,
-                        AuthSecurityType.TOTP_DEVICE_REGISTRATION -> emit(IntroState.GoToTOTP)
+                        AuthSecurityType.TOTP_DEVICE_REGISTRATION,
+                        -> emit(IntroState.GoToTOTP)
                         AuthSecurityType.EMAIL_TOKEN -> emit(IntroState.GoToToken)
                         AuthSecurityType.SSO -> throw IllegalStateException("SSO does not support ARK")
                     }

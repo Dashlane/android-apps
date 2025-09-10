@@ -10,6 +10,6 @@ interface CreateAccountActionIntentProvider {
         summary: AutoFillHintSummary,
         hadCredentials: Boolean,
         forKeyboard: Boolean,
-        isAccountFrozen: Boolean
+        isAccountFrozen: Boolean,
     ): IntentSender
 }

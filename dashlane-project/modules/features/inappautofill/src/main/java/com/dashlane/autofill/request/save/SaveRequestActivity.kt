@@ -6,11 +6,12 @@ import android.content.Intent
 import android.content.IntentSender
 import android.service.autofill.SaveRequest
 import androidx.lifecycle.lifecycleScope
+import com.dashlane.autofill.SaveRequestHandler
+import com.dashlane.autofill.formdetector.AutoFillFormType
+import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.ui.AutoFillResponseActivity
 import com.dashlane.autofill.util.AutofillLogUtil
 import com.dashlane.autofill.util.DomainWrapper
-import com.dashlane.autofill.formdetector.AutoFillFormType
-import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.hermes.generated.definitions.SaveType
 import com.dashlane.url.toUrlDomainOrNull
@@ -23,9 +24,11 @@ import kotlin.coroutines.CoroutineContext
 
 @AndroidEntryPoint
 class SaveRequestActivity : AutoFillResponseActivity(), CoroutineScope, SaveCallback {
-
     @Inject
     lateinit var saveRequestLogger: AutofillSaveRequestLogger
+
+    @Inject
+    internal lateinit var saveRequestHandler: SaveRequestHandler
 
     private var itemType: ItemType? = null
     lateinit var domainWrapper: DomainWrapper
@@ -40,7 +43,7 @@ class SaveRequestActivity : AutoFillResponseActivity(), CoroutineScope, SaveCall
         itemType = summary?.getItemType()
         domainWrapper = AutofillLogUtil.extractDomainFrom(
             summary?.webDomain?.toUrlDomainOrNull(),
-            summary?.packageName
+            summary?.packageName,
         )
         if (saveRequest == null || saveSummary == null || itemType == null) {
             finish()
@@ -53,13 +56,13 @@ class SaveRequestActivity : AutoFillResponseActivity(), CoroutineScope, SaveCall
     }
 
     private fun handleSaveRequest(request: SaveRequest, saveSummary: AutoFillHintSummary) {
-        componentInternal.saveRequestHandler.onSaveRequest(
+        saveRequestHandler.onSaveRequest(
             context = this,
             coroutineScope = this,
             clientState = request.clientState,
             summary = saveSummary,
             saveCallback = this,
-            forKeyboard = false
+            forKeyboard = false,
         )
     }
 
@@ -94,13 +97,13 @@ class SaveRequestActivity : AutoFillResponseActivity(), CoroutineScope, SaveCall
         internal fun getSaveRequestIntent(
             context: Context,
             summary: AutoFillHintSummary,
-            saveRequest: SaveRequest
+            saveRequest: SaveRequest,
         ): Intent {
             val intent =
                 createIntent(
                     context,
                     summary,
-                    SaveRequestActivity::class
+                    SaveRequestActivity::class,
                 )
             intent.putExtra(SAVE_REQUEST, saveRequest)
             return intent
@@ -109,10 +112,10 @@ class SaveRequestActivity : AutoFillResponseActivity(), CoroutineScope, SaveCall
         internal fun getSaveRequestPendingIntent(
             context: Context,
             summary: AutoFillHintSummary,
-            saveRequest: SaveRequest
+            saveRequest: SaveRequest,
         ): IntentSender = createIntentSender(
             context,
-            getSaveRequestIntent(context, summary, saveRequest)
+            getSaveRequestIntent(context, summary, saveRequest),
         )
     }
 }

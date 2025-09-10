@@ -15,7 +15,7 @@ fun createIdentity(
     middlename: String? = null,
     pseudo: String? = null,
     dateOfBirth: LocalDate? = null,
-    placeOfBirth: String? = null
+    placeOfBirth: String? = null,
 ): VaultItem<SyncObject.Identity> {
     return dataIdentifier.toVaultItem(
         SyncObject.Identity {
@@ -29,7 +29,7 @@ fun createIdentity(
             this.birthPlace = placeOfBirth
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
@@ -43,7 +43,6 @@ val SummaryObject.Identity.identityPartialOrFullNameNoLogin: String?
         }.joinToString(" ")
     }
 
-fun VaultItem<SyncObject.Identity>.copySyncObject(builder: SyncObject.Identity.Builder.() -> Unit = {}):
-    VaultItem<SyncObject.Identity> {
+fun VaultItem<SyncObject.Identity>.copySyncObject(builder: SyncObject.Identity.Builder.() -> Unit = {}): VaultItem<SyncObject.Identity> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/migrate_crypto.json",
+  "type": "object",
+  "description": "Sent everytime user account encryption is updated",
+  "metas": {
+    "area": "technical"
+  },
+  "properties": {
+    "name": {
+      "const": "migrate_crypto"
+    },
+    "new_crypto": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_crypto.json#/definitions/crypto_algorithm"
+    },
+    "previous_crypto": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_crypto.json#/definitions/crypto_algorithm"
+    },
+    "status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_crypto.json#/definitions/crypto_migration_status"
+    },
+    "type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_crypto.json#/definitions/crypto_migration_type"
+    }
+  },
+  "required": [
+    "name",
+    "new_crypto",
+    "previous_crypto",
+    "status",
+    "type"
+  ],
+  "additionalProperties": false
+}

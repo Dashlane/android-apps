@@ -6,5 +6,5 @@ import java.time.Instant
 data class SyncSummaryItem(
     val objectId: String,
     val lastUpdateTime: Instant,
-    val syncObjectType: SyncObjectType
+    val syncObjectType: SyncObjectType,
 )

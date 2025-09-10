@@ -2,14 +2,12 @@ package com.dashlane.login.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.biometricrecovery.BiometricRecovery
+import com.dashlane.biometric.BiometricSetupRepository
 import com.dashlane.hardwaresecurity.BiometricAuthModule
+import com.dashlane.hardwaresecurity.BiometricRecovery
 import com.dashlane.hermes.LogRepository
-import com.dashlane.lock.LockManager
-import com.dashlane.lock.LockType
 import com.dashlane.mvvm.MutableViewStateFlow
 import com.dashlane.mvvm.ViewStateFlow
-import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.screens.settings.UserSettingsLogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,11 +19,10 @@ import javax.inject.Inject
 class LoginSettingsViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     private val biometricRecovery: BiometricRecovery,
-    private val sessionCredentialsSaver: SessionCredentialsSaver,
-    private val lockManager: LockManager,
     private val biometricAuthModule: BiometricAuthModule,
     private val logRepository: LogRepository,
-    private val userSettingsLogRepository: UserSettingsLogRepository
+    private val userSettingsLogRepository: UserSettingsLogRepository,
+    private val biometricSetupRepository: BiometricSetupRepository,
 ) : ViewModel() {
     private val _stateFlow = MutableViewStateFlow<LoginSettingsState.View, LoginSettingsState.SideEffect>(LoginSettingsState.View())
     val stateFlow: ViewStateFlow<LoginSettingsState.View, LoginSettingsState.SideEffect> = _stateFlow
@@ -46,7 +43,7 @@ class LoginSettingsViewModel @Inject constructor(
                 state.copy(
                     biometricChecked = checked,
                     biometricRecoveryChecked = false,
-                    snackBarShown = !checked && _stateFlow.value.biometricRecoveryChecked
+                    snackBarShown = !checked && _stateFlow.value.biometricRecoveryChecked,
                 )
             }
         }
@@ -58,7 +55,7 @@ class LoginSettingsViewModel @Inject constructor(
                 state.copy(
                     biometricChecked = _stateFlow.value.biometricChecked || checked,
                     biometricRecoveryChecked = checked,
-                    snackBarShown = checked && !_stateFlow.value.biometricChecked
+                    snackBarShown = checked && !_stateFlow.value.biometricChecked,
                 )
             }
         }
@@ -82,8 +79,7 @@ class LoginSettingsViewModel @Inject constructor(
             val result = biometricAuthModule.createEncryptionKeyForBiometrics(username = session.userId)
             if (!result) return@launch
             
-            sessionCredentialsSaver.saveCredentials(session)
-            lockManager.addLock(session.username, LockType.Biometric)
+            biometricSetupRepository.enableBiometric(session)
 
             if (_stateFlow.value.biometricRecoveryChecked) {
                 

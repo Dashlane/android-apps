@@ -1,0 +1,45 @@
+{
+  "id": "838bf943-b9a1-4301-83e4-cb192f2e70c4",
+  "schema_version": "1.31.6",
+  "category": "anonymous",
+  "date": "2021-03-02",
+  "date_origin": "local",
+  "context": {
+    "os": {
+      "type": "linux",
+      "version": "4.1",
+      "locale": "en-US"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "web",
+      "build_type": "dev"
+    }
+  },
+  "properties": {
+    "name": "register_passkey",
+    "algorithms_supported_list": [
+      "a_128_gcm",
+      "a_128_kw",
+      "a_192_gcm"
+    ],
+    "authenticator_attachment": "platform",
+    "authenticator_resident_key": "preferred",
+    "authenticator_user_verification": "preferred",
+    "domain": {
+      "type": "app",
+      "id": "1191b6d2199790c5bad2b8c3d678c2aa41a23e2809ce7aa9fbec8778bc5c2973"
+    },
+    "is_registered_with_dashlane": false,
+    "ms_to_complete_registration": 1000,
+    "ms_to_complete_registration_timeout": 3000,
+    "passkey_registration_error_type": "not_supported",
+    "passkey_registration_status": "failure",
+    "passkey_type": "cloud",
+    "webauthn_extension_supported_list": [
+      "appid",
+      "appid_exclude",
+      "authn_sel"
+    ]
+  }
+}

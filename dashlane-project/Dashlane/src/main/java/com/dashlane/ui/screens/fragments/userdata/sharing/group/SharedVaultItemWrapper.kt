@@ -8,11 +8,11 @@ import com.dashlane.ui.activities.fragments.list.ItemWrapperViewHolder
 import com.dashlane.ui.activities.fragments.list.action.ListItemAction
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
-import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.adapter.ItemListContext
-import com.dashlane.ui.adapter.util.DiffUtilComparator
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
+import com.dashlane.ui.legacy.recyclerview.HeaderItem
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
 import com.dashlane.util.ViewTypeUtils
 import com.dashlane.vault.summary.SummaryObject
@@ -25,9 +25,8 @@ class SharedVaultItemWrapper(
     val sharedItem: SharingModels,
     val itemWrapperProvider: ItemWrapperProvider,
     val onPendingMenuClick: (View, SharingModels) -> Unit,
-    val onAcceptedMenuClick: (View, SharingModels) -> Unit
+    val onAcceptedMenuClick: (View, SharingModels) -> Unit,
 ) : MultiColumnViewTypeProvider, DiffUtilComparator<SharedVaultItemWrapper> {
-
     val itemWrapper: VaultItemWrapper<out SummaryObject>
         get() = itemWrapperProvider(
             sharedItem.item,
@@ -42,6 +41,7 @@ class SharedVaultItemWrapper(
     val description: String = itemWrapper.getDescription(context).text
 
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = VIEW_TYPE
+
     override fun getSpanSize(spanCount: Int): Int = 1
 
     override fun isItemTheSame(item: SharedVaultItemWrapper): Boolean =
@@ -88,12 +88,12 @@ class SharedVaultItemWrapper(
                         if (sharedVaultItemWrapper.isPending) {
                             sharedVaultItemWrapper.onPendingMenuClick(
                                 v,
-                                sharedVaultItemWrapper.sharedItem
+                                sharedVaultItemWrapper.sharedItem,
                             )
                         } else {
                             sharedVaultItemWrapper.onAcceptedMenuClick(
                                 v,
-                                sharedVaultItemWrapper.sharedItem
+                                sharedVaultItemWrapper.sharedItem,
                             )
                         }
                     }
@@ -109,13 +109,13 @@ class SharedVaultItemWrapper(
         private val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<out SharedVaultItemWrapper> =
             DashlaneRecyclerAdapter.ViewType(
                 ViewTypeUtils.DEFAULT_ITEM_WRAPPER_VIEW_TYPE.layoutResId,
-                ItemViewHolder::class.java
+                ItemViewHolder::class.java,
             )
 
         fun comparator(): Comparator<SharedVaultItemWrapper> = compareBy(
             { it.sharedItem.item.syncObjectType.xmlObjectName },
             { it.title },
-            { it.description }
+            { it.description },
         )
     }
 }
@@ -126,14 +126,14 @@ fun List<MultiColumnViewTypeProvider>.addHeaders(context: Context) =
             (it as? SharedVaultItemWrapper)?.sharedItem?.item?.syncObjectType == SyncObjectType.AUTHENTIFIANT
         }.takeIf { it != -1 }?.also { index ->
             HeaderItem(
-                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.AUTHENTIFIANT))
+                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.AUTHENTIFIANT)),
             ).also { add(index, it) }
         }
         indexOfFirst {
             (it as? SharedVaultItemWrapper)?.sharedItem?.item?.syncObjectType == SyncObjectType.SECURE_NOTE
         }.takeIf { it != -1 }?.also { index ->
             HeaderItem(
-                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.SECURE_NOTE))
+                context.getString(DataIdentifierTypeTextFactory.getStringResId(SyncObjectType.SECURE_NOTE)),
             ).also { add(index, it) }
         }
     }

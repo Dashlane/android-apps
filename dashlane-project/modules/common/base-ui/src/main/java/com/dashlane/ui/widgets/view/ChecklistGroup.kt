@@ -12,12 +12,13 @@ import kotlinx.parcelize.Parcelize
 class ChecklistGroup @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
-
     @IdRes
     var expandedId: Int = View.NO_ID
-        private set(@IdRes value) {
+        private set(
+        @IdRes value
+        ) {
             if (value != field) {
                 setCollapsedStateForView(field)
                 field = value
@@ -61,7 +62,7 @@ class ChecklistGroup @JvmOverloads constructor(
     override fun onSaveInstanceState(): Parcelable? {
         return SaveState(
             superState = super.onSaveInstanceState(),
-            expandedId = expandedId
+            expandedId = expandedId,
         )
     }
 
@@ -91,6 +92,6 @@ class ChecklistGroup @JvmOverloads constructor(
     @Parcelize
     private data class SaveState(
         val superState: Parcelable?,
-        @IdRes val expandedId: Int
+        @IdRes val expandedId: Int,
     ) : Parcelable
 }

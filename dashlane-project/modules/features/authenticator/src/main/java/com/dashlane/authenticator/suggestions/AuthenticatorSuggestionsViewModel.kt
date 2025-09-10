@@ -7,12 +7,14 @@ import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.OtpSetupCommand
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.SeeAllCommand
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.SeeLessCommand
+import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.UserCommand.UriHandledCommand
 import com.dashlane.authenticator.AuthenticatorLogger
 import com.dashlane.authenticator.Otp
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.AllSetup
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.HasLogins
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.HasLogins.CredentialItem
-import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.NoLogins
+import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.No2FACompatibleLogins
+import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.NoLoginOnboarding
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.Progress
 import com.dashlane.authenticator.suggestions.AuthenticatorSuggestionsUiState.SetupComplete
 import com.dashlane.authenticator.updateOtp
@@ -22,8 +24,14 @@ import com.dashlane.lock.LockHelper
 import com.dashlane.navigation.Navigator
 import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
+import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.storage.userdata.accessor.filter.CounterFilter
+import com.dashlane.storage.userdata.accessor.filter.datatype.CredentialsDataTypeFilter
+import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
+import com.dashlane.storage.userdata.accessor.filter.space.NoSpaceFilter
+import com.dashlane.storage.userdata.accessor.filter.status.DefaultStatusFilter
 import com.dashlane.sync.DataSync
 import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.url.domain.otp.HardcodedOtpDomainsRepository
@@ -37,7 +45,7 @@ import com.dashlane.vault.model.urlDomain
 import com.dashlane.vault.summary.SummaryObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.flatMapConcat
@@ -60,6 +68,7 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
     private val logger: AuthenticatorLogger,
     private val navigator: Navigator,
     private val frozenStateManager: FrozenStateManager,
+    private val dataCounter: DataCounter,
 ) : ViewModel(), AuthenticatorSuggestionsViewModelContract {
     private val repository = HardcodedOtpDomainsRepository()
     private val userCommand = Channel<UserCommand>(1)
@@ -68,8 +77,19 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
 
     override val urlDomainRegistry = urlDomainRegistryFactory.create()
 
-    @OptIn(FlowPreview::class)
-    override val uiState = userCommand.receiveAsFlow()
+    private val hasNoCredential
+        get() = dataCounter.count(
+            CounterFilter(
+                CredentialsDataTypeFilter,
+                NoSpaceFilter,
+                DefaultLockFilter,
+                DefaultStatusFilter,
+            ),
+        ) == 0
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val uiState = userCommand
+        .receiveAsFlow()
         .flatMapConcat { command ->
             when (command) {
                 is SeeAllCommand -> flow {
@@ -83,13 +103,14 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
                     saveOtp(command)
                     emit(SetupComplete)
                 }
+                is UriHandledCommand -> flow {
+                    emit(refreshCompatibleLogins())
+                }
             }
-        }
-        .onStart {
+        }.onStart {
             lockHelper.waitUnlock()
             emit(refreshCompatibleLogins())
-        }
-        .flowOn(Dispatchers.Default)
+        }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, WhileSubscribed(5_000), Progress)
 
     override fun launchOrShowFrozenAccountPaywall(block: () -> Unit) {
@@ -129,6 +150,9 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
     override fun getCredentials() = credentialDataQuery.queryAll()
 
     private fun refreshCompatibleLogins(): AuthenticatorSuggestionsUiState {
+        if (hasNoCredential) {
+            return NoLoginOnboarding
+        }
         val credentials = getCredentials()
         val otpSetupCount = getCredentialsWithOtpCount(credentials)
         if (otpCredentialsCount != -1 && otpSetupCount != otpCredentialsCount) {
@@ -139,7 +163,7 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
         val compatibleCredentials = getCompatibleCredentials(credentials)
         val credentialToSecure = getReadyToSecureCredentialItems(compatibleCredentials)
         return when {
-            compatibleCredentials.isEmpty() -> NoLogins
+            compatibleCredentials.isEmpty() -> No2FACompatibleLogins
             credentialToSecure.isEmpty() -> AllSetup
             else -> {
                 loadedCredentials = credentialToSecure
@@ -155,11 +179,12 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
         dataSaver,
         dataSync,
         logger,
-        updateModificationDate = command.updateModificationDate
+        updateModificationDate = command.updateModificationDate,
     )
 
     private fun getReadyToSecureCredentialItems(credentials: List<SummaryObject.Authentifiant>) =
-        credentials.filter { !it.hasOtpUrl }
+        credentials
+            .filter { !it.hasOtpUrl }
             .sortedByDescending { it.locallyUsedCount }
             .map {
                 CredentialItem(
@@ -168,16 +193,17 @@ class AuthenticatorSuggestionsViewModel @Inject constructor(
                     it.urlDomain,
                     it.loginForUi,
                     it.linkedServices.getAllLinkedPackageName().firstOrNull(),
-                    it.isProfessional()
+                    it.isProfessional(),
                 )
             }
 
     private fun getCompatibleCredentials(credentials: List<SummaryObject.Authentifiant>) =
         credentials.filter {
             val domain = it.urlDomain?.toUrlDomainOrNull() ?: return@filter false
-            repository.isSupportingOtp(domain) || getMatchingLinkedDomainSet(domain.value)?.any { linkedDomain ->
-                repository.isSupportingOtp(linkedDomain)
-            } == true
+            repository.isSupportingOtp(domain) ||
+                getMatchingLinkedDomainSet(domain.value)?.any { linkedDomain ->
+                    repository.isSupportingOtp(linkedDomain)
+                } == true
         }
 
     private fun getCredentialsWithOtpCount(credentials: List<SummaryObject.Authentifiant>) =

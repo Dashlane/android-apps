@@ -15,7 +15,7 @@ data class ItemEditViewSetupOptions(
     val successIntent: Intent?,
     val savedScreenConfiguration: Bundle?,
     val savedAdditionalData: Bundle?,
-    val scannedOtp: Otp?
+    val scannedOtp: Otp?,
 ) {
     val editMode: Boolean = forceEdit || uid.isSemanticallyNull() || dataType == SyncObjectType.SECURE_NOTE
 }

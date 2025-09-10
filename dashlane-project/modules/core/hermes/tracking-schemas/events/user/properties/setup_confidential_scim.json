@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/setup_confidential_scim.json",
+  "type": "object",
+  "description": "When an admin performs specific actions throughout the Confidential SCIM setup funnel",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "setup_confidential_scim"
+    },
+    "scim_setup_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/scim_setup_step"
+    }
+  },
+  "required": [
+    "name",
+    "scim_setup_step"
+  ],
+  "additionalProperties": false
+}

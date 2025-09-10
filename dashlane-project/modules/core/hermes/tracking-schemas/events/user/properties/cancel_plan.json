@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/cancel_plan.json",
+  "type": "object",
+  "description": "When the user cancels his plan in his B2C account management panel. The steps in the cancel flow : Start when the cancel flow begins. Success_cancel when the subscription is cancelled and the user is out of policy for refund. Success_refund when the subscription is cancelled and refunded. Success_cancel_and_error_refund when the subscription is cancelled and refund does not go through because of an error. Contact_support when the user clicks on contact support after having an error with refund. Abandon when the user quits and does not complete the cancellation flow. In the cancelation survey, if the user picks any other answer than other_reasons, then other_reasons will be NULL. Figma : https://www.figma.com/file/DpoyPciwE3SvyZQRiBuxeh/B2C-Subscription-Self-Service?node-id=2849%3A101657",
+  "metas": {
+    "area": "plan"
+  },
+  "properties": {
+    "name": {
+      "const": "cancel_plan"
+    },
+    "cancel_plan_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/cancel_plan_step"
+    },
+    "plan": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/plan"
+    },
+    "plan_billing_period": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/plan_billing_period"
+    },
+    "survey_answer": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/survey_answer"
+    }
+  },
+  "required": [
+    "name",
+    "cancel_plan_step",
+    "plan",
+    "plan_billing_period"
+  ],
+  "additionalProperties": false
+}

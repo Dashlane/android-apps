@@ -10,7 +10,7 @@ import com.dashlane.vault.summary.SummaryObject
 class QuickActionCopy(
     private val summaryObject: SummaryObject,
     private val copyField: CopyField,
-    private val vaultItemCopyService: VaultItemCopyService
+    private val vaultItemCopyService: VaultItemCopyService,
 ) : Action {
     override val tintColorRes = R.color.text_neutral_catchy
 
@@ -20,7 +20,6 @@ class QuickActionCopy(
         vaultItemCopyService.handleCopy(
             item = summaryObject,
             copyField = copyField,
-            updateLocalUsage = true,
             updateFrequentSearch = true,
         )
     }
@@ -33,20 +32,25 @@ class QuickActionCopy(
                 CopyField.Login, CopyField.IdentityLogin, CopyField.PasskeyDisplayName -> R.string.quick_action_copy_login
                 CopyField.Email -> R.string.quick_action_copy_email
                 CopyField.SecondaryLogin -> R.string.quick_action_copy_secondary_login
+                CopyField.PaymentsCardHolder -> R.string.quick_action_copy_credit_card_holder
+                CopyField.PaymentsCardNote -> R.string.quick_action_copy_credit_card_note
                 CopyField.PaymentsNumber,
                 CopyField.TaxNumber,
                 CopyField.SocialSecurityNumber,
                 CopyField.PassportNumber,
-                CopyField.DriverLicenseNumber -> R.string.quick_action_copy_number
+                CopyField.DriverLicenseNumber,
+                -> R.string.quick_action_copy_number
                 CopyField.PaymentsSecurityCode -> R.string.quick_action_copy_credit_card_security_code
                 CopyField.IdsLinkedIdentity,
                 CopyField.DriverLicenseLinkedIdentity,
                 CopyField.SocialSecurityLinkedIdentity,
-                CopyField.PassportLinkedIdentity -> R.string.quick_action_copy_name_holder
+                CopyField.PassportLinkedIdentity,
+                -> R.string.quick_action_copy_name_holder
                 CopyField.PaymentsExpirationDate,
                 CopyField.IdsExpirationDate,
                 CopyField.DriverLicenseExpirationDate,
-                CopyField.PassportExpirationDate -> R.string.quick_action_copy_expiration_date
+                CopyField.PassportExpirationDate,
+                -> R.string.quick_action_copy_expiration_date
                 CopyField.BankAccountBank -> R.string.quick_action_copy_bank_name
                 CopyField.BankAccountBicSwift -> R.string.quick_action_copy_swift
                 CopyField.BankAccountIban -> R.string.quick_action_copy_iban
@@ -56,7 +60,8 @@ class QuickActionCopy(
                 CopyField.IdsNumber -> R.string.quick_action_copy_number
                 CopyField.IdsIssueDate,
                 CopyField.PassportIssueDate,
-                CopyField.DriverLicenseIssueDate -> R.string.quick_action_copy_issue_date
+                CopyField.DriverLicenseIssueDate,
+                -> R.string.quick_action_copy_issue_date
                 CopyField.OtpCode -> R.string.quick_action_copy_security_code
                 CopyField.FirstName -> R.string.quick_action_copy_first_name
                 CopyField.LastName -> R.string.quick_action_copy_last_name
@@ -74,6 +79,9 @@ class QuickActionCopy(
                 CopyField.BankAccountClabe -> R.string.quick_action_copy_clabe
                 CopyField.SecretValue -> R.string.quick_action_copy_secret_value
                 CopyField.SecretId -> R.string.quick_action_copy_secret_id
+                CopyField.WiFiSsid -> R.string.quick_action_copy_wifi_ssid
+                CopyField.WiFiPassphrase -> R.string.quick_action_copy_wifi_passphrase
+                CopyField.WiFiNote -> throw IllegalStateException("Copy quick action not allowed for WiFi note")
             }
         }
 
@@ -82,7 +90,7 @@ class QuickActionCopy(
             summaryObject: SummaryObject,
             copyField: CopyField,
             vaultItemCopyService: VaultItemCopyService,
-            sharingPolicyDataProvider: SharingPolicyDataProvider
+            sharingPolicyDataProvider: SharingPolicyDataProvider,
         ): QuickActionCopy? {
             val canEditItem = sharingPolicyDataProvider.canEditItem(summaryObject, false)
             if (vaultItemCopyService.hasContent(summaryObject, copyField) &&
@@ -91,7 +99,7 @@ class QuickActionCopy(
                 return QuickActionCopy(
                     summaryObject = summaryObject,
                     copyField = copyField,
-                    vaultItemCopyService = vaultItemCopyService
+                    vaultItemCopyService = vaultItemCopyService,
                 )
             }
             return null

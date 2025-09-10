@@ -4,19 +4,19 @@ import com.dashlane.xml.XmlData
 
 fun XmlData.ObjectNode.mergeInto(
     other: XmlData.ObjectNode?,
-    anonymousListsStrategy: MergeListStrategy = MergeListStrategy.DEDUPLICATE
+    anonymousListsStrategy: MergeListStrategy = MergeListStrategy.DEDUPLICATE,
 ): XmlData.ObjectNode {
     other ?: return this
     if (other.type != this.type) throw IllegalStateException("Tried to merge a '$type' node into a '${other.type}' node.")
 
     return copy(
-        data = data.mergeInto(other.data, anonymousListsStrategy)
+        data = data.mergeInto(other.data, anonymousListsStrategy),
     )
 }
 
 private fun Map<String, XmlData>.mergeInto(
     others: Map<String, XmlData>,
-    anonymousListsStrategy: MergeListStrategy = MergeListStrategy.DEDUPLICATE
+    anonymousListsStrategy: MergeListStrategy = MergeListStrategy.DEDUPLICATE,
 ): Map<String, XmlData> {
     return (this - others.keys) + (others - this.keys) + (this.keys.intersect(others.keys)).associateWith { key ->
         val otherValue = others[key]!!
@@ -50,7 +50,7 @@ private fun Map<String, XmlData>.mergeInto(
 
 fun XmlData.ListNode.mergeInto(
     other: XmlData.ListNode,
-    anonymousListsStrategy: MergeListStrategy
+    anonymousListsStrategy: MergeListStrategy,
 ): XmlData.ListNode = when (anonymousListsStrategy) {
     MergeListStrategy.DEDUPLICATE -> XmlData.ListNode((other.value.toSet() + value).toList())
     MergeListStrategy.KEEP_RICHEST -> {
@@ -62,7 +62,7 @@ fun XmlData.ListNode.mergeInto(
 }
 
 private fun MutableList<XmlData>.mergeRichestInto(
-    mutableL2: MutableList<XmlData>
+    mutableL2: MutableList<XmlData>,
 ): MutableList<XmlData> {
     val result = mutableListOf<XmlData>()
 

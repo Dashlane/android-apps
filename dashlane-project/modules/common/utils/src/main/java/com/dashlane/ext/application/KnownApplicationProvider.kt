@@ -9,9 +9,8 @@ import javax.inject.Singleton
 
 @Singleton
 class KnownApplicationProvider @Inject constructor(
-    private val whitelistApplication: WhitelistApplication
+    private val whitelistApplication: WhitelistApplication,
 ) {
-
     val popularServices by lazy {
         PopularServicesRegistry().loadAll()
     }

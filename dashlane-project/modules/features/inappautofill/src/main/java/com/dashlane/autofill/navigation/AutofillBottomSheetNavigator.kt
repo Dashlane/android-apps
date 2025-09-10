@@ -5,10 +5,19 @@ import com.dashlane.bottomnavigation.NavigableBottomSheetFragment
 
 interface AutofillBottomSheetNavigator {
     fun popStack(): Boolean
+
     fun goToCreateAccountFromRootDecisions(website: String? = null, packageName: String? = null)
+
     fun goToChangePasswordFromRootDecisions(website: String, packageName: String)
+
     fun goToCreateAccountFromAllAccounts(website: String? = null, packageName: String? = null)
-    fun goToLinkServiceFromAllAccounts(formSource: AutoFillFormSource, itemId: String)
+
+    fun goToLinkServiceFromAllAccounts(
+        formSource: AutoFillFormSource,
+        itemId: String,
+        itemWebsite: String?,
+    )
+
     fun hasVisiblePrevious(): Boolean
 }
 

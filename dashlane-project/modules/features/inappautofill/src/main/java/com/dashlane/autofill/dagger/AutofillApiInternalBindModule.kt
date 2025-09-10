@@ -12,6 +12,8 @@ import com.dashlane.autofill.fillresponse.RemoteViewProvider
 import com.dashlane.autofill.fillresponse.RemoteViewProviderImpl
 import com.dashlane.autofill.request.autofill.database.ItemLoader
 import com.dashlane.autofill.request.autofill.database.ItemLoaderImpl
+import com.dashlane.autofill.util.IdGenerator
+import com.dashlane.autofill.util.IdGeneratorImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -20,7 +22,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 internal interface AutofillApiInternalBindModule {
-
     @Binds
     fun bindsFillRequestHandler(impl: FillRequestHandlerImpl): FillRequestHandler
 
@@ -38,4 +39,7 @@ internal interface AutofillApiInternalBindModule {
 
     @Binds
     fun bindsDataSetCreator(impl: DataSetCreatorImpl): DataSetCreator
+
+    @Binds
+    fun bindsIdGenerator(impl: IdGeneratorImpl): IdGenerator
 }

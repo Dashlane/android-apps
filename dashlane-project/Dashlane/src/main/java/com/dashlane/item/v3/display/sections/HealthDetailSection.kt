@@ -1,5 +1,6 @@
 package com.dashlane.item.v3.display.sections
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,12 +28,13 @@ import com.dashlane.teamspaces.model.TeamSpace
 fun HealthDetailSection(data: Data<CredentialFormData>, editMode: Boolean) {
     val credentialFormData = data.formData
     if (editMode || credentialFormData.passwordHealth?.isPasswordEmpty == true) return
-    SectionContent(editMode = false) {
+    SectionContent {
         SectionTitle(title = stringResource(id = R.string.vault_health_detail), editMode = false)
         if (credentialFormData.passwordHealth != null) {
             val passwordScore = credentialFormData.passwordHealth.passwordStrength?.score
             if (passwordScore != null) {
                 DisplayField(
+                    modifier = Modifier.fillMaxWidth(),
                     label = stringResource(id = R.string.vault_password_strength),
                     value = passwordScore.getShortTitle(LocalContext.current),
                     mood = getPasswordStrengthDisplayMood(passwordScore),
@@ -40,20 +42,22 @@ fun HealthDetailSection(data: Data<CredentialFormData>, editMode: Boolean) {
             }
             if (credentialFormData.passwordHealth.reusedCount > 1) {
                 DisplayField(
+                    modifier = Modifier.fillMaxWidth(),
                     label = stringResource(id = R.string.vault_password_safety),
                     value = pluralStringResource(
                         id = R.plurals.vault_password_safety_reused,
                         count = credentialFormData.passwordHealth.reusedCount,
-                        credentialFormData.passwordHealth.reusedCount
+                        credentialFormData.passwordHealth.reusedCount,
                     ),
-                    mood = getReusedCountDisplayMood(reusedCount = credentialFormData.passwordHealth.reusedCount)
+                    mood = getReusedCountDisplayMood(reusedCount = credentialFormData.passwordHealth.reusedCount),
                 )
             }
             if (credentialFormData.passwordHealth.isCompromised) {
                 DisplayField(
+                    modifier = Modifier.fillMaxWidth(),
                     label = stringResource(id = R.string.vault_password_safety),
                     value = stringResource(R.string.vault_password_compromised),
-                    mood = DisplayFieldMood.Danger(true)
+                    mood = DisplayFieldMood.Danger(DisplayFieldMood.IconType.Decorative),
                 )
             }
         } else {
@@ -69,16 +73,17 @@ fun HealthDetailSection(data: Data<CredentialFormData>, editMode: Boolean) {
 private fun getPasswordStrengthDisplayMood(passwordStrengthScore: PasswordStrengthScore) =
     when (passwordStrengthScore) {
         PasswordStrengthScore.VERY_UNGUESSABLE,
-        PasswordStrengthScore.SAFELY_UNGUESSABLE -> DisplayFieldMood.Positive(true)
-        PasswordStrengthScore.SOMEWHAT_GUESSABLE -> DisplayFieldMood.Warning(true)
-        else -> DisplayFieldMood.Danger(true)
+        PasswordStrengthScore.SAFELY_UNGUESSABLE,
+        -> DisplayFieldMood.Positive(DisplayFieldMood.IconType.Decorative)
+        PasswordStrengthScore.SOMEWHAT_GUESSABLE -> DisplayFieldMood.Warning(DisplayFieldMood.IconType.Decorative)
+        else -> DisplayFieldMood.Danger(DisplayFieldMood.IconType.Decorative)
     }
 
 @Composable
 private fun getReusedCountDisplayMood(reusedCount: Int) = when {
-    reusedCount > 10 -> DisplayFieldMood.Danger(true)
-    reusedCount > 1 -> DisplayFieldMood.Warning(true)
-    else -> DisplayFieldMood.Positive(true)
+    reusedCount > 10 -> DisplayFieldMood.Danger(DisplayFieldMood.IconType.Decorative)
+    reusedCount > 1 -> DisplayFieldMood.Warning(DisplayFieldMood.IconType.Decorative)
+    else -> DisplayFieldMood.Positive(DisplayFieldMood.IconType.Decorative)
 }
 
 @Preview
@@ -96,15 +101,15 @@ private fun HealthDetailsSectionPreview() {
                         ),
                         isCompromised = true,
                         isPasswordEmpty = false,
-                        reusedCount = 2
-                    )
+                        reusedCount = 2,
+                    ),
                 ),
                 commonData = CommonData(
                     name = "My item",
-                    space = TeamSpace.Personal
+                    space = TeamSpace.Personal,
                 ),
             ),
-            editMode = false
+            editMode = false,
         )
     }
 }
@@ -120,7 +125,7 @@ private fun HealthDetailsSectionLoadingPreview() {
                 ),
                 commonData = CommonData(
                     name = "My item",
-                    space = TeamSpace.Personal
+                    space = TeamSpace.Personal,
                 ),
             ),
             editMode = false,

@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 class DataIdentifierSyncRepositoryRaclette @Inject constructor(
     private val dao: DataSyncDaoRaclette,
-    private val databaseItemSaver: DatabaseItemSaverRaclette
+    private val databaseItemSaver: DatabaseItemSaverRaclette,
 ) {
     suspend fun inTransaction(block: suspend VaultObjectRepository.Transaction.() -> Unit) =
         databaseItemSaver.inTransaction(block)
@@ -39,7 +39,7 @@ class DataIdentifierSyncRepositoryRaclette @Inject constructor(
     }
 
     suspend fun fetchAsOutgoingUpdate(
-        uuids: List<String>
+        uuids: List<String>,
     ): List<OutgoingTransaction.Update> {
         return dao.getItemsWithExtraData(uuids).map {
             createOutgoingTransaction(it, SyncState.IN_SYNC_MODIFIED) as OutgoingTransaction.Update
@@ -48,13 +48,13 @@ class DataIdentifierSyncRepositoryRaclette @Inject constructor(
 
     private fun createOutgoingTransaction(
         it: PendingSyncItemRaclette,
-        forcedSyncState: SyncState? = null
+        forcedSyncState: SyncState? = null,
     ): OutgoingTransaction {
         val dataIdentifierExtraDataWrapper = it.first
         val vaultItem = dataIdentifierExtraDataWrapper.vaultItem
         val transaction = Transaction(
             vaultItem.uid,
-            vaultItem.backupDate ?: Instant.EPOCH
+            vaultItem.backupDate ?: Instant.EPOCH,
         )
         val syncObjectType = vaultItem.syncObject.objectType
         return when (forcedSyncState ?: it.second) {
@@ -68,13 +68,13 @@ class DataIdentifierSyncRepositoryRaclette @Inject constructor(
                     transaction,
                     syncObject,
                     backupXml?.toObject(syncObjectType) ?: syncObject,
-                    vaultItem.isShared()
+                    vaultItem.isShared(),
                 )
             }
             SyncState.IN_SYNC_DELETED, SyncState.DELETED -> {
                 OutgoingTransaction.Delete(
                     transaction,
-                    syncObjectType
+                    syncObjectType,
                 )
             }
             else -> error("Unexpected state ${it.second} for ${dataIdentifierExtraDataWrapper.vaultItem}")
@@ -100,7 +100,7 @@ class DataIdentifierSyncRepositoryRaclette @Inject constructor(
     }
 
     suspend fun fetchDuplicate(
-        types: List<SyncObjectType>
+        types: List<SyncObjectType>,
     ): List<List<OutgoingTransaction.Update>> =
         dao.getDuplicationCandidates(types).map { items ->
             items.map { item ->

@@ -10,10 +10,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -24,8 +24,12 @@ object NewDataStorageModule {
         @ApplicationContext context: Context,
         @ApplicationCoroutineScope coroutineScope: CoroutineScope,
         @IoCoroutineDispatcher ioDispatcher: CoroutineDispatcher,
-        cryptography: Cryptography
+        cryptography: Cryptography,
     ): DatabaseProvider {
-        return DatabaseProvider(rootDirAsync = coroutineScope.async { context.filesDir }, cryptography = cryptography, ioDispatcher = ioDispatcher)
+        return DatabaseProvider(
+            rootDirAsync = coroutineScope.async { context.filesDir },
+            cryptography = cryptography,
+            ioDispatcher = ioDispatcher,
+        )
     }
 }

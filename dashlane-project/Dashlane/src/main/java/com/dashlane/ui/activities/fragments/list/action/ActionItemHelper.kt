@@ -11,14 +11,13 @@ import androidx.core.widget.ImageViewCompat
 import com.dashlane.R
 
 class ActionItemHelper {
-
     fun createNewActionItem(
         context: Context,
         icon: Drawable?,
         iconWithTint: Boolean,
         title: String,
         tintColor: Int?,
-        action: () -> Unit
+        action: () -> Unit,
     ): View {
         val view = LayoutInflater.from(context).inflate(R.layout.item_action_bottom_sheet_dialog, null)
 

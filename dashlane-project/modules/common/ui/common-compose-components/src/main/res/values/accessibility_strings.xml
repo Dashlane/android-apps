@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="and_accessibility_back_button">Back</string>
     
-    <string name="and_accessibility_pin_keyboard_action_text_clear">Clear</string>
+    <string name="and_accessibility_action_text_clear">Clear</string>
+    
+    <string name="and_accessibility_text_edit_reveal">Reveal</string>
+    
+    <string name="and_accessibility_text_edit_hide">Hide</string>
+    
+    <string name="and_accessibility_list_item_thumbnail_app">Application</string>
+    
+    <string name="and_accessibility_list_item_thumbnail_website">Website</string>
+    
+    <string name="and_accessibility_content_desc_sync_multi_device_logo">Multi device</string>
+    
+    <string name="and_accessibility_expandable_faq_item_state_description_expanded">Expanded</string>
+    
+    <string name="and_accessibility_expandable_faq_item_state_description_collapsed">Collapsed</string>
+    
+    <string name="and_accessibility_expandable_faq_item_click_label_to_expand">expand</string>
+    
+    <string name="and_accessibility_expandable_faq_item_click_label_to_collapse">collapse</string>
 </resources>

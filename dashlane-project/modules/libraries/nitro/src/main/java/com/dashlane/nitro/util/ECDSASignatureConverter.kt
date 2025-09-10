@@ -1,7 +1,6 @@
 package com.dashlane.nitro.util
 
 object ECDSASignatureConverter {
-
     private val DER_SEQUENCE_TAG = byteArrayOf(0x30)
     private const val DER_INTEGER_TAG: Byte = 0x02
 
@@ -18,7 +17,7 @@ object ECDSASignatureConverter {
     private fun encodeSignature(r: ByteArray, s: ByteArray): ByteArray {
         return arrayListOf(
             r.toUnsignedInteger(),
-            s.toUnsignedInteger()
+            s.toUnsignedInteger(),
         ).toDerSequence()
     }
 
@@ -58,7 +57,7 @@ object ECDSASignatureConverter {
     private fun ArrayList<ByteArray>.toBytes(): ByteArray {
         var l = 0
         l = stream().map { r: ByteArray -> r.size }.reduce(
-            l
+            l,
         ) { a: Int, b: Int -> Integer.sum(a, b) }
         val b = ByteArray(l)
         l = 0

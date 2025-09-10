@@ -13,9 +13,8 @@ import com.dashlane.R
 
 abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleCallback(
     0,
-    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
 ) {
-
     private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_up_indicator_close)!!.mutate().apply {
         setTint(context.getColor(R.color.text_inverse_standard))
     }
@@ -33,7 +32,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleC
     override fun onMove(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder
+        target: RecyclerView.ViewHolder,
     ): Boolean {
         return false
     }
@@ -45,7 +44,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleC
         dX: Float,
         dY: Float,
         actionState: Int,
-        isCurrentlyActive: Boolean
+        isCurrentlyActive: Boolean,
     ) {
         val itemView = viewHolder.itemView
         val itemHeight = itemView.bottom - itemView.top
@@ -57,7 +56,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleC
                 itemView.right + dX,
                 itemView.top.toFloat(),
                 itemView.right.toFloat(),
-                itemView.bottom.toFloat()
+                itemView.bottom.toFloat(),
             )
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             return
@@ -73,7 +72,7 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleC
                 itemView.left + deleteIconMargin / 2,
                 deleteIconTop,
                 itemView.left + deleteIcon.intrinsicWidth + deleteIconMargin / 2,
-                deleteIconBottom
+                deleteIconBottom,
             )
             background.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
         } else {
@@ -82,13 +81,13 @@ abstract class SwipeToDeleteCallback(context: Context) : ItemTouchHelper.SimpleC
                 itemView.right - deleteIconMargin / 2 - intrinsicWidth,
                 deleteIconTop,
                 itemView.right - deleteIconMargin / 2,
-                deleteIconBottom
+                deleteIconBottom,
             )
             background.setBounds(
                 itemView.right + dX.toInt(),
                 itemView.top,
                 itemView.right,
-                itemView.bottom
+                itemView.bottom,
             )
         }
 

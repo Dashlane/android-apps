@@ -6,17 +6,18 @@ import com.dashlane.navigation.NavigationHelper.Destination.MainPath.AUTHENTICAT
 import com.dashlane.navigation.NavigationHelper.Destination.MainPath.DARK_WEB_MONITORING
 import com.dashlane.navigation.NavigationHelper.Destination.MainPath.DARK_WEB_MONITORING_PREMIUM_PROMPT
 import com.dashlane.navigation.NavigationHelper.Destination.MainPath.GET_PREMIUM
+import com.dashlane.navigation.NavigationHelper.Destination.MainPath.SECRET_TRANSFER
 import com.dashlane.navigation.NavigationHelper.Destination.MainPath.VPN
 import com.dashlane.navigation.NavigationHelper.Destination.SecondaryPath
 import com.dashlane.navigation.NavigationHelper.Destination.SecondaryPath.GetPremium
 import com.dashlane.navigation.paywall.PaywallIntroType
 import com.dashlane.premium.offer.common.model.OfferType
+import com.dashlane.util.UriUtils.getOrigin
 import com.dashlane.xml.domain.SyncObjectType
 
 class NavDeepLinkHelper(
-    private val navigator: Navigator
+    private val navigator: Navigator,
 ) {
-
     fun overrideDeepLink(intent: Intent): Boolean {
         val uri = intent.data ?: return false
         if (overrideOtpDeepLink(uri)) {
@@ -36,7 +37,7 @@ class NavDeepLinkHelper(
         val dataType = SchemeUtils.getDataType(host)
         val isHomeFilter = pathSegments.isEmpty() && SchemeUtils.isHomeFilter(host)
 
-        val origin = uri.getQueryParameter("origin")
+        val origin = uri.getOrigin()
         return when {
             dataType != null && pathSegments.isNotEmpty() -> {
                 
@@ -62,13 +63,17 @@ class NavDeepLinkHelper(
                 true
             }
             host == DARK_WEB_MONITORING_PREMIUM_PROMPT -> {
-                navigator.goToPaywall(
-                    type = PaywallIntroType.DARK_WEB_MONITORING
-                )
+                navigator.goToPaywall(type = PaywallIntroType.DARK_WEB_MONITORING)
                 true
             }
             host == AUTHENTICATOR_TOOL -> {
                 navigator.goToAuthenticator()
+                true
+            }
+            host == SECRET_TRANSFER -> {
+                val id = uri.getQueryParameter("id")
+                val key = uri.getQueryParameter("key")
+                navigator.goToSecretTransfer(id = id, key = key)
                 true
             }
             else -> false
@@ -78,7 +83,7 @@ class NavDeepLinkHelper(
     private fun handleItemDeepLink(
         dataType: SyncObjectType,
         pathSegments: List<String>,
-        origin: String?
+        origin: String?,
     ) {
         
         val uid = pathSegments.firstOrNull {
@@ -118,14 +123,22 @@ class NavDeepLinkHelper(
         uid: String,
         subOperation: String,
         dataType: SyncObjectType,
-        origin: String?
+        origin: String?,
     ) {
         when (subOperation) {
             SecondaryPath.Items.SHARE -> {
-                if (dataType == SyncObjectType.AUTHENTIFIANT) {
-                    navigator.goToSharePeopleSelection(selectedPasswords = arrayOf(uid), origin = origin)
-                } else if (dataType == SyncObjectType.SECURE_NOTE) {
-                    navigator.goToSharePeopleSelection(selectedNotes = arrayOf(uid), origin = origin)
+                when (dataType) {
+                    SyncObjectType.AUTHENTIFIANT -> {
+                        navigator.goToSharePeopleSelection(selectedPasswords = arrayOf(uid), origin = origin)
+                    }
+                    SyncObjectType.SECURE_NOTE -> {
+                        navigator.goToSharePeopleSelection(selectedNotes = arrayOf(uid), origin = origin)
+                    }
+                    SyncObjectType.SECRET -> {
+                        navigator.goToSharePeopleSelection(selectedSecrets = arrayOf(uid), origin = origin)
+                    }
+                    else -> {
+                    }
                 }
             }
             SecondaryPath.Items.SHARE_INFO -> navigator.goToShareUsersForItems(uid)

@@ -8,13 +8,12 @@ import javax.inject.Inject
 
 @Deprecated(
     "Account Manager is no more used to store the local key when setting up Pin or Biometrics authentication. " +
-            "We're only keeping restricted access for migration purposes. See SessionRestorerImpl for more info"
+        "We're only keeping restricted access for migration purposes. See SessionRestorerImpl for more info",
 )
 class AccountsManager @Inject constructor(
     @ApplicationContext
-    private val context: Context
+    private val context: Context,
 ) {
-
     private val accountManager: AccountManager
         get() = AccountManager.get(context)
 

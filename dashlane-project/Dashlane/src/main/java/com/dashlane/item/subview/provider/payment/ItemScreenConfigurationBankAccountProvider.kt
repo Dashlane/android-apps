@@ -19,6 +19,8 @@ import com.dashlane.item.subview.provider.DateTimeFieldFactory
 import com.dashlane.item.subview.provider.SubViewFactory
 import com.dashlane.item.subview.provider.createCountryField
 import com.dashlane.item.subview.readonly.ItemReadValueListSubView
+import com.dashlane.server.api.endpoints.teams.ActivityLog
+import com.dashlane.server.api.endpoints.teams.Properties
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
@@ -50,7 +52,6 @@ class ItemScreenConfigurationBankAccountProvider(
     private val vaultItemCopy: VaultItemCopyService,
     private val bankDataProvider: BankDataProvider,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -58,12 +59,12 @@ class ItemScreenConfigurationBankAccountProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.BankStatement>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -71,12 +72,12 @@ class ItemScreenConfigurationBankAccountProvider(
     override fun hasEnoughDataToSave(itemToSave: VaultItem<*>): Boolean {
         itemToSave as VaultItem<SyncObject.BankStatement>
         return itemToSave.syncObject.bankAccountBIC?.toString()?.trim().isNotSemanticallyNull() ||
-                itemToSave.syncObject.bankAccountIBAN?.toString()?.trim().isNotSemanticallyNull()
+            itemToSave.syncObject.bankAccountIBAN?.toString()?.trim().isNotSemanticallyNull()
     }
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<SyncObject.BankStatement>
+        item: VaultItem<SyncObject.BankStatement>,
     ): ItemHeader {
         val bankTitle = if (item.syncObject.bankAccountName.isNullOrBlank()) {
             context.getString(R.string.bank_statement)
@@ -97,7 +98,7 @@ class ItemScreenConfigurationBankAccountProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         val otherLabel = context.getString(R.string.other)
         val bankView = createBankSpinnerField(context, item, editMode, bankDataProvider, otherLabel)
@@ -112,7 +113,7 @@ class ItemScreenConfigurationBankAccountProvider(
                 context, item, editMode, bicView, ibanView, bankView,
                 bankDataProvider,
                 otherLabel,
-                listener
+                listener,
             ),
             
             bankView,
@@ -130,29 +131,29 @@ class ItemScreenConfigurationBankAccountProvider(
             dateTimeFieldFactory.createCreationDateField(
                 editMode = editMode,
                 context = context,
-                item = item
+                item = item,
             ),
             
             dateTimeFieldFactory.createLatestUpdateDateField(
                 editMode = editMode,
                 context = context,
-                item = item
+                item = item,
             ),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.BankStatement>
+        item: VaultItem<SyncObject.BankStatement>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -163,14 +164,14 @@ class ItemScreenConfigurationBankAccountProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.BankStatement>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val iban = item.syncObject.bankAccountIBAN?.toString()
         val subview = subViewFactory.createSubViewString(
             context.getString(ibanHeaderRes(item.syncObject.localeFormat ?: Country.UnitedStates)),
             iban,
             true,
-            VaultItem<*>::copyForUpdatedIban
+            VaultItem<*>::copyForUpdatedIban,
         ) { ibanShown -> if (ibanShown) logRevealIban(item) }
         return if (editMode) {
             subview
@@ -182,8 +183,8 @@ class ItemScreenConfigurationBankAccountProvider(
                         summaryObject = item.toSummary(),
                         copyField = ibanCopyField(item.syncObject.localeFormat ?: Country.UnitedStates),
                         action = {},
-                        vaultItemCopy = vaultItemCopy
-                    )
+                        vaultItemCopy = vaultItemCopy,
+                    ),
                 )
             }
         }
@@ -193,7 +194,7 @@ class ItemScreenConfigurationBankAccountProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.BankStatement>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val bic = item.syncObject.bankAccountBIC?.toString() ?: ""
         val bicHeaderRes = bicHeaderRes(item.syncObject.localeFormat ?: Country.UnitedStates)
@@ -201,7 +202,7 @@ class ItemScreenConfigurationBankAccountProvider(
             context.getString(bicHeaderRes),
             bic,
             true,
-            VaultItem<*>::copyForUpdatedBic
+            VaultItem<*>::copyForUpdatedBic,
         ) { bicShown -> if (bicShown) logRevealBic(item) }
         return if (editMode) {
             subview
@@ -212,11 +213,11 @@ class ItemScreenConfigurationBankAccountProvider(
                     CopyAction(
                         summaryObject = item.toSummary(),
                         copyField = bicCopyField(
-                            item.syncObject.localeFormat ?: Country.UnitedStates
+                            item.syncObject.localeFormat ?: Country.UnitedStates,
                         ),
                         action = {},
-                        vaultItemCopy = vaultItemCopy
-                    )
+                        vaultItemCopy = vaultItemCopy,
+                    ),
                 )
             }
         }
@@ -225,7 +226,7 @@ class ItemScreenConfigurationBankAccountProvider(
     private fun createAccountHolderField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.BankStatement>
+        item: VaultItem<SyncObject.BankStatement>,
     ): ItemSubView<*>? {
         val identities = genericDataQuery
             .queryAll(genericFilter { specificDataType(SyncObjectType.IDENTITY) })
@@ -235,7 +236,7 @@ class ItemScreenConfigurationBankAccountProvider(
             item.syncObject.bankAccountOwner,
             false,
             VaultItem<*>::copyForUpdatedOwner,
-            identities
+            identities,
         )
     }
 
@@ -248,7 +249,7 @@ class ItemScreenConfigurationBankAccountProvider(
         bankView: ItemSubView<*>?,
         bankDataProvider: BankDataProvider,
         otherLabel: String,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ItemSubView<*> =
         createCountryField(
             context,
@@ -277,7 +278,7 @@ class ItemScreenConfigurationBankAccountProvider(
                         listener.notifySubViewChanged(this)
                     }
                 }
-            }
+            },
         )
 
     private fun createBankSpinnerField(
@@ -285,7 +286,7 @@ class ItemScreenConfigurationBankAccountProvider(
         item: VaultItem<SyncObject.BankStatement>,
         editMode: Boolean,
         bankDataProvider: BankDataProvider,
-        otherLabel: String
+        otherLabel: String,
     ): ItemSubView<*>? {
         val bankHeader = context.getString(R.string.bank)
         val country = item.syncObject.localeFormat ?: Country.UnitedStates
@@ -299,7 +300,7 @@ class ItemScreenConfigurationBankAccountProvider(
                 bankHeader,
                 selectedBank,
                 bankList.map { it.first },
-                bankUpdate
+                bankUpdate,
             ).also {
                 it.invisible = !bankDataProvider.isCountrySupported(country)
             }
@@ -308,7 +309,7 @@ class ItemScreenConfigurationBankAccountProvider(
                 bankHeader,
                 selectedBank,
                 bankList.map { it.first },
-                item
+                item,
             )
         }
     }
@@ -317,7 +318,7 @@ class ItemScreenConfigurationBankAccountProvider(
         bankHeader: String,
         selectedBank: String,
         bankList: List<String>,
-        vaultItem: VaultItem<SyncObject.BankStatement>
+        vaultItem: VaultItem<SyncObject.BankStatement>,
     ): ItemSubView<*> {
         val itemReadValueListSubView = ItemReadValueListSubView(bankHeader, selectedBank, bankList)
         return ItemSubViewWithActionWrapper(
@@ -325,15 +326,15 @@ class ItemScreenConfigurationBankAccountProvider(
             CopyAction(
                 summaryObject = vaultItem.toSummary(),
                 copyField = CopyField.BankAccountBank,
-                vaultItemCopy = vaultItemCopy
-            )
+                vaultItemCopy = vaultItemCopy,
+            ),
         )
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun copyForUpdatedBank(
         bankDataProvider: BankDataProvider,
-        otherLabel: String
+        otherLabel: String,
     ): (Any, String) -> VaultItem<SyncObject.BankStatement> {
         return { it, value ->
             it as VaultItem<SyncObject.BankStatement>
@@ -355,14 +356,14 @@ class ItemScreenConfigurationBankAccountProvider(
         editMode: Boolean,
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.BankStatement>
+        item: VaultItem<SyncObject.BankStatement>,
     ): ItemSubView<*>? {
         return if (editMode) {
             subViewFactory.createSubViewString(
                 context.getString(R.string.bank_account_hint_name),
                 item.syncObject.bankAccountName,
                 false,
-                VaultItem<*>::copyForUpdatedName
+                VaultItem<*>::copyForUpdatedName,
             )
         } else {
             null
@@ -370,11 +371,26 @@ class ItemScreenConfigurationBankAccountProvider(
     }
 
     private fun logRevealIban(item: VaultItem<SyncObject.BankStatement>) {
-        vaultItemLogger.logRevealField(Field.IBAN, item.uid, ItemType.BANK_STATEMENT, null)
+        vaultItemLogger.apply {
+            val field = when (item.syncObject.localeFormat) {
+                Country.UnitedStates, Country.Mexico, Country.UnitedKingdom -> Properties.Field.ACCOUNT_NUMBER
+                else -> Properties.Field.IBAN
+            }
+            activityLogRevealBankField(item, field, ActivityLog.LogType.USER_REVEALED_BANK_ACCOUNT_FIELD)
+            logRevealField(Field.IBAN, item.uid, ItemType.BANK_STATEMENT, null)
+        }
     }
 
     private fun logRevealBic(item: VaultItem<SyncObject.BankStatement>) {
-        vaultItemLogger.logRevealField(Field.BIC, item.uid, ItemType.BANK_STATEMENT, null)
+        vaultItemLogger.apply {
+            val field = when (item.syncObject.localeFormat) {
+                Country.UnitedKingdom -> Properties.Field.ROUTING_NUMBER
+                Country.UnitedStates -> Properties.Field.SORT_CODE
+                else -> Properties.Field.IBAN
+            }
+            activityLogRevealBankField(item, field, ActivityLog.LogType.USER_REVEALED_BANK_ACCOUNT_FIELD)
+            logRevealField(Field.BIC, item.uid, ItemType.BANK_STATEMENT, null)
+        }
     }
 
     private fun bicHeaderRes(country: Country): Int = when (country) {

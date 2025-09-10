@@ -7,65 +7,73 @@ import android.service.autofill.Dataset
 import android.service.autofill.FillResponse
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
-import androidx.fragment.app.DialogFragment
+import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.dashlane.autofill.api.R
-import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
-import com.dashlane.autofill.pause.model.PauseDurations
+import com.dashlane.autofill.pause.AskPauseViewModel
 import com.dashlane.autofill.ui.AutoFillResponseActivity
+import com.dashlane.autofill.util.setFieldCompat
+import com.dashlane.design.theme.DashlaneTheme
+import com.dashlane.util.Toaster
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @AndroidEntryPoint
 class AutofillPauseActivity :
     CoroutineScope,
-    AskPauseDialogContract,
     AutoFillResponseActivity() {
-
     override val coroutineContext: CoroutineContext
         get() = lifecycleScope.coroutineContext
 
-    private lateinit var summaryPackageName: String
-    private lateinit var summaryWebDomain: String
+    private val viewModel by viewModels<AskPauseViewModel>()
+
+    @Inject
+    lateinit var toaster: Toaster
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        summaryPackageName = summary?.packageName ?: ""
-        summaryWebDomain = summary?.webDomain ?: ""
+        setContent {
+            DashlaneTheme {
+                AskPauseBottomSheetScreen(
+                    viewModel = viewModel,
+                    onPauseSuccess = ::onPauseSuccess,
+                    onPauseError = ::onPauseError,
+                    onPauseCancelled = ::onPauseCancelled,
+                )
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
 
+        val summary = summary
         if (summary == null) {
             finish()
             return
         }
 
-        openBottomSheetAuthentifiantsListDialog()
+        viewModel.load(summary.formSource)
     }
 
-    private fun openBottomSheetAuthentifiantsListDialog() {
-        var dialog = supportFragmentManager.findFragmentByTag(BottomSheetAskPauseDialogFragment.PAUSE_DIALOG_TAG)
-        if (dialog == null) {
-            dialog = BottomSheetAskPauseDialogFragment.buildFragment()
-            dialog.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.Theme_Dashlane_Transparent_Cancelable)
-            dialog.show(supportFragmentManager, BottomSheetAskPauseDialogFragment.PAUSE_DIALOG_TAG)
-        }
+    fun onPauseSuccess(message: String) {
+        toaster.show(message, Toast.LENGTH_SHORT)
+        finishWithPauseResponse()
     }
 
-    override fun getPausedFormSource(): AutoFillFormSource {
-        return summary!!.formSource
+    fun onPauseError(message: String) {
+        toaster.show(message, Toast.LENGTH_SHORT)
+        finishWithAutoFillSuggestions()
     }
 
-    override fun onPauseFormSourceDialogResponse(pauseDurations: PauseDurations?) {
-        pauseDurations?.let {
-            finishWithPauseResponse()
-        } ?: finishWithAutoFillSuggestions()
+    fun onPauseCancelled() {
+        finishWithAutoFillSuggestions()
     }
 
     private fun finishWithPauseResponse() {
@@ -74,26 +82,17 @@ class AutofillPauseActivity :
         }
     }
 
-    private fun buildPauseResponse(summary: AutoFillHintSummary?): FillResponse {
-        return FillResponse.Builder().apply {
+    private fun buildPauseResponse(summary: AutoFillHintSummary?): FillResponse =
+        FillResponse.Builder().apply {
             summary?.entries?.mapNotNull { entry ->
                 entry.id?.let { buildEmptyDataset(it) }
             }?.forEach {
                 addDataset(it)
             }
         }.build()
-    }
 
-    private fun buildEmptyDataset(autofillId: AutofillId): Dataset {
-        return buildEmptyDatasetBuilder().apply {
-            setValue(autofillId, AutofillValue.forText(""))
-        }.build()
-    }
-
-    @Suppress("DEPRECATION")
-    private fun buildEmptyDatasetBuilder(): Dataset.Builder {
-        return Dataset.Builder()
-    }
+    private fun buildEmptyDataset(autofillId: AutofillId): Dataset =
+        Dataset.Builder().setFieldCompat(autofillId, AutofillValue.forText("")).build()
 
     companion object {
         private const val EXTRA_HAD_CREDENTIALS = "extra_had_credentials"
@@ -101,12 +100,12 @@ class AutofillPauseActivity :
         internal fun getAuthIntentSenderForPause(
             context: Context,
             summary: AutoFillHintSummary,
-            hadCredentials: Boolean
+            hadCredentials: Boolean,
         ): IntentSender {
             val intent = createIntent(
                 context,
                 summary,
-                AutofillPauseActivity::class
+                AutofillPauseActivity::class,
             )
             intent.putExtra(EXTRA_HAD_CREDENTIALS, hadCredentials)
             return createIntentSender(context, intent)

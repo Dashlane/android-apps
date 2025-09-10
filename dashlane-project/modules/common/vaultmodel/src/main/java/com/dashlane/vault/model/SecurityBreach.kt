@@ -11,7 +11,7 @@ fun createSecurityBreach(
     content: String? = null,
     contentRevision: Int = 0,
     status: SyncObject.SecurityBreach.Status?,
-    leakedPasswords: Set<String> = emptySet()
+    leakedPasswords: Set<String> = emptySet(),
 ): VaultItem<SyncObject.SecurityBreach> {
     return dataIdentifier.toVaultItem(
         SyncObject.SecurityBreach {
@@ -22,7 +22,7 @@ fun createSecurityBreach(
             this.leakedPasswords = serialize(leakedPasswords).toSyncObfuscatedValue()
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
@@ -34,6 +34,7 @@ var SyncObject.SecurityBreach.Builder.leakedPasswordsSet: Set<String>?
 
 val SyncObject.SecurityBreach.leakedPasswordsSet: Set<String>
     get() = unserialize(this.leakedPasswords?.toString())
+
 fun SyncObject.SecurityBreach.isViewed() =
     status == SyncObject.SecurityBreach.Status.VIEWED || status == SyncObject.SecurityBreach.Status.ACKNOWLEDGED
 
@@ -57,6 +58,6 @@ private fun unserialize(serialized: String?): Set<String> {
 }
 
 fun VaultItem<SyncObject.SecurityBreach>.copySyncObject(builder: SyncObject.SecurityBreach.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.SecurityBreach> {
+    VaultItem<SyncObject.SecurityBreach> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

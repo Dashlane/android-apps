@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Dashlane.Wear.SplashScreen" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/brand_black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splashscreen_icon</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/brand_white</item>
+        <item name="postSplashScreenTheme">@style/Theme.Dashlane</item>
+    </style>
+</resources>

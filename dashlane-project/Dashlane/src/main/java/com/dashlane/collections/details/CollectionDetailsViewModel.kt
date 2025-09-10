@@ -7,12 +7,12 @@ import com.dashlane.collections.businessSpaceData
 import com.dashlane.collections.sharing.item.CollectionSharingItemDataProvider
 import com.dashlane.collections.spaceData
 import com.dashlane.securefile.extensions.hasAttachments
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.CredentialDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.queryFirst
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
@@ -43,7 +43,7 @@ class CollectionDetailsViewModel @Inject constructor(
     private val sharingDataProvider: SharingDataProvider,
     private val collectionSharingItemDataProvider: CollectionSharingItemDataProvider,
     private val collectionLimiter: CollectionLimiter,
-    private val vaultActivityLogger: VaultActivityLogger
+    private val vaultActivityLogger: VaultActivityLogger,
 ) : ViewModel() {
     
     val isCollectionSharingLimited: Boolean
@@ -62,9 +62,10 @@ class CollectionDetailsViewModel @Inject constructor(
                 spaceData = null,
                 editAllowed = false,
                 deleteAllowed = false,
-                hasItemWithAttachment = false
-            )
-        )
+                canShare = false,
+                hasItemWithAttachment = false,
+            ),
+        ),
     )
     val uiState = _uiState.asStateFlow()
 
@@ -113,7 +114,7 @@ class CollectionDetailsViewModel @Inject constructor(
         }
         val collection = collections.first()
         val title = collection.name
-        val items = sharingDataProvider.getAcceptedCollectionsItems(navArgs.collectionId)
+        val items = sharingDataProvider.getAcceptedCollectionsItems(collection)
         val collectionLimit = collectionLimiter.checkCollectionLimit(navArgs.sharedCollection)
         val viewData = ViewData(
             collectionName = title,
@@ -123,7 +124,9 @@ class CollectionDetailsViewModel @Inject constructor(
             collectionLimit = collectionLimit,
             editAllowed = sharingDataProvider.isAdmin(collection),
             deleteAllowed = sharingDataProvider.isAdmin(collection),
-            hasItemWithAttachment = items.any { it.hasAttachments() }
+            
+            canShare = sharingDataProvider.isAdmin(collection),
+            hasItemWithAttachment = items.any { it.hasAttachments() },
         )
 
         if (items.isNotEmpty()) {
@@ -143,16 +146,18 @@ class CollectionDetailsViewModel @Inject constructor(
         val title = collection.syncObject.name
         val items = collectionDataQuery.queryVaultItemsWithCollectionId(navArgs.collectionId)
         val collectionLimit = collectionLimiter.checkCollectionLimit(navArgs.sharedCollection)
+        val spaceData = collection.syncObject.spaceData(teamSpaceAccessorProvider)
 
         val viewData = ViewData(
             collectionName = title,
             shared = false,
             sections = items.toItemSections(),
-            spaceData = collection.syncObject.spaceData(teamSpaceAccessorProvider),
+            spaceData = spaceData,
             collectionLimit = collectionLimit,
             editAllowed = true,
             deleteAllowed = true,
-            hasItemWithAttachment = items.any { it.hasAttachments() }
+            canShare = spaceData?.businessSpace == true,
+            hasItemWithAttachment = items.any { it.hasAttachments() },
         )
 
         if (items.isNotEmpty()) {
@@ -172,7 +177,7 @@ class CollectionDetailsViewModel @Inject constructor(
             sectionType?.let { type ->
                 ItemSection(
                     sectionType = type,
-                    items = entry.value.mapNotNull { it.toSummaryForUi() }
+                    items = entry.value.mapNotNull { it.toSummaryForUi() },
                 )
             }
         }.sortedBy {
@@ -189,7 +194,7 @@ class CollectionDetailsViewModel @Inject constructor(
                     firstLine = titleForListNormalized ?: "",
                     secondLine = ContentLine2.Text(loginForUi ?: ""),
                     sharingPermission = sharingPermission,
-                    spaceData = spaceData(teamSpaceAccessorProvider)
+                    spaceData = spaceData(teamSpaceAccessorProvider),
                 )
             }
             is SummaryObject.SecureNote -> {
@@ -197,7 +202,7 @@ class CollectionDetailsViewModel @Inject constructor(
                     id = id,
                     type = syncObjectType.xmlObjectName,
                     thumbnail = ThumbnailData.SecureNoteThumbnail(
-                        secureNoteType = type ?: SyncObject.SecureNoteType.NO_TYPE
+                        secureNoteType = type ?: SyncObject.SecureNoteType.NO_TYPE,
                     ),
                     firstLine = title ?: "",
                     secondLine = if (secured == true) {
@@ -206,7 +211,7 @@ class CollectionDetailsViewModel @Inject constructor(
                         ContentLine2.Text(content?.lineSequence()?.firstOrNull()?.take(n = 80) ?: "")
                     },
                     sharingPermission = sharingPermission,
-                    spaceData = spaceData(teamSpaceAccessorProvider)
+                    spaceData = spaceData(teamSpaceAccessorProvider),
                 )
             }
             else -> null
@@ -230,7 +235,7 @@ class CollectionDetailsViewModel @Inject constructor(
                 val collectionToDelete = collection.copy(syncState = SyncState.DELETED)
                 dataSaver.save(collectionToDelete)
                 vaultActivityLogger.sendCollectionDeletedActivityLog(
-                    collection = collectionToDelete.toSummary()
+                    collection = collectionToDelete.toSummary(),
                 )
             }
         }
@@ -277,7 +282,7 @@ class CollectionDetailsViewModel @Inject constructor(
                         .firstOrNull { it.uuid == navArgs.collectionId } ?: return@launch
                 collectionSharingItemDataProvider.removeItemFromSharedCollections(
                     itemId,
-                    listOf(collection)
+                    listOf(collection),
                 )
                 return@launch
             }
@@ -294,7 +299,7 @@ class CollectionDetailsViewModel @Inject constructor(
                 if (removedItem != null) {
                     vaultActivityLogger.sendRemoveItemFromCollectionActivityLog(
                         collection = updatedCollection.toSummary(),
-                        item = removedItem
+                        item = removedItem,
                     )
                 }
             }

@@ -14,9 +14,8 @@ import javax.inject.Inject
 
 class AutofillSearchUsingLoader @Inject constructor(
     private val searchSorter: SearchSorter,
-    private val searchLoader: SearchLoader
+    private val searchLoader: SearchLoader,
 ) : AutofillSearch {
-
     override suspend fun loadAuthentifiants(): List<SummaryObject.Authentifiant> =
         searchLoader.loadCredentials()
 
@@ -26,7 +25,7 @@ class AutofillSearchUsingLoader @Inject constructor(
 
     override fun matchAuthentifiantsFromQuery(
         query: String?,
-        items: List<SummaryObject.Authentifiant>
+        items: List<SummaryObject.Authentifiant>,
     ): List<MatchedSearchResult> = if (query == null) {
         items.map {
             MatchedSearchResult(it, Match(MatchPosition.START, LegacySearchField.ANY_FIELD))

@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/autofill_setting.json",
+  "type": "object",
+  "description": "Autofill disable setting modified.",
+  "metas": {
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_setting"
+    },
+    "disable_setting": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/disable_setting"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "is_native_app": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+    },
+    "item_type_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+    }
+  },
+  "required": [
+    "name",
+    "disable_setting",
+    "is_native_app"
+  ],
+  "additionalProperties": false
+}

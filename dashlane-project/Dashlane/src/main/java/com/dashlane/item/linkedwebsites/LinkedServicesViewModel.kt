@@ -22,9 +22,8 @@ class LinkedServicesViewModel @Inject constructor(
     private val dataProvider: LinkedServicesDataProvider,
     private val sharingPolicyDataProvider: SharingPolicyDataProvider,
     @IoCoroutineDispatcher
-    private val ioDispatcher: CoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel(), LinkedServicesContract.ViewModel {
-
     private val args = LinkedServicesFragmentArgs.fromSavedStateHandle(savedStateHandle)
     val fromViewOnly = args.fromViewOnly
     val state: StateFlow<LinkedServicesUIState>
@@ -34,8 +33,8 @@ class LinkedServicesViewModel @Inject constructor(
             vaultItem = null,
             editMode = !fromViewOnly,
             actionClosePageAfterSave = false,
-            closePageImmediate = false
-        )
+            closePageImmediate = false,
+        ),
     )
     private var vaultItem: VaultItem<SyncObject.Authentifiant>? = null
     var isEditMode = !fromViewOnly
@@ -86,7 +85,7 @@ class LinkedServicesViewModel @Inject constructor(
                 ?: vaultItem?.syncObject?.linkedServices?.associatedAndroidApps
                     ?.filter { it.linkSource == SyncObject.Authentifiant.LinkedServices.AssociatedAndroidApps.LinkSource.USER }
                     ?.map { it.packageName } ?: arrayOf<String>()
-            ) != linkedApps
+        ) != linkedApps
 
     override fun canEdit(): Boolean =
         vaultItem?.let { sharingPolicyDataProvider.canEditItem(it.toSummary(), false) } ?: false

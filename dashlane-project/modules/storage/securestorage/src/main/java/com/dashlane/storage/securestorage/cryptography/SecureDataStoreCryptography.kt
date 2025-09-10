@@ -11,11 +11,12 @@ import com.dashlane.cryptography.encryptUtf8ToBase64String
 
 interface SecureDataStoreCryptography {
     fun encrypt(byteArray: ByteArray): EncryptedBase64String
+
     fun decrypt(encryptedData: EncryptedBase64String): ByteArray?
 }
 
 class SecureDataStoreCryptographyMpProtectedImpl(
-    private val cryptographyEngineFactory: CryptographyEngineFactory
+    private val cryptographyEngineFactory: CryptographyEngineFactory,
 ) : SecureDataStoreCryptography {
     override fun encrypt(byteArray: ByteArray): EncryptedBase64String {
         val base64Data = byteArray.encodeBase64ToString()
@@ -33,7 +34,7 @@ class SecureDataStoreCryptographyMpProtectedImpl(
 }
 
 class SecureDataStoreCryptographyRawKeyProtectedImpl(
-    private val cryptographyEngineFactory: CryptographyEngineFactory
+    private val cryptographyEngineFactory: CryptographyEngineFactory,
 ) : SecureDataStoreCryptography {
     override fun encrypt(byteArray: ByteArray): EncryptedBase64String =
         cryptographyEngineFactory.createEncryptionEngine().use { encryptionEngine ->

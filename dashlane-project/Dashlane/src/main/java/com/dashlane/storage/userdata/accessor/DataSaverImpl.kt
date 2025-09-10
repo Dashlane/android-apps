@@ -7,6 +7,7 @@ import com.dashlane.events.PasswordChangedEvent
 import com.dashlane.storage.userdata.DatabaseItemSaver
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.inject.OptionalProvider
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copyWithSpaceId
@@ -25,7 +26,7 @@ class DataSaverImpl @Inject constructor(
     private val dataChangeHistorySaver: DataChangeHistorySaver,
     private val databaseItemSaver: DatabaseItemSaver,
     private val appEvents: AppEvents,
-    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) : DataSaver {
     
     private val _savedItemFlow = MutableSharedFlow<Unit>()
@@ -41,12 +42,19 @@ class DataSaverImpl @Inject constructor(
         }
 
         val dataChangeHistoryItems = dataChangeHistories.itemsToSave.toMutableList()
-        val enforcedSpacedId = teamSpaceAccessorProvider.get()?.enforcedSpace?.teamId
+        val teamspaceProvider = teamSpaceAccessorProvider.get()
+        val enforcedSpacedId = teamspaceProvider?.enforcedSpace?.teamId
+        
+        val defaultSpaceId = teamspaceProvider
+            ?.availableSpaces
+            ?.minus(TeamSpace.Combined)
+            ?.let { availableSpaces -> availableSpaces.firstOrNull { it != TeamSpace.Personal } }
+            ?.teamId
 
         val savedRegularItems = when (regularItems.mode) {
             DataSaver.SaveRequest.Mode.INSERT_ONLY -> {
                 val newRegularItems = regularItems.copyWithNewItemsToSave(
-                    itemsToSave = regularItems.itemsToSave.enforceSpaceIfRequired(enforcedSpacedId)
+                    itemsToSave = regularItems.itemsToSave.enforceSpaceIfRequired(defaultSpaceId, enforcedSpacedId),
                 )
                 
                 dataChangeHistoryItems.addAll(newRegularItems.itemsToSave.generateDataChangeHistories())
@@ -59,7 +67,7 @@ class DataSaverImpl @Inject constructor(
                 val (oldItems, newItems) = loadDatabaseItems(regularItems.itemsToSave)
 
                 val newRegularItems = regularItems.copyWithNewItemsToSave(
-                    itemsToSave = regularItems.itemsToSave.replaceItems(newItems.enforceSpaceIfRequired(enforcedSpacedId))
+                    itemsToSave = regularItems.itemsToSave.replaceItems(newItems.enforceSpaceIfRequired(defaultSpaceId, enforcedSpacedId)),
                 )
 
                 if (Thread.interrupted()) {
@@ -102,7 +110,7 @@ class DataSaverImpl @Inject constructor(
         }
     }
 
-    private fun loadDatabaseItems(itemsToSave: List<VaultItem<*>>): Pair<List<VaultItem<*>>, List<VaultItem<*>>> {
+    private suspend fun loadDatabaseItems(itemsToSave: List<VaultItem<*>>): Pair<List<VaultItem<*>>, List<VaultItem<*>>> {
         
         val existingItems = itemsToSave.groupBy { it.syncObject.objectType }
             .map { (dataType, items) ->
@@ -112,7 +120,7 @@ class DataSaverImpl @Inject constructor(
                     specificUid(items.map { it.uid })
                     specificDataType(dataType)
                 }
-                vaultDataQuery.queryAllLegacy(filter)
+                vaultDataQuery.queryAll(filter)
             }.flatten()
         val newItems = itemsToSave.filterExistingItems(existingItems)
         return existingItems to newItems
@@ -137,7 +145,7 @@ class DataSaverImpl @Inject constructor(
         return copy(itemsToSave = leftItems) to DataSaver.SaveRequest(
             itemsToSave = dataChangeHistory,
             origin = origin,
-            mode = mode
+            mode = mode,
         )
     }
 
@@ -150,7 +158,7 @@ class DataSaverImpl @Inject constructor(
                 val oldItem = oldItems?.firstOrNull { it.uid == item.uid }
                 authentifiantHistoryGenerator.getDataChangeHistoryToSave(
                     oldItem as? VaultItem<SyncObject.Authentifiant>,
-                    item as VaultItem<SyncObject.Authentifiant>
+                    item as VaultItem<SyncObject.Authentifiant>,
                 )
             } else {
                 null
@@ -158,15 +166,25 @@ class DataSaverImpl @Inject constructor(
         }
     }
 
-    private fun <T : SyncObject> List<VaultItem<T>>.enforceSpaceIfRequired(spacedId: String?): List<VaultItem<T>> {
-        spacedId ?: return this
-
+    private fun <T : SyncObject> List<VaultItem<T>>.enforceSpaceIfRequired(
+        defaultSpaceId: String?,
+        enforcedSpaceId: String?,
+    ): List<VaultItem<T>> {
+        if (defaultSpaceId == null && enforcedSpaceId == null) return this
         return map { vaultItem ->
             when (vaultItem.syncObjectType) {
                 
                 
-                SyncObjectType.ADDRESS,
                 SyncObjectType.AUTHENTIFIANT,
+                SyncObjectType.SECURE_NOTE,
+                SyncObjectType.PASSKEY,
+                -> {
+                    
+                    val item = if (vaultItem.syncObject.spaceId == null) vaultItem.copyWithSpaceId(defaultSpaceId) else vaultItem
+                    
+                    if (enforcedSpaceId != null) item.copyWithSpaceId(enforcedSpaceId) else item
+                }
+                SyncObjectType.ADDRESS,
                 SyncObjectType.BANK_STATEMENT,
                 SyncObjectType.COLLECTION,
                 SyncObjectType.COMPANY,
@@ -175,21 +193,21 @@ class DataSaverImpl @Inject constructor(
                 SyncObjectType.FISCAL_STATEMENT,
                 SyncObjectType.ID_CARD,
                 SyncObjectType.IDENTITY,
-                SyncObjectType.PASSKEY,
                 SyncObjectType.PASSPORT,
                 SyncObjectType.PAYMENT_CREDIT_CARD,
                 SyncObjectType.PERSONAL_WEBSITE,
                 SyncObjectType.PHONE,
-                SyncObjectType.SECURE_NOTE,
-                SyncObjectType.SOCIAL_SECURITY_STATEMENT -> vaultItem.copyWithSpaceId(spacedId)
+                SyncObjectType.SOCIAL_SECURITY_STATEMENT,
+                -> if (enforcedSpaceId != null) vaultItem.copyWithSpaceId(enforcedSpaceId) else vaultItem
                 else -> vaultItem
             }
         }
     }
 
-    private fun <T : SyncObject> DataSaver.SaveRequest<T>.copyWithNewItemsToSave(itemsToSave: List<VaultItem<*>>): DataSaver.SaveRequest<T> = copy(
-        itemsToSave = itemsToSave.filterIsInstance<VaultItem<T>>()
-
+    private fun <T : SyncObject> DataSaver.SaveRequest<T>.copyWithNewItemsToSave(
+        itemsToSave: List<VaultItem<*>>,
+    ): DataSaver.SaveRequest<T> = copy(
+        itemsToSave = itemsToSave.filterIsInstance<VaultItem<T>>(),
     )
 
     private fun <U : SyncObject, V : SyncObject> List<VaultItem<U>>.filterExistingItems(items: List<VaultItem<V>>): List<VaultItem<U>> {

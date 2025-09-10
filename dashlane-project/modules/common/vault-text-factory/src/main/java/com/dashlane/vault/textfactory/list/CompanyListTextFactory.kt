@@ -9,7 +9,6 @@ import javax.inject.Inject
 class CompanyListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.Company> {
-
     override fun getTitle(item: SummaryObject.Company): StatusText {
         return StatusText(if (item.name.isSemanticallyNull()) resources.getString(R.string.company) else item.name!!)
     }

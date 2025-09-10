@@ -7,6 +7,6 @@ import com.dashlane.xml.domain.SyncObject
 interface GeneratedPasswordRepository {
     suspend fun updateGeneratedPassword(
         data: CredentialFormData,
-        itemToSave: VaultItem<SyncObject>
+        itemToSave: VaultItem<SyncObject>,
     ): Boolean
 }

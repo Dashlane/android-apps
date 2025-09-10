@@ -18,24 +18,23 @@ import com.dashlane.csvimport.csvimport.CsvImportViewTypeProvider
 import com.dashlane.csvimport.csvimport.CsvSchema
 import com.dashlane.csvimport.csvimport.ImportAuthentifiantHelper
 import com.dashlane.csvimport.csvimport.toVaultItem
-import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity
 import com.dashlane.csvimport.databinding.ActivityCsvImportBinding
+import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity
 import com.dashlane.csvimport.utils.Intents
 import com.dashlane.csvimport.utils.localBroadcastManager
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.ui.activities.DashlaneActivity
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.ui.widgets.view.empty.EmptyScreenConfiguration
 import com.dashlane.ui.widgets.view.empty.EmptyScreenViewProvider
 import com.dashlane.util.ActivityResultContractCompat
 import com.dashlane.util.showToaster
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CsvImportActivity : DashlaneActivity() {
-
     @Inject
     lateinit var csvImportViewTypeProviderFactory: CsvImportViewTypeProvider.Factory
 
@@ -51,7 +50,7 @@ class CsvImportActivity : DashlaneActivity() {
             override fun createIntent(context: Context, input: List<String>): Intent =
                 MatchCsvFieldsActivity.newIntent(
                     this@CsvImportActivity,
-                    input
+                    input,
                 )
         }) { (resultCode, intent) ->
             val fieldTypes = intent?.getIntegerArrayListExtra(MatchCsvFieldsActivity.EXTRA_CATEGORIES)?.map {
@@ -115,7 +114,7 @@ class CsvImportActivity : DashlaneActivity() {
             is CsvImportState.Saved -> {
                 showToaster(
                     resources.getQuantityString(R.plurals.csv_import_success_message, state.count, state.count),
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 )
                 broadcastResultAndFinish(Intents.CSV_IMPORT_RESULT_SUCCESS)
             }
@@ -145,8 +144,8 @@ class CsvImportActivity : DashlaneActivity() {
                 EmptyScreenConfiguration.Builder()
                     .setImage(VectorDrawableCompat.create(resources, R.drawable.ic_empty_password, null))
                     .setLine1(getString(R.string.csv_import_empty_state_heading))
-                    .setLine2(getString(R.string.csv_import_empty_state_description)).build()
-            )
+                    .setLine2(getString(R.string.csv_import_empty_state_description)).build(),
+            ),
         )
 
         binding.title.setText(R.string.csv_import_empty_state_title)
@@ -166,7 +165,7 @@ class CsvImportActivity : DashlaneActivity() {
             items.map { csvAuthentifiant ->
                 val vaultItem = csvAuthentifiant.toVaultItem(this.importAuthentifiantHelper)
                 csvImportViewTypeProviderFactory.create(vaultItem, csvAuthentifiant.selected)
-            }
+            },
         )
 
         binding.recyclerView.gridLayoutManager.onRestoreInstanceState(lastInstanceState)
@@ -183,7 +182,9 @@ class CsvImportActivity : DashlaneActivity() {
         binding.secondaryCta.visibility = View.VISIBLE
     }
 
-    private fun broadcastResultAndFinish(@Intents.CsvImportResult result: String) {
+    private fun broadcastResultAndFinish(
+        @Intents.CsvImportResult result: String,
+    ) {
         val csvImportIntent = Intent(Intents.ACTION_CSV_IMPORT).putExtra(Intents.EXTRA_CSV_IMPORT_RESULT, result)
 
         localBroadcastManager.sendBroadcast(csvImportIntent)

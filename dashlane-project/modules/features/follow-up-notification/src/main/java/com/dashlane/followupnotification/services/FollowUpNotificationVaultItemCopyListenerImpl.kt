@@ -11,15 +11,14 @@ import javax.inject.Inject
 
 class FollowUpNotificationVaultItemCopyListenerImpl @Inject constructor(
     @ApplicationContext
-    private val context: Context
+    private val context: Context,
 ) : VaultItemCopyListener {
-
     override fun onCopyFromVault(
         summaryObject: SummaryObject,
         copyField: CopyField,
         highlight: Highlight?,
         index: Double?,
-        totalCount: Int?
+        totalCount: Int?,
     ) {
         FollowUpNotificationEntryPoint(context)
             .followUpNotificationApiProvider

@@ -18,14 +18,13 @@ class StepInfoBox @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    defStyleRes: Int = R.style.Widget_Dashlane_Infobox
+    defStyleRes: Int = R.style.Widget_Dashlane_Infobox,
 ) : ConstraintLayout(
-    context,
-    attrs,
-    defStyleAttr,
-    defStyleRes
-) {
-
+        context,
+        attrs,
+        defStyleAttr,
+        defStyleRes,
+    ) {
     private val iconView by lazy(LazyThreadSafetyMode.NONE) { findViewById<ImageView>(R.id.infobox_icon)!! }
     private val iconTextView by lazy(LazyThreadSafetyMode.NONE) { findViewById<TextView>(R.id.infobox_icon_text)!! }
     private val textView by lazy(LazyThreadSafetyMode.NONE) { findViewById<TextView>(R.id.infobox_text)!! }
@@ -65,7 +64,10 @@ class StepInfoBox @JvmOverloads constructor(
         buttonsLayout.addView(primaryButton, generateCtaLayoutParams())
     }
 
-    fun setIcon(@DrawableRes icon: Int?, iconText: String?) {
+    fun setIcon(
+        @DrawableRes icon: Int?,
+        iconText: String?,
+    ) {
         when {
             icon != null -> {
                 iconView.setImageResource(icon)

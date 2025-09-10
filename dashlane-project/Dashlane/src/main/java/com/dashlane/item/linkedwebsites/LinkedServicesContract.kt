@@ -6,6 +6,7 @@ import com.dashlane.xml.domain.SyncObject
 interface LinkedServicesContract {
     interface ViewModel {
         fun save(linkedWebsites: List<String>, linkedApps: List<String>)
+
         fun switchEditMode()
 
         fun hasOtherItemsDuplicate(linkedWebsites: List<String>): Pair<String, String>?
@@ -19,15 +20,16 @@ interface LinkedServicesContract {
 
     interface DataProvider {
         suspend fun getItem(itemId: String): VaultItem<SyncObject.Authentifiant>?
+
         suspend fun save(
             vaultItem: VaultItem<SyncObject.Authentifiant>,
             linkedWebsites: List<String>,
-            linkedApps: List<String>
+            linkedApps: List<String>,
         ): Boolean
 
         fun getDuplicateWebsitesItem(
             vaultItem: VaultItem<SyncObject.Authentifiant>?,
-            websites: List<String>
+            websites: List<String>,
         ): Pair<String, String>?
     }
 }

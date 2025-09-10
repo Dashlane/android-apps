@@ -12,6 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.hermes.generated.definitions.BrowseComponent
+import com.dashlane.utils.android.BuildConfig
 import com.skocken.presentation.definition.Base
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -50,7 +51,7 @@ fun Context.logPageView(page: AnyPage, fromAutofill: Boolean = false) {
 private fun LogRepository.logPageView(page: AnyPage, fromAutofill: Boolean) {
     queuePageView(
         component = if (fromAutofill) BrowseComponent.OS_AUTOFILL else BrowseComponent.MAIN_APP,
-        page = page
+        page = page,
     )
 }
 
@@ -66,7 +67,7 @@ interface CurrentPageViewLogger {
 fun CurrentPageViewLogger(activity: AppCompatActivity): CurrentPageViewLogger = CurrentPageViewLoggerImpl(activity)
 
 private class CurrentPageViewLoggerImpl(
-    activity: AppCompatActivity
+    activity: AppCompatActivity,
 ) : CurrentPageViewLogger, LifecycleEventObserver {
     private var latestPageView: Pair<AnyPage, Boolean>? = null
     private var resumedAtLeastOnce = false

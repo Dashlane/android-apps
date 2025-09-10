@@ -21,7 +21,7 @@ fun View?.configureAsFab(
     @StringRes titleRes: Int,
     @StringRes titleDescription: Int,
     @DrawableRes drawableRes: Int,
-    hasUpgradeBadge: Boolean = false
+    hasUpgradeBadge: Boolean = false,
 ) {
     this?.findViewById<TextView>(R.id.title)?.run {
         setText(titleRes)
@@ -49,7 +49,7 @@ object FabViewUtil {
     fun showFabMenu(
         fabMenuHolder: FrameLayout,
         fabButton: View,
-        animate: Boolean
+        animate: Boolean,
     ) {
         fabButton.isEnabled = false
         if (animate) {
@@ -102,9 +102,9 @@ object FabViewUtil {
             fabMenuHolder,
             "alpha",
             ANIMATION_BACKGROUND_ALPHA_INVISIBLE,
-            ANIMATION_BACKGROUND_ALPHA_VISIBLE
+            ANIMATION_BACKGROUND_ALPHA_VISIBLE,
         ).setDuration(
-            (2 * ANIMATION_DURATION_DEFAULT).toLong()
+            (2 * ANIMATION_DURATION_DEFAULT).toLong(),
         )
         objectAnimator.interpolator = AccelerateDecelerateInterpolator()
         objectAnimator.startDelay = ANIMATION_DURATION_DEFAULT.toLong()
@@ -115,7 +115,7 @@ object FabViewUtil {
         fabMenuHolder: FrameLayout,
         fabButton: View,
         animate: Boolean,
-        hideFabMenu: View.OnClickListener = View.OnClickListener { hideFabMenu(fabMenuHolder, fabButton, true) }
+        hideFabMenu: View.OnClickListener = View.OnClickListener { hideFabMenu(fabMenuHolder, fabButton, true) },
     ) {
         val menuHolder: ViewGroup = fabMenuHolder.findViewById(R.id.fab_menu_items_holder) ?: return
         menuHolder.setOnClickListener(hideFabMenu)
@@ -207,7 +207,7 @@ object FabViewUtil {
             fabMenuHolder,
             "alpha",
             ANIMATION_BACKGROUND_ALPHA_VISIBLE,
-            ANIMATION_BACKGROUND_ALPHA_INVISIBLE
+            ANIMATION_BACKGROUND_ALPHA_INVISIBLE,
         )
             .setDuration(2 * ANIMATION_DURATION_DEFAULT.toLong())
         objectAnimator.startDelay = ANIMATION_DURATION_DEFAULT.toLong()
@@ -234,7 +234,7 @@ object FabViewUtil {
     fun hideFabMenuItems(
         fabMenuHolder: FrameLayout,
         animate: Boolean,
-        lastMenuItemHiddenCallBack: LastMenuItemHiddenCallBack?
+        lastMenuItemHiddenCallBack: LastMenuItemHiddenCallBack?,
     ) {
         val menuHolder: ViewGroup = fabMenuHolder.findViewById(R.id.fab_menu_items_holder) ?: return
         for (i in menuHolder.childCount - 1 downTo 1) {

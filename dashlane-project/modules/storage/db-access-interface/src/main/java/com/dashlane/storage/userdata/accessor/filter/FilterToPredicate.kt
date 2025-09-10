@@ -1,5 +1,6 @@
 package com.dashlane.storage.userdata.accessor.filter
 
+import com.dashlane.sharing.UserPermission
 import com.dashlane.storage.userdata.accessor.filter.sharing.SharingFilter
 import com.dashlane.storage.userdata.accessor.filter.space.SpaceFilter
 import com.dashlane.storage.userdata.accessor.filter.uid.UidFilter
@@ -7,7 +8,6 @@ import com.dashlane.teamspaces.manager.DataIdentifierSpaceCategorization
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.util.inject.OptionalProvider
-import com.dashlane.sharing.UserPermission
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.asVaultItemOfClassOrNull
 import com.dashlane.vault.summary.SummaryObject
@@ -19,9 +19,8 @@ import javax.inject.Inject
 class FilterToPredicate @Inject constructor(
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
-    private val authentifiantPackageNameMatcher: AuthentifiantPackageNameMatcher
+    private val authentifiantPackageNameMatcher: AuthentifiantPackageNameMatcher,
 ) {
-
     fun toPredicate(filter: BaseFilter): (VaultItem<*>) -> Boolean {
         return { accept(filter, it) }
     }
@@ -66,8 +65,9 @@ class FilterToPredicate @Inject constructor(
 
     private fun acceptCredentialFilter(filter: CredentialFilter, vaultItem: VaultItem<*>): Boolean {
         return vaultItem.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
-        ?.toSummary<SummaryObject.Authentifiant>()?.let {
-                filter.email?.equals(it.email, ignoreCase = true) ?: true && 
+            ?.toSummary<SummaryObject.Authentifiant>()
+            ?.let {
+                filter.email?.equals(it.email, ignoreCase = true) ?: true &&
                     hasCorrectDomain(filter, it) &&
                     hasCorrectPackageName(filter, it)
             } ?: false
@@ -79,7 +79,7 @@ class FilterToPredicate @Inject constructor(
             authentifiant.url,
             authentifiant.userSelectedUrl,
             authentifiant.title,
-            authentifiant.linkedServices?.associatedDomains?.map { it.domain }
+            authentifiant.linkedServices?.associatedDomains?.map { it.domain },
         )
 
     private fun hasCorrectPackageName(filter: CredentialFilter, authentifiant: SummaryObject.Authentifiant) =
@@ -100,13 +100,13 @@ class FilterToPredicate @Inject constructor(
                 filterItemId in (
                     vaultItem.toSummary<SummaryObject.Collection>().vaultItems?.map { it.id }
                         ?: emptyList()
-                    )
+                )
             } ?: true &&
             filter.withoutVaultItemId?.let { filterItemId ->
                 filterItemId !in (
                     vaultItem.toSummary<SummaryObject.Collection>().vaultItems?.map { it.id }
                         ?: emptyList()
-                    )
+                )
             } ?: true &&
             filter.name?.equals(syncObject.name) ?: true
     }

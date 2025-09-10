@@ -9,7 +9,7 @@ sealed class AutofillCreateAccountState {
     abstract val data: AutofillCreateAccountData
 
     data class Initial(
-        override val data: AutofillCreateAccountData
+        override val data: AutofillCreateAccountData,
     ) : AutofillCreateAccountState()
 
     data class InitSuggestions(
@@ -20,20 +20,20 @@ sealed class AutofillCreateAccountState {
 
     data class AccountCreated(
         override val data: AutofillCreateAccountData,
-        val authentifiant: VaultItem<SyncObject.Authentifiant>
+        val authentifiant: VaultItem<SyncObject.Authentifiant>,
     ) : AutofillCreateAccountState()
 
     data class Cancelled(
-        override val data: AutofillCreateAccountData
+        override val data: AutofillCreateAccountData,
     ) : AutofillCreateAccountState()
 
     data class Error(
         override val data: AutofillCreateAccountData,
-        val error: AutofillCreateAccountErrors
+        val error: AutofillCreateAccountErrors,
     ) : AutofillCreateAccountState()
 }
 
 data class AutofillCreateAccountData(
     val canSave: Boolean,
-    val teamSpace: List<TeamSpace>?
+    val teamSpace: List<TeamSpace>?,
 )

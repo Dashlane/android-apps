@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/autofill_correct.json",
+  "type": "object",
+  "description": "When the user makes a correction on a field filled by Dashlane with autofill. There are 4 types of corrections possible (erase, edit, change classification, overwrite). Specifically, when a user changes the classification of field, for example from email to phone, the next time he changes the classification of the field, the value for field_corrected will be phone.",
+  "metas": {
+    "priority": true,
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_correct"
+    },
+    "correction_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/correction_type"
+    },
+    "field_corrected": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+    },
+    "initial_field_classification_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+    },
+    "new_field_classification": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+    }
+  },
+  "required": [
+    "name",
+    "correction_type",
+    "field_corrected"
+  ],
+  "additionalProperties": false
+}

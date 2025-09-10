@@ -14,7 +14,7 @@ fun AutoFillFormSource?.getDomain(): Domain = when (this) {
         id = webDomain.toUrlDomainOrNull()?.root?.value?.let {
             Sha256Hash.of(it)
         },
-        type = DomainType.WEB
+        type = DomainType.WEB,
     )
     else -> Domain(type = DomainType.APP)
 }

@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatusRepository
+import com.dashlane.hermes.LogRepository
+import com.dashlane.passwordhealth.identitydashboard.password.PasswordAnalysisContract
 import com.dashlane.security.identitydashboard.password.PasswordAnalysisFragmentArgs.Companion.fromBundle
 import com.dashlane.session.SessionManager
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
@@ -40,6 +42,9 @@ class PasswordAnalysisFragment : AbstractContentFragment() {
     @Inject
     lateinit var accountStatusRepository: AccountStatusRepository
 
+    @Inject
+    lateinit var logRepository: LogRepository
+
     private lateinit var presenter: PasswordAnalysisPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -54,7 +59,8 @@ class PasswordAnalysisFragment : AbstractContentFragment() {
             itemWrapperProvider = itemWrapperProvider,
             currentTeamSpaceUiFilter = currentTeamSpaceUiFilter,
             sessionManager = sessionManager,
-            accountStatusRepository = accountStatusRepository
+            accountStatusRepository = accountStatusRepository,
+            logRepository = logRepository,
         )
 
         arguments?.let {

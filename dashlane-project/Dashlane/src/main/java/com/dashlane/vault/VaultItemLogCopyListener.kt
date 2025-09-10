@@ -12,14 +12,14 @@ import javax.inject.Inject
 
 class VaultItemLogCopyListener @Inject constructor(
     private val vaultItemLogger: VaultItemLogger,
-    private val followUpNotificationRepository: FollowUpNotificationRepository
+    private val followUpNotificationRepository: FollowUpNotificationRepository,
 ) : VaultItemCopyListener {
     override fun onCopyFromVault(
         summaryObject: SummaryObject,
         copyField: CopyField,
         highlight: Highlight?,
         index: Double?,
-        totalCount: Int?
+        totalCount: Int?,
     ) {
         val (field, itemType) = copyField.toFieldItemType()
 
@@ -39,7 +39,7 @@ class VaultItemLogCopyListener @Inject constructor(
         index: Double?,
         totalCount: Int?,
         itemType: ItemType,
-        isItemProtected: Boolean
+        isItemProtected: Boolean,
     ) {
         vaultItemLogger.logCopyField(highlight, field, vaultItemId, itemType, totalCount, index, isItemProtected, null)
     }
@@ -55,6 +55,8 @@ fun CopyField.toFieldItemType() = when (this) {
     CopyField.PaymentsNumber -> Field.CARD_NUMBER to ItemType.CREDIT_CARD
     CopyField.PaymentsSecurityCode -> Field.SECURITY_CODE to ItemType.CREDIT_CARD
     CopyField.PaymentsExpirationDate -> Field.EXPIRE_DATE to ItemType.CREDIT_CARD
+    CopyField.PaymentsCardHolder -> Field.NAME to ItemType.CREDIT_CARD
+    CopyField.PaymentsCardNote -> Field.NOTE to ItemType.CREDIT_CARD
     CopyField.BankAccountBank -> Field.NAME to ItemType.BANK_STATEMENT
     CopyField.BankAccountBicSwift, CopyField.BankAccountRoutingNumber, CopyField.BankAccountSortCode -> Field.BIC to ItemType.BANK_STATEMENT
     CopyField.BankAccountIban, CopyField.BankAccountAccountNumber, CopyField.BankAccountClabe -> Field.IBAN to ItemType.BANK_STATEMENT
@@ -66,14 +68,14 @@ fun CopyField.toFieldItemType() = when (this) {
     CopyField.IdsExpirationDate -> Field.EXPIRE_DATE to ItemType.ID_CARD
     CopyField.PassportLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.PASSPORT
     CopyField.IdsLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.ID_CARD
-    CopyField.DriverLicenseLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.DRIVER_LICENCE
+    CopyField.DriverLicenseLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.DRIVER_LICENSE
     CopyField.SocialSecurityLinkedIdentity -> Field.LINKED_IDENTITY to ItemType.SOCIAL_SECURITY
     CopyField.PassportNumber -> Field.NUMBER to ItemType.PASSPORT
     CopyField.PassportIssueDate -> Field.DELIVERY_DATE to ItemType.PASSPORT
     CopyField.PassportExpirationDate -> Field.EXPIRE_DATE to ItemType.PASSPORT
-    CopyField.DriverLicenseNumber -> Field.NUMBER to ItemType.DRIVER_LICENCE
-    CopyField.DriverLicenseIssueDate -> Field.DELIVERY_DATE to ItemType.DRIVER_LICENCE
-    CopyField.DriverLicenseExpirationDate -> Field.EXPIRE_DATE to ItemType.DRIVER_LICENCE
+    CopyField.DriverLicenseNumber -> Field.NUMBER to ItemType.DRIVER_LICENSE
+    CopyField.DriverLicenseIssueDate -> Field.DELIVERY_DATE to ItemType.DRIVER_LICENSE
+    CopyField.DriverLicenseExpirationDate -> Field.EXPIRE_DATE to ItemType.DRIVER_LICENSE
     CopyField.SocialSecurityNumber -> Field.SOCIAL_SECURITY_NUMBER to ItemType.SOCIAL_SECURITY
     CopyField.TaxOnlineNumber -> Field.TELEDECLARANT_NUMBER to ItemType.SOCIAL_SECURITY
     CopyField.TaxNumber -> Field.FISCAL_NUMBER to ItemType.FISCAL_STATEMENT
@@ -90,4 +92,7 @@ fun CopyField.toFieldItemType() = when (this) {
     CopyField.PasskeyDisplayName -> Field.NAME to ItemType.PASSKEY 
     CopyField.SecretValue -> Field.SECRET to ItemType.SECRET
     CopyField.SecretId -> Field.SECRET_ID to ItemType.SECRET
+    CopyField.WiFiSsid -> Field.SSID to ItemType.WIFI
+    CopyField.WiFiPassphrase -> Field.PASSPHRASE to ItemType.WIFI
+    CopyField.WiFiNote -> Field.NOTE to ItemType.WIFI
 }

@@ -10,11 +10,10 @@ import androidx.fragment.app.Fragment
 import com.dashlane.R
 
 class PurchaseCheckingProgressFragment : Fragment() {
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? = inflater.inflate(R.layout.fragment_purchase_checking_loading, container, false)
 
     override fun onCreateAnimation(transit: Int, enter: Boolean, nextAnim: Int): Animation? {

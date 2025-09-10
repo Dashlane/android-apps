@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="totp_token_title">2FA token:</string>
+    
+    <string name="totp_token_incorrect">Incorrect</string>
+</resources>

@@ -1,6 +1,5 @@
 package com.dashlane.item
 
-import android.content.Intent
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,7 +9,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -21,57 +19,33 @@ import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.dashlane.R
-import com.dashlane.authenticator.AuthenticatorIntro.Companion.RESULT_OTP
-import com.dashlane.authenticator.AuthenticatorLogger
-import com.dashlane.authenticator.Otp
-import com.dashlane.authenticator.item.AuthenticatorViewProxy
 import com.dashlane.design.component.compat.view.ThumbnailViewType
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.item.BaseUiUpdateListener.Companion.BOTTOM_SHEET_DIALOG_TAG
-import com.dashlane.item.BaseUiUpdateListener.Companion.NFC_DIALOG_ERROR_TAG
-import com.dashlane.item.BaseUiUpdateListener.Companion.NFC_DIALOG_SUCCESS_TAG
-import com.dashlane.item.BaseUiUpdateListener.Companion.NFC_DIALOG_TAG
 import com.dashlane.item.delete.DeleteVaultItemFragment
 import com.dashlane.item.header.ItemHeader
-import com.dashlane.ui.action.Action
 import com.dashlane.item.subview.ItemSubView
 import com.dashlane.item.subview.ItemSubViewWithActionWrapper
 import com.dashlane.item.subview.ViewFactory
 import com.dashlane.item.subview.action.MenuAction
-import com.dashlane.item.subview.action.authenticator.ActivateRemoveAuthenticatorAction
-import com.dashlane.item.subview.edit.ItemAuthenticatorEditSubView
-import com.dashlane.item.subview.edit.ItemEditPasswordWithStrengthSubView
 import com.dashlane.item.subview.edit.ItemEditValueDateSubView
 import com.dashlane.item.subview.edit.ItemEditValueListSubView
 import com.dashlane.item.subview.edit.ItemEditValueNumberSubView
 import com.dashlane.item.subview.edit.ItemEditValueTextSubView
-import com.dashlane.item.subview.readonly.ItemAuthenticatorReadSubView
-import com.dashlane.item.subview.readonly.ItemPasswordSafetySubView
 import com.dashlane.item.subview.readonly.ItemReadValueNumberSubView
 import com.dashlane.item.subview.readonly.ItemReadValueTextSubView
 import com.dashlane.item.subview.view.ButtonInputProvider
 import com.dashlane.item.subview.view.DatePickerInputProvider
 import com.dashlane.item.subview.view.SpinnerInputProvider
 import com.dashlane.navigation.Navigator
-import com.dashlane.passwordstrength.PasswordStrengthEvaluator
-import com.dashlane.passwordstrength.borderColorRes
-import com.dashlane.passwordstrength.getShortTitle
-import com.dashlane.passwordstrength.textColorRes
-import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.ui.action.Action
 import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
-import com.dashlane.ui.credential.passwordgenerator.StrengthLevelUpdater
 import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
-import com.dashlane.ui.screens.fragments.userdata.CredentialViewPasswordSafety
 import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
-import com.dashlane.ui.widgets.view.tintProgressDrawable
 import com.dashlane.util.SnackbarUtils
 import com.dashlane.util.computeStatusBarColor
-import com.dashlane.util.getColorOn
-import com.dashlane.util.getParcelableExtraCompat
-import com.dashlane.util.getThemeAttrDrawable
 import com.dashlane.util.setContentTint
 import com.dashlane.util.statusBarColor
 import com.google.android.material.appbar.AppBarLayout
@@ -79,32 +53,21 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.skocken.presentation.viewproxy.BaseViewProxy
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 class ItemEditViewViewProxy(
+    lifecycleOwner: LifecycleOwner,
     val activity: AppCompatActivity,
     private val viewFactory: ViewFactory,
-    private val lifecycleOwner: LifecycleOwner,
     private val navigator: Navigator,
-    private val authenticatorLogger: AuthenticatorLogger,
-    private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
-    private val vaultDataQuery: VaultDataQuery
 ) :
     BaseViewProxy<ItemEditViewContract.Presenter>(activity),
-    ItemEditViewContract.View {
-
+        ItemEditViewContract.View {
     private val allDialogsTags = listOf(
         DatePickerInputProvider.DATE_PICKER_DIALOG_TAG,
         DeleteVaultItemFragment.DELETE_DIALOG_TAG,
         SAVE_DIALOG_TAG,
-        NFC_DIALOG_TAG,
-        NFC_DIALOG_SUCCESS_TAG,
-        NFC_DIALOG_ERROR_TAG,
-        BOTTOM_SHEET_DIALOG_TAG
+        BOTTOM_SHEET_DIALOG_TAG,
     )
 
     init {
@@ -116,7 +79,7 @@ class ItemEditViewViewProxy(
         
         activity.supportFragmentManager.setFragmentResultListener(
             DeleteVaultItemFragment.DELETE_VAULT_ITEM_RESULT,
-            lifecycleOwner
+            lifecycleOwner,
         ) { _, bundle ->
             val isItemDeleted = bundle.getBoolean(DeleteVaultItemFragment.DELETE_VAULT_ITEM_SUCCESS)
             if (isItemDeleted) {
@@ -126,64 +89,28 @@ class ItemEditViewViewProxy(
     }
 
     override val listener: ItemEditViewContract.View.UiUpdateListener
-        get() = object : BaseUiUpdateListener(activity, navigator) {
-
+        get() = object : BaseUiUpdateListener(activity) {
             override fun notifySubViewChanged(itemSubView: ItemSubView<*>) {
                 val view = views[itemSubView] ?: return
                 when (itemSubView) {
                     is ItemEditValueDateSubView -> configureDateSubView(itemSubView, view)
-                    is ItemEditPasswordWithStrengthSubView -> configurePasswordWithStrengthSubView(
-                        itemSubView,
-                        view
-                    )
-
                     is ItemReadValueTextSubView -> configureReadValueTextSubView(itemSubView, view)
                     is ItemEditValueTextSubView -> configureEditValueTextSubView(itemSubView, view)
                     is ItemReadValueNumberSubView -> configureReadValueNumberSubView(
                         itemSubView,
-                        view
+                        view,
                     )
 
                     is ItemEditValueNumberSubView -> configureEditValueNumberSubView(
                         itemSubView,
-                        view
+                        view,
                     )
 
-                    is ItemPasswordSafetySubView -> passwordSafety?.setPassword(itemSubView.value)
                     is ItemEditValueListSubView -> configureValueListSubView(
                         itemSubView,
-                        view as LinearLayout
-                    )
-
-                    is ItemAuthenticatorEditSubView -> configureAuthenticatorSubview(
-                        itemSubView,
-                        view
+                        view as LinearLayout,
                     )
                 }
-            }
-
-            override fun notifyHeaderChanged(itemHeader: ItemHeader, editMode: Boolean) {
-                setHeader(itemHeader, editMode)
-            }
-
-            override fun notifyColorChanged(color: Int) {
-                setDominantColor(color)
-            }
-
-            override fun notifyPotentialBarCodeScan(
-                requestCode: Int,
-                resultCode: Int,
-                data: Intent?
-            ) {
-                val otp = data?.getParcelableExtraCompat<Otp>(RESULT_OTP) ?: return
-                
-                views.filter { (it.key as? ItemSubViewWithActionWrapper)?.itemSubView is ItemAuthenticatorEditSubView || it.key is ItemAuthenticatorEditSubView }
-                    .forEach {
-                        val subview =
-                            (it.key as? ItemSubViewWithActionWrapper)?.itemSubView ?: it.key
-                        (subview as ItemAuthenticatorEditSubView).notifyValueChanged(otp)
-                        listener.notifySubViewChanged(subview)
-                    }
             }
 
             override fun requestFocus(subview: ItemSubView<*>) {
@@ -191,10 +118,6 @@ class ItemEditViewViewProxy(
             }
 
             override fun notifyDeleteClicked() = presenter.deleteClicked()
-
-            override fun notifyRestorePassword() = presenter.onPasswordRestored()
-
-            override fun notifyOtpRefreshed(otp: Otp) = presenter.otpRefreshed(otp)
         }
 
     private val collapsingToolbarLayout =
@@ -207,18 +130,14 @@ class ItemEditViewViewProxy(
     private val actionsMenu = mutableMapOf<Action, MenuItem>()
     private val toolbarContentColor = context.getColor(R.color.text_neutral_standard)
     private var headerColor: Int = context.getColor(R.color.container_agnostic_neutral_standard)
-    private val headerButtonColor: Int
-        get() = if (presenter.isSecureNote) context.getColorOn(headerColor) else toolbarContentColor
-    private var passwordSafety: CredentialViewPasswordSafety? = null
-    private var strengthLevelUpdater: StrengthLevelUpdater? = null
+    private val headerButtonColor: Int = toolbarContentColor
     override var isToolbarCollapsed: Boolean = false
-    private var resetPasswordScoreJob: Job? = null
 
     override fun setConfiguration(
         screenConfiguration: ScreenConfiguration,
         isEditMode: Boolean,
         isToolbarCollapsed: Boolean,
-        isChangingMode: Boolean
+        isChangingMode: Boolean,
     ) {
         this.isToolbarCollapsed = isToolbarCollapsed
         screenConfiguration.itemHeader?.let {
@@ -277,7 +196,6 @@ class ItemEditViewViewProxy(
             .setCancelable(true)
             .setClickPositiveOnCancel(false)
             .setClicker(object : NotificationDialogFragment.TwoButtonClicker {
-
                 override fun onNegativeButton() {
                     action.invoke(false)
                 }
@@ -298,11 +216,13 @@ class ItemEditViewViewProxy(
         SnackbarUtils.showSnackbar(
             activity.findViewById(android.R.id.content) as View,
             activity.getString(R.string.multi_domain_credentials_update_validation),
-            Snackbar.LENGTH_SHORT
+            Snackbar.LENGTH_SHORT,
         )
     }
 
-    fun setDominantColor(@ColorInt dominantColor: Int) {
+    fun setDominantColor(
+        @ColorInt dominantColor: Int,
+    ) {
         headerColor = dominantColor
         collapsingToolbarLayout.setContentScrimColor(dominantColor)
         collapsingToolbarLayout.setBackgroundColor(dominantColor)
@@ -368,16 +288,16 @@ class ItemEditViewViewProxy(
         subViewContainer.removeAllViews()
         views.clear()
         itemSubView.forEach {
-            createView(it, isEditMode).let { v ->
+            createView(it).let { v ->
                 subViewContainer.addView(
                     v,
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
                     ).apply {
                         
                         topMargin = context.resources.getDimensionPixelSize(it.topMargin)
-                    }
+                    },
                 )
             }
         }
@@ -390,36 +310,18 @@ class ItemEditViewViewProxy(
         }
     }
 
-    private fun createView(itemSubView: ItemSubView<*>, isEditMode: Boolean = false): View {
+    private fun createView(itemSubView: ItemSubView<*>): View {
         return when (itemSubView) {
             is ItemSubViewWithActionWrapper -> createSubViewWithAction(itemSubView)
             else -> viewFactory.makeView(itemSubView).also {
                 when (itemSubView) {
-                    is ItemEditPasswordWithStrengthSubView -> {
-                        strengthLevelUpdater = StrengthLevelUpdater(lifecycleOwner.lifecycleScope)
-                        configurePasswordWithStrengthSubView(itemSubView, it)
-                    }
-
                     is ItemEditValueTextSubView -> configureEditValueTextSubView(itemSubView, it)
                     is ItemReadValueTextSubView -> configureReadValueTextSubView(itemSubView, it)
-                    is ItemPasswordSafetySubView -> {
-                        passwordSafety = CredentialViewPasswordSafety.newInstance(
-                            it,
-                            lifecycleOwner.lifecycleScope,
-                            passwordStrengthEvaluator,
-                            vaultDataQuery
-                        )
-                        configurePasswordSafetySubView(itemSubView, isEditMode)
-                    }
-
                     is ItemEditValueDateSubView -> configureDateSubView(itemSubView, it)
                     is ItemEditValueListSubView -> configureValueListSubView(
                         itemSubView,
-                        it as LinearLayout
+                        it as LinearLayout,
                     )
-
-                    is ItemAuthenticatorEditSubView,
-                    is ItemAuthenticatorReadSubView -> setupAuthenticatorSubview(itemSubView, it)
                 }
             }
         }.also {
@@ -432,7 +334,7 @@ class ItemEditViewViewProxy(
         val layout = LayoutInflater.from(context).inflate(
             R.layout.subview_with_action,
             subview as ViewGroup,
-            false
+            false,
         )
         layout.findViewById<FrameLayout>(R.id.view_container).addView(subview)
 
@@ -443,7 +345,7 @@ class ItemEditViewViewProxy(
                     context.getString(text),
                     icon,
                     Mood.Brand,
-                    Intensity.Supershy
+                    Intensity.Supershy,
                 ) {
                     onClickAction(activity)
                 }
@@ -456,7 +358,7 @@ class ItemEditViewViewProxy(
             val layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.RIGHT
+                Gravity.RIGHT,
             )
             layout.findViewById<FrameLayout>(R.id.view_action_container)
                 .addView(button, layoutParams)
@@ -503,80 +405,13 @@ class ItemEditViewViewProxy(
         }
     }
 
-    fun configurePasswordWithStrengthSubView(
-        itemSubView: ItemEditPasswordWithStrengthSubView,
-        view: View
-    ) {
-        val inputLayout = view.findViewById(R.id.item_subview_text_input_layout) as? TextInputLayout
-        if (inputLayout?.editText?.text?.toString() != itemSubView.value) {
-            inputLayout?.editText?.setText(itemSubView.value, TextView.BufferType.EDITABLE)
-        }
-        val strengthLevel = view.findViewById<TextView>(R.id.item_subview_strength_level_textview)
-        val strengthProgress =
-            view.findViewById<ProgressBar>(R.id.item_subview_strength_level_progress_bar)
-        if (itemSubView.value.isEmpty()) {
-            strengthLevel.visibility = View.GONE
-            strengthProgress.visibility = View.GONE
-            inputLayout?.editText?.background =
-                context.getThemeAttrDrawable(R.attr.editTextBackground)
-        } else {
-            strengthLevel.visibility = View.VISIBLE
-            strengthProgress.visibility = View.VISIBLE
-            inputLayout?.editText?.background = null
-        }
-
-        resetPasswordScoreJob?.cancel()
-        resetPasswordScoreJob = lifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            delay(500)
-            
-            
-            strengthProgress.apply {
-                isIndeterminate = true
-                progress = 0
-                strengthLevel.text = null
-            }
-        }
-
-        strengthLevelUpdater?.updateWith(
-            passwordStrengthEvaluator,
-            itemSubView.value
-        ) { strength ->
-            resetPasswordScoreJob?.cancel()
-            strengthLevel.apply {
-                text = strength.getShortTitle(context)
-                setTextColor(context.getColor(strength.textColorRes))
-            }
-            strengthProgress.apply {
-                isIndeterminate = false
-                
-                progress = if (strength.percentScore == 0) 2 else strength.percentScore
-
-                tintProgressDrawable(context.getColor(strength.borderColorRes))
-            }
-        }
-    }
-
-    private fun configurePasswordSafetySubView(
-        item: ItemPasswordSafetySubView,
-        isEditMode: Boolean
-    ) {
-        passwordSafety?.apply {
-            setPassword(item.value)
-            if (isEditMode) {
-                onEditMode()
-            } else {
-                onViewMode()
-            }
-        }
-    }
-
     private fun configureDateSubView(item: ItemEditValueDateSubView, view: View) {
         val inputLayout = view as? TextInputLayout ?: return
         inputLayout.editText?.setText(item.formattedDate, TextView.BufferType.EDITABLE)
         DatePickerInputProvider.setClickListener(
             activity,
             inputLayout,
-            item.value
+            item.value,
         ) { newDate -> item.notifyValueChanged(newDate) }
         if (item.invisible) {
             inputLayout.visibility = View.GONE
@@ -592,7 +427,7 @@ class ItemEditViewViewProxy(
                 R.layout.spinner_item_dropdown,
                 R.layout.spinner_item_preview,
                 item.values,
-                item.value
+                item.value,
             )
             val promptText = context.getString(R.string.choose)
 
@@ -604,7 +439,7 @@ class ItemEditViewViewProxy(
                 newAdapter,
                 null,
                 null,
-                null
+                null,
             ) { selectedIndex ->
                 val newValue = item.values[selectedIndex]
                 item.notifyValueChanged(newValue)
@@ -627,37 +462,6 @@ class ItemEditViewViewProxy(
                 view.visibility = View.VISIBLE
             }
         }
-    }
-
-    private fun setupAuthenticatorSubview(itemSubView: ItemSubView<*>, view: View) {
-        if (itemSubView.value == null) return
-        AuthenticatorViewProxy(
-            view.findViewById(R.id.item_subview_textview),
-            view.findViewById(R.id.item_subview_imageview),
-            activity.lifecycleScope,
-            itemSubView.value as Otp,
-        ) { listener.notifyOtpRefreshed(it) }
-    }
-
-    private fun configureAuthenticatorSubview(item: ItemAuthenticatorEditSubView, view: View) {
-        
-        val subviewsWithAction =
-            views.filter { (it.key as? ItemSubViewWithActionWrapper)?.itemSubView is ItemAuthenticatorEditSubView }
-        val parent = if (subviewsWithAction.isEmpty()) {
-            view as ViewGroup
-        } else {
-            subviewsWithAction.values.first() as ViewGroup
-        }
-        
-        parent.removeAllViews()
-        parent.addView(
-            createView(
-                ItemSubViewWithActionWrapper(
-                    item,
-                    ActivateRemoveAuthenticatorAction(item, listener, authenticatorLogger)
-                )
-            )
-        )
     }
 
     companion object {

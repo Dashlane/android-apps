@@ -1,5 +1,9 @@
 package com.github.devnied.emvnfccard.enums;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum CommandEnum {
 
 	SELECT(0x00, 0xA4, 0x04, 0x00),

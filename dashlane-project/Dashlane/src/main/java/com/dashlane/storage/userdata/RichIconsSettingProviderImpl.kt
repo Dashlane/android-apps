@@ -9,9 +9,8 @@ import javax.inject.Inject
 class RichIconsSettingProviderImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDataRepository,
-    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) : RichIconsSettingProvider {
-
     override val editable: Boolean
         get() = teamSpaceAccessorProvider.get()?.isRichIconsEnabled != false
 

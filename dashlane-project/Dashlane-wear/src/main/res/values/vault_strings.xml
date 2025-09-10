@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="vault_filter_passkeys_passwords">Passkeys and Passwords</string>
+    
+    <string name="vault_empty_state_title">No passkeys or passwords</string>
+    
+    <string name="vault_empty_state_content">Save passkeys and passwords in Dashlane on mobile and desktop for supported services. We\'ll automatically save them to your watch.</string>
+    
+    <string name="vault_empty_state_mobile_redirection">Check supported services</string>
+    
+    <string name="vault_settings_item">My account</string>
+
+    
+    <string name="check_your_phone">Check your phone</string>
+</resources>

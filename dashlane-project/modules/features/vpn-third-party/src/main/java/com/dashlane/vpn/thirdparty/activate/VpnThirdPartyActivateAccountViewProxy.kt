@@ -21,10 +21,9 @@ import kotlinx.coroutines.launch
 class VpnThirdPartyActivateAccountViewProxy(
     fragment: Fragment,
     defaultEmail: String?,
-    suggestions: List<String>?
+    suggestions: List<String>?,
 ) : BaseViewProxy<VpnThirdPartyActivateAccountContract.Presenter>(fragment),
     VpnThirdPartyActivateAccountContract.ViewProxy {
-
     private val confirmButton: Button =
         findViewByIdEfficient(R.id.vpn_third_party_activate_account_positive_button)!!
     private val termsCheckbox: CheckBox =
@@ -63,7 +62,7 @@ class VpnThirdPartyActivateAccountViewProxy(
                     context,
                     R.layout.autocomplete_textview_adapter,
                     R.id.listTextView,
-                    it
+                    it,
                 )
                 setAdapter(adapter)
             }
@@ -96,8 +95,8 @@ class VpnThirdPartyActivateAccountViewProxy(
             R.string.vpn_third_party_activate_account_terms_of_service,
             listOf(
                 R.string.vpn_third_party_activate_account_terms_link to "https://www.hotspotshield.com/terms/".toUri(),
-                R.string.vpn_third_party_activate_account_policy_link to "https://www.aura.com/legal/privacy-policy".toUri()
-            )
+                R.string.vpn_third_party_activate_account_policy_link to "https://www.aura.com/legal/privacy-policy".toUri(),
+            ),
         )
         setOnCheckedChangeListener { _, _ -> mayEnableConfirmButton() }
     }

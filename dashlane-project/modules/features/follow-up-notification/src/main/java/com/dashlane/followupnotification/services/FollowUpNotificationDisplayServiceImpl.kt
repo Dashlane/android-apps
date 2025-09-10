@@ -1,5 +1,6 @@
 package com.dashlane.followupnotification.services
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.widget.RemoteViews
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 class FollowUpNotificationDisplayServiceImpl @Inject constructor(
     @ApplicationContext val context: Context,
-    private val followUpNotificationDiscoveryService: FollowUpNotificationDiscoveryService
+    private val followUpNotificationDiscoveryService: FollowUpNotificationDiscoveryService,
 ) : FollowUpNotificationDisplayService {
     private companion object {
         const val ACTIVE_FOLLOW_UP_NOTIFICATION_ID = 0x037
@@ -24,6 +25,7 @@ class FollowUpNotificationDisplayServiceImpl @Inject constructor(
 
     private var onScreenFollowUpNotificationId: String? = null
 
+    @SuppressLint("MissingPermission")
     override fun displayNotification(followUpNotification: FollowUpNotification) {
         val remoteViews = followUpNotification.toRemoteViews(context)
         val dismissPendingIntent =
@@ -45,7 +47,7 @@ class FollowUpNotificationDisplayServiceImpl @Inject constructor(
         followUpNotificationDiscoveryService.updateLastNotificationItem(
             followUpNotification.vaultItemId,
             followUpNotification.id,
-            false
+            false,
         )
     }
 
@@ -61,7 +63,7 @@ class FollowUpNotificationDisplayServiceImpl @Inject constructor(
                 }
                 addView(
                     R.id.ll_item,
-                    attributeRemoteViewFont(context, field.label, field.content.displayValue, copyIntent)
+                    attributeRemoteViewFont(context, field.label, field.content.displayValue, copyIntent),
                 )
             }
         }
@@ -69,7 +71,7 @@ class FollowUpNotificationDisplayServiceImpl @Inject constructor(
     private fun attributeRemoteViewHeader(
         context: Context,
         attributeValue: String,
-        notificationType: FollowUpNotificationsTypes
+        notificationType: FollowUpNotificationsTypes,
     ): RemoteViews {
         return RemoteViews(context.packageName, R.layout.follow_up_notification_header).apply {
             setTextViewText(R.id.tv_item_name, attributeValue)
@@ -84,7 +86,7 @@ class FollowUpNotificationDisplayServiceImpl @Inject constructor(
         context: Context,
         attributeLabel: CharSequence,
         attributeValue: String,
-        copyClickIntent: PendingIntent
+        copyClickIntent: PendingIntent,
     ): RemoteViews =
         RemoteViews(context.packageName, R.layout.follow_up_notification_field).apply {
             setTextViewText(R.id.tv_attribute_name, attributeLabel)

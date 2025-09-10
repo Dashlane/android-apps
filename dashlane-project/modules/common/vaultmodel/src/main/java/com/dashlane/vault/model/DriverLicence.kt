@@ -12,7 +12,7 @@ fun createDriverLicence(
     number: String? = null,
     sex: SyncObject.Gender? = null,
     state: String? = null,
-    linkedIdentity: String? = null
+    linkedIdentity: String? = null,
 ): VaultItem<SyncObject.DriverLicence> {
     return dataIdentifier.toVaultItem(
         SyncObject.DriverLicence {
@@ -26,11 +26,11 @@ fun createDriverLicence(
             this.linkedIdentity = linkedIdentity
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
 fun VaultItem<SyncObject.DriverLicence>.copySyncObject(builder: SyncObject.DriverLicence.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.DriverLicence> {
+    VaultItem<SyncObject.DriverLicence> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

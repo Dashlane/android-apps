@@ -13,7 +13,7 @@ data class SecureNoteFormData(
     val contentFeedback: SecureNoteContentFeedback? = null,
     val secureSettingAvailable: Boolean = true,
     val secured: Boolean = false,
-    val secureNoteType: SyncObject.SecureNoteType = SyncObject.SecureNoteType.NO_TYPE
+    val secureNoteType: SyncObject.SecureNoteType = SyncObject.SecureNoteType.NO_TYPE,
 ) : FormData
 
 sealed class SecureNoteContentFeedback {
@@ -37,14 +37,14 @@ sealed class SecureNoteContentFeedback {
             return if (length < SECURE_NOTE_CONTENT_SIZE_CHARACTER_LIMIT) {
                 UnderLimitFeedback(
                     length = length,
-                    limit = SECURE_NOTE_CONTENT_SIZE_CHARACTER_LIMIT
+                    limit = SECURE_NOTE_CONTENT_SIZE_CHARACTER_LIMIT,
                 )
             } else if (length == SECURE_NOTE_CONTENT_SIZE_CHARACTER_LIMIT) {
                 AtLimitFeedback(limit = SECURE_NOTE_CONTENT_SIZE_CHARACTER_LIMIT)
             } else {
                 AboveLimitFeedback(
                     length = length,
-                    limit = SECURE_NOTE_CONTENT_SIZE_CHARACTER_LIMIT
+                    limit = SECURE_NOTE_CONTENT_SIZE_CHARACTER_LIMIT,
                 )
             }
         }
@@ -58,7 +58,7 @@ internal fun SummaryObject.SecureNote.toSecureNoteFormData(
     sharingCount: SharingCount?,
     teamSpace: TeamSpace?,
     isSharedWithLimitedRight: Boolean,
-    secureSettingAvailable: Boolean
+    secureSettingAvailable: Boolean,
 ) = Data(
     commonData = CommonData(
         id = this.id,
@@ -79,6 +79,6 @@ internal fun SummaryObject.SecureNote.toSecureNoteFormData(
         contentFeedback = SecureNoteContentFeedback.fromContent(this.content),
         secureSettingAvailable = secureSettingAvailable,
         secured = this.secured ?: false,
-        secureNoteType = this.type ?: SyncObject.SecureNoteType.NO_TYPE
-    )
+        secureNoteType = this.type ?: SyncObject.SecureNoteType.NO_TYPE,
+    ),
 )

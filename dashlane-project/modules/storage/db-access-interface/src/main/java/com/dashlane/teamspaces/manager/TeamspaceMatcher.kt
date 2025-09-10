@@ -11,24 +11,26 @@ fun VaultItem<*>.getSuggestedTeamspace(teamspaceAccessor: TeamSpaceAccessor?): T
     teamspaceAccessor ?: return null
     
     
-    val teamSpaces: List<TeamSpace> = teamspaceAccessor.allBusinessSpaces
     return when (val item = syncObject) {
         is SyncObject.Authentifiant -> {
-            teamSpaces.firstOrNullMatchingDefinedDomain(
+            teamspaceAccessor.allBusinessSpaces.firstOrNullMatchingDefinedDomain(
                 arrayOf(
                     item.url,
                     item.login,
                     item.email,
                     item.secondaryLogin,
-                    item.userSelectedUrl
-                )
+                    item.userSelectedUrl,
+                ),
             )
         }
         is SyncObject.Email -> {
-            teamSpaces.firstOrNullMatchingDefinedDomain(arrayOf(item.email))
+            teamspaceAccessor.allBusinessSpaces.firstOrNullMatchingDefinedDomain(arrayOf(item.email))
         }
         is SyncObject.PersonalWebsite -> {
-            teamSpaces.firstOrNullMatchingDefinedDomain(arrayOf(item.website))
+            teamspaceAccessor.allBusinessSpaces.firstOrNullMatchingDefinedDomain(arrayOf(item.website))
+        }
+        is SyncObject.Secret -> {
+            teamspaceAccessor.currentBusinessTeam
         }
         else -> null
     }
@@ -51,7 +53,7 @@ object TeamspaceMatcher {
     val DATA_TYPE_TO_MATCH = listOf(
         SyncObjectType.AUTHENTIFIANT,
         SyncObjectType.EMAIL,
-        SyncObjectType.PASSKEY
+        SyncObjectType.PASSKEY,
     )
 }
 

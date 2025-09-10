@@ -10,22 +10,22 @@ class SharedContactUserGroup(
     context: Context,
     private val userGroup: SharingModels.ItemUserGroup,
     val onPendingMenuClick: (View, SharingModels.ItemUserGroup) -> Unit,
-    val onAcceptedMenuClick: (View, SharingModels.ItemUserGroup) -> Unit
+    val onAcceptedMenuClick: (View, SharingModels.ItemUserGroup) -> Unit,
 ) : SharingContactItem(context, userGroup.name, {
-    val action = findViewByIdEfficient<View?>(R.id.action)
-    if (userGroup.isAdmin && action != null) {
-        setVisibility(R.id.action, View.VISIBLE)
-        action.setOnClickListener { v ->
-            if (userGroup.isPending) {
-                onPendingMenuClick(v, userGroup)
-            } else if (userGroup.isAccepted) {
-                onAcceptedMenuClick(v, userGroup)
+        val action = findViewByIdEfficient<View?>(R.id.action)
+        if (userGroup.isAdmin && action != null) {
+            setVisibility(R.id.action, View.VISIBLE)
+            action.setOnClickListener { v ->
+                if (userGroup.isPending) {
+                    onPendingMenuClick(v, userGroup)
+                } else if (userGroup.isAccepted) {
+                    onAcceptedMenuClick(v, userGroup)
+                }
             }
+        } else {
+            setVisibility(R.id.action, View.GONE)
         }
-    } else {
-        setVisibility(R.id.action, View.GONE)
-    }
-}) {
+    }) {
     override fun getLine2() = if (userGroup.sharingStatusResource > 0) {
         context.getString(userGroup.sharingStatusResource)
     } else {

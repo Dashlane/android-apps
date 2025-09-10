@@ -7,7 +7,6 @@ import android.widget.Toast
 import com.dashlane.R
 
 object IntentFactory {
-
     @JvmStatic
     fun sendShareWithFriendsIntent(activity: Context, toaster: Toaster, refid: String?) {
         val intent = Intent(Intent.ACTION_SEND)
@@ -21,13 +20,13 @@ object IntentFactory {
             String.format(
                 activity.getString(R.string.refferal_text),
                 TextUtil
-                    .generateRefferalUrl(refid)
-            )
+                    .generateRefferalUrl(refid),
+            ),
         )
         if (intent.resolveActivity(activity.packageManager) == null) {
             toaster.show(
                 activity.getString(R.string.contact_system_administrator),
-                Toast.LENGTH_LONG
+                Toast.LENGTH_LONG,
             )
         } else {
             val chooserIntent = Intent.createChooser(intent, activity.getString(R.string.invites))
@@ -43,7 +42,7 @@ object IntentFactory {
         if (playStoreIntent.resolveActivity(context!!.packageManager) == null) {
             ToasterImpl(context).show(
                 context.getString(R.string.contact_system_administrator),
-                Toast.LENGTH_LONG
+                Toast.LENGTH_LONG,
             )
         } else {
             playStoreIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

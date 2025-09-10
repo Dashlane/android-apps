@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <plurals name="share_item_selection_items_selected">
+        <item quantity="one">%1$d item selected</item>
+        <item quantity="other">%1$d items selected</item>
+    </plurals>
+    
+    <string name="share_item_selection_confirm_item_selection_button">Share with</string>
+    
+    <string name="share_item_selection_search_bar_label">Search</string>"
+</resources>

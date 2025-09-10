@@ -21,7 +21,7 @@ class QuickActionDelete(private val summaryObject: SummaryObject, private val na
         fun createActionIfCanDelete(
             summaryObject: SummaryObject,
             sharingPolicy: SharingPolicyDataProvider,
-            navigator: Navigator
+            navigator: Navigator,
         ): QuickActionDelete? {
             if (sharingPolicy.isDeleteAllowed(summaryObject.id, false, summaryObject.isShared)) {
                 return QuickActionDelete(summaryObject, navigator)

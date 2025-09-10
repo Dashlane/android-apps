@@ -21,6 +21,8 @@ import androidx.biometric.BiometricManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.WorkManager
 import com.dashlane.util.notification.NotificationHelper
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,81 +32,121 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object ApplicationContextModule {
-
     @Provides
-    fun provideAssetsManager(@ApplicationContext context: Context): AssetManager =
+    fun provideAssetsManager(
+        @ApplicationContext context: Context,
+    ): AssetManager =
         context.assets
 
     @Provides
-    fun provideResources(@ApplicationContext context: Context): Resources =
+    fun provideResources(
+        @ApplicationContext context: Context,
+    ): Resources =
         context.resources
 
     @Provides
-    fun providePackageManager(@ApplicationContext context: Context): PackageManager =
+    fun providePackageManager(
+        @ApplicationContext context: Context,
+    ): PackageManager =
         context.packageManager
 
     @Provides
-    fun provideContentResolver(@ApplicationContext context: Context): ContentResolver =
+    fun provideContentResolver(
+        @ApplicationContext context: Context,
+    ): ContentResolver =
         context.contentResolver
 
     @Provides
-    fun provideLocalBroadcastManager(@ApplicationContext context: Context): LocalBroadcastManager =
+    fun provideLocalBroadcastManager(
+        @ApplicationContext context: Context,
+    ): LocalBroadcastManager =
         LocalBroadcastManager.getInstance(context)
 
     @Provides
-    fun provideWorkManager(@ApplicationContext context: Context): WorkManager =
+    fun provideWorkManager(
+        @ApplicationContext context: Context,
+    ): WorkManager =
         WorkManager.getInstance(context)
 
     @Provides
-    fun provideAlarmManager(@ApplicationContext context: Context): AlarmManager? =
+    fun provideAlarmManager(
+        @ApplicationContext context: Context,
+    ): AlarmManager? =
         context.getSystemService(Context.ALARM_SERVICE) as AlarmManager?
 
     @Provides
-    fun providerAccessibilityManager(@ApplicationContext context: Context): AccessibilityManager? =
+    fun providerAccessibilityManager(
+        @ApplicationContext context: Context,
+    ): AccessibilityManager? =
         context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager?
 
     @Provides
-    fun provideActivityManager(@ApplicationContext context: Context): ActivityManager? =
+    fun provideActivityManager(
+        @ApplicationContext context: Context,
+    ): ActivityManager? =
         context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
 
     @Provides
-    fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager? =
+    fun provideNotificationManager(
+        @ApplicationContext context: Context,
+    ): NotificationManager? =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
 
     @Provides
     fun provideNotificationHelper(
         @ApplicationContext context: Context,
-        notificationManager: NotificationManager?
+        notificationManager: NotificationManager?,
     ): NotificationHelper = NotificationHelper(context, notificationManager)
 
     @Provides
-    fun provideClipboardManager(@ApplicationContext context: Context): ClipboardManager? =
+    fun provideClipboardManager(
+        @ApplicationContext context: Context,
+    ): ClipboardManager? =
         context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
 
     @Provides
-    fun provideBiometricManager(@ApplicationContext context: Context): BiometricManager =
+    fun provideBiometricManager(
+        @ApplicationContext context: Context,
+    ): BiometricManager =
         BiometricManager.from(context)
 
     @Provides
-    fun providePowerManager(@ApplicationContext context: Context): PowerManager? =
+    fun providePowerManager(
+        @ApplicationContext context: Context,
+    ): PowerManager? =
         context.getSystemService(AccessibilityService.POWER_SERVICE) as PowerManager?
 
     @Provides
-    fun provideInputMethodManager(@ApplicationContext context: Context): InputMethodManager? =
+    fun provideInputMethodManager(
+        @ApplicationContext context: Context,
+    ): InputMethodManager? =
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
 
     @Provides
-    fun provideDownloadManager(@ApplicationContext context: Context): DownloadManager? =
+    fun provideDownloadManager(
+        @ApplicationContext context: Context,
+    ): DownloadManager? =
         context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager?
 
     @Provides
-    fun provideKeyguardManager(@ApplicationContext context: Context): KeyguardManager =
+    fun provideKeyguardManager(
+        @ApplicationContext context: Context,
+    ): KeyguardManager =
         context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
     @Provides
-    fun provideUsbManager(@ApplicationContext context: Context): UsbManager? =
+    fun provideUsbManager(
+        @ApplicationContext context: Context,
+    ): UsbManager? =
         context.getSystemService(Context.USB_SERVICE) as UsbManager?
 
     @Provides
-    fun provideBackupManager(@ApplicationContext context: Context): BackupManager = BackupManager(context)
+    fun provideBackupManager(
+        @ApplicationContext context: Context,
+    ): BackupManager = BackupManager(context)
+
+    @Provides
+    fun providesAppUpdateManager(
+        @ApplicationContext context: Context,
+    ): AppUpdateManager = AppUpdateManagerFactory.create(context)
 }

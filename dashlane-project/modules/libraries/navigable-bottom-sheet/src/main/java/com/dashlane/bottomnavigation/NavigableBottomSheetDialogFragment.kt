@@ -19,7 +19,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class NavigableBottomSheetDialogFragment : BottomSheetDialogFragment() {
-
     private val args: NavigableBottomSheetDialogFragmentArgs by navArgs()
     private val navigationGraphId
         get() = args.navigationGraphId
@@ -93,7 +92,7 @@ class NavigableBottomSheetDialogFragment : BottomSheetDialogFragment() {
             val bottomSheetDialog = dialogInterface as BottomSheetDialog
 
             val bottomSheet = bottomSheetDialog.findViewById<FrameLayout>(
-                com.google.android.material.R.id.design_bottom_sheet
+                com.google.android.material.R.id.design_bottom_sheet,
             )
             bottomSheet?.let {
                 BottomSheetBehavior.from(it).apply {

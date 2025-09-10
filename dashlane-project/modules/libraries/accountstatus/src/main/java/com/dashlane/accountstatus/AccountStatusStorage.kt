@@ -1,10 +1,9 @@
 package com.dashlane.accountstatus
 
-import android.util.Log
 import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.session.Session
-import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.UserSecureStorageManager
+import com.dashlane.user.Username
 import com.dashlane.util.anonymize
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -18,7 +17,7 @@ interface AccountStatusStorage {
 
 class AccountStatusStorageImpl @Inject constructor(
     private val userSecureDataStorageManager: UserSecureStorageManager,
-    private val gson: Gson
+    private val gson: Gson,
 ) : AccountStatusStorage {
     override fun saveAccountStatus(localKey: LocalKey, username: Username, newStatus: AccountStatus): Boolean {
         val jsonStatus = gson.toJson(newStatus)
@@ -29,12 +28,12 @@ class AccountStatusStorageImpl @Inject constructor(
         return newStatus == readAccountStatus(localKey, username)
     }
 
-    override fun readAccountStatus(localKey: LocalKey, username: Username,): AccountStatus? =
+    override fun readAccountStatus(localKey: LocalKey, username: Username): AccountStatus? =
         try {
             val storedStatus = userSecureDataStorageManager.readAccountStatus(localKey, username) ?: throw NullPointerException()
             val result = gson.fromJson(
                 storedStatus,
-                AccountStatus::class.java
+                AccountStatus::class.java,
             )
 
             @Suppress("SENSELESS_COMPARISON")
@@ -55,6 +54,5 @@ class AccountStatusStorageImpl @Inject constructor(
         }
 
     private fun logException(e: Throwable) {
-        Log.d("ACCOUNT_STATUS", "Cannot read local AccountStatus ${e.anonymize()}")
     }
 }

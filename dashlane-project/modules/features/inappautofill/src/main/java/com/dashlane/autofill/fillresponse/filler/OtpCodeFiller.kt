@@ -1,20 +1,19 @@
 package com.dashlane.autofill.fillresponse.filler
 
-import com.dashlane.autofill.fillresponse.DatasetWrapperBuilder
-import com.dashlane.autofill.model.ItemToFill
-import com.dashlane.autofill.model.OtpItemToFill
 import com.dashlane.autofill.api.util.AutofillValueFactory
-import com.dashlane.autofill.util.getBestEntry
+import com.dashlane.autofill.fillresponse.DatasetWrapperBuilder
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.model.ItemToFill
+import com.dashlane.autofill.model.OtpItemToFill
+import com.dashlane.autofill.util.getBestEntry
 
 internal class OtpCodeFiller(private val autofillValueFactory: AutofillValueFactory) : Filler {
-
     override fun fill(
         dataSetBuilder: DatasetWrapperBuilder,
         summary: AutoFillHintSummary,
         item: ItemToFill,
-        requireLock: Boolean
+        requireLock: Boolean,
     ): Boolean {
         val otpItemToFill = item as OtpItemToFill
         val fullSmsCodeEntry = summary.getBestEntry { it.hasHint(AutoFillHint.SMS_OTP_CODE) }

@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/filter_by_collection.json",
+  "type": "object",
+  "description": "When the user clicks a collection to filter items",
+  "metas": {
+    "area": "vault"
+  },
+  "properties": {
+    "name": {
+      "const": "filter_by_collection"
+    },
+    "collection_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/filter_collection_count"
+    },
+    "has_interacted": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/has_interacted"
+    },
+    "is_from_search": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/is_from_search"
+    },
+    "total_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/total_count"
+    }
+  },
+  "required": [
+    "name",
+    "collection_count",
+    "has_interacted",
+    "is_from_search",
+    "total_count"
+  ],
+  "additionalProperties": false
+}

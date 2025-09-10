@@ -14,13 +14,12 @@ open class SearchItemWrapper<D : SummaryObject>(
     private val searchListTextResolver: SearchListTextResolver,
     itemWrapper: VaultItemWrapper<D>,
 ) : VaultItemDoubleWrapper<D>(itemWrapper) {
-
     override fun getTitle(context: Context): StatusText = if (matchedText == null) {
         searchListTextResolver.getLine1(originalItemWrapper.summaryObject)
     } else {
         searchListTextResolver.getHighlightedLine1(
             originalItemWrapper.summaryObject,
-            matchedText
+            matchedText,
         )
     }
 
@@ -30,7 +29,7 @@ open class SearchItemWrapper<D : SummaryObject>(
         searchListTextResolver.getHighlightedLine2(
             originalItemWrapper.summaryObject,
             matchedText,
-            matchResult.match.field
+            matchResult.match.field,
         )
     }
 }

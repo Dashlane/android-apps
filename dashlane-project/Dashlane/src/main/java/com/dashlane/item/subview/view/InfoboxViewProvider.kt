@@ -10,7 +10,6 @@ import com.dashlane.design.theme.color.Mood
 import com.dashlane.ui.widgets.view.StepInfoBox
 
 object InfoboxViewProvider {
-
     fun create(
         activity: AppCompatActivity,
         mood: Mood?,
@@ -33,7 +32,7 @@ object InfoboxViewProvider {
         buttonText: String?,
         @DrawableRes iconImage: Int? = null,
         iconText: String? = null,
-        buttonAction: (() -> Unit)? = null
+        buttonAction: (() -> Unit)? = null,
     ) = StepInfoBox(context).apply {
         text = content
         if (buttonText != null) {

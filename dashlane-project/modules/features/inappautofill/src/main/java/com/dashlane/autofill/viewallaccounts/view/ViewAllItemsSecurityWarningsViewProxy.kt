@@ -6,8 +6,8 @@ import androidx.lifecycle.lifecycleScope
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.internal.AutofillFormSourcesStrings
+import com.dashlane.autofill.linkservices.model.FormSourcesDataProvider
 import com.dashlane.autofill.model.AuthentifiantItemToFill
-import com.dashlane.autofill.rememberaccount.model.FormSourcesDataProvider
 import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
 import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsService
 import com.dashlane.autofill.securitywarnings.view.SecurityWarningsViewProxy
@@ -15,29 +15,29 @@ import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.autofill.viewallaccounts.services.ViewAllAccountSelectionNotifier
 import com.dashlane.hermes.generated.definitions.MatchType
 import com.dashlane.util.Toaster
+import com.dashlane.vault.model.urlForUI
 import kotlinx.coroutines.launch
 
 internal class ViewAllItemsSecurityWarningsViewProxy(
     private val autofillViewAllItemsActivity: AutofillViewAllItemsActivity,
     applicationContext: Context,
-    authentifiantResult: AutofillAnalyzerDef.IAutofillSecurityApplication,
+    authentifiantResult: AutofillAnalyzerDef.AutofillSecurityApplication,
     securityWarningsLogger: AutofillSecurityWarningsLogger,
     rememberSecurityWarningsService: RememberSecurityWarningsService,
     autofillFormSourcesStrings: AutofillFormSourcesStrings,
     toaster: Toaster,
     val viewAllAccountSelectionNotifier: ViewAllAccountSelectionNotifier,
-    val formSourcesDataProvider: FormSourcesDataProvider
+    val formSourcesDataProvider: FormSourcesDataProvider,
 ) : SecurityWarningsViewProxy(
-    autofillViewAllItemsActivity,
-    applicationContext,
-    authentifiantResult,
-    securityWarningsLogger,
-    rememberSecurityWarningsService,
-    autofillFormSourcesStrings,
-    toaster,
-    MatchType.EXPLORE_PASSWORDS
-) {
-
+        autofillViewAllItemsActivity,
+        applicationContext,
+        authentifiantResult,
+        securityWarningsLogger,
+        rememberSecurityWarningsService,
+        autofillFormSourcesStrings,
+        toaster,
+        MatchType.EXPLORE_PASSWORDS,
+    ) {
     override fun autoAcceptUnknown(): Boolean = true
 
     override fun autoAcceptMismatch(): Boolean = true
@@ -45,7 +45,7 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
     override fun finishWithResult(
         unlockedAuthentifiant: UnlockedAuthentifiant,
         showWarningRemembered: Boolean,
-        warningShown: Boolean
+        warningShown: Boolean,
     ) {
         if (showWarningRemembered) {
             toaster.show(R.string.autofill_warning_we_will_remember, Toast.LENGTH_SHORT)
@@ -61,13 +61,13 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
             autofillViewAllItemsActivity.lifecycleScope.launch {
                 val isAlreadyLinked = formSourcesDataProvider.isLinked(
                     unlockedAuthentifiant.formSource,
-                    unlockedAuthentifiant.authentifiantSummary.id
+                    unlockedAuthentifiant.authentifiantSummary.id,
                 )
                 
                 if (isAlreadyLinked) {
                     finishAndAutofill(unlockedAuthentifiant, false)
                 } else {
-                    openLinkServiceBottomSheet(unlockedAuthentifiant)
+                    openLinkServiceBottomSheet(unlockedAuthentifiant = unlockedAuthentifiant)
                 }
             }
         }
@@ -75,34 +75,39 @@ internal class ViewAllItemsSecurityWarningsViewProxy(
 
     private fun openLinkServiceBottomSheet(unlockedAuthentifiant: UnlockedAuthentifiant) {
         autofillViewAllItemsActivity.onNavigateToLinkService(
-            unlockedAuthentifiant.formSource,
-            unlockedAuthentifiant.authentifiantSummary.id
+            formSource = unlockedAuthentifiant.formSource,
+            itemId = unlockedAuthentifiant.authentifiantSummary.id,
+            itemWebsite = unlockedAuthentifiant.authentifiantSummary.urlForUI(),
         )
 
         
         autofillViewAllItemsActivity.getNavigableFragment()?.childFragmentManager?.setFragmentResultListener(
             AutofillViewAllItemsActivity.LINK_SERVICE_REQUEST_KEY,
-            autofillViewAllItemsActivity
+            autofillViewAllItemsActivity,
         ) { _, bundle ->
             if (bundle.getBoolean(AutofillViewAllItemsActivity.LINK_SERVICE_SHOULD_AUTOFILL)) {
-                val shouldLink = bundle.getBoolean(AutofillViewAllItemsActivity.LINK_SERVICE_SHOULD_LINK)
-                finishAndAutofill(unlockedAuthentifiant, shouldLink)
+                
+                
+                finishAndAutofill(unlockedAuthentifiant = unlockedAuthentifiant, shouldLink = false)
             } else {
                 autofillViewAllItemsActivity.finish()
             }
         }
     }
 
-    private fun finishAndAutofill(unlockedAuthentifiant: UnlockedAuthentifiant, shouldLink: Boolean) {
+    private fun finishAndAutofill(
+        unlockedAuthentifiant: UnlockedAuthentifiant,
+        shouldLink: Boolean,
+    ) {
         if (shouldLink) {
             viewAllAccountSelectionNotifier.onAccountSelected(
                 unlockedAuthentifiant.formSource,
-                unlockedAuthentifiant.authentifiantSummary
+                unlockedAuthentifiant.authentifiantSummary,
             )
         }
         autofillViewAllItemsActivity.finishWithResult(
             itemToFill = unlockedAuthentifiant.itemToFill,
-            matchType = MatchType.EXPLORE_PASSWORDS
+            matchType = MatchType.EXPLORE_PASSWORDS,
         )
     }
 

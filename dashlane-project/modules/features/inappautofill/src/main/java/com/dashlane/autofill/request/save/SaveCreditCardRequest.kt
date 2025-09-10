@@ -4,6 +4,7 @@ import android.content.Context
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.formdetector.field.AutoFillHint
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
+import com.dashlane.autofill.logs.AutofillUsageLog
 import com.dashlane.util.time.toMonthOrNull
 import com.dashlane.util.time.toYearOrNull
 import kotlinx.coroutines.CoroutineScope
@@ -16,15 +17,14 @@ import java.time.ZoneId
 
 internal class SaveCreditCardRequest(
     summary: AutoFillHintSummary,
-    usageLog: AutofillAnalyzerDef.IAutofillUsageLog,
-    databaseAccess: AutofillAnalyzerDef.DatabaseAccess
+    usageLog: AutofillUsageLog,
+    databaseAccess: AutofillAnalyzerDef.DatabaseAccess,
 ) : SaveRequest(summary, usageLog, databaseAccess) {
-
     override fun execute(
         context: Context,
         coroutineScope: CoroutineScope,
         saveCallback: SaveCallback,
-        hasInline: Boolean
+        hasInline: Boolean,
     ) {
         var number: String? = null
         var expireMonth: Month? = null
@@ -46,7 +46,7 @@ internal class SaveCreditCardRequest(
                     expireMonth = it.autoFillValueString?.convertToMonth()
                 }
                 (expireMonth == null || expireYear == null) &&
-                        it.hasOneOfHints(arrayOf(AutoFillHint.CREDIT_CARD_EXPIRATION_DATE)) -> {
+                    it.hasOneOfHints(arrayOf(AutoFillHint.CREDIT_CARD_EXPIRATION_DATE)) -> {
                     val expireDate = it.autoFillValueTimestamp
                     if (expireDate > 0) {
                         val dateTime =
@@ -69,7 +69,7 @@ internal class SaveCreditCardRequest(
 
     override fun notifyLogout(
         callback: SaveCallback,
-        forKeyboard: Boolean
+        forKeyboard: Boolean,
     ) {
         super.notifyLogout(callback)
     }

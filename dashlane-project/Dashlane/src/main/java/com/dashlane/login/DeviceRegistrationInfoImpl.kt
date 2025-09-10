@@ -19,9 +19,8 @@ class DeviceRegistrationInfoImpl @Inject constructor(
     private val context: Context,
     private val deviceInfoRepository: DeviceInfoRepository,
     private val globalPreferencesManager: GlobalPreferencesManager,
-    private val dadadaVersion: DaDaDaVersion
+    private val dadadaVersion: DaDaDaVersion,
 ) : DeviceRegistrationInfo {
-
     override val appVersion: String
         get() = dadadaVersion.appVersionName ?: BuildConfig.VERSION_NAME
 

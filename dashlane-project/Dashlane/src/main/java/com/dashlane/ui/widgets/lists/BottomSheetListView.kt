@@ -8,7 +8,6 @@ import android.widget.ListView
 
 @SuppressWarnings("ClickableViewAccessibility")
 class BottomSheetListView(context: Context, attrs: AttributeSet) : ListView(context, attrs) {
-
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return true
     }

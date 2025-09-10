@@ -4,12 +4,12 @@ import com.android.billingclient.api.Purchase
 import com.dashlane.inappbilling.BillingManager
 import com.dashlane.inappbilling.ServiceResult
 import com.dashlane.inappbilling.withServiceConnection
-import com.dashlane.session.authorization
 import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.server.api.Authorization
 import com.dashlane.server.api.endpoints.payments.VerifyPlaystoreReceiptService
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +28,7 @@ class BillingVerification @Inject constructor(
     private val verifyPlaystoreReceiptService: VerifyPlaystoreReceiptService,
     private val billingManager: BillingManager,
     private val logger: OffersLogger,
-    private val refreshPremiumAfterPurchase: RefreshPremiumAfterPurchase
+    private val refreshPremiumAfterPurchase: RefreshPremiumAfterPurchase,
 ) {
     private var lastVerifyPurchases: Long = 0
 
@@ -58,7 +58,7 @@ class BillingVerification @Inject constructor(
         purchase: Purchase,
         currency: String? = null,
         price: Float? = null,
-        errorListener: () -> Unit = {}
+        errorListener: () -> Unit = {},
     ) {
         val acknowledged = purchase.isAcknowledgedCompat()
         if (acknowledged) return
@@ -74,7 +74,7 @@ class BillingVerification @Inject constructor(
                 plan = planId,
                 currency = currency,
                 price = price,
-                authorization = session.authorization
+                authorization = session.authorization,
             )
         }.getOrElse {
             errorListener()
@@ -117,7 +117,7 @@ class BillingVerification @Inject constructor(
                 transactionIdentifier = purchase.orderId,
                 amount = price?.let { String.format(Locale.US, "%.2f", it) },
                 currency = currency,
-            )
+            ),
         ).data
     }
 

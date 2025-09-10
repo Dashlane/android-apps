@@ -1,0 +1,192 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json",
+  "type": "object",
+  "description": "Definitions for vault report",
+  "definitions": {
+    "scope": {
+      "description": "the scope of the vault report",
+      "type": "string",
+      "enum": [
+        "global",
+        "personal",
+        "team"
+      ]
+    },
+    "domains_without_autofill_count": {
+      "description": "Count of credentials where autologin is disabled. Autologin is disabled for a credential when the user has unchecked the 'automatically log me in to this website' setting from the detailed view. This property has been deprecated because of a misleading naming. It has been replaced by password_with_autologin_disabled_count",
+      "type": "integer",
+      "deprecated": true
+    },
+    "passwords_with_autologin_disabled_count": {
+      "description": "Count of credentials where autologin is disabled. Autologin is disabled for a credential when the user has unchecked the 'automatically log me in to this website' setting from the detailed view. This property has been deprecated because of a misleading naming.",
+      "type": "integer"
+    },
+    "password_changer_compatible_credentials_count": {
+      "description": "It has been deprecated because we removed the Password Changer feature from all clients in October 2022. Count of credentials compatible with password changer",
+      "type": "integer",
+      "deprecated": true
+    },
+    "passwords_compromised_count": {
+      "description": "Count of passwords in the vault currently compromised by public breaches or dark web breaches",
+      "type": "integer"
+    },
+    "passwords_compromised_through_dark_web_count": {
+      "description": "Count of passwords in the vault currently compromised by dark web breaches",
+      "type": "integer"
+    },
+    "passwords_excluded_count": {
+      "description": "Count of passwords excluded from security score",
+      "type": "integer"
+    },
+    "passwords_safe_count": {
+      "description": "Count of safe passwords in the vault",
+      "type": "integer"
+    },
+    "passwords_total_count": {
+      "description": "Count of passwords in the vault",
+      "type": "integer"
+    },
+    "passwords_reused_count": {
+      "description": "Count of reused passwords in the vault",
+      "type": "integer"
+    },
+    "passwords_weak_count": {
+      "description": "Count of weak passwords in the vault",
+      "type": "integer"
+    },
+    "passwords_with_otp_count": {
+      "description": "Count of passwords with Dashlane OTP",
+      "type": "integer"
+    },
+    "passwords_protected_with_master_password_count": {
+      "description": "Count of passwords protected with master password (either at the individual level or global level)",
+      "type": "integer"
+    },
+    "passwords_compromised_compatible_with_password_changer_count": {
+      "description": "It has been deprecated because we removed the Password Changer feature from all clients in October 2022. The count of compromised passwords supported by password changer in the user's vault",
+      "type": "integer",
+      "deprecated": true
+    },
+    "passwords_weak_compatible_with_password_changer_count": {
+      "description": "It has been deprecated because we removed the Password Changer feature from all clients in October 2022. The count of weak passwords supported by password changer in the user's vault",
+      "type": "integer",
+      "deprecated": true
+    },
+    "passwords_reused_compatible_with_password_changer_count": {
+      "description": "It has been deprecated because we removed the Password Changer feature from all clients in October 2022. The count of reused passwords supported by password changer in the user's vault",
+      "type": "integer",
+      "deprecated": true
+    },
+    "security_alerts_count": {
+      "description": "Count of security alerts (public breach and dark web, active and inactive)",
+      "type": "integer"
+    },
+    "security_alerts_active_count": {
+      "description": "Count of currently active security alerts (public breach and dark web)",
+      "type": "integer"
+    },
+    "dark_web_alerts_count": {
+      "description": "Count of dark web alerts (active and inactive)",
+      "type": "integer"
+    },
+    "dark_web_alerts_active_count": {
+      "description": "Count of currently active dark web alerts",
+      "type": "integer"
+    },
+    "security_score": {
+      "description": "Security score (0 - 100)",
+      "type": "integer"
+    },
+    "items_shared_count": {
+      "description": "Count of shared items in the vault",
+      "type": "integer"
+    },
+    "items_total_count": {
+      "description": "Count of items in the vault",
+      "type": "integer"
+    },
+    "collections_total_count": {
+      "description": "Count of distinct collections in the vault",
+      "type": "integer"
+    },
+    "items_per_collection_average_count": {
+      "description": "Average number of items per collection - only collections with items",
+      "type": "integer"
+    },
+    "collections_per_item_average_count": {
+      "description": "Average number of collections per item - only items with collections",
+      "type": "integer"
+    },
+    "collections_shared_count": {
+      "description": "Count of distinct shared collections in the vault",
+      "type": "integer"
+    },
+    "item_type_collections_count": {
+      "description": "Count of distinct collections, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_collections_shared_count": {
+      "description": "Count of distinct shared collections, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_multiple_collections_count": {
+      "description": "Count of items with multiple collections associated, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_multiple_collections_shared_count": {
+      "description": "Count of shared items with multiple collections associated, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_single_collection_count": {
+      "description": "Count of items with a single collection associated, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_single_collection_shared_count": {
+      "description": "Count of shared items with a single collection associated, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_shared_count": {
+      "description": "Count of shared items, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_total_count": {
+      "description": "Count of items, within item type(s)",
+      "type": "integer"
+    },
+    "item_type_counts": {
+      "type": "object",
+      "description": "Object with counts by item type grouping",
+      "properties": {
+        "collections_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_collections_count"
+        },
+        "collections_shared_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_collections_shared_count"
+        },
+        "multiple_collections_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_multiple_collections_count"
+        },
+        "multiple_collections_shared_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_multiple_collections_shared_count"
+        },
+        "single_collection_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_single_collection_count"
+        },
+        "single_collection_shared_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_single_collection_shared_count"
+        },
+        "shared_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_shared_count"
+        },
+        "total_count": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault_report.json#/definitions/item_type_total_count"
+        }
+      },
+      "required": [
+        "total_count"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

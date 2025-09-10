@@ -13,12 +13,12 @@ internal class FillResponseWrapper(
     var clientState: Bundle?,
     val dataSets: List<DatasetWrapper>,
     val scrollingRemoteViews: RemoteViews?,
-    val ignoreIds: List<AutofillId>? = null
+    val ignoreIds: List<AutofillId>? = null,
 ) {
-
     @Suppress("SpreadOperator")
-    fun toAndroidFillResponse(): FillResponse {
-        return FillResponse.Builder().apply {
+    fun toAndroidFillResponse(): FillResponse = FillResponse
+        .Builder()
+        .apply {
             saveInfo?.let {
                 setSaveInfo(it)
             }
@@ -35,7 +35,6 @@ internal class FillResponseWrapper(
                 setIgnoredIds(*it.toTypedArray())
             }
         }.build()
-    }
 
     private fun FillResponse.Builder.setScrollingRemoteView(remoteViews: RemoteViews) {
         setFooter(remoteViews)
@@ -47,7 +46,6 @@ internal class FillResponseWrapper(
         internal val remoteViewProvider: RemoteViewProvider,
         internal val inlinePresentationProvider: InlinePresentationProvider?,
     ) {
-
         private var saveInfo: SaveInfo? = null
         private var clientState: Bundle? = null
         private var scrollingRemoteView: RemoteViews? = null
@@ -124,12 +122,12 @@ internal class FillResponseWrapper(
             }
 
             
-            val pauseDataSetWrapper = pauseDataSet?.clone()
+            val pauseDataSetWrapper = pauseDataSet
+                ?.clone()
                 ?.apply {
                     val datasetAutofillIds = datasets.map { it.autofillIdsValues.keys }.flatten()
                     limitAutofillIdTo(datasetAutofillIds)
-                }
-                ?.build()
+                }?.build()
 
             pauseDataSetWrapper?.let { datasets.add(0, it) }
 
@@ -138,20 +136,19 @@ internal class FillResponseWrapper(
                 clientState = clientState,
                 dataSets = datasets,
                 scrollingRemoteViews = getScrollingRemoteView(datasets),
-                ignoreIds = ignoreAutofillIds
+                ignoreIds = ignoreAutofillIds,
             )
         }
 
         private fun buildDatasetWrapperLimitedToAutofillIds(
             dataSetWrapperBuilder: DatasetWrapperBuilder?,
-            autofillIdsWithDatasets: List<AutofillId>
-        ): DatasetWrapper? {
-            return dataSetWrapperBuilder?.apply {
+            autofillIdsWithDatasets: List<AutofillId>,
+        ): DatasetWrapper? = dataSetWrapperBuilder
+            ?.apply {
                 if (autofillIdsWithDatasets.isNotEmpty()) {
                     limitAutofillIdTo(autofillIdsWithDatasets)
                 }
             }?.build()
-        }
 
         private fun getScrollingRemoteView(datasets: List<DatasetWrapper>): RemoteViews? {
             if (!datasets.showScrolling()) {
@@ -161,17 +158,14 @@ internal class FillResponseWrapper(
             return scrollingRemoteView
         }
 
-        private fun List<DatasetWrapper>.showScrolling(): Boolean {
-            return this
-                .asSequence()
-                .map {
-                    it.autofillIdsValues.keys
-                }
-                .flatten()
-                .groupBy { it }
-                .map { it.value.size }
-                .any { it > FILL_RESPONSE_VISIBLE_CELLS }
-        }
+        private fun List<DatasetWrapper>.showScrolling(): Boolean = this
+            .asSequence()
+            .map {
+                it.autofillIdsValues.keys
+            }.flatten()
+            .groupBy { it }
+            .map { it.value.size }
+            .any { it > FILL_RESPONSE_VISIBLE_CELLS }
     }
 
     companion object {
@@ -183,5 +177,5 @@ fun <E> LinkedList<E>.popOrLast(): E =
     if (this.size > 1) {
         pop()
     } else {
-        last
+        last()
     }

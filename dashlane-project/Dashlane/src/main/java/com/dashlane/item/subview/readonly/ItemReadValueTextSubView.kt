@@ -11,5 +11,5 @@ open class ItemReadValueTextSubView(
     val allowReveal: Boolean = true,
     val multiline: Boolean = false,
     val coloredCharacter: Boolean = false,
-    val protectedStateListener: (Boolean) -> Unit = {}
+    val protectedStateListener: (Boolean) -> Unit = {},
 ) : ItemReadValueSubView<String>()

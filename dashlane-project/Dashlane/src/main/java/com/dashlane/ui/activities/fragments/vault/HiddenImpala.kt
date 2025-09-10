@@ -11,10 +11,9 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
 class HiddenImpala(private val activity: Activity) {
-
     enum class ClickType {
         SHORT,
-        LONG
+        LONG,
     }
 
     data class MorseLetter(val letter: Char, val morseCode: List<ClickType>)
@@ -23,7 +22,7 @@ class HiddenImpala(private val activity: Activity) {
         MorseLetter('D', listOf(LONG, SHORT, SHORT)),
         MorseLetter('A', listOf(SHORT, LONG)),
         MorseLetter('S', listOf(SHORT, SHORT, SHORT)),
-        MorseLetter('H', listOf(SHORT, SHORT, SHORT, SHORT))
+        MorseLetter('H', listOf(SHORT, SHORT, SHORT, SHORT)),
     )
     private var currentLetterIndex = 0
     private var currentClickIndex = 0
@@ -52,7 +51,7 @@ class HiddenImpala(private val activity: Activity) {
         val snackbar = SnackbarUtils.showSnackbar(
             activity,
             code.joinToString(separator = " ", limit = currentLetterIndex, transform = { it.letter.toString() }),
-            Snackbar.LENGTH_SHORT
+            Snackbar.LENGTH_SHORT,
         )
         if (currentLetterIndex < code.size) return
         

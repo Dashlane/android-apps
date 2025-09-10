@@ -5,7 +5,6 @@ import com.dashlane.url.UrlDomain
 import com.dashlane.url.toUrlDomain
 
 object SearchKeywordUtils {
-
     fun fromUrl(url: String, withLinkedDomain: Boolean): List<String> {
         val urlDomain = tryOrNull { url.toUrlDomain() } ?: return listOf()
         val topDomain = urlDomain.root.value

@@ -16,6 +16,7 @@ interface SecureFileStorage {
     suspend fun decipherToPublicFolder(secureFile: SecureFile, mimeType: String, localSize: Long?)
 
     suspend fun deleteDecipheredFilesCache()
+
     suspend fun deleteCipheredFile(secureFile: SecureFile)
 }
 

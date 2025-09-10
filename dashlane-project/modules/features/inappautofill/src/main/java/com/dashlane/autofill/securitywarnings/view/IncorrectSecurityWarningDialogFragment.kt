@@ -1,77 +1,96 @@
 package com.dashlane.autofill.securitywarnings.view
 
-import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
-import android.widget.CheckBox
-import androidx.appcompat.app.AlertDialog
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
-import com.dashlane.autofill.api.R
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.securitywarnings.data.SecurityWarningAction
 import com.dashlane.autofill.securitywarnings.data.SecurityWarningType
-import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.ui.util.DialogHelper
-import com.dashlane.util.getParcelableCompat
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.dashlane.autofill.securitywarnings.ui.UnsecureSourceWarningDialog
+import com.dashlane.design.theme.DashlaneTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class IncorrectSecurityWarningDialogFragment : DialogFragment() {
-
-    private var formSource: AutoFillFormSource? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        formSource = requireArguments().getParcelableCompat(ARG_FORM_SOURCE)
-
-        setStyle(STYLE_NO_FRAME, R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog)
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialogContext = context ?: return super.onCreateDialog(savedInstanceState) as BottomSheetDialog
-        val dialogHelper = DialogHelper()
-
-        return dialogHelper.builder(dialogContext, R.style.ThemeOverlay_Dashlane_DashlaneAlertDialog).apply {
-            setIcon(R.drawable.ic_warning_outlined)
-
-            setTitle(R.string.autofill_incorrect_warning_title)
-
-            setView(R.layout.security_warning_incorrect_modal_dialog)
-
-            setPositiveButton(R.string.autofill_warning_accept) { dialogInterface, _ ->
-                val dialog: AlertDialog = dialogInterface as AlertDialog
-                val isChecked = dialog.findViewById<CheckBox>(R.id.checkbox_do_not_show_again)?.isChecked ?: false
-                setResult(SecurityWarningAction.POSITIVE, isChecked)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                DashlaneTheme {
+                    UnsecureSourceWarningDialog(
+                        viewModel = hiltViewModel(),
+                        onFillCancelled = ::onFillCancelled,
+                        onFillAllowed = ::onFillAllowed,
+                        onFillDenied = ::onFillDenied,
+                    )
+                }
             }
-
-            setNegativeButton(R.string.autofill_warning_cancel) { _, _ ->
-                setResult(SecurityWarningAction.NEGATIVE, false)
-            }
-        }.create()
+        }
     }
 
-    override fun onCancel(dialog: DialogInterface) {
-        super.onCancel(dialog)
-        setResult(SecurityWarningAction.CANCEL, false)
-    }
-
-    private fun setResult(action: SecurityWarningAction, isChecked: Boolean) {
-        setFragmentResult(
-            SecurityWarningsViewProxy.SECURITY_WARNING_ACTION_RESULT,
-            bundleOf(
-                SecurityWarningsViewProxy.PARAMS_WARNING_TYPE to SecurityWarningType.Incorrect(
-                    formSource,
-                    isChecked
-                ),
-                SecurityWarningsViewProxy.PARAMS_ACTION to action
-            )
+    private fun onFillAllowed(
+        formSource: AutoFillFormSource,
+        isChecked: Boolean,
+    ) {
+        setResult(
+            action = SecurityWarningAction.POSITIVE,
+            formSource = formSource,
+            isChecked = isChecked,
         )
     }
 
-    companion object {
+    private fun onFillDenied(
+        formSource: AutoFillFormSource,
+    ) {
+        setResult(
+            action = SecurityWarningAction.NEGATIVE,
+            formSource = formSource,
+            isChecked = false,
+        )
+    }
 
-        private const val ARG_FORM_SOURCE = "form_source"
+    private fun onFillCancelled(
+        formSource: AutoFillFormSource,
+    ) {
+        setResult(
+            action = SecurityWarningAction.CANCEL,
+            formSource = formSource,
+            isChecked = false,
+        )
+    }
+
+    private fun setResult(
+        action: SecurityWarningAction,
+        formSource: AutoFillFormSource,
+        isChecked: Boolean,
+    ) {
+        setFragmentResult(
+            requestKey = SecurityWarningsViewProxy.SECURITY_WARNING_ACTION_RESULT,
+            result = bundleOf(
+                SecurityWarningsViewProxy.PARAMS_WARNING_TYPE to
+                    SecurityWarningType.Incorrect(
+                        formSource,
+                        isChecked,
+                    ),
+                SecurityWarningsViewProxy.PARAMS_ACTION to action,
+            ),
+        )
+        dismiss()
+    }
+
+    companion object {
+        internal const val ARG_FORM_SOURCE = "form_source"
 
         fun create(formSource: AutoFillFormSource): IncorrectSecurityWarningDialogFragment =
             IncorrectSecurityWarningDialogFragment().apply {

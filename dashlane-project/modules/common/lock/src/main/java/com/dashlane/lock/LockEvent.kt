@@ -13,7 +13,6 @@ sealed class LockEvent {
         val reason: Reason? = null,
         val lockType: LockType,
     ) : LockEvent() {
-
         sealed class Reason : Parcelable {
             @Parcelize
             data object Unknown : Reason()

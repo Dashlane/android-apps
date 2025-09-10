@@ -11,7 +11,7 @@ fun createSecureFileInfo(
     localSize: String? = null,
     remoteSize: String? = null,
     owner: String? = null,
-    version: String? = null
+    version: String? = null,
 ): VaultItem<SyncObject.SecureFileInfo> {
     return dataIdentifier.toVaultItem(
         SyncObject.SecureFileInfo {
@@ -25,11 +25,11 @@ fun createSecureFileInfo(
             this.version = version
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
 fun VaultItem<SyncObject.SecureFileInfo>.copySyncObject(builder: SyncObject.SecureFileInfo.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.SecureFileInfo> {
+    VaultItem<SyncObject.SecureFileInfo> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

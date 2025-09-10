@@ -10,7 +10,9 @@ interface NewSharePeopleViewModelContract {
     val uiState: Flow<UIState>
     val contacts: Flow<List<SharingContact>>
     val permission: StateFlow<Permission>
+
     fun onPermissionChanged(sharingPermission: Permission)
+
     fun onClickShare(contacts: List<SharingContact>)
 
     enum class UIState {
@@ -21,7 +23,7 @@ interface NewSharePeopleViewModelContract {
         ERROR_FIND_USERS,
         ERROR_NOT_INTERNAL,
         SUCCESS,
-        SUCCESS_FOR_RESULT
+        SUCCESS_FOR_RESULT,
     }
 }
 

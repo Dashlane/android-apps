@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/toggle_nudge.json",
+  "type": "object",
+  "description": "The admin toggles a Nudge.",
+  "metas": {
+    "area": "tools"
+  },
+  "properties": {
+    "name": {
+      "const": "toggle_nudge"
+    },
+    "integration_platform": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/integrations.json#/definitions/integration_platform"
+    },
+    "nudge_state": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/integrations.json#/definitions/state"
+    },
+    "nudge_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/integrations.json#/definitions/nudge_type"
+    }
+  },
+  "required": [
+    "name",
+    "integration_platform",
+    "nudge_state",
+    "nudge_type"
+  ],
+  "additionalProperties": false
+}

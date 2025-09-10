@@ -1,5 +1,9 @@
 package com.github.devnied.emvnfccard.model.enums;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum TransactionTypeEnum implements IKeyEnum {
 
 	PURCHASE(0x00),

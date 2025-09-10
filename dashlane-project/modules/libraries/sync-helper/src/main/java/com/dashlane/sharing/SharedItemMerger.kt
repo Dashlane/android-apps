@@ -8,12 +8,11 @@ import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import com.dashlane.xml.domain.objectType
 import com.dashlane.xml.domain.properties.AuthentifiantXml
+import com.dashlane.xml.domain.properties.SecretXml
 import com.dashlane.xml.domain.properties.SecureNoteXml
 import com.dashlane.xml.domain.properties.SyncObjectXml
 
-@OptIn(ExperimentalStdlibApi::class)
 object SharedItemMerger {
-
     private val SHARED_FIELDS_AUTHENTIFIANT = arrayListOf(
         AuthentifiantXml.EMAIL,
         AuthentifiantXml.LOGIN,
@@ -27,13 +26,20 @@ object SharedItemMerger {
         AuthentifiantXml.USE_FIXED_URL,
         AuthentifiantXml.TITLE,
         AuthentifiantXml.LINKED_SERVICES,
-        SyncObjectXml.ATTACHMENTS
+        SyncObjectXml.ATTACHMENTS,
     )
 
     private val SHARED_FIELDS_SECURE_NOTE = arrayListOf(
         SecureNoteXml.TITLE,
         SecureNoteXml.CONTENT,
-        SyncObjectXml.ATTACHMENTS
+        SyncObjectXml.ATTACHMENTS,
+    )
+
+    private val SHARED_FIELDS_SECRETS = arrayListOf(
+        SecretXml.TITLE,
+        SecretXml.CONTENT,
+        SecretXml.SECURED,
+        SyncObjectXml.ATTACHMENTS,
     )
 
     fun needSharingMerge(original: VaultItem<*>?, newItem: VaultItem<*>?): Boolean {
@@ -43,7 +49,7 @@ object SharedItemMerger {
     fun mergeVaultItemToSave(
         oldVaultItem: VaultItem<*>?,
         newVaultItem: VaultItem<*>?,
-        origin: DataSaver.SaveRequest.Origin
+        origin: DataSaver.SaveRequest.Origin,
     ): VaultItem<*>? {
         if (newVaultItem == null) {
             return null
@@ -54,7 +60,7 @@ object SharedItemMerger {
         var mergedVaultItem = newVaultItem
         if (origin !== DataSaver.SaveRequest.Origin.SHARING_SYNC) {
             mergedVaultItem = newVaultItem.copy(
-                hasDirtySharedField = oldVaultItem.hasDirtySharedField
+                hasDirtySharedField = oldVaultItem.hasDirtySharedField,
             )
         }
 
@@ -98,6 +104,7 @@ object SharedItemMerger {
         return when (objectType) {
             SyncObjectType.AUTHENTIFIANT -> data.filterKeys { it in SHARED_FIELDS_AUTHENTIFIANT }
             SyncObjectType.SECURE_NOTE -> data.filterKeys { it in SHARED_FIELDS_SECURE_NOTE }
+            SyncObjectType.SECRET -> data.filterKeys { it in SHARED_FIELDS_SECRETS }
             else -> error("Unsupported types")
         }.toSortedMap()
     }

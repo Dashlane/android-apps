@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="plans_price_billed_monthly_suffix">/month</string>
+    
+    <string name="plans_price_billed_yearly_suffix">/year</string>
+</resources>

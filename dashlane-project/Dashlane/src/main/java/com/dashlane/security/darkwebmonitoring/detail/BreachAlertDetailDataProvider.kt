@@ -1,8 +1,8 @@
 package com.dashlane.security.darkwebmonitoring.detail
 
+import com.dashlane.breach.BreachWrapper
 import com.dashlane.notificationcenter.alerts.BreachDataHelper
-import com.dashlane.security.identitydashboard.breach.BreachLoader
-import com.dashlane.security.identitydashboard.breach.BreachWrapper
+import com.dashlane.passwordhealth.identitydashboard.breach.BreachLoader
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
 import com.dashlane.vault.summary.SummaryObject
@@ -14,9 +14,8 @@ import javax.inject.Inject
 class BreachAlertDetailDataProvider @Inject constructor(
     private val breachesDataHelper: BreachDataHelper,
     private val breachLoader: BreachLoader,
-    private val genericDataQuery: GenericDataQuery
+    private val genericDataQuery: GenericDataQuery,
 ) : BaseDataProvider<BreachAlertDetail.Presenter>(), BreachAlertDetail.DataProvider {
-
     override suspend fun deleteBreach(breachWrapper: BreachWrapper) {
         breachesDataHelper.saveAndRemove(breachWrapper, SyncObject.SecurityBreach.Status.ACKNOWLEDGED)
     }
@@ -41,9 +40,9 @@ class BreachAlertDetailDataProvider @Inject constructor(
     override suspend fun getCredential(itemId: String): SummaryObject.Authentifiant? {
         val vaultItem = genericDataQuery.queryFirst(
             vaultFilter {
-            specificDataType(SyncObjectType.AUTHENTIFIANT)
-            specificUid(itemId)
-        }
+                specificDataType(SyncObjectType.AUTHENTIFIANT)
+                specificUid(itemId)
+            },
         ) ?: return null
         return vaultItem as SummaryObject.Authentifiant
     }

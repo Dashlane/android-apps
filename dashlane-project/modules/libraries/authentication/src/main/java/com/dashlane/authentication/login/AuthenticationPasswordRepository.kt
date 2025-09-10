@@ -4,13 +4,13 @@ import com.dashlane.authentication.AuthenticationDeviceCredentialsInvalidExcepti
 import com.dashlane.authentication.AuthenticationEmptyPasswordException
 import com.dashlane.authentication.AuthenticationInvalidPasswordException
 import com.dashlane.authentication.AuthenticationNetworkException
-import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
-import com.dashlane.cryptography.ObfuscatedByteArray
-import com.dashlane.cryptography.SharingKeys
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.crypto.keys.VaultKey
+import com.dashlane.cryptography.ObfuscatedByteArray
+import com.dashlane.cryptography.SharingKeys
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SecurityFeature
 import com.dashlane.xml.domain.SyncObject
 import java.time.Instant
 
@@ -19,16 +19,16 @@ interface AuthenticationPasswordRepository {
         AuthenticationEmptyPasswordException::class,
         AuthenticationInvalidPasswordException::class,
         AuthenticationNetworkException::class,
-        AuthenticationDeviceCredentialsInvalidException::class
+        AuthenticationDeviceCredentialsInvalidException::class,
     )
     suspend fun validate(
         registeredUserDevice: RegisteredUserDevice,
-        passwordUtf8Bytes: ObfuscatedByteArray
+        passwordUtf8Bytes: ObfuscatedByteArray,
     ): Result
 
     suspend fun validateRemoteUser(
         registeredUserDevice: RegisteredUserDevice.Remote,
-        password: AppKey.Password
+        password: AppKey.Password,
     ): Result.Remote
 
     sealed class Result {
@@ -46,7 +46,7 @@ interface AuthenticationPasswordRepository {
             override val secretKey: String,
             override val password: AppKey,
             override val localKey: LocalKey,
-            val isAccessKeyRefreshed: Boolean
+            val isAccessKeyRefreshed: Boolean,
         ) : Result()
 
         data class Remote(
@@ -62,7 +62,7 @@ interface AuthenticationPasswordRepository {
             val remoteKey: VaultKey.RemoteKey?,
             val sharingKeys: SharingKeys? = null,
             val deviceAnalyticsId: String,
-            val userAnalyticsId: String
+            val userAnalyticsId: String,
         ) : Result()
     }
 }

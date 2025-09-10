@@ -6,5 +6,5 @@ import androidx.annotation.Keep
 enum class PaywallIntroType {
     DARK_WEB_MONITORING,
     VPN,
-    FROZEN_ACCOUNT
+    FROZEN_ACCOUNT,
 }

@@ -18,7 +18,7 @@ import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CA
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CATEGORY_URL
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CATEGORY_USERNAME
 import com.dashlane.csvimport.utils.OnSwipeTouchListener
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.util.showToaster
 import com.google.android.material.tabs.TabLayout
@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 
 internal class MatchCsvFieldsViewProxy(
     private val activity: AppCompatActivity,
-    private val viewModel: MatchCsvFieldsViewModel
+    private val viewModel: MatchCsvFieldsViewModel,
 ) {
     private val rvAdapter = DashlaneRecyclerAdapter<MatchCsvFieldsItem>().apply {
         onItemClickListener = EfficientAdapter.OnItemClickListener { _, _, _, _ ->
@@ -73,8 +73,8 @@ internal class MatchCsvFieldsViewProxy(
                         .setMessage(
                             activity.getString(
                                 R.string.custom_csv_import_instructions_message,
-                                itemsSize
-                            )
+                                itemsSize,
+                            ),
                         )
                         .setPositiveButton(R.string.custom_csv_import_instructions_primary_cta) { _, _ -> viewModel.onDismissIntroPopup() }
                         .setOnDismissListener { viewModel.onDismissIntroPopup() }
@@ -99,6 +99,7 @@ internal class MatchCsvFieldsViewProxy(
                         }
 
                         override fun onTabUnselected(tab: TabLayout.Tab) = Unit
+
                         override fun onTabReselected(tab: TabLayout.Tab) = Unit
                     })
 
@@ -222,7 +223,7 @@ internal class MatchCsvFieldsViewProxy(
             CATEGORY_URL to R.id.button_url,
             CATEGORY_USERNAME to R.id.button_username,
             CATEGORY_PASSWORD to R.id.button_password,
-            CATEGORY_NONE to R.id.button_other
+            CATEGORY_NONE to R.id.button_other,
         )
     }
 }

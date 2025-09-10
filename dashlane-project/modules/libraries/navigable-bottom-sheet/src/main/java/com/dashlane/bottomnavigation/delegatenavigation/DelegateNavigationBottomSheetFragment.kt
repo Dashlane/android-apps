@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.dashlane.bottomnavigation.NavigableBottomSheetFragment
 
 interface DelegateNavigationBottomSheetFragment : NavigableBottomSheetFragment {
-
     interface NavigationDelegate {
         fun delegatedNavigate(delegateNavigationBottomSheetFragment: DelegateNavigationBottomSheetFragment)
     }
@@ -20,7 +19,7 @@ interface DelegateNavigationBottomSheetFragment : NavigableBottomSheetFragment {
     }
 
     private fun runIfValidDelegatee(
-        block: ((NavigationDelegate, NavigateFromBottomSheetFragmentActivityViewModel) -> Unit)
+        block: ((NavigationDelegate, NavigateFromBottomSheetFragmentActivityViewModel) -> Unit),
     ) {
         val navHostFragment = getNavHostFragment() ?: return
         val fragmentActivity = navHostFragment.activity ?: return
@@ -28,7 +27,7 @@ interface DelegateNavigationBottomSheetFragment : NavigableBottomSheetFragment {
             return
         }
         val delegationOnceViewModel = ViewModelProvider(fragmentActivity).get(
-            NavigateFromBottomSheetFragmentActivityViewModel::class.java
+            NavigateFromBottomSheetFragmentActivityViewModel::class.java,
         )
 
         block.invoke(fragmentActivity, delegationOnceViewModel)

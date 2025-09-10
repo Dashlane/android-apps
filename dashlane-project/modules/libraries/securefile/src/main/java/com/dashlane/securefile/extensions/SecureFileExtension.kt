@@ -18,14 +18,14 @@ fun SecureFile.toSecureFileInfo(username: String): VaultItem<SyncObject.SecureFi
     return createSecureFileInfo(
         dataIdentifier = CommonDataIdentifierAttrsImpl(
             creationDate = timestamp,
-            userModificationDate = timestamp
+            userModificationDate = timestamp,
         ),
         filename = this@toSecureFileInfo.fileName,
         downloadKey = this@toSecureFileInfo.id,
         cryptoKey = this@toSecureFileInfo.key.encodeBase64ToString(),
         remoteSize = this@toSecureFileInfo.encryptedFile?.value?.length()?.toInt()?.toString(),
         owner = username,
-        version = "1"
+        version = "1",
     )
 }
 
@@ -33,8 +33,8 @@ fun SecureFile.toSecureFileInfo(username: String): VaultItem<SyncObject.SecureFi
 suspend fun VaultDataQuery.getSecureFileInfo(uid: String) = withContext(Dispatchers.IO) {
     query(
         vaultFilter {
-        specificUid(uid)
-        specificDataType(SyncObjectType.SECURE_FILE_INFO)
-    }
+            specificUid(uid)
+            specificDataType(SyncObjectType.SECURE_FILE_INFO)
+        },
     ) as? VaultItem<SyncObject.SecureFileInfo>
 }

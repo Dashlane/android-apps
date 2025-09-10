@@ -5,18 +5,17 @@ import com.dashlane.xml.domain.SyncObject
 import kotlinx.coroutines.flow.SharedFlow
 
 interface DataSaver {
-
     val savedItemFlow: SharedFlow<Unit>
 
-     suspend fun save(item: VaultItem<*>) = save(listOf(item))
+    suspend fun save(item: VaultItem<*>) = save(listOf(item))
 
     suspend fun save(items: List<VaultItem<*>>): Boolean {
         return save(
             SaveRequest(
                 itemsToSave = items,
                 origin = SaveRequest.Origin.LOCAL_EDIT,
-                mode = SaveRequest.Mode.INSERT_OR_UPDATE
-            )
+                mode = SaveRequest.Mode.INSERT_OR_UPDATE,
+            ),
         ).isNotEmpty()
     }
 
@@ -27,14 +26,17 @@ interface DataSaver {
     data class SaveRequest<T : SyncObject>(
         val itemsToSave: List<VaultItem<T>>,
         val origin: Origin = Origin.LOCAL_EDIT,
-        val mode: Mode = Mode.INSERT_OR_UPDATE
+        val mode: Mode = Mode.INSERT_OR_UPDATE,
     ) {
         enum class Mode {
-            INSERT_ONLY, INSERT_OR_UPDATE
+            INSERT_ONLY,
+            INSERT_OR_UPDATE,
         }
 
         enum class Origin {
-            PERSONAL_SYNC, SHARING_SYNC, LOCAL_EDIT
+            PERSONAL_SYNC,
+            SHARING_SYNC,
+            LOCAL_EDIT,
         }
     }
 }

@@ -13,14 +13,14 @@ class VpnThirdPartyActivateAccountErrorFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         val listener = activity as? VpnThirdPartyActivateAccountErrorListener
         listener?.onError(ERROR_TYPE_UNKNOWN)
         return inflater.inflate(
             R.layout.fragment_vpn_third_party_activate_account_error,
             container,
-            false
+            false,
         ).also {
             it.findViewById<Button>(R.id.vpn_activation_error_negative_button)
                 .setOnClickListener {

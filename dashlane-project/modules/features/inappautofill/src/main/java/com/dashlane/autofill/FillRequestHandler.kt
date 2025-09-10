@@ -11,10 +11,10 @@ import com.dashlane.autofill.formdetector.AutoFillFormType
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
 import com.dashlane.autofill.request.autofill.database.ItemLoader
 import com.dashlane.autofill.util.SmsOtpPossibleChecker
-import java.time.Instant
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import javax.inject.Inject
 
 interface FillRequestHandler {
     suspend fun getFillResponse(
@@ -22,22 +22,21 @@ interface FillRequestHandler {
         clientState: Bundle?,
         summary: AutoFillHintSummary,
         inlineSpecs: List<InlinePresentationSpec>?,
-        focusedAutofillId: AutofillId? = null
+        focusedAutofillId: AutofillId? = null,
     ): FillResponse?
 }
 
 internal class FillRequestHandlerImpl @Inject constructor(
     private val fillResponseCreator: FillResponseCreator,
     private val itemLoader: ItemLoader,
-    private val changePasswordConfiguration: AutoFillChangePasswordConfiguration
+    private val changePasswordConfiguration: AutoFillChangePasswordConfiguration,
 ) : FillRequestHandler {
-
     override suspend fun getFillResponse(
         context: Context,
         clientState: Bundle?,
         summary: AutoFillHintSummary,
         inlineSpecs: List<InlinePresentationSpec>?,
-        focusedAutofillId: AutofillId?
+        focusedAutofillId: AutofillId?,
     ): FillResponse? {
         
         if (summary.formType == AutoFillFormType.OTP &&
@@ -62,7 +61,7 @@ internal class FillRequestHandlerImpl @Inject constructor(
                 formType = summary.formType,
                 packageName = summary.packageName,
                 url = summary.webDomain,
-                username = userName
+                username = userName,
             )?.sortedByDescending {
                 it.lastUsedDate ?: Instant.MIN
             }
@@ -74,7 +73,7 @@ internal class FillRequestHandlerImpl @Inject constructor(
             result = items,
             inlineSpecs = inlineSpecs,
             focusedAutofillId = focusedAutofillId,
-            changePasswordConfiguration = changePasswordConfig
+            changePasswordConfiguration = changePasswordConfig,
         )
 
         
@@ -83,7 +82,7 @@ internal class FillRequestHandlerImpl @Inject constructor(
 
     private fun isInChangePasswordMode(
         summary: AutoFillHintSummary,
-        configuration: AutoFillChangePasswordConfiguration
+        configuration: AutoFillChangePasswordConfiguration,
     ) = !configuration.isEmpty &&
         summary.webDomain?.contains(configuration.filterOnDomain ?: "", true) == true
 }

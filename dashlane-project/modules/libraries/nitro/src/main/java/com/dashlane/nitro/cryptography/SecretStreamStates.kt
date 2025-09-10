@@ -2,7 +2,7 @@ package com.dashlane.nitro.cryptography
 
 internal data class SecretStreamStates(
     val encryptionState: ByteArray,
-    val decryptionState: ByteArray
+    val decryptionState: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

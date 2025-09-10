@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_recovery_biometric_prompt_title">Authenticate with biometrics</string>
+    <string name="account_recovery_biometric_prompt_description">Reset password for %1$s</string>
+    <string name="account_recovery_reset_password_title">Reset Master Password</string>
+    <string name="account_recovery_reset_password_desc">Create a new Master Password to access your Dashlane account.</string>
+    <string name="account_recovery_reset_password_validation">I\'m ready</string>
+
+    
+    <string name="login_account_recovery_key_enter_progress_title">Processing your recovery request...</string>
+    
+    <string name="login_account_recovery_key_enter_success_title">You successfully recovered access to your account!</string>
+</resources>

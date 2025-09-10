@@ -11,9 +11,8 @@ class QuickActionsItemAction(
     private val quickActionProvider: QuickActionProvider,
     private val item: SummaryObject,
     private val itemListContext: ItemListContext,
-    private val navigator: Navigator
+    private val navigator: Navigator,
 ) : ListItemAction {
-
     override val icon: Int = R.drawable.ic_item_action_more
 
     override val contentDescription: Int = R.string.and_accessibility_quick_action

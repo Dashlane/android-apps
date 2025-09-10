@@ -14,7 +14,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class WaiterDialogFragment : DialogFragment() {
-
     @Inject
     lateinit var announcementCenter: AnnouncementCenter
 

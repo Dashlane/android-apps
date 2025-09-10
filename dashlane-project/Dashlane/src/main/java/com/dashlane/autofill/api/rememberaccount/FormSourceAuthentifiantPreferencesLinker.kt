@@ -1,6 +1,6 @@
 package com.dashlane.autofill.api.rememberaccount
 
-import com.dashlane.autofill.rememberaccount.services.FormSourceAuthentifiantLinker
+import com.dashlane.autofill.linkservices.services.FormSourceAuthentifiantLinker
 import com.dashlane.preference.GlobalPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,9 +9,8 @@ import kotlin.coroutines.CoroutineContext
 class FormSourceAuthentifiantPreferencesLinker constructor(
     private val preferencesKey: String,
     val globalPreferencesManager: GlobalPreferencesManager,
-    val coroutineContext: CoroutineContext = Dispatchers.IO
+    val coroutineContext: CoroutineContext = Dispatchers.IO,
 ) : FormSourceAuthentifiantLinker {
-
     private val applicationFormSources =
         globalPreferencesManager.getStringSet(preferencesKey)?.toMap() ?: mutableListOf()
 
@@ -50,7 +49,7 @@ class FormSourceAuthentifiantPreferencesLinker constructor(
     private fun isFormSourceLinked(
         linkedFormSources: List<Pair<String, String>>,
         formSourceId: String,
-        authentifiantId: String
+        authentifiantId: String,
     ): Boolean {
         val linkedFormSource = formSourceId to authentifiantId
         return linkedFormSources.contains(linkedFormSource)
@@ -60,7 +59,7 @@ class FormSourceAuthentifiantPreferencesLinker constructor(
         key: String,
         formSourceId: String,
         formSources: MutableList<Pair<String, String>>,
-        authentifiantId: String
+        authentifiantId: String,
     ) {
         val linkToAdd = formSourceId to authentifiantId
         if (!formSources.contains(linkToAdd)) {
@@ -74,7 +73,7 @@ class FormSourceAuthentifiantPreferencesLinker constructor(
         key: String,
         formSourceId: String,
         formSources: MutableList<Pair<String, String>>,
-        authentifiantId: String
+        authentifiantId: String,
     ) {
         val linkToAdd = formSourceId to authentifiantId
         formSources.remove(linkToAdd)

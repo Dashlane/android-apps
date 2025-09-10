@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="settings_search_field_placeholder">Search in settings</string>
+    
+    <string name="settings_search_empty_content_and_search_title">Start typing</string>
+    
+    <string name="settings_search_empty_content_and_search_description">Nothing in the settings matches your search</string>
+    
+    <string name="settings_search_empty_content_title">No results found</string>
+    
+    <string name="settings_search_empty_content_description">Nothing in the settings matches your search</string>
+</resources>

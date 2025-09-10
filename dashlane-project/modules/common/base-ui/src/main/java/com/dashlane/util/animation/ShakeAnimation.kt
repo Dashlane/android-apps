@@ -17,12 +17,12 @@ fun Modifier.shake(enabled: Boolean) = composed(
             animationSpec = repeatable(
                 iterations = 7,
                 animation = tween(durationMillis = 50, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
+                repeatMode = RepeatMode.Reverse,
             ),
-            label = "shakeAnimation"
+            label = "shakeAnimation",
         )
         Modifier.graphicsLayer {
             translationX = if (enabled) scale else 0f
         }
-    }
+    },
 )

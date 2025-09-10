@@ -10,7 +10,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface FrozenAccountModule {
-
     @Binds
     fun bindsFrozenStateManager(impl: FrozenStateManagerImpl): FrozenStateManager
 }

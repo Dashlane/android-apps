@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  
+  <string name="item_details_passkey_username">Username</string>
+  
+  <string name="item_details_passkey_website">Website</string>
+    
+    <string name="item_details_password_otp">2FA token</string>
+</resources>

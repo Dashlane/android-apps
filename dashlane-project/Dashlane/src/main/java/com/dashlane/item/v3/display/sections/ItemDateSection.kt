@@ -10,8 +10,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.dashlane.R
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.item.v3.data.CommonData
+import com.dashlane.item.v3.data.CredentialFormData
 import com.dashlane.item.v3.data.FormData
-import com.dashlane.item.v3.data.SecureNoteFormData
 import com.dashlane.item.v3.display.fields.GenericField
 import com.dashlane.item.v3.display.fields.SectionContent
 import com.dashlane.item.v3.viewmodels.Data
@@ -24,15 +24,15 @@ import java.time.Instant
 fun ItemDateSection(
     clock: Clock,
     data: Data<out FormData>,
-    editMode: Boolean
+    editMode: Boolean,
 ) {
     if (editMode) return
-    SectionContent(editMode = false) {
+    SectionContent {
         GenericField(
             label = stringResource(id = R.string.creation_date_header),
             data = data.commonData.created?.toRelativeDateTimeFormat(LocalContext.current, clock),
             editMode = false,
-            onValueChanged = {}
+            onValueChanged = {},
         )
         if (data.commonData.updated != null) {
             GenericField(
@@ -43,7 +43,15 @@ fun ItemDateSection(
                 },
                 data = data.commonData.updated.toRelativeDateTimeFormat(LocalContext.current, clock),
                 editMode = false,
-                onValueChanged = {}
+                onValueChanged = {},
+            )
+        }
+        if (data.formData is CredentialFormData && data.formData.lastUsed != null) {
+            GenericField(
+                label = stringResource(id = R.string.used_date_header),
+                data = data.formData.lastUsed.toRelativeDateTimeFormat(LocalContext.current, clock),
+                editMode = false,
+                onValueChanged = {},
             )
         }
     }
@@ -58,7 +66,7 @@ private fun Instant.toRelativeDateTimeFormat(context: Context, clock: Clock): St
             clock.millis(),
             DateUtils.MINUTE_IN_MILLIS,
             DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or
-                DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_SHOW_TIME
+                DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_SHOW_TIME,
         ).toString()
     }
 }
@@ -72,9 +80,11 @@ private fun ItemDateSectionPreview() {
     val data = Data(
         commonData = CommonData(
             created = Instant.ofEpochSecond(200_000),
-            updated = Instant.now()
+            updated = Instant.now(),
         ),
-        formData = SecureNoteFormData()
+        formData = CredentialFormData(
+            lastUsed = Instant.now() - Duration.ofMinutes(1),
+        ),
     )
     val clock = Clock.systemUTC()
     DashlanePreview {
@@ -82,21 +92,21 @@ private fun ItemDateSectionPreview() {
             ItemDateSection(
                 clock = clock,
                 data = data,
-                editMode = false
+                editMode = false,
             )
             ItemDateSection(
                 clock = clock,
                 data = data.copyCommonData {
                     it.copy(isShared = true)
                 },
-                editMode = false
+                editMode = false,
             )
             ItemDateSection(
                 clock = clock,
                 data = data.copyCommonData {
                     it.copy(updated = null, created = null)
                 },
-                editMode = false
+                editMode = false,
             )
         }
     }

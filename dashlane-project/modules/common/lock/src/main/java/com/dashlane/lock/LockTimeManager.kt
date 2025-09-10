@@ -1,6 +1,5 @@
 package com.dashlane.lock
 
-import android.os.SystemClock
 import com.dashlane.user.Username
 import java.time.Duration
 import java.time.Instant
@@ -12,9 +11,11 @@ interface LockTimeManager {
     val lastAction: Instant?
 
     fun updateLockTimeout(duration: Duration, username: Username)
+
     fun refreshSavedDuration(username: Username)
 
     fun startAutoLockGracePeriod(duration: Duration, lockWithoutEvents: () -> Unit)
+
     fun shouldAuthoriseForView(): Boolean
 
     fun setLastActionTimestampToNow()
@@ -22,10 +23,10 @@ interface LockTimeManager {
     fun setUnlockTimestampToNow()
 
     fun isInAutoLockGracePeriod(): Boolean
+
     fun stopAutoLockGracePeriod()
 
-    fun elapsedDuration(instant: Instant): Duration =
-        Duration.between(instant, Instant.ofEpochMilli(SystemClock.elapsedRealtime()))
+    fun elapsedDuration(instant: Instant): Duration
 
     companion object {
         const val LOCK_ON_EXIT_DEFAULT_VALUE = false

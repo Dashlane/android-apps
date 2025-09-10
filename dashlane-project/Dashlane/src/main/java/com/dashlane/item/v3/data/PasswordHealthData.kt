@@ -6,5 +6,5 @@ data class PasswordHealthData(
     val passwordStrength: PasswordStrength?,
     val isCompromised: Boolean,
     val reusedCount: Int,
-    val isPasswordEmpty: Boolean
+    val isPasswordEmpty: Boolean,
 )

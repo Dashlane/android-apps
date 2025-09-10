@@ -3,7 +3,6 @@ package com.dashlane.login.pages.secrettransfer
 import kotlinx.serialization.Serializable
 
 sealed interface LoginSecretTransferDestination {
-
     @Serializable
     data object ChooseType : LoginSecretTransferDestination
 

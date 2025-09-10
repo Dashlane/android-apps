@@ -8,7 +8,6 @@ import java.time.Instant
 import kotlin.reflect.KClass
 
 interface SyncVault {
-
     var lastSyncTime: Instant?
 
     suspend fun inTransaction(block: suspend TransactionScope.() -> Unit)
@@ -30,11 +29,10 @@ interface SyncVault {
     suspend fun flagForDeletion(it: OutgoingTransaction.Update)
 
     interface TransactionScope {
-
         fun insertOrUpdateForSync(
             identifier: String,
             value: SyncObject,
-            backupTimeMillis: Long
+            backupTimeMillis: Long,
         )
 
         fun deleteForSync(kClass: KClass<out SyncObject>, uuid: String)

@@ -4,17 +4,17 @@ import java.io.Reader
 
 internal fun Reader.csvLineSequence(
     separator: Char = ',',
-    quoteChar: Char = '"'
+    quoteChar: Char = '"',
 ): Sequence<List<String>> = CsvLinesSequence(
     ReadSequence(buffered()),
     separator,
-    quoteChar
+    quoteChar,
 ).constrainOnce()
 
 private class CsvLinesSequence(
     private val readSequence: ReadSequence,
     private val separator: Char,
-    private val quoteChar: Char
+    private val quoteChar: Char,
 ) : Sequence<List<String>> {
     private val quoteString = quoteChar.toString()
 
@@ -82,7 +82,7 @@ private class CsvLinesSequence(
 }
 
 private class ReadSequence(
-    private val reader: Reader
+    private val reader: Reader,
 ) : Sequence<Char> {
     override fun iterator() = object : Iterator<Char> {
         private var nextRead: Int = -1

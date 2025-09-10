@@ -17,9 +17,8 @@ import javax.inject.Singleton
 class DataChangeHistoryQueryImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,
-    private val vaultDataQuery: Lazy<VaultDataQuery>
+    private val vaultDataQuery: Lazy<VaultDataQuery>,
 ) : DataChangeHistoryQuery {
-
     private val database: Database?
         get() = sessionManager.session?.let { userDataRepository.getRacletteDatabase(it) }
 

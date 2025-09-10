@@ -6,7 +6,7 @@ import com.dashlane.xml.domain.SyncObject
 interface AutofillChangePasswordResultHandler {
     fun onFinishWithResult(
         result: VaultItem<SyncObject.Authentifiant>,
-        oldItem: VaultItem<SyncObject.Authentifiant>
+        oldItem: VaultItem<SyncObject.Authentifiant>,
     )
 
     fun onError(error: AutofillChangePasswordErrors)

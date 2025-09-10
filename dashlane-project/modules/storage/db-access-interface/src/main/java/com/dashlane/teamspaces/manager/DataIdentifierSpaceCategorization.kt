@@ -12,9 +12,8 @@ import com.dashlane.xml.domain.SyncObject
 class DataIdentifierSpaceCategorization(
     teamspaceAccessor: TeamSpaceAccessor,
     currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
-    forTeamspace: TeamSpace = currentTeamSpaceUiFilter.currentFilter.teamSpace
+    forTeamspace: TeamSpace = currentTeamSpaceUiFilter.currentFilter.teamSpace,
 ) {
-
     val showOnlySpace: TeamSpace?
     val forbiddenTeamspaces: List<TeamSpace>?
     val forbiddenDomains: List<String>?
@@ -25,11 +24,17 @@ class DataIdentifierSpaceCategorization(
         when (forTeamspace) {
             TeamSpace.Personal -> {
                 
-                forbiddenTeamspaces = teamspaceAccessor.allBusinessSpaces
+                forbiddenTeamspaces = teamspaceAccessor.allBusinessSpaces.filter { team ->
+                    
+                    team is TeamSpace.Business.Current || isTeamInGracePeriod(team)
+                }
                 showOnlySpace = forTeamspace
             }
             TeamSpace.Combined -> {
-                forbiddenTeamspaces = null
+                forbiddenTeamspaces = teamspaceAccessor.allBusinessSpaces.filter { team ->
+                    
+                    isTeamInGracePeriod(team)
+                }
                 showOnlySpace = null
             }
             else -> {
@@ -44,7 +49,8 @@ class DataIdentifierSpaceCategorization(
         return when (vaultItem.syncObject) {
             is SyncObject.GeneratedPassword,
             is SyncObject.Settings,
-            is SyncObject.DataChangeHistory -> true
+            is SyncObject.DataChangeHistory,
+            -> true
             else -> canBeDisplay(vaultItem.toSummary<SummaryObject>())
         }
     }
@@ -54,34 +60,25 @@ class DataIdentifierSpaceCategorization(
 
         val spaceId = item.spaceId?.takeUnless { it.isSemanticallyNull() }
             ?: TeamSpace.Personal.teamId
-
+        val isInForbiddenTeamspace = forbiddenTeamspaces?.any { it.teamId == spaceId } ?: false
         
-        showOnlySpace?.let { return spaceId == it.teamId }
-
         
-        forbiddenTeamspaces?.let {
-            if (forbiddenTeamspaces.any { spaceId == it.teamId }) {
+        if (isInForbiddenTeamspace) return false
+        
+        showOnlySpace?.let { selectedSpace ->
+            
+            if (showOnlySpace != TeamSpace.Personal) {
                 
-                return false
+                return spaceId == selectedSpace.teamId
             }
         }
-
-        
-        forbiddenDomains?.let {
-            if (isItemAffectedByExcludedDomains(item, it)) {
-                
-                return false
-            }
-        }
-
         
         return true
     }
 
-    private fun isItemAffectedByExcludedDomains(
-        item: SummaryObject,
-        domainsToExcludeFrom: List<String>
-    ): Boolean {
-        return item.matchForceDomains(domainsToExcludeFrom)
+    private fun isTeamInGracePeriod(team: TeamSpace.Business) = when {
+        team !is TeamSpace.Business.Past -> false
+        team.isRemovedBusinessContentEnabled || !team.hasPersonalSpace -> true
+        else -> false
     }
 }

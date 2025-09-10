@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="settings_category_general">General</string>
+
+    
+    
+    <string name="setting_in_app_login_category">Autofill</string>
+    
+    <string name="setting_in_app_login_enabled_title">Autofill</string>
+    
+    <string name="setting_in_app_login_enabled_description">Fill forms using your data stored in Dashlane</string>
+    
+    <string name="setting_in_app_login_chrome_enabled_title">Google Chrome Autofill</string>
+    
+    <string name="setting_in_app_login_chrome_enabled_description">Allow Dashlane to autofill your passwords and info securely in Chrome</string>
+    
+    <string name="autofill_pause_resume_settings_title">Paused Autofill</string>
+    
+    <string name="autofill_pause_resume_settings_description">Resume Autofill on paused websites and apps</string>
+    
+    <string name="inline_autofill_settings_title_2">Keyboard Autofill</string>
+    
+    <string name="inline_autofill_settings_description">Display Autofill suggestions within the suggestion strip of your favorite keyboard app</string>
+    
+    <string name="settings_anti_phishing">Phishing alerts</string>
+    
+    <string name="settings_anti_phishing_description">Display phishing alerts when autofilling your login details</string>
+
+    
+    <string name="notifications_settings_header">Notifications</string>
+    
+    <string name="general_notifications_settings_title">General notifications</string>
+    
+    <string name="general_notifications_settings_description">Manage your Dashlane notifications</string>
+    
+    <string name="follow_up_settings_title">Copy and paste notification</string>
+    
+    <string name="follow_up_settings_description">When you’re copying info in Dashlane, we’ll hold the rest of the info in the notification panel</string>
+
+    
+    <string name="setting_backup_category">Backup</string>
+    
+    <string name="setting_backup_export">Export your vault</string>
+    
+    <string name="setting_backup_export_description">Back up your Dashlane data to an encrypted file</string>
+    
+    <string name="setting_backup_export_csv">Export data to CSV</string>
+    
+    <string name="setting_backup_export_csv_description">Backup your Dashlane data to a readable format</string>
+    
+    <string name="setting_backup_import">Restore your vault</string>
+    
+    <string name="setting_backup_import_description">Restore your data from an encrypted backup</string>
+
+    
+    <string name="setting_logs_header">Usage data</string>
+    
+    <string name="setting_allow_logs_title">Help improve Dashlane</string>
+    
+    <string name="setting_allow_logs_description">This setting allows us to collect information on how our tools and features are used. We use this data to make product improvements. Nothing is shared outside of Dashlane, and sensitive data is anonymized.</string>
+</resources>

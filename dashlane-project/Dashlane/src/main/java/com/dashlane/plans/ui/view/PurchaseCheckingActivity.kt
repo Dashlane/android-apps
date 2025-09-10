@@ -23,6 +23,7 @@ import com.dashlane.accountstatus.premiumstatus.planFeature
 import com.dashlane.accountstatus.premiumstatus.planName
 import com.dashlane.accountstatus.premiumstatus.planType
 import com.dashlane.announcements.AnnouncementCenter
+import com.dashlane.premium.StoreOffersCache
 import com.dashlane.premium.offer.common.OffersLogger
 import com.dashlane.security.DashlaneIntent
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
@@ -30,7 +31,6 @@ import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.premium.inappbilling.BillingVerification
-import com.dashlane.premium.StoreOffersCache
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
@@ -39,7 +39,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 open class PurchaseCheckingActivity : DashlaneActivity() {
-
     @Inject
     lateinit var logger: OffersLogger
 
@@ -216,7 +215,7 @@ open class PurchaseCheckingActivity : DashlaneActivity() {
             purchaseOriginalJson: String,
             signature: String,
             currencyCode: String?,
-            totalPrice: Float?
+            totalPrice: Float?,
         ): Intent {
             return DashlaneIntent.newInstance(context, PurchaseCheckingActivity::class.java).apply {
                 putExtra(EXTRA_PURCHASED_PLAN_ID, purchasePlanId)

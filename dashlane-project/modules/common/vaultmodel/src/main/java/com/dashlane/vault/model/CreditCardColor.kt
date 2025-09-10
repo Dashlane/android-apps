@@ -17,3 +17,18 @@ fun SyncObject.PaymentCreditCard.Color?.getColorResource(): Int {
         else -> R.color.credit_card_blue1
     }
 }
+
+fun SyncObject.PaymentCreditCard.Color.getColorName(): Int =
+    when (this) {
+        SyncObject.PaymentCreditCard.Color.NO_TYPE -> R.string.creditcard_color_no_type
+        SyncObject.PaymentCreditCard.Color.RED -> R.string.creditcard_color_red
+        SyncObject.PaymentCreditCard.Color.GOLD -> R.string.creditcard_color_gold
+        SyncObject.PaymentCreditCard.Color.GREEN_1 -> R.string.creditcard_color_green
+        SyncObject.PaymentCreditCard.Color.WHITE -> R.string.creditcard_color_white
+        SyncObject.PaymentCreditCard.Color.GREEN_2 -> R.string.creditcard_color_amex_green
+        SyncObject.PaymentCreditCard.Color.SILVER -> R.string.creditcard_color_silver
+        SyncObject.PaymentCreditCard.Color.BLACK -> R.string.creditcard_color_black
+        SyncObject.PaymentCreditCard.Color.BLUE_1 -> R.string.creditcard_color_blue
+        SyncObject.PaymentCreditCard.Color.BLUE_2 -> R.string.creditcard_color_dark_blue
+        SyncObject.PaymentCreditCard.Color.ORANGE -> R.string.creditcard_color_orange
+    }

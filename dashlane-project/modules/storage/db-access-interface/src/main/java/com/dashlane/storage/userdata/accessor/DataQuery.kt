@@ -4,7 +4,6 @@ import com.dashlane.storage.userdata.accessor.filter.BaseFilter
 import com.dashlane.vault.summary.SummaryObject
 
 interface DataQuery<T : SummaryObject, F : BaseFilter> {
-
     fun createFilter(): F
 
     fun queryFirst(filter: F = createFilter()): T?

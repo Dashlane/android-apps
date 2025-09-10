@@ -3,6 +3,7 @@ package com.dashlane.autofill.core
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
+import com.dashlane.autofill.securitywarnings.data.getDomain
 import com.dashlane.autofill.unlockfill.UnlockedAuthentifiant
 import com.dashlane.core.helpers.SignatureVerification
 import com.dashlane.hermes.LogRepository
@@ -11,7 +12,6 @@ import com.dashlane.hermes.generated.definitions.AutofillMessageType
 import com.dashlane.hermes.generated.definitions.BrowseComponent
 import com.dashlane.hermes.generated.definitions.Button
 import com.dashlane.hermes.generated.definitions.DismissType
-import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.hermes.generated.definitions.ItemType
 import com.dashlane.hermes.generated.events.anonymous.AutofillAcceptAnonymous
 import com.dashlane.hermes.generated.events.anonymous.AutofillDismissAnonymous
@@ -22,130 +22,97 @@ import com.dashlane.hermes.generated.events.user.Click
 import javax.inject.Inject
 
 class AutofillSecurityWarningsLoggerImpl @Inject constructor(
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
 ) : AutofillSecurityWarningsLogger {
-
     override fun onDisplayedIncorrectWarning(
         security: SignatureVerification.Incorrect,
-        fill: UnlockedAuthentifiant
+        fill: UnlockedAuthentifiant,
     ) {
-        logDisplayAutofillWarning(fill.formSource, AutofillMessageType.KNOWN_INCORRECT_SIGNATURE)
+        logDisplayAutofillWarning(
+            formSource = fill.formSource,
+            warningMessageType = AutofillMessageType.KNOWN_INCORRECT_SIGNATURE,
+        )
     }
 
     override fun onDisplayedMismatchWarning(
         security: SignatureVerification.UnknownWithSignature,
-        fill: UnlockedAuthentifiant
+        fill: UnlockedAuthentifiant,
     ) {
         logDisplayAutofillWarning(
-            fill.formSource,
-            AutofillMessageType.KNOWN_SOURCE_ACCOUNT_FILL_MISMATCH
+            formSource = fill.formSource,
+            warningMessageType = AutofillMessageType.KNOWN_SOURCE_ACCOUNT_FILL_MISMATCH,
         )
     }
 
     override fun onDisplayedUnknownWarning(
         security: SignatureVerification,
-        fill: UnlockedAuthentifiant
+        fill: UnlockedAuthentifiant,
     ) {
         logDisplayAutofillWarning(
-            fill.formSource,
-            AutofillMessageType.UNKNOWN_SOURCE_ACCOUNT_FILL_MISMATCH
+            formSource = fill.formSource,
+            warningMessageType = AutofillMessageType.UNKNOWN_SOURCE_ACCOUNT_FILL_MISMATCH,
         )
     }
 
-    override fun onApprovedIncorrectWarning(
-        security: SignatureVerification.Incorrect,
+    override fun onApprovedWarning(
         fill: UnlockedAuthentifiant,
         neverShowAgain: Boolean,
-        domain: Domain
     ) {
-        logAcceptWarning(neverShowAgain, domain)
+        logAcceptWarning(fill, neverShowAgain)
     }
 
-    override fun onApprovedMismatchWarning(
-        security: SignatureVerification.UnknownWithSignature,
+    override fun onDeclinedWarning(
         fill: UnlockedAuthentifiant,
-        neverShowAgain: Boolean,
-        domain: Domain
     ) {
-        logAcceptWarning(neverShowAgain, domain)
-    }
-
-    override fun onApprovedUnknownWarning(
-        security: SignatureVerification,
-        fill: UnlockedAuthentifiant,
-        neverShowAgain: Boolean,
-        domain: Domain
-    ) {
-        logAcceptWarning(neverShowAgain, domain)
-    }
-
-    override fun onDeclinedIncorrectWarning(
-        security: SignatureVerification.Incorrect,
-        fill: UnlockedAuthentifiant,
-        domain: Domain
-    ) {
-        logDismissAutofill(fill, domain)
-    }
-
-    override fun onDeclinedMismatchWarning(
-        security: SignatureVerification.UnknownWithSignature,
-        fill: UnlockedAuthentifiant,
-        domain: Domain
-    ) {
-        logDismissAutofill(fill, domain)
-    }
-
-    override fun onDeclinedUnknownWarning(
-        security: SignatureVerification,
-        fill: UnlockedAuthentifiant,
-        domain: Domain
-    ) {
-        logDismissAutofill(fill, domain)
+        logDismissAutofill(fill)
     }
 
     private fun logDisplayAutofillWarning(
         formSource: AutoFillFormSource,
-        warningMessageType: AutofillMessageType
+        warningMessageType: AutofillMessageType,
     ) {
         logRepository.queuePageView(
             component = BrowseComponent.OS_AUTOFILL,
-            page = AnyPage.AUTOFILL_WARNING
+            page = AnyPage.AUTOFILL_WARNING,
         )
         logRepository.queueEvent(
             AutofillSuggest(
                 isNativeApp = formSource is ApplicationFormSource,
-                autofillMessageTypeList = listOf(warningMessageType)
-            )
+                autofillMessageTypeList = listOf(warningMessageType),
+            ),
         )
     }
 
-    private fun logAcceptWarning(neverShowAgain: Boolean, domain: Domain) {
+    private fun logAcceptWarning(
+        fill: UnlockedAuthentifiant,
+        neverShowAgain: Boolean,
+    ) {
         if (neverShowAgain) {
             logRepository.queueEvent(
-                Click(Button.OK)
+                Click(Button.OK),
             )
         }
         logRepository.queueEvent(
-            AutofillAccept(dataTypeList = listOf(ItemType.CREDENTIAL))
+            AutofillAccept(dataTypeList = listOf(ItemType.CREDENTIAL)),
         )
         logRepository.queueEvent(
-            AutofillAcceptAnonymous(domain = domain)
+            AutofillAcceptAnonymous(domain = fill.formSource.getDomain()),
         )
     }
 
-    private fun logDismissAutofill(fill: UnlockedAuthentifiant, domain: Domain) {
+    private fun logDismissAutofill(fill: UnlockedAuthentifiant) {
         logRepository.queueEvent(
             AutofillDismiss(
-                DismissType.CLOSE
-            )
+                DismissType.CLOSE,
+            ),
         )
 
         logRepository.queueEvent(
             AutofillDismissAnonymous(
                 dismissType = DismissType.CLOSE,
-                domain = domain,
-                isNativeApp = fill.formSource is ApplicationFormSource
-            )
+                domain = fill.formSource.getDomain(),
+                isNativeApp = fill.formSource is ApplicationFormSource,
+            ),
         )
     }
 }

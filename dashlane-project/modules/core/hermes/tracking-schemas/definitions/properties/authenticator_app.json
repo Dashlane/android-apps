@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authenticator_app.json",
+  "type": "object",
+  "description": "Definition for the Authenticator app events",
+  "definitions": {
+    "has_password_manager_installed": {
+      "description": "True if the user already has the password manager installer when launching the Authenticator app. False if not",
+      "type": "boolean"
+    },
+    "authenticator_names": {
+      "description": "The name of other authenticator apps",
+      "type": "string",
+      "enum": [
+        "authy",
+        "duo",
+        "google",
+        "lastpass",
+        "microsoft"
+      ]
+    },
+    "other_authenticator_list": {
+      "type": "array",
+      "description": "List of other authenticator apps",
+      "items": {
+        "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authenticator_app.json#/definitions/authenticator_names"
+      }
+    },
+    "authenticator_push_type": {
+      "type": "string",
+      "description": "The type of push notification for the Authenticator",
+      "enum": [
+        "otp_code"
+      ]
+    },
+    "authenticator_push_status": {
+      "type": "string",
+      "description": "The status of a push notification for the Authenticator",
+      "enum": [
+        "accepted",
+        "received",
+        "rejected"
+      ]
+    }
+  }
+}

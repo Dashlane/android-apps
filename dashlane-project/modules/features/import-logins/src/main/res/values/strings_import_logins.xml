@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="import_logins_action_bar_title">Import logins</string>
+    
+    <string name="import_logins_title">Where are you importing data from?</string>
+    
+    <string name="import_logins_section1">From another password manager</string>
+    
+    <string name="import_logins_section2">Other</string>
+    
+    <string name="import_logins_from_csv_file_line1">From a CSV file</string>
+    
+    <string name="import_logins_from_csv_file_line2">Import manually</string>
+    
+    <string name="import_logins_from_dash_file_line1">Dashlane backup</string>
+    
+    <string name="import_logins_from_dash_file_line2">Import your DASH file</string>
+    
+    <string name="import_logins_add_single_login_manually">Add logins manually</string>
+</resources>

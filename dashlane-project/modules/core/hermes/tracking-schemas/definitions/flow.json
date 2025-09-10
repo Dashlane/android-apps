@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/flow.json",
+  "type": "object",
+  "description": "Definition for the Flow section.",
+  "definitions": {
+    "flow_id": {
+      "description": "The flow ID, generated client-side. : UUIDv4 - xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (RFC4122)",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$"
+    },
+    "sequence_number": {
+      "description": "The index of the log within this flow. Each new log will increment this value, and it will be reset on the new flow",
+      "type": "integer"
+    },
+    "flow": {
+      "type": "object",
+      "description": "Flow object. Used to group events together, within a UI context.",
+      "properties": {
+        "id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/flow.json#/definitions/flow_id"
+        },
+        "sequence_number": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/flow.json#/definitions/sequence_number"
+        }
+      },
+      "required": [
+        "id",
+        "sequence_number"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

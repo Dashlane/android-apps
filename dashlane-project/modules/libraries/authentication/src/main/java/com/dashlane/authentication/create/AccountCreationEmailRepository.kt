@@ -16,7 +16,7 @@ interface AccountCreationEmailRepository {
         AuthenticationContactSsoAdministratorException::class,
         AuthenticationNetworkException::class,
         AuthenticationUnknownException::class,
-        AuthenticationExpiredVersionException::class
+        AuthenticationExpiredVersionException::class,
     )
     suspend fun validate(email: String): Result
 
@@ -27,11 +27,11 @@ interface AccountCreationEmailRepository {
             val isEuropeanUnion: Boolean,
             val ssoServiceProviderUrl: String?,
             val ssoIsNitroProvider: Boolean,
-            val isB2B: Boolean
+            val isB2B: Boolean,
         ) : Result()
 
         data class Warning(
-            val success: Success
+            val success: Success,
         ) : Result()
     }
 }

@@ -9,7 +9,6 @@ import javax.inject.Inject
 class EmailListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.Email> {
-
     override fun getTitle(item: SummaryObject.Email): StatusText {
         return StatusText(if (item.emailName.isSemanticallyNull()) resources.getString(R.string.email) else item.emailName!!)
     }

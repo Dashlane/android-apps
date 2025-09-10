@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="welcome_header">Login with QR Code</string>
+    
+    <string name="welcome_step_1">Open \"Settings\" in your Dashlane mobile app</string>
+    
+    <string name="welcome_step_2">Select \"Add new device\"</string>
+    
+    <string name="welcome_step_3">Scan the QR code on your watch</string>
+    
+    <string name="welcome_show_qr_code_button">Show QR Code</string>
+</resources>

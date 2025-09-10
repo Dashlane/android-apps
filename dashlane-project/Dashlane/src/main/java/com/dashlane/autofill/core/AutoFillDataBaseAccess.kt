@@ -13,6 +13,9 @@ import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
+import com.dashlane.storage.userdata.accessor.copyWithDefaultValue
+import com.dashlane.storage.userdata.accessor.copyWithNewPassword
+import com.dashlane.storage.userdata.accessor.copyWithNewUrl
 import com.dashlane.storage.userdata.accessor.filter.GenericFilter
 import com.dashlane.storage.userdata.accessor.filter.counterFilter
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
@@ -23,10 +26,10 @@ import com.dashlane.url.root
 import com.dashlane.url.toUrlDomainOrNull
 import com.dashlane.url.toUrlOrNull
 import com.dashlane.util.PackageUtilities
-import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.util.isValidEmail
 import com.dashlane.util.obfuscated.toSyncObfuscatedValue
 import com.dashlane.util.valueWithoutWww
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
@@ -36,19 +39,16 @@ import com.dashlane.vault.model.createAuthentifiant
 import com.dashlane.vault.model.createPaymentCreditCard
 import com.dashlane.vault.model.formatTitle
 import com.dashlane.vault.summary.SummaryObject
-import com.dashlane.vault.util.copyWithDefaultValue
-import com.dashlane.vault.util.copyWithNewPassword
-import com.dashlane.vault.util.copyWithNewUrl
 import com.dashlane.vault.util.getSignatureVerificationWith
 import com.dashlane.xml.domain.SyncObfuscatedValue
 import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.Month
 import java.time.Year
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 
 @Suppress("LargeClass")
 class AutoFillDataBaseAccess @Inject constructor(
@@ -63,14 +63,14 @@ class AutoFillDataBaseAccess @Inject constructor(
     private val linkedServicesHelper: LinkedServicesHelper,
     private val dataSync: DataSync,
     private val knownApplicationProvider: KnownApplicationProvider,
-    private val packageNameSignatureHelper: PackageNameSignatureHelper
+    private val packageNameSignatureHelper: PackageNameSignatureHelper,
 ) : AutofillAnalyzerDef.DatabaseAccess {
-
     private var lastResult: LastResult? = null
 
     override val isLoggedIn: Boolean
         get() = sessionManager.session != null
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : SummaryObject> loadSummary(uid: String): T? {
         return genericDataQuery.queryFirst(GenericFilter(uid)) as? T
     }
@@ -84,7 +84,7 @@ class AutoFillDataBaseAccess @Inject constructor(
 
         val packageNameCredentials = loadAuthentifiantsForPackageName(packageName)
         val packageNameDomainsCredentials = loadAuthentifiantsPackageNameWhiteListDomains(packageName)?.let {
-            it - packageNameCredentials
+            it - packageNameCredentials.toSet()
         } ?: emptyList()
 
         
@@ -143,6 +143,7 @@ class AutoFillDataBaseAccess @Inject constructor(
         return credentials
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : SummaryObject> loadSummaries(type: SyncObjectType): List<T>? {
         if (!isLoggedIn) return null
         val filter = genericFilter {
@@ -152,13 +153,14 @@ class AutoFillDataBaseAccess @Inject constructor(
         return genericDataQuery.queryAll(filter).mapNotNull { it as? T }
     }
 
-    override fun <T : SyncObject> loadSyncObject(itemId: String): VaultItem<T>? {
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun <T : SyncObject> loadSyncObject(itemId: String): VaultItem<T>? {
         if (!isLoggedIn) return null
         val filter = vaultFilter {
             ignoreUserLock()
             specificUid(itemId)
         }
-        return vaultDataQuery.queryLegacy(filter) as? VaultItem<T>
+        return vaultDataQuery.query(filter) as? VaultItem<T>
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -169,7 +171,7 @@ class AutoFillDataBaseAccess @Inject constructor(
         login: String,
         password: String,
         packageName: String?,
-        spaceId: String?
+        spaceId: String?,
     ): VaultItem<SyncObject.Authentifiant>? {
         if (!isLoggedIn) return null
 
@@ -187,7 +189,7 @@ class AutoFillDataBaseAccess @Inject constructor(
                 syncState = SyncState.MODIFIED,
                 creationDate = createTimestamp,
                 userModificationDate = createTimestamp,
-                teamSpaceId = spaceId
+                teamSpaceId = spaceId,
             ),
             title = title,
             deprecatedUrl = website,
@@ -196,8 +198,8 @@ class AutoFillDataBaseAccess @Inject constructor(
             password = obfuscatedPassword,
             autoLogin = "true",
             passwordModificationDate = createTimestamp,
-            linkedServices = linkedServices
-        ).copyWithDefaultValue(context, sessionManager.session) as VaultItem<SyncObject.Authentifiant>
+            linkedServices = linkedServices,
+        ).copyWithDefaultValue(context) as VaultItem<SyncObject.Authentifiant>
         if (!dataSaver.save(newCredential)) {
             
             return null
@@ -210,7 +212,7 @@ class AutoFillDataBaseAccess @Inject constructor(
         website: String?,
         packageName: String,
         login: String?,
-        password: String?
+        password: String?,
     ): VaultItem<SyncObject.Authentifiant>? {
         if (!isLoggedIn) return null
 
@@ -225,7 +227,7 @@ class AutoFillDataBaseAccess @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     override suspend fun updateAuthentifiantWebsite(
         uid: String,
-        website: String
+        website: String,
     ): VaultItem<SyncObject.Authentifiant>? {
         if (!isLoggedIn) return null
 
@@ -233,22 +235,42 @@ class AutoFillDataBaseAccess @Inject constructor(
             specificUid(uid)
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
-        val account = vaultDataQuery.queryLegacy(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
-        val updatedAccount = account.copyWithNewUrl(website).copyWithAttrs { syncState = SyncState.MODIFIED }
+        val account = vaultDataQuery.query(filter) as VaultItem<SyncObject.Authentifiant>?
+            ?: return null
+        val updatedAccount =
+            account.copyWithNewUrl(website).copyWithAttrs { syncState = SyncState.MODIFIED }
         dataSaver.save(updatedAccount)
         return updatedAccount
     }
 
     override suspend fun updateLastViewDate(
         itemId: String,
-        instant: Instant
+        instant: Instant,
     ) {
         if (!isLoggedIn) return
 
         val filter = vaultFilter {
             specificUid(itemId)
         }
-        val updatedAccount = vaultDataQuery.queryLegacy(filter)?.copyWithAttrs { locallyViewedDate = instant } ?: return
+        val updatedAccount = vaultDataQuery.query(filter)?.copyWithAttrs { locallyViewedDate = instant } ?: return
+        dataSaver.save(updatedAccount)
+    }
+
+    override suspend fun updateLastUsed(itemId: String, instant: Instant) {
+        if (!isLoggedIn) return
+
+        val filter = vaultFilter {
+            specificUid(itemId)
+        }
+        val updatedAccount = vaultDataQuery.query(filter)
+            ?.asVaultItemOfClassOrNull(SyncObject.Authentifiant::class.java)
+            ?.copyWithAttrs {
+                syncState = SyncState.MODIFIED
+            }
+            ?.copySyncObject {
+                lastUse = instant
+            }
+            ?: return
         dataSaver.save(updatedAccount)
     }
 
@@ -257,7 +279,7 @@ class AutoFillDataBaseAccess @Inject constructor(
         packageName: String,
         context: Context,
         password: String?,
-        login: String?
+        login: String?,
     ): VaultItem<*> {
         val createTimestamp = Instant.now()
         val (linkedServices, deprecatedUrl, newTitle) = getAuthentifiantData(website, packageName, context)
@@ -269,7 +291,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             dataIdentifier = CommonDataIdentifierAttrsImpl(
                 syncState = SyncState.MODIFIED,
                 creationDate = createTimestamp,
-                userModificationDate = createTimestamp
+                userModificationDate = createTimestamp,
             ),
             title = newTitle,
             deprecatedUrl = deprecatedUrl,
@@ -278,8 +300,8 @@ class AutoFillDataBaseAccess @Inject constructor(
             password = obfuscatedPassword,
             autoLogin = "true",
             passwordModificationDate = createTimestamp,
-            linkedServices = linkedServices
-        ).copyWithDefaultValue(context, sessionManager.session)
+            linkedServices = linkedServices,
+        ).copyWithDefaultValue(context)
     }
 
     private fun getLoginAndEmail(login: String?): Pair<String?, String?> {
@@ -297,7 +319,7 @@ class AutoFillDataBaseAccess @Inject constructor(
     private fun getAuthentifiantData(
         website: String?,
         packageName: String,
-        context: Context
+        context: Context,
     ): Triple<SyncObject.Authentifiant.LinkedServices?, String?, String?> {
         val newTitle: String?
         val deprecatedUrl: String?
@@ -314,7 +336,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             
             val appWebsite = knownApplicationProvider.getKnownApplication(packageName)?.mainDomain
             newTitle = SyncObject.Authentifiant.formatTitle(
-                appWebsite ?: PackageUtilities.getApplicationNameFromPackage(context, packageName)
+                appWebsite ?: PackageUtilities.getApplicationNameFromPackage(context, packageName),
             )
             deprecatedUrl = appWebsite
         }
@@ -325,7 +347,7 @@ class AutoFillDataBaseAccess @Inject constructor(
         number: String?,
         securityCode: String?,
         expireMonth: Month?,
-        expireYear: Year?
+        expireYear: Year?,
     ): VaultItem<SyncObject.PaymentCreditCard>? {
         if (!isLoggedIn) return null
         val creditCard = createPaymentCreditCard(
@@ -333,7 +355,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             cardNumber = number.toSyncObfuscatedValue(),
             securityCode = securityCode,
             expireMonth = expireMonth,
-            expireYear = expireYear
+            expireYear = expireYear,
         )
         if (dataSaver.save(creditCard)) {
             return creditCard
@@ -344,7 +366,7 @@ class AutoFillDataBaseAccess @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     override suspend fun updateAuthentifiantPassword(
         uid: String?,
-        password: String?
+        password: String?,
     ): VaultItem<SyncObject.Authentifiant>? {
         if (!isLoggedIn || uid == null || password == null) return null
 
@@ -352,7 +374,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             specificUid(uid)
             specificDataType(SyncObjectType.AUTHENTIFIANT)
         }
-        val account = vaultDataQuery.queryLegacy(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
+        val account = vaultDataQuery.query(filter) as VaultItem<SyncObject.Authentifiant>? ?: return null
         val updatedAccount = account.copyWithNewPassword(password).copyWithAttrs { syncState = SyncState.MODIFIED }
         dataSaver.save(updatedAccount)
         return updatedAccount
@@ -366,9 +388,9 @@ class AutoFillDataBaseAccess @Inject constructor(
                     listOf(
                         SyncObject.Authentifiant.LinkedServices.AssociatedDomains(
                             website.toUrlDomainOrNull()?.valueWithoutWww(),
-                            SyncObject.Authentifiant.LinkedServices.AssociatedDomains.Source.REMEMBER
-                        )
-                    )
+                            SyncObject.Authentifiant.LinkedServices.AssociatedDomains.Source.REMEMBER,
+                        ),
+                    ),
                 )
                 val toSaveItem = vault.copySyncObject {
                     linkedServices = newLinkedServices
@@ -394,7 +416,7 @@ class AutoFillDataBaseAccess @Inject constructor(
                 loadSyncObject<SyncObject.Authentifiant>(uid)?.let { vault ->
                     val newLinkedServices = linkedServicesHelper.addLinkedApps(
                         vault.syncObject.linkedServices,
-                        it.associatedAndroidApps ?: emptyList()
+                        it.associatedAndroidApps ?: emptyList(),
                     )
                     val toSaveItem = vault.copySyncObject {
                         linkedServices = newLinkedServices
@@ -421,7 +443,7 @@ class AutoFillDataBaseAccess @Inject constructor(
             counterFilter {
                 ignoreUserLock()
                 specificDataType(SyncObjectType.AUTHENTIFIANT)
-            }
+            },
         )
 
     private fun getCachedResult(query: String): List<SummaryObject.Authentifiant>? {
@@ -432,5 +454,8 @@ class AutoFillDataBaseAccess @Inject constructor(
         lastResult = LastResult(query, authentifiants)
     }
 
-    private data class LastResult(val query: String, val authentifiants: List<SummaryObject.Authentifiant>)
+    private data class LastResult(
+        val query: String,
+        val authentifiants: List<SummaryObject.Authentifiant>,
+    )
 }

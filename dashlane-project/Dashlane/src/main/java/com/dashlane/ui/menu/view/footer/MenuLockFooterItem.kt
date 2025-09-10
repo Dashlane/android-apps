@@ -34,9 +34,9 @@ fun MenuLockFooterItem(onLockoutClick: () -> Unit) {
             topStart = noCorner,
             topEnd = noCorner,
             bottomEnd = noCorner,
-            bottomStart = noCorner
+            bottomStart = noCorner,
         ),
-        animationSpec = null
+        animationSpec = null,
     )
 }
 

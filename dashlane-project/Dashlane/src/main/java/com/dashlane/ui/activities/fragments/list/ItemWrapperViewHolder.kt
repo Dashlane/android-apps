@@ -31,7 +31,6 @@ import com.dashlane.vault.util.isProtected
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItemWrapper<out SummaryObject>>(itemView) {
-
     public override fun updateView(context: Context, item: VaultItemWrapper<out SummaryObject>?) {
         item?.let {
             updateText(context, item)
@@ -69,7 +68,7 @@ open class ItemWrapperViewHolder(itemView: View) : EfficientViewHolder<VaultItem
                 background = context.getThemeAttrDrawable(android.R.attr.selectableItemBackground)
                 layoutParams = LinearLayout.LayoutParams(
                     context.resources.getDimensionPixelSize(R.dimen.minimum_clickable_area_size),
-                    context.resources.getDimensionPixelSize(R.dimen.minimum_clickable_area_size)
+                    context.resources.getDimensionPixelSize(R.dimen.minimum_clickable_area_size),
                 )
                 constraintLayout.addView(this)
                 flowActionsMenu.addView(this)

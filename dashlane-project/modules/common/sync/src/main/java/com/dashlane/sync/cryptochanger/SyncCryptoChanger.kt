@@ -4,12 +4,11 @@ import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.CryptographyMarker
 import com.dashlane.server.api.Authorization
-import com.dashlane.server.api.endpoints.sync.MasterPasswordUploadService
+import com.dashlane.server.api.endpoints.sync.UploadDataForMasterPasswordChangeService
 import com.dashlane.sync.vault.SyncVault
 import com.dashlane.xml.domain.SyncObject
 
 interface SyncCryptoChanger {
-
     suspend fun updateCryptography(
         authorization: Authorization.User,
         appKey: AppKey,
@@ -20,15 +19,15 @@ interface SyncCryptoChanger {
         authTicket: String? = null,
         ssoServerKey: ByteArray? = null,
         syncVault: SyncVault,
-        uploadReason: MasterPasswordUploadService.Request.UploadReason? = null,
-        publishProgress: suspend (Progress) -> Unit = {}
+        uploadReason: UploadDataForMasterPasswordChangeService.Request.UploadReason? = null,
+        publishProgress: suspend (Progress) -> Unit = {},
     ): SyncObject.Settings
 
     suspend fun updateCryptography(
         authorization: Authorization.User,
         appKey: AppKey,
         vaultKey: VaultKey,
-        cryptographyMarker: CryptographyMarker
+        cryptographyMarker: CryptographyMarker,
     ): SyncObject.Settings
 
     suspend fun reAuthorizeDevice(authorization: Authorization.User)

@@ -9,9 +9,8 @@ import javax.inject.Inject
 
 @Reusable
 class M2xIntentFactoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) : M2xIntentFactory {
-
     override fun buildM2xConnect(): Intent =
         M2wIntentCoordinator.createConnectActivityIntent(context)
 }

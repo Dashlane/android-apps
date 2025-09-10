@@ -26,9 +26,13 @@ interface SharingItemsForUserViewModelContract {
 
     sealed class UIState {
         object Loading : UIState()
+
         object RequestLoading : UIState()
+
         object RequestSuccess : UIState()
+
         object RequestFailure : UIState()
+
         data class Data(val items: List<SharingModels.ItemUser> = emptyList()) : UIState()
     }
 }

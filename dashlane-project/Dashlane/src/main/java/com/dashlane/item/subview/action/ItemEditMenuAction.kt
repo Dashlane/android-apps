@@ -10,9 +10,8 @@ open class ItemEditMenuAction(
     checkable: Boolean = false,
     checked: Boolean = false,
     action: (Activity) -> Unit = {},
-    val valueUpdate: (VaultItem<*>) -> VaultItem<*>?
+    val valueUpdate: (VaultItem<*>) -> VaultItem<*>?,
 ) : MenuAction(title, icon, displayFlags, checkable, checked, null, true, action) {
-
     fun updateValue(item: VaultItem<*>): VaultItem<*> {
         return valueUpdate(item) ?: item
     }

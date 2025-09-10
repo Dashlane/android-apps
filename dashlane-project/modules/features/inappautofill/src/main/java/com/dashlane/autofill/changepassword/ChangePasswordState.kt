@@ -8,12 +8,12 @@ sealed class AutofillChangePasswordState {
     abstract val data: AutofillChangePasswordData
 
     data class Initial(
-        override val data: AutofillChangePasswordData
+        override val data: AutofillChangePasswordData,
     ) : AutofillChangePasswordState()
 
     data class PrefillLogin(
         override val data: AutofillChangePasswordData,
-        val logins: List<String>
+        val logins: List<String>,
     ) : AutofillChangePasswordState()
 
     data class PasswordChanged(
@@ -23,12 +23,12 @@ sealed class AutofillChangePasswordState {
     ) : AutofillChangePasswordState()
 
     data class Cancelled(
-        override val data: AutofillChangePasswordData
+        override val data: AutofillChangePasswordData,
     ) : AutofillChangePasswordState()
 
     data class Error(
         override val data: AutofillChangePasswordData,
-        val error: AutofillChangePasswordErrors
+        val error: AutofillChangePasswordErrors,
     ) : AutofillChangePasswordState()
 }
 

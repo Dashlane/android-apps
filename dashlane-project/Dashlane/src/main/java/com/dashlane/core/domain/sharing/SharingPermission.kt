@@ -6,7 +6,7 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
 enum class SharingPermission(val stringResource: Int) {
     ADMIN(R.string.enum_sharing_permission_admin),
     LIMITED(R.string.enum_sharing_permission_limited),
-    REVOKED(R.string.enum_sharing_permission_revoked);
+    REVOKED(R.string.enum_sharing_permission_revoked),
 }
 
 fun SharingPermission.toUserPermission(): Permission = when (this) {

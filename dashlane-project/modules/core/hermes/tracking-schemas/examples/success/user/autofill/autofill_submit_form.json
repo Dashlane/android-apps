@@ -1,0 +1,49 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:43+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "browse": {
+    "origin_component": "os_autofill"
+  },
+  "context": {
+    "user": {
+      "id": "b293a330-2e7c-4a69-b1c6-4f5cae8b8a9b"
+    },
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "id": "514ecc2f-2431-4b03-9f6d-dfc832e05591",
+      "os": {
+        "type": "linux",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "web",
+      "build_type": "dev"
+    },
+    "browser": {
+      "user_agent": "Mozilla/5.0 (X11; U; SunOS sun4u; en-US; rv:1.9b5) Gecko/2008032620 Firefox/3.0b5",
+      "name": "Firefox",
+      "version": "3.0b5"
+    }
+  },
+  "properties": {
+    "name": "autofill_submit_form",
+    "fields_detected_by_analysis_engine_count": 2,
+    "fields_filled_by": {
+      "autofill_count": 1,
+      "autologin_count": 0,
+      "manually_typed_count": 2
+    },
+    "form_loaded_at_date_time": "2020-06-13T20:20:39+00:00",
+    "form_submitted_at_date_time": "2020-06-13T20:20:43+00:00",
+    "form_type": "login",
+    "has_modified_initially_autofilled_value": false,
+    "has_password_field": true,
+    "total_form_fields_count": 3
+  }
+}

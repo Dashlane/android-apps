@@ -13,7 +13,7 @@ import javax.inject.Inject
 class SpaceDeletedNotifier @Inject constructor(
     private val sessionManager: SessionManager,
     private val preferencesManager: PreferencesManager,
-    private val spaceDeletedService: SpaceDeletedService
+    private val spaceDeletedService: SpaceDeletedService,
 ) {
     suspend fun sendIfNeeded(session: Session) {
         val spaceIds = preferencesManager[session.username].getStringSet(PREF_SPACE_IDS)
@@ -58,7 +58,7 @@ class SpaceDeletedNotifier @Inject constructor(
                 userAuthorization = userAuthorization,
                 request = SpaceDeletedService.Request(
                     teamId = spaceId,
-                )
+                ),
             )
         }
 

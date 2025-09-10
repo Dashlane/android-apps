@@ -5,6 +5,7 @@ package com.dashlane.vault
 import com.dashlane.ext.application.TrustedBrowserApplication
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.Sha256Hash
+import com.dashlane.hermes.activityLog
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.hermes.generated.definitions.Domain
 import com.dashlane.hermes.generated.definitions.DomainType
@@ -27,13 +28,23 @@ import com.dashlane.hermes.generated.events.user.RevealVaultItemField
 import com.dashlane.hermes.generated.events.user.SelectVaultItem
 import com.dashlane.hermes.generated.events.user.UpdateVaultItem
 import com.dashlane.hermes.generated.events.user.UpdateVaultItemAttachment
+import com.dashlane.hermes.generated.events.user.UseVaultItem
 import com.dashlane.hermes.generated.events.user.ViewVaultItemAttachment
+import com.dashlane.server.api.endpoints.teams.ActivityLog
+import com.dashlane.server.api.endpoints.teams.Properties
+import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.shouldCaptureActivityLog
 import com.dashlane.useractivity.hermes.TrackingLogUtils
+import com.dashlane.util.inject.OptionalProvider
+import com.dashlane.vault.model.VaultItem
+import com.dashlane.vault.model.isSemanticallyNull
+import com.dashlane.xml.domain.SyncObject
 import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
 class VaultItemLogger @Inject constructor(
-    private val logRepository: LogRepository
+    private val logRepository: LogRepository,
+    private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
 ) {
     fun logCopyField(
         highlight: Highlight? = null,
@@ -43,7 +54,7 @@ class VaultItemLogger @Inject constructor(
         totalCount: Int? = null,
         index: Double? = null,
         isProtected: Boolean,
-        domain: String?
+        domain: String?,
     ) {
         logRepository.queueEvent(
             CopyVaultItemField(
@@ -53,16 +64,16 @@ class VaultItemLogger @Inject constructor(
                 itemId = ItemId(id = itemId),
                 itemType = itemType,
                 totalCount = totalCount,
-                isProtected = isProtected
-            )
+                isProtected = isProtected,
+            ),
         )
         domain?.let {
             logRepository.queueEvent(
                 CopyVaultItemFieldAnonymous(
                     field = field,
                     itemType = itemType,
-                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
-                )
+                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB),
+                ),
             )
         }
     }
@@ -70,7 +81,7 @@ class VaultItemLogger @Inject constructor(
     fun logOpenExternalLink(
         itemId: String,
         packageName: String,
-        url: String?
+        url: String?,
     ) {
         val isBrowser = TrustedBrowserApplication.getAppForPackage(packageName) != null
         val domain = if (isBrowser) {
@@ -83,15 +94,57 @@ class VaultItemLogger @Inject constructor(
             OpenExternalVaultItemLink(
                 domainType = domain.type,
                 itemId = ItemId(id = itemId),
-                itemType = ItemTypeWithLink.CREDENTIAL
-            )
+                itemType = ItemTypeWithLink.CREDENTIAL,
+            ),
         )
 
         logRepository.queueEvent(
             OpenExternalVaultItemLinkAnonymous(
                 itemType = ItemTypeWithLink.CREDENTIAL,
-                domain = domain
-            )
+                domain = domain,
+            ),
+        )
+    }
+
+    fun activityLogRevealCreditCardField(
+        item: VaultItem<SyncObject.PaymentCreditCard>,
+        propertyField: Properties.Field,
+        logType: ActivityLog.LogType,
+    ) {
+        sendActivityLog(
+            summary = item,
+            logType = logType,
+            properties = Properties(name = item.syncObject.name, field = propertyField),
+        )
+    }
+
+    fun activityLogRevealBankField(
+        item: VaultItem<SyncObject.BankStatement>,
+        propertyField: Properties.Field,
+        logType: ActivityLog.LogType,
+    ) {
+        sendActivityLog(
+            summary = item,
+            logType = logType,
+            properties = Properties(name = item.syncObject.bankAccountName, field = propertyField),
+        )
+    }
+
+    fun activityLogRevealField(
+        login: String?,
+        spaceId: String?,
+        domain: String?,
+        propertyField: Properties.Field,
+        logType: ActivityLog.LogType,
+    ) {
+        sendActivityLog(
+            spaceId = spaceId,
+            logType = logType,
+            properties = Properties(
+                credentialLogin = login,
+                credentialDomain = domain,
+                field = propertyField,
+            ),
         )
     }
 
@@ -99,23 +152,23 @@ class VaultItemLogger @Inject constructor(
         field: Field,
         itemId: String,
         itemType: ItemType,
-        domain: String?
+        domain: String?,
     ) {
         logRepository.queueEvent(
             RevealVaultItemField(
                 field = field,
                 itemId = ItemId(id = itemId),
                 itemType = itemType,
-                isProtected = false
-            )
+                isProtected = false,
+            ),
         )
         domain?.let {
             logRepository.queueEvent(
                 RevealVaultItemFieldAnonymous(
                     field = field,
                     itemType = itemType,
-                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB)
-                )
+                    domain = Domain(Sha256Hash.of(domain), DomainType.WEB),
+                ),
             )
         }
     }
@@ -125,7 +178,7 @@ class VaultItemLogger @Inject constructor(
         itemId: String,
         index: Int?,
         itemType: ItemType,
-        totalCount: Int?
+        totalCount: Int?,
     ) {
         logRepository.queueEvent(
             SelectVaultItem(
@@ -133,8 +186,8 @@ class VaultItemLogger @Inject constructor(
                 index = index?.toDouble(),
                 itemId = ItemId(id = itemId),
                 itemType = itemType,
-                totalCount = totalCount
-            )
+                totalCount = totalCount,
+            ),
         )
     }
 
@@ -148,7 +201,8 @@ class VaultItemLogger @Inject constructor(
         addedWebsites: List<String>?,
         removedWebsites: List<String>?,
         removedApps: List<String>?,
-        collectionCount: Int? = null 
+        
+        collectionCount: Int? = null,
     ) {
         logRepository.queueEvent(
             UpdateVaultItem(
@@ -157,8 +211,8 @@ class VaultItemLogger @Inject constructor(
                 itemId = ItemId(id = itemId),
                 itemType = itemType,
                 space = space,
-                collectionCount = collectionCount
-            )
+                collectionCount = collectionCount,
+            ),
         )
 
         if (itemType == ItemType.CREDENTIAL) {
@@ -171,7 +225,7 @@ class VaultItemLogger @Inject constructor(
                     associatedWebsitesAddedList = addedWebsites?.map { Sha256Hash.of(it) },
                     associatedWebsitesRemovedList = removedWebsites?.map { Sha256Hash.of(it) },
                     associatedAppsRemovedList = removedApps?.map { Sha256Hash.of(it) },
-                )
+                ),
             )
         }
     }
@@ -180,8 +234,8 @@ class VaultItemLogger @Inject constructor(
         logRepository.queueEvent(
             DownloadVaultItemAttachment(
                 itemId = ItemId(id = itemId),
-                itemType = itemType
-            )
+                itemType = itemType,
+            ),
         )
     }
 
@@ -190,8 +244,8 @@ class VaultItemLogger @Inject constructor(
             UpdateVaultItemAttachment(
                 attachmentAction = action,
                 itemId = ItemId(id = itemId),
-                itemType = itemType
-            )
+                itemType = itemType,
+            ),
         )
     }
 
@@ -199,14 +253,56 @@ class VaultItemLogger @Inject constructor(
         logRepository.queueEvent(
             ViewVaultItemAttachment(
                 itemId = ItemId(id = itemId),
-                itemType = itemType
-            )
+                itemType = itemType,
+            ),
         )
     }
 
     fun logPasswordRestored(itemId: String, url: String?) {
         logRepository.queueEvent(RestorePassword(ItemId(id = itemId)))
         logRepository.queueEvent(RestorePasswordAnonymous(TrackingLogUtils.createWebDomainForLog(url.orEmpty())))
+    }
+
+    fun logDisplayWiFiQrCode(itemId: String) {
+        logRepository.queueEvent(
+            UseVaultItem(
+                itemId = ItemId(id = itemId),
+                itemType = ItemType.WIFI,
+                action = Action.DISPLAY_QR_CODE,
+                fieldsUsed = listOf(Field.PASSPHRASE, Field.SSID),
+            ),
+        )
+    }
+
+    fun logConnectToWiFi(itemId: String) {
+        logRepository.queueEvent(
+            UseVaultItem(
+                itemId = ItemId(id = itemId),
+                itemType = ItemType.WIFI,
+                action = Action.DISPLAY_QR_CODE,
+                fieldsUsed = listOf(Field.PASSPHRASE, Field.SSID),
+            ),
+        )
+    }
+
+    private fun sendActivityLog(
+        summary: VaultItem<*>,
+        logType: ActivityLog.LogType,
+        properties: Properties,
+    ) {
+        val teamSpaceAccessor = teamSpaceAccessorProvider.get() ?: return
+        if (!summary.shouldCaptureActivityLog(teamSpaceAccessor)) return
+        logRepository.queueEvent(activityLog(logType = logType, properties = properties))
+    }
+
+    private fun sendActivityLog(
+        spaceId: String?,
+        logType: ActivityLog.LogType,
+        properties: Properties,
+    ) {
+        val teamSpaceAccessor = teamSpaceAccessorProvider.get() ?: return
+        if (spaceId.isSemanticallyNull() || teamSpaceAccessor.get(spaceId)?.isCollectSensitiveDataActivityLogsEnabled ?: false) return
+        logRepository.queueEvent(activityLog(logType = logType, properties = properties))
     }
 }
 
@@ -215,7 +311,7 @@ fun SyncObjectType.toItemTypeOrNull() = when (this) {
     SyncObjectType.AUTHENTIFIANT, SyncObjectType.PASSKEY -> ItemType.CREDENTIAL
     SyncObjectType.BANK_STATEMENT -> ItemType.BANK_STATEMENT
     SyncObjectType.COMPANY -> ItemType.COMPANY
-    SyncObjectType.DRIVER_LICENCE -> ItemType.DRIVER_LICENCE
+    SyncObjectType.DRIVER_LICENCE -> ItemType.DRIVER_LICENSE
     SyncObjectType.EMAIL -> ItemType.EMAIL
     SyncObjectType.FISCAL_STATEMENT -> ItemType.FISCAL_STATEMENT
     SyncObjectType.GENERATED_PASSWORD -> ItemType.GENERATED_PASSWORD
@@ -229,7 +325,9 @@ fun SyncObjectType.toItemTypeOrNull() = when (this) {
     SyncObjectType.SECURITY_BREACH -> ItemType.SECURITY_BREACH
     SyncObjectType.SOCIAL_SECURITY_STATEMENT -> ItemType.SOCIAL_SECURITY
     SyncObjectType.SECRET -> ItemType.SECRET
+    SyncObjectType.WI_FI -> ItemType.WIFI
     else -> null
 }
 
-fun SyncObjectType.toItemType() = toItemTypeOrNull() ?: throw IllegalStateException("No ItemType for $this")
+fun SyncObjectType.toItemType() =
+    toItemTypeOrNull() ?: throw IllegalStateException("No ItemType for $this")

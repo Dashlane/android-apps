@@ -25,9 +25,8 @@ import com.dashlane.xml.domain.SyncObject
 class ItemScreenConfigurationWebsiteProvider(
     private val teamSpaceAccessor: TeamSpaceAccessor,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -35,12 +34,12 @@ class ItemScreenConfigurationWebsiteProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.PersonalWebsite>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, canDelete, editMode, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -52,7 +51,7 @@ class ItemScreenConfigurationWebsiteProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val websiteTitle = context.getString(R.string.personal_website)
         return ItemHeader(
@@ -69,7 +68,7 @@ class ItemScreenConfigurationWebsiteProvider(
         subViewFactory: SubViewFactory,
         canDelete: Boolean,
         editMode: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         val websiteView = createWebsiteField(subViewFactory, context, item, editMode)
         return listOfNotNull(
@@ -86,21 +85,21 @@ class ItemScreenConfigurationWebsiteProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
         item: VaultItem<SyncObject.PersonalWebsite>,
-        websiteView: ItemSubView<String>?
+        websiteView: ItemSubView<String>?,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 listOfNotNull(websiteView),
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -111,14 +110,14 @@ class ItemScreenConfigurationWebsiteProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.PersonalWebsite>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<String>? {
         val website = item.syncObject.website
         val websiteView = subViewFactory.createSubViewString(
             context.getString(R.string.personal_website_hint_url),
             website,
             false,
-            VaultItem<*>::copyForUpdatedWebsite
+            VaultItem<*>::copyForUpdatedWebsite,
         )
         return if (websiteView == null || editMode) {
             websiteView
@@ -128,8 +127,8 @@ class ItemScreenConfigurationWebsiteProvider(
                 CopyAction(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.PersonalWebsite,
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -137,13 +136,13 @@ class ItemScreenConfigurationWebsiteProvider(
     private fun createNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.PersonalWebsite>
+        item: VaultItem<SyncObject.PersonalWebsite>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.personal_website_hint_name),
             item.syncObject.name,
             false,
-            VaultItem<*>::copyForUpdatedName
+            VaultItem<*>::copyForUpdatedName,
         )
     }
 }

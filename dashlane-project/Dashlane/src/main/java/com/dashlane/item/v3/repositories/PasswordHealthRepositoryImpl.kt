@@ -13,11 +13,11 @@ import javax.inject.Inject
 class PasswordHealthRepositoryImpl @Inject constructor(
     private val itemEditRepository: ItemEditRepository,
     private val vaultDataQuery: VaultDataQuery,
-    private val passwordStrengthEvaluator: PasswordStrengthEvaluator
+    private val passwordStrengthEvaluator: PasswordStrengthEvaluator,
 ) : PasswordHealthRepository {
     override suspend fun getPasswordHealth(
         itemId: String?,
-        password: String?
+        password: String?,
     ): PasswordHealthData {
         val loadedPassword = password ?: itemId?.let { uid ->
             vaultDataQuery.query(vaultFilter { specificUid(uid) })
@@ -33,7 +33,7 @@ class PasswordHealthRepositoryImpl @Inject constructor(
                 isCompromised = false,
                 isPasswordEmpty = true,
                 reusedCount = 0,
-                passwordStrength = null
+                passwordStrength = null,
             )
         }
         val securityBreaches =
@@ -47,7 +47,7 @@ class PasswordHealthRepositoryImpl @Inject constructor(
             passwordStrength = passwordStrength,
             isCompromised = isCompromised,
             reusedCount = reusedCount,
-            isPasswordEmpty = false
+            isPasswordEmpty = false,
         )
     }
 }

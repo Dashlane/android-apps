@@ -14,14 +14,12 @@ import androidx.biometric.BiometricManager
 import com.dashlane.ui.util.DialogHelper
 import com.dashlane.user.Username
 import com.dashlane.user.isSmokeTestAccount
-import com.dashlane.util.queryIntentActivitiesCompat
 import javax.inject.Inject
 
 class SecurityHelper @Inject constructor(
     private val keyguardManager: KeyguardManager,
-    packageManager: PackageManager
+    packageManager: PackageManager,
 ) {
-
     val intentHelper = IntentHelper(packageManager)
 
     fun isDeviceSecured(username: Username?): Boolean {
@@ -37,66 +35,29 @@ class SecurityHelper @Inject constructor(
             return
         }
         val builder = DialogHelper().builder(activity)
-        builder.setTitle(R.string.settings_use_pincode_need_screen_lock_title)
+        builder
+            .setTitle(R.string.settings_use_pincode_need_screen_lock_title)
             .setMessage(R.string.settings_use_pincode_need_screen_lock_description)
             .setNegativeButton(R.string.settings_use_pincode_need_screen_lock_action_dontuse, null)
             .setPositiveButtonStartSecuritySettingsIfAvailable(
                 activity,
-                R.string.settings_use_pincode_need_screen_lock_action_settings
-            )
-            .show()
-    }
-
-    fun showPopupBiometricsRequired(activity: Context, onCancel: () -> Unit) {
-        DialogHelper()
-            .builder(activity)
-            .setTitle(R.string.biometric_prompt_registration_required_title)
-            .setMessage(R.string.biometric_prompt_registration_required_message)
-            .setNegativeButton(R.string.biometric_prompt_registration_required_button_cancel) { _, _ -> onCancel() }
-            .setPositiveButtonRegisterBiometricsIfAvailable(
-                activity,
-                R.string.biometric_prompt_registration_required_button_continue
-            )
-            .setOnCancelListener { onCancel() }
-            .show()
-    }
-
-    fun showPopupStrongerBiometricsRequired(activity: Context, onCancel: () -> Unit) {
-        DialogHelper()
-            .builder(activity)
-            .setTitle(R.string.biometric_prompt_strong_registration_required_title)
-            .setMessage(R.string.biometric_prompt_strong_registration_required_message)
-            .setNegativeButton(R.string.biometric_prompt_strong_registration_required_button_cancel) { _, _ -> onCancel() }
-            .setPositiveButtonRegisterBiometricsIfAvailable(
-                activity,
-                R.string.biometric_prompt_strong_registration_required_button_continue
-            )
-            .setOnDismissListener { onCancel() }
-            .show()
+                R.string.settings_use_pincode_need_screen_lock_action_settings,
+            ).show()
     }
 
     private fun AlertDialog.Builder.setPositiveButtonStartSecuritySettingsIfAvailable(
         activity: Context,
         @StringRes
-        textId: Int
+        textId: Int,
     ) = apply {
         val intent = intentHelper.findEnableDeviceLockIntent()
-        setPositiveButtonIfIntentNotNull(activity, textId, intent)
-    }
-
-    private fun AlertDialog.Builder.setPositiveButtonRegisterBiometricsIfAvailable(
-        activity: Context,
-        @StringRes
-        textId: Int
-    ) = apply {
-        val intent = intentHelper.findEnableBiometricsIntent()
         setPositiveButtonIfIntentNotNull(activity, textId, intent)
     }
 
     private fun AlertDialog.Builder.setPositiveButtonIfIntentNotNull(
         activity: Context,
         textId: Int,
-        intent: Intent?
+        intent: Intent?,
     ) {
         if (intent != null) {
             setPositiveButton(textId) { dialog, _ ->
@@ -107,20 +68,16 @@ class SecurityHelper @Inject constructor(
     }
 
     class IntentHelper(
-        private val packageManager: PackageManager
+        private val packageManager: PackageManager,
     ) {
         fun findEnableDeviceLockIntent(): Intent? =
             IntentRegistry.enableDeviceLockIntentSequence.find(::isAvailableIntent)
 
-        fun findEnableBiometricsIntent(): Intent? =
-            IntentRegistry.enableBiometricsIntentSequence.find(::isAvailableIntent)
-
         private fun isAvailableIntent(intent: Intent): Boolean =
-            packageManager.queryIntentActivitiesCompat(intent, 0).size > 0
+            packageManager.queryIntentActivities(intent, 0).isNotEmpty()
     }
 
-    private object IntentRegistry {
-
+    object IntentRegistry {
         val enableDeviceLockIntentSequence
             get() = sequence {
                 yield(intentSettingsEnableLockScreen)
@@ -150,7 +107,7 @@ class SecurityHelper @Inject constructor(
         private val intentSettingsBiometricsEnrollStrong: Intent
             get() = createSettingsIntent(Settings.ACTION_BIOMETRIC_ENROLL).putExtra(
                 Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                BiometricManager.Authenticators.BIOMETRIC_STRONG
+                BiometricManager.Authenticators.BIOMETRIC_STRONG,
             )
 
         private fun createSettingsIntent(settingsAction: String): Intent =

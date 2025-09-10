@@ -15,13 +15,12 @@ import javax.inject.Inject
 class AuthenticationLocalKeyRepositoryImpl @Inject constructor(
     private val localKeyRepository: LocalKeyRepository,
     private val secureStorageManager: SecureStorageManager,
-    private val sessionTrasher: Lazy<SessionTrasher>
+    private val sessionTrasher: Lazy<SessionTrasher>,
 ) : AuthenticationLocalKeyRepository {
-
     override suspend fun createForRemote(
         username: Username,
         appKey: AppKey,
-        cryptographyMarker: CryptographyMarker
+        cryptographyMarker: CryptographyMarker,
     ): LocalKey {
         
         sessionTrasher.get().trash(username = username, deletePreferences = false)
@@ -30,7 +29,7 @@ class AuthenticationLocalKeyRepositoryImpl @Inject constructor(
 
     override fun validateForLocal(
         username: Username,
-        appKey: AppKey
+        appKey: AppKey,
     ): AuthenticationLocalKeyRepository.LocalResult {
         val localKey = localKeyRepository.getLocalKey(username, appKey)
             ?: throw AuthenticationLocalKeyRepository.AccessLocalKeyException()

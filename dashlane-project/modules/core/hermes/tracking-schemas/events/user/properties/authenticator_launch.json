@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/authenticator_launch.json",
+  "type": "object",
+  "description": "When the user launches the Authenticator app",
+  "metas": {
+    "area": "authenticator_app",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "authenticator_launch"
+    },
+    "has_password_manager_installed": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authenticator_app.json#/definitions/has_password_manager_installed"
+    },
+    "is_first_launch": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_first_launch"
+    }
+  },
+  "required": [
+    "name",
+    "has_password_manager_installed",
+    "is_first_launch"
+  ],
+  "additionalProperties": false
+}

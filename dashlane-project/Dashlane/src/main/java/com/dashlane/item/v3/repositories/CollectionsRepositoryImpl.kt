@@ -7,14 +7,13 @@ import com.dashlane.hermes.generated.definitions.CollectionAction
 import com.dashlane.hermes.generated.events.user.UpdateCollection
 import com.dashlane.item.v3.data.CollectionData
 import com.dashlane.item.v3.util.fillDefaultValue
-import com.dashlane.session.SessionManager
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.CommonDataIdentifierAttrsImpl
 import com.dashlane.vault.model.SyncState
@@ -32,16 +31,14 @@ import javax.inject.Inject
 
 class CollectionsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val sessionManager: SessionManager,
     private val collectionSharingItemDataProvider: CollectionSharingItemDataProvider,
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val sharingDataProvider: SharingDataProvider,
     private val hermesLogRepository: LogRepository,
     private val collectionDataQuery: CollectionDataQuery,
     private val activityLogger: VaultActivityLogger,
-    private val dataSaver: DataSaver
+    private val dataSaver: DataSaver,
 ) : CollectionsRepository {
-
     private val teamSpaceAccessor: TeamSpaceAccessor?
         get() = teamSpaceAccessorProvider.get()
 
@@ -50,9 +47,9 @@ class CollectionsRepositoryImpl @Inject constructor(
             CollectionFilter().apply {
                 withVaultItem = CollectionVaultItems(item.toCollectionDataType(), item.id)
                 specificSpace(
-                    teamSpaceAccessorProvider.get()?.getOrDefault(item.spaceId) ?: return@apply
+                    teamSpaceAccessorProvider.get()?.getOrDefault(item.spaceId) ?: return@apply,
                 )
-            }
+            },
         ).mapNotNull {
             val name = it.name ?: return@mapNotNull null
             CollectionData(id = it.id, name = name, shared = false)
@@ -65,7 +62,7 @@ class CollectionsRepositoryImpl @Inject constructor(
 
     override suspend fun saveCollections(item: VaultItem<SyncObject>, collections: List<CollectionData>) {
         
-        val itemToSave = item.fillDefaultValue(context, sessionManager.session)
+        val itemToSave = item.fillDefaultValue(context)
         
         val privateCollections = collections.filter { !it.shared }.map { it.name }
         savePrivateCollectionsToSave(itemToSave, privateCollections)
@@ -91,7 +88,7 @@ class CollectionsRepositoryImpl @Inject constructor(
                     sharedCollectionToAdd.mapNotNull { collection ->
                         allCollections.firstOrNull { it.uuid == collection.id }
                     },
-                    itemToSave.toSummary()
+                    itemToSave.toSummary(),
                 )
             }
             
@@ -101,7 +98,7 @@ class CollectionsRepositoryImpl @Inject constructor(
             if (sharedCollectionToRemove.isNotEmpty()) {
                 collectionSharingItemDataProvider.removeItemFromSharedCollections(
                     itemToSave.uid,
-                    sharedCollectionToRemove
+                    sharedCollectionToRemove,
                 )
             }
         }
@@ -109,12 +106,12 @@ class CollectionsRepositoryImpl @Inject constructor(
 
     private suspend fun savePrivateCollectionsToSave(
         item: VaultItem<*>,
-        privateCollections: List<String>
+        privateCollections: List<String>,
     ) {
         val alreadyExistingCollections = collectionDataQuery.queryAll(
             CollectionFilter().apply {
                 withVaultItem = CollectionVaultItems(item.toCollectionDataType(), item.uid)
-            }
+            },
         )
 
         val collectionNamesToAdd = privateCollections.filterNot { name ->
@@ -136,9 +133,9 @@ class CollectionsRepositoryImpl @Inject constructor(
         dataSaver.save(syncCollectionsToAdd + syncCollectionsToRemove)
     }
 
-    private fun buildAddCollectionVaultItemList(
+    private suspend fun buildAddCollectionVaultItemList(
         item: VaultItem<*>,
-        collectionNamesToAdd: Set<String>
+        collectionNamesToAdd: Set<String>,
     ): List<VaultItem<SyncObject.Collection>> {
         return collectionNamesToAdd.map { name ->
             collectionDataQuery.queryByName(
@@ -148,7 +145,7 @@ class CollectionsRepositoryImpl @Inject constructor(
                         ?.takeIf { item.syncObject.spaceId == it.teamId }
                         ?: TeamSpace.Personal
                     specificSpace(spaceFilter)
-                }
+                },
             )?.let {
                 it.copySyncObject {
                     vaultItems = (vaultItems ?: emptyList()) + item.toCollectionVaultItem()
@@ -158,28 +155,28 @@ class CollectionsRepositoryImpl @Inject constructor(
             } ?: createCollection(
                 dataIdentifier = CommonDataIdentifierAttrsImpl(teamSpaceId = item.syncObject.spaceId),
                 name = name,
-                vaultItems = listOf(item.toCollectionVaultItem())
+                vaultItems = listOf(item.toCollectionVaultItem()),
             )
         }
     }
 
-    private fun buildRemovedCollectionVaultItemList(
+    private suspend fun buildRemovedCollectionVaultItemList(
         item: VaultItem<*>,
-        collectionsSummaryToRemove: List<SummaryObject.Collection>
+        collectionsSummaryToRemove: List<SummaryObject.Collection>,
     ): List<VaultItem<SyncObject.Collection>> =
         collectionDataQuery.queryByIds(collectionsSummaryToRemove.map { it.id })
             .map { syncCollection ->
                 syncCollection.copy(
                     syncObject = syncCollection.syncObject.copy {
                         vaultItems = vaultItems?.filterNot { it.id == item.uid }
-                    }
+                    },
                 )
             }
 
     private fun logCollectionUpdates(
         collectionsToAdd: List<VaultItem<SyncObject.Collection>>,
         collectionsToRemove: List<VaultItem<SyncObject.Collection>>,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ) {
         for (collection in collectionsToAdd) {
             if (collection.syncState != SyncState.MODIFIED) { 
@@ -189,8 +186,8 @@ class CollectionsRepositoryImpl @Inject constructor(
                         collectionId = collection.uid,
                         action = CollectionAction.ADD,
                         itemCount = 1,
-                        isShared = false
-                    )
+                        isShared = false,
+                    ),
                 )
                 activityLogger.sendCollectionCreatedActivityLog(collection.toSummary())
             }
@@ -200,13 +197,13 @@ class CollectionsRepositoryImpl @Inject constructor(
                     collectionId = collection.uid,
                     action = CollectionAction.ADD_CREDENTIAL,
                     itemCount = 1,
-                    isShared = false
-                )
+                    isShared = false,
+                ),
             )
 
             activityLogger.sendAddItemToCollectionActivityLog(
                 collection = collection.toSummary(),
-                item = item.toSummary()
+                item = item.toSummary(),
             )
         }
 
@@ -217,12 +214,12 @@ class CollectionsRepositoryImpl @Inject constructor(
                     collectionId = collection.uid,
                     action = CollectionAction.DELETE_CREDENTIAL,
                     itemCount = 1,
-                    isShared = false
-                )
+                    isShared = false,
+                ),
             )
             activityLogger.sendRemoveItemFromCollectionActivityLog(
                 collection = collection.toSummary(),
-                item = item.toSummary()
+                item = item.toSummary(),
             )
         }
     }

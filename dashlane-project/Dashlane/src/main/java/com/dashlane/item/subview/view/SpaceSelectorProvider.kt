@@ -18,7 +18,6 @@ import com.dashlane.ui.widgets.NotificatorImpl
 import com.dashlane.util.Toaster
 
 object SpaceSelectorProvider {
-
     fun create(
         activity: FragmentActivity,
         current: TeamSpace,
@@ -26,7 +25,7 @@ object SpaceSelectorProvider {
         editable: Boolean = false,
         item: ItemEditSpaceSubView?,
         toaster: Toaster,
-        selectionAction: ((Int) -> Unit)? = null
+        selectionAction: ((Int) -> Unit)? = null,
     ): LinearLayout {
         val view = SpinnerInputProvider.create(
             activity,
@@ -36,7 +35,7 @@ object SpaceSelectorProvider {
             promptText = null,
             adapter = TeamspaceSpinnerAdapter(activity, values),
             currentValueChangeManager = item,
-            selectionAction = selectionAction
+            selectionAction = selectionAction,
         )
 
         if (editable && item != null) {
@@ -44,7 +43,7 @@ object SpaceSelectorProvider {
                 activity = activity,
                 view = view,
                 enable = item.changeEnable,
-                toaster = toaster
+                toaster = toaster,
             )
             item.enableValueChangeManager.addValueChangedListener(object : ValueChangeManager.Listener<Boolean> {
                 override fun onValueChanged(origin: Any, newValue: Boolean) {
@@ -52,7 +51,7 @@ object SpaceSelectorProvider {
                         activity = activity,
                         view = view,
                         enable = newValue,
-                        toaster = toaster
+                        toaster = toaster,
                     )
                 }
             })
@@ -67,7 +66,7 @@ object SpaceSelectorProvider {
                 activity = activity,
                 spinner = it,
                 editable = enable,
-                toaster = toaster
+                toaster = toaster,
             )
         }
     }
@@ -87,7 +86,7 @@ object SpaceSelectorProvider {
                     showDisabledTeamspaceNotification(
                         activity = activity,
                         teamspace = adapter.getItem(spinner.selectedItemPosition)!!,
-                        toaster = toaster
+                        toaster = toaster,
                     )
                 }
                 true
@@ -100,8 +99,8 @@ object SpaceSelectorProvider {
         if (rootView is Spinner) {
             return rootView
         } else if (rootView is ViewGroup) {
-            (0 until rootView.childCount).forEach {
-                foundSpinner(rootView.getChildAt(it))?.let { return it }
+            for (i in 0 until rootView.childCount) {
+                foundSpinner(rootView.getChildAt(i))?.let { return it }
             }
         }
         return null
@@ -113,13 +112,13 @@ object SpaceSelectorProvider {
             when (val name = teamspace.name) {
                 is SpaceName.FixName -> activity.getString(name.nameRes)
                 is SpaceName.TeamName -> name.value
-            }
+            },
         )
         NotificatorImpl(toaster).customErrorDialogMessage(
             activity = activity,
             topic = null,
             message = message,
-            shouldCloseCaller = false
+            shouldCloseCaller = false,
         )
     }
 }

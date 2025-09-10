@@ -8,7 +8,6 @@ class UserGroupMemberItem(
     context: Context,
     private val user: SharingUserGroupUser,
 ) : SharingContactItem(context, user.user.userId) {
-
     override fun isContentTheSame(item: SharingContactItem): Boolean {
         return super.isContentTheSame(item) &&
             item is UserGroupMemberItem &&

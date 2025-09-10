@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json",
+  "type": "object",
+  "description": "Definition for the authentication events",
+  "definitions": {
+    "has_team_account_recovery": {
+      "description": "True if the team has enabled account recovery",
+      "type": "boolean"
+    },
+    "has_biometric_reset": {
+      "description": "True if the user has enabled biometric reset on this device",
+      "type": "boolean"
+    },
+    "is_first_login": {
+      "description": "True, when it’s the first authentication on this device. False otherwise. Also, must be sent only after successful login.",
+      "type": "boolean"
+    },
+    "mode": {
+      "description": "The authentication mode in an app",
+      "type": "string",
+      "enum": [
+        "biometric",
+        "device_transfer",
+        "master_password",
+        "not_selected",
+        "passkey",
+        "pin",
+        "sso"
+      ]
+    },
+    "reason": {
+      "description": "The reason why the user should authenticate",
+      "type": "string",
+      "enum": [
+        "change_master_password",
+        "edit_settings",
+        "login",
+        "unlock_app",
+        "unlock_item"
+      ]
+    },
+    "status": {
+      "description": "The status of the login (success or failure)",
+      "type": "string",
+      "enum": [
+        "error_invalid_sso",
+        "error_unknown",
+        "error_wrong_backup_code",
+        "error_wrong_biometric",
+        "error_wrong_email",
+        "error_wrong_otp",
+        "error_wrong_password",
+        "error_wrong_pin",
+        "success"
+      ]
+    },
+    "authentication_status": {
+      "description": "The authentication status of the user",
+      "type": "string",
+      "enum": [
+        "locked_out",
+        "logged_in",
+        "logged_out"
+      ]
+    },
+    "two_factor_authentication_error": {
+      "description": "An error returned when changing the two factor authentication setting",
+      "type": "string",
+      "enum": [
+        "unknown_error",
+        "user_offline_error",
+        "wrong_backup_code_error",
+        "wrong_code_error",
+        "wrong_phone_format_error"
+      ]
+    },
+    "has_authenticator_installed": {
+      "description": "True if the user already has the authenticator app installed when launching the password manager (mobile only). False if not.",
+      "type": "boolean"
+    },
+    "authenticator_otp_codes_count": {
+      "description": "Number of OTP codes present in the authenticator app when it is already installed on the device. Null when the authenticator app is not installed.",
+      "type": "integer"
+    },
+    "verification_mode": {
+      "description": "The verification mode the user was asked to login with. email_token is the default one when the user adds a new device. OTP1 (= new_device) when the user has 2FA enabled, required when adding a new device. OTP2 (=login) when the user has 2FA enabled, required at every login. authenticator_app when the user has 2FA enabled and the Authenticator app. None when no verification mode.",
+      "type": "string",
+      "enum": [
+        "authenticator_app",
+        "email_token",
+        "none",
+        "otp1",
+        "otp2"
+      ]
+    },
+    "is_backup_code": {
+      "description": "True if the user used a backup code to login or try to login. False if not.",
+      "type": "boolean"
+    }
+  }
+}

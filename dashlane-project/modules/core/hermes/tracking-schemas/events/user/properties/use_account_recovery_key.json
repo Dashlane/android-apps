@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/use_account_recovery_key.json",
+  "type": "object",
+  "description": "When a user uses the account recovery key to recover their account",
+  "metas": {
+    "area": "recovery",
+    "should_track_flow": true
+  },
+  "properties": {
+    "name": {
+      "const": "use_account_recovery_key"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    },
+    "use_key_error_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_recovery_key.json#/definitions/use_key_error_name"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step"
+  ],
+  "additionalProperties": false
+}

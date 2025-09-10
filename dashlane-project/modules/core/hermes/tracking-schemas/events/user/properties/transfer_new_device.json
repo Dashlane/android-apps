@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/transfer_new_device.json",
+  "type": "object",
+  "description": "After user does certain actions or completes certain steps of the device transfer request from the untrusted device",
+  "metas": {
+    "area": "authentication"
+  },
+  "properties": {
+    "name": {
+      "const": "transfer_new_device"
+    },
+    "action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/device_transfer.json#/definitions/action_during_transfer"
+    },
+    "biometrics_enabled": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/user_settings.json#/definitions/has_authentication_with_biometrics"
+    },
+    "logged_in_device_selected": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/device_transfer.json#/definitions/device_selected"
+    },
+    "transfer_method": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/device_transfer.json#/definitions/transfer_method"
+    }
+  },
+  "required": [
+    "name",
+    "action",
+    "biometrics_enabled",
+    "logged_in_device_selected",
+    "transfer_method"
+  ],
+  "additionalProperties": false
+}

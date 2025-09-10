@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/update_vault_item.json",
+  "type": "object",
+  "description": "Details of update of a vault item",
+  "metas": {
+    "area": "vault"
+  },
+  "properties": {
+    "name": {
+      "const": "update_vault_item"
+    },
+    "action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/action"
+    },
+    "collection_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/collection_count"
+    },
+    "credential_original_security_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/credential_security_status"
+    },
+    "credential_security_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/credential_security_status"
+    },
+    "fields_edited": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/field_list"
+    },
+    "is_credential_currently_eligible_to_password_changer": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/is_credential_currently_eligible_to_password_changer"
+    },
+    "item_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_id"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+    },
+    "multi_select_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/multi_select_id"
+    },
+    "space": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/space"
+    },
+    "update_credential_origin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/update_credential_origin"
+    }
+  },
+  "required": [
+    "name",
+    "action",
+    "item_id",
+    "item_type",
+    "space"
+  ],
+  "additionalProperties": false
+}

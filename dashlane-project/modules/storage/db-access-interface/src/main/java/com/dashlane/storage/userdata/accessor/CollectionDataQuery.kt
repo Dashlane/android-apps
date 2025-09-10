@@ -6,14 +6,14 @@ import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObject
 
 interface CollectionDataQuery : DataQuery<SummaryObject.Collection, CollectionFilter> {
-    fun queryByName(
+    suspend fun queryByName(
         name: String,
-        filter: CollectionFilter = createFilter()
+        filter: CollectionFilter = createFilter(),
     ): VaultItem<SyncObject.Collection>?
 
-    fun queryById(id: String): VaultItem<SyncObject.Collection>?
+    suspend fun queryById(id: String): VaultItem<SyncObject.Collection>?
 
-    fun queryByIds(ids: List<String>): List<VaultItem<SyncObject.Collection>>
+    suspend fun queryByIds(ids: List<String>): List<VaultItem<SyncObject.Collection>>
 
-    fun queryVaultItemsWithCollectionId(id: String): List<SummaryObject>
+    suspend fun queryVaultItemsWithCollectionId(id: String): List<SummaryObject>
 }

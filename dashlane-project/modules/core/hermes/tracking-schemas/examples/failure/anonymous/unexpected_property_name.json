@@ -1,0 +1,22 @@
+{
+  "id": "838bf943-b9a1-4301-83e4-cb192f2e70c4",
+  "schema_version": "1.31.6",
+  "category": "business",
+  "date": "2021-03-02",
+  "date_origin": "local",
+  "context": {
+    "os": {
+      "type": "linux",
+      "version": "4.1",
+      "locale": "en-US"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "saex",
+      "build_type": "dev"
+    }
+  },
+  "properties": {
+    "name": "undefined_property_name"
+  }
+}

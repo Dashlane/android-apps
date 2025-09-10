@@ -1,0 +1,255 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Meta schema for event definition validation.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "const": "http://json-schema.org/draft-07/schema#"
+    },
+    "$id": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://track-production.service.kwift.eu/1.31.6/events/.*$"
+    },
+    "title": {
+      "type": "string",
+      "pattern": "^[A-Z][a-zA-Z0-9 ]*$",
+      "description": "The title of the event. This will be used to generate the code class representing the event. As such, prefer using verbs in nominalized form, i.e. 'Account Creation' rather than 'Account Created'."
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the event and of when it should be reported."
+    },
+    "type": {
+      "const": "object"
+    },
+    "properties": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "object",
+          "description": "version",
+          "properties": {
+            "const": {
+              "const": "1.31.6"
+            }
+          },
+          "additionalProperties": false
+        },
+        "id": {
+          "const": {
+            "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json#/definitions/id"
+          }
+        },
+        "category": {
+          "type": "object",
+          "description": "The event category. User events are directly linked to a user, while anonymous events contain personal information and are anonymous.",
+          "properties": {
+            "const": {
+              "type": "string",
+              "enum": [
+                "user",
+                "anonymous"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "date": {
+          "type": "object",
+          "properties": {
+            "const": {
+              "enum": [
+                {
+                  "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json#/definitions/date_time"
+                },
+                {
+                  "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json#/definitions/date"
+                }
+              ]
+            }
+          }
+        },
+        "date_origin": {
+          "const": {
+            "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json#/definitions/date_origin"
+          }
+        },
+        "context": {
+          "type": "object",
+          "description": "The context of the event. Depends on the event category.",
+          "properties": {
+            "const": {
+              "enum": [
+                {
+                  "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context.json"
+                },
+                {
+                  "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context_anonymous.json"
+                }
+              ]
+            }
+          }
+        },
+        "browse": {
+          "type": "object",
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "category": {
+                    "const": "user"
+                  }
+                }
+              },
+              "then": {
+                "const": {
+                  "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/browse.json#/definitions/browse"
+                }
+              }
+            }
+          ]
+        },
+        "session": {
+          "const": {
+            "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/session.json#/definitions/session"
+          }
+        },
+        "flow": {
+          "const": {
+            "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/flow.json#/definitions/flow"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "object"
+            },
+            "description": {
+              "type": "string"
+            },
+            "allOf": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "if": {
+                        "type": "object"
+                      },
+                      "then": {
+                        "type": "object",
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^https://track-production.service.kwift.eu/1.31.6/events/.*$"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "const": {
+                        "type": "object"
+                      },
+                      "properties": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "object",
+                            "properties": {
+                              "const": {
+                                "type": "string"
+                              },
+                              "enum": {
+                                "type": "array"
+                              },
+                              "additionalProperties": false
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "category",
+        "date",
+        "date_origin",
+        "context",
+        "properties"
+      ],
+      "additionalProperties": false
+    },
+    "required": {
+      "type": "array",
+      "allOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        {
+          "contains": {
+            "const": "schema_version"
+          }
+        },
+        {
+          "contains": {
+            "const": "id"
+          }
+        },
+        {
+          "contains": {
+            "const": "category"
+          }
+        },
+        {
+          "contains": {
+            "const": "date"
+          }
+        },
+        {
+          "contains": {
+            "const": "date_origin"
+          }
+        },
+        {
+          "contains": {
+            "const": "context"
+          }
+        }
+      ]
+    },
+    "additionalProperties": {
+      "const": false
+    }
+  },
+  "required": [
+    "$schema",
+    "$id",
+    "title",
+    "description",
+    "type"
+  ],
+  "additionalProperties": false
+}

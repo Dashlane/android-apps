@@ -1,0 +1,1363 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/event.json",
+  "type": "object",
+  "description": "An event truly anonymous, no link to a user",
+  "title": "Anonymous Event",
+  "properties": {
+    "schema_version": {
+      "const": "1.31.6"
+    },
+    "id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json#/definitions/id"
+    },
+    "date": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json#/definitions/date"
+    },
+    "date_origin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json#/definitions/date_origin"
+    },
+    "browse": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/browse.json#/definitions/browse"
+    },
+    "context": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/context.json#/definitions/context_anonymous"
+    },
+    "category": {
+      "const": "anonymous"
+    },
+    "properties": {
+      "type": "object",
+      "description": "List of all the possible event properties. DO NOT Change. Automatically generated during build",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "reveal_vault_item_field"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Reveal of a field in vault item, at detail /edit view and not at creation. Reasons : this is to compare with autofill volumes, and is not significant at creation.",
+            "metas": {
+              "area": "vault",
+              "priority": true
+            },
+            "properties": {
+              "name": {
+                "const": "reveal_vault_item_field"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "field": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/field"
+              },
+              "item_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "field",
+              "item_type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_suggest"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When Dashlane suggests to autofill some data field (eg. address, credit_card, website) with an extension webcard (or with the Android dropdown/keyboard suggestions (eg. autofill/keyboard/suggestion and autofill/dropdown/suggestion)) or to save/replace a password with a webcard.",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_suggest"
+              },
+              "autofill_message_type_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_message_type_list"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "is_login_prefilled": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_login_prefilled"
+              },
+              "is_native_app": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+              },
+              "is_password_prefilled": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_password_prefilled"
+              },
+              "is_suggest_last_unsaved": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_suggest_last_unsaved"
+              },
+              "ms_to_webcard": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_webcard"
+              },
+              "phishing_risk": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/phishing_risk"
+              },
+              "vault_type_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+              },
+              "webcard_item_total_count": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/webcard_item_total_count"
+              },
+              "webcard_save_options": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/webcard_save_options_list"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "is_native_app"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "phishing_attempt_detected"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When Dashlane detects a phishing attempt on a user.",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "phishing_attempt_detected"
+              },
+              "confidence": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/percentage_nb"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "form_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_type"
+              }
+            },
+            "required": [
+              "name",
+              "confidence",
+              "domain",
+              "form_type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "authenticate_with_passkey"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When Dashlane suggests the user to authenticate with a passkey on a website.",
+            "metas": {
+              "area": "passkey"
+            },
+            "properties": {
+              "name": {
+                "const": "authenticate_with_passkey"
+              },
+              "authentication_mediation_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authentication_mediation_type"
+              },
+              "authenticator_user_verification": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_user_verification"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "has_credentials_allowed": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/has_credentials_allowed"
+              },
+              "is_authenticated_with_dashlane": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/is_authenticated_with_dashlane"
+              },
+              "ms_to_complete_authentication": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ms_to_complete_authentication"
+              },
+              "ms_to_complete_authentication_timeout": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ms_to_complete_authentication_timeout"
+              },
+              "passkey_authentication_error_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/passkey_authentication_error_type"
+              },
+              "passkey_authentication_status": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ceremony_status"
+              },
+              "passkey_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/passkey_type"
+              },
+              "webauthn_extension_supported_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/webauthn_extension_supported_list"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "passkey_authentication_status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "antiphishing_redirect"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Redirection of user triggered by a phishing attempt",
+            "metas": {
+              "area": "tools"
+            },
+            "properties": {
+              "name": {
+                "const": "antiphishing_redirect"
+              },
+              "phishing_domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "redirect_domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              }
+            },
+            "required": [
+              "name",
+              "phishing_domain",
+              "redirect_domain"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "ping"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Ping event for integration test",
+            "metas": {
+              "area": "technical"
+            },
+            "properties": {
+              "name": {
+                "const": "ping"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "antiphishing_display_alert"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Sent when the Antiphishing alert has been shown and completed prediction and scraping.",
+            "metas": {
+              "area": "antiphishing"
+            },
+            "properties": {
+              "name": {
+                "const": "antiphishing_display_alert"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "ms_to_alert": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_icon"
+              },
+              "ms_to_prediction": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_icon"
+              },
+              "ms_to_scraping": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_icon"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "ms_to_alert"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_submit_form"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user submits a form (login, registration, save payment, etc.).",
+            "metas": {
+              "area": "autofill",
+              "priority": true
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_submit_form"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "fields_detected_by_analysis_engine_count": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_detected_by_analysis_engine_count"
+              },
+              "fields_filled_by": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/fields_filled_by.json#/definitions/fields_filled_by_count"
+              },
+              "form_loaded_at_date_time": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_loaded_at_date_time"
+              },
+              "form_submitted_at_date_time": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_submitted_at_date_time"
+              },
+              "form_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_type"
+              },
+              "has_modified_initially_autofilled_value": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/has_modified_initially_autofilled_value"
+              },
+              "has_password_field": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/has_password_field"
+              },
+              "total_form_fields_count": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/total_form_fields_count"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "fields_detected_by_analysis_engine_count",
+              "fields_filled_by",
+              "form_loaded_at_date_time",
+              "form_submitted_at_date_time",
+              "form_type",
+              "has_modified_initially_autofilled_value",
+              "has_password_field",
+              "total_form_fields_count"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_dismiss"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Dismiss autofill",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_dismiss"
+              },
+              "dismiss_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/dismiss_type"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "is_native_app": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+              }
+            },
+            "required": [
+              "name",
+              "dismiss_type",
+              "domain",
+              "is_native_app"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "remove_two_factor_authentication_from_credential"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Details of when a user removes an OTP code from one of their credentials",
+            "metas": {
+              "area": "vault"
+            },
+            "properties": {
+              "name": {
+                "const": "remove_two_factor_authentication_from_credential"
+              },
+              "authenticator_issuer_id": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/authenticator_issuer_id"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "space": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/space"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "space"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "right_click_menu_action"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user right clicks in a field, the right click menu appears. This event tracks the actions taken by the user in the right click menu from the the moment he triggers it.",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "right_click_menu_action"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "field_filled": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+              },
+              "field_initial_classification_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+              },
+              "is_field_detected_by_analysis_engine": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_field_detected_by_analysis_engine"
+              },
+              "is_native_app": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+              },
+              "right_click_menu_flow_step": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/right_click_menu_flow_step"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "is_field_detected_by_analysis_engine",
+              "is_native_app",
+              "right_click_menu_flow_step"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "authenticator_remove_otp_code"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user successfully removes an OTP code from the Authenticator app",
+            "metas": {
+              "area": "authenticator_app"
+            },
+            "properties": {
+              "name": {
+                "const": "authenticator_remove_otp_code"
+              },
+              "authenticator_issuer_id": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/authenticator_issuer_id"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "other_authenticators_installed_report"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user launches the Authenticator app for the first time, collect the other authenticator app installed. Sent only at first launch and strictly only once",
+            "metas": {
+              "area": "authenticator_app"
+            },
+            "properties": {
+              "name": {
+                "const": "other_authenticators_installed_report"
+              },
+              "other_authenticator_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authenticator_app.json#/definitions/other_authenticator_list"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "authenticator_add_otp_code"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user successfully adds an OTP code from the Authenticator app",
+            "metas": {
+              "area": "authenticator_app"
+            },
+            "properties": {
+              "name": {
+                "const": "authenticator_add_otp_code"
+              },
+              "authenticator_issuer_id": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/authenticator_issuer_id"
+              },
+              "otp_addition_mode": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/otp_addition_mode"
+              },
+              "otp_specifications": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/otp_specifications"
+              }
+            },
+            "required": [
+              "name",
+              "otp_addition_mode"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "register_passkey"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When Dashlane suggests the user to register a new passkey on a website.",
+            "metas": {
+              "area": "passkey"
+            },
+            "properties": {
+              "name": {
+                "const": "register_passkey"
+              },
+              "algorithms_supported_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/algorithms_supported_list"
+              },
+              "authenticator_attachment": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_attachment"
+              },
+              "authenticator_resident_key": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_resident_key"
+              },
+              "authenticator_user_verification": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_user_verification"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "is_registered_with_dashlane": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/is_registered_with_dashlane"
+              },
+              "ms_to_complete_registration": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ms_to_complete_registration"
+              },
+              "ms_to_complete_registration_timeout": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ms_to_complete_registration_timeout"
+              },
+              "passkey_registration_error_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/passkey_registration_error_type"
+              },
+              "passkey_registration_status": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/ceremony_status"
+              },
+              "passkey_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/passkey_type"
+              },
+              "webauthn_extension_supported_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/webauthn_extension_supported_list"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "passkey_registration_status"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "open_external_vault_item_link"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Open an external link on a vault item field",
+            "metas": {
+              "area": "vault"
+            },
+            "properties": {
+              "name": {
+                "const": "open_external_vault_item_link"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "item_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type_with_link"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "item_type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "master_password_health_report"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Report sent following a scan of the security of a master password which is performed every 2 weeks. Notably, it checks whether the master password can be found on the dark web. This is separate from the Dark Web Monitoring feature.",
+            "metas": {
+              "area": "vault",
+              "priority": false
+            },
+            "properties": {
+              "name": {
+                "const": "master_password_health_report"
+              },
+              "is_leaked": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/is_leaked"
+              },
+              "is_weak": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/is_credential_weak"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "copy_vault_item_field"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user copies a field from the application.",
+            "metas": {
+              "area": "vault",
+              "priority": true
+            },
+            "properties": {
+              "name": {
+                "const": "copy_vault_item_field"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "field": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/field"
+              },
+              "item_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "field",
+              "item_type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "restore_password"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Sent when a user restores their password to its previous version after being proposed to do so by Dashlane (e.g. after a potential automatic password change failure).",
+            "metas": {
+              "area": "tools"
+            },
+            "properties": {
+              "name": {
+                "const": "restore_password"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              }
+            },
+            "required": [
+              "name",
+              "domain"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "add_two_factor_authentication_to_credential"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Details of when a user adds an OTP code to one of their credentials. Item information can be empty because the user can start adding an OTP code before a credential is created.",
+            "metas": {
+              "area": "vault"
+            },
+            "properties": {
+              "name": {
+                "const": "add_two_factor_authentication_to_credential"
+              },
+              "authenticator_issuer_id": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/authenticator_issuer_id"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "flow_step": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+              },
+              "otp_addition_error": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/otp_addition_error"
+              },
+              "otp_addition_mode": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/otp_addition_mode"
+              },
+              "otp_specifications": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/otp_specifications"
+              },
+              "space": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/space"
+              }
+            },
+            "required": [
+              "name",
+              "flow_step",
+              "otp_addition_mode"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_correct"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user makes a correction on a field filled by Dashlane with autofill. There are 4 types of corrections possible (erase, edit, change classification, overwrite). Specifically, when a user changes the classification of field, for example from email to phone, the next time he changes the classification of the field, the value for field_corrected will be phone.",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_correct"
+              },
+              "correction_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/correction_type"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "field_corrected": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+              },
+              "initial_field_classification_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+              },
+              "is_native_app": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+              },
+              "new_field_classification": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+              }
+            },
+            "required": [
+              "name",
+              "correction_type",
+              "domain",
+              "field_corrected",
+              "is_native_app"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "launch_password_changer"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "It has been deprecated because we removed the Password Changer feature from all clients in October 2022. Sent every time an attempt to update a credential with Password Changer is done. To be precise, the date of the event correspond to the moment the recipe has finished to run, not when it has started.",
+            "deprecated": true,
+            "metas": {
+              "area": "tools"
+            },
+            "properties": {
+              "name": {
+                "const": "launch_password_changer"
+              },
+              "bulk_change_credential_count": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/bulk_change_credential_count"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "is_bulk_change": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/is_bulk_change"
+              },
+              "is_success": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_success"
+              },
+              "last_recipe_step_position": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/last_recipe_step_position"
+              },
+              "password_changer_failure_reason": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/password_changer_failure_reason"
+              },
+              "password_changer_recipe_version": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/password_changer_recipe_version"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "is_bulk_change",
+              "is_success",
+              "last_recipe_step_position"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "perform_autofill"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Autofill by Dashlane, for anonymous side",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "perform_autofill"
+              },
+              "autofill_mechanism": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_mechanism"
+              },
+              "autofill_origin": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_origin"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "fields_filled": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_filled"
+              },
+              "form_type_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_type_list"
+              },
+              "is_autologin": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_autologin"
+              },
+              "is_manual": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_manual"
+              },
+              "is_native_app": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+              },
+              "match_type": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/match_type"
+              },
+              "mobile_browser_name": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/mobile_browser_name"
+              },
+              "password_filled_health": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/credential_security_status"
+              }
+            },
+            "required": [
+              "name",
+              "autofill_mechanism",
+              "autofill_origin",
+              "domain",
+              "is_autologin",
+              "is_manual",
+              "is_native_app",
+              "match_type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "mass_deployment_status"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Event sent on extension install or extension updates, initially sent for devices that have been mass deployed and are protected by CRD.",
+            "metas": {
+              "area": "technical"
+            },
+            "properties": {
+              "name": {
+                "const": "mass_deployment_status"
+              },
+              "is_protected_by_credential_risk_detection": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/mass_deployment.json#/definitions/is_protected_by_credential_risk_detection"
+              },
+              "mass_deployment_access_key": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/mass_deployment.json#/definitions/mass_deployment_access_key"
+              },
+              "mass_deployment_device_id": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/mass_deployment.json#/definitions/mass_deployment_device_id"
+              }
+            },
+            "required": [
+              "name",
+              "is_protected_by_credential_risk_detection",
+              "mass_deployment_access_key",
+              "mass_deployment_device_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "update_credential"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "A credential was updated in the vault",
+            "metas": {
+              "area": "vault"
+            },
+            "properties": {
+              "name": {
+                "const": "update_credential"
+              },
+              "action": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/action"
+              },
+              "associated_apps_added_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/associated_apps_updated_list"
+              },
+              "associated_apps_removed_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/associated_apps_updated_list"
+              },
+              "associated_websites_added_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/associated_websites_updated_list"
+              },
+              "associated_websites_removed_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/associated_websites_updated_list"
+              },
+              "credential_original_security_status": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/credential_security_status"
+              },
+              "credential_security_status": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/credential_security_status"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "field_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/field_list"
+              },
+              "is_credential_currently_eligible_to_password_changer": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/is_credential_currently_eligible_to_password_changer"
+              },
+              "space": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/space"
+              },
+              "update_credential_origin": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_password.json#/definitions/update_credential_origin"
+              }
+            },
+            "required": [
+              "name",
+              "action",
+              "domain",
+              "space"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_accept"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the user accepts a suggestion made by Dashlane.",
+            "metas": {
+              "area": "autofill",
+              "priority": true
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_accept"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "is_protected": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_protected"
+              },
+              "is_set_as_default": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_set_as_default"
+              },
+              "item_position": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/item_position"
+              },
+              "phishing_risk": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/phishing_risk"
+              },
+              "webcard_option_selected": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/webcard_save_options"
+              }
+            },
+            "required": [
+              "name",
+              "domain"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "change_password_guided"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Sent every time the user starts (e.g. by clicking on a change password button in Android autofill), cancels, or completes a guided password change (the credential is successfully updated in the vault). This happens when the automatic password changer is not available.",
+            "metas": {
+              "area": "tools"
+            },
+            "properties": {
+              "name": {
+                "const": "change_password_guided"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "flow_step": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "flow_step"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_setting"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Autofill disable setting modified.",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_setting"
+              },
+              "disable_setting": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/disable_setting"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "is_native_app": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+              },
+              "item_type_list": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/type_list"
+              }
+            },
+            "required": [
+              "name",
+              "disable_setting",
+              "is_native_app"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_display_icons"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "Sent when the autofill engine has finished to inject icons in the autofillable fields identified in the page.",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_display_icons"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "ms_to_icon": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/ms_to_icon"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "ms_to_icon"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "autofill_choose_generated_password"
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "description": "When the password generated within the webcard is validated by the user",
+            "metas": {
+              "area": "autofill"
+            },
+            "properties": {
+              "name": {
+                "const": "autofill_choose_generated_password"
+              },
+              "domain": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+              },
+              "has_digits": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/generate_password.json#/definitions/has_digits"
+              },
+              "has_letters": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/generate_password.json#/definitions/has_letters"
+              },
+              "has_pwg_default_settings": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/generate_password.json#/definitions/has_pwg_default_settings"
+              },
+              "has_similar": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/generate_password.json#/definitions/has_similar"
+              },
+              "has_symbols": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/generate_password.json#/definitions/has_symbols"
+              },
+              "is_native_app": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+              },
+              "length": {
+                "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/generate_password.json#/definitions/length"
+              }
+            },
+            "required": [
+              "name",
+              "domain",
+              "has_digits",
+              "has_letters",
+              "has_similar",
+              "has_symbols",
+              "length"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "enum": [
+                "reveal_vault_item_field",
+                "autofill_suggest",
+                "phishing_attempt_detected",
+                "authenticate_with_passkey",
+                "antiphishing_redirect",
+                "ping",
+                "antiphishing_display_alert",
+                "autofill_submit_form",
+                "autofill_dismiss",
+                "remove_two_factor_authentication_from_credential",
+                "right_click_menu_action",
+                "authenticator_remove_otp_code",
+                "other_authenticators_installed_report",
+                "authenticator_add_otp_code",
+                "register_passkey",
+                "open_external_vault_item_link",
+                "master_password_health_report",
+                "copy_vault_item_field",
+                "restore_password",
+                "add_two_factor_authentication_to_credential",
+                "autofill_correct",
+                "launch_password_changer",
+                "perform_autofill",
+                "mass_deployment_status",
+                "update_credential",
+                "autofill_accept",
+                "change_password_guided",
+                "autofill_setting",
+                "autofill_display_icons",
+                "autofill_choose_generated_password"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "category",
+    "date",
+    "date_origin",
+    "context",
+    "properties"
+  ],
+  "additionalProperties": false
+}

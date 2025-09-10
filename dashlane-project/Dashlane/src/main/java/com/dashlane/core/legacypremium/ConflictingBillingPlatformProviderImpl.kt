@@ -5,8 +5,8 @@ import com.dashlane.accountstatus.premiumstatus.isPremium
 import com.dashlane.accountstatus.premiumstatus.planType
 import com.dashlane.accountstatus.subscription.autoRenewTrigger
 import com.dashlane.accountstatus.subscription.willAutoRenew
-import com.dashlane.premium.R
 import com.dashlane.premium.offer.details.ConflictingBillingPlatformProvider
+import com.dashlane.premium.ui.R
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.B2cStatus.PlanType
 import com.dashlane.server.api.endpoints.premium.SubscriptionInfo
@@ -17,9 +17,8 @@ import com.dashlane.util.inject.OptionalProvider
 import javax.inject.Inject
 
 class ConflictingBillingPlatformProviderImpl @Inject constructor(
-    private val accountStatusProvider: OptionalProvider<AccountStatus>
+    private val accountStatusProvider: OptionalProvider<AccountStatus>,
 ) : ConflictingBillingPlatformProvider {
-
     private val premiumStatus: PremiumStatus?
         get() = accountStatusProvider.get()?.premiumStatus
     private val subscriptionInfo: SubscriptionInfo?
@@ -36,16 +35,19 @@ class ConflictingBillingPlatformProviderImpl @Inject constructor(
         if (currentPlanIsRenewableType(premiumStatus, subscriptionInfo)) {
             when (premiumStatus.planType) {
                 PlanType.PLAYSTORE,
-                PlanType.PLAYSTORE_RENEWABLE -> null
+                PlanType.PLAYSTORE_RENEWABLE,
+                -> null
                 PlanType.IOS_RENEWABLE,
                 PlanType.MAC_RENEWABLE,
                 PlanType.IOS,
-                PlanType.MAC -> {
+                PlanType.MAC,
+                -> {
                     TextResource.StringText(stringRes = R.string.billing_platform_conflict_warning_app_store)
                 }
                 PlanType.PAYPAL,
                 PlanType.PAYPAL_RENEWABLE,
-                PlanType.STRIPE ->
+                PlanType.STRIPE,
+                ->
                     TextResource.StringText(stringRes = R.string.billing_platform_conflict_warning_web_Store)
                 else -> TextResource.StringText(stringRes = R.string.billing_platform_conflict_warning_fallback)
             }
@@ -60,7 +62,8 @@ class ConflictingBillingPlatformProviderImpl @Inject constructor(
             
             
             MANUAL,
-            AUTOMATIC -> {
+            AUTOMATIC,
+            -> {
                 premiumStatus.isPremium
             }
             

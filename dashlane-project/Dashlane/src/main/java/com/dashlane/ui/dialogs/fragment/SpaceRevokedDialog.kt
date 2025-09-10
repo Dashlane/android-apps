@@ -13,7 +13,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class SpaceRevokedDialog : NotificationDialogFragment() {
-
     @Inject
     lateinit var clock: Clock
 

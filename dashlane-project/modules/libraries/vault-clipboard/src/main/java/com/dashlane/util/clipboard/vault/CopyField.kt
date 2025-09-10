@@ -14,7 +14,7 @@ enum class CopyField(
     internal val syncObjectType: SyncObjectType,
     internal val contentMapper: CopyFieldContentMapper<out SummaryObject, out SyncObject>,
     val isSharingProtected: Boolean = false,
-    val isSensitiveData: Boolean = false
+    val isSensitiveData: Boolean = false,
 ) {
     Password(
         SyncObjectType.AUTHENTIFIANT,
@@ -25,7 +25,7 @@ enum class CopyField(
             getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.password) },
         ),
         true,
-        true
+        true,
     ),
     Login(
         SyncObjectType.AUTHENTIFIANT,
@@ -33,8 +33,8 @@ enum class CopyField(
             hasContentInSummary = { it.login.isNotSemanticallyNull() },
             hasContentInFull = { it.login.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.login) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.login) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.login) },
+        ),
     ),
     Email(
         SyncObjectType.AUTHENTIFIANT,
@@ -42,8 +42,8 @@ enum class CopyField(
             hasContentInSummary = { it.email.isNotSemanticallyNull() },
             hasContentInFull = { it.email.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.email) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.email) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.email) },
+        ),
     ),
     SecondaryLogin(
         SyncObjectType.AUTHENTIFIANT,
@@ -51,8 +51,8 @@ enum class CopyField(
             hasContentInSummary = { it.secondaryLogin.isNotSemanticallyNull() },
             hasContentInFull = { it.secondaryLogin.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.secondaryLogin) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.secondaryLogin) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.secondaryLogin) },
+        ),
     ),
     OtpCode(
         SyncObjectType.AUTHENTIFIANT,
@@ -60,19 +60,28 @@ enum class CopyField(
             hasContentInSummary = { throw ContentOnlyInSyncObjectException() },
             hasContentInFull = { it.otp() != null },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.StringValue(it.otp()?.getPin()?.code) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.otp()?.getPin()?.code) },
+        ),
     ),
 
+    PaymentsCardHolder(
+        SyncObjectType.PAYMENT_CREDIT_CARD,
+        CopyFieldContentMapper.PaymentCreditCard(
+            hasContentInSummary = { it.ownerName.isNotSemanticallyNull() },
+            hasContentInFull = { it.cardNumber.isNotSemanticallyNull() },
+            getContentInSummary = { CopyContent.Ready.StringValue(it.ownerName) },
+            getContentInFull = { CopyContent.Ready.StringValue(it.ownerName) },
+        ),
+    ),
     PaymentsNumber(
         SyncObjectType.PAYMENT_CREDIT_CARD,
         CopyFieldContentMapper.PaymentCreditCard(
             hasContentInSummary = { it.isCardNumberEmpty.not() },
             hasContentInFull = { it.cardNumber.isNotSemanticallyNull() },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.cardNumber) }
+            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.cardNumber) },
         ),
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     PaymentsSecurityCode(
         SyncObjectType.PAYMENT_CREDIT_CARD,
@@ -80,9 +89,9 @@ enum class CopyField(
             hasContentInSummary = { it.isSecurityCodeEmpty.not() },
             hasContentInFull = { it.securityCode.isNotSemanticallyNull() },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.securityCode) }
+            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.securityCode) },
         ),
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     PaymentsExpirationDate(
         SyncObjectType.PAYMENT_CREDIT_CARD,
@@ -90,8 +99,18 @@ enum class CopyField(
             hasContentInSummary = { it.expireDate != null },
             hasContentInFull = { it.expireDate != null },
             getContentInSummary = { CopyContent.Ready.YearMonth(it.expireDate) },
-            getContentInFull = { CopyContent.Ready.YearMonth(it.expireDate) }
-        )
+            getContentInFull = { CopyContent.Ready.YearMonth(it.expireDate) },
+        ),
+    ),
+    PaymentsCardNote(
+        SyncObjectType.PAYMENT_CREDIT_CARD,
+        CopyFieldContentMapper.PaymentCreditCard(
+            hasContentInSummary = { it.isNoteEmpty.not() },
+            hasContentInFull = { it.cCNote.isNotSemanticallyNull() },
+            getContentInSummary = { throw ContentOnlyInSyncObjectException() },
+            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.cCNote) },
+        ),
+        isSensitiveData = true,
     ),
 
     BankAccountBank(
@@ -100,8 +119,8 @@ enum class CopyField(
             hasContentInSummary = { it.bankAccountBank.isValidBank() },
             hasContentInFull = { it.bankAccountBank.isValidBank() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.bankAccountBank) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.bankAccountBank) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.bankAccountBank) },
+        ),
     ),
     BankAccountBicSwift(
         SyncObjectType.BANK_STATEMENT,
@@ -109,19 +128,19 @@ enum class CopyField(
             hasContentInSummary = { it.isBICEmpty.not() },
             hasContentInFull = { it.bankAccountBIC.isNotSemanticallyNull() },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.bankAccountBIC) }
+            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.bankAccountBIC) },
         ),
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     BankAccountRoutingNumber(
         SyncObjectType.BANK_STATEMENT,
         BankAccountBicSwift.contentMapper,
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     BankAccountSortCode(
         SyncObjectType.BANK_STATEMENT,
         BankAccountBicSwift.contentMapper,
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     BankAccountIban(
         SyncObjectType.BANK_STATEMENT,
@@ -129,18 +148,18 @@ enum class CopyField(
             hasContentInSummary = { it.isIBANEmpty.not() },
             hasContentInFull = { it.bankAccountIBAN.isNotSemanticallyNull() },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.bankAccountIBAN) }
+            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.bankAccountIBAN) },
         ),
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     BankAccountAccountNumber(
         SyncObjectType.BANK_STATEMENT,
         BankAccountIban.contentMapper,
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     BankAccountClabe(
         SyncObjectType.BANK_STATEMENT,
-        BankAccountIban.contentMapper
+        BankAccountIban.contentMapper,
     ),
 
     Address(
@@ -149,8 +168,8 @@ enum class CopyField(
             hasContentInSummary = { it.addressFull.isNotSemanticallyNull() },
             hasContentInFull = { it.addressFull.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.addressFull) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.addressFull) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.addressFull) },
+        ),
     ),
     City(
         SyncObjectType.ADDRESS,
@@ -158,8 +177,8 @@ enum class CopyField(
             hasContentInSummary = { it.city.isNotSemanticallyNull() },
             hasContentInFull = { it.city.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.city) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.city) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.city) },
+        ),
     ),
     ZipCode(
         SyncObjectType.ADDRESS,
@@ -167,8 +186,8 @@ enum class CopyField(
             hasContentInSummary = { it.zipCode.isNotSemanticallyNull() },
             hasContentInFull = { it.zipCode.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.zipCode) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.zipCode) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.zipCode) },
+        ),
     ),
 
     IdsLinkedIdentity(
@@ -177,8 +196,8 @@ enum class CopyField(
             hasContentInSummary = { it.fullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             hasContentInFull = { it.fullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             getContentInSummary = { it.getLinkedIdentityContent() },
-            getContentInFull = { it.getLinkedIdentityContent() }
-        )
+            getContentInFull = { it.getLinkedIdentityContent() },
+        ),
     ),
     IdsNumber(
         SyncObjectType.ID_CARD,
@@ -186,8 +205,8 @@ enum class CopyField(
             hasContentInSummary = { it.number.isNotSemanticallyNull() },
             hasContentInFull = { it.number.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.number) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.number) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.number) },
+        ),
     ),
     IdsIssueDate(
         SyncObjectType.ID_CARD,
@@ -195,8 +214,8 @@ enum class CopyField(
             hasContentInSummary = { throw ContentOnlyInSyncObjectException() },
             hasContentInFull = { it.deliveryDate != null },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.Date(it.deliveryDate) }
-        )
+            getContentInFull = { CopyContent.Ready.Date(it.deliveryDate) },
+        ),
     ),
     IdsExpirationDate(
         SyncObjectType.ID_CARD,
@@ -204,8 +223,8 @@ enum class CopyField(
             hasContentInSummary = { it.expireDate != null },
             hasContentInFull = { it.expireDate != null },
             getContentInSummary = { CopyContent.Ready.Date(it.expireDate) },
-            getContentInFull = { CopyContent.Ready.Date(it.expireDate) }
-        )
+            getContentInFull = { CopyContent.Ready.Date(it.expireDate) },
+        ),
     ),
 
     PassportLinkedIdentity(
@@ -214,8 +233,8 @@ enum class CopyField(
             hasContentInSummary = { it.fullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             hasContentInFull = { it.fullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             getContentInSummary = { it.getLinkedIdentityContent() },
-            getContentInFull = { it.getLinkedIdentityContent() }
-        )
+            getContentInFull = { it.getLinkedIdentityContent() },
+        ),
     ),
     PassportNumber(
         SyncObjectType.PASSPORT,
@@ -223,8 +242,8 @@ enum class CopyField(
             hasContentInSummary = { it.number.isNotSemanticallyNull() },
             hasContentInFull = { it.number.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.number) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.number) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.number) },
+        ),
     ),
     PassportIssueDate(
         SyncObjectType.PASSPORT,
@@ -232,8 +251,8 @@ enum class CopyField(
             hasContentInSummary = { throw ContentOnlyInSyncObjectException() },
             hasContentInFull = { it.deliveryDate != null },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.Date(it.deliveryDate) }
-        )
+            getContentInFull = { CopyContent.Ready.Date(it.deliveryDate) },
+        ),
     ),
     PassportExpirationDate(
         SyncObjectType.PASSPORT,
@@ -241,8 +260,8 @@ enum class CopyField(
             hasContentInSummary = { it.expireDate != null },
             hasContentInFull = { it.expireDate != null },
             getContentInSummary = { CopyContent.Ready.Date(it.expireDate) },
-            getContentInFull = { CopyContent.Ready.Date(it.expireDate) }
-        )
+            getContentInFull = { CopyContent.Ready.Date(it.expireDate) },
+        ),
     ),
 
     DriverLicenseLinkedIdentity(
@@ -251,8 +270,8 @@ enum class CopyField(
             hasContentInSummary = { it.fullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             hasContentInFull = { it.fullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             getContentInSummary = { it.getLinkedIdentityContent() },
-            getContentInFull = { it.getLinkedIdentityContent() }
-        )
+            getContentInFull = { it.getLinkedIdentityContent() },
+        ),
     ),
     DriverLicenseNumber(
         SyncObjectType.DRIVER_LICENCE,
@@ -260,8 +279,8 @@ enum class CopyField(
             hasContentInSummary = { it.number.isNotSemanticallyNull() },
             hasContentInFull = { it.number.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.number) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.number) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.number) },
+        ),
     ),
     DriverLicenseIssueDate(
         SyncObjectType.DRIVER_LICENCE,
@@ -269,8 +288,8 @@ enum class CopyField(
             hasContentInSummary = { throw ContentOnlyInSyncObjectException() },
             hasContentInFull = { it.deliveryDate != null },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.Date(it.deliveryDate) }
-        )
+            getContentInFull = { CopyContent.Ready.Date(it.deliveryDate) },
+        ),
     ),
     DriverLicenseExpirationDate(
         SyncObjectType.DRIVER_LICENCE,
@@ -278,8 +297,8 @@ enum class CopyField(
             hasContentInSummary = { it.expireDate != null },
             hasContentInFull = { it.expireDate != null },
             getContentInSummary = { CopyContent.Ready.Date(it.expireDate) },
-            getContentInFull = { CopyContent.Ready.Date(it.expireDate) }
-        )
+            getContentInFull = { CopyContent.Ready.Date(it.expireDate) },
+        ),
     ),
 
     SocialSecurityLinkedIdentity(
@@ -288,8 +307,8 @@ enum class CopyField(
             hasContentInSummary = { it.socialSecurityFullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             hasContentInFull = { it.socialSecurityFullname.isNotSemanticallyNull() || it.linkedIdentity.isNotSemanticallyNull() },
             getContentInSummary = { it.getLinkedIdentityContent() },
-            getContentInFull = { it.getLinkedIdentityContent() }
-        )
+            getContentInFull = { it.getLinkedIdentityContent() },
+        ),
     ),
     SocialSecurityNumber(
         SyncObjectType.SOCIAL_SECURITY_STATEMENT,
@@ -297,9 +316,9 @@ enum class CopyField(
             hasContentInSummary = { it.isSocialSecurityNumberEmpty.not() },
             hasContentInFull = { it.socialSecurityNumber.isNotSemanticallyNull() },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.socialSecurityNumber) }
+            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.socialSecurityNumber) },
         ),
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
 
     TaxNumber(
@@ -308,8 +327,8 @@ enum class CopyField(
             hasContentInSummary = { it.fiscalNumber.isNotSemanticallyNull() },
             hasContentInFull = { it.fiscalNumber.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.fiscalNumber) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.fiscalNumber) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.fiscalNumber) },
+        ),
     ),
     TaxOnlineNumber(
         SyncObjectType.FISCAL_STATEMENT,
@@ -317,8 +336,8 @@ enum class CopyField(
             hasContentInSummary = { throw ContentOnlyInSyncObjectException() },
             hasContentInFull = { it.teledeclarantNumber.isNotSemanticallyNull() },
             getContentInSummary = { throw ContentOnlyInSyncObjectException() },
-            getContentInFull = { CopyContent.Ready.StringValue(it.teledeclarantNumber) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.teledeclarantNumber) },
+        ),
     ),
 
     JustEmail(
@@ -327,8 +346,8 @@ enum class CopyField(
             hasContentInSummary = { it.email.isNotSemanticallyNull() },
             hasContentInFull = { it.email.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.email) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.email) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.email) },
+        ),
     ),
 
     PhoneNumber(
@@ -337,8 +356,8 @@ enum class CopyField(
             hasContentInSummary = { it.number.isNotSemanticallyNull() },
             hasContentInFull = { it.number.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.number) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.number) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.number) },
+        ),
     ),
 
     PersonalWebsite(
@@ -347,8 +366,8 @@ enum class CopyField(
             hasContentInSummary = { it.website.isNotSemanticallyNull() },
             hasContentInFull = { it.website.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.website) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.website) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.website) },
+        ),
     ),
 
     FirstName(
@@ -357,8 +376,8 @@ enum class CopyField(
             hasContentInSummary = { it.firstName.isNotSemanticallyNull() },
             hasContentInFull = { it.firstName.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.firstName) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.firstName) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.firstName) },
+        ),
     ),
     LastName(
         SyncObjectType.IDENTITY,
@@ -366,8 +385,8 @@ enum class CopyField(
             hasContentInSummary = { it.lastName.isNotSemanticallyNull() },
             hasContentInFull = { it.lastName.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.lastName) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.lastName) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.lastName) },
+        ),
     ),
     MiddleName(
         SyncObjectType.IDENTITY,
@@ -375,8 +394,8 @@ enum class CopyField(
             hasContentInSummary = { it.middleName.isNotSemanticallyNull() },
             hasContentInFull = { it.middleName.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.middleName) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.middleName) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.middleName) },
+        ),
     ),
     IdentityLogin(
         SyncObjectType.IDENTITY,
@@ -384,8 +403,8 @@ enum class CopyField(
             hasContentInSummary = { it.pseudo.isNotSemanticallyNull() },
             hasContentInFull = { it.pseudo.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.pseudo) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.pseudo) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.pseudo) },
+        ),
     ),
     FullName(
         SyncObjectType.IDENTITY,
@@ -393,8 +412,8 @@ enum class CopyField(
             hasContentInSummary = { it.fullName.isNotSemanticallyNull() },
             hasContentInFull = { it.fullName.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.fullName) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.fullName) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.fullName) },
+        ),
     ),
     CompanyName(
         SyncObjectType.COMPANY,
@@ -402,8 +421,8 @@ enum class CopyField(
             hasContentInSummary = { it.name.isNotSemanticallyNull() },
             hasContentInFull = { it.name.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.name) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.name) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.name) },
+        ),
     ),
     CompanyTitle(
         SyncObjectType.COMPANY,
@@ -411,8 +430,8 @@ enum class CopyField(
             hasContentInSummary = { it.jobTitle.isNotSemanticallyNull() },
             hasContentInFull = { it.jobTitle.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.jobTitle) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.jobTitle) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.jobTitle) },
+        ),
     ),
     PasskeyDisplayName(
         SyncObjectType.PASSKEY,
@@ -420,8 +439,8 @@ enum class CopyField(
             hasContentInSummary = { it.userDisplayName.isNotSemanticallyNull() },
             hasContentInFull = { it.userDisplayName.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.userDisplayName) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.userDisplayName) }
-        )
+            getContentInFull = { CopyContent.Ready.StringValue(it.userDisplayName) },
+        ),
     ),
     SecretValue(
         SyncObjectType.SECRET,
@@ -429,19 +448,52 @@ enum class CopyField(
             hasContentInSummary = { it.content.isNotSemanticallyNull() },
             hasContentInFull = { it.content.isNotSemanticallyNull() },
             getContentInSummary = { CopyContent.Ready.StringValue(it.content) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.content) }
+            getContentInFull = { CopyContent.Ready.StringValue(it.content) },
         ),
         isSharingProtected = true,
-        isSensitiveData = true
+        isSensitiveData = true,
     ),
     SecretId(
         SyncObjectType.SECRET,
         CopyFieldContentMapper.Secret(
             hasContentInSummary = { it.id.isNotSemanticallyNull() },
             hasContentInFull = { it.id.isNotSemanticallyNull() },
-            getContentInSummary = { CopyContent.Ready.StringValue(it.id.removeSurrounding("{", "}")) },
-            getContentInFull = { CopyContent.Ready.StringValue(it.id?.removeSurrounding("{", "}")) }
-        )
+            getContentInSummary = {
+                CopyContent.Ready.StringValue(it.id.removeSurrounding("{", "}"))
+            },
+            getContentInFull = {
+                CopyContent.Ready.StringValue(it.id?.removeSurrounding("{", "}"))
+            },
+        ),
+    ),
+    WiFiSsid(
+        SyncObjectType.WI_FI,
+        CopyFieldContentMapper.WiFi(
+            hasContentInSummary = { it.ssid.isNotSemanticallyNull() },
+            hasContentInFull = { it.ssid.isNotSemanticallyNull() },
+            getContentInSummary = { CopyContent.Ready.StringValue(it.ssid) },
+            getContentInFull = { CopyContent.Ready.StringValue(it.ssid) },
+        ),
+    ),
+    WiFiPassphrase(
+        SyncObjectType.WI_FI,
+        CopyFieldContentMapper.WiFi(
+            hasContentInSummary = { it.isPassphraseEmpty.not() },
+            hasContentInFull = { it.passphrase.isNotSemanticallyNull() },
+            getContentInSummary = { throw ContentOnlyInSyncObjectException() },
+            getContentInFull = { CopyContent.Ready.ObfuscatedValue(it.passphrase) },
+        ),
+        isSharingProtected = true,
+        isSensitiveData = true,
+    ),
+    WiFiNote(
+        SyncObjectType.WI_FI,
+        CopyFieldContentMapper.WiFi(
+            hasContentInSummary = { it.note.isNotSemanticallyNull() },
+            hasContentInFull = { it.note.isNotSemanticallyNull() },
+            getContentInSummary = { CopyContent.Ready.StringValue(it.note) },
+            getContentInFull = { CopyContent.Ready.StringValue(it.note) },
+        ),
     ),
 }
 
@@ -469,7 +521,7 @@ private fun SummaryObject.getLinkedIdentityContent(): CopyContent {
 
 private fun resolveIdentityContent(
     fullName: String?,
-    linkedIdentityId: String?
+    linkedIdentityId: String?,
 ): CopyContent {
     return if (fullName.isNotSemanticallyNull()) {
         CopyContent.Ready.StringValue(fullName)
@@ -477,7 +529,7 @@ private fun resolveIdentityContent(
         CopyContent.FromRemoteItem(
             uid = linkedIdentityId!!,
             syncObjectType = SyncObjectType.IDENTITY,
-            copyField = CopyField.FullName
+            copyField = CopyField.FullName,
         )
     } else {
         CopyContent.Ready.StringValue("")

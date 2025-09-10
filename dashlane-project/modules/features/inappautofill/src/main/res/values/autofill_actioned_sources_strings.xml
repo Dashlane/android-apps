@@ -1,17 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="autofill_pause_resume_settings_title">Paused Autofill</string>
-    
-    <string name="autofill_pause_resume_settings_description">Resume Autofill on paused websites and apps</string>
-    
     <string name="autofill_actioned_sources_paused_title">Paused Autofill</string>
-    <string name="autofill_actioned_sources_all_header">All</string>
     <string name="autofill_actioned_sources_items_empty_title">Nothing here yet</string>
     <string name="autofill_actioned_sources_items_empty_description">We\'ll display a list of apps and websites that have Dashlane Autofill paused.</string>
-    <string name="autofill_actioned_sources_forget_error_message">We can\'t open this right now. Please try again later.</string>
 
     <string name="autofill_list_items_error_title">Something went wrong</string>
     <string name="autofill_list_items_error_description">Please refresh this page or try again later.</string>
     <string name="autofill_list_items_error_retry_action">Refresh page</string>
+
+    
+    <string name="and_accessibility_paused_autofill_setting_loading">Loading Paused Autofill services</string>
+    
+    <string name="paused_autofill_setting_temporarily_paused_header">Temporarily paused</string>
+    
+    <string name="paused_autofill_setting_permanently_paused_header">Paused until I turn it back on</string>
+    
+    <plurals name="paused_autofill_setting_paused_until_by_hours">
+        <item quantity="one">%1$d hour left</item>
+        <item quantity="other">%1$d hours left</item>
+    </plurals>
+    
+    <plurals name="paused_autofill_setting_paused_until_by_minutes">
+        <item quantity="one">%1$d minute left</item>
+        <item quantity="other">%1$d minutes left</item>
+    </plurals>
+    
+    <string name="paused_autofill_setting_re_enable_action">Resume</string>
+    
+    <string name="paused_autofill_setting_resumed_success_feedback">Autofill resumed for %1$s</string>
 </resources>

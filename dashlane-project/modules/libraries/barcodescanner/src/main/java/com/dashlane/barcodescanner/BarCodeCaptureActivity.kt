@@ -1,7 +1,6 @@
 package com.dashlane.barcodescanner
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,12 +9,13 @@ import android.view.Surface.ROTATION_0
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
-import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.ViewModelProvider
@@ -35,7 +35,6 @@ import kotlin.math.min
 @AndroidEntryPoint
 @ExperimentalGetImage
 class BarCodeCaptureActivity : DashlaneActivity() {
-
     private lateinit var previewView: PreviewView
     private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var cameraSelector: CameraSelector
@@ -43,7 +42,7 @@ class BarCodeCaptureActivity : DashlaneActivity() {
     private var previewUseCase: Preview? = null
     private var analysisUseCase: ImageAnalysis? = null
 
-    private val screenAspectRatio: Int
+    private val screenAspectRatio: AspectRatioStrategy
         get() {
             
             val (width, height) = getMetrics()
@@ -78,7 +77,7 @@ class BarCodeCaptureActivity : DashlaneActivity() {
         cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         ViewModelProvider(
             this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application),
         )[CameraXViewModel::class.java]
             .processCameraProvider
             .observe(this) { provider: ProcessCameraProvider? ->
@@ -104,7 +103,7 @@ class BarCodeCaptureActivity : DashlaneActivity() {
                                 finish()
                             }
                         },
-                        Manifest.permission.CAMERA
+                        Manifest.permission.CAMERA,
                     )
                 }
             }
@@ -121,26 +120,30 @@ class BarCodeCaptureActivity : DashlaneActivity() {
             cameraProvider!!.unbind(previewUseCase)
         }
 
-        previewUseCase = Preview.Builder()
-            .setTargetAspectRatio(screenAspectRatio)
+        previewUseCase = Preview
+            .Builder()
+            .setResolutionSelector(ResolutionSelector.Builder().setAspectRatioStrategy(screenAspectRatio).build())
             .setTargetRotation(previewView.display?.rotation ?: ROTATION_0)
             .build()
-        previewUseCase!!.setSurfaceProvider(previewView.surfaceProvider)
+        previewUseCase!!.surfaceProvider = previewView.surfaceProvider
 
         try {
+            cameraProvider!!.bindToLifecycle(
+                
                 this,
                 cameraSelector,
-                previewUseCase
+                previewUseCase,
             )
-        } catch (illegalStateException: IllegalStateException) {
+        } catch (_: IllegalStateException) {
             finish()
-        } catch (illegalArgumentException: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             finish()
         }
     }
 
     private fun bindAnalyseUseCase(barCodeFormat: Int) {
-        val options = BarcodeScannerOptions.Builder()
+        val options = BarcodeScannerOptions
+            .Builder()
             .setBarcodeFormats(barCodeFormat)
             .build()
         val barcodeScanner: BarcodeScanner = BarcodeScanning.getClient(options)
@@ -153,8 +156,9 @@ class BarCodeCaptureActivity : DashlaneActivity() {
             cameraProvider!!.unbind(analysisUseCase)
         }
 
-        analysisUseCase = ImageAnalysis.Builder()
-            .setTargetAspectRatio(screenAspectRatio)
+        analysisUseCase = ImageAnalysis
+            .Builder()
+            .setResolutionSelector(ResolutionSelector.Builder().setAspectRatioStrategy(screenAspectRatio).build())
             .setTargetRotation(previewView.display?.rotation ?: ROTATION_0)
             .build()
 
@@ -166,24 +170,27 @@ class BarCodeCaptureActivity : DashlaneActivity() {
         }
 
         try {
+            cameraProvider!!.bindToLifecycle(
+                
                 this,
                 cameraSelector,
-                analysisUseCase
+                analysisUseCase,
             )
-        } catch (illegalStateException: IllegalStateException) {
+        } catch (_: IllegalStateException) {
             finish()
-        } catch (illegalArgumentException: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             finish()
         }
     }
 
     private fun processImageProxy(
         barcodeScanner: BarcodeScanner,
-        imageProxy: ImageProxy
+        imageProxy: ImageProxy,
     ) {
         val inputImage = createInputImage(imageProxy)
 
-        barcodeScanner.process(inputImage)
+        barcodeScanner
+            .process(inputImage)
             .addOnSuccessListener { barcodes ->
                 if (barcodes.isEmpty()) return@addOnSuccessListener
                 cameraProvider!!.unbind(previewUseCase)
@@ -191,14 +198,13 @@ class BarCodeCaptureActivity : DashlaneActivity() {
                     it.rawValue
                 }
                 setResult(
-                    Activity.RESULT_OK,
+                    RESULT_OK,
                     Intent().apply {
-                    putExtra(RESULT_EXTRA_BARCODE_VALUES, codes.toTypedArray())
-                }
+                        putExtra(RESULT_EXTRA_BARCODE_VALUES, codes.toTypedArray())
+                    },
                 )
                 finish()
-            }
-            .addOnFailureListener {
+            }.addOnFailureListener {
                 finish()
             }.addOnCompleteListener {
                 
@@ -211,23 +217,21 @@ class BarCodeCaptureActivity : DashlaneActivity() {
     private fun createInputImage(imageProxy: ImageProxy) =
         InputImage.fromMediaImage(imageProxy.image!!, imageProxy.imageInfo.rotationDegrees)
 
-    private fun aspectRatio(width: Int, height: Int): Int {
+    private fun aspectRatio(width: Int, height: Int): AspectRatioStrategy {
         val previewRatio = max(width, height).toDouble() / min(width, height)
         if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
-            return AspectRatio.RATIO_4_3
+            return AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY
         }
-        return AspectRatio.RATIO_16_9
+        return AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY
     }
 
     @Suppress("DEPRECATION")
-    private fun getMetrics(): Pair<Int, Int> {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val bounds = windowManager.currentWindowMetrics.bounds
-            bounds.width() to bounds.height()
-        } else {
-            val metrics = DisplayMetrics().also { previewView.display?.getRealMetrics(it) }
-            metrics.widthPixels to metrics.heightPixels
-        }
+    private fun getMetrics(): Pair<Int, Int> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val bounds = windowManager.currentWindowMetrics.bounds
+        bounds.width() to bounds.height()
+    } else {
+        val metrics = DisplayMetrics().also { previewView.display?.getRealMetrics(it) }
+        metrics.widthPixels to metrics.heightPixels
     }
 
     companion object {

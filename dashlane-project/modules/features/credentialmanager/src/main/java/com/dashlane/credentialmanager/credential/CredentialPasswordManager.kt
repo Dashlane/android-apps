@@ -10,6 +10,7 @@ import com.dashlane.credentialmanager.CredentialManagerDAO
 import com.dashlane.credentialmanager.model.MissingFieldException
 import com.dashlane.ext.application.KnownApplicationProvider
 import com.dashlane.util.PackageUtilities
+import com.dashlane.util.obfuscated.isNullOrEmpty
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.formatTitle
 import com.dashlane.vault.model.loginForUi
@@ -20,7 +21,7 @@ import javax.inject.Inject
 interface CredentialPasswordManager {
     suspend fun createPasswordLogin(
         createPasswordRequest: CreatePasswordRequest,
-        callingAppInfo: CallingAppInfo
+        callingAppInfo: CallingAppInfo,
     ): CreatePasswordResponse
 
     fun providePasswordLogin(authentifiantVaultItem: VaultItem<SyncObject.Authentifiant>): PasswordCredential
@@ -34,7 +35,7 @@ class CredentialPasswordManagerImpl @Inject constructor(
 ) : CredentialPasswordManager {
     override suspend fun createPasswordLogin(
         createPasswordRequest: CreatePasswordRequest,
-        callingAppInfo: CallingAppInfo
+        callingAppInfo: CallingAppInfo,
     ): CreatePasswordResponse {
         val website = getWebsiteFromPackageName(callingAppInfo.packageName)
         
@@ -60,7 +61,7 @@ class CredentialPasswordManagerImpl @Inject constructor(
             return SyncObject.Authentifiant.formatTitle(website)
         } else if (packageName != null) {
             return SyncObject.Authentifiant.formatTitle(
-                PackageUtilities.getApplicationNameFromPackage(context, packageName)
+                PackageUtilities.getApplicationNameFromPackage(context, packageName),
             )
         }
         return null
@@ -70,8 +71,8 @@ class CredentialPasswordManagerImpl @Inject constructor(
         if (authentifiantVaultItem.loginForUi == null) {
             throw MissingFieldException("Login cannot be null")
         }
-        if (authentifiantVaultItem.syncObject.password == null) {
-            throw MissingFieldException("Password cannot be null")
+        if (authentifiantVaultItem.syncObject.password.isNullOrEmpty()) {
+            throw MissingFieldException("Password cannot be null or empty")
         }
         return PasswordCredential(
             authentifiantVaultItem.loginForUi!!,

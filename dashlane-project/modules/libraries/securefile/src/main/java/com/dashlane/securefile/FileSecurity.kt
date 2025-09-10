@@ -16,7 +16,7 @@ object FileSecurity {
         "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.spreadsheet",
         "application/vnd.oasis.opendocument.presentation", "application/vnd.oasis.opendocument.graphics",
         "application/x-rar-compressed", "application/rar", "application/ogg",
-        "application/x-7z-compressed", "application/x-sqlite3", "application/octet-stream", "application/unknown"
+        "application/x-7z-compressed", "application/x-sqlite3", "application/octet-stream", "application/unknown",
         
         
         
@@ -27,7 +27,7 @@ object FileSecurity {
         "docx", "doc", "csv", "xlsx", "xls", "ppt", "pptx", "pdf", "txt", "zip",
         "key", "png", "jpg", "jpeg", "gif", "tiff", "bmp", "odt", "avi", "ogg", "m4a", "mov", "mp3", "mp4", "mpg",
         "wav", "wmv", "ods", "rar", "7z", "mkv", "raw", "db", "aac", "3gp", "webm", "flac", "gz", "tar", "azw3",
-        "odp", "odg", "heic", "heif"
+        "odp", "odg", "heic", "heif",
     )
 
     fun isSupportedType(filename: String?, mimeType: String?): Boolean {

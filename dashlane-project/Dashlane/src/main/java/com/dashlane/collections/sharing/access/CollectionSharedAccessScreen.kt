@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -47,11 +47,13 @@ import com.dashlane.design.component.ListItemActions
 import com.dashlane.design.component.Text
 import com.dashlane.design.component.ThumbnailType
 import com.dashlane.design.iconography.IconTokens
+import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.design.theme.color.Intensity
 import com.dashlane.design.theme.color.Mood
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.design.theme.typography.withSearchHighlight
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
+import com.dashlane.ui.common.compose.components.basescreen.scaffoldBackgroundAndInsets
 import com.dashlane.util.MD5Hash
 
 var totalMemberCountBeforeRevoke = 0
@@ -60,13 +62,15 @@ var totalMemberCountBeforeRevoke = 0
 @Composable
 internal fun CollectionSharedAccessScreen(
     viewModel: CollectionSharedAccessViewModel = viewModel(),
-    userInteractionListener: UserInteractionListener
+    userInteractionListener: UserInteractionListener,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val viewData = uiState.viewData
     val searchQuery = remember { mutableStateOf("") }
     val isSearching = remember { mutableStateOf(false) }
     Scaffold(
+        modifier = Modifier.scaffoldBackgroundAndInsets(),
+        containerColor = DashlaneTheme.colors.backgroundAlternate,
         topBar = {
             CollectionSharedAccessTopBar(
                 uiState,
@@ -74,11 +78,11 @@ internal fun CollectionSharedAccessScreen(
                 searchQuery,
                 isSearching,
                 viewModel,
-                userInteractionListener
+                userInteractionListener,
             )
-        }
-    ) {
-        Box(modifier = Modifier.padding(it)) {
+        },
+    ) { contentPadding ->
+        Box(modifier = Modifier.padding(contentPadding)) {
             when (uiState) {
                 is Loading -> CollectionLoading()
                 is ShowList, is ConfirmRevoke -> {
@@ -93,7 +97,7 @@ internal fun CollectionSharedAccessScreen(
                             },
                             revokeUserAction = { individual ->
                                 viewModel.onRevokeClicked(individual)
-                            }
+                            },
                         )
                     }
                     if (totalMemberCountBeforeRevoke != 0) {
@@ -122,7 +126,7 @@ internal fun CollectionSharedAccessScreen(
                         dismissAction = {
                             totalMemberCountBeforeRevoke = 0
                             viewModel.onRevokeCancelClicked()
-                        }
+                        },
                     )
                 }
                 is MyselfRevoked -> userInteractionListener.onCloseClicked()
@@ -139,7 +143,7 @@ private fun EditorPermissionInfobox() {
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
         mood = Mood.Brand,
         title = stringResource(id = R.string.collection_shared_access_infobox_title_roles),
-        description = stringResource(id = R.string.collection_shared_access_infobox_description_roles)
+        description = stringResource(id = R.string.collection_shared_access_infobox_description_roles),
     )
 }
 
@@ -150,7 +154,7 @@ private fun CollectionSharedAccessTopBar(
     searchQuery: MutableState<String>,
     isSearching: MutableState<Boolean>,
     viewModel: CollectionSharedAccessViewModel,
-    userInteractionListener: UserInteractionListener
+    userInteractionListener: UserInteractionListener,
 ) {
     CollectionSharingTopAppBar(
         title = stringResource(id = R.string.collection_shared_access_title),
@@ -167,7 +171,7 @@ private fun CollectionSharedAccessTopBar(
             override fun onToggleSearch() {
                 viewModel.onToggleSearch()
             }
-        }
+        },
     )
 }
 
@@ -177,7 +181,7 @@ private fun SharedGroupsAndUsersList(
     login: String,
     searchQuery: String,
     revokeGroupAction: (UserGroup) -> Unit,
-    revokeUserAction: (Individual) -> Unit
+    revokeUserAction: (Individual) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         val filteredUserGroups = if (searchQuery.isNotEmpty()) {
@@ -200,7 +204,7 @@ private fun SharedGroupsAndUsersList(
                     group = group,
                     canRevoke = viewData.isAdmin,
                     searchQuery = searchQuery,
-                    revokeGroupAction = revokeAction
+                    revokeGroupAction = revokeAction,
                 )
             }
         }
@@ -219,7 +223,7 @@ private fun SharedGroupsAndUsersList(
                     individual = individual,
                     canRevoke = viewData.isAdmin,
                     searchQuery = searchQuery,
-                    revokeUserAction = revokeAction
+                    revokeUserAction = revokeAction,
                 )
             }
         }
@@ -232,13 +236,13 @@ private fun UserGroupItem(
     group: UserGroup,
     canRevoke: Boolean,
     searchQuery: String,
-    revokeGroupAction: ((UserGroup) -> Unit)?
+    revokeGroupAction: ((UserGroup) -> Unit)?,
 ) {
     val isAdmin = remember(group.permission) { group.permission == Permission.ADMIN }
     val groupMemberCount = pluralStringResource(
         id = R.plurals.collections_new_share_group_members,
         count = group.membersCount,
-        formatArgs = arrayOf(group.membersCount)
+        formatArgs = arrayOf(group.membersCount),
     )
     val roleStatus = getRoleStatus(isAdmin)
     val statusText = remember(groupMemberCount, roleStatus) {
@@ -259,7 +263,7 @@ private fun UserGroupItem(
                         layout = TextOnly(text = revokeLabel),
                         mood = Mood.Warning,
                         intensity = Intensity.Supershy,
-                        enabled = canRevoke
+                        enabled = canRevoke,
                     )
                 }
 
@@ -272,7 +276,7 @@ private fun UserGroupItem(
                                     revokeGroupAction(group)
                                     true
                                 },
-                            )
+                            ),
                         )
                     } else {
                         emptyList()
@@ -298,14 +302,14 @@ private fun IndividualItem(
     individual: Individual,
     canRevoke: Boolean,
     searchQuery: String,
-    revokeUserAction: ((Individual) -> Unit)?
+    revokeUserAction: ((Individual) -> Unit)?,
 ) {
     val url = remember(individual.username) {
         "https://www.gravatar.com/avatar/${MD5Hash.hash(individual.username)}?s=200&r=pg&d=404"
     }
     val statusText = getIndividualStatus(
         individual = individual,
-        revokeUserAction = revokeUserAction
+        revokeUserAction = revokeUserAction,
     )
     val revokeLabel = stringResource(id = R.string.collection_shared_access_revoke_button_accessibility)
     val actions = remember(revokeUserAction) {
@@ -322,7 +326,7 @@ private fun IndividualItem(
                         layout = TextOnly(text = revokeLabel),
                         mood = Mood.Warning,
                         intensity = Intensity.Supershy,
-                        enabled = canRevoke
+                        enabled = canRevoke,
                     )
                 }
 
@@ -335,7 +339,7 @@ private fun IndividualItem(
                                     revokeUserAction(individual)
                                     true
                                 },
-                            )
+                            ),
                         )
                     } else {
                         emptyList()
@@ -359,7 +363,7 @@ private fun IndividualItem(
 @Composable
 private fun getIndividualStatus(
     individual: Individual,
-    revokeUserAction: ((Individual) -> Unit)?
+    revokeUserAction: ((Individual) -> Unit)?,
 ): String {
     val isAdmin = remember(individual.permission) { individual.permission == Permission.ADMIN }
     val roleStatus = getRoleStatus(isAdmin)
@@ -392,7 +396,7 @@ private fun RevokeConfirmDialog(
     group: UserGroup?,
     revokeUserAction: (Individual) -> Unit,
     revokeGroupAction: (UserGroup) -> Unit,
-    dismissAction: () -> Unit
+    dismissAction: () -> Unit,
 ) {
     val name = individual?.username ?: group?.name ?: ""
     Dialog(
@@ -404,24 +408,24 @@ private fun RevokeConfirmDialog(
             Text(
                 text = stringResource(
                     id = R.string.collection_shared_access_revoke_dialog_text,
-                    name
-                )
+                    name,
+                ),
             )
         },
         mainActionLayout = TextOnly(
-            stringResource(R.string.collection_shared_access_revoke_dialog_positive_button)
+            stringResource(R.string.collection_shared_access_revoke_dialog_positive_button),
         ),
         mainActionClick = {
             individual?.let { revokeUserAction.invoke(it) }
             group?.let { revokeGroupAction.invoke(it) }
         },
         additionalActionLayout = TextOnly(
-            stringResource(R.string.collection_shared_access_revoke_dialog_negative_button)
+            stringResource(R.string.collection_shared_access_revoke_dialog_negative_button),
         ),
         additionalActionClick = {
             dismissAction.invoke()
         },
-        isDestructive = true
+        isDestructive = true,
     )
 }
 
@@ -434,7 +438,7 @@ private fun PreviewSharedUsersAndGroups() {
                 userGroups = listOf(
                     UserGroup("1", "All", 324),
                     UserGroup("2", "Marketing", 34),
-                    UserGroup("3", "Engineering", 16)
+                    UserGroup("3", "Engineering", 16),
                 ),
                 individuals = listOf(
                     Individual("randomemail@provider.com"),
@@ -443,7 +447,7 @@ private fun PreviewSharedUsersAndGroups() {
                     Individual("randomemail@provider.com"),
                     Individual("randomemail@provider.com"),
                     Individual("randomemail@provider.com"),
-                    Individual("randomemail@provider.com")
+                    Individual("randomemail@provider.com"),
                 ),
                 isAdmin = true,
             ),
@@ -454,7 +458,7 @@ private fun PreviewSharedUsersAndGroups() {
             },
             revokeUserAction = {
                 
-            }
+            },
         )
     }
 }

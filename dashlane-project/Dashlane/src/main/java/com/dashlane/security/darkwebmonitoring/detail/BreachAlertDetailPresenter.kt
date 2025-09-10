@@ -5,11 +5,11 @@ import android.text.style.StyleSpan
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.dashlane.R
 import com.dashlane.breach.Breach
+import com.dashlane.breach.BreachWrapper
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.navigation.Navigator
+import com.dashlane.passwordhealth.identitydashboard.breach.getDataInvolvedFormatted
 import com.dashlane.security.darkwebmonitoring.DarkWebMonitoringAlertViewModel
-import com.dashlane.security.identitydashboard.breach.BreachWrapper
-import com.dashlane.security.identitydashboard.breach.getDataInvolvedFormatted
 import com.dashlane.util.getFormattedSpannable
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.utils.coroutines.inject.qualifiers.FragmentLifecycleCoroutineScope
@@ -32,9 +32,8 @@ class BreachAlertDetailPresenter @Inject constructor(
     private val navigator: Navigator,
     private val logger: BreachAlertDetail.Logger,
     @MainCoroutineDispatcher
-    private val mainDispatcher: CoroutineDispatcher
+    private val mainDispatcher: CoroutineDispatcher,
 ) : BasePresenter<BreachAlertDetail.DataProvider, BreachAlertDetail.ViewProxy>(), BreachAlertDetail.Presenter {
-
     private var breachWrapper = initialBreach
         set(value) {
             field = value
@@ -142,9 +141,9 @@ class BreachAlertDetailPresenter @Inject constructor(
             setOf(
                 BreachAlertAdvice(
                     view.resources.getString(R.string.dwm_alert_detail_advice_password_changed),
-                    true
-                )
-            )
+                    true,
+                ),
+            ),
         )
     } else {
         view.showAdvicesInfoBox(emptySet())
@@ -160,7 +159,7 @@ class BreachAlertDetailPresenter @Inject constructor(
                 breachWrapper.linkedAuthentifiant.size > 1 -> {
                     passwordAdvice = view.resources.getString(
                         R.string.dwm_alert_detail_advice_password_multiple,
-                        breachWrapper.linkedAuthentifiant.size
+                        breachWrapper.linkedAuthentifiant.size,
                     )
                     passwordAdviceButton = view.resources.getString(R.string.dwm_alert_detail_view_accounts_cta)
                     passwordAdviceButtonAction = {
@@ -200,7 +199,7 @@ class BreachAlertDetailPresenter @Inject constructor(
                 view.resources.getFormattedSpannable(
                     R.string.dwm_alert_detail_advice_creditcard,
                     domain,
-                    listOf(StyleSpan(Typeface.BOLD))
+                    listOf(StyleSpan(Typeface.BOLD)),
                 )
             } else {
                 view.resources.getString(R.string.dwm_alert_detail_advice_creditcard_nodomain)
@@ -208,7 +207,7 @@ class BreachAlertDetailPresenter @Inject constructor(
             return BreachAlertAdvice(
                 creditCardAdvice.toString(),
                 false,
-                view.resources.getString(R.string.dwm_alert_detail_mark_done_cta)
+                view.resources.getString(R.string.dwm_alert_detail_mark_done_cta),
             ) {
                 fragmentLifecycleCoroutineScope.launch(mainDispatcher) {
                     provider.markAsResolved(breachWrapper)
@@ -224,7 +223,7 @@ class BreachAlertDetailPresenter @Inject constructor(
             navigator.goToGuidedPasswordChange(
                 itemId,
                 domain,
-                email
+                email,
             )
         } else {
             
@@ -233,7 +232,7 @@ class BreachAlertDetailPresenter @Inject constructor(
 
     private fun viewAffectedAccounts() {
         navigator.goToPasswordAnalysisFromBreach(
-            breachWrapper.publicBreach.id
+            breachWrapper.publicBreach.id,
         )
     }
 

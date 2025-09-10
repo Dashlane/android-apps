@@ -20,8 +20,8 @@ fun ThumbnailUserSingle(
     Thumbnail(
         modifier = modifier,
         type = ThumbnailType.User.Single(
-            url = url
+            url = url,
         ),
-        size = size
+        size = size,
     )
 }

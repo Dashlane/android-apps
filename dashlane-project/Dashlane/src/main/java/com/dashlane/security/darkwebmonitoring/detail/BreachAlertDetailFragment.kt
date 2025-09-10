@@ -12,7 +12,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class BreachAlertDetailFragment : AbstractContentFragment() {
-
     @Inject
     lateinit var presenter: BreachAlertDetail.Presenter
 

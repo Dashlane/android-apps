@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="login_email_page_validate_button">Continue</string>
+    
+    <string name="login_email_text_field_placeholder">Enter your email address</string>
+    
+    <string name="login_email_page_secret_transfer_label">Logged in on a different mobile device?</string>
+    
+    <string name="login_email_page_secret_transfer_button">Log in with a QR code</string>
+    
+    <string name="create_account">Create account</string>
+    
+    <string name="login_button_error">Error</string>
+    
+    <string name="invalid_email">The email address you provided is invalid. Please provide a valid email address.</string>
+    
+    <string name="account_doesn_t_exist_do_you_have_an_account_with_dashlane">We couldn\'t find this account. Please check the email address.</string>
+    
+    <string name="login_team_error">An error has occurred. Please reach out to your plan admin for more info.</string>
+    
+    <string name="login_email_error_user_deactivated">We\'re sorry, this account is no longer available. Please refer to the Help Center article for more information.</string>
+
+    
+    <string name="please_enter_master_password_to_edit_settings">Please enter your Master Password to change this setting.</string>
+    
+    <string name="unlock_message_secure_note_master_password">Unlock this Secure Note with your Master Password</string>
+    
+    <string name="unlock_message_item_master_password">Unlock this item with your Master Password</string>
+    
+    <string name="please_enter_master_password_to_share">Please enter your Master Password to share</string>
+    
+    <string name="enter_masterpassword">Unlock with your Master Password</string>
+    
+    <string name="forced_logout">Your account settings have been modified from another authorized device. To continue using your account on this device, please sign in again.</string>
+    
+    <string name="lock_force_logout_password_incorrect_too_much">You have been logged out after 3 failed authentication attempts. Please log in again.</string>
+    
+    <string name="login_enter_mp_remember_title">We\'ll occasionally ask for your Master Password to make sure you still remember it.</string>
+    
+    <string name="fragment_lock_master_password_button_unlock">Unlock</string>
+    
+    <string name="login_password_page_login_button">Log in</string>
+    
+    <string name="login_enter_mp_later">Ask later</string>
+    
+    <string name="login_password_forgot_password_button">Forgot your password?</string>
+    
+    <string name="login_password_switch_account_label">Account</string>
+    
+    <string name="login_change_account">Use another account</string>
+    
+    <string name="password_empty">Password Error. Please provide your Master Password.</string>
+    
+    <string name="login_password_dialog_trouble_login_title">Trouble logging in?</string>
+    
+    <string name="login_password_dialog_trouble_biometric_button">Reset with biometrics</string>
+    
+    <string name="login_password_dialog_trouble_recovery_key_button">Use recovery key</string>
+    
+    <string name="trouble_logging_in">Login Issues?</string>
+    
+    <string name="login_cannot_login">I cannot log in</string>
+    
+    <string name="login_forgot_password">I forgot my password</string>
+
+    
+    <string name="user_support_file_confirmation_description">These logs are used for diagnostic purposes and do not contain your encrypted data. Dashlane deletes these logs after 14 days.</string>
+    
+    <string name="user_support_file_upload_description">Uploading diagnostic file...</string>
+    
+    <string name="user_support_file_finish_title">Upload successful. To continue troubleshooting, please share this code with Customer Support:</string>
+    
+    <string name="user_support_file_copy">Copy</string>
+    
+    <string name="user_support_file_fail_title">We encountered an unexpected error. Please try again.</string>
+
+    
+    <string name="enter_pin">Unlock with your PIN</string>
+    
+    <string name="passwordless_pin_error_button">Forgot your PIN?</string>
+    
+    <string name="passwordless_pin_forgot_use_another_device">Log in with another device</string>
+    
+    <string name="passwordless_pin_forgot_use_recovery_method">Use a recovery method</string>
+    
+    <string name="passwordless_pin_error_title">Forgot your PIN?</string>
+    
+    <string name="passwordless_pin_error_description">Re-authenticate this device using another logged-in device or your recovery key. Then you can reset your PIN.\n\nIf none of these methods are available to you, visit the Help Center to learn how to reset your account.</string>
+    
+    <string name="lock_pincode_force_logout_pin_missed_too_much">You entered the wrong PIN three times. Please log in with your Master Password.</string>
+    
+    <plurals name="failed_attempt">
+        <item quantity="one">%1$d failed attempt</item>
+        <item quantity="other">%1$d failed attempts</item>
+    </plurals>
+
+    
+    <string name="unlock_message_secure_note_biometrics">Unlock this Secure Note with your biometrics</string>
+    
+    <string name="unlock_biometrics">Unlock with your biometrics</string>
+    
+    <string name="unlock_message_item_biometrics">Unlock this item with your biometrics</string>
+    
+    <string name="window_biometric_unlock_hardware_module_google_fp_title">Unlock Dashlane with biometrics</string>
+    
+    <string name="biometric_prompt_pin_fallback">Use PIN</string>
+    
+    <string name="sso_lock_use_sso">Use SSO</string>
+    
+    <string name="fragment_lock_pin_button_use_master_password">Use Master Password</string>
+    
+    <string name="lock_fingerprint_force_logout_fingerprint_incorrect_too_much">You were not recognized. Please try logging in again.</string>
+
+    
+    <string name="otp_enabled_token_desc">To verify your identity, enter the 2FA token provided by your authentication app.</string>
+    
+    <string name="login_totp_text_field_label">2FA token</string>
+    
+    <string name="login_totp_next_button">Next</string>
+    
+    <string name="login_totp_use_recovery_code">Can’t access your app?</string>
+    
+    <string name="login_totp_error_message_already_used">This OTP was already used</string>
+    
+    <string name="totp_failed">Incorrect or expired 2FA token Please check your token and try again.</string>
+    
+    <string name="totp_failed_locked_out">2FA token verification failed. Please check your token or try again later.</string>
+    
+    <string name="login_token_text_field_label">Verification code</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_title">Can’t access your app?</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_choice_description">Use a recovery code from when you first set up 2FA. We can also send you codes by text message.</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_choice_button_positive">Log in with recovery code</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_choice_button_negative">Receive a text message</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_description">Enter one of the 10 recovery codes that were generated when you set up 2FA.</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_button_positive">Next</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_button_negative">Cancel</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_hint">Enter a recovery code</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_backup_error">Incorrect recovery code</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_description">We’ll send a text message with two recovery codes to the phone number associated with this account.</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_button_positive">Send</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_button_negative">Cancel</string>
+    
+    <string name="login_totp_enter_token_recovery_dialog_phone_backup_description">Enter one of the recovery codes you received by text message.</string>
+
+    
+    <string name="receive_sec_code">We just sent you a verification code by email. Enter the code below to verify your identity.</string>
+    
+    <string name="receive_sec_code_expires">Your code expires in 3 hours.</string>
+    
+    <string name="login_token_where_is_cta">Where is my code?</string>
+    
+    <string name="login_token_where_is_popup_title">Where is my code?</string>
+    
+    <string name="login_token_where_is_popup_message">We sent a verification code to your primary contact email address, which may be different from the address you use to log in to Dashlane.\n\nIf you use Dashlane on another mobile device, you can also access the code in your app.</string>
+    
+    <string name="login_token_where_is_popup_resend">Resend code</string>
+    
+    <string name="login_token_where_is_popup_close">Close</string>
+    
+    <string name="token_failed_resend_or_try_later">Your verification code is invalid. Click \"Where is my code?\" to resend the code, or try again later.</string>
+
+    
+    <string name="login_device_limit_log_out">Log out</string>
+    <string name="login_device_limit_unlink_previous_device">Unlink device</string>
+    <string name="login_device_limit_see_premium_plan">Upgrade to Premium</string>
+    <string name="login_device_limit_title_dynamic">Your plan supports only %1$d devices</string>
+    <string name="login_device_limit_subtitle">Upgrade to Premium to access your data on unlimited devices. Or, unlink a device to stay on your current plan.</string>
+    <string name="login_device_limit_tip">Our Premium plan also includes unlimited logins, VPN, and Dark Web Monitoring.</string>
+    <string name="login_device_limit_unregister_devices_title">Select the devices to unlink</string>
+    <string name="login_device_limit_unregister_devices_message_dynamic">The plan supports only %1$d devices. Unlink all but one from this list.</string>
+    <string name="login_device_limit_unregister_devices_caption">We’ll securely transfer your Dashlane data to your new device in the next step.</string>
+    <string name="login_device_limit_unregister_device_date">Last active %1$s</string>
+
+    
+    <string name="login_monobucket_log_out">Log out</string>
+    <string name="login_monobucket_unlink_previous_device">Unlink previous device</string>
+    <string name="login_monobucket_see_premium_plan">Upgrade to Premium</string>
+    <string name="login_monobucket_title">Your current plan supports only 1 device</string>
+    <string name="login_monobucket_subtitle">Upgrade to Premium to access your data on unlimited devices. Or, unlink your previous device to continue.</string>
+    <string name="login_monobucket_unregister_device_title">Unlink your previous device?</string>
+    <string name="login_monobucket_unregister_device_message">All your Dashlane data will be securely transferred to your new device.</string>
+    <string name="login_monobucket_unregister_device_cancel">Cancel</string>
+    <string name="login_monobucket_unregister_device_unlink">Unlink</string>
+
+    
+    <string name="login_sync_progress_monobucket_unregister">Unlinking previous device…</string>
+    <string name="login_sync_progress_deciphering">Downloading your data…</string>
+    <string name="login_sync_progress_saving">Securely storing your data…</string>
+    <string name="login_sync_progress_finalizing">Finalizing your settings…</string>
+    <string name="login_sync_progress_notes">It may take a minute.</string>
+    <string name="login_sync_progress_success">You’re all set up!</string>
+    <string name="login_sync_progress_device_limit_unregister">Unlinking selected device(s)</string>
+    <string name="login_sync_progress_unlink_devices_error_title">Something went wrong</string>
+    <string name="login_sync_progress_unlink_devices_error_message">There was a problem with unlinking your device(s). Please try again or visit our help center.</string>
+    <string name="login_sync_progress_unlink_devices_error_positive_button">Try again</string>
+    <string name="login_sync_progress_unlink_devices_error_negative_button">Cancel</string>
+
+    
+    <string name="passwordless_pin_error_primary_button" translatable="false">Go to Login</string>
+    <string name="passwordless_pin_error_secondary_button" translatable="false">Contact customer support</string>
+</resources>

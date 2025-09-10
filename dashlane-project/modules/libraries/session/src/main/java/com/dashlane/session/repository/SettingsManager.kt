@@ -21,9 +21,8 @@ import kotlinx.coroutines.sync.withLock
 class SettingsManager(
     private val userSecureStorageManager: UserSecureStorageManager,
     private val preferencesManager: PreferencesManager,
-    private val session: Session
+    private val session: Session,
 ) {
-
     var shouldSyncSettings: Boolean
         get() = preferencesManager[session.username].userSettingsShouldSync
         set(value) {

@@ -3,13 +3,13 @@ package com.dashlane.ui.screens.sharing
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.navigation.Navigator
 import com.dashlane.server.api.endpoints.premium.PremiumStatus.PremiumCapability.Capability
 import com.dashlane.server.api.endpoints.sharinguserdevice.Permission
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.exception.SharingAlreadyAccessException
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.sharing.SharingContact.SharingContactUser
-import com.dashlane.featureflipping.UserFeaturesChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,11 +24,12 @@ class NewSharePeopleViewModel @Inject constructor(
     private val dataProvider: NewSharePeopleDataProvider,
     private val navigator: Navigator,
     private val userFeaturesChecker: UserFeaturesChecker,
-    private val sharingDataProvider: SharingDataProvider
+    private val sharingDataProvider: SharingDataProvider,
 ) : ViewModel(), NewSharePeopleViewModelContract {
     private val args = SharingNewSharePeopleFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private val authentifiantUIDs = args.argsAuthentifiantUIDs
     private val secureNotesUIDs = args.argsSecureNotesUIDs
+    private val secretsUIDs = args.argsSecretsUIDs
 
     override val uiState = MutableStateFlow(NewSharePeopleViewModelContract.UIState.INIT)
     override val permission = MutableStateFlow(Permission.LIMITED)
@@ -40,7 +41,7 @@ class NewSharePeopleViewModel @Inject constructor(
         }.shareIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(),
-            replay = 1
+            replay = 1,
         )
 
     override fun onPermissionChanged(sharingPermission: Permission) {
@@ -69,10 +70,11 @@ class NewSharePeopleViewModel @Inject constructor(
 
             runCatching {
                 dataProvider.share(
-                    authentifiantUIDs,
-                    secureNotesUIDs,
-                    contacts,
-                    permission.value
+                    accountIds = authentifiantUIDs,
+                    secureNoteIds = secureNotesUIDs,
+                    secrets = secretsUIDs,
+                    contacts = contacts,
+                    permission = permission.value,
                 )
             }.onFailure {
                 when (it) {

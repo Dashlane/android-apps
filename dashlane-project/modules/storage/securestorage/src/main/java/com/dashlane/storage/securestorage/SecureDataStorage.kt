@@ -20,25 +20,29 @@ interface SecureDataStorage {
 
     @Discouraged("Use the suspend version instead")
     fun existsLegacy(identifier: String): Boolean
+
     suspend fun exists(identifier: String): Boolean
 
     @Discouraged("Use the suspend version instead")
     fun readLegacy(identifier: String): EncryptedBase64String?
+
     suspend fun read(identifier: String): EncryptedBase64String?
 
     @Discouraged("Use the suspend version instead")
     fun writeLegacy(identifier: String, data: EncryptedBase64String)
+
     suspend fun write(identifier: String, data: EncryptedBase64String)
 
     @Discouraged("Use the suspend version instead")
     fun removeLegacy(identifier: String)
+
     suspend fun remove(identifier: String)
 
     enum class Type(val identifier: String) {
         LOCAL_KEY_PROTECTED("lk"),
         MASTER_PASSWORD_PROTECTED("mp"),
         RECOVERY_KEY_PROTECTED("rk"),
-        ANDROID_KEYSTORE_PROTECTED("aks")
+        ANDROID_KEYSTORE_PROTECTED("aks"),
     }
 
     class Factory @Inject constructor(
@@ -47,14 +51,14 @@ interface SecureDataStorage {
     ) {
         fun create(
             username: Username,
-            type: Type
+            type: Type,
         ): SecureDataStorage {
             val storeName = MD5Hash.hash(username.email) + "." + type.identifier
             return SecureDataStorageImpl(
                 context = context,
                 storeName = storeName,
                 type = type,
-                ioDispatcher = ioDispatcher
+                ioDispatcher = ioDispatcher,
             )
         }
     }
@@ -66,7 +70,6 @@ class SecureDataStorageImpl(
     override val type: SecureDataStorage.Type,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : SecureDataStorage {
-
     @Suppress("kotlin:S6291")
     private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences(storeName, Context.MODE_PRIVATE)

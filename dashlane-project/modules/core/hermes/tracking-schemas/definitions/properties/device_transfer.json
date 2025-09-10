@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/device_transfer.json",
+  "type": "object",
+  "description": "Definition for Device Transfer (D2D) events for Auth & Sync",
+  "definitions": {
+    "action_during_transfer": {
+      "description": "The action done by the user during device transfer on their trusted or untrusted device",
+      "type": "string",
+      "enum": [
+        "access_vault",
+        "cancel_device_transfer",
+        "cancel_login",
+        "complete_device_transfer",
+        "confirm_request",
+        "contact_support",
+        "refresh_request",
+        "reject_request",
+        "return_to_device_setup",
+        "return_to_login",
+        "scan_qr_code",
+        "select_logged_in_device",
+        "select_transfer_method",
+        "set_pin",
+        "setup_biometrics",
+        "submit_security_challenge_answer",
+        "tap_help",
+        "tap_learn_more",
+        "tap_reset_account",
+        "try_again",
+        "view_security_challenge_solution"
+      ]
+    },
+    "device_selected": {
+      "description": "The trusted device selected to continue the device transfer process",
+      "type": "string",
+      "enum": [
+        "any",
+        "computer",
+        "mobile",
+        "no_device_available"
+      ]
+    },
+    "transfer_method": {
+      "description": "The transfer method selected for the device transfer",
+      "type": "string",
+      "enum": [
+        "account_recovery_key",
+        "not_selected",
+        "qr_code",
+        "security_challenge"
+      ]
+    }
+  }
+}

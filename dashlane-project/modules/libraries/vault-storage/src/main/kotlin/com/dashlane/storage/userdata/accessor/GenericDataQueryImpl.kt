@@ -24,9 +24,8 @@ class GenericDataQueryImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,
     private val filterToPredicate: FilterToPredicateSummary,
-    private val lockHelper: Lazy<LockHelper>
+    private val lockHelper: Lazy<LockHelper>,
 ) : GenericDataQuery {
-
     private val database: Database?
         get() = sessionManager.session?.let { userDataRepository.getRacletteDatabase(it) }
 
@@ -95,8 +94,8 @@ class GenericDataQueryImpl @Inject constructor(
         filter { summaryObject ->
             if (filter.onlyVisibleStatus) {
                 summaryObject.syncState == SyncState.IN_SYNC_MODIFIED ||
-                        summaryObject.syncState == SyncState.MODIFIED ||
-                        summaryObject.syncState == SyncState.SYNCED
+                    summaryObject.syncState == SyncState.MODIFIED ||
+                    summaryObject.syncState == SyncState.SYNCED
             } else {
                 true
             }
@@ -111,7 +110,7 @@ class GenericDataQueryImpl @Inject constructor(
             filter.sharingPermissions?.any {
                 
                 (it == UserPermission.UNDEFINED && summaryObject.sharingPermission == null) ||
-                        (summaryObject.sharingPermission == it)
+                    (summaryObject.sharingPermission == it)
             } ?: true
         }
     }

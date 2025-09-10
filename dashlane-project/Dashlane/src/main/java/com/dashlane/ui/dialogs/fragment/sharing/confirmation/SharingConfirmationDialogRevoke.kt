@@ -11,7 +11,6 @@ import com.dashlane.ui.dialogs.fragments.NotificationDialogFragment
 class SharingConfirmationDialogRevoke :
     NotificationDialogFragment(),
     NotificationDialogFragment.TwoButtonClicker {
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         clicker = this
         return super.onCreateDialog(savedInstanceState)
@@ -20,7 +19,7 @@ class SharingConfirmationDialogRevoke :
     override fun onPositiveButton() {
         setFragmentResult(
             REQUEST_KEY,
-            requireArguments()
+            requireArguments(),
         )
     }
 
@@ -41,7 +40,7 @@ class SharingConfirmationDialogRevoke :
             newInstance(
                 context,
                 itemGroupId,
-                userId = userId
+                userId = userId,
             )
 
         fun newInstanceForUserGroup(
@@ -52,7 +51,7 @@ class SharingConfirmationDialogRevoke :
             newInstance(
                 context,
                 itemGroupId,
-                userGroupId = userGroupId
+                userGroupId = userGroupId,
             )
 
         private fun newInstance(
@@ -65,24 +64,24 @@ class SharingConfirmationDialogRevoke :
                 bundleOf(
                     REVOKE_ITEM_GROUP_ID to itemGroupId,
                     REVOKE_FOR_USER_ID to userId,
-                    REVOKE_FOR_USER_GROUP_ID to userGroupId
-                )
+                    REVOKE_FOR_USER_GROUP_ID to userGroupId,
+                ),
             )
                 .setTitle(
                     context,
-                    R.string.sharing_confirmation_popup_title_revoke_item_from_sharing_center
+                    R.string.sharing_confirmation_popup_title_revoke_item_from_sharing_center,
                 )
                 .setMessage(
                     context,
-                    R.string.sharing_confirmation_popup_description_revoke_item_from_sharing_center
+                    R.string.sharing_confirmation_popup_description_revoke_item_from_sharing_center,
                 )
                 .setPositiveButtonText(
                     context,
-                    R.string.sharing_confirmation_popup_btn_confirm_revoke_item_from_sharing_center
+                    R.string.sharing_confirmation_popup_btn_confirm_revoke_item_from_sharing_center,
                 )
                 .setNegativeButtonText(
                     context,
-                    R.string.sharing_confirmation_popup_btn_cancel_revoke_item_from_sharing_center
+                    R.string.sharing_confirmation_popup_btn_cancel_revoke_item_from_sharing_center,
                 )
                 .build(SharingConfirmationDialogRevoke())
         }

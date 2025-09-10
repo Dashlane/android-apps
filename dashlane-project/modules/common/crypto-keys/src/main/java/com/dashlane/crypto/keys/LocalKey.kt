@@ -7,7 +7,6 @@ import okio.ByteString
 import java.io.Closeable
 
 class LocalKey : Closeable, Cloneable {
-
     private val _cryptographyKey: CryptographyKey.Raw32
     val cryptographyKey: CryptographyKey.Raw32
         get() = _cryptographyKey.clone()

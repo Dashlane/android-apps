@@ -14,7 +14,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface SessionCoroutineScopeModule {
-
     @Singleton
     @Binds
     fun bindSessionCoroutineScope(impl: SessionCoroutineScopeRepository): BySessionRepository<CoroutineScope>

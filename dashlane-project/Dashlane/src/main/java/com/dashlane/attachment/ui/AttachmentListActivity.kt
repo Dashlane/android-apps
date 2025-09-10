@@ -141,23 +141,23 @@ class AttachmentListActivity : DashlaneActivity() {
             VaultItemLogAttachmentHelper(vaultItemLogger, vaultItem)
         val (attachments, isAttachmentListUpdated) = if (savedInstanceState != null) {
             savedInstanceState.getString(EXTRA_ATTACHMENTS_STRING) to savedInstanceState.getBoolean(
-                EXTRA_HAVE_ATTACHMENTS_CHANGED
+                EXTRA_HAVE_ATTACHMENTS_CHANGED,
             )
         } else {
             intent.getStringExtra(ITEM_ATTACHMENTS) to false
         }
         attachmentListProvider = AttachmentListDataProvider(
-                jsonAttachments = attachments,
-                vaultItem = vaultItem,
-                dataSaver = dataSaver,
-                dataSync = dataSync,
-                secureFileStorage = secureFileStorage
-            )
+            jsonAttachments = attachments,
+            vaultItem = vaultItem,
+            dataSaver = dataSaver,
+            dataSync = dataSync,
+            secureFileStorage = secureFileStorage,
+        )
 
         val openDocumentResultLauncher =
             registerForActivityResult(OpenDocumentResultContract()) { uri ->
                 this.onOpenDocumentResult(
-                    uri
+                    uri,
                 )
             }
         uploadAttachmentsPresenter =
@@ -167,7 +167,7 @@ class AttachmentListActivity : DashlaneActivity() {
                 coroutineScope = this.lifecycleScope,
                 sessionManager = mSessionManager,
                 vaultItemLogAttachmentHelper = vaultItemLogAttachmentHelper,
-                openDocumentResultLauncher = openDocumentResultLauncher
+                openDocumentResultLauncher = openDocumentResultLauncher,
             ).apply {
                 setProvider(uploadFileDataProvider)
                 setView(UploadAttachmentsViewProxy(this@AttachmentListActivity))
@@ -175,7 +175,7 @@ class AttachmentListActivity : DashlaneActivity() {
 
         val downloadPresenter = DownloadAttachmentsPresenter(
             this.lifecycleScope,
-            vaultItemLogAttachmentHelper
+            vaultItemLogAttachmentHelper,
         ).apply {
             setProvider(downloadFileDataProvider)
             setView(DownloadAttachmentsViewProxy(this@AttachmentListActivity))
@@ -188,7 +188,7 @@ class AttachmentListActivity : DashlaneActivity() {
                 downloadPresenter = downloadPresenter,
                 deleteManager = deleteFileManager,
                 lockHelper = lockHelper,
-                vaultItemLogAttachmentHelper = vaultItemLogAttachmentHelper
+                vaultItemLogAttachmentHelper = vaultItemLogAttachmentHelper,
             ).apply {
                 this.isAttachmentListUpdated = isAttachmentListUpdated
                 setProvider(attachmentListProvider)
@@ -211,11 +211,11 @@ class AttachmentListActivity : DashlaneActivity() {
         
         outState.putString(
             EXTRA_ATTACHMENTS_STRING,
-            Gson().toJson(getAttachmentsItems(attachmentListProvider))
+            Gson().toJson(getAttachmentsItems(attachmentListProvider)),
         )
         outState.putBoolean(
             EXTRA_HAVE_ATTACHMENTS_CHANGED,
-            attachmentListPresenter.isAttachmentListUpdated
+            attachmentListPresenter.isAttachmentListUpdated,
         )
         super.onSaveInstanceState(outState)
     }
@@ -236,7 +236,7 @@ class AttachmentListActivity : DashlaneActivity() {
         result.putExtra(EXTRA_HAVE_ATTACHMENTS_CHANGED, presenter.isAttachmentListUpdated)
         result.putExtra(
             EXTRA_ATTACHMENTS_STRING,
-            Gson().toJson(getAttachmentsItems(attachmentListProvider))
+            Gson().toJson(getAttachmentsItems(attachmentListProvider)),
         )
         setResult(RESULT_OK, result)
     }

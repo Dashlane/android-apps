@@ -1,0 +1,1593 @@
+[
+  {
+    "packageName": "air.com.vudu.air.DownloaderTablet",
+    "website": "vudu.com"
+  },
+  {
+    "packageName": "au.com.bankwest.mobile",
+    "website": "bankwest.com.au"
+  },
+  {
+    "packageName": "au.com.commsec.android.CommSec",
+    "website": "commsec.com.au",
+    "sha256": [
+      "385af65ec76d6f788f899983eb3ba29c3fc33c4f33baa5c1ecf2c54ec9d7cfeb"
+    ]
+  },
+  {
+    "packageName": "au.com.nab.mobile",
+    "website": "nab.com.au",
+    "sha256": [
+      "cee864a9b7f399baa63eff043d5a1b24c1d86f1b44cfbb111a0af34c833daf6a"
+    ]
+  },
+  {
+    "packageName": "au.gov.nsw.service",
+    "website": "nsw.gov.au",
+    "sha256": [
+      "a4d23013aed30fca459962926cfe745c42d50342c7497d2afd4d969b6c3935ab"
+    ]
+  },
+  {
+    "packageName": "ca.bnc.android",
+    "website": "bnc.ca",
+    "sha256": [
+      "3a46d2dc8de20865ed0f77aff78e24155db8893edd2a401245ea84596aab3097"
+    ]
+  },
+  {
+    "packageName": "ca.capitalone.enterprisemobilebanking",
+    "website": "capitalone.com"
+  },
+  {
+    "packageName": "ca.pcfinancial.bank",
+    "website": "pcfinancial.ca"
+  },
+  {
+    "packageName": "ca.servus.mbanking",
+    "website": "servus.ca",
+    "sha256": [
+      "d195f0933f83cd4c35d959ba0a5b989fa4f8e96827f1076c8f3bea487f4e7bf2"
+    ]
+  },
+  {
+    "packageName": "ca.shaw.android.selfserve",
+    "website": "shaw.ca"
+  },
+  {
+    "packageName": "ch.protonmail.android",
+    "website": "protonmail.com",
+    "sha256": [
+      "dcc9439ec1a6c6a8d0203f3423ee42bcc8b970628e53cb73a0393f398dd5b853"
+    ]
+  },
+  {
+    "packageName": "ch.protonvpn.android",
+    "website": "protonvpn.com",
+    "sha256": [
+      "dcc9439ec1a6c6a8d0203f3423ee42bcc8b970628e53cb73a0393f398dd5b853"
+    ]
+  },
+  {
+    "packageName": "ch.raiffeisen.android",
+    "website": "raiffeisen.ch",
+    "sha256": [
+      "2016c4680947586cb389dfdb6769aae4f2a9d3532c9cc25f0819b6efbfd7affd"
+    ]
+  },
+  {
+    "packageName": "ch.viseca.visecaone",
+    "website": "viseca.ch",
+    "sha256": [
+      "0d19c26c3fea4e54b9379b9c53dae9512d28e1cf9a58bf8b54d74d05a280ca4f"
+    ]
+  },
+  {
+    "packageName": "com.Nelnet.nelnetmmaapp",
+    "website": "nelnet.com",
+    "sha256": [
+      "99716a2a02cabbc6dd1b480374670a6528af19c28dda1f43b5a729e3a1b12834"
+    ]
+  },
+  {
+    "packageName": "com.Travis.mobile",
+    "website": "traviscu.org",
+    "sha256": [
+      "70b9282a587787c57a1e3aa84198f5f7fc2c5d0cb54252554e6ab87c25c6ed1a"
+    ]
+  },
+  {
+    "packageName": "com.aa.android",
+    "website": "americanairlines.fr",
+    "sha256": [
+      "332091b222d7086e0f8b193e8fa137fb582bce0ce6e60d696a5983bc39371f22"
+    ]
+  },
+  {
+    "packageName": "com.aaa.android.discounts",
+    "website": "aaa.com"
+  },
+  {
+    "packageName": "com.acorns.android",
+    "website": "acorns.com"
+  },
+  {
+    "packageName": "com.activision.callofduty.companion",
+    "website": "sonyentertainmentnetwork.com",
+    "sha256": [
+      "79af5c286ed654ba73442de76668bd4fa7fc92ecc30031678beca87c7f610070"
+    ]
+  },
+  {
+    "packageName": "com.adobe.lrmobile",
+    "website": "adobe.com",
+    "sha256": [
+      "a51dccb1a7a0da2c24f51c334da578c71e1fc51282983d1dc78a793876e64e7f"
+    ]
+  },
+  {
+    "packageName": "com.adobe.psmobile",
+    "website": "adobe.com",
+    "sha256": [
+      "bb8ed811946b9f28d949d88d8f028580a31dd193b5d50f9bb3622251ae9f375e"
+    ]
+  },
+  {
+    "packageName": "com.adobe.reader",
+    "website": "adobe.com",
+    "sha256": [
+      "b6dd0562256487fcd6c98cde137858ef50d9adb9f9cd2f1ca58c5357efdf0faf"
+    ]
+  },
+  {
+    "packageName": "com.adobe.scan.android",
+    "website": "adobe.com",
+    "sha256": [
+      "b6dd0562256487fcd6c98cde137858ef50d9adb9f9cd2f1ca58c5357efdf0faf"
+    ]
+  },
+  {
+    "packageName": "com.adt.pulse",
+    "website": "adtpulse.com"
+  },
+  {
+    "packageName": "com.aetna.aetnahealth",
+    "website": "aetna.com",
+    "sha256": [
+      "241c0c7f466a25f953ec6cf596a1880bc63c3751f8075218b29b06f142023030"
+    ]
+  },
+  {
+    "packageName": "com.airfrance.android.dinamoprd",
+    "website": "airfrance.fr",
+    "sha256": [
+      "71fc829965005a49b1d33e851e2c181e6a8dd43ee196cdbbf7ad4db30c488422"
+    ]
+  },
+  {
+    "packageName": "com.alaskaairlines.android",
+    "website": "alaskaair.com",
+    "sha256": [
+      "c808fae38ad48742df66a5af4112da59eb9593d0ca72c4a9fe43b4cc5498b8b8"
+    ]
+  },
+  {
+    "packageName": "com.allstate.view",
+    "website": "allstate.com"
+  },
+  {
+    "packageName": "com.ally.MobileBanking",
+    "website": "ally.com"
+  },
+  {
+    "packageName": "com.amazon.avod.thirdpartyclient",
+    "website": "primevideo.com",
+    "sha256": [
+      "2f19adeb284eb36f7f07786152b9a1d14b21653203ad0b04ebbf9c73ab6d7625"
+    ]
+  },
+  {
+    "packageName": "com.amazon.dee.app",
+    "website": "amazon.com",
+    "sha256": [
+      "2f19adeb284eb36f7f07786152b9a1d14b21653203ad0b04ebbf9c73ab6d7625"
+    ]
+  },
+  {
+    "packageName": "com.amazon.kindle",
+    "website": "amazon.com",
+    "sha256": [
+      "2f19adeb284eb36f7f07786152b9a1d14b21653203ad0b04ebbf9c73ab6d7625"
+    ]
+  },
+  {
+    "packageName": "com.amazon.mp3",
+    "website": "amazon.com",
+    "sha256": [
+      "2f19adeb284eb36f7f07786152b9a1d14b21653203ad0b04ebbf9c73ab6d7625"
+    ]
+  },
+  {
+    "packageName": "com.amazon.storm.lightning.client.aosp",
+    "website": "amazon.com",
+    "sha256": [
+      "2f19adeb284eb36f7f07786152b9a1d14b21653203ad0b04ebbf9c73ab6d7625"
+    ]
+  },
+  {
+    "packageName": "com.amazon.windowshop",
+    "website": "amazon.com"
+  },
+  {
+    "packageName": "com.amc",
+    "website": "amctheatres.com"
+  },
+  {
+    "packageName": "com.amhfcu.rda",
+    "website": "amhfcu.org"
+  },
+  {
+    "packageName": "com.amtrak.rider",
+    "website": "amtrak.com",
+    "sha256": [
+      "b2cf72bbeff5bccb1a0ad7fe52ed49775cb9c1300e657c0ffb4fa5815291c410"
+    ]
+  },
+  {
+    "packageName": "com.apple.android.music",
+    "website": "apple.com",
+    "sha256": [
+      "88ba590ec2e1ea33c4458daf59489faee2cef297a9b4071e18cf82ef531100aa"
+    ]
+  },
+  {
+    "packageName": "com.arlo.app",
+    "website": "arlo.com",
+    "sha256": [
+      "81ee3b93b3df40bb3e06ae30479d00ac1be87685b4967d862222684ace96949f"
+    ]
+  },
+  {
+    "packageName": "com.arvest.arvestgo",
+    "website": "arvest.com"
+  },
+  {
+    "packageName": "com.att.myWireless",
+    "website": "att.com"
+  },
+  {
+    "packageName": "com.att.shm",
+    "website": "att.com"
+  },
+  {
+    "packageName": "com.att.tv",
+    "website": "att.com"
+  },
+  {
+    "packageName": "com.audible.application",
+    "website": "amazon.com",
+    "sha256": [
+      "57901d5c9f6744f28636f98f68ae5a3248571c0ef610470c09b08b34b6b3a80f"
+    ]
+  },
+  {
+    "packageName": "com.aufeminin.marmiton.activities",
+    "website": "marmiton.org",
+    "sha256": [
+      "016db9972657d8f830f77ba74b08cf8106e568de4332ae01b7052af5d6c12574"
+    ]
+  },
+  {
+    "packageName": "com.authy.authy",
+    "website": "authy.com",
+    "sha256": [
+      "505cd63da51f198f3fb1c2950b6b46b606fec413574b967f3d86a3cf73fe0553"
+    ]
+  },
+  {
+    "packageName": "com.azure.authenticator",
+    "website": "live.com",
+    "sha256": [
+      "eebd0f16e629af8b8381bfedfdd649605fe90f763f5cb7ba473eb9eef94d9af1"
+    ]
+  },
+  {
+    "packageName": "com.ba.mobile",
+    "website": "britishairways.com",
+    "sha256": [
+      "a689c4474b958ec66587c1e783e752fa67d91062d456e06719478cd883013a65"
+    ]
+  },
+  {
+    "packageName": "com.barclaycardus",
+    "website": "barclaycardus.com"
+  },
+  {
+    "packageName": "com.bbt.myfi",
+    "website": "bbt.com"
+  },
+  {
+    "packageName": "com.bitdefender.centralmgmt",
+    "website": "bitdefender.com",
+    "sha256": [
+      "31f4ff2ed0448c6de8561a1b5358b25e32f3827c2cd9163b061b62cfb4f1ed18"
+    ]
+  },
+  {
+    "packageName": "com.bitdefender.security",
+    "website": "bitdefender.com",
+    "sha256": [
+      "31f4ff2ed0448c6de8561a1b5358b25e32f3827c2cd9163b061b62cfb4f1ed18"
+    ]
+  },
+  {
+    "packageName": "com.blade.shadowcloudgaming",
+    "website": "shadow.tech",
+    "sha256": [
+      "b919a593c426d4eeff965457c9c7fe208ef318ccf16aa67a91ca9d91621be095"
+    ]
+  },
+  {
+    "packageName": "com.blizzard.bma",
+    "website": "battle.net",
+    "sha256": [
+      "f783859eed6e4a40a4ebd020578d36e00a62cf9cf27da395f77d1d73a6a9a41f"
+    ]
+  },
+  {
+    "packageName": "com.blizzard.messenger",
+    "website": "battle.net",
+    "sha256": [
+      "f783859eed6e4a40a4ebd020578d36e00a62cf9cf27da395f77d1d73a6a9a41f"
+    ]
+  },
+  {
+    "packageName": "com.blizzard.wtcg.hearthstone",
+    "website": "battle.net",
+    "sha256": [
+      "f783859eed6e4a40a4ebd020578d36e00a62cf9cf27da395f77d1d73a6a9a41f"
+    ]
+  },
+  {
+    "packageName": "com.bmo.mobile",
+    "website": "bmo.com"
+  },
+  {
+    "packageName": "com.bmoharris.digital",
+    "website": "bmoharris.com"
+  },
+  {
+    "packageName": "com.callcredit.noddle",
+    "website": "creditkarma.co.uk"
+  },
+  {
+    "packageName": "com.canal.android.canal",
+    "website": "canal-plus.com",
+    "sha256": [
+      "feea41f0b5270e3812dd916cbd068fed30aed69b88b6d0c7a4d408e91f750d6e"
+    ]
+  },
+  {
+    "packageName": "com.capitainetrain.android",
+    "website": "trainline.com",
+    "sha256": [
+      "5abf2c431a2e54a3603158a762aa4de0aabe50f700363ccb41cd83fef5b9582c"
+    ]
+  },
+  {
+    "packageName": "com.capitalone.credittracker",
+    "website": "capitalone.com"
+  },
+  {
+    "packageName": "com.cardinalcommerce.greendot",
+    "website": "greendot.com"
+  },
+  {
+    "packageName": "com.caremark.caremark",
+    "website": "caremark.com",
+    "sha256": [
+      "37bff7c0ee776177f0fdcb98bca438901149533e4cb82fbcfc948222cbc11050"
+    ]
+  },
+  {
+    "packageName": "com.ccubank.mobile",
+    "website": "myconsumers.org"
+  },
+  {
+    "packageName": "com.cibc.android.mobi",
+    "website": "cibc.com",
+    "sha256": [
+      "2f6caea905bd1e46fda455768e539462de2ab81b7453840ae22309bea998c182"
+    ]
+  },
+  {
+    "packageName": "com.cigna.mobile.mycigna",
+    "website": "cigna.com"
+  },
+  {
+    "packageName": "com.cineworld.app",
+    "website": "cineworld.co.uk"
+  },
+  {
+    "packageName": "com.cisco.anyconnect.vpn.android.avf",
+    "website": "cisco.com",
+    "sha256": [
+      "482b9d63dc263953b262973ec306898b892beb097edf3299826ea93727513ed8"
+    ]
+  },
+  {
+    "packageName": "com.citi.citimobile",
+    "website": "citi.com"
+  },
+  {
+    "packageName": "com.citibank.mobile.au",
+    "website": "citibank.com.au"
+  },
+  {
+    "packageName": "com.citiuat",
+    "website": "citibank.com"
+  },
+  {
+    "packageName": "com.citizensbank.androidapp",
+    "website": "citizensbankonline.com"
+  },
+  {
+    "packageName": "com.cmcmarkets.android.cfd",
+    "website": "cmcmarkets.com",
+    "sha256": [
+      "88efa48e03c4734f3740d05d14d75b8a8fadff9d57c1dea1b63ed0d87265b486"
+    ]
+  },
+  {
+    "packageName": "com.coinbase.pro",
+    "website": "coinbase.com",
+    "sha256": [
+      "f9005a499ed67d13077f33aaada4f7e9032d5d8239878726643a2158f7a3d9f0"
+    ]
+  },
+  {
+    "packageName": "com.comerica.mobilebanking",
+    "website": "comerica.com"
+  },
+  {
+    "packageName": "com.commercebank.mobile",
+    "website": "commercebank.com"
+  },
+  {
+    "packageName": "com.costco.app.android",
+    "website": "costco.com"
+  },
+  {
+    "packageName": "com.db.pwcc.dbmobile",
+    "website": "deutsche-bank.de",
+    "sha256": [
+      "61f41823133bfbdd28ad4c9ce7bd3232deb32cc94306d0bcbd13dc6a1d4c4a92"
+    ]
+  },
+  {
+    "packageName": "com.directv.dvrscheduler",
+    "website": "directv.com"
+  },
+  {
+    "packageName": "com.disney.wdw.android",
+    "website": "go.com",
+    "sha256": [
+      "1ca3f9de022a4b218577f49fc19354a7910fb5bf509bc58f11fa3c980c957036"
+    ]
+  },
+  {
+    "packageName": "com.dominospizza",
+    "website": "dominos.com"
+  },
+  {
+    "packageName": "com.easilydo.mail",
+    "website": "edison.tech",
+    "sha256": [
+      "a09b85c28d4562da778ee5f61c5711cf26776097b342174189ba70a97e032c5f"
+    ]
+  },
+  {
+    "packageName": "com.ellation.vrv",
+    "website": "vrv.co"
+  },
+  {
+    "packageName": "com.engie.particuliers",
+    "website": "engie.fr",
+    "sha256": [
+      "1857728c835c344ad01bce5da54896ed0da92adc6c3c1f0adaeae7a681d282a8"
+    ]
+  },
+  {
+    "packageName": "com.ent.mobile",
+    "website": "ent.com",
+    "sha256": [
+      "85315e963817b6c74e27e8f28c4fe66bea2ae53d307e993ff9d7843902e861c6"
+    ]
+  },
+  {
+    "packageName": "com.etoro.openbook",
+    "website": "etoro.com",
+    "sha256": [
+      "8b5f4a8f51cb26f2c17810d1b5c93c1e13156dc3e5ee695569e916d3f6be5de8"
+    ]
+  },
+  {
+    "packageName": "com.etrade.mobilepro.activity",
+    "website": "etrade.com",
+    "sha256": [
+      "35ca9d191860a17c77277dbb5d21bca62392dded3e492d92e8a4667dae077197"
+    ]
+  },
+  {
+    "packageName": "com.experian.android",
+    "website": "experian.com"
+  },
+  {
+    "packageName": "com.facebook.pages.app",
+    "website": "facebook.com",
+    "sha256": [
+      "e3f9e1e0cf99d0e56a055ba65e241b3399f7cea524326b0cdd6ec1327ed0fdc1"
+    ]
+  },
+  {
+    "packageName": "com.fidelity.wi.activity",
+    "website": "fidelity.com",
+    "sha256": [
+      "4906570dccd6de9d20cb122f5fe64a6a5df89588538f8bbb42a2819d892d6ccf"
+    ]
+  },
+  {
+    "packageName": "com.firstbank.mobilebanking",
+    "website": "efirstbank.com",
+    "sha256": [
+      "8d904936e73e5dd335e85bbfcc93e373598456ed5d98a85f64936f19d6579c95"
+    ]
+  },
+  {
+    "packageName": "com.firstdirect.bankingonthego",
+    "website": "firstdirect.com",
+    "sha256": [
+      "1f3c6481453dfc5f41edfee201ddce476aa0aa605f6d8e3259c252f46a0a092f"
+    ]
+  },
+  {
+    "packageName": "com.firsttech.firsttech",
+    "website": "firsttechfed.com",
+    "sha256": [
+      "2e8b336543627ba298632a025fd597910666b7482c91ba36afe83073faa713b2"
+    ]
+  },
+  {
+    "packageName": "com.ford.fordpass",
+    "website": "ford.com"
+  },
+  {
+    "packageName": "com.forex.whitelabel.forex",
+    "website": "forex.com"
+  },
+  {
+    "packageName": "com.geico.mobile",
+    "website": "geico.com"
+  },
+  {
+    "packageName": "com.gobank",
+    "website": "gobank.com"
+  },
+  {
+    "packageName": "com.golden1.mobilebanking",
+    "website": "golden1.com",
+    "sha256": [
+      "74362685a603a0a61c81956c00fb5d17c71145195bfa7da298223285a729fc86"
+    ]
+  },
+  {
+    "packageName": "com.google.android.apps.chromecast.app",
+    "website": "google.com",
+    "sha256": [
+      "3d7a1223019aa39d9ea0e3436ab7c0896bfb4fb679f4de5fe7c23f326c8f994a"
+    ]
+  },
+  {
+    "packageName": "com.google.android.gm",
+    "website": "google.com",
+    "sha256": [
+      "f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83"
+    ]
+  },
+  {
+    "packageName": "com.gotv.nflgamecenter.us.lite",
+    "website": "nfl.com",
+    "sha256": [
+      "1d985b3aad0684cf25ea1725f8c73d7b70939ce294122cc18fd0be9be6118870"
+    ]
+  },
+  {
+    "packageName": "com.greendot.walmart.prepaid",
+    "website": "walmartmoneycard.com"
+  },
+  {
+    "packageName": "com.guerdons.passresto",
+    "website": "sodexo.com",
+    "sha256": [
+      "ec15e9c29f386c9dc76cee9d70f9df55ea0099cb7e938daa9f829f3ebaed9f50"
+    ]
+  },
+  {
+    "packageName": "com.hbo.hbonow",
+    "website": "hbomax.com"
+  },
+  {
+    "packageName": "com.healthequity.healthequitymobile",
+    "website": "healthequity.com",
+    "sha256": [
+      "a8f7e8205ce5533c2e5f76dd6fd322181931075c7b78a37b1d6532e1fd0e04a6"
+    ]
+  },
+  {
+    "packageName": "com.hilton.android.hhonors",
+    "website": "hilton.com",
+    "sha256": [
+      "889135370ff205e8640a08c98c5b19c8a6855b1728f3b245459191db521374d7"
+    ]
+  },
+  {
+    "packageName": "com.hootsuite.droid.full",
+    "website": "hootsuite.com",
+    "sha256": [
+      "379b8c4a2ddeff588451779d50602650621fe78624809665122238588bb91fe2"
+    ]
+  },
+  {
+    "packageName": "com.hrblock.AtHome",
+    "website": "hrblock.com"
+  },
+  {
+    "packageName": "com.hrblock.blockmobile",
+    "website": "hrblock.com"
+  },
+  {
+    "packageName": "com.hsn.android",
+    "website": "hsn.com"
+  },
+  {
+    "packageName": "com.hualai",
+    "website": "wyze.com",
+    "sha256": [
+      "78613bd2c1415127c5093b60d29ff85a51b396f28257c75012257d7531d96a2a"
+    ]
+  },
+  {
+    "packageName": "com.huffingtonpost.android",
+    "website": "huffingtonpost.com"
+  },
+  {
+    "packageName": "com.humana.myhumana",
+    "website": "humana.com"
+  },
+  {
+    "packageName": "com.huntington.m",
+    "website": "huntington.com"
+  },
+  {
+    "packageName": "com.ideomobile.hapoalim",
+    "website": "bankhapoalim.co.il",
+    "sha256": [
+      "25f68205d3c26b98db6b4f9628d7163f9eb1d5dee75301085dac8da3c1f31e12"
+    ]
+  },
+  {
+    "packageName": "com.immediasemi.android.blink",
+    "website": "blinkforhome.com",
+    "sha256": [
+      "ca5b36d12fe84935dd7de849fe9f7fd318b8a413b95ec200b38e73f4fd0cdaf2"
+    ]
+  },
+  {
+    "packageName": "com.ing.rs.ingretire",
+    "website": "voya.com",
+    "sha256": [
+      "f405c1a7649151a6f83eccdd448e05c1090dd51144092ab0d4f5b9e52af4ff95"
+    ]
+  },
+  {
+    "packageName": "com.instructure.candroid",
+    "website": "canvas.net",
+    "sha256": [
+      "abfe1362d84c5234c174c2c03d405a480405e361162f7b28dad6bec825ba02b3"
+    ]
+  },
+  {
+    "packageName": "com.intuit.qbse",
+    "website": "intuit.com"
+  },
+  {
+    "packageName": "com.intuit.quickbooks",
+    "website": "intuit.com",
+    "sha256": [
+      "f39f8155d0fe3da8b94eeeee87739bca008b04ec078d3a37b0f1335a3c49f87f"
+    ]
+  },
+  {
+    "packageName": "com.intuit.turbo",
+    "website": "intuit.com"
+  },
+  {
+    "packageName": "com.intuit.turbotax.mobile",
+    "website": "intuit.com"
+  },
+  {
+    "packageName": "com.jetblue.JetBlueAndroid",
+    "website": "jetblue.com",
+    "sha256": [
+      "ab2d3aaa8b3df71af2e4ce73d8ba1961de3d676c189d9d1a31933cff2163eb06"
+    ]
+  },
+  {
+    "packageName": "com.key.android",
+    "website": "key.com"
+  },
+  {
+    "packageName": "com.konylabs.capitalone",
+    "website": "capitalone.com"
+  },
+  {
+    "packageName": "com.kronos.mobile.android",
+    "website": "kronos.net",
+    "sha256": [
+      "246c1dc35f587c2f9fc2d6cd5149bc6f9f2eb356bcd2f6cdbdf071bd27ba8196"
+    ]
+  },
+  {
+    "packageName": "com.laposte.bnum.digiposteplus",
+    "website": "laposte.fr",
+    "sha256": [
+      "5a7412a93ada7616364e0b502fd8db99f5587b44d89463073dd3130037c1a2b7"
+    ]
+  },
+  {
+    "packageName": "com.lastpass.lpandroid",
+    "website": "lastpass.com",
+    "sha256": [
+      "e5de0a7f60fc5ed119c7952b2540f9006e6ab4a4b27f8cadb9f4164bb9c91b71"
+    ]
+  },
+  {
+    "packageName": "com.linxo.androlinxo",
+    "website": "linxo.com",
+    "sha256": [
+      "3a9d41e9c52d56ab9ab33b73afea9c29de6651a12b4b5e8eadc3044fdb1f26e0"
+    ]
+  },
+  {
+    "packageName": "com.m1finance.android",
+    "website": "m1finance.com"
+  },
+  {
+    "packageName": "com.marvel.comics",
+    "website": "marvel.com",
+    "sha256": [
+      "80667537ec704e38f40de93d05fb53af4f8df902686764061a1afdf37acd5ab9"
+    ]
+  },
+  {
+    "packageName": "com.mcdo.mcdonalds",
+    "website": "mcdonalds.com",
+    "sha256": [
+      "08bbcb26586a81cbcad3df4fe804be08e24d1affb1379627d96cadabf1d4529b"
+    ]
+  },
+  {
+    "packageName": "com.mcdonalds.app",
+    "website": "mcdonalds.com",
+    "sha256": [
+      "392db11ddc91594b2bc7c0b05d75175f466c3495c7345a0bcd77df70380458b0"
+    ]
+  },
+  {
+    "packageName": "com.mcom.firstcitizens",
+    "website": "firstcitizens.com",
+    "sha256": [
+      "21317086f0016fc07c812bbbfce264fcfe90ec458e7d9f66ef8e5411514d0ec0"
+    ]
+  },
+  {
+    "packageName": "com.medco.medcopharmacy",
+    "website": "express-scripts.com",
+    "sha256": [
+      "436fd28bf710a297b2fc61c84485409ba7ed6424b1e326659514af2b7a4240be"
+    ]
+  },
+  {
+    "packageName": "com.meraki.Dashboard",
+    "website": "meraki.com",
+    "sha256": [
+      "ee4dc3ecf5ddbad2366b1adb4c33aa4b996ee5d526de60e0d5ff83d3bd8006bd"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.appmanager",
+    "website": "live.com",
+    "sha256": [
+      "e843ee3da1195d6afb89caa3ce7427b08fc01fd878a24fa56e962c35c71d5e70"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.launcher",
+    "website": "live.com",
+    "sha256": [
+      "e843ee3da1195d6afb89caa3ce7427b08fc01fd878a24fa56e962c35c71d5e70"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.office.excel",
+    "website": "live.com",
+    "sha256": [
+      "b925136f3ea7c0a1951690a1ab313910da81f40994a85342ec622888f1287051"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.office.officehubrow",
+    "website": "live.com",
+    "sha256": [
+      "b925136f3ea7c0a1951690a1ab313910da81f40994a85342ec622888f1287051"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.office.onenote",
+    "website": "live.com",
+    "sha256": [
+      "b925136f3ea7c0a1951690a1ab313910da81f40994a85342ec622888f1287051"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.office.outlook",
+    "website": "live.com",
+    "sha256": [
+      "b925136f3ea7c0a1951690a1ab313910da81f40994a85342ec622888f1287051"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.office.word",
+    "website": "live.com",
+    "sha256": [
+      "b925136f3ea7c0a1951690a1ab313910da81f40994a85342ec622888f1287051"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.skydrive",
+    "website": "live.com",
+    "sha256": [
+      "a0794215278a567e887af6cde015a5e88414ef640f7dab3855a3e779658be778"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.teams",
+    "website": "microsoftonline.com",
+    "sha256": [
+      "b925136f3ea7c0a1951690a1ab313910da81f40994a85342ec622888f1287051"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.todos",
+    "website": "live.com",
+    "sha256": [
+      "5fa5e6be06d6fb983f262ece6134c52608450cb11dc30612f78059d8e769aca1"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.windowsintune.companyportal",
+    "website": "microsoftonline.com",
+    "sha256": [
+      "e4151e382b51078caa2e3e0c719a95df1772e4caf19496264833ab661d861265"
+    ]
+  },
+  {
+    "packageName": "com.microsoft.xboxone.smartglass",
+    "website": "live.com",
+    "sha256": [
+      "ad0666c2aa230513a4d4f73fa242a4586cd8ed6726a1d0dd54250772fd9b9605"
+    ]
+  },
+  {
+    "packageName": "com.mint",
+    "website": "mint.com"
+  },
+  {
+    "packageName": "com.mobile.lakemichigancu",
+    "website": "lmcu.org"
+  },
+  {
+    "packageName": "com.mobile.uhc",
+    "website": "myuhc.com"
+  },
+  {
+    "packageName": "com.ms.office365admin",
+    "website": "microsoftonline.com",
+    "sha256": [
+      "b925136f3ea7c0a1951690a1ab313910da81f40994a85342ec622888f1287051"
+    ]
+  },
+  {
+    "packageName": "com.mtb.mbanking.sc.retail.prod",
+    "website": "mtb.com"
+  },
+  {
+    "packageName": "com.mttnow.droid.easyjet",
+    "website": "easyjet.com",
+    "sha256": [
+      "bae14d593db0da16451b1a852b72c88f385c935e12a543ed1528ecd24bd66ac2"
+    ]
+  },
+  {
+    "packageName": "com.navient.navientloans",
+    "website": "navient.com",
+    "sha256": [
+      "1e282742a9cb967a66aba9d111a61eeb88c2202b4df9dc39bdfe5dc1b1fd77dc"
+    ]
+  },
+  {
+    "packageName": "com.navyfederal.android",
+    "website": "navyfederal.org",
+    "sha256": [
+      "8625f8bae2654acfc0e4adc578cc40e6904eb8f40c5ff1a4c4a8b481d1031f50"
+    ]
+  },
+  {
+    "packageName": "com.netgear.netgearup",
+    "website": "netgear.com",
+    "sha256": [
+      "caf7af5caa27d903ff8a368e9ce62f422bb24741edefeda220ad12e149ac9e77"
+    ]
+  },
+  {
+    "packageName": "com.newsblur",
+    "website": "newsblur.com",
+    "sha256": [
+      "5c5e93503c6ac489886a29be0c286ba60482e2c25aa6d6ef5684fd6e8fd7c319"
+    ]
+  },
+  {
+    "packageName": "com.nhs.online.nhsonline",
+    "website": "nhs.uk"
+  },
+  {
+    "packageName": "com.nordvpn.android",
+    "website": "nordvpn.com",
+    "sha256": [
+      "bc64ae0725af656b3b10b684cd1df4c9d6b7f81bc5dc32df3a3b2ce94ce61466"
+    ]
+  },
+  {
+    "packageName": "com.nusendacreditunion5093.mobile",
+    "website": "nusenda.org"
+  },
+  {
+    "packageName": "com.onpointcommunitycreditunion5123.mobile",
+    "website": "onpointcu.com"
+  },
+  {
+    "packageName": "com.orange.mail.fr",
+    "website": "orange.fr",
+    "sha256": [
+      "b67affcda89e3193b1595036d7c6cdbe22be5ca24c9f6cf93fc6b48f91d7310d"
+    ]
+  },
+  {
+    "packageName": "com.orange.mylivebox.fr",
+    "website": "orange.fr",
+    "sha256": [
+      "b67affcda89e3193b1595036d7c6cdbe22be5ca24c9f6cf93fc6b48f91d7310d"
+    ]
+  },
+  {
+    "packageName": "com.orange.mysosh",
+    "website": "orange.fr",
+    "sha256": [
+      "b67affcda89e3193b1595036d7c6cdbe22be5ca24c9f6cf93fc6b48f91d7310d"
+    ]
+  },
+  {
+    "packageName": "com.orange.orangeetmoi",
+    "website": "orange.fr",
+    "sha256": [
+      "b67affcda89e3193b1595036d7c6cdbe22be5ca24c9f6cf93fc6b48f91d7310d"
+    ]
+  },
+  {
+    "packageName": "com.orange.owtv",
+    "website": "orange.fr",
+    "sha256": [
+      "b67affcda89e3193b1595036d7c6cdbe22be5ca24c9f6cf93fc6b48f91d7310d"
+    ]
+  },
+  {
+    "packageName": "com.overdrive.mobile.android.mediaconsole",
+    "website": "overdrive.com"
+  },
+  {
+    "packageName": "com.paybyphone",
+    "website": "paybyphone.com",
+    "sha256": [
+      "c8c1c729fe1026d9bb6b45878ced3e07fa01209452d5d3d31eda9d328923c69a"
+    ]
+  },
+  {
+    "packageName": "com.paylocity.paylocitymobile",
+    "website": "paylocity.com",
+    "sha256": [
+      "3ed25e8892ff058309e994772898f263c72f41bd39bff3470fcacbf25ccb4482"
+    ]
+  },
+  {
+    "packageName": "com.paypal.here",
+    "website": "paypal.com"
+  },
+  {
+    "packageName": "com.paypal.merchant.client",
+    "website": "paypal.com",
+    "sha256": [
+      "c7c62ea0f6e2f6eba87f95406987505530ef2f516e7cde5991d7140331448072"
+    ]
+  },
+  {
+    "packageName": "com.pcfinancial.mobile",
+    "website": "simplii.com",
+    "sha256": [
+      "888f1d7458cc4fe64ac21bfe1cffd8c7fa855bdd9c1cc16ffe65f8eb650597f5"
+    ]
+  },
+  {
+    "packageName": "com.personalcapital.pcapandroid",
+    "website": "personalcapital.com"
+  },
+  {
+    "packageName": "com.philips.lighting.hue2",
+    "website": "philips-hue.com",
+    "sha256": [
+      "1b4b5167e16fd029474bc2b2947902acf9ee1e20e47cf85ab438b62cdea8164a"
+    ]
+  },
+  {
+    "packageName": "com.phonevalley.progressive",
+    "website": "progressive.com"
+  },
+  {
+    "packageName": "com.pl.premierleague",
+    "website": "premierleague.com",
+    "sha256": [
+      "1e016f37614a01729fe4c16a83bf3e65dc10b1b34ef0973cb85433d0281ca3fa"
+    ]
+  },
+  {
+    "packageName": "com.plexapp.android",
+    "website": "plex.tv",
+    "sha256": [
+      "822cd1246884be960e0f2667eb8afc5f7df08920363c2f16742933bfeb5717c6"
+    ]
+  },
+  {
+    "packageName": "com.pnc.ecommerce.mobile",
+    "website": "pnc.com",
+    "sha256": [
+      "5b406cc9be5f5c6d01f31a4ca9717395b945eb63a588e740f3627cc7257b21dd"
+    ]
+  },
+  {
+    "packageName": "com.poleemploi.poleemploietmoi",
+    "website": "pole-emploi.fr",
+    "sha256": [
+      "6cb723944232a16b3125dc3d852a622540c991f325293b628146b83abd183903"
+    ]
+  },
+  {
+    "packageName": "com.privateinternetaccess.android",
+    "website": "privateinternetaccess.com",
+    "sha256": [
+      "8b6ae2b9b06f4d1817fd3f846f88e440dd431a3f46620bdd4a152b70fc9089a2"
+    ]
+  },
+  {
+    "packageName": "com.qtrade.app",
+    "website": "qtrade.ca"
+  },
+  {
+    "packageName": "com.questrade.my",
+    "website": "questrade.com"
+  },
+  {
+    "packageName": "com.quicken.qm2014",
+    "website": "quicken.com"
+  },
+  {
+    "packageName": "com.rbc.mobile.android",
+    "website": "royalbank.com"
+  },
+  {
+    "packageName": "com.regions.mobbanking",
+    "website": "regions.com"
+  },
+  {
+    "packageName": "com.roku.remote",
+    "website": "roku.com",
+    "sha256": [
+      "cc5ea1084f5480018da19de8cb8edbb00085595a38501d7dba73ac6b0374f000"
+    ]
+  },
+  {
+    "packageName": "com.rubenmayayo.reddit",
+    "website": "reddit.com",
+    "sha256": [
+      "c54b55f605360abb607c330957a4b304e36f62f0457dca50528eee3453ab2832"
+    ]
+  },
+  {
+    "packageName": "com.ryanair.cheapflights",
+    "website": "ryanair.com",
+    "sha256": [
+      "7b95ca165b9de6038eb9f1cc77bc542c2233dea143ee3238693a3f55b81a01e9"
+    ]
+  },
+  {
+    "packageName": "com.samsung.android.geargplugin",
+    "website": "samsung.com",
+    "sha256": [
+      "34df0e7a9f1cf1892e45c056b4973cd81ccf148a4050d11aea4ac5a65f900a42"
+    ]
+  },
+  {
+    "packageName": "com.samsung.android.scloud",
+    "website": "samsung.com",
+    "sha256": [
+      "34df0e7a9f1cf1892e45c056b4973cd81ccf148a4050d11aea4ac5a65f900a42"
+    ]
+  },
+  {
+    "packageName": "com.scee.psxandroid",
+    "website": "sonyentertainmentnetwork.com",
+    "sha256": [
+      "db4c389642cddc762f6c72b867b8fcd939e5b5dae4ac3763dbcdf62327d382f7"
+    ]
+  },
+  {
+    "packageName": "com.scotiabank.banking",
+    "website": "scotiabank.com",
+    "sha256": [
+      "71eff98ff3f732815bdebbe0ed31e2851306334016af3ce971395570e64ed18f"
+    ]
+  },
+  {
+    "packageName": "com.sdccu.olbmb",
+    "website": "sdccu.com"
+  },
+  {
+    "packageName": "com.sec.android.app.shealth",
+    "website": "samsung.com",
+    "sha256": [
+      "b9a42dd5fc4e054889ae4127a6274cec64e75c41733d42f5991e7019f9ea5caf"
+    ]
+  },
+  {
+    "packageName": "com.serve.mobile",
+    "website": "serve.com"
+  },
+  {
+    "packageName": "com.sfr.android.sfrmail",
+    "website": "sfr.fr",
+    "sha256": [
+      "5f00d30d66af74dd43e98a00695362719d8e7c9e7de367b962769cdfe12bd9da"
+    ]
+  },
+  {
+    "packageName": "com.shopify.arrive",
+    "website": "shopify.com",
+    "sha256": [
+      "07dc8326f605d272f62d9318e2c203d500935f2d6e0e6a67ba94a13fff835138"
+    ]
+  },
+  {
+    "packageName": "com.sirius",
+    "website": "siriusxm.com"
+  },
+  {
+    "packageName": "com.skype.raider",
+    "website": "skype.com",
+    "sha256": [
+      "7d539351ca39c27ca706409e5a9b6b062db9bf8dc3d8caa6137067ae7f68b5e7"
+    ]
+  },
+  {
+    "packageName": "com.sofi.mobile",
+    "website": "sofi.com",
+    "sha256": [
+      "4182979d2d447b02bdd03b1e8a27afe3924aaec6bc1214d7db93e615969b4b87"
+    ]
+  },
+  {
+    "packageName": "com.softek.ofxclmobile.warrenfcu",
+    "website": "bluefcu.com"
+  },
+  {
+    "packageName": "com.softpauer.f1timingapp2014.basic",
+    "website": "formula1.com",
+    "sha256": [
+      "4b177b44440880bea3157770bcc3184b08abbd2f46daa3c9518ba312c8b0528e"
+    ]
+  },
+  {
+    "packageName": "com.sonos.acr2",
+    "website": "sonos.com",
+    "sha256": [
+      "7c34eb3cfbda05faf56e8890a2abbac14b3036e6e4358849b98e8819b6b7b329"
+    ]
+  },
+  {
+    "packageName": "com.subaru.telematics.app.remote",
+    "website": "mysubaru.com"
+  },
+  {
+    "packageName": "com.swissquote.android",
+    "website": "swissquote.ch",
+    "sha256": [
+      "50d240a8315dd7fb502ae189b234ea27a45fff4a322ca6e196852475a3559fab"
+    ]
+  },
+  {
+    "packageName": "com.symantec.mobilesecurity",
+    "website": "norton.com",
+    "sha256": [
+      "d6829a71ba85b25291188a5d87fa8219a2b5d0662c5e11c1872234a817d8345c"
+    ]
+  },
+  {
+    "packageName": "com.td.mbna",
+    "website": "mbna.ca"
+  },
+  {
+    "packageName": "com.tdameritrade.mobile.ac",
+    "website": "advisorclient.com"
+  },
+  {
+    "packageName": "com.tdameritrade.mobile3",
+    "website": "tdameritrade.com"
+  },
+  {
+    "packageName": "com.tdbank",
+    "website": "tdbank.com"
+  },
+  {
+    "packageName": "com.teamviewer.teamviewer.market.mobile",
+    "website": "teamviewer.com",
+    "sha256": [
+      "a7d99ff485f0c55fd4f1f9cc35cb08a1b74eb995fc3f0524318ff662f8d3cd26"
+    ]
+  },
+  {
+    "packageName": "com.tencent.mobileqq",
+    "website": "qq.com",
+    "sha256": [
+      "ea6e97ad6c34f7039a9c6daba732c97d0e098e83ede2b4d52c76eb0184ac7a38"
+    ]
+  },
+  {
+    "packageName": "com.ticketmaster.mobile.android.na",
+    "website": "ticketmaster.com"
+  },
+  {
+    "packageName": "com.tivophone.android",
+    "website": "tivo.com"
+  },
+  {
+    "packageName": "com.tradestation.MobileTrading",
+    "website": "tradestation.com",
+    "sha256": [
+      "61484fde0f3bf3d5bbd379192f428b4db54b894326c80d1151479434d2448a8c"
+    ]
+  },
+  {
+    "packageName": "com.tuya.smartlife",
+    "website": "ismartlife.me",
+    "sha256": [
+      "0fc361999cc0c35ba8aca57daa5593a20cf55727702ea85ad7b3228949f888fe"
+    ]
+  },
+  {
+    "packageName": "com.ubercab.driver",
+    "website": "uber.com",
+    "sha256": [
+      "4003231ab42feb8d955e62fdfaa4fad59567054b9c6bbc3d950299ddfc268392"
+    ]
+  },
+  {
+    "packageName": "com.ubnt.easyunifi",
+    "website": "ubnt.com",
+    "sha256": [
+      "80447834e74da0c4e1edab116518c1058ec552c20c405ef3eee5b545674b08f4"
+    ]
+  },
+  {
+    "packageName": "com.umpquabank.mobilebanking",
+    "website": "umpquabank.com"
+  },
+  {
+    "packageName": "com.valvesoftware.android.steam.community",
+    "website": "steampowered.com",
+    "sha256": [
+      "5dff6b05761447a5bdf919ea88fc6fdf20d301e30b2315415c4d368ec0fbda45"
+    ]
+  },
+  {
+    "packageName": "com.valvesoftware.steamlink",
+    "website": "steampowered.com",
+    "sha256": [
+      "5dff6b05761447a5bdf919ea88fc6fdf20d301e30b2315415c4d368ec0fbda45"
+    ]
+  },
+  {
+    "packageName": "com.valvesoftware.underlords",
+    "website": "steampowered.com",
+    "sha256": [
+      "be66e057cd456a415ac80e1e101f560a8c5a4a43fc94ac638090ff74fe5e00ca"
+    ]
+  },
+  {
+    "packageName": "com.vanguard",
+    "website": "vanguard.com"
+  },
+  {
+    "packageName": "com.venteprivee",
+    "website": "vente-privee.com",
+    "sha256": [
+      "6f4fefea311069e919f439e39e60b9e7f42dfa1debb0044e8c129260e1c3dd3f"
+    ]
+  },
+  {
+    "packageName": "com.vsct.vsc.mobile.horaireetresa.android",
+    "website": "voyages-sncf.com",
+    "sha256": [
+      "5008b868a173774d10843f34c00900c92fd08a9bfca43c21f7274c819ca85628"
+    ]
+  },
+  {
+    "packageName": "com.wealthsimple",
+    "website": "wealthsimple.com"
+  },
+  {
+    "packageName": "com.wf.wellsfargomobile",
+    "website": "wellsfargo.com",
+    "sha256": [
+      "6a2d2b7689beb759b815d4aa582708f61e7932bb1a2b8213e4cf1fc3d8ec4c5e"
+    ]
+  },
+  {
+    "packageName": "com.wholefoods.wholefoodsmarket",
+    "website": "amazon.com"
+  },
+  {
+    "packageName": "com.wix.android",
+    "website": "wix.com",
+    "sha256": [
+      "b75b3341014616f1a366e0826081f45cc96c2208b6f75180a53001c13b571a1a"
+    ]
+  },
+  {
+    "packageName": "com.xiaomi.smarthome",
+    "website": "xiaomi.com",
+    "sha256": [
+      "b031fe98a4dbb0d4d82661787f25de643182b378e9ef632d8adea75aab58f2d8"
+    ]
+  },
+  {
+    "packageName": "com.yahoo.mobile.client.android.mail",
+    "website": "yahoo.com",
+    "sha256": [
+      "d3f1fb1b2c81e096e3f5809a503afda0cfaf56b9d39dedc656ee2660acef614c"
+    ]
+  },
+  {
+    "packageName": "com.yum.pizzahut",
+    "website": "pizzahut.com"
+  },
+  {
+    "packageName": "com.ziraat.ziraatmobil",
+    "website": "ziraatbank.com.tr",
+    "sha256": [
+      "056effe9b4ea4889ec63a8d938d7f789fda4134afb574b89f608116887c9ea9a"
+    ]
+  },
+  {
+    "packageName": "cuofco.mbanking",
+    "website": "cuofco.org",
+    "sha256": [
+      "231c2370e29b82a4f2cfd5d59606b18c0b0b2d95479689c58320dc921ec2d99f"
+    ]
+  },
+  {
+    "packageName": "de.comdirect.android",
+    "website": "comdirect.de",
+    "sha256": [
+      "3596f29018ccc58c050fa705b70640cf7004d7a2cd0e6484dc1b38af38ef9c0b"
+    ]
+  },
+  {
+    "packageName": "de.consorsbank",
+    "website": "consorsbank.de",
+    "sha256": [
+      "34943801ca3eafe0099a8c21f1dcaa6f0a3ac43d27ac73d660f4dc5400800146"
+    ]
+  },
+  {
+    "packageName": "de.gmx.mobile.android.mail",
+    "website": "gmx.net",
+    "sha256": [
+      "fa5babc1dc9ce77cab4bc8b757758b62a4e3b338277a2bb966cd36db500f0f71"
+    ]
+  },
+  {
+    "packageName": "de.number26.android",
+    "website": "n26.com",
+    "sha256": [
+      "800f89b010f9ef7cb4884ed6edcfd0bae50e7f484ec07517fdf661d69d650add"
+    ]
+  },
+  {
+    "packageName": "de.payback.client.android",
+    "website": "payback.de"
+  },
+  {
+    "packageName": "de.postbank.finanzassistent",
+    "website": "postbank.de",
+    "sha256": [
+      "36c370f847db266b867ed76d8e7f13374f4f9c3405af81b64dd63126f22704bb"
+    ]
+  },
+  {
+    "packageName": "de.tutao.tutanota",
+    "website": "tutanota.com",
+    "sha256": [
+      "b454c176f90a1ea0572987d382723b5cd74f942a7937a2a0b99a368069148850"
+    ]
+  },
+  {
+    "packageName": "epic.mychart.android",
+    "website": "mychart.com",
+    "sha256": [
+      "12e74132bcd6d1c273cfa5be4c821d38f2e09ca8e4956e378efa0eebdd5e9dd1"
+    ]
+  },
+  {
+    "packageName": "fm.last.android",
+    "website": "last.fm",
+    "sha256": [
+      "45aa56e4e4cfd0e886265d60dae75db1fa923f07a4775687f98fa3f4ab244082"
+    ]
+  },
+  {
+    "packageName": "fr.banquepopulaire.cyberplus",
+    "website": "banquepopulaire.fr",
+    "sha256": [
+      "feb34d148f9a14bafbcdc330a985269ed0435980c38af670f39b511bd68b109f"
+    ]
+  },
+  {
+    "packageName": "fr.bouyguestelecom.ecm.android",
+    "website": "bouyguestelecom.fr",
+    "sha256": [
+      "a0058f6467628ea2031c4c9d8519abecb2671f6a1752b15a89369cdcb8d2952b"
+    ]
+  },
+  {
+    "packageName": "fr.bred.fr",
+    "website": "bred.fr",
+    "sha256": [
+      "aaa7a67f0021267ec6ba7a0f00ba46e8ae904f3bc6d84c29bc636fe34b314424"
+    ]
+  },
+  {
+    "packageName": "fr.cnaf.mobile.moncompte",
+    "website": "caf.fr",
+    "sha256": [
+      "23e94ac4afc2487f502080993b7671598cd0b6b629c0004a81cf0f9517df4e3d"
+    ]
+  },
+  {
+    "packageName": "fr.cnamts.it.activity",
+    "website": "ameli.fr",
+    "sha256": [
+      "11b6a8b319fced5a3efc880bb373bd8158cb3c7ff83df2051fe2a36013e8a1d9"
+    ]
+  },
+  {
+    "packageName": "fr.fdj.apps.fdj",
+    "website": "fdj.fr"
+  },
+  {
+    "packageName": "fr.fnac.com",
+    "website": "fnac.com",
+    "sha256": [
+      "f0cb80e522d2088c31fa3a7bb087a018bb3ac0c614e53829f006829ea9f465aa"
+    ]
+  },
+  {
+    "packageName": "fr.gouv.finances.smartphone.android",
+    "website": "impots.gouv.fr",
+    "sha256": [
+      "c407a62a78a7e74f0ab9e1bcfdd06b6b72abb1a18db722904483132b7fb6e64a"
+    ]
+  },
+  {
+    "packageName": "fr.taxisg7.grandpublic",
+    "website": "taxig7.fr",
+    "sha256": [
+      "b85729bf2840549994572ff8aa4f9b500a15db4d3dbaef33d999bcf0a972e4d0"
+    ]
+  },
+  {
+    "packageName": "it.hype.app",
+    "website": "hype.it",
+    "sha256": [
+      "3150e879488b296b21e38d75aa51afa97e4264d8705b8533d5abc2b4507ba348"
+    ]
+  },
+  {
+    "packageName": "jp.mufg.bk.applisp.app",
+    "website": "mufg.jp"
+  },
+  {
+    "packageName": "my.com.maybank2u.m2umobile",
+    "website": "maybank2u.com.my",
+    "sha256": [
+      "d2771403c9507dd342b703d829f807f01b74483d7bef2a899dada37181b03e2c"
+    ]
+  },
+  {
+    "packageName": "org.alliant.mobile",
+    "website": "alliantcreditunion.com"
+  },
+  {
+    "packageName": "org.becu.androidapp",
+    "website": "becu.org"
+  },
+  {
+    "packageName": "org.coastalfcu.mobile",
+    "website": "coastal24.com"
+  },
+  {
+    "packageName": "org.mygreatlakes.borrower.mobile",
+    "website": "mygreatlakes.org",
+    "sha256": [
+      "89a223aad005d8a26cfb5b13da108df67512a95a09545e1c62d1a59e26621379"
+    ]
+  },
+  {
+    "packageName": "org.sutterhealth.myhealthonline",
+    "website": "sutterhealth.org"
+  },
+  {
+    "packageName": "org.westpac.bank",
+    "website": "westpac.com.au",
+    "sha256": [
+      "c7bb403d21494e702d27c1184d91741e2e5b50a52e7a9ab334b41aa3d2d765d6"
+    ]
+  },
+  {
+    "packageName": "uk.co.hsbc.hsbcukmobilebanking",
+    "website": "hsbc.co.uk",
+    "sha256": [
+      "1f3c6481453dfc5f41edfee201ddce476aa0aa605f6d8e3259c252f46a0a092f"
+    ]
+  },
+  {
+    "packageName": "us.hsbc.hsbcus",
+    "website": "hsbc.com",
+    "sha256": [
+      "1f3c6481453dfc5f41edfee201ddce476aa0aa605f6d8e3259c252f46a0a092f"
+    ]
+  },
+  {
+    "packageName": "us.zoom.videomeetings",
+    "website": "zoom.us",
+    "sha256": [
+      "60b75724b34686e52bde944969de120f16bd6d959788d54384494caedd4e445d"
+    ]
+  }
+]

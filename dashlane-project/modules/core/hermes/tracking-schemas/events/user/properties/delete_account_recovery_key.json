@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/delete_account_recovery_key.json",
+  "type": "object",
+  "description": "When an account recovery key is deleted. This can happen for different reasons listed in delete_ark_reason property.",
+  "metas": {
+    "area": "recovery"
+  },
+  "properties": {
+    "name": {
+      "const": "delete_account_recovery_key"
+    },
+    "delete_key_reason": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_recovery_key.json#/definitions/delete_key_reason"
+    }
+  },
+  "required": [
+    "name",
+    "delete_key_reason"
+  ],
+  "additionalProperties": false
+}

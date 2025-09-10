@@ -11,6 +11,6 @@ interface EmptyWebsiteWarningIntentProvider {
         itemId: String,
         summary: AutoFillHintSummary,
         matchType: MatchType,
-        isAccountFrozen: Boolean
+        isAccountFrozen: Boolean,
     ): IntentSender
 }

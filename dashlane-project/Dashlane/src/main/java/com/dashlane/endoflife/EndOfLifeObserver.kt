@@ -6,7 +6,7 @@ import com.dashlane.announcements.PopupAnnouncement
 import com.dashlane.announcements.displayers.SystemPopupDisplayer
 import com.dashlane.announcements.modules.EndOfLifeAnnouncementModule
 import com.dashlane.announcements.modules.EndOfLifeModuleProvider
-import com.dashlane.login.LoginInfo
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.server.api.endpoints.platforms.AppVersionStatusService
 import com.dashlane.session.Session
 import com.dashlane.ui.util.DialogHelper
@@ -17,9 +17,8 @@ class EndOfLifeObserver @Inject constructor(
     private val module: EndOfLifeAnnouncementModule,
     private val endOfLifeModuleProvider: EndOfLifeModuleProvider,
     private val dialogHelper: DialogHelper,
-    private val announcementCenter: AnnouncementCenter
+    private val announcementCenter: AnnouncementCenter,
 ) : EndOfLife {
-
     override suspend fun sessionStarted(session: Session, loginInfo: LoginInfo?) {
         runCatching {
             service.execute()
@@ -43,8 +42,8 @@ class EndOfLifeObserver @Inject constructor(
                 updatePossible = false,
                 daysBeforeExpiration = 0,
                 userSupportLink = null,
-                status = AppVersionStatusService.Data.Status.EXPIRED_VERSION
-            )
+                status = AppVersionStatusService.Data.Status.EXPIRED_VERSION,
+            ),
         )
     }
 

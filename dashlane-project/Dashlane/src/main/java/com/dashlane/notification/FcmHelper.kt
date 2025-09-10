@@ -10,10 +10,10 @@ import com.dashlane.user.Username
 import com.dashlane.util.isValueNull
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.google.firebase.messaging.FirebaseMessaging
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class FcmHelper @Inject constructor(
@@ -24,7 +24,6 @@ class FcmHelper @Inject constructor(
     private val register: PushNotificationRegister,
     private val applicationForegroundChecker: ApplicationForegroundChecker,
 ) {
-
     companion object {
         
         private const val SERVER_REGISTERED = "dservNot"

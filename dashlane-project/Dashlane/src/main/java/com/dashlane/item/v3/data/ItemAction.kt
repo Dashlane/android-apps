@@ -12,4 +12,6 @@ sealed class ItemAction : State.SideEffect {
     data object ConfirmRemove2FA : ItemAction()
 
     data object OpenNoRights : ItemAction()
+
+    data object SavePendingChangesToEditCollection : ItemAction()
 }

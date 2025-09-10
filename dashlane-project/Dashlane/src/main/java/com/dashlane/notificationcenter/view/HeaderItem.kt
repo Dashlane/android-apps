@@ -3,14 +3,14 @@ package com.dashlane.notificationcenter.view
 import android.content.Context
 import android.view.View
 import com.dashlane.R
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.util.DiffUtilComparator
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 data class HeaderItem(
     val section: ActionItemSection,
     var count: Int?,
-    val seeAllListener: (ActionItemSection) -> Unit
+    val seeAllListener: (ActionItemSection) -> Unit,
 ) : DashlaneRecyclerAdapter.MultiColumnViewTypeProvider, DiffUtilComparator<HeaderItem> {
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> {
         return VIEW_TYPE
@@ -25,7 +25,7 @@ data class HeaderItem(
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.item_actionitem_header,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 
@@ -40,7 +40,7 @@ data class HeaderItem(
             }
             setText(
                 R.id.see_all_button,
-                seeAllText
+                seeAllText,
             )
             findViewByIdEfficient<View>(R.id.see_all_button)?.setOnClickListener { item.seeAllListener(item.section) }
         }

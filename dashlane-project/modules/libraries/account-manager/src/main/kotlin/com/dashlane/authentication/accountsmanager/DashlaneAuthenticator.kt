@@ -9,14 +9,13 @@ import android.content.Context
 import android.os.Bundle
 
 class DashlaneAuthenticator(context: Context) : AbstractAccountAuthenticator(context) {
-
     @Throws(NetworkErrorException::class)
     override fun addAccount(
         response: AccountAuthenticatorResponse,
         accountType: String,
         authTokenType: String,
         requiredFeatures: Array<String>,
-        options: Bundle
+        options: Bundle,
     ): Bundle {
         val bundle = Bundle()
         return bundle
@@ -27,7 +26,7 @@ class DashlaneAuthenticator(context: Context) : AbstractAccountAuthenticator(con
         response: AccountAuthenticatorResponse,
         account: Account,
         authTokenType: String,
-        options: Bundle
+        options: Bundle,
     ): Bundle {
         val bundle = Bundle()
         return bundle
@@ -58,7 +57,7 @@ class DashlaneAuthenticator(context: Context) : AbstractAccountAuthenticator(con
         response: AccountAuthenticatorResponse,
         account: Account,
         authTokenType: String,
-        options: Bundle
+        options: Bundle,
     ): Bundle? {
         return null
     }

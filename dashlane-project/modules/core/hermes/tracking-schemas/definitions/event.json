@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/event.json",
+  "type": "object",
+  "description": "Definitions for events",
+  "definitions": {
+    "id": {
+      "description": "UUIDv4 - xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$"
+    },
+    "date_time": {
+      "description": "Date of the event, <a href='http://en.wikipedia.org/wiki/ISO_8601'>ISO format</a>",
+      "type": "string",
+      "format": "date-time"
+    },
+    "date": {
+      "description": "Date of the event, <a href='http://en.wikipedia.org/wiki/ISO_8601'>ISO format</a>",
+      "type": "string",
+      "format": "date"
+    },
+    "date_origin": {
+      "description": "The reference for the system clock.",
+      "type": "string",
+      "enum": [
+        "local",
+        "remote"
+      ]
+    }
+  }
+}

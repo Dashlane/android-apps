@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/buy_seat.json",
+  "type": "object",
+  "description": "Deprecated because not respecting tracking events purposes. The clicks on 'buy seats' CTAs have been replaced by the click event. To understand the number of seats purchases, rather use server events which are more robust and designed for that.",
+  "deprecated": true,
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "buy_seat"
+    },
+    "error_checkout": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/error_checkout"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    },
+    "has_promo": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/has_promo"
+    },
+    "initial_seat_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/initial_seat_count"
+    },
+    "price_amount_cents": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/price_amount_cents"
+    },
+    "price_currency_code": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/price_currency_code"
+    },
+    "purchased_seat_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/purchased_seat_count"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step",
+    "has_promo",
+    "initial_seat_count",
+    "price_amount_cents",
+    "price_currency_code",
+    "purchased_seat_count"
+  ],
+  "additionalProperties": false
+}

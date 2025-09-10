@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/complete_onboarding_task.json",
+  "type": "object",
+  "description": "When a task from Get Started checklist is marked as checked in the UI.",
+  "metas": {
+    "area": "Ui"
+  },
+  "properties": {
+    "name": {
+      "const": "complete_onboarding_task"
+    },
+    "onboarding_task": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/ui.json#/definitions/onboarding_task"
+    }
+  },
+  "required": [
+    "name",
+    "onboarding_task"
+  ],
+  "additionalProperties": false
+}

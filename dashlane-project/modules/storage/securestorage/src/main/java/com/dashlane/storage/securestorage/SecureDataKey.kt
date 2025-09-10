@@ -49,7 +49,7 @@ class SecureDataKey {
         USER_CONTACT_EMAIL,
         SERVER_KEY,
         USER_ACTIVITY,
-        CURRENT_SPACE_ID_FILTER
+        CURRENT_SPACE_ID_FILTER,
     )
     annotation class Key
 }

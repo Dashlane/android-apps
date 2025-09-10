@@ -10,16 +10,15 @@ import com.dashlane.teamspaces.model.TeamSpace
 
 class BuildMenuNavigationUseCase(
     private val navigator: Navigator,
-    private val menuConfiguration: MenuConfiguration
+    private val menuConfiguration: MenuConfiguration,
 ) {
-
     private val menuItemPersonalPlan: MenuItemModel.NavigationItem?
         get() = if (menuConfiguration.isPersonalPlanVisible) {
             MenuItemModel.NavigationItem(
                 iconToken = IconTokens.tipOutlined,
                 iconTokenSelected = IconTokens.tipFilled,
                 titleResId = R.string.menu_v3_section_personal_plan,
-                isSelected = isSelected(arrayOf(R.id.nav_personal_plan))
+                isSelected = isSelected(arrayOf(R.id.nav_personal_plan)),
             ) {
                 navigator.goToPersonalPlanOrHome()
             }
@@ -32,7 +31,7 @@ class BuildMenuNavigationUseCase(
             iconToken = IconTokens.homeOutlined,
             iconTokenSelected = IconTokens.homeFilled,
             titleResId = R.string.menu_v2_home,
-            isSelected = isSelected(arrayOf(R.id.nav_home))
+            isSelected = isSelected(arrayOf(R.id.nav_home)),
         ) {
             navigator.goToHome()
         }
@@ -40,7 +39,7 @@ class BuildMenuNavigationUseCase(
     private val notificationCenterEndIcon: MenuItemModel.NavigationItem.EndIcon?
         get() = if (menuConfiguration.hasUnReadActionItems) {
             MenuItemModel.NavigationItem.EndIcon.DotNotification(
-                contentDescription = R.string.and_accessibility_notification
+                contentDescription = R.string.and_accessibility_notification,
             )
         } else {
             null
@@ -52,7 +51,7 @@ class BuildMenuNavigationUseCase(
             iconTokenSelected = IconTokens.notificationFilled,
             titleResId = R.string.talk_to_me_menu_entry_title,
             isSelected = isSelected(arrayOf(R.id.nav_notif_center)),
-            endIcon = notificationCenterEndIcon
+            endIcon = notificationCenterEndIcon,
         ) {
             navigator.goToActionCenter()
         }
@@ -62,7 +61,7 @@ class BuildMenuNavigationUseCase(
             iconToken = IconTokens.featurePasswordGeneratorOutlined,
             iconTokenSelected = IconTokens.featurePasswordGeneratorFilled,
             titleResId = R.string.generated_password,
-            isSelected = isSelected(arrayOf(R.id.nav_password_generator))
+            isSelected = isSelected(arrayOf(R.id.nav_password_generator)),
         ) {
             navigator.goToPasswordGenerator()
         }
@@ -72,7 +71,7 @@ class BuildMenuNavigationUseCase(
             iconToken = IconTokens.sharedOutlined,
             iconTokenSelected = IconTokens.sharedFilled,
             titleResId = R.string.menu_v3_section_sharing_center,
-            isSelected = isSelected(arrayOf(R.id.nav_sharing_center))
+            isSelected = isSelected(arrayOf(R.id.nav_sharing_center)),
         ) {
             navigator.goToPasswordSharing()
         }
@@ -85,9 +84,9 @@ class BuildMenuNavigationUseCase(
             isSelected = isSelected(
                 arrayOf(
                     R.id.nav_identity_dashboard,
-                    R.id.nav_password_analysis
-                )
-            )
+                    R.id.nav_password_analysis,
+                ),
+            ),
         ) {
             navigator.goToIdentityDashboard()
         }
@@ -108,7 +107,7 @@ class BuildMenuNavigationUseCase(
             iconTokenSelected = IconTokens.featureDarkWebMonitoringOutlined,
             titleResId = R.string.menu_v3_section_dark_web_monitoring,
             isSelected = isSelected(arrayOf(R.id.nav_dark_web_monitoring)),
-            premiumTag = dwmPremiumTag
+            premiumTag = dwmPremiumTag,
         ) {
             navigator.goToDarkWebMonitoring()
         }
@@ -121,9 +120,9 @@ class BuildMenuNavigationUseCase(
             isSelected = isSelected(
                 arrayOf(
                     R.id.nav_authenticator_dashboard,
-                    R.id.nav_authenticator_suggestions
-                )
-            )
+                    R.id.nav_authenticator_suggestions,
+                ),
+            ),
         ) {
             navigator.goToAuthenticator()
         }
@@ -140,7 +139,7 @@ class BuildMenuNavigationUseCase(
                 iconTokenSelected = IconTokens.featureVpnFilled,
                 titleResId = R.string.menu_vpn,
                 isSelected = isSelected(arrayOf(R.id.nav_vpn_third_party)),
-                premiumTag = vpnPremiumTag
+                premiumTag = vpnPremiumTag,
             ) {
                 navigator.goToVpn()
             }
@@ -153,7 +152,7 @@ class BuildMenuNavigationUseCase(
             iconToken = IconTokens.folderOutlined,
             iconTokenSelected = IconTokens.folderFilled,
             titleResId = R.string.menu_collections,
-            isSelected = isSelected(arrayOf(R.id.nav_collections_list))
+            isSelected = isSelected(arrayOf(R.id.nav_collections_list)),
         ) {
             navigator.goToCollectionsList()
         }
@@ -163,7 +162,7 @@ class BuildMenuNavigationUseCase(
             iconToken = IconTokens.settingsOutlined,
             iconTokenSelected = IconTokens.settingsFilled,
             titleResId = R.string.menu_v2_settings_button,
-            isSelected = isSelected(arrayOf(R.id.nav_settings))
+            isSelected = isSelected(arrayOf(R.id.nav_settings_compose)),
         ) {
             navigator.goToSettings()
         }
@@ -173,7 +172,7 @@ class BuildMenuNavigationUseCase(
             iconToken = IconTokens.feedbackHelpOutlined,
             iconTokenSelected = IconTokens.feedbackHelpFilled,
             titleResId = R.string.menu_help_center,
-            isSelected = false
+            isSelected = false,
         ) {
             navigator.goToHelpCenter()
         }
@@ -200,7 +199,7 @@ class BuildMenuNavigationUseCase(
                 MenuItemModel.TeamspaceItem(
                     spaceName = space.name,
                     icon = getTeamSpaceIcon(space),
-                    onClick = { onSpaceClick(space) }
+                    onClick = { onSpaceClick(space) },
                 )
             }
         }
@@ -211,16 +210,16 @@ class BuildMenuNavigationUseCase(
             menuConfiguration.canChangeSpace && menuConfiguration.currentSpace != null -> MenuItemModel.Header.TeamspaceProfile(
                 icon = getTeamSpaceIcon(menuConfiguration.currentSpace),
                 name = menuConfiguration.currentSpace.name,
-                mode = menuConfiguration.teamspaceSelectionMode
+                mode = menuConfiguration.teamspaceSelectionMode,
             )
             menuConfiguration.enforcedTeamspace != null -> MenuItemModel.Header.EnforcedTeamspaceProfile(
                 userName = menuConfiguration.userAlias,
-                spaceName = menuConfiguration.enforcedTeamspace.name
+                spaceName = menuConfiguration.enforcedTeamspace.name,
             )
             else -> MenuItemModel.Header.UserProfile(
                 userName = menuConfiguration.userAlias,
                 userStatus = getAccountStatusText(menuConfiguration.userPremiumStatusType),
-                canUpgrade = menuConfiguration.canUpgradePremium
+                canUpgrade = menuConfiguration.canUpgradePremium,
             )
         }
     }
@@ -272,7 +271,9 @@ class BuildMenuNavigationUseCase(
         return NavigationUtils.matchDestination(currentDestination, destinationIds)
     }
 
-    private fun MutableList<MenuItemModel?>.addHeader(@StringRes textResId: Int) {
+    private fun MutableList<MenuItemModel?>.addHeader(
+        @StringRes textResId: Int,
+    ) {
         add(MenuItemModel.SectionHeader(textResId))
     }
 

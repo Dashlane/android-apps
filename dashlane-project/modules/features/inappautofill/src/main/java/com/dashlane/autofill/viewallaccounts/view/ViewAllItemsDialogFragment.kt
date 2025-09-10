@@ -19,7 +19,6 @@ class ViewAllItemsDialogFragment :
     NavigableBottomSheetFragment,
     NavigableBottomSheetDialogFragmentCanceledListener,
     BottomSheetDialogFragment() {
-
     private val viewModel: ViewAllItemsViewModel by viewModels()
 
     @Inject

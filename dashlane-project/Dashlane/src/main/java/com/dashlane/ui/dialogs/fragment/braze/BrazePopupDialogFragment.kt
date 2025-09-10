@@ -22,7 +22,7 @@ class BrazePopupDialogFragment : NotificationDialogFragment() {
     override fun onCreateDialogCustomView(
         inflater: LayoutInflater?,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         inflater ?: return null
         val binding = FragmentInAppMessageBinding.inflate(layoutInflater)

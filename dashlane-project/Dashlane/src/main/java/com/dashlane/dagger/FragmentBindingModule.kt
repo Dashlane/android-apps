@@ -13,5 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 interface FragmentBindingModule {
     @Binds
     @FragmentLifecycleCoroutineScope
-    fun bindLifecycleCoroutineScope(@FragmentLifecycleCoroutineScope coroutineScope: LifecycleCoroutineScope): CoroutineScope
+    fun bindLifecycleCoroutineScope(
+        @FragmentLifecycleCoroutineScope coroutineScope: LifecycleCoroutineScope,
+    ): CoroutineScope
 }

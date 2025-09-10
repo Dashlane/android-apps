@@ -17,7 +17,6 @@ import com.dashlane.autofill.api.databinding.BottomSheetCreateAccountLayoutBindi
 import com.dashlane.autofill.createaccount.domain.AutofillCreateAccountErrors
 import com.dashlane.autofill.createaccount.domain.AutofillCreateAccountResultHandler
 import com.dashlane.autofill.formdetector.model.AutoFillHintSummary
-import com.dashlane.autofill.generatepassword.AutofillGeneratePasswordService
 import com.dashlane.autofill.generatepassword.GeneratePasswordState
 import com.dashlane.autofill.generatepassword.GeneratePasswordViewModel
 import com.dashlane.autofill.generatepassword.GeneratePasswordViewProxy
@@ -25,6 +24,8 @@ import com.dashlane.autofill.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.bottomnavigation.NavigableBottomSheetDialogFragmentCanceledListener
 import com.dashlane.bottomnavigation.NavigableBottomSheetFragment
 import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.password.generator.PasswordGeneratorWrapper
+import com.dashlane.session.SessionManager
 import com.dashlane.teamspaces.adapter.SpinnerUtil
 import com.dashlane.teamspaces.adapter.TeamspaceSpinnerAdapter
 import com.dashlane.util.Toaster
@@ -41,12 +42,14 @@ class CreateAccountDialogFragment :
     NavigableBottomSheetFragment,
     NavigableBottomSheetDialogFragmentCanceledListener,
     Fragment() {
-
     @Inject
     lateinit var toaster: Toaster
 
     @Inject
-    lateinit var generatePasswordService: AutofillGeneratePasswordService
+    lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var passwordGeneratorWrapper: PasswordGeneratorWrapper
 
     private val viewModel: CreateAccountViewModel by viewModels()
     private val generatePasswordViewModel: GeneratePasswordViewModel by viewModels()
@@ -65,9 +68,9 @@ class CreateAccountDialogFragment :
         binding = BottomSheetCreateAccountLayoutBinding.inflate(inflater, container, false)
         generatePasswordViewProxy = GeneratePasswordViewProxy(
             binding.generateLayout,
-            generatePasswordService.getPasswordGeneratorDefaultCriteria(),
+            passwordGeneratorWrapper.getCriteria(sessionManager.session?.userId),
             generatePasswordViewModel,
-            viewLifecycleOwner
+            viewLifecycleOwner,
         )
         return binding.root
     }
@@ -110,7 +113,7 @@ class CreateAccountDialogFragment :
                 binding.website.text.toString(),
                 binding.login.text.toString(),
                 binding.generateLayout.password.text.toString(),
-                binding.spaceSpinner.selectedItemPosition
+                binding.spaceSpinner.selectedItemPosition,
             )
         }
         binding.backArrow.setOnClickListener { autofillBottomSheetNavigator.popStack() }
@@ -143,15 +146,15 @@ class CreateAccountDialogFragment :
                                 ArrayAdapter(
                                     requireContext(),
                                     R.layout.autocomplete_textview_adapter,
-                                    state.suggestionLogins ?: emptyList()
-                                )
+                                    state.suggestionLogins ?: emptyList(),
+                                ),
                             )
                             binding.login.setAdapter(
                                 ArrayAdapter(
                                     requireContext(),
                                     R.layout.autocomplete_textview_adapter,
-                                    state.suggestionEmails ?: emptyList()
-                                )
+                                    state.suggestionEmails ?: emptyList(),
+                                ),
                             )
                             if (binding.login.text.isNullOrBlank()) {
                                 binding.login.setText(state.suggestionEmails?.firstOrNull())
@@ -179,9 +182,7 @@ class CreateAccountDialogFragment :
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 
                 if (binding.generateLayout.password.text.isNullOrBlank()) {
-                    generatePasswordViewModel.generateNewPassword(
-                        generatePasswordService.getPasswordGeneratorDefaultCriteria()
-                    )
+                    generatePasswordViewModel.generateNewPassword()
                 }
                 generatePasswordViewModel.uiState.collect { state ->
                     if (state is GeneratePasswordState.PasswordSavedToHistory) {
@@ -208,7 +209,8 @@ class CreateAccountDialogFragment :
     private fun handleErrors(error: AutofillCreateAccountErrors) {
         when (error) {
             AutofillCreateAccountErrors.USER_LOGGED_OUT,
-            AutofillCreateAccountErrors.DATABASE_ERROR -> {
+            AutofillCreateAccountErrors.DATABASE_ERROR,
+            -> {
                 resultHandler?.onError(error)
             }
             AutofillCreateAccountErrors.INCOMPLETE -> {
@@ -235,11 +237,11 @@ class CreateAccountDialogFragment :
 
     data class CreateAccountDomainInfo(
         val webDomain: String? = null,
-        val packageName: String? = null
+        val packageName: String? = null,
     ) {
         constructor(summary: AutoFillHintSummary?) : this(
             summary?.webDomain?.takeIf { it.isNotSemanticallyNull() },
-            summary?.packageName?.takeIf { summary.webDomain.isNullOrBlank() && it.isNotSemanticallyNull() }
+            summary?.packageName?.takeIf { summary.webDomain.isNullOrBlank() && it.isNotSemanticallyNull() },
         )
     }
 }

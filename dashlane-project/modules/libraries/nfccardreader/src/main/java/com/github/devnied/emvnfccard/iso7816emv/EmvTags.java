@@ -6,6 +6,9 @@ import com.github.devnied.emvnfccard.iso7816emv.impl.TagImpl;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 
+import androidx.annotation.Keep;
+
+@Keep
 public final class EmvTags {
 
 	private static LinkedHashMap<ByteArrayWrapper, ITag> tags = new LinkedHashMap<ByteArrayWrapper, ITag>();

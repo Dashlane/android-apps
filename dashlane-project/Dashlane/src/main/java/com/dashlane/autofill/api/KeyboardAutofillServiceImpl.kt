@@ -8,9 +8,8 @@ import javax.inject.Inject
 
 class KeyboardAutofillServiceImpl @Inject constructor(
     private val sessionManager: SessionManager,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) : KeyboardAutofillService {
-
     private val userPreferencesManager: UserPreferencesManager
         get() = preferencesManager[sessionManager.session?.username]
 
@@ -19,5 +18,5 @@ class KeyboardAutofillServiceImpl @Inject constructor(
     }
 
     override fun canDisplayOnBoardingSuggestion() = !userPreferencesManager.hasSeenKeyboardOnBoardingSuggestion &&
-            userPreferencesManager.keyboardAutofillAnnouncementTimestamp == 0L
+        userPreferencesManager.keyboardAutofillAnnouncementTimestamp == 0L
 }

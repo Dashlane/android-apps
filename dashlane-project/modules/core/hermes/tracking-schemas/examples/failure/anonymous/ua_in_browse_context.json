@@ -1,0 +1,25 @@
+{
+  "id": "838bf943-b9a1-4301-83e4-cb192f2e70c4",
+  "schema_version": "1.31.6",
+  "category": "anonymous",
+  "date": "2020-06-13",
+  "date_origin": "local",
+  "context": {
+    "os": {
+      "version": "4.1",
+      "locale": "en-US"
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "saex",
+      "build_type": "dev"
+    },
+    "browser": {
+      "name": "chrome",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"
+    }
+  },
+  "properties": {
+    "name": "view_page"
+  }
+}

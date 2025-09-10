@@ -2,28 +2,20 @@ package com.dashlane.autofill.fillresponse
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.BlendMode
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.autofill.InlinePresentation
 import android.widget.inline.InlinePresentationSpec
-import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import androidx.core.content.ContextCompat.getColor
-import androidx.core.graphics.drawable.DrawableCompat
 import com.dashlane.autofill.api.R
 import com.dashlane.autofill.model.AuthentifiantItemToFill
 import com.dashlane.autofill.model.CreditCardItemToFill
 import com.dashlane.autofill.model.EmailItemToFill
 import com.dashlane.autofill.model.ItemToFill
 import com.dashlane.autofill.model.OtpItemToFill
-import com.dashlane.autofill.phishing.PhishingAttemptLevel
 import com.dashlane.autofill.util.AutofillNavigationService
-import com.dashlane.util.toBitmap
-import com.dashlane.vault.util.BankDataProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -46,45 +38,48 @@ internal interface InlinePresentationProvider {
 
     fun forOtp(spec: InlinePresentationSpec?): InlinePresentation?
 
-    fun forPinnedItem(spec: InlinePresentationSpec?, phishingAttemptLevel: PhishingAttemptLevel): InlinePresentation?
-
-    fun forPhishingWarning(
-        spec: InlinePresentationSpec?,
-        phishingAttemptLevel: PhishingAttemptLevel
-    ): InlinePresentation?
+    fun forPinnedItem(spec: InlinePresentationSpec?): InlinePresentation?
 }
 
 @RequiresApi(Build.VERSION_CODES.R)
 internal class InlinePresentationProviderImpl @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
-    private val bankDataProvider: BankDataProvider,
-    navigationService: AutofillNavigationService
+    navigationService: AutofillNavigationService,
 ) : InlinePresentationProvider {
-
     private val longPressIntent = navigationService.getLongPressActionOnInline()
 
     private val iconViewAllAccount
-        get() = Icon.createWithResource(applicationContext, R.drawable.ic_action_search_outlined).applyTint()
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_action_search_outlined)
+            .applyTint()
     private val iconAddAccount
-        get() = Icon.createWithResource(applicationContext, R.drawable.ic_action_add_outlined).applyTint()
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_action_add_outlined)
+            .applyTint()
     private val iconChangePassword
-        get() = Icon.createWithResource(applicationContext, R.drawable.ic_action_refresh_outlined).applyTint()
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_action_refresh_outlined)
+            .applyTint()
     private val iconDashlane
-        get() = Icon.createWithResource(applicationContext, R.drawable.vd_logo_dashlane_micro_logomark).applyTint()
+        get() = Icon.createWithResource(
+            applicationContext,
+            R.drawable.vd_logo_dashlane_micro_logomark,
+        ).applyTint()
     private val iconOtp
         get() = Icon.createWithResource(applicationContext, R.drawable.ic_chat_outlined).applyTint()
     private val iconOnBoarding
-        get() = Icon.createWithResource(applicationContext, R.drawable.ic_feature_autofill_outlined).applyTint()
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_feature_autofill_outlined)
+            .applyTint()
     private val iconLogin
-        get() = Icon.createWithResource(applicationContext, R.drawable.ic_item_login_outlined).applyTint()
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_item_login_outlined)
+            .applyTint()
     private val iconEmail
-        get() = Icon.createWithResource(applicationContext, R.drawable.ic_item_email_outlined).applyTint()
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_item_email_outlined)
+            .applyTint()
     private val creditCard
-        get() = Icon.createWithResource(applicationContext, R.drawable.ic_item_payment_outlined).applyTint()
+        get() = Icon.createWithResource(applicationContext, R.drawable.ic_item_payment_outlined)
+            .applyTint()
 
     override fun forItem(
         item: ItemToFill,
-        spec: InlinePresentationSpec?
+        spec: InlinePresentationSpec?,
     ) = when (item) {
         is AuthentifiantItemToFill -> forAuthentifiant(item, spec)
         is CreditCardItemToFill -> forCreditCard(item, spec)
@@ -111,7 +106,8 @@ internal class InlinePresentationProviderImpl @Inject constructor(
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
 
-    override fun forViewAllItems(spec: InlinePresentationSpec?): InlinePresentation? = createViewAllAccountsInline(spec)
+    override fun forViewAllItems(spec: InlinePresentationSpec?): InlinePresentation? =
+        createViewAllAccountsInline(spec)
 
     override fun forViewAllItemsOnEmptyResults(spec: InlinePresentationSpec?): InlinePresentation? =
         createViewAllAccountsInline(spec)
@@ -146,74 +142,22 @@ internal class InlinePresentationProviderImpl @Inject constructor(
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
 
-    override fun forPinnedItem(
-        spec: InlinePresentationSpec?,
-        phishingAttemptLevel: PhishingAttemptLevel
-    ): InlinePresentation? {
+    override fun forPinnedItem(spec: InlinePresentationSpec?): InlinePresentation? {
         spec ?: return null
 
         val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
-        val icon = when (phishingAttemptLevel) {
-            PhishingAttemptLevel.NONE -> iconDashlane
-            PhishingAttemptLevel.MODERATE -> buildColoredIcon(
-                applicationContext,
-                R.drawable.vd_logo_dashlane_micro_logomark,
-                R.color.text_warning_standard,
-            )
-            PhishingAttemptLevel.HIGH -> buildColoredIcon(
-                applicationContext,
-                R.drawable.vd_logo_dashlane_micro_logomark,
-                R.color.text_danger_standard,
-            )
-        }
+        val icon = iconDashlane
         sliceBuilder.setStartIcon(icon)
-        return createInlinePresentation(inlineContent = sliceBuilder.build(), spec = spec, isPinned = true)
-    }
-
-    private fun buildColoredIcon(context: Context, @DrawableRes drawableRes: Int, @ColorRes colorRes: Int) =
-        AppCompatResources.getDrawable(context, drawableRes)
-            ?.apply {
-                DrawableCompat.wrap(this)
-                DrawableCompat.setTint(this, getColor(context, colorRes))
-            }
-            ?.toBitmap()
-            ?.run { Icon.createWithBitmap(this) }
-            ?.apply { setTintBlendMode(BlendMode.DST) }
-            ?: Icon.createWithResource(context, drawableRes)
-
-    override fun forPhishingWarning(
-        spec: InlinePresentationSpec?,
-        phishingAttemptLevel: PhishingAttemptLevel
-    ): InlinePresentation? {
-        spec ?: return null
-
-        val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
-        val text = when (phishingAttemptLevel) {
-            PhishingAttemptLevel.MODERATE ->
-                applicationContext.resources.getString(R.string.inline_phishing_moderate)
-            PhishingAttemptLevel.HIGH ->
-                applicationContext.resources.getString(R.string.inline_phishing_high)
-            PhishingAttemptLevel.NONE -> throw IllegalStateException("PhishingAttemptLevel should not be NONE here")
-        }
-        val icon = when (phishingAttemptLevel) {
-            PhishingAttemptLevel.MODERATE ->
-                Icon.createWithResource(applicationContext, R.drawable.ic_inline_phishing_moderate).apply {
-                    setTintBlendMode(BlendMode.DST)
-                }
-            PhishingAttemptLevel.HIGH ->
-                Icon.createWithResource(applicationContext, R.drawable.ic_inline_phishing_high).apply {
-                    setTintBlendMode(BlendMode.DST)
-                }
-            PhishingAttemptLevel.NONE -> throw IllegalStateException("PhishingAttemptLevel should not be NONE here")
-        }
-        sliceBuilder.setTitle(text)
-        sliceBuilder.setStartIcon(icon)
-        return createInlinePresentation(sliceBuilder.build(), spec)
+        return createInlinePresentation(
+            inlineContent = sliceBuilder.build(),
+            spec = spec,
+            isPinned = true,
+        )
     }
 
     private fun forCreditCard(
         item: CreditCardItemToFill,
-        spec: InlinePresentationSpec?
+        spec: InlinePresentationSpec?,
     ): InlinePresentation? {
         spec ?: return null
 
@@ -221,26 +165,21 @@ internal class InlinePresentationProviderImpl @Inject constructor(
         sliceBuilder.setStartIcon(creditCard)
         sliceBuilder.setTitle(item.cardNumberObfuscate)
         sliceBuilder.setSubtitle(
-            item.name
-                ?: item.bankName?.let {
-                    bankDataProvider.getBankConfiguration(it)
-                        .takeUnless { bankConfiguration ->
-                            bankConfiguration == BankDataProvider.DEFAULT_BANK
-                        }?.displayName
-                }
-                ?: applicationContext.getString(R.string.inline_credit_card_fallback_title)
+            item.name ?: applicationContext.getString(R.string.inline_credit_card_fallback_title),
         )
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
 
     private fun forAuthentifiant(
         item: AuthentifiantItemToFill,
-        spec: InlinePresentationSpec?
+        spec: InlinePresentationSpec?,
     ): InlinePresentation? {
         spec ?: return null
 
         val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
-        sliceBuilder.setTitle(item.login ?: applicationContext.getString(R.string.inline_account_fallback_title))
+        sliceBuilder.setTitle(
+            item.login ?: applicationContext.getString(R.string.inline_account_fallback_title),
+        )
         sliceBuilder.setSubtitle(item.title ?: "")
         sliceBuilder.setStartIcon(iconLogin)
         return createInlinePresentation(sliceBuilder.build(), spec)
@@ -248,12 +187,14 @@ internal class InlinePresentationProviderImpl @Inject constructor(
 
     private fun forEmail(
         item: EmailItemToFill,
-        spec: InlinePresentationSpec?
+        spec: InlinePresentationSpec?,
     ): InlinePresentation? {
         spec ?: return null
 
         val sliceBuilder = InlineSuggestionUi.newContentBuilder(longPressIntent)
-        sliceBuilder.setTitle(item.email ?: applicationContext.getString(R.string.inline_email_fallback_title))
+        sliceBuilder.setTitle(
+            item.email ?: applicationContext.getString(R.string.inline_email_fallback_title),
+        )
         sliceBuilder.setStartIcon(iconEmail)
         return createInlinePresentation(sliceBuilder.build(), spec)
     }
@@ -271,10 +212,11 @@ internal class InlinePresentationProviderImpl @Inject constructor(
     private fun createInlinePresentation(
         inlineContent: InlineSuggestionUi.Content,
         spec: InlinePresentationSpec,
-        isPinned: Boolean = false
+        isPinned: Boolean = false,
     ): InlinePresentation {
         return InlinePresentation(inlineContent.slice, spec, isPinned)
     }
 
-    private fun Icon.applyTint(): Icon = setTint(getColor(applicationContext, R.color.text_brand_standard))
+    private fun Icon.applyTint(): Icon =
+        setTint(getColor(applicationContext, R.color.text_brand_standard))
 }

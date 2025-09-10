@@ -9,25 +9,26 @@ data class FollowUpNotification(
     val name: String,
     val fields: List<Field>,
     val isItemProtected: Boolean,
-    val itemDomain: String?
+    val itemDomain: String?,
 ) {
     data class Field(
         val name: String,
         val label: String,
-        val content: FieldContent
+        val content: FieldContent,
     ) {
         constructor(
             copyField: CopyField,
-            content: FieldContent
+            content: FieldContent,
         ) : this(
             name = copyField.name,
             label = copyField.name,
-            content = content
+            content = content,
         )
     }
 
     sealed class FieldContent(val displayValue: String, val needsUnlock: Boolean) {
         class ClearContent(value: String) : FieldContent(value, false)
+
         class ObfuscatedContent(value: String) : FieldContent(value, true)
 
         override fun equals(other: Any?): Boolean {

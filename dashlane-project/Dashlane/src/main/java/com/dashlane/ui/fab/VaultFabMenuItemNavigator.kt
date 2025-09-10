@@ -32,6 +32,7 @@ class VaultFabMenuItemNavigator(
         setupClickListener(rootView, R.id.fab_menu_item_social_security)
         setupClickListener(rootView, R.id.fab_menu_item_tax_number)
         setupClickListener(rootView, R.id.fab_menu_item_secret)
+        setupClickListener(rootView, R.id.fab_menu_item_wifi)
     }
 
     override fun onClick(v: View) {
@@ -52,6 +53,7 @@ class VaultFabMenuItemNavigator(
             R.id.fab_menu_item_social_security -> addNewSocialSecurity()
             R.id.fab_menu_item_tax_number -> addNewTaxStatement()
             R.id.fab_menu_item_secret -> addSecret()
+            R.id.fab_menu_item_wifi -> addWifi()
             else -> Unit
         }
     }
@@ -63,7 +65,7 @@ class VaultFabMenuItemNavigator(
     fun addSecureNote() {
         teamspaceRestrictionNotificator.runOrNotifyTeamRestriction(
             fabViewProxy.context.getBaseActivity() as FragmentActivity,
-            Feature.SECURE_NOTES_DISABLED
+            Feature.SECURE_NOTES_DISABLED,
         ) {
             addNewItem(SyncObjectType.SECURE_NOTE)
         }
@@ -71,6 +73,10 @@ class VaultFabMenuItemNavigator(
 
     fun addSecret() {
         addNewItem(SyncObjectType.SECRET)
+    }
+
+    fun addWifi() {
+        addNewItem(SyncObjectType.WI_FI)
     }
 
     private fun addNewIdentity() {

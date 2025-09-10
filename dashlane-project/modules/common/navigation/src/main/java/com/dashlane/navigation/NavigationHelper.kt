@@ -1,7 +1,6 @@
 package com.dashlane.navigation
 
 object NavigationHelper {
-
     object Destination {
         const val SCHEME = "dashlane"
 
@@ -9,6 +8,7 @@ object NavigationHelper {
             
             const val PASSWORDS = "passwords"
             const val NOTES = "notes"
+            const val SECRETS = "secrets"
             const val ADDRESSES = "addresses"
             const val BANK_ACCOUNTS = "bank-accounts"
             const val COMPANIES = "companies"

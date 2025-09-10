@@ -2,20 +2,19 @@ package com.dashlane.collections.details
 
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.accountstatus.premiumstatus.isCurrentTeamTrial
+import com.dashlane.featureflipping.UserFeaturesChecker
 import com.dashlane.server.api.endpoints.premium.PremiumStatus
 import com.dashlane.session.Session
 import com.dashlane.session.SessionManager
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
-import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.sharing.SharingDataProvider
 import javax.inject.Inject
 
 class CollectionLimiter @Inject constructor(
     private val userFeatureChecker: UserFeaturesChecker,
     private val sharingDataProvider: SharingDataProvider,
     private val accountStatusRepository: AccountStatusRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
 ) {
-
     private val session: Session?
         get() = sessionManager.session
 
@@ -24,7 +23,7 @@ class CollectionLimiter @Inject constructor(
 
     private val info: PremiumStatus.PremiumCapability.Info?
         get() = userFeatureChecker.getCapabilityInfo(
-            PremiumStatus.PremiumCapability.Capability.COLLECTIONSHARING
+            PremiumStatus.PremiumCapability.Capability.COLLECTIONSHARING,
         )
 
     private val isCurrentTeamTrial: Boolean
@@ -38,6 +37,9 @@ class CollectionLimiter @Inject constructor(
 
     private val whoCanShare: PremiumStatus.PremiumCapability.Info.WhoCanShare?
         get() = info?.whoCanShare
+
+    val showCollectionSharingBenefitInOnboarding: Boolean
+        get() = hasCollectionSharing
 
     enum class UserLimit {
         DISABLED, 

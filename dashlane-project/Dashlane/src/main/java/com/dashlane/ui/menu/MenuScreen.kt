@@ -1,5 +1,7 @@
 package com.dashlane.ui.menu
 
+import android.os.Build
+import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,10 +16,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,6 +28,8 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import com.dashlane.R
 import com.dashlane.databinding.ActivityHomeActivityLayoutBinding
 import com.dashlane.design.iconography.IconTokens
@@ -44,11 +47,10 @@ import com.dashlane.ui.menu.view.item.MenuItem
 import com.dashlane.ui.menu.view.separator.MenuSectionHeaderItem
 import com.dashlane.ui.menu.view.separator.MenuSeparatorItem
 import com.dashlane.ui.menu.view.teamspace.MenuTeamspaceItem
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 fun menuScreen(
     homeViewBinding: ActivityHomeActivityLayoutBinding,
-    viewModel: MenuViewModel
+    viewModel: MenuViewModel,
 ) {
     val composeView: ComposeView = homeViewBinding.menuFrame
     
@@ -56,16 +58,23 @@ fun menuScreen(
     
     composeView.consumeWindowInsets = false
     
-    ViewCompat.setOnApplyWindowInsetsListener(composeView) { _, windowInsets ->
-        
-        windowInsets
+    ViewCompat.setOnApplyWindowInsetsListener(composeView) { v, windowInsets ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            
+            windowInsets
+        } else {
+            
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.left
+                bottomMargin = insets.bottom
+                rightMargin = insets.right
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
     }
     composeView.setContent {
-        val systemUiController = rememberSystemUiController()
-        val useDarkIcons = false
-        SideEffect {
-            systemUiController.setStatusBarColor(color = Color.Transparent, darkIcons = useDarkIcons)
-        }
         DashlaneTheme {
             Box {
                 val uiState by viewModel.uiState.collectAsState()
@@ -75,13 +84,13 @@ fun menuScreen(
                     onUpgradeClick = viewModel::onUpgradeClick,
                     onHeaderTeamspaceSelectorClick = viewModel::onHeaderTeamspaceSelectorClick,
                     onHeaderProfileClick = viewModel::onHeaderProfileClick,
-                    onLockout = viewModel::onLockout
+                    onLockout = viewModel::onLockout,
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.Black.copy(alpha = 0.2f))
-                        .statusBarsPadding()
+                        .statusBarsPadding(),
                 )
             }
         }
@@ -96,14 +105,14 @@ fun MenuContent(
     onUpgradeClick: (() -> Unit)?,
     onHeaderTeamspaceSelectorClick: () -> Unit,
     onHeaderProfileClick: (canUpgrade: Boolean) -> Unit,
-    onLockout: () -> Unit
+    onLockout: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
             .background(color = DashlaneTheme.colors.containerAgnosticNeutralSupershy)
             .testTag("menu screen")
             .fillMaxHeight(),
-        contentPadding = innerPadding
+        contentPadding = innerPadding,
     ) {
         items(uiState.items) { item ->
             when (item) {
@@ -111,20 +120,20 @@ fun MenuContent(
                     MenuHeaderUserProfileItem(
                         userProfile = item,
                         onUpgradeClick = onUpgradeClick,
-                        onUserWrapperClick = { onHeaderProfileClick(item.canUpgrade) }
+                        onUserWrapperClick = { onHeaderProfileClick(item.canUpgrade) },
                     )
                 }
 
                 is MenuItemModel.Header.TeamspaceProfile -> {
                     MenuHeaderTeamspaceItem(
                         teamspace = item,
-                        onTeamspaceWrapperClick = onHeaderTeamspaceSelectorClick
+                        onTeamspaceWrapperClick = onHeaderTeamspaceSelectorClick,
                     )
                 }
 
                 is MenuItemModel.Header.EnforcedTeamspaceProfile -> {
                     MenuHeaderEnforcedTeamProfileItem(
-                        enforcedTeamspaceProfile = item
+                        enforcedTeamspaceProfile = item,
                     )
                 }
 
@@ -156,7 +165,7 @@ fun MenuContent(
 @Composable
 private fun B2cMenuContentPreview() {
     DashlanePreview {
-        var index by rememberSaveable { mutableStateOf(0) }
+        var index by rememberSaveable { mutableIntStateOf(0) }
         MenuContent(
             innerPadding = PaddingValues(),
             uiState = MenuState.Loaded(
@@ -164,13 +173,13 @@ private fun B2cMenuContentPreview() {
                     MenuItemModel.Header.UserProfile(
                         userName = "randomemail@provider.com",
                         userStatus = R.string.menu_user_profile_status_trial,
-                        canUpgrade = true
+                        canUpgrade = true,
                     ),
                     MenuItemModel.NavigationItem(
                         iconToken = IconTokens.homeOutlined,
                         iconTokenSelected = IconTokens.homeFilled,
                         titleResId = R.string.menu_v2_home,
-                        isSelected = index == 0
+                        isSelected = index == 0,
                     ) { index = 0 },
                     MenuItemModel.NavigationItem(
                         iconToken = IconTokens.notificationOutlined,
@@ -178,8 +187,8 @@ private fun B2cMenuContentPreview() {
                         titleResId = R.string.talk_to_me_menu_entry_title,
                         isSelected = index == 1,
                         endIcon = MenuItemModel.NavigationItem.EndIcon.DotNotification(
-                            contentDescription = R.string.and_accessibility_notification
-                        )
+                            contentDescription = R.string.and_accessibility_notification,
+                        ),
                     ) { index = 1 },
                     MenuItemModel.Divider,
                     MenuItemModel.SectionHeader(R.string.menu_v3_header_security_boosters),
@@ -188,7 +197,7 @@ private fun B2cMenuContentPreview() {
                         iconTokenSelected = IconTokens.featureDarkWebMonitoringOutlined,
                         titleResId = R.string.menu_v3_section_dark_web_monitoring,
                         isSelected = index == 2,
-                        premiumTag = MenuItemModel.NavigationItem.PremiumTag.Trial(remainingDays = 21)
+                        premiumTag = MenuItemModel.NavigationItem.PremiumTag.Trial(remainingDays = 21),
                     ) { index = 2 },
                     MenuItemModel.NavigationItem(
                         iconToken = IconTokens.featureVpnOutlined,
@@ -196,15 +205,15 @@ private fun B2cMenuContentPreview() {
                         titleResId = R.string.menu_vpn,
                         isSelected = index == 3,
                         premiumTag = MenuItemModel.NavigationItem.PremiumTag.PremiumOnly,
-                        endIcon = MenuItemModel.NavigationItem.EndIcon.NewLabel
+                        endIcon = MenuItemModel.NavigationItem.EndIcon.NewLabel,
                     ) { index = 3 },
-                    MenuItemModel.LockoutFooter
-                )
+                    MenuItemModel.LockoutFooter,
+                ),
             ),
             onUpgradeClick = { },
             onHeaderTeamspaceSelectorClick = { },
             onHeaderProfileClick = { },
-            onLockout = { }
+            onLockout = { },
         )
     }
 }
@@ -220,30 +229,30 @@ private fun B2bMenuContentPreview() {
                     MenuItemModel.Header.TeamspaceProfile(
                         icon = TeamspaceIcon.Combined,
                         name = SpaceName.TeamName("All spaces"),
-                        mode = true
+                        mode = true,
                     ),
                     MenuItemModel.TeamspaceItem(
                         spaceName = SpaceName.TeamName("Personal"),
                         icon = TeamspaceIcon.Space(
                             displayLetter = 'P',
-                            spaceColor = SpaceColor.FixColor(0xFFD000AF.toInt())
+                            spaceColor = SpaceColor.FixColor(0xFFD000AF.toInt()),
                         ),
-                        onClick = {}
+                        onClick = {},
                     ),
                     MenuItemModel.TeamspaceItem(
                         spaceName = SpaceName.TeamName("Upshit"),
                         icon = TeamspaceIcon.Space(
                             displayLetter = 'U',
-                            spaceColor = SpaceColor.FixColor(0xFF3366FF.toInt())
+                            spaceColor = SpaceColor.FixColor(0xFF3366FF.toInt()),
                         ),
-                        onClick = {}
-                    )
-                )
+                        onClick = {},
+                    ),
+                ),
             ),
             onUpgradeClick = { },
             onHeaderTeamspaceSelectorClick = { },
             onHeaderProfileClick = { },
-            onLockout = { }
+            onLockout = { },
         )
     }
 }

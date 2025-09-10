@@ -15,20 +15,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dashlane.design.component.IndeterminateLoader
 import com.dashlane.design.theme.tooling.DashlanePreview
+import com.dashlane.item.passwordhistory.PasswordHistoryEntry.CredentialPasswordHistoryEntry
+import com.dashlane.item.passwordhistory.PasswordHistoryEntry.GeneratedPasswordHistoryEntry
 import com.dashlane.item.passwordhistory.PasswordHistoryViewModel.PasswordHistoryState
 
 @Composable
 fun PasswordHistoryScreen(
     modifier: Modifier = Modifier,
     state: PasswordHistoryState,
-    onRevertClick: (PasswordHistoryEntry) -> Boolean,
-    onCopyClick: (PasswordHistoryEntry) -> Boolean
+    onRevertClick: (CredentialPasswordHistoryEntry) -> Boolean,
+    onCopyClick: (PasswordHistoryEntry) -> Boolean,
 ) {
     if (state is PasswordHistoryState.Init) {
         Box(
             modifier = modifier
                 .padding(8.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             IndeterminateLoader(
                 modifier = Modifier
@@ -41,17 +43,36 @@ fun PasswordHistoryScreen(
             modifier = modifier
                 .fillMaxWidth(),
             contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(state.entries) {
-                PasswordHistoryItem(
-                    password = it.password,
-                    dateString = it.lastModifiedDateString,
-                    onRevertClick = { onRevertClick(it) },
-                    onCopyClick = { onCopyClick(it) },
-                )
+                PasswordHistoryItem(it, onRevertClick, onCopyClick)
             }
         }
+    }
+}
+
+@Composable
+private fun PasswordHistoryItem(
+    entry: PasswordHistoryEntry,
+    onRevertClick: (CredentialPasswordHistoryEntry) -> Boolean,
+    onCopyClick: (PasswordHistoryEntry) -> Boolean,
+) {
+    when (entry) {
+        is CredentialPasswordHistoryEntry ->
+            CredentialPasswordHistoryItem(
+                password = entry.password,
+                dateString = entry.lastModifiedDateString,
+                onRevertClick = { onRevertClick(entry) },
+                onCopyClick = { onCopyClick(entry) },
+            )
+        is GeneratedPasswordHistoryEntry -> GeneratedPasswordHistoryItem(
+            password = entry.password,
+            dateString = entry.lastModifiedDateString,
+            domain = entry.domain,
+            saved = entry.saved,
+            onCopyClick = { onCopyClick(entry) },
+        )
     }
 }
 
@@ -63,9 +84,27 @@ private fun PasswordHistoryScreenPreview() {
         PasswordHistoryScreen(
             state = PasswordHistoryState.Loaded(
                 listOf(
-                    PasswordHistoryEntry("Azerty12", "2 minutes ago"),
-                    PasswordHistoryEntry("Dashlane12", "last month")
-                )
+                    CredentialPasswordHistoryEntry("1", "Azerty12", "2 minutes ago"),
+                    CredentialPasswordHistoryEntry("2", "Dashlane12", "last month"),
+                ),
+            ),
+            onRevertClick = { true },
+            onCopyClick = { true },
+        )
+    }
+}
+
+@SuppressLint("InternalTestExpressions")
+@Composable
+@Preview
+private fun PasswordGeneratedHistoryScreenPreview() {
+    DashlanePreview {
+        PasswordHistoryScreen(
+            state = PasswordHistoryState.Loaded(
+                listOf(
+                    GeneratedPasswordHistoryEntry("Azerty12", "2 minutes ago", domain = "google.com", saved = true),
+                    GeneratedPasswordHistoryEntry("Dashlane12", "last month", domain = null, saved = false),
+                ),
             ),
             onRevertClick = { true },
             onCopyClick = { true },

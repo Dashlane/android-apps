@@ -10,18 +10,18 @@ import com.dashlane.storage.userdata.accessor.filter.GenericFilter
 import com.dashlane.storage.userdata.accessor.filter.datatype.SpecificDataTypeFilter
 import com.dashlane.storage.userdata.accessor.filter.space.NoSpaceFilter
 import com.dashlane.storage.userdata.accessor.filter.uid.SpecificUidFilter
-import com.dashlane.teamspaces.hasValidSpace
-import com.dashlane.teamspaces.isSpaceItem
 import com.dashlane.teamspaces.manager.TeamSpaceAccessor
+import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.util.inject.OptionalProvider
+import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.xml.domain.SyncObjectType
 import dagger.Lazy
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Singleton
 class FrequentSearchImpl @Inject constructor(
@@ -29,7 +29,8 @@ class FrequentSearchImpl @Inject constructor(
     private val userDataRepository: UserDatabaseRepository,
     private val genericDataQuery: Lazy<GenericDataQuery>,
     private val teamSpaceAccessorProvider: OptionalProvider<TeamSpaceAccessor>,
-    private val lockHelper: LockHelper
+    private val lockHelper: LockHelper,
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : FrequentSearch {
     private val database: Database?
         get() = sessionManager.session?.let { userDataRepository.getRacletteDatabase(it) }
@@ -40,13 +41,13 @@ class FrequentSearchImpl @Inject constructor(
     override suspend fun markedAsSearched(itemId: String, syncObjectType: SyncObjectType) {
         if (lockHelper.forbidDataAccess()) return
         val searchRepository = searchRepository ?: return
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val searchItem = searchRepository.load().items.find { it.dataId == itemId }
                 ?: SearchItem(
                     dataId = itemId,
                     dataType = syncObjectType,
                     lastUsed = Instant.now(),
-                    hitCount = 0
+                    hitCount = 0,
                 )
             val updated =
                 searchItem.copy(lastUsed = Instant.now(), hitCount = searchItem.hitCount.inc())
@@ -63,17 +64,21 @@ class FrequentSearchImpl @Inject constructor(
     }
 
     private fun getSummaryObjects(items: List<SearchItem>): List<SummaryObject> {
-        return items.asSequence().mapNotNull { item ->
+        val availableSpaceIds =
+            (teamSpaceAccessorProvider.get()?.availableSpaces ?: listOf(TeamSpace.Personal))
+                .map { it.teamId }
+        val loadedItems = items.asSequence().mapNotNull { item ->
             genericDataQuery.get().queryFirst(
                 GenericFilter(
                     uidFilter = SpecificUidFilter(item.dataId),
                     dataTypeFilter = SpecificDataTypeFilter(item.dataType),
-                    spaceFilter = NoSpaceFilter
-                )
+                    spaceFilter = NoSpaceFilter,
+                ),
             )
-        }.filter {
-            !it.isSpaceItem() || teamSpaceAccessorProvider.get()?.hasValidSpace(it) == true
-            !it.isSpaceItem() || teamSpaceAccessorProvider.get()?.currentBusinessTeam?.teamId == it.spaceId
+        }
+        return loadedItems.filter {
+            
+            (it.spaceId ?: TeamSpace.Personal.teamId) in availableSpaceIds
         }.toList()
     }
 }

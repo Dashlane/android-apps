@@ -9,6 +9,7 @@ import com.skocken.presentation.definition.Base
 internal interface OnboardingGuidedPasswordChangeContract {
     interface ViewProxy : Base.IView {
         var currentIllustration: Int
+
         fun showEnableAutofillApiDialog()
     }
 
@@ -28,6 +29,7 @@ internal interface OnboardingGuidedPasswordChangeContract {
 
     interface DataProvider : Base.IDataProvider {
         suspend fun getPasswordChangeUrl(domain: String): Uri?
+
         fun isAutofillApiEnabled(context: Context): Boolean
     }
 }

@@ -21,12 +21,12 @@ import com.dashlane.design.theme.tooling.DashlanePreview
 fun PinTextFieldCharacter(
     modifier: Modifier = Modifier,
     color: Color,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         content()
         Box(
@@ -34,7 +34,7 @@ fun PinTextFieldCharacter(
                 .fillMaxWidth()
                 .padding(top = 8.dp)
                 .height(2.dp)
-                .background(color)
+                .background(color),
         )
     }
 }
@@ -45,7 +45,7 @@ private fun PinTextFieldCharacterPreview() {
     DashlanePreview {
         PinTextFieldCharacter(
             modifier = Modifier.size(64.dp),
-            color = Color.Magenta
+            color = Color.Magenta,
         ) {
             Text(text = "2")
         }

@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/open_vault_item_dropdown.json",
+  "type": "object",
+  "description": "When the user clicks on the dropdown (copy or quick actions) from the Vault item details or list or from the search results (eg. pages: item/credential/details page, item/all/list).",
+  "metas": {
+    "area": "vault"
+  },
+  "properties": {
+    "name": {
+      "const": "open_vault_item_dropdown"
+    },
+    "dropdown_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/dropdown_type"
+    },
+    "highlight": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/highlight"
+    },
+    "index": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/index"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_type"
+    },
+    "total_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/total_count"
+    }
+  },
+  "required": [
+    "name",
+    "dropdown_type",
+    "item_type"
+  ],
+  "additionalProperties": false
+}

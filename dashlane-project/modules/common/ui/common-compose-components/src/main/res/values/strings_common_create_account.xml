@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="login_settings_title">Customize your settings for this device</string>
+    
+    <string name="create_account_settings_warning_toast">Biometric recovery needs biometric unlock turned on to work.</string>
+    
+    <string name="create_account_settings_biometric">Biometric unlock</string>
+    
+    <string name="create_account_settings_biometric_desc">Unlock Dashlane with one look or touch</string>
+    
+    <string name="create_account_settings_resetmp">Biometric recovery</string>
+    
+    <string name="create_account_settings_resetmp_desc">In case you forget it</string>
+    
+    <string name="create_account_settings_info_cta">How it works</string>
+    
+    <string name="create_account_settings_info_description">If you turn on &lt;b&gt;biometric unlock&lt;/b&gt; or &lt;b&gt;biometric recovery&lt;/b&gt; we\'ll encrypt your Master Password and store it on your device. It remains encrypted from everyone, including us.&lt;br/&gt;&lt;br/&gt;Note: &lt;b&gt;Biometric recovery&lt;/b&gt; needs &lt;b&gt;biometric unlock&lt;/b&gt; turned on to work.</string>
+    
+    <string name="login_settings_complete_cta">Jump in</string>
+</resources>

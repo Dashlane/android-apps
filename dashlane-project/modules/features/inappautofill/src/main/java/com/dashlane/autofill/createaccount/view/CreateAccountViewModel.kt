@@ -20,12 +20,12 @@ import com.dashlane.util.isSemanticallyNull
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @HiltViewModel
 class CreateAccountViewModel @Inject constructor(
@@ -35,11 +35,10 @@ class CreateAccountViewModel @Inject constructor(
     private val provider: CreateAccountDataProvider,
     private val logger: AutofillCreateAccountLogger,
     private val teamSpaceRepository: TeamSpaceAccessorProvider,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow<AutofillCreateAccountState>(
-        AutofillCreateAccountState.Initial(AutofillCreateAccountData(false, listOf()))
+        AutofillCreateAccountState.Initial(AutofillCreateAccountData(false, listOf())),
     )
     val uiState = stateFlow.asStateFlow()
 
@@ -56,13 +55,16 @@ class CreateAccountViewModel @Inject constructor(
             teamspaceAccessor?.availableSpaces?.filter { it !is TeamSpace.Combined }
         } else {
             null
+        }?.sortedWith { t1, _ ->
+            
+            if (t1 is TeamSpace.Business) -1 else 0
         }
         stateFlow.tryEmit(
             AutofillCreateAccountState.InitSuggestions(
                 stateFlow.value.data.copy(teamSpace = teamSpaces),
                 emailList,
-                websiteList
-            )
+                websiteList,
+            ),
         )
     }
 
@@ -83,7 +85,7 @@ class CreateAccountViewModel @Inject constructor(
                     password = password!!,
                     packageName = packageName,
                     spaceId = stateFlow.value.data.teamSpace?.getOrNull(spaceSelectedIndex)?.teamId
-                        ?: TeamSpace.Personal.teamId
+                        ?: TeamSpace.Personal.teamId,
                 )
                 provider.saveCredentialToVault(info)
             }
@@ -96,12 +98,12 @@ class CreateAccountViewModel @Inject constructor(
             logger.logSave(
                 domainWrapper = AutofillLogUtil.extractDomainFrom(
                     urlDomain = userInputWebsite?.toUrlDomainOrNull(),
-                    packageName = packageName
+                    packageName = packageName,
                 ),
-                credential = result
+                credential = result,
             )
             stateFlow.emit(
-                AutofillCreateAccountState.AccountCreated(stateFlow.value.data, result)
+                AutofillCreateAccountState.AccountCreated(stateFlow.value.data, result),
             )
         }
     }
@@ -110,8 +112,8 @@ class CreateAccountViewModel @Inject constructor(
         stateFlow.tryEmit(
             AutofillCreateAccountState.Error(
                 stateFlow.value.data,
-                error = errorRaised
-            )
+                error = errorRaised,
+            ),
         )
     }
 
@@ -136,7 +138,7 @@ class CreateAccountViewModel @Inject constructor(
     fun onCancel() {
         val domainWrapper = AutofillLogUtil.extractDomainFrom(
             urlDomain = website?.toUrlDomainOrNull(),
-            packageName = packageName
+            packageName = packageName,
         )
         logger.onCancel(domainWrapper)
         stateFlow.tryEmit(AutofillCreateAccountState.Cancelled(stateFlow.value.data))

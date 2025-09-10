@@ -11,11 +11,11 @@ import javax.inject.Inject
 
 class GeneratedPasswordRepositoryImpl @Inject constructor(
     private val dataSaver: DataSaver,
-    private val generatedPasswordQuery: GeneratedPasswordQuery
+    private val generatedPasswordQuery: GeneratedPasswordQuery,
 ) : GeneratedPasswordRepository {
     override suspend fun updateGeneratedPassword(
         data: CredentialFormData,
-        itemToSave: VaultItem<SyncObject>
+        itemToSave: VaultItem<SyncObject>,
     ) = data.password?.idFromPasswordGenerator?.let { id ->
         generatedPasswordQuery.queryAllNotRevoked()
             .firstOrNull { it.uid == id }

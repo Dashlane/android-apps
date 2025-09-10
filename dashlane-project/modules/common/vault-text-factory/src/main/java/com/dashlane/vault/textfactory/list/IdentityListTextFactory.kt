@@ -11,7 +11,6 @@ import javax.inject.Inject
 class IdentityListTextFactory @Inject constructor(
     private val resources: Resources,
 ) : DataIdentifierListTextFactory<SummaryObject.Identity> {
-
     override fun getTitle(item: SummaryObject.Identity): StatusText {
         val name = item.identityPartialOrFullNameNoLogin
         return StatusText(if (name.isNotSemanticallyNull()) name!! else resources.getString(R.string.identity))

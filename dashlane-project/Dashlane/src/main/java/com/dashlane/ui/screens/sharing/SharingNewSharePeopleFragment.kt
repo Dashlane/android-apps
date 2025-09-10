@@ -16,10 +16,11 @@ import dagger.hilt.android.AndroidEntryPoint
 class SharingNewSharePeopleFragment : AbstractContentFragment() {
     private val viewModel by viewModels<NewSharePeopleViewModel>()
     private lateinit var viewProxy: NewSharePeopleViewProxy
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         val view: View = inflater.inflate(R.layout.fragment_sharing_message, container, false)
@@ -27,10 +28,12 @@ class SharingNewSharePeopleFragment : AbstractContentFragment() {
         return view
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.sharing_share_item_send, menu)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.sharing_share_item_send -> {
@@ -38,6 +41,7 @@ class SharingNewSharePeopleFragment : AbstractContentFragment() {
                 return true
             }
         }
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 

@@ -7,7 +7,7 @@ import com.dashlane.permission.PermissionsManager
 import javax.inject.Inject
 
 class FollowUpNotificationPermissionManagerImpl @Inject constructor(
-    private val permissionsManager: PermissionsManager
+    private val permissionsManager: PermissionsManager,
 ) : FollowUpNotificationPermissionManager {
     override fun isNotificationPermissionGranted(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

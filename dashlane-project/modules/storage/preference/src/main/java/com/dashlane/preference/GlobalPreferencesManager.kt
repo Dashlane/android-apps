@@ -4,6 +4,7 @@ import android.app.backup.BackupManager
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.dashlane.preference.ConstantsPrefs.Companion.AUTOFILL_NOTIFICATION_CHROME_DISMISS_COUNT
 import com.dashlane.preference.ConstantsPrefs.Companion.AUTOFILL_NOTIFICATION_DISMISS_COUNT
 import com.dashlane.preference.ConstantsPrefs.Companion.BACKUP_TOKEN_SET
 import com.dashlane.preference.ConstantsPrefs.Companion.HAS_ACTIVATED_AUTOFILL_ONCE
@@ -14,7 +15,6 @@ import com.dashlane.preference.ConstantsPrefs.Companion.IS_USER_LOCKED
 import com.dashlane.preference.ConstantsPrefs.Companion.LOGGED_USER
 import com.dashlane.preference.ConstantsPrefs.Companion.MULTIPLE_ACCOUNT_LOADED_ON_THIS_DEVICE
 import com.dashlane.preference.ConstantsPrefs.Companion.REGISTRATION_ID
-import com.dashlane.preference.ConstantsPrefs.Companion.SKIP_INTRO
 import com.dashlane.preference.ConstantsPrefs.Companion.UITEST_FORCE_SCREENSHOT
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_LIST_HISTORY
 import com.dashlane.preference.ConstantsPrefs.Companion.USER_LIST_HISTORY_MAX_SIZE
@@ -31,9 +31,8 @@ import javax.inject.Singleton
 @Singleton
 class GlobalPreferencesManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val backupManager: BackupManager
+    private val backupManager: BackupManager,
 ) : DashlanePreferencesManager() {
-
     override val sharedPreferences: SharedPreferences? = PreferenceManager.getDefaultSharedPreferences(context)
 
     val lastModificationTime: Long
@@ -42,7 +41,7 @@ class GlobalPreferencesManager @Inject constructor(
             return tryOrNull {
                 File(
                     context.filesDir.parent,
-                    "/shared_prefs/${packageName}_preferences.xml"
+                    "/shared_prefs/${packageName}_preferences.xml",
                 ).lastModified()
             } ?: 0L
         }
@@ -90,18 +89,9 @@ class GlobalPreferencesManager @Inject constructor(
         }
     }
 
-    fun saveSkipIntro() {
-        putBoolean(SKIP_INTRO, true)
-        backupManager.dataChanged()
-    }
-
-    fun shouldSkipIntro(): Boolean {
-        return getBoolean(SKIP_INTRO)
-    }
-
     fun setLastLoggedInUser(username: String) {
         val lastUser = getLastLoggedInUser()
-        if (!lastUser.isEmpty()) {
+        if (lastUser.isNotEmpty()) {
             isUserLoggedOut = false
         }
         if (lastUser.isNotSemanticallyNull() &&
@@ -121,7 +111,7 @@ class GlobalPreferencesManager @Inject constructor(
 
     fun getLastLoggedInUser(): String {
         val result = getUserListHistory().firstOrNull()
-        if (result == null || result.isBlank()) {
+        if (result.isNullOrBlank()) {
             return ""
         }
         return result
@@ -137,8 +127,14 @@ class GlobalPreferencesManager @Inject constructor(
 
     fun getAutofillNotificationDismissCount() = getInt(AUTOFILL_NOTIFICATION_DISMISS_COUNT)
 
+    fun getAutofillChromeNotificationDismissCount() = getInt(AUTOFILL_NOTIFICATION_CHROME_DISMISS_COUNT)
+
     fun incrementAutofillNotificationDismiss() {
         putInt(AUTOFILL_NOTIFICATION_DISMISS_COUNT, getAutofillNotificationDismissCount() + 1)
+    }
+
+    fun incrementAutofillChromeNotificationDismiss() {
+        putInt(AUTOFILL_NOTIFICATION_CHROME_DISMISS_COUNT, getAutofillChromeNotificationDismissCount() + 1)
     }
 
     fun saveActivatedAutofillOnce() {
@@ -147,7 +143,7 @@ class GlobalPreferencesManager @Inject constructor(
 
     fun hasActivatedAutofillOnce(): Boolean = getBoolean(HAS_ACTIVATED_AUTOFILL_ONCE, false)
 
-    fun count() = sharedPreferences?.let { it.all.keys.size } ?: -1
+    fun count() = sharedPreferences?.all?.keys?.size ?: -1
 
     private fun getBackupToken(username: String) =
         getStringSet(BACKUP_TOKEN_SET)?.firstOrNull { it.startsWith(username) }?.split(";;")

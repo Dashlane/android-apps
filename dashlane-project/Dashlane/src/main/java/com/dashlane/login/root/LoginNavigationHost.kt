@@ -1,61 +1,65 @@
 package com.dashlane.login.root
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dashlane.authentication.login.SsoInfo
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SsoInfo
 import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.lock.LockSetting
+import com.dashlane.login.LoginDestination.Email
+import com.dashlane.login.LoginDestination.Otp
+import com.dashlane.login.LoginDestination.Password
+import com.dashlane.login.LoginDestination.SecretTransfer
+import com.dashlane.login.LoginDestination.Token
 import com.dashlane.login.LoginStrategy
-import com.dashlane.login.pages.email.compose.LoginEmailScreen
-import com.dashlane.login.pages.password.compose.LoginPasswordScreen
+import com.dashlane.login.email.LoginEmailScreen
 import com.dashlane.login.pages.secrettransfer.remoteLoginSecretTransferNavigation
-import com.dashlane.login.pages.token.compose.LoginTokenScreen
-import com.dashlane.login.pages.totp.compose.LoginTotpScreen
-import com.dashlane.login.root.LoginDestination.Email
-import com.dashlane.login.root.LoginDestination.Otp
-import com.dashlane.login.root.LoginDestination.Password
-import com.dashlane.login.root.LoginDestination.SecretTransfer
-import com.dashlane.login.root.LoginDestination.Token
+import com.dashlane.login.password.LoginPasswordScreen
+import com.dashlane.login.token.LoginTokenScreen
+import com.dashlane.login.totp.LoginTotpScreen
+import com.dashlane.user.UserAccountInfo
 
-@Suppress("LongMethod")
+
+@Suppress("LongMethod", "kotlin:S107")
 @Composable
 fun LoginNavigationHost(
+    contentPadding: PaddingValues = PaddingValues(),
     email: String?,
     allowSkipEmail: Boolean,
     lockSetting: LockSetting,
     goToCreateAccount: (String, Boolean) -> Unit,
     endOfLife: () -> Unit,
-    onSuccess: (LoginStrategy.Strategy?, SsoInfo?) -> Unit
+    onSuccess: (LoginStrategy.Strategy?, SsoInfo?) -> Unit,
+    goToArk: (RegisteredUserDevice?, UserAccountInfo.AccountType) -> Unit,
 ) {
     val navController = rememberNavController()
 
-    Scaffold(
-        modifier = Modifier.safeDrawingPadding(),
-        containerColor = DashlaneTheme.colors.containerAgnosticNeutralSupershy
-    ) { contentPadding ->
+    Surface(
+        modifier = Modifier.padding(contentPadding),
+        color = DashlaneTheme.colors.containerAgnosticNeutralSupershy,
+    ) {
         NavHost(
             startDestination = Email(login = email, allowSkipEmail = allowSkipEmail),
-            navController = navController
+            navController = navController,
         ) {
             composable<Email> {
                 LoginEmailScreen(
-                    modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     goToCreateAccount = goToCreateAccount,
                     goToOTP = { secondFactor -> navController.navigate(route = Otp(secondFactor.login)) },
                     goToPassword = { navController.navigate(route = Password) },
                     goToSecretTransfer = { email, showQrCode ->
                         navController.navigate(
-                            route = SecretTransfer(login = email, showQrCode = showQrCode)
+                            route = SecretTransfer(login = email, showQrCode = showQrCode),
                         )
                     },
                     goToToken = { secondFactor -> navController.navigate(route = Token(secondFactor.login)) },
@@ -63,28 +67,25 @@ fun LoginNavigationHost(
                         
                         onSuccess(null, null)
                     },
-                    endOfLife = endOfLife
+                    endOfLife = endOfLife,
                 )
             }
             composable<Otp> {
                 LoginTotpScreen(
-                    modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     verificationMode = VerificationMode.OTP1,
-                    goToNext = { navController.navigate(route = Password) }
+                    goToNext = { navController.navigate(route = Password) },
                 )
             }
             composable<Token> {
                 LoginTokenScreen(
-                    modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
-                    goToNext = { navController.navigate(route = Password) }
+                    goToNext = { navController.navigate(route = Password) },
                 )
             }
             composable<Password> {
                 LoginPasswordScreen(
                     modifier = Modifier
-                        .padding(contentPadding)
                         .fillMaxHeight(),
                     viewModel = hiltViewModel(),
                     lockSetting = lockSetting,
@@ -108,13 +109,14 @@ fun LoginNavigationHost(
                         navController.navigate(Email(email, allowSkipEmail)) {
                             popUpTo(Email(email, allowSkipEmail))
                         }
-                    }
+                    },
+                    goToArk = { accountType -> goToArk(null, accountType) },
                 )
             }
             remoteLoginSecretTransferNavigation(
-                contentPadding = contentPadding,
+                goToArk = { registeredUserDevice, accountType -> goToArk(registeredUserDevice, accountType) },
                 onSuccess = { strategy -> onSuccess(strategy, null) },
-                onCancel = { navController.popBackStack(Email(email, allowSkipEmail), false) }
+                onCancel = { navController.popBackStack(Email(email, allowSkipEmail), false) },
             )
         }
     }

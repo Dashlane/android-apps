@@ -1,8 +1,8 @@
 package com.dashlane.notificationcenter.alerts
 
+import com.dashlane.breach.BreachWrapper
+import com.dashlane.breach.events.BreachStatusChangedEvent
 import com.dashlane.events.AppEvents
-import com.dashlane.events.BreachStatusChangedEvent
-import com.dashlane.security.identitydashboard.breach.BreachWrapper
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.storage.userdata.accessor.filter.vaultFilter
@@ -16,9 +16,8 @@ import javax.inject.Inject
 class BreachDataHelper @Inject constructor(
     private val vaultDataQuery: VaultDataQuery,
     private val dataSaver: DataSaver,
-    private val appEvents: AppEvents
+    private val appEvents: AppEvents,
 ) {
-
     @Suppress("UNCHECKED_CAST")
     suspend fun saveAndRemove(breachWrapper: BreachWrapper, breachStatus: SyncObject.SecurityBreach.Status) {
         val securityBreach = breachWrapper.localBreach
@@ -32,7 +31,7 @@ class BreachDataHelper @Inject constructor(
                 .copySyncObject { status = breachStatus }
                 .copyWithAttrs {
                     syncState = SyncState.MODIFIED
-                }
+                },
         )
         appEvents.post(BreachStatusChangedEvent())
     }
@@ -49,7 +48,7 @@ class BreachDataHelper @Inject constructor(
                 dataSaver.save(
                     breach.copySyncObject {
                         status = SyncObject.SecurityBreach.Status.VIEWED
-                    }
+                    },
                 )
             }
     }

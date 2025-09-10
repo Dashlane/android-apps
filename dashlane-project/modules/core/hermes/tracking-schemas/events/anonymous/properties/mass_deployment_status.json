@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/mass_deployment_status.json",
+  "type": "object",
+  "description": "Event sent on extension install or extension updates, initially sent for devices that have been mass deployed and are protected by CRD.",
+  "metas": {
+    "area": "technical"
+  },
+  "properties": {
+    "name": {
+      "const": "mass_deployment_status"
+    },
+    "is_protected_by_credential_risk_detection": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/mass_deployment.json#/definitions/is_protected_by_credential_risk_detection"
+    },
+    "mass_deployment_access_key": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/mass_deployment.json#/definitions/mass_deployment_access_key"
+    },
+    "mass_deployment_device_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/mass_deployment.json#/definitions/mass_deployment_device_id"
+    }
+  },
+  "required": [
+    "name",
+    "is_protected_by_credential_risk_detection",
+    "mass_deployment_access_key",
+    "mass_deployment_device_id"
+  ],
+  "additionalProperties": false
+}

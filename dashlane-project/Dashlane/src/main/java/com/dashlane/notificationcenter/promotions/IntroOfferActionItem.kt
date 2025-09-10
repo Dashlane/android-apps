@@ -10,12 +10,12 @@ import com.dashlane.notificationcenter.view.ActionItemType
 import com.dashlane.notificationcenter.view.NotificationItem
 import com.dashlane.notificationcenter.view.ReadStateViewHolder
 import com.dashlane.premium.offer.common.model.IntroOfferType
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
 import com.dashlane.ui.drawable.CircleDrawable
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 
 class IntroOfferActionItem(
     override val actionItemsRepository: NotificationCenterRepository,
-    private val introOfferType: IntroOfferType
+    private val introOfferType: IntroOfferType,
 ) : NotificationItem {
     override val section: ActionItemSection = ActionItemSection.PROMOTIONS
     override val type: ActionItemType = ActionItemType.INTRODUCTORY_OFFERS
@@ -32,12 +32,11 @@ class IntroOfferActionItem(
         private const val ID_SUFFIX = "_NOTIFICATION"
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.item_actionitem,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 
     class ViewHolder(val v: View) : ReadStateViewHolder<IntroOfferActionItem>(v) {
-
         override fun updateView(context: Context, item: IntroOfferActionItem?) {
             super.updateView(context, item)
             item ?: return
@@ -50,8 +49,8 @@ class IntroOfferActionItem(
                     context = context,
                     backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
                     drawableRes = R.drawable.ic_action_item_premium_star,
-                    drawableTintColorRes = R.color.text_brand_standard
-                )
+                    drawableTintColorRes = R.color.text_brand_standard,
+                ),
             )
         }
     }

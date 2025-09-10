@@ -6,16 +6,17 @@ import androidx.core.view.isVisible
 import com.dashlane.R
 import com.dashlane.databinding.SharingPendingInvitationLayoutBinding
 import com.dashlane.design.component.compat.view.ThumbnailViewType
+import com.dashlane.sharing.SharingContact
 import com.dashlane.sharing.model.getUser
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter.MultiColumnViewTypeProvider
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 class SharingInvitationUserGroup(
     context: Context,
     private val groupInvite: SharingContact.UserGroupInvite,
     private val onClickAccept: () -> Unit,
-    private val onClickDecline: () -> Unit
+    private val onClickDecline: () -> Unit,
 ) : MultiColumnViewTypeProvider {
     val displayTitle: String = groupInvite.userGroup.name
     val displaySubtitle: String
@@ -32,9 +33,9 @@ class SharingInvitationUserGroup(
         val userDownload = groupInvite.userGroup.getUser(groupInvite.login)
         return if (userDownload != null) {
             context.getString(
-            R.string.sharing_pending_invite_user_group_description,
-            userDownload.referrer
-        )
+                R.string.sharing_pending_invite_user_group_description,
+                userDownload.referrer,
+            )
         } else {
             ""
         }
@@ -43,6 +44,7 @@ class SharingInvitationUserGroup(
     class ItemViewHolder(itemView: View) :
         EfficientViewHolder<SharingInvitationUserGroup>(itemView) {
         private val viewBinding = SharingPendingInvitationLayoutBinding.bind(view)
+
         override fun updateView(context: Context, item: SharingInvitationUserGroup?) {
             item ?: return
             viewBinding.sharingPendingInviteTitle.text = item.displayTitle
@@ -50,7 +52,7 @@ class SharingInvitationUserGroup(
         }
 
         private fun updateViewUserGroup(
-            item: SharingInvitationUserGroup
+            item: SharingInvitationUserGroup,
         ) {
             val accept = viewBinding.sharingPendingInviteBtnAccept
             val refuse = viewBinding.sharingPendingInviteBtnRefuse
@@ -80,13 +82,13 @@ class SharingInvitationUserGroup(
         private val VIEW_TYPE: DashlaneRecyclerAdapter.ViewType<out SharingInvitationUserGroup> =
             DashlaneRecyclerAdapter.ViewType(
                 R.layout.sharing_pending_invitation_layout_forwarder,
-                ItemViewHolder::class.java
+                ItemViewHolder::class.java,
             )
 
         fun comparator(): Comparator<SharingInvitationUserGroup> =
             compareBy(
                 { it.displayTitle },
-                { it.displaySubtitle }
+                { it.displaySubtitle },
             )
     }
 }

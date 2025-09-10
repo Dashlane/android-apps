@@ -5,14 +5,13 @@ import com.dashlane.premium.offer.common.PurchaseCheckingCoordinator
 import javax.inject.Inject
 
 class PurchaseCheckingCoordinatorImpl @Inject constructor() : PurchaseCheckingCoordinator {
-
     override fun openPlayStorePurchaseChecking(
         context: Context,
         sku: String,
         purchaseOriginalJson: String,
         signature: String,
         currencyCode: String,
-        price: Float
+        price: Float,
     ) {
         context.startActivity(
             PurchaseCheckingActivity.newIntentForPlayStorePurchase(
@@ -21,8 +20,8 @@ class PurchaseCheckingCoordinatorImpl @Inject constructor() : PurchaseCheckingCo
                 purchaseOriginalJson = purchaseOriginalJson,
                 signature = signature,
                 currencyCode = currencyCode,
-                totalPrice = price
-            )
+                totalPrice = price,
+            ),
         )
     }
 }

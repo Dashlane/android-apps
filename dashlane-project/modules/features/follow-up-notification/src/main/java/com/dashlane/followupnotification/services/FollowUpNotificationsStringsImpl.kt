@@ -8,7 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class FollowUpNotificationsStringsImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) : FollowUpNotificationsStrings {
     override fun getFollowUpNotificationsTypesLabels(followUpNotificationsTypes: FollowUpNotificationsTypes): String {
         return when (followUpNotificationsTypes) {
@@ -17,10 +17,13 @@ class FollowUpNotificationsStringsImpl @Inject constructor(
             FollowUpNotificationsTypes.BANK_ACCOUNT,
             FollowUpNotificationsTypes.BANK_ACCOUNT_US,
             FollowUpNotificationsTypes.BANK_ACCOUNT_GB,
-            FollowUpNotificationsTypes.BANK_ACCOUNT_MX -> context.getString(
-                R.string.follow_up_notification_vault_item_label_bank
+            FollowUpNotificationsTypes.BANK_ACCOUNT_MX,
+            -> context.getString(
+                R.string.follow_up_notification_vault_item_label_bank,
             )
-            FollowUpNotificationsTypes.DRIVERS_LICENSE -> context.getString(R.string.follow_up_notification_vault_item_label_drivers_license)
+            FollowUpNotificationsTypes.DRIVERS_LICENSE -> context.getString(
+                R.string.follow_up_notification_vault_item_label_drivers_license,
+            )
             FollowUpNotificationsTypes.ID_CARD -> context.getString(R.string.follow_up_notification_vault_item_label_ids)
             FollowUpNotificationsTypes.PASSPORT -> context.getString(R.string.follow_up_notification_vault_item_label_passport)
             FollowUpNotificationsTypes.PAYMENTS_CARD -> context.getString(R.string.follow_up_notification_vault_item_label_credit_card)

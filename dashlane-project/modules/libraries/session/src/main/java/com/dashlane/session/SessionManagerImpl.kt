@@ -7,14 +7,14 @@ import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.crypto.keys.VaultKey
 import com.dashlane.cryptography.ObfuscatedByteArray
 import com.dashlane.cryptography.use
+import com.dashlane.data.login.LoginInfo
+import com.dashlane.data.login.LoginMode
+import com.dashlane.data.login.toMode
+import com.dashlane.data.login.verification
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.hermes.LogRepository
 import com.dashlane.hermes.generated.definitions.Status
 import com.dashlane.hermes.generated.events.user.Login
-import com.dashlane.login.LoginInfo
-import com.dashlane.login.LoginMode
-import com.dashlane.login.toMode
-import com.dashlane.login.verification
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.session.repository.SessionCoroutineScopeRepository
 import com.dashlane.session.repository.UserDataRepository
@@ -53,7 +53,6 @@ class SessionManagerImpl @Inject constructor(
     private val logRepository: LogRepository,
     private val sessionCreator: SessionCreator,
 ) : SessionManager, SessionInitializer {
-
     
     private val observerList = mutableListOf<SessionObserver>()
     private var alreadyTriedToRestore = false
@@ -93,7 +92,7 @@ class SessionManagerImpl @Inject constructor(
         deviceAnalyticsId: String,
         userAnalyticsId: String,
         loginMode: LoginMode,
-        accountType: UserAccountInfo.AccountType
+        accountType: UserAccountInfo.AccountType,
     ): SessionResult {
         _session?.let {
             
@@ -110,7 +109,7 @@ class SessionManagerImpl @Inject constructor(
             )
         } catch (e: InvalidRemoteKeyException) {
             logRepository.queueEvent(
-                Login(mode = loginMode.toMode(), isBackupCode = false, verificationMode = loginMode.verification, status = Status.ERROR_UNKNOWN)
+                Login(mode = loginMode.toMode(), isBackupCode = false, verificationMode = loginMode.verification, status = Status.ERROR_UNKNOWN),
             )
             return SessionResult.Error(SessionResult.ErrorCode.ERROR_REMOTE_KEY, "No remote key available")
         }
@@ -119,9 +118,9 @@ class SessionManagerImpl @Inject constructor(
             allowOverwriteAccessKey = true,
             loginInfo = LoginInfo(
                 isFirstLogin = true,
-                loginMode = loginMode
+                loginMode = loginMode,
             ),
-            accountType = accountType
+            accountType = accountType,
         ).also {
             if (it is SessionResult.Success) {
                 val userPreferencesManager = preferencesManager[username]
@@ -148,7 +147,7 @@ class SessionManagerImpl @Inject constructor(
         secretKey: String,
         localKey: LocalKey,
         accessKey: String?,
-        loginMode: LoginMode
+        loginMode: LoginMode,
     ): SessionResult {
         _session?.let {
             
@@ -161,7 +160,7 @@ class SessionManagerImpl @Inject constructor(
             ?: deviceInfoRepository.deviceId
             ?: return SessionResult.Error(
                 SessionResult.ErrorCode.ERROR_SESSION_ACCESS_KEY,
-                "No session access key available"
+                "No session access key available",
             )
 
         val accountType: UserAccountInfo.AccountType =
@@ -181,7 +180,7 @@ class SessionManagerImpl @Inject constructor(
             )
         } catch (e: InvalidRemoteKeyException) {
             logRepository.queueEvent(
-                Login(mode = loginMode.toMode(), isBackupCode = false, verificationMode = loginMode.verification, status = Status.ERROR_UNKNOWN)
+                Login(mode = loginMode.toMode(), isBackupCode = false, verificationMode = loginMode.verification, status = Status.ERROR_UNKNOWN),
             )
             return SessionResult.Error(SessionResult.ErrorCode.ERROR_REMOTE_KEY, "No remote key available")
         }
@@ -189,14 +188,11 @@ class SessionManagerImpl @Inject constructor(
             userSettings = null,
             accountType = accountType,
             allowOverwriteAccessKey = accessKey != null,
-            loginInfo = LoginInfo(isFirstLogin = false, loginMode = loginMode)
+            loginInfo = LoginInfo(isFirstLogin = false, loginMode = loginMode),
         )
     }
 
     override suspend fun destroySession(session: Session, byUser: Boolean, forceLogout: Boolean) {
-            "Received Logout for ${session.userId}. Logout by user:$byUser",
-            logToUserSupportFile = true
-        )
         crashReporter.get()
             .addInformation("[SessionManager] Session destroyed. Logout by user:$byUser")
         
@@ -218,7 +214,7 @@ class SessionManagerImpl @Inject constructor(
         userSettings: SyncObject.Settings? = null,
         accountType: UserAccountInfo.AccountType,
         allowOverwriteAccessKey: Boolean,
-        loginInfo: LoginInfo
+        loginInfo: LoginInfo,
     ): SessionResult {
         return try {
             sessionCoroutineScopeRepository.get().sessionInitializing(session)
@@ -234,13 +230,13 @@ class SessionManagerImpl @Inject constructor(
             SessionResult.Success(session)
         } catch (e: Exception) {
                 "A session initializationObserver has failed, session can't be initialized",
-                throwable = e
+                throwable = e,
             )
             destroySession(session, false)
             SessionResult.Error(
                 SessionResult.ErrorCode.ERROR_INIT,
                 "A session initializationObserver has failed, session can't be initialized",
-                e
+                e,
             )
         }
     }
@@ -249,7 +245,7 @@ class SessionManagerImpl @Inject constructor(
         userSettings: SyncObject.Settings?,
         accountType: UserAccountInfo.AccountType,
         allowOverwriteAccessKey: Boolean,
-        loginInfo: LoginInfo
+        loginInfo: LoginInfo,
     ): SessionResult {
         return when (
             val sessionInitializationResult =
@@ -295,7 +291,7 @@ class SessionManagerImpl @Inject constructor(
 private fun SecureStorageManager.storeRemoteKey(
     username: Username,
     localKey: LocalKey,
-    remoteKey: VaultKey.RemoteKey
+    remoteKey: VaultKey.RemoteKey,
 ) {
     remoteKey.cryptographyKeyBytes.use(ObfuscatedByteArray::toByteArray).use {
         storeKeyData(it, SecureDataKey.REMOTE_KEY, username, localKey)
@@ -304,5 +300,5 @@ private fun SecureStorageManager.storeRemoteKey(
 
 private fun SecureStorageManager.getRemoteKey(
     username: Username,
-    localKey: LocalKey
+    localKey: LocalKey,
 ): VaultKey.RemoteKey? = getKeyData(SecureDataKey.REMOTE_KEY, username, localKey)?.let(VaultKey::RemoteKey)

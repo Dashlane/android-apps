@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/ask_use_other_authentication.json",
+  "type": "object",
+  "description": "When the app asks the user to change the authentication mechanism",
+  "metas": {
+    "area": "authentication",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "ask_use_other_authentication"
+    },
+    "next": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/mode"
+    },
+    "previous": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/mode"
+    }
+  },
+  "required": [
+    "name",
+    "next",
+    "previous"
+  ],
+  "additionalProperties": false
+}

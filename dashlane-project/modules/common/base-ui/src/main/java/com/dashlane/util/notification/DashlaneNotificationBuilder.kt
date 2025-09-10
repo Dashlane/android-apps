@@ -49,7 +49,9 @@ class DashlaneNotificationBuilder constructor(private val mContext: Context) {
         return setSmallIcon(smallIconResId)
     }
 
-    fun setSmallIcon(@DrawableRes iconResId: Int): DashlaneNotificationBuilder {
+    fun setSmallIcon(
+        @DrawableRes iconResId: Int,
+    ): DashlaneNotificationBuilder {
         notificationBuilder.setSmallIcon(iconResId)
         return this
     }

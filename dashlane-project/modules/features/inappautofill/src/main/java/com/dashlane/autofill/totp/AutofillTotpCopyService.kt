@@ -15,7 +15,7 @@ interface AutofillTotpCopyService {
 
 class AutofillTotpCopyServiceImpl @Inject constructor(
     private val clipboardCopy: ClipboardCopy,
-    private val clock: Clock
+    private val clock: Clock,
 ) : AutofillTotpCopyService {
     override fun copyTotpToClipboard(credential: VaultItem<SyncObject.Authentifiant>) {
         val totpResult = credential.syncObject.otp()?.let { it as? Totp }?.toTotpResult() ?: return
@@ -24,7 +24,7 @@ class AutofillTotpCopyServiceImpl @Inject constructor(
             data = totpResult.code,
             sensitiveData = true,
             autoClear = true,
-            feedback = R.string.autofill_totp_automatically_copy
+            feedback = R.string.autofill_totp_automatically_copy,
         )
     }
 

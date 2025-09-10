@@ -23,6 +23,13 @@
         <item name="android:windowIsFloating">false</item>
     </style>
 
+    <style name="Theme.Dashlane.Transparent.ComposeModal">
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
     <style name="Theme.Dashlane.Transparent.Modal.NoAnimation" parent="Theme.Dashlane.Transparent.Modal">
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
     </style>

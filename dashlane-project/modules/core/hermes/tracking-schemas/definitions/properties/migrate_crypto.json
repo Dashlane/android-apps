@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/migrate_crypto.json",
+  "type": "object",
+  "description": "Definitions for the crypto migration process.",
+  "definitions": {
+    "crypto_migration_type": {
+      "description": "The crypto migration type",
+      "type": "string",
+      "enum": [
+        "master_password_change",
+        "master_password_to_sso",
+        "migrate_legacy",
+        "settings_apply_locally",
+        "settings_change",
+        "sso_to_master_password",
+        "team_enforced"
+      ]
+    },
+    "crypto_migration_status": {
+      "description": "The crypto migration process final status",
+      "type": "string",
+      "enum": [
+        "error_download",
+        "error_reencryption",
+        "error_update_local_data",
+        "error_upload",
+        "success"
+      ]
+    },
+    "crypto_algorithm": {
+      "description": "The crypto configuration name",
+      "type": "string",
+      "enum": [
+        "argon2d",
+        "kwc3",
+        "kwc5",
+        "no_derivation",
+        "pbkdf2"
+      ]
+    }
+  }
+}

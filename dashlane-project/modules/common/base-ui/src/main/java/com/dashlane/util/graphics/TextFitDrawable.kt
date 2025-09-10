@@ -17,7 +17,7 @@ open class TextFitDrawable @JvmOverloads constructor(
     @ColorInt textColor: Int,
     @Px textSize: Float,
     @ColorInt backgroundColor: Int = Color.TRANSPARENT,
-    typeface: Typeface? = null
+    typeface: Typeface? = null,
 ) : Drawable(),
     BackgroundColorDrawable {
     private val backgroundPaint: Paint = Paint()
@@ -26,7 +26,9 @@ open class TextFitDrawable @JvmOverloads constructor(
     override var backgroundColor: Int
         @ColorInt
         get() = backgroundPaint.color
-        set(@ColorInt color) {
+        set(
+        @ColorInt color
+        ) {
             backgroundPaint.color = color
         }
 

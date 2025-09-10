@@ -5,6 +5,8 @@ import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.session.repository.UserDatabaseRepository
+import com.dashlane.sharing.SharingDaoMemoryDataAccess
+import com.dashlane.sharing.SharingDaoMemoryDataAccessImpl
 import com.dashlane.sharing.model.ItemContentRaclette
 import com.dashlane.sharing.model.toCollectionRaclettes
 import com.dashlane.sharing.model.toCollections
@@ -17,9 +19,8 @@ import com.dashlane.storage.userdata.dao.ItemContentDB
 class SharingDaoMemoryDataAccessRacletteImpl(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,
-    private val delegate: SharingDaoMemoryDataAccessImpl
+    private val delegate: SharingDaoMemoryDataAccessImpl,
 ) : SharingDaoMemoryDataAccess by delegate {
-
     override val itemGroups: List<ItemGroup>
         get() = delegate.itemGroups
     override val userGroups: List<UserGroup>
@@ -57,18 +58,20 @@ class SharingDaoMemoryDataAccessRacletteImpl(
 }
 
 private fun List<ItemContentRaclette>.toItemContentDBs(): List<ItemContentDB> = map { it.toItemContentDB() }
+
 private fun ItemContentRaclette.toItemContentDB() =
     ItemContentDB(
         id = itemId,
         timestamp = timestamp,
         extraData = extraData,
-        itemKeyBase64 = itemKeyBase64
+        itemKeyBase64 = itemKeyBase64,
     )
 
 private fun List<ItemContentDB>.toItemContentRaclettes(): List<ItemContentRaclette> = map { it.toItemContentRaclette() }
+
 private fun ItemContentDB.toItemContentRaclette() = ItemContentRaclette(
     itemId = id,
     timestamp = timestamp,
     extraData = extraData,
-    itemKeyBase64 = itemKeyBase64
+    itemKeyBase64 = itemKeyBase64,
 )

@@ -1,7 +1,7 @@
 package com.dashlane.storage.userdata.accessor.dagger
 
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.core.sharing.SharingDaoImplRaclette
+import com.dashlane.sharing.SharingDao
 import com.dashlane.storage.userdata.DatabaseItemSaver
 import com.dashlane.storage.userdata.DatabaseItemSaverRaclette
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery

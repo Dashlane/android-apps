@@ -10,7 +10,7 @@ interface ConnectionScope {
         activity: Activity,
         productDetails: ProductDetails,
         offerToken: String?,
-        updateReference: UpdateReference? = null
+        updateReference: UpdateReference? = null,
     ): ServiceResult
 
     suspend fun consume(purchaseToken: String): ServiceResult
@@ -21,6 +21,6 @@ interface ConnectionScope {
 
     suspend fun queryProductDetails(
         productList: List<String>,
-        types: List<String> = listOf(BillingClient.ProductType.SUBS)
+        types: List<String> = listOf(BillingClient.ProductType.SUBS),
     ): ServiceResult
 }

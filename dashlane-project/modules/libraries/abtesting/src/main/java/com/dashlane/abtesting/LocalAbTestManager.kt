@@ -10,11 +10,13 @@ import javax.inject.Inject
 
 class LocalAbTestManager constructor(
     private val sharedPreferences: SharedPreferences,
-    private val random: Random = SecureRandom()
+    private val random: Random = SecureRandom(),
 ) {
-
+    @Suppress("kotlin:S6291")
     @Inject
-    constructor(@ApplicationContext context: Context) : this(context.getSharedPreferences(SHARED_PREFERENCES_PREFIX, Context.MODE_PRIVATE))
+    constructor(
+        @ApplicationContext context: Context,
+    ) : this(context.getSharedPreferences(SHARED_PREFERENCES_PREFIX, Context.MODE_PRIVATE))
 
     fun getVariant(localAbTest: LocalAbTest): Variant {
         return getVariant(localAbTest.testName, localAbTest.variants)

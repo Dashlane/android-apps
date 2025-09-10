@@ -10,7 +10,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 fun interface NotificatorModule {
-
     @Binds
     fun bindsNotificator(impl: NotificatorImpl): Notificator
 }

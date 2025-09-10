@@ -23,7 +23,6 @@ import com.google.android.material.textfield.TextInputLayout.END_ICON_NONE
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
 
 object TextInputLayoutProvider {
-
     fun create(
         context: Context,
         lockManager: LockManager,
@@ -35,7 +34,7 @@ object TextInputLayoutProvider {
         suggestions: List<String>? = null,
         multiline: Boolean = false,
         listener: View.OnClickListener? = null,
-        coloredCharacter: Boolean = false
+        coloredCharacter: Boolean = false,
     ): TextInputLayout {
         val textInputLayout = createTextInputLayout(context, header)
 
@@ -88,7 +87,7 @@ object TextInputLayoutProvider {
                 val adapter = ArrayAdapter<String>(
                     context,
                     R.layout.autocomplete_textview_adapter,
-                    suggestions
+                    suggestions,
                 )
                 setTextAppearance(context.getThemeAttrResourceId(R.attr.textAppearanceSubtitle1))
                 setTextColor(context.getThemeAttrColor(R.attr.colorOnBackground))

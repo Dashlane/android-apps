@@ -12,7 +12,7 @@ import com.dashlane.design.theme.tooling.DashlanePreview
 @Composable
 fun DeleteConfirmationDialog(
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -24,7 +24,7 @@ fun DeleteConfirmationDialog(
         description = {
             Text(text = stringResource(id = R.string.collections_list_delete_popup_text))
         },
-        isDestructive = true
+        isDestructive = true,
     )
 }
 
@@ -34,7 +34,7 @@ private fun DeleteConfirmationDialogPreview() {
     DashlanePreview {
         DeleteConfirmationDialog(
             onDismiss = {},
-            onConfirm = {}
+            onConfirm = {},
         )
     }
 }

@@ -1,7 +1,20 @@
 package com.dashlane.nitro.hilt
 
 import com.dashlane.network.NitroUrlOverride
+import com.dashlane.network.ServerUrlOverride
+import com.dashlane.network.webservices.DashlaneUrls.URL_API
+import com.dashlane.nitro.AttestationValidator
+import com.dashlane.nitro.AttestationValidatorImpl
+import com.dashlane.nitro.Nitro
+import com.dashlane.nitro.NitroImpl
+import com.dashlane.nitro.api.DashlaneApiProvider
+import com.dashlane.nitro.api.NitroApiClientProvider
 import com.dashlane.nitro.api.tools.CloudflareNitroHeaderInterceptor
+import com.dashlane.nitro.api.tools.toHostUrl
+import com.dashlane.nitro.cryptography.NitroSecretStreamClient
+import com.dashlane.nitro.cryptography.NitroSecretStreamClientImpl
+import com.dashlane.nitro.cryptography.sodium.SodiumCryptography
+import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
@@ -21,12 +34,69 @@ import kotlin.jvm.optionals.getOrNull
 
 @InstallIn(SingletonComponent::class)
 @Module
-fun interface NitroModule {
-
+internal interface NitroModule {
     @BindsOptionalOf
     fun bindsOptionalNitroUrlOverride(): NitroUrlOverride
 
+    @Binds
+    fun bindNitroSecretStreamClient(impl: NitroSecretStreamClientImpl): NitroSecretStreamClient
+
+    @Binds
+    fun bindAttestationValidator(impl: AttestationValidatorImpl): AttestationValidator
+
     companion object {
+        @Provides
+        @NitroLegacy
+        @Suppress(
+            
+            "kotlin:S107",
+        )
+        fun providesNitroLegacy(
+            dashlaneApiProvider: DashlaneApiProvider,
+            nitroApiClientProvider: NitroApiClientProvider,
+            nitroSecretStreamClient: NitroSecretStreamClient,
+            sodiumCryptography: SodiumCryptography,
+            attestationValidator: AttestationValidator,
+            nitroUrlOverride: Optional<NitroUrlOverride>,
+        ): Nitro {
+            return NitroImpl(
+                dashlaneApiProvider = dashlaneApiProvider,
+                nitroApiClientProvider = nitroApiClientProvider,
+                nitroSecretStreamClient = nitroSecretStreamClient,
+                sodiumCryptography = sodiumCryptography,
+                attestationValidator = attestationValidator,
+                behindProxy = false,
+                
+                nitroHost = (nitroUrlOverride.getOrNull()?.nitroUrl ?: URL_API).toHostUrl(),
+            )
+        }
+
+        @Provides
+        @NitroProxy
+        @Suppress(
+            
+            "kotlin:S107",
+        )
+        fun providesNitroProxy(
+            dashlaneApiProvider: DashlaneApiProvider,
+            nitroApiClientProvider: NitroApiClientProvider,
+            nitroSecretStreamClient: NitroSecretStreamClient,
+            sodiumCryptography: SodiumCryptography,
+            attestationValidator: AttestationValidator,
+            serverUrlOverride: Optional<ServerUrlOverride>,
+        ): Nitro {
+            return NitroImpl(
+                dashlaneApiProvider = dashlaneApiProvider,
+                nitroApiClientProvider = nitroApiClientProvider,
+                nitroSecretStreamClient = nitroSecretStreamClient,
+                sodiumCryptography = sodiumCryptography,
+                attestationValidator = attestationValidator,
+                
+                nitroHost = (serverUrlOverride.getOrNull()?.apiUrl ?: URL_API).toHostUrl(),
+                behindProxy = true,
+            )
+        }
+
         @Singleton
         @Provides
         @Named("NitroCallFactory")
@@ -94,10 +164,10 @@ class WrappedCookie private constructor(val cookie: Cookie) {
         if (other !is WrappedCookie) return false
 
         return other.cookie.name == cookie.name &&
-                other.cookie.domain == cookie.domain &&
-                other.cookie.path == cookie.path &&
-                other.cookie.secure == cookie.secure &&
-                other.cookie.hostOnly == cookie.hostOnly
+            other.cookie.domain == cookie.domain &&
+            other.cookie.path == cookie.path &&
+            other.cookie.secure == cookie.secure &&
+            other.cookie.hostOnly == cookie.hostOnly
     }
 
     override fun hashCode(): Int {

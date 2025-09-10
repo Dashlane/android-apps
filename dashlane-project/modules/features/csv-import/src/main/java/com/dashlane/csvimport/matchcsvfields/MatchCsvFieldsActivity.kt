@@ -12,7 +12,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MatchCsvFieldsActivity : DashlaneActivity() {
-
     private val viewModel: MatchCsvFieldsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,12 +23,12 @@ class MatchCsvFieldsActivity : DashlaneActivity() {
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (!viewModel.onBackPressed()) {
-                    finish()
+                override fun handleOnBackPressed() {
+                    if (!viewModel.onBackPressed()) {
+                        finish()
+                    }
                 }
-            }
-        }
+            },
         )
     }
 
@@ -38,8 +37,8 @@ class MatchCsvFieldsActivity : DashlaneActivity() {
             CATEGORY_NONE,
             CATEGORY_URL,
             CATEGORY_USERNAME,
-            CATEGORY_PASSWORD
-        ]
+            CATEGORY_PASSWORD,
+        ],
     )
     annotation class Category
 
@@ -54,7 +53,7 @@ class MatchCsvFieldsActivity : DashlaneActivity() {
 
         fun newIntent(
             context: Context,
-            fields: List<String>
+            fields: List<String>,
         ): Intent =
             Intent(context, MatchCsvFieldsActivity::class.java)
                 .putExtra(EXTRA_FIELDS, ArrayList(fields))

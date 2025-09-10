@@ -29,7 +29,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 abstract class SyncBindingModule {
-
     @Singleton
     @Binds
     abstract fun bindSyncRepository(impl: SyncRepositoryImpl): SyncRepository

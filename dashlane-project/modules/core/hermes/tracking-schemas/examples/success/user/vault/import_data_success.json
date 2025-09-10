@@ -1,0 +1,45 @@
+{
+  "id": "3e46a2e4-9625-4314-b52f-cffb46ecc9f8",
+  "schema_version": "1.31.6",
+  "date": "2020-06-13T20:20:39+00:00",
+  "date_origin": "local",
+  "category": "user",
+  "context": {
+    "user": {
+      "id": "b293a330-2e7c-4a69-b1c6-4f5cae8b8a9b"
+    },
+    "device": {
+      "installation_id": "bdda4768-7ebc-4c45-98cb-702a1afd753a",
+      "id": "514ecc2f-2431-4b03-9f6d-dfc832e05591",
+      "os": {
+        "type": "linux",
+        "version": "4.1",
+        "locale": "en-US"
+      }
+    },
+    "app": {
+      "version": "6.2024.0.35745",
+      "platform": "saex",
+      "build_type": "dev"
+    }
+  },
+  "browse": {
+    "origin_component": "main_app",
+    "origin_page": "import/backupfile"
+  },
+  "session": {
+    "id": "735623d9-a29f-4fae-9697-7673435003ec",
+    "sequence_number": 8
+  },
+  "properties": {
+    "name": "import_data",
+    "backup_file_type": "secure_vault",
+    "import_data_status": "success",
+    "imported_items_count": 63,
+    "import_data_step": "success",
+    "import_source": "source_dash",
+    "items_to_import_count": 84,
+    "is_direct_import": false,
+    "space": "professional"
+  }
+}

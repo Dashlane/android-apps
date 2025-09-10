@@ -1,5 +1,9 @@
 package com.github.devnied.emvnfccard.model.enums;
 
+import androidx.annotation.Keep;
+
+@Keep
+
 public enum ServiceCode1Enum implements IKeyEnum {
 
 	INTERNATIONNAL(1, "International interchange", "None"),

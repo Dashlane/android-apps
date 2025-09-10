@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/update_device_settings.json",
+  "type": "object",
+  "description": "User updates device specific settings like appearance.",
+  "metas": {
+    "area": "state"
+  },
+  "properties": {
+    "name": {
+      "const": "update_device_settings"
+    },
+    "device_appearance": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/settings.json#/definitions/device_appearance"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

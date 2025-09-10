@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="confirm">Confirm</string>
+    <string name="create_account_confirm_unlikely_email">The email address you entered has not been recognized and may be incorrect. Continue account creation with this email address?</string>
+    <string name="create_account_choose_password_title">...and a Master Password. The one to rule them all.</string>
+    <string name="create_account_choose_password_see_tips">Need help? See our tips</string>
+    <string name="create_account_choose_password_hint">Create your Master Password</string>
+    <string name="create_account_choose_password_tips">Note: For your security, we don’t store your Master Password. Make sure you remember it!</string>
+    <string name="create_account_email_title">Let\'s start with your email...</string>
+    <string name="create_account_email_subtitle">We don\'t need much to get the ball rolling.</string>
+    <string name="create_account_confirm_password_title">Got it. Can you type it one more time?</string>
+    <string name="create_account_confirm_password_subtitle">Just making sure you\'re happy with it.</string>
+    <string name="create_account_confirm_password_hint">Type your Master Password again</string>
+    <string name="create_account_error_email_description">The email address that you entered appears invalid. Please check it, and try again.</string>
+    <string name="create_account_error_email_empty_description">You need to enter an email address to proceed.</string>
+    <string name="username_exists_already">There already is an account with that email address. Try logging in, or create an account with another email address.</string>
+    <string name="unable_to_verify_username_with_dashlane_at_this_time_please_try_again_later">Unable to verify username with Dashlane at this time. Please try again later.</string>
+    <string name="create_account_cta_continue">Continue</string>
+
+    
+    <string name="create_account_cta_passwordless">Create passwordless account</string>
+    
+    <string name="passwordless_info_screen_app_bar_title">Add new device</string>
+    
+    <string name="passwordless_info_screen_title">Create an account without a Master Password</string>
+    
+    <string name="passwordless_info_screen_content_step1">Set a device specific &lt;strong&gt;PIN&lt;/strong&gt; and &lt;strong&gt;biometrics&lt;/strong&gt; to log in to this device</string>
+    
+    <string name="passwordless_info_screen_content_step2">Get a &lt;strong&gt;recovery key&lt;/strong&gt; you can use in the event you lose your device(s)</string>
+    
+    <string name="passwordless_info_screen_content_step3">Use this device to log in to new devices using &lt;strong&gt;QR code&lt;/strong&gt; or &lt;strong&gt;security challenge&lt;/strong&gt;</string>
+    
+    <string name="passwordless_info_screen_button_learn_more">Learn more</string>
+    
+    <string name="passwordless_info_screen_button_get_started">Get Started</string>
+    
+    <string name="passwordless_biometrics_setup_app_bar_title">Set up biometrics</string>
+    
+    <string name="passwordless_biometrics_setup_title">Use biometrics to unlock Dashlane on this device?</string>
+    
+    <string name="passwordless_biometrics_setup_description">Unlock this app even faster with biometrics. You can manage this in your Dashlane security settings at any time.</string>
+    
+    <string name="passwordless_biometrics_positive_button">Use biometrics</string>
+    
+    <string name="passwordless_biometrics_neutral_button">Skip for now</string>
+    
+    <string name="passwordless_account_creation_confirmed_title">Your Dashlane account is ready to go!</string>
+</resources>

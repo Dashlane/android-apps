@@ -7,18 +7,25 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import com.dashlane.R
 import com.dashlane.accountstatus.AccountStatusRepository
 import com.dashlane.breach.Breach
+import com.dashlane.hermes.LogRepository
+import com.dashlane.hermes.activityLog
 import com.dashlane.hermes.generated.definitions.AnyPage
 import com.dashlane.navigation.Navigator
+import com.dashlane.passwordanalysis.GroupOfAuthentifiant
+import com.dashlane.passwordanalysis.SecurityScoreEvaluator
+import com.dashlane.passwordhealth.identitydashboard.password.PasswordAnalysisContract
 import com.dashlane.passwordstrength.PasswordStrength
 import com.dashlane.passwordstrength.getShortTitle
+import com.dashlane.server.api.endpoints.teams.ActivityLog
+import com.dashlane.server.api.endpoints.teams.Properties
 import com.dashlane.session.SessionManager
 import com.dashlane.similarpassword.GroupOfPassword
 import com.dashlane.storage.userdata.accessor.VaultDataQuery
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 import com.dashlane.ui.activities.fragments.list.wrapper.ItemWrapperProvider
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.adapter.HeaderItem
 import com.dashlane.ui.adapter.ItemListContext.Container
+import com.dashlane.ui.legacy.recyclerview.HeaderItem
 import com.dashlane.url.UrlDomain
 import com.dashlane.url.registry.UrlDomainCategory
 import com.dashlane.url.toUrlDomainOrNull
@@ -47,16 +54,18 @@ class PasswordAnalysisPresenter(
     private val itemWrapperProvider: ItemWrapperProvider,
     private val currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter,
     private val sessionManager: SessionManager,
-    private val accountStatusRepository: AccountStatusRepository
-) : BasePresenter<PasswordAnalysisContract.DataProvider,
-    PasswordAnalysisContract.ViewProxy>(),
+    private val accountStatusRepository: AccountStatusRepository,
+    private val logRepository: LogRepository,
+) : BasePresenter<
+        PasswordAnalysisContract.DataProvider,
+        PasswordAnalysisContract.ViewProxy,
+        >(),
     PasswordAnalysisContract.Presenter,
     PasswordAnalysisItemWrapper.ActionListener {
-
     var defaultDestination: String? = null
     var focusBreachIdPending: String? = null
     private var sensitiveAccountOnly = false
-    private var securityResult: AuthentifiantSecurityEvaluator.Result? = null
+    private var securityResult: SecurityScoreEvaluator.Result? = null
 
     override fun onViewVisible() {
         requireRefresh(false)
@@ -100,14 +109,26 @@ class PasswordAnalysisPresenter(
     }
 
     override fun onListItemClick(item: Any) {
-        val authentifiant = (item as? VaultItemWrapper<*>)?.summaryObject as? SummaryObject.Authentifiant ?: return
+        val authentifiant =
+            (item as? VaultItemWrapper<*>)?.summaryObject as? SummaryObject.Authentifiant ?: return
         open(authentifiant)
     }
 
     override fun saveModified(
-        authentifiant: VaultItem<SyncObject.Authentifiant>
+        authentifiant: VaultItem<SyncObject.Authentifiant>,
+        isExcluded: Boolean,
     ) {
         coroutineScope.launch(Dispatchers.Main) {
+            val logType = if (isExcluded) {
+                ActivityLog.LogType.USER_EXCLUDED_ITEM_FROM_PASSWORD_HEALTH
+            } else {
+                ActivityLog.LogType.USER_INCLUDED_ITEM_IN_PASSWORD_HEALTH
+            }
+            val properties = Properties(
+                credentialLogin = authentifiant.syncObject.email ?: authentifiant.syncObject.login,
+                credentialDomain = authentifiant.syncObject.url,
+            )
+            logRepository.queueEvent(activityLog(logType = logType, properties = properties))
             provider.saveModified(authentifiant)
             requireRefresh(true)
         }
@@ -151,7 +172,8 @@ class PasswordAnalysisPresenter(
                 val listFilteredAndSorted = getFilteredSortedListByMode(mode)
                 val items = ArrayList<Any>()
 
-                val cachedItemWrapper = mutableMapOf<VaultItem<SyncObject.Authentifiant>, PasswordAnalysisItemWrapper>()
+                val cachedItemWrapper =
+                    mutableMapOf<VaultItem<SyncObject.Authentifiant>, PasswordAnalysisItemWrapper>()
                 listFilteredAndSorted.forEach { groupOfAuthentifiant ->
 
                     if (mode == modeToSelect) {
@@ -165,7 +187,13 @@ class PasswordAnalysisPresenter(
                         }
                     }
 
-                    items.addItems(groupOfAuthentifiant, cachedItemWrapper, mode, sensitiveDomains, this)
+                    items.addItems(
+                        groupOfAuthentifiant,
+                        cachedItemWrapper,
+                        mode,
+                        sensitiveDomains,
+                        this,
+                    )
                 }
                 mode to items
             }
@@ -182,12 +210,13 @@ class PasswordAnalysisPresenter(
         cachedItemWrapper: MutableMap<VaultItem<SyncObject.Authentifiant>, PasswordAnalysisItemWrapper>,
         mode: PasswordAnalysisContract.Mode,
         sensitiveDomains: Map<UrlDomain, UrlDomainCategory?>?,
-        listener: PasswordAnalysisItemWrapper.ActionListener
+        listener: PasswordAnalysisItemWrapper.ActionListener,
     ) {
         val authentifiants = groupOfAuthentifiant.authentifiants.let { list ->
             if (sensitiveAccountOnly) {
                 list.filter {
-                    sensitiveDomains?.get(it.navigationUrl?.toUrlDomainOrNull())?.isDataSensitive ?: false
+                    sensitiveDomains?.get(it.navigationUrl?.toUrlDomainOrNull())?.isDataSensitive
+                        ?: false
                 }
             } else {
                 list
@@ -211,13 +240,13 @@ class PasswordAnalysisPresenter(
                         mode,
                         itemWrapperProvider.getAuthentifiantItemWrapper(
                             it.item.toSummary(),
-                            Container.PASSWORD_HEALTH.asListContext()
+                            Container.PASSWORD_HEALTH.asListContext(),
                         ),
                         listener,
-                        vaultDataQuery
+                        vaultDataQuery,
                     )
                 }
-            }
+            },
         )
     }
 
@@ -229,7 +258,11 @@ class PasswordAnalysisPresenter(
         view.setSecurityScore(score)
     }
 
-    private fun getHeaderTitle(mode: PasswordAnalysisContract.Mode, header: Any?, extraInfo: String): String? {
+    private fun getHeaderTitle(
+        mode: PasswordAnalysisContract.Mode,
+        header: Any?,
+        extraInfo: String,
+    ): String? {
         val context = this.context ?: return null
         return when {
             header is PasswordStrength -> {
@@ -237,12 +270,19 @@ class PasswordAnalysisPresenter(
             }
             mode == PasswordAnalysisContract.Mode.REUSED && header is GroupOfPassword
             -> {
-                String.format(context.getString(R.string.security_dashboard_header_reused), extraInfo)
+                String.format(
+                    context.getString(R.string.security_dashboard_header_reused),
+                    extraInfo,
+                )
             }
             mode == PasswordAnalysisContract.Mode.COMPROMISED && header is Breach
             -> {
                 val date = header.getDateEventFormated(context)
-                String.format(context.getString(R.string.security_dashboard_header_breach), header.title, date)
+                String.format(
+                    context.getString(R.string.security_dashboard_header_breach),
+                    header.title,
+                    date,
+                )
             }
             else -> null
         }
@@ -258,7 +298,7 @@ class PasswordAnalysisPresenter(
                 result.authentifiantsBySimilarity
                     .sortedWith(
                         compareByDescending<GroupOfAuthentifiant<GroupOfPassword>> { it.countReal }
-                            .thenBy { it.groupBy.initialPassword }
+                            .thenBy { it.groupBy.initialPassword },
                     )
             PasswordAnalysisContract.Mode.EXCLUDED ->
                 listOf(GroupOfAuthentifiant(null, result.authentifiantsIgnored))

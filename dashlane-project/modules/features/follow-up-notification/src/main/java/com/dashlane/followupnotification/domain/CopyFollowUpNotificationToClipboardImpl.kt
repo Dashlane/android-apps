@@ -12,9 +12,8 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
     private val vaultItemCopyService: VaultItemCopyService,
     private val followUpNotificationLogger: FollowUpNotificationLogger,
     private val discoveryService: FollowUpNotificationDiscoveryService,
-    private val lockManager: FollowUpNotificationLockManager
+    private val lockManager: FollowUpNotificationLockManager,
 ) : CopyFollowUpNotificationToClipboard {
-
     override fun copy(followUpNotification: FollowUpNotification, copyFieldIndex: Int): Boolean {
         val followUpNotificationField = tryOrNull { followUpNotification.fields[copyFieldIndex] } ?: return false
         val copyField = tryOrNull { CopyField.valueOf(followUpNotificationField.name) } ?: return false
@@ -38,12 +37,12 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
     private fun copyFromNotification(
         followUpNotificationField: FollowUpNotification.Field,
         followUpNotification: FollowUpNotification,
-        copyField: CopyField
+        copyField: CopyField,
     ): Boolean {
         val result = vaultItemCopyService.handleCopy(
             notificationId = followUpNotification.id,
             content = followUpNotificationField.content.displayValue,
-            copyField = copyField
+            copyField = copyField,
         )
         return onFieldCopied(result, followUpNotification, copyField)
     }
@@ -52,7 +51,6 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
         val result = vaultItemCopyService.handleCopy(
             followUpNotification.vaultItemId,
             copyField,
-            followUpNotification.type.syncObjectType
         )
         return onFieldCopied(result, followUpNotification, copyField)
     }
@@ -60,7 +58,7 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
     private fun onFieldCopied(
         result: Boolean,
         followUpNotification: FollowUpNotification,
-        copyField: CopyField
+        copyField: CopyField,
     ): Boolean {
         if (result) {
             onFieldCopied(followUpNotification, copyField)
@@ -70,19 +68,19 @@ class CopyFollowUpNotificationToClipboardImpl @Inject constructor(
 
     private fun onFieldCopied(
         followUpNotification: FollowUpNotification,
-        copyField: CopyField
+        copyField: CopyField,
     ) {
         followUpNotificationLogger.copyFieldFromFollowUp(
             followUpNotification.type,
             copyField,
             followUpNotification.vaultItemId,
             followUpNotification.isItemProtected,
-            followUpNotification.itemDomain
+            followUpNotification.itemDomain,
         )
         discoveryService.updateLastNotificationItem(
             followUpNotification.vaultItemId,
             followUpNotification.id,
-            true
+            true,
         )
     }
 }

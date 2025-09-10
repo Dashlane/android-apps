@@ -11,9 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class TokenChecker(
-    private val loginTokensModule: LoginTokensModule
+    private val loginTokensModule: LoginTokensModule,
 ) {
-
     fun checkAndDisplayTokenIfNeeded(activity: DashlaneActivity, username: String) {
         activity.lifecycleScope.launch(Dispatchers.Main) {
             val pushToken = loginTokensModule.tokenHashmap[username]

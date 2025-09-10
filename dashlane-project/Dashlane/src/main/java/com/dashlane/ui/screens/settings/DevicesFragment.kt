@@ -23,10 +23,10 @@ import com.dashlane.util.DeviceListManager
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.vault.model.DeviceType.Companion.forValue
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Locale
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DevicesFragment : AbstractContentFragment() {
@@ -123,6 +123,7 @@ class DevicesFragment : AbstractContentFragment() {
     private fun setupInfoDialog(device: Device): DialogFragment {
         val clicker: TwoButtonClicker = object : TwoButtonClicker {
             override fun onPositiveButton() {}
+
             override fun onNegativeButton() {
                 showConfirmDeleteDialog(device)
             }

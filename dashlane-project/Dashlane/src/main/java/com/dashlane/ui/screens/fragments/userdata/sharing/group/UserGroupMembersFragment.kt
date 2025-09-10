@@ -15,10 +15,11 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class UserGroupMembersFragment : AbstractContentFragment() {
     private val viewModel by viewModels<UserGroupMembersViewModel>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         setCurrentPageView(AnyPage.SHARING_MEMBER_DETAILS)
@@ -30,6 +31,7 @@ class UserGroupMembersFragment : AbstractContentFragment() {
 
     companion object {
         const val ARGS_GROUP_ID = "args_group_id"
+
         fun newInstance(groupId: String): UserGroupMembersFragment {
             return UserGroupMembersFragment().also {
                 it.arguments = bundleOf(ARGS_GROUP_ID to groupId)

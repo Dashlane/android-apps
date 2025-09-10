@@ -14,12 +14,12 @@ sealed class GeneratePasswordState {
 
     data class PasswordSavedToHistory(
         override val data: GeneratePasswordData,
-        val authentifiant: VaultItem<SyncObject.Authentifiant>
+        val authentifiant: VaultItem<SyncObject.Authentifiant>,
     ) : GeneratePasswordState()
 }
 
 data class GeneratePasswordData(
     val strengthScore: PasswordStrengthScore? = null,
     val specialMode: GeneratePasswordSpecialMode? = null,
-    val lastGeneratedPassword: String? = null
+    val lastGeneratedPassword: String? = null,
 )

@@ -7,7 +7,6 @@ import android.os.Bundle
 import com.dashlane.ui.activities.DashlaneActivity
 
 abstract class AbstractActivityLifecycleListener : ActivityLifecycleListener {
-
     override fun onActivityUserInteraction(activity: DashlaneActivity) {
         
     }

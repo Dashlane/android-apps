@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json",
+  "type": "object",
+  "description": "Definition for the device context",
+  "definitions": {
+    "id": {
+      "description": "Server device analytics id : UUIDv4 - xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (RFC4122)",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$"
+    },
+    "installation_id": {
+      "description": "App installation id : UUIDv4 - xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (RFC4122). This id is specific by platform, so two platforms used on the same physical device would have distinct ids.",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$"
+    },
+    "os_type": {
+      "description": "Operating system",
+      "type": "string",
+      "enum": [
+        "android",
+        "blackberry",
+        "chrome_os",
+        "debian",
+        "electron",
+        "fedora",
+        "firefox_os",
+        "freebsd",
+        "haiku",
+        "ipad",
+        "iphone",
+        "linux",
+        "mac_os",
+        "mint",
+        "netbsd",
+        "openbsd",
+        "os_carbon_unknown",
+        "other",
+        "playstation",
+        "sailfish",
+        "solaris",
+        "symbian",
+        "tizen",
+        "ubuntu",
+        "watch_os",
+        "wear_os",
+        "windows",
+        "windows_phone"
+      ]
+    },
+    "os_version": {
+      "description": "Operating system version. X, or X.Y or potentially X.Y.Z",
+      "type": "string",
+      "pattern": ".+"
+    },
+    "os_locale": {
+      "description": "The locale of the computer (eg. 'en-US', 'fr-FR', 'es-419', 'zh-SG-Hans', 'gsw-CH', 'sr-Latn-RS', 'ast')",
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,4}.*$"
+    },
+    "os": {
+      "description": "Operating system",
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/os_type"
+        },
+        "version": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/os_version"
+        },
+        "locale": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/os_locale"
+        }
+      },
+      "required": [
+        "locale",
+        "type",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "device": {
+      "description": "Definition for the device context",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/id"
+        },
+        "installation_id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/installation_id"
+        },
+        "os": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/context/device.json#/definitions/os"
+        }
+      },
+      "required": [
+        "installation_id",
+        "os"
+      ]
+    }
+  }
+}

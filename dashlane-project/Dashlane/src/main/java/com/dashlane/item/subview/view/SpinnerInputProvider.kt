@@ -9,8 +9,8 @@ import android.widget.SpinnerAdapter
 import android.widget.TextView
 import com.dashlane.R
 import com.dashlane.item.subview.ValueChangeManager
-import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
 import com.dashlane.teamspaces.adapter.SpinnerUtil
+import com.dashlane.ui.adapter.SpinnerAdapterDefaultValueString
 import com.dashlane.util.dpToPx
 import com.dashlane.util.getThemeAttrColor
 import com.dashlane.util.getThemeAttrResourceId
@@ -23,14 +23,14 @@ object SpinnerInputProvider {
         values: List<String>,
         editable: Boolean = false,
         currentValueChangeManager: ValueChangeManager<String>? = null,
-        selectionAction: (Int) -> Unit = { _ -> }
+        selectionAction: (Int) -> Unit = { _ -> },
     ): LinearLayout {
         val adapter = SpinnerAdapterDefaultValueString(
             context,
             R.layout.spinner_item_dropdown,
             R.layout.spinner_item_preview,
             values,
-            defaultText
+            defaultText,
         )
         val promptText = context.getString(R.string.choose)
 
@@ -42,7 +42,7 @@ object SpinnerInputProvider {
             promptText = promptText,
             adapter = adapter,
             currentValueChangeManager = currentValueChangeManager,
-            selectionAction = selectionAction
+            selectionAction = selectionAction,
         )
     }
 
@@ -55,7 +55,7 @@ object SpinnerInputProvider {
         currentValueChangeManager: ValueChangeManager<T>? = null,
         adapterValueChangeManager: ValueChangeManager<SpinnerAdapter>? = null,
         enableStateValueChangeManager: ValueChangeManager<Boolean>? = null,
-        selectionAction: ((Int) -> Unit)? = null
+        selectionAction: ((Int) -> Unit)? = null,
     ): Spinner {
         return Spinner(context).apply {
             id = R.id.item_subview_spinner
@@ -109,7 +109,7 @@ object SpinnerInputProvider {
         currentValueChangeManager: ValueChangeManager<T>? = null,
         adapterValueChangeManager: ValueChangeManager<SpinnerAdapter>? = null,
         enableStateValueChangeManager: ValueChangeManager<Boolean>? = null,
-        selectionAction: ((Int) -> Unit)? = null
+        selectionAction: ((Int) -> Unit)? = null,
     ): LinearLayout {
         val layout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -117,30 +117,30 @@ object SpinnerInputProvider {
         val spinner = createSpinner(
             context, defaultValue, editable, promptText,
             adapter, currentValueChangeManager, adapterValueChangeManager,
-            enableStateValueChangeManager, selectionAction
+            enableStateValueChangeManager, selectionAction,
         )
 
         layout.addView(
             TextView(context).apply {
-            text = title
-            id = R.id.item_subview_title
-            setTextAppearance(context.getThemeAttrResourceId(R.attr.textAppearanceBody2))
-            setTextColor(context.getThemeAttrColor(R.attr.colorOnBackgroundMedium))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                marginStart = context.dpToPx(4f).toInt()
-            }
-        }
+                text = title
+                id = R.id.item_subview_title
+                setTextAppearance(context.getThemeAttrResourceId(R.attr.textAppearanceBody2))
+                setTextColor(context.getThemeAttrColor(R.attr.colorOnBackgroundMedium))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    marginStart = context.dpToPx(4f).toInt()
+                }
+            },
         )
         layout.addView(
             spinner.apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                )
+            },
         )
         return layout
     }

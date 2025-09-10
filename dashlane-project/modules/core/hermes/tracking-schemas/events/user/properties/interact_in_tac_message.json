@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/interact_in_tac_message.json",
+  "type": "object",
+  "description": "When an admin interacts with any kind of in-app message within the Team Admin Console.",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "interact_in_tac_message"
+    },
+    "has_clicked_cta": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/has_clicked_cta"
+    },
+    "has_cta": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/has_cta"
+    },
+    "is_discarded": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/is_discarded"
+    },
+    "tac_notification": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/tac_notification"
+    }
+  },
+  "required": [
+    "name",
+    "has_clicked_cta",
+    "has_cta",
+    "is_discarded",
+    "tac_notification"
+  ],
+  "additionalProperties": false
+}

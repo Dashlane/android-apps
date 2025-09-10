@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/first_launch.json",
+  "type": "object",
+  "description": "First launch of the App",
+  "metas": {
+    "area": "attribution",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "first_launch"
+    },
+    "android": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/android"
+    },
+    "ios": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/ios"
+    },
+    "is_marketing_opt_in": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/account_creation.json#/definitions/is_marketing_opt_in"
+    },
+    "web": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/web"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false
+}

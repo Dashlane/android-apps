@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.dashlane.autofill.viewallaccounts.AutofillSearch
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,13 +16,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ViewAllItemsViewModel @Inject constructor(
     private val autofillSearch: AutofillSearch,
-    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow<ViewAllItemsState>(ViewAllItemsState.Initial)
     val uiState = stateFlow.asStateFlow()
     private var filterJob: Job? = null
@@ -45,7 +44,7 @@ class ViewAllItemsViewModel @Inject constructor(
     }
 
     fun selectedCredential(
-        wrapperItem: AuthentifiantSearchViewTypeProviderFactory.AuthentifiantWrapperItem
+        wrapperItem: AuthentifiantSearchViewTypeProviderFactory.AuthentifiantWrapperItem,
     ) {
         viewModelScope.launch(ioDispatcher) {
             val result = autofillSearch.loadAuthentifiant(wrapperItem.getAuthentifiant().id)

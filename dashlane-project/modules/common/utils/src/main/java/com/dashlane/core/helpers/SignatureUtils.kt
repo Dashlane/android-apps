@@ -8,7 +8,7 @@ fun SyncObject.Authentifiant.LinkedServices.toAppSignature() = associatedAndroid
             AppSignature(
                 packageName,
                 it.sha256CertFingerprints,
-                it.sha512CertFingerprints
+                it.sha512CertFingerprints,
             )
         }
     }
@@ -20,8 +20,8 @@ fun List<AppSignature>.toSyncObject() = SyncObject.Authentifiant.LinkedServices(
             null,
             it.packageName,
             it.sha256Signatures,
-            it.sha512Signatures
+            it.sha512Signatures,
         )
     },
-    listOf()
+    listOf(),
 )

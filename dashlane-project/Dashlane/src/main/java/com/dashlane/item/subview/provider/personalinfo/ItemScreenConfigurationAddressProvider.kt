@@ -40,9 +40,8 @@ class ItemScreenConfigurationAddressProvider(
     private val teamSpaceAccessor: TeamSpaceAccessor,
     private val genericDataQuery: GenericDataQuery,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -50,12 +49,12 @@ class ItemScreenConfigurationAddressProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.Address>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -75,7 +74,7 @@ class ItemScreenConfigurationAddressProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val addressTitle = context.getString(R.string.address)
         return ItemHeader(
@@ -92,7 +91,7 @@ class ItemScreenConfigurationAddressProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         val stateView = createStateSpinnerField(context, item, editMode)
         val houseNumberView = createHouseNumberField(subViewFactory, context, item, editMode)
@@ -132,20 +131,20 @@ class ItemScreenConfigurationAddressProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.Address>
+        item: VaultItem<SyncObject.Address>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -155,7 +154,7 @@ class ItemScreenConfigurationAddressProvider(
     private fun createPhoneNumberField(
         context: Context,
         item: VaultItem<SyncObject.Address>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val noneLabel = context.getString(R.string.none)
         val phoneList = genericDataQuery.getPhoneList(context, noneLabel)
@@ -168,7 +167,7 @@ class ItemScreenConfigurationAddressProvider(
                 editMode -> ItemEditValueListSubView(
                     phoneHeader,
                     selectedNumber,
-                    phoneList.map { it.first }
+                    phoneList.map { it.first },
                 ) { it, value -> it.copyForUpdatedPhone(phoneList, value) }
                 else -> ItemReadValueListSubView(phoneHeader, selectedNumber, phoneList.map { it.first })
             }
@@ -180,52 +179,52 @@ class ItemScreenConfigurationAddressProvider(
     private fun createDoorCodeField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Address>
+        item: VaultItem<SyncObject.Address>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_doorcode),
             item.syncObject.digitCode,
             false,
-            VaultItem<*>::copyForUpdatedDigitCode
+            VaultItem<*>::copyForUpdatedDigitCode,
         )
     }
 
     private fun createApartmentNumberField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Address>
+        item: VaultItem<SyncObject.Address>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_appartment),
             item.syncObject.door,
             false,
-            VaultItem<*>::copyForUpdatedDoor
+            VaultItem<*>::copyForUpdatedDoor,
         )
     }
 
     private fun createFloorField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Address>
+        item: VaultItem<SyncObject.Address>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_floor),
             item.syncObject.floor,
             false,
-            VaultItem<*>::copyForUpdatedFloor
+            VaultItem<*>::copyForUpdatedFloor,
         )
     }
 
     private fun createBuildingField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Address>
+        item: VaultItem<SyncObject.Address>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_building),
             item.syncObject.building,
             false,
-            VaultItem<*>::copyForUpdatedBilling
+            VaultItem<*>::copyForUpdatedBilling,
         )
     }
 
@@ -233,13 +232,13 @@ class ItemScreenConfigurationAddressProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.Address>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<String>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_house_number),
             item.syncObject.streetNumber,
             false,
-            VaultItem<*>::copyForUpdatedStreetNumber
+            VaultItem<*>::copyForUpdatedStreetNumber,
         ).apply {
             if (editMode) {
                 val view = this as ItemEditValueTextSubView
@@ -253,13 +252,13 @@ class ItemScreenConfigurationAddressProvider(
     private fun createRecipientField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Address>
+        item: VaultItem<SyncObject.Address>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_receipent),
             item.syncObject.receiver,
             false,
-            VaultItem<*>::copyForUpdatedReceiver
+            VaultItem<*>::copyForUpdatedReceiver,
         )
     }
 
@@ -269,7 +268,7 @@ class ItemScreenConfigurationAddressProvider(
         editMode: Boolean,
         stateView: ItemSubView<*>?,
         houseNumber: ItemSubView<String>?,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ItemSubView<*> {
         val countryHeader = context.getString(R.string.country)
         val allCountryList = Country.labels(context)
@@ -278,7 +277,7 @@ class ItemScreenConfigurationAddressProvider(
             editMode -> ItemEditValueListSubView(
                 countryHeader,
                 selectedCountry,
-                allCountryList
+                allCountryList,
             ) { it, value -> it.copyForUpdatedCountry(context, value) }
                 .apply {
                     addValueChangedListener(object : ValueChangeManager.Listener<String> {
@@ -316,7 +315,7 @@ class ItemScreenConfigurationAddressProvider(
     private fun createStateSpinnerField(
         context: Context,
         item: VaultItem<SyncObject.Address>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val currentCountry = item.syncObject.localeFormat
         val stateHeader = if (currentCountry.isInGreatBritain) {
@@ -332,7 +331,7 @@ class ItemScreenConfigurationAddressProvider(
                 stateHeader,
                 selectedState,
                 stateList.map { it.name },
-                VaultItem<*>::copyForUpdatedState
+                VaultItem<*>::copyForUpdatedState,
             ).apply {
                 invisible = stateList.isEmpty()
             }
@@ -340,7 +339,7 @@ class ItemScreenConfigurationAddressProvider(
             else -> ItemReadValueListSubView(
                 stateHeader,
                 selectedState,
-                stateList.map { it.name }
+                stateList.map { it.name },
             )
         }
     }
@@ -349,13 +348,13 @@ class ItemScreenConfigurationAddressProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.Address>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val createSubViewString = subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_zipcode),
             item.syncObject.zipCode,
             false,
-            VaultItem<*>::copyForUpdatedZipCode
+            VaultItem<*>::copyForUpdatedZipCode,
         )
         return if (createSubViewString == null || editMode) {
             createSubViewString
@@ -365,8 +364,8 @@ class ItemScreenConfigurationAddressProvider(
                 CopyAction(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.ZipCode,
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -375,20 +374,20 @@ class ItemScreenConfigurationAddressProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.Address>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val createSubViewString = subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_city),
             item.syncObject.city,
             false,
-            VaultItem<*>::copyForUpdatedCity
+            VaultItem<*>::copyForUpdatedCity,
         )
         return if (createSubViewString == null || editMode) {
             createSubViewString
         } else {
             ItemSubViewWithActionWrapper(
                 createSubViewString,
-                CopyAction(summaryObject = item.toSummary(), copyField = CopyField.City, vaultItemCopy = vaultItemCopy)
+                CopyAction(summaryObject = item.toSummary(), copyField = CopyField.City, vaultItemCopy = vaultItemCopy),
             )
         }
     }
@@ -397,13 +396,13 @@ class ItemScreenConfigurationAddressProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.Address>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val createSubViewString = subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_address),
             item.syncObject.addressFull,
             false,
-            VaultItem<*>::copyForUpdatedFull
+            VaultItem<*>::copyForUpdatedFull,
         )
         return if (createSubViewString == null || editMode) {
             createSubViewString
@@ -413,8 +412,8 @@ class ItemScreenConfigurationAddressProvider(
                 CopyAction(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.Address,
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -422,13 +421,13 @@ class ItemScreenConfigurationAddressProvider(
     private fun createNameField(
         subViewFactory: SubViewFactory,
         context: Context,
-        item: VaultItem<SyncObject.Address>
+        item: VaultItem<SyncObject.Address>,
     ): ItemSubView<*>? {
         return subViewFactory.createSubViewString(
             context.getString(R.string.address_hint_name),
             item.syncObject.addressName,
             false,
-            VaultItem<*>::copyForUpdatedName
+            VaultItem<*>::copyForUpdatedName,
         )
     }
 }
@@ -469,7 +468,7 @@ private fun VaultItem<*>.copyForUpdatedTeamspace(value: TeamSpace): VaultItem<*>
 @Suppress("UNCHECKED_CAST")
 private fun VaultItem<*>.copyForUpdatedPhone(
     phoneList: List<Pair<String, String?>>,
-    value: String
+    value: String,
 ): VaultItem<*> {
     this as VaultItem<SyncObject.Address>
     val address = this.syncObject
@@ -559,7 +558,7 @@ private fun VaultItem<*>.copyForUpdatedCountry(context: Context, value: String):
             syncObject = syncObject.copy {
                 localeFormat = countryIsoCode
                 country = countryIsoCode
-            }
+            },
         )
     }
 }

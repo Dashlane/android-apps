@@ -17,7 +17,6 @@ class ThumbnailDomainIconView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : ThumbnailView(context, attrs, defStyleAttr) {
-
     init {
         thumbnailType = ThumbnailViewType.VAULT_ITEM_DOMAIN_ICON.value
     }
@@ -57,7 +56,7 @@ class ThumbnailDomainIconView @JvmOverloads constructor(
                 viewModel.fetchIcon(domainUrl)
             } catch (e: IllegalArgumentException) {
                     "Could not get ViewModel from current view tree. You may be trying to display a Thumbnail after the view was " +
-                            "detached."
+                        "detached.",
                 )
             }
         } ?: run {
@@ -69,7 +68,7 @@ class ThumbnailDomainIconView @JvmOverloads constructor(
     private fun getViewModelForDomain(urlDomain: String): ThumbnailDomainIconViewModel {
         return ViewModelProvider(requireNotNull(findViewTreeViewModelStoreOwner())).get(
             key = "domain:$urlDomain",
-            ThumbnailDomainIconViewModel::class.java
+            ThumbnailDomainIconViewModel::class.java,
         )
     }
 }

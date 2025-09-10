@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/perform_autofill.json",
+  "type": "object",
+  "description": "Autofill by Dashlane, for user side",
+  "metas": {
+    "priority": true,
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "perform_autofill"
+    },
+    "autofill_mechanism": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_mechanism"
+    },
+    "autofill_origin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/autofill_origin"
+    },
+    "credential_filled_item_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_id"
+    },
+    "fields_filled": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_filled"
+    },
+    "form_type_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_type_list"
+    },
+    "is_autologin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_autologin"
+    },
+    "is_manual": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/is_manual"
+    },
+    "item_source": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_source"
+    },
+    "match_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/match_type"
+    },
+    "mobile_browser_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/mobile_browser_name"
+    },
+    "password_filled_health": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/credential_security_status"
+    },
+    "space": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/space"
+    }
+  },
+  "required": [
+    "name",
+    "autofill_mechanism",
+    "autofill_origin",
+    "is_autologin",
+    "is_manual",
+    "match_type"
+  ],
+  "additionalProperties": false
+}

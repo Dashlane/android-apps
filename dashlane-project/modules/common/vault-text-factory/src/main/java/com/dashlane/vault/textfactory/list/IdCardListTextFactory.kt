@@ -14,7 +14,6 @@ class IdCardListTextFactory @Inject constructor(
     private val identityNameHolderService: IdentityNameHolderService,
     private val clock: Clock,
 ) : DataIdentifierListTextFactory<SummaryObject.IdCard> {
-
     override fun getTitle(item: SummaryObject.IdCard): StatusText {
         val title = identityNameHolderService.getOwner(item)
         if (title.isSemanticallyNull()) {
@@ -28,6 +27,6 @@ class IdCardListTextFactory @Inject constructor(
             resources = resources,
             number = item.number,
             default = default,
-            clock = clock
+            clock = clock,
         ) ?: default
 }

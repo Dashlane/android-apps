@@ -1,0 +1,3 @@
+package com.dashlane.notification.creator
+
+interface ChromeAutofillNotificationCreator : AutoFillNotificationCreator

@@ -53,7 +53,7 @@ fun MenuHeaderUserProfileItem(
     modifier: Modifier = Modifier,
     userProfile: MenuItemModel.Header.UserProfile,
     onUpgradeClick: (() -> Unit)?,
-    onUserWrapperClick: () -> Unit
+    onUserWrapperClick: () -> Unit,
 ) {
     BaseMenuHeaderItem(
         modifier = modifier,
@@ -61,7 +61,7 @@ fun MenuHeaderUserProfileItem(
             Image(
                 modifier = Modifier.size(avatarSize),
                 painter = painterResource(id = R.drawable.ic_menu_dashlane),
-                contentDescription = stringResource(id = R.string.and_accessibility_user_profile_icon)
+                contentDescription = stringResource(id = R.string.and_accessibility_user_profile_icon),
             )
         },
         onUpgradeClick = onUpgradeClick.takeIf { userProfile.canUpgrade },
@@ -76,7 +76,7 @@ fun MenuHeaderUserProfileItem(
 fun MenuHeaderTeamspaceItem(
     modifier: Modifier = Modifier,
     teamspace: MenuItemModel.Header.TeamspaceProfile,
-    onTeamspaceWrapperClick: () -> Unit
+    onTeamspaceWrapperClick: () -> Unit,
 ) {
     BaseMenuHeaderItem(
         modifier = modifier,
@@ -92,10 +92,10 @@ fun MenuHeaderTeamspaceItem(
                                 is SpaceColor.TeamColor -> Color(color.color)
                             }.copy(alpha = if (DashlaneTheme.colors.isLight) 0.2f else 0.3f)
                         },
-                        shape = CircleShape
+                        shape = CircleShape,
                     )
                     .padding(12.dp),
-                icon = teamspace.icon
+                icon = teamspace.icon,
             )
         },
         onUpgradeClick = null,
@@ -112,7 +112,7 @@ fun MenuHeaderTeamspaceItem(
 @Composable
 fun MenuHeaderEnforcedTeamProfileItem(
     modifier: Modifier = Modifier,
-    enforcedTeamspaceProfile: MenuItemModel.Header.EnforcedTeamspaceProfile
+    enforcedTeamspaceProfile: MenuItemModel.Header.EnforcedTeamspaceProfile,
 ) {
     BaseMenuHeaderItem(
         modifier = modifier,
@@ -120,7 +120,7 @@ fun MenuHeaderEnforcedTeamProfileItem(
             Image(
                 modifier = Modifier.size(avatarSize),
                 painter = painterResource(id = R.drawable.ic_menu_dashlane),
-                contentDescription = stringResource(id = R.string.and_accessibility_user_profile_icon)
+                contentDescription = stringResource(id = R.string.and_accessibility_user_profile_icon),
             )
         },
         onUpgradeClick = null,
@@ -143,16 +143,16 @@ private fun BaseMenuHeaderItem(
     statusText: String,
     statusHelper: String?,
     dropdownToken: IconToken?,
-    onStatusWrapperClick: () -> Unit
+    onStatusWrapperClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 24.dp, bottom = 8.dp)
+            .padding(top = 24.dp, bottom = 8.dp),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             icon()
             onUpgradeClick?.let {
@@ -161,7 +161,7 @@ private fun BaseMenuHeaderItem(
                 ButtonMedium(
                     layout = ButtonLayout.TextOnly(text = stringResource(R.string.menu_v3_upgrade)),
                     intensity = Intensity.Supershy,
-                    onClick = onUpgradeClick
+                    onClick = onUpgradeClick,
                 )
             }
         }
@@ -170,28 +170,28 @@ private fun BaseMenuHeaderItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onStatusWrapperClick() }
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = AnnotatedString(
                         statusText,
-                        DashlaneTheme.typography.bodyStandardRegular.getStrongerStyle()
+                        DashlaneTheme.typography.bodyStandardRegular.getStrongerStyle(),
                     ),
                     color = DashlaneTheme.colors.textNeutralCatchy,
                     style = DashlaneTheme.typography.bodyStandardRegular,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 dropdownToken?.let {
                     Icon(
                         modifier = Modifier.size(12.dp),
                         token = dropdownToken,
                         contentDescription = null,
-                        tint = DashlaneTheme.colors.textNeutralCatchy
+                        tint = DashlaneTheme.colors.textNeutralCatchy,
                     )
                 }
             }
@@ -201,7 +201,7 @@ private fun BaseMenuHeaderItem(
                     color = DashlaneTheme.colors.textNeutralQuiet,
                     style = DashlaneTheme.typography.bodyHelperRegular,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
@@ -210,7 +210,7 @@ private fun BaseMenuHeaderItem(
                 .fillMaxWidth()
                 .padding(top = 8.dp)
                 .height(1.dp)
-                .background(DashlaneTheme.colors.borderNeutralQuietIdle)
+                .background(DashlaneTheme.colors.borderNeutralQuietIdle),
         )
     }
 }
@@ -223,10 +223,10 @@ private fun MenuHeaderUserProfileItemPreview() {
             userProfile = MenuItemModel.Header.UserProfile(
                 userName = "randomemail@provider.com",
                 userStatus = R.string.plans_on_going_trial,
-                canUpgrade = true
+                canUpgrade = true,
             ),
             onUpgradeClick = { },
-            onUserWrapperClick = { }
+            onUserWrapperClick = { },
         )
     }
 }
@@ -240,9 +240,9 @@ private fun MenuHeaderTeamspaceCombinedItemPreview() {
             teamspace = MenuItemModel.Header.TeamspaceProfile(
                 icon = TeamspaceIcon.Combined,
                 name = SpaceName.FixName(R.string.teamspace_combined_title),
-                mode = mode
+                mode = mode,
             ),
-            onTeamspaceWrapperClick = { mode = !mode }
+            onTeamspaceWrapperClick = { mode = !mode },
         )
     }
 }
@@ -256,12 +256,12 @@ private fun MenuHeaderTeamspacePersonalItemPreview() {
             teamspace = MenuItemModel.Header.TeamspaceProfile(
                 icon = TeamspaceIcon.Space(
                     displayLetter = 'P',
-                    spaceColor = SpaceColor.FixColor(R.color.teamspace_personal)
+                    spaceColor = SpaceColor.FixColor(R.color.teamspace_personal),
                 ),
                 name = SpaceName.FixName(R.string.teamspace_personal_title),
-                mode = mode
+                mode = mode,
             ),
-            onTeamspaceWrapperClick = { mode = !mode }
+            onTeamspaceWrapperClick = { mode = !mode },
         )
     }
 }
@@ -275,12 +275,12 @@ private fun MenuHeaderTeamspaceTeamItemPreview() {
             teamspace = MenuItemModel.Header.TeamspaceProfile(
                 icon = TeamspaceIcon.Space(
                     displayLetter = 'B',
-                    spaceColor = SpaceColor.TeamColor(android.graphics.Color.BLUE)
+                    spaceColor = SpaceColor.TeamColor(android.graphics.Color.BLUE),
                 ),
                 name = SpaceName.TeamName("Business"),
-                mode = mode
+                mode = mode,
             ),
-            onTeamspaceWrapperClick = { mode = !mode }
+            onTeamspaceWrapperClick = { mode = !mode },
         )
     }
 }
@@ -292,8 +292,8 @@ private fun MenuHeaderEnforcedTeamspaceProfileItemPreview() {
         MenuHeaderEnforcedTeamProfileItem(
             enforcedTeamspaceProfile = MenuItemModel.Header.EnforcedTeamspaceProfile(
                 userName = "randomemail@provider.com",
-                spaceName = SpaceName.TeamName("The Dashling Dashers")
-            )
+                spaceName = SpaceName.TeamName("The Dashling Dashers"),
+            ),
         )
     }
 }

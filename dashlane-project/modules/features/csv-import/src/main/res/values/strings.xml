@@ -42,8 +42,8 @@
     <string name="import_methods_name_dashlane_secure_archive">From an encrypted backup file</string>
 
     
-    <string name="import_methods_empty_state_title">Add your logins</string>
-    <string name="import_methods_empty_state_description">Start adding logins to your Dashlane vault.</string>
+    <string name="import_methods_empty_state_title">Start adding logins</string>
+    <string name="import_methods_empty_state_description">Manage your logins securely in one place.</string>
 
     
     <string name="custom_csv_import_title">What is</string>

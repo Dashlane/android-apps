@@ -6,14 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordResultHandler
 import com.dashlane.autofill.api.databinding.BottomSheetChangePasswordLayoutBinding
-import com.dashlane.autofill.generatepassword.AutofillGeneratePasswordService
+import com.dashlane.autofill.changepassword.domain.AutofillChangePasswordResultHandler
 import com.dashlane.autofill.generatepassword.GeneratePasswordViewModel
 import com.dashlane.autofill.generatepassword.GeneratePasswordViewProxy
 import com.dashlane.autofill.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.bottomnavigation.NavigableBottomSheetDialogFragmentCanceledListener
 import com.dashlane.bottomnavigation.NavigableBottomSheetFragment
+import com.dashlane.password.generator.PasswordGeneratorWrapper
+import com.dashlane.session.SessionManager
 import com.dashlane.util.Toaster
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -30,7 +31,10 @@ class ChangePasswordDialogFragment :
     lateinit var autoFillchangePasswordConfiguration: AutoFillChangePasswordConfiguration
 
     @Inject
-    lateinit var generatePasswordService: AutofillGeneratePasswordService
+    lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var passwordGeneratorWrapper: PasswordGeneratorWrapper
 
     private val viewModel: ChangePasswordViewModel by viewModels()
     private val generatePasswordViewModel: GeneratePasswordViewModel by viewModels()
@@ -48,13 +52,13 @@ class ChangePasswordDialogFragment :
             resultHandler,
             autoFillchangePasswordConfiguration.filterOnUsername,
             viewLifecycleOwner,
-            getAutofillBottomSheetNavigator()
+            getAutofillBottomSheetNavigator(),
         )
         GeneratePasswordViewProxy(
             binding.generateLayout,
-            generatePasswordService.getPasswordGeneratorDefaultCriteria(),
+            passwordGeneratorWrapper.getCriteria(sessionManager.session?.userId),
             generatePasswordViewModel,
-            viewLifecycleOwner
+            viewLifecycleOwner,
         )
         return binding.root
     }

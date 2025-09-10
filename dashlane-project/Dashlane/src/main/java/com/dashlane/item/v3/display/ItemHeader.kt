@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,65 +24,90 @@ import com.dashlane.design.theme.color.DecorativeColor
 import com.dashlane.design.theme.tooling.DashlanePreview
 import com.dashlane.item.v3.data.CommonData
 import com.dashlane.item.v3.data.CredentialFormData
-import com.dashlane.item.v3.data.CreditCardFormData
 import com.dashlane.item.v3.data.FormData
 import com.dashlane.item.v3.data.SecretFormData
 import com.dashlane.item.v3.data.SecureNoteFormData
+import com.dashlane.item.v3.itemtype.creditcard.CreditCardFormData
+import com.dashlane.item.v3.itemtype.wifi.WiFiFormData
 import com.dashlane.item.v3.viewmodels.Data
 import com.dashlane.ui.thumbnail.ThumbnailDomainIcon
+import com.dashlane.vault.model.R
 import com.dashlane.vault.model.getColorId
-import com.dashlane.vault.model.getColorResource
 import com.dashlane.xml.domain.SyncObject
 
 @Composable
 internal fun ItemHeader(data: Data<out FormData>) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        when (data.formData) {
-            is CredentialFormData -> {
-                ThumbnailDomainIcon(
-                    urlDomain = data.formData.url,
-                    size = ThumbnailSize.XLarge,
-                )
+
+        ItemHeaderThumbnail(
+            data = data.formData,
+        )
+        val context = LocalContext.current
+        val defaultTitle = remember {
+            when (data.formData) {
+                is CredentialFormData -> context.getString(com.dashlane.R.string.creditcard_new_label)
+                else -> ""
             }
-            is CreditCardFormData -> {
-                Thumbnail(
-                    type = ThumbnailType.VaultItem.LegacyOtherIcon(
-                        token = IconTokens.itemPaymentOutlined,
-                        color = colorResource(id = data.formData.color.getColorResource()),
-                    ),
-                    size = ThumbnailSize.XLarge,
-                )
-            }
-            is SecureNoteFormData -> {
-                Thumbnail(
-                    type = ThumbnailType.VaultItem.LegacyOtherIcon(
-                        token = IconTokens.itemSecureNoteOutlined,
-                        color = colorResource(id = data.formData.secureNoteType.getColorId()),
-                    ),
-                    size = ThumbnailSize.XLarge
-                )
-            }
-            is SecretFormData ->
-                Thumbnail(
-                    type = ThumbnailType.VaultItem.OtherIcon(
-                        token = IconTokens.itemSecretOutlined,
-                        color = DecorativeColor.GREY,
-                    ),
-                    size = ThumbnailSize.XLarge
-                )
         }
         Text(
-            text = data.commonData.name,
+            text = data.commonData.name ?: defaultTitle,
             style = DashlaneTheme.typography.titleBlockMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 12.dp)
+            modifier = Modifier.padding(top = 12.dp, start = 16.dp, end = 16.dp),
         )
     }
+}
+
+@Suppress("DEPRECATION")
+@Composable
+private fun ItemHeaderThumbnail(
+    modifier: Modifier = Modifier,
+    data: FormData,
+) {
+    val type = when (data) {
+        is CredentialFormData -> {
+            ThumbnailDomainIcon(
+                modifier = modifier,
+                urlDomain = data.url,
+                size = ThumbnailSize.XLarge,
+            )
+            return
+        }
+        is CreditCardFormData -> {
+            ThumbnailType.VaultItem.LegacyOtherIcon(
+                token = IconTokens.itemPaymentOutlined,
+                color = colorResource(data.color),
+            )
+        }
+        is SecureNoteFormData -> {
+            ThumbnailType.VaultItem.LegacyOtherIcon(
+                token = IconTokens.itemSecureNoteOutlined,
+                color = colorResource(id = data.secureNoteType.getColorId()),
+            )
+        }
+        is SecretFormData ->
+            ThumbnailType.VaultItem.OtherIcon(
+                token = IconTokens.itemSecretOutlined,
+                color = DecorativeColor.GREY,
+            )
+        is WiFiFormData ->
+            ThumbnailType.VaultItem.OtherIcon(
+                token = IconTokens.itemWifiOutlined,
+                color = DecorativeColor.GREY,
+            )
+        else -> return
+    }
+
+    Thumbnail(
+        modifier = modifier,
+        type = type,
+        size = ThumbnailSize.XLarge,
+    )
 }
 
 
@@ -91,10 +118,10 @@ private fun ItemHeaderSecureNotePreview() {
         ItemHeader(
             Data(
                 commonData = CommonData(
-                    name = "Secure Note"
+                    name = "Secure Note",
                 ),
-                formData = SecureNoteFormData()
-            )
+                formData = SecureNoteFormData(),
+            ),
         )
     }
 }
@@ -107,9 +134,10 @@ private fun ItemHeaderCreditCardPreview() {
             Data(
                 commonData = CommonData(name = "google.com"),
                 formData = CreditCardFormData(
-                    color = SyncObject.PaymentCreditCard.Color.RED
-                )
-            )
+                    colorId = SyncObject.PaymentCreditCard.Color.BLUE_1.value,
+                    color = R.color.credit_card_blue1,
+                ),
+            ),
         )
     }
 }
@@ -121,10 +149,10 @@ private fun ItemHeaderSecretPreview() {
         ItemHeader(
             Data(
                 commonData = CommonData(
-                    name = "Secret"
+                    name = "Secret",
                 ),
-                formData = SecretFormData()
-            )
+                formData = SecretFormData(),
+            ),
         )
     }
 }

@@ -10,9 +10,8 @@ import com.dashlane.vault.summary.SummaryObject
 import javax.inject.Inject
 
 class VaultItemContentServiceImpl @Inject constructor(
-    private val vaultItemFieldContentService: VaultItemFieldContentService
+    private val vaultItemFieldContentService: VaultItemFieldContentService,
 ) : VaultItemContentService {
-
     override fun getContent(summaryObject: SummaryObject, copyField: CopyField): FieldContent? {
         return when (copyField) {
             CopyField.Password -> hiddenContentString(8, summaryObject, copyField)?.asObfuscatedContent()
@@ -20,10 +19,12 @@ class VaultItemContentServiceImpl @Inject constructor(
             CopyField.PaymentsSecurityCode -> hiddenContentString(3, summaryObject, copyField)?.asObfuscatedContent()
             CopyField.BankAccountBicSwift,
             CopyField.BankAccountRoutingNumber,
-            CopyField.BankAccountSortCode -> hiddenContentString(3, summaryObject, copyField)?.asObfuscatedContent()
+            CopyField.BankAccountSortCode,
+            -> hiddenContentString(3, summaryObject, copyField)?.asObfuscatedContent()
             CopyField.BankAccountIban,
             CopyField.BankAccountAccountNumber,
-            CopyField.BankAccountClabe -> hiddenContentString(25, summaryObject, copyField)?.asObfuscatedContent()
+            CopyField.BankAccountClabe,
+            -> hiddenContentString(25, summaryObject, copyField)?.asObfuscatedContent()
             CopyField.OtpCode -> vaultItemFieldContentService.getContent(summaryObject, copyField)?.otpToDisplay()
                 ?.asClearContent()
             else -> vaultItemFieldContentService.getContent(summaryObject, copyField)?.asClearContent()

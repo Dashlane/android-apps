@@ -1,100 +1,98 @@
 package com.dashlane.autofill.actionssources.view
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.autofill.actionssources.model.ActionsSourcesDataProvider
-import com.dashlane.autofill.actionssources.model.ActionsSourcesError
+import com.dashlane.autofill.actionssources.model.ActionsSourcesRepository
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
+import com.dashlane.autofill.pause.services.RemovePauseContract
+import com.dashlane.hermes.LogRepository
+import com.dashlane.hermes.generated.definitions.AnyPage
+import com.dashlane.hermes.generated.definitions.BrowseComponent
+import com.dashlane.mvvm.MutableViewStateFlow
+import com.dashlane.mvvm.ViewStateFlow
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ActionsSourcesViewModel @Inject constructor(
-    private val dataProvider: ActionsSourcesDataProvider,
-    private val autofillFormSourceViewTypeProviderFactory: AutofillFormSourceViewTypeProviderFactory,
-    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher
+    private val removePauseContract: RemovePauseContract,
+    private val actionsSourcesRepository: ActionsSourcesRepository,
+    private val logRepository: LogRepository,
+    @DefaultCoroutineDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
-    private val selectedItemMutableFLow = MutableSharedFlow<AutoFillFormSource>()
-    private val actionsSourcesStateMutableFlow = MutableStateFlow<ActionsSourcesState>(
-        ActionsSourcesState.Initial(
-            ActionsSourcesData()
+    private val _stateFlow: MutableViewStateFlow<ActionsSourcesState.View, ActionsSourcesState.SideEffect> =
+        MutableViewStateFlow(
+            ActionsSourcesState.View.Initial(
+                data = ActionsSourcesData(
+                    temporarilyPausedItems = emptyList(),
+                    permanentlyPausedItems = emptyList(),
+                ),
+            ),
         )
-    )
+    val stateFlow: ViewStateFlow<ActionsSourcesState.View, ActionsSourcesState.SideEffect> = _stateFlow
 
-    val actionsSourcesStateFlow = actionsSourcesStateMutableFlow.asStateFlow()
-    val selectedItemFlow: Flow<AutoFillFormSource> = selectedItemMutableFLow.asSharedFlow()
-
-    private var hasNavigated: Boolean = false
-
-    fun viewResumed() {
-        if (actionsSourcesStateMutableFlow.value is ActionsSourcesState.Initial || hasNavigated) loadFormSources()
-        hasNavigated = false
+    init {
+        loadFormSources()
+        logCurrentPageView()
     }
 
     fun onRefresh() {
         loadFormSources()
     }
 
-    fun onFormSourcesItemClick(position: Int) {
+    fun onResumeClick(form: AutoFillFormSource) {
+        viewModelScope.launch {
+            removePauseContract.removePause(form)
+            val message = actionsSourcesRepository.getResumedMessageFor(form)
+            _stateFlow.send(ActionsSourcesState.SideEffect.OnServiceResumed(message = message))
+            loadFormSources()
+        }
+    }
+
+    private fun loadFormSources() {
         viewModelScope.launch(defaultDispatcher) {
-            try {
-                val selectedFormSource = dataProvider.selectFormSourceItem(position)
-                hasNavigated = true
-                selectedItemMutableFLow.emit(selectedFormSource)
-            } catch (e: IllegalStateException) {
-                actionsSourcesStateMutableFlow.update { previousState ->
-                    ActionsSourcesState.Error(previousState.data, ActionsSourcesError.AllSelectItem)
+            val formSourcesResult = actionsSourcesRepository.loadFormSources().getOrNull()
+            _stateFlow.update { previousState ->
+                when (formSourcesResult != null) {
+                    true -> {
+                        val (temporarilyPausedItems, permanentlyPausedItems) = formSourcesResult
+                        if (temporarilyPausedItems.isEmpty() && permanentlyPausedItems.isEmpty()) {
+                            ActionsSourcesState.View.EmptyState(
+                                data = ActionsSourcesData(
+                                    temporarilyPausedItems = emptyList(),
+                                    permanentlyPausedItems = emptyList(),
+                                ),
+                            )
+                        } else {
+                            ActionsSourcesState.View.Success(
+                                data = ActionsSourcesData(
+                                    temporarilyPausedItems = temporarilyPausedItems,
+                                    permanentlyPausedItems = permanentlyPausedItems,
+                                ),
+                            )
+                        }
+                    }
+                    else -> {
+                        ActionsSourcesState.View.Error(
+                            data = ActionsSourcesData(
+                                temporarilyPausedItems = previousState.data.temporarilyPausedItems,
+                                permanentlyPausedItems = previousState.data.permanentlyPausedItems,
+                            ),
+                        )
+                    }
                 }
             }
         }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun loadFormSources() {
-        viewModelScope.launch(defaultDispatcher) {
-            actionsSourcesStateMutableFlow.update { previousState ->
-                ActionsSourcesState.Loading(
-                    previousState.data.copy(
-                        isLoading = true
-                    )
-                )
-            }
-
-            val formSourceResult = dataProvider.loadFormSources()
-
-            formSourceResult.getOrNull()
-                ?.let { allFormSources -> allFormSources.map { autofillFormSourceViewTypeProviderFactory.create(it) } }
-                ?.let { autofillFormSourceWrappers ->
-                    actionsSourcesStateMutableFlow.update { previousState ->
-                        ActionsSourcesState.Success(
-                            previousState.data.copy(
-                                isLoading = false,
-                                itemList = autofillFormSourceWrappers
-                            )
-                        )
-                    }
-                }
-
-            formSourceResult.exceptionOrNull()
-                ?.let { error ->
-                    actionsSourcesStateMutableFlow.update { previousState ->
-                        ActionsSourcesState.Error(
-                            previousState.data.copy(isLoading = false),
-                            error as ActionsSourcesError
-                        )
-                    }
-                }
-        }
+    private fun logCurrentPageView() {
+        logRepository.queuePageView(
+            component = BrowseComponent.MAIN_APP,
+            page = AnyPage.SETTINGS_AUTOFILL,
+        )
     }
 }

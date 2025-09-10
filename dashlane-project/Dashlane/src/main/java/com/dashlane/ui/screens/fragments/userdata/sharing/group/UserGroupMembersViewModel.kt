@@ -3,15 +3,17 @@ package com.dashlane.ui.screens.fragments.userdata.sharing.group
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dashlane.sync.DataSync
-import com.dashlane.events.AppEvents
-import com.dashlane.events.SyncFinishedEvent
 import com.dashlane.hermes.generated.definitions.Trigger
 import com.dashlane.session.SessionManager
+import com.dashlane.sync.DataSync
+import com.dashlane.sync.DataSyncState
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingUserGroupUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,11 +21,9 @@ import javax.inject.Inject
 class UserGroupMembersViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dataProvider: UserGroupDataProvider,
-    appEvents: AppEvents,
     private val sessionManager: SessionManager,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
 ) : ViewModel(), UserGroupMembersViewModelContract {
-
     private val userId: String?
         get() = sessionManager.session?.userId
 
@@ -37,9 +37,10 @@ class UserGroupMembersViewModel @Inject constructor(
 
     init {
         reloadData()
-        appEvents.register(this, SyncFinishedEvent::class.java, false) {
-            reloadData()
-        }
+        dataSync.dataSyncState
+            .filterIsInstance<DataSyncState.Idle.Success>()
+            .onEach { reloadData() }
+            .launchIn(viewModelScope)
     }
 
     override fun reloadData() {

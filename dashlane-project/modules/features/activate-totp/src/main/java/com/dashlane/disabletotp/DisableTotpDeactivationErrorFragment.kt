@@ -12,13 +12,13 @@ internal class DisableTotpDeactivationErrorFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ) = ActivateTotpErrorBinding.inflate(inflater, container, false).apply {
         setup(
             titleResId = R.string.disable_totp_error_title,
             descriptionResId = R.string.disable_totp_error_description,
             positiveButtonResId = R.string.disable_totp_error_cta,
-            onClickPositiveButton = { requireActivity().finish() }
+            onClickPositiveButton = { requireActivity().finish() },
         )
     }.root
 }

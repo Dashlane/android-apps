@@ -18,9 +18,8 @@ import javax.inject.Inject
 class SmartSpaceCategorizationDatabaseAccessor @Inject constructor(
     private val dataSaver: DataSaver,
     private val vaultDataQuery: VaultDataQuery,
-    private val genericDataQuery: GenericDataQuery
+    private val genericDataQuery: GenericDataQuery,
 ) {
-
     fun getSummaryCandidatesForCategorization(): List<SummaryObject> {
         val summaryItems = mutableListOf<SummaryObject>()
         TeamspaceMatcher.DATA_TYPE_TO_MATCH.forEach { dataType ->
@@ -42,6 +41,16 @@ class SmartSpaceCategorizationDatabaseAccessor @Inject constructor(
         return genericDataQuery.queryAll(filter)
     }
 
+    fun getSummarySecretsForPersonalSpace(): List<SummaryObject.Secret> {
+        val filter = genericFilter {
+            spaceFilter = SpecificSpaceFilter(listOf(TeamSpace.Personal))
+            specificDataType(SyncObjectType.SECRET)
+            allStatusFilter()
+        }
+        return genericDataQuery.queryAll(filter)
+            .mapNotNull { it as? SummaryObject.Secret }
+    }
+
     suspend fun getVaultItems(ids: List<String>): List<VaultItem<SyncObject>> {
         val vaultFilter = vaultFilter {
             specificUid(ids)
@@ -56,7 +65,8 @@ class SmartSpaceCategorizationDatabaseAccessor @Inject constructor(
         val vaultFilter = vaultFilter {
             specificDataType(SyncObjectType.GENERATED_PASSWORD)
         }
-        return vaultDataQuery.queryAll(vaultFilter).map { it as VaultItem<SyncObject.GeneratedPassword> }
+        return vaultDataQuery.queryAll(vaultFilter)
+            .map { it as VaultItem<SyncObject.GeneratedPassword> }
     }
 
     suspend fun save(items: List<VaultItem<*>>) = dataSaver.save(items)

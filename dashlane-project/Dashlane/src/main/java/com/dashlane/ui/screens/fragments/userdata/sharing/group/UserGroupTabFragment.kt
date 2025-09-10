@@ -29,7 +29,7 @@ class UserGroupTabFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         activity?.findViewById<Toolbar>(R.id.toolbar)?.title = groupName
         val view = inflater.inflate(R.layout.fragment_tablayout_viewpager2, container, false)

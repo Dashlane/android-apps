@@ -9,13 +9,12 @@ interface SyncLogs :
     SyncDecipherTransactionLogs,
     SyncCipherLogs,
     SyncTreatProblemLogs {
-
     fun onSyncBegin()
 
     fun onSyncChronologicalStart(
         syncTime: Instant?,
         updateCount: Int,
-        deleteCount: Int
+        deleteCount: Int,
     )
 
     fun onSyncChronologicalDone()
@@ -26,17 +25,16 @@ interface SyncLogs :
 }
 
 interface SyncNetworkLogs {
-
     fun onDownloadRequest(
         syncTime: Instant?,
         lock: Boolean,
-        sharingKeys: Boolean
+        sharingKeys: Boolean,
     )
 
     fun onDownloadResponse(
         syncTime: Instant?,
         updateCount: Int?,
-        deleteCount: Int?
+        deleteCount: Int?,
     )
 
     fun onDownloadError(throwable: Throwable)
@@ -50,49 +48,53 @@ interface SyncNetworkLogs {
 
 interface SyncDecipherTransactionLogs {
     fun onDecipherTransactionsStart()
+
     fun onDecipherTransaction(
         action: String,
         type: String,
         identifier: String,
-        date: Instant
+        date: Instant,
     )
 
     fun onDecipherTransactionError(
         type: String,
         transaction: Transaction,
-        throwable: Throwable
+        throwable: Throwable,
     )
 
     fun onDecipherTransactionsDone(count: Int, errors: Int)
 }
 
 interface SyncCipherLogs {
-
     fun onCipherTransactionsStart()
 
     fun onCipherTransaction(
         action: String,
         type: String,
         identifier: String,
-        date: Instant
+        date: Instant,
     )
 
     fun onCipherTransactionsDone()
 }
 
 interface SyncTreatProblemLogs {
-
     fun onTreatProblemStart()
+
     fun onTreatProblemSummaryBegin(localCount: Int, remoteCount: Int)
+
     fun onTreatProblemSummaryUploadMissing(item: List<SyncSummaryItem>)
+
     fun onTreatProblemSummaryUpToDate(item: List<SyncSummaryItem>)
+
     fun onTreatProblemSummaryUploadOutOfDate(
-        item: List<SyncSummaryItem>
+        item: List<SyncSummaryItem>,
     )
 
     fun onTreatProblemSummaryDownloadMissing(item: List<SyncSummaryItem>)
+
     fun onTreatProblemSummaryDownloadOutOfDate(
-        item: List<SyncSummaryItem>
+        item: List<SyncSummaryItem>,
     )
 
     fun onTreatProblemSummaryDone()

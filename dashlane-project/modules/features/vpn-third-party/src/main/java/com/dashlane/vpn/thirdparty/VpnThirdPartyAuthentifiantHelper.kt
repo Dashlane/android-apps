@@ -9,7 +9,7 @@ interface VpnThirdPartyAuthentifiantHelper {
         title: String,
         deprecatedUrl: String,
         email: String,
-        password: SyncObfuscatedValue
+        password: SyncObfuscatedValue,
     ): VaultItem<SyncObject.Authentifiant>
 
     suspend fun addAuthentifiant(authentifiant: VaultItem<SyncObject.Authentifiant>)

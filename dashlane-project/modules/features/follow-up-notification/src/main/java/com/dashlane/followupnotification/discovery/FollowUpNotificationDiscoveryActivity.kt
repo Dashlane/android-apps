@@ -30,7 +30,7 @@ class FollowUpNotificationDiscoveryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         presenter = Presenter(
             followUpNotificationLogger,
-            followUpNotificationDiscoveryService
+            followUpNotificationDiscoveryService,
         )
         presenter.setProvider(DataProvider())
         presenter.setView(ViewProxy(this))
@@ -41,10 +41,10 @@ class FollowUpNotificationDiscoveryActivity : AppCompatActivity() {
 
     private class Presenter(
         private val logger: FollowUpNotificationLogger,
-        private val service: FollowUpNotificationDiscoveryService
+        private val service: FollowUpNotificationDiscoveryService,
     ) :
         BasePresenter<FollowUpNotificationDiscoveryContract.DataProvider, FollowUpNotificationDiscoveryContract.ViewProxy>(),
-        FollowUpNotificationDiscoveryContract.Presenter {
+            FollowUpNotificationDiscoveryContract.Presenter {
         override fun setupDiscoveryScreen(isReminder: Boolean) {
             
             
@@ -78,17 +78,16 @@ class FollowUpNotificationDiscoveryActivity : AppCompatActivity() {
     private class DataProvider :
         BaseDataProvider<FollowUpNotificationDiscoveryContract.Presenter>(),
         FollowUpNotificationDiscoveryContract.DataProvider {
-
         override fun getScreenContent(config: ScreenConfiguration) = when (config) {
             ScreenConfiguration.INTRODUCTION -> ScreenContent(
                 false,
                 R.string.discovery_screen_title_introduction,
-                R.string.discovery_screen_body_introduction
+                R.string.discovery_screen_body_introduction,
             )
             ScreenConfiguration.REMINDER -> ScreenContent(
                 true,
                 R.string.discovery_screen_title_reminder,
-                R.string.discovery_screen_body_reminder
+                R.string.discovery_screen_body_reminder,
             )
         }
     }
@@ -96,7 +95,6 @@ class FollowUpNotificationDiscoveryActivity : AppCompatActivity() {
     private class ViewProxy(private val activity: Activity) :
         BaseViewProxy<FollowUpNotificationDiscoveryContract.Presenter>(activity),
         FollowUpNotificationDiscoveryContract.ViewProxy {
-
         val swipeIcon: ImageView
         val title: TextView
         val description: TextView

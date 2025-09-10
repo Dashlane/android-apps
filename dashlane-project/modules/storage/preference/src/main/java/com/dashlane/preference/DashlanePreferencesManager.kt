@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import com.dashlane.util.MD5Hash
 
 abstract class DashlanePreferencesManager {
-
     protected abstract val sharedPreferences: SharedPreferences?
 
     fun getString(label: String): String? {
@@ -13,7 +12,7 @@ abstract class DashlanePreferencesManager {
 
     fun getString(label: String, defaultValue: String?): String? {
         val sharedPreferences = sharedPreferences ?: return defaultValue
-        val labelObfuscated = MD5Hash.hash(label)
+        val labelObfuscated = MD5Hash.hash(label) ?: return defaultValue
         CompatibilityPreferencesManager(sharedPreferences).obfuscateStringIfNeeded(label, labelObfuscated)
         return sharedPreferences.getString(labelObfuscated, defaultValue)
     }
@@ -24,7 +23,7 @@ abstract class DashlanePreferencesManager {
 
     fun getInt(label: String, defaultValue: Int): Int {
         val sharedPreferences = sharedPreferences ?: return defaultValue
-        val labelObfuscated = MD5Hash.hash(label)
+        val labelObfuscated = MD5Hash.hash(label) ?: return defaultValue
         CompatibilityPreferencesManager(sharedPreferences).obfuscateIntIfNeeded(label, labelObfuscated)
         return sharedPreferences.getInt(labelObfuscated, defaultValue)
     }
@@ -35,7 +34,7 @@ abstract class DashlanePreferencesManager {
 
     fun getLong(label: String, defaultValue: Long): Long {
         val sharedPreferences = sharedPreferences ?: return defaultValue
-        val labelObfuscated = MD5Hash.hash(label)
+        val labelObfuscated = MD5Hash.hash(label) ?: return defaultValue
         CompatibilityPreferencesManager(sharedPreferences).obfuscateLongIfNeeded(label, labelObfuscated)
         return sharedPreferences.getLong(labelObfuscated, defaultValue)
     }
@@ -46,7 +45,7 @@ abstract class DashlanePreferencesManager {
 
     fun getBoolean(label: String, defaultValue: Boolean): Boolean {
         val sharedPreferences = sharedPreferences ?: return defaultValue
-        val labelObfuscated = MD5Hash.hash(label)
+        val labelObfuscated = MD5Hash.hash(label) ?: return defaultValue
         CompatibilityPreferencesManager(sharedPreferences).obfuscateBooleanIfNeeded(label, labelObfuscated)
         return sharedPreferences.getBoolean(labelObfuscated, defaultValue)
     }
@@ -57,7 +56,7 @@ abstract class DashlanePreferencesManager {
 
     fun getFloat(label: String, defaultValue: Float = 0f): Float {
         val sharedPreferences = sharedPreferences ?: return defaultValue
-        val labelObfuscated = MD5Hash.hash(label)
+        val labelObfuscated = MD5Hash.hash(label) ?: return defaultValue
         CompatibilityPreferencesManager(sharedPreferences).obfuscateFloatIfNeeded(label, labelObfuscated)
         return sharedPreferences.getFloat(labelObfuscated, defaultValue)
     }

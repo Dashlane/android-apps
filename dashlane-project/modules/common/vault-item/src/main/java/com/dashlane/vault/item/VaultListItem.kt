@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.dashlane.design.component.ButtonLayout
 import com.dashlane.design.component.ButtonMedium
 import com.dashlane.design.component.Icon
-import com.dashlane.design.component.ListItem
 import com.dashlane.design.component.ListItemActions
 import com.dashlane.design.component.Thumbnail
 import com.dashlane.design.component.ThumbnailSize
@@ -36,7 +35,7 @@ import com.dashlane.ui.thumbnail.ThumbnailDomainIcon
 fun VaultListItem(
     item: VaultListItemState,
     modifier: Modifier = Modifier,
-    onClick: (String) -> Unit,
+    onClick: ((String) -> Unit)?,
     onLongClick: () -> Unit = {},
     onCopyClicked: () -> Unit = {},
     onMoreClicked: () -> Unit = {},
@@ -61,11 +60,11 @@ fun VaultListItem(
             }
         }
     }
-
-    ListItem(
+    BaseVaultListItem(
         modifier = modifier,
         title = title,
         description = description,
+        checked = item.isChecked,
         titleExtraContent = buildTitleTrailingIcons(
             isPasskeyIconVisible = item.isPasskeyIconVisible,
             isLockIconVisible = item.isLockIconVisible,
@@ -74,12 +73,14 @@ fun VaultListItem(
         ),
         thumbnail = buildThumbnail(item.thumbnail),
         actions = actions,
-        onClick = { onClick(item.id) },
+        onClick = onClick?.let { onClick ->
+            { onClick(item.id) }
+        },
         onLongClick = onLongClick,
     )
 }
 
-private fun buildTitleTrailingIcons(
+fun buildTitleTrailingIcons(
     isPasskeyIconVisible: Boolean,
     isLockIconVisible: Boolean,
     isSharedIconVisible: Boolean,
@@ -89,41 +90,41 @@ private fun buildTitleTrailingIcons(
         Icon(
             modifier = Modifier.size(12.dp),
             token = IconTokens.passkeyOutlined,
-            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_passkey)
+            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_passkey),
         )
     }
     if (isLockIconVisible) {
         Icon(
             modifier = Modifier.size(12.dp),
             token = IconTokens.lockOutlined,
-            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_locked)
+            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_locked),
         )
     }
     if (isSharedIconVisible) {
         Icon(
             modifier = Modifier.size(12.dp),
             token = IconTokens.sharedOutlined,
-            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_shared)
+            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_shared),
         )
     }
     if (isAttachmentIconVisible) {
         Icon(
             modifier = Modifier.size(12.dp),
             token = IconTokens.attachmentOutlined,
-            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_has_attachment)
+            contentDescription = stringResource(id = R.string.and_accessibility_vault_item_list_has_attachment),
         )
     }
 }
 
-private fun buildThumbnail(thumbnail: VaultListItemState.ThumbnailState?): @Composable (() -> Unit) = @Composable {
+fun buildThumbnail(thumbnail: VaultListItemState.ThumbnailState?): @Composable (() -> Unit) = @Composable {
     when (thumbnail) {
-        is VaultListItemState.ThumbnailState.DomainIcon ->
+        is VaultListItemState.ThumbnailState.VaultThumbnail.DomainIcon ->
             ThumbnailDomainIcon(
                 urlDomain = thumbnail.url,
                 size = ThumbnailSize.Medium,
             )
 
-        is VaultListItemState.ThumbnailState.LegacyOtherIcon ->
+        is VaultListItemState.ThumbnailState.VaultThumbnail.LegacyOtherIcon ->
             Thumbnail(
                 type = ThumbnailType.VaultItem.LegacyOtherIcon(
                     token = thumbnail.token,
@@ -133,13 +134,19 @@ private fun buildThumbnail(thumbnail: VaultListItemState.ThumbnailState?): @Comp
                 size = ThumbnailSize.Medium,
             )
 
-        is VaultListItemState.ThumbnailState.OtherIcon ->
+        is VaultListItemState.ThumbnailState.VaultThumbnail.OtherIcon ->
             Thumbnail(
                 type = ThumbnailType.VaultItem.OtherIcon(
                     token = thumbnail.token,
                     color = DecorativeColor.GREY,
                 ),
                 size = ThumbnailSize.Medium,
+            )
+        is VaultListItemState.ThumbnailState.Icon ->
+            Thumbnail(
+                type = ThumbnailType.Icon(
+                    token = thumbnail.token,
+                ),
             )
         null -> {
             
@@ -148,7 +155,8 @@ private fun buildThumbnail(thumbnail: VaultListItemState.ThumbnailState?): @Comp
 }
 
 @Composable
-private fun buildVaultListItemActions(
+@Suppress("kotlin:S3776")
+fun buildVaultListItemActions(
     isCopyButtonVisible: Boolean,
     isMoreButtonVisible: Boolean,
     onCopyClicked: () -> Unit,
@@ -173,7 +181,8 @@ private fun buildVaultListItemActions(
                         intensity = Intensity.Supershy,
                         layout = ButtonLayout.IconOnly(
                             iconToken = IconTokens.actionCopyOutlined,
-                            contentDescription = "", 
+                            
+                            contentDescription = "",
                         ),
                     )
                 } else {
@@ -188,7 +197,8 @@ private fun buildVaultListItemActions(
                         intensity = Intensity.Supershy,
                         layout = ButtonLayout.IconOnly(
                             iconToken = IconTokens.actionMoreOutlined,
-                            contentDescription = "", 
+                            
+                            contentDescription = "",
                         ),
                     )
                 } else {
@@ -204,8 +214,8 @@ private fun buildVaultListItemActions(
                             action = {
                                 onCopyClicked()
                                 true
-                            }
-                        )
+                            },
+                        ),
                     )
                 }
 
@@ -216,8 +226,8 @@ private fun buildVaultListItemActions(
                             action = {
                                 onMoreClicked()
                                 true
-                            }
-                        )
+                            },
+                        ),
                     )
                 }
             }
@@ -230,6 +240,7 @@ data class VaultListItemState(
     val title: String,
     val description: String,
     val hasError: Boolean = false,
+    val isChecked: Boolean? = null,
     val isSharedIconVisible: Boolean = false,
     val isAttachmentIconVisible: Boolean = false,
     val isLockIconVisible: Boolean = false,
@@ -240,9 +251,15 @@ data class VaultListItemState(
     val extraContentLoaded: Boolean = false,
 ) {
     sealed class ThumbnailState {
-        data class DomainIcon(val url: String?) : ThumbnailState()
-        data class OtherIcon(val token: IconToken) : ThumbnailState()
-        data class LegacyOtherIcon(val token: IconToken, val color: Int?) : ThumbnailState()
+        sealed class VaultThumbnail : ThumbnailState() {
+            data class DomainIcon(val url: String?) : VaultThumbnail()
+
+            data class OtherIcon(val token: IconToken) : VaultThumbnail()
+
+            data class LegacyOtherIcon(val token: IconToken, val color: Int?) : VaultThumbnail()
+        }
+
+        data class Icon(val token: IconToken) : ThumbnailState()
     }
 }
 
@@ -260,7 +277,7 @@ private fun VaultListItemDomainThumbnailPreview() = DashlaneTheme {
             isPasskeyIconVisible = true,
             isCopyButtonVisible = true,
             isMoreButtonVisible = true,
-            thumbnail = VaultListItemState.ThumbnailState.DomainIcon("https://www.dashlane.com"),
+            thumbnail = VaultListItemState.ThumbnailState.VaultThumbnail.DomainIcon("https://www.dashlane.com"),
         ),
         onClick = {},
     )
@@ -274,9 +291,9 @@ private fun VaultListItemLegacyThumbnailPreview() = DashlaneTheme {
             id = "id",
             title = "Title",
             description = "Description",
-            thumbnail = VaultListItemState.ThumbnailState.LegacyOtherIcon(
+            thumbnail = VaultListItemState.ThumbnailState.VaultThumbnail.LegacyOtherIcon(
                 IconTokens.homeOutlined,
-                color = R.color.securenote_color_blue
+                color = R.color.securenote_color_blue,
             ),
         ),
         onClick = {},
@@ -291,7 +308,7 @@ private fun VaultListItemIconThumbnailPreview() = DashlaneTheme {
             id = "id",
             title = "Title",
             description = "Description",
-            thumbnail = VaultListItemState.ThumbnailState.OtherIcon(IconTokens.homeOutlined),
+            thumbnail = VaultListItemState.ThumbnailState.VaultThumbnail.OtherIcon(IconTokens.homeOutlined),
         ),
         onClick = {},
     )

@@ -17,11 +17,13 @@ enum class UserAccountStatus {
 
     ERROR_NETWORK,
 
-    ERROR_PROCESSING;
+    ERROR_PROCESSING,
+
+    ;
 
     fun userExists(): Boolean {
         return this == YES ||
-                this == YES_OTP_LOGIN ||
-                this == YES_OTP_NEWDEVICE
+            this == YES_OTP_LOGIN ||
+            this == YES_OTP_NEWDEVICE
     }
 }

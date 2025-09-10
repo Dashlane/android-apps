@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/mv3_extension_task_report.json",
+  "type": "object",
+  "description": "Triggered when interrupted tasks have restarted and ended. Only tasks that restarted after being interrupted will send a log. One log per interrupted task. It is a technical tracking monitoring the interruption of tasks and user flows in the context of the switch from MV2 to MV3 extension on Chrome.",
+  "deprecated": true,
+  "metas": {
+    "area": "technical"
+  },
+  "properties": {
+    "name": {
+      "const": "mv3_extension_task_report"
+    },
+    "business_domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json#/definitions/business_domain"
+    },
+    "feature": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json#/definitions/feature"
+    },
+    "has_woken_up_service_worker": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json#/definitions/has_woken_up_service_worker"
+    },
+    "service_worker_interruption_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json#/definitions/service_worker_interruption_count"
+    },
+    "service_worker_start_date_time": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/session.json#/definitions/service_worker_start_date_time"
+    },
+    "task_end_date_time": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json#/definitions/task_date_time"
+    },
+    "task_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json#/definitions/task_name"
+    },
+    "task_start_date_time": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/performance.json#/definitions/task_date_time"
+    }
+  },
+  "required": [
+    "name",
+    "business_domain",
+    "feature",
+    "service_worker_interruption_count",
+    "service_worker_start_date_time",
+    "task_end_date_time",
+    "task_name",
+    "task_start_date_time"
+  ],
+  "additionalProperties": false
+}

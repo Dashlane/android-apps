@@ -8,20 +8,18 @@ import androidx.navigation.NavDestination
 import com.dashlane.R
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.ui.activities.MenuContainer
-import com.dashlane.ui.screens.settings.SettingsFragmentArgs.Companion.fromBundle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MenuIconDestinationChangedListener(
     private val activity: Activity,
-    var topLevelDestinations: Set<Int>
+    var topLevelDestinations: Set<Int>,
 ) : NavController.OnDestinationChangedListener {
-
     override fun onDestinationChanged(
         controller: NavController,
         destination: NavDestination,
-        arguments: Bundle?
+        arguments: Bundle?,
     ) {
         
         val dashlaneActivity = activity as? DashlaneActivity ?: return
@@ -30,11 +28,11 @@ class MenuIconDestinationChangedListener(
             
             
             delay(1)
-            val shouldShowMenu = dashlaneActivity.shouldShowMenu(arguments, controller.currentDestination)
+            val shouldShowMenu = shouldShowMenu(controller.currentDestination)
             if (shouldShowMenu) {
                 dashlaneActivity.drawerToggleDelegate?.setActionBarUpIndicator(
                     drawable,
-                    R.string.and_accessibility_open_drawer_description
+                    R.string.and_accessibility_open_drawer_description,
                 )
             }
             
@@ -44,12 +42,8 @@ class MenuIconDestinationChangedListener(
         }
     }
 
-    private fun DashlaneActivity.shouldShowMenu(arguments: Bundle?, currentDestination: NavDestination?): Boolean {
-        val isSettingsMainSection = currentDestination?.id == R.id.nav_settings &&
-            arguments != null && fromBundle(arguments).id == null
-        if (!isSettingsMainSection && !topLevelDestinations.contains(currentDestination?.id)) {
-            return false
-        }
-        return true
+    private fun shouldShowMenu(currentDestination: NavDestination?): Boolean {
+        val isSettingsMainSection = (currentDestination?.id == R.id.nav_settings_compose)
+        return !(!isSettingsMainSection && !topLevelDestinations.contains(currentDestination?.id))
     }
 }

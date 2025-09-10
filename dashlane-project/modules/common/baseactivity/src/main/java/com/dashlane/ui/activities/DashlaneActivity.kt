@@ -21,7 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
 abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPageViewLogger.Owner {
-
     override val coroutineContext: CoroutineContext
         get() = lifecycleScope.coroutineContext
 
@@ -48,7 +47,7 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
     private val uiPartEntryPoint: UiPartEntryPoint
         get() = EarlyEntryPoints.get(
             this.application,
-            UiPartEntryPoint::class.java
+            UiPartEntryPoint::class.java,
         )
     private var wasLock = false
 
@@ -82,7 +81,7 @@ abstract class DashlaneActivity : AppCompatActivity(), CoroutineScope, CurrentPa
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager.onRequestPermissionResult(this, permissions, requestCode, grantResults)

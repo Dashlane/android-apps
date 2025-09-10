@@ -14,24 +14,22 @@ import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.Lazy
-import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 class VaultDataQueryImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val userDataRepository: UserDatabaseRepository,
     private val filterToPredicate: FilterToPredicate,
     private val genericDataQuery: Lazy<GenericDataQuery>,
-    private val lockHelper: Lazy<LockHelper>
+    private val lockHelper: Lazy<LockHelper>,
 ) : VaultDataQuery {
     private val database: Database?
         get() = sessionManager.session?.let { userDataRepository.getRacletteDatabase(it) }
 
     override fun queryLegacy(filter: VaultFilter): VaultItem<SyncObject>? = runBlocking { query(filter) }
 
-    override suspend fun query(filter: VaultFilter): VaultItem<SyncObject>? {
-        return queryAllLegacy(filter).firstOrNull()
-    }
+    override suspend fun query(filter: VaultFilter): VaultItem<SyncObject>? = queryAll(filter).firstOrNull()
 
     override fun queryAllLegacy(filter: VaultFilter): List<VaultItem<SyncObject>> = runBlocking { queryAll(filter) }
 

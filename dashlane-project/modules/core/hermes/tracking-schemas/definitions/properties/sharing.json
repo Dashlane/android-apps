@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json",
+  "type": "object",
+  "description": "Definition for the sharing events",
+  "definitions": {
+    "sharing_item_type": {
+      "description": "Type of vault item that is shared",
+      "type": "string",
+      "enum": [
+        "credential",
+        "secret",
+        "secure_note"
+      ]
+    },
+    "individuals_count": {
+      "description": "Count of individuals in the sharing request",
+      "type": "integer"
+    },
+    "groups_count": {
+      "description": "Count of groups in the sharing request",
+      "type": "integer"
+    },
+    "has_accepted": {
+      "description": "True if the recipient has accepted the sharing invite",
+      "type": "boolean"
+    },
+    "update_status": {
+      "description": "the status of the permissions update",
+      "type": "string",
+      "enum": [
+        "error",
+        "updated"
+      ]
+    },
+    "request_status": {
+      "description": "The status of the sharing request from the point of view of the owner",
+      "type": "string",
+      "enum": [
+        "error",
+        "shared"
+      ]
+    },
+    "response_status": {
+      "description": "The respond status to a sharing request",
+      "type": "string",
+      "enum": [
+        "accepted",
+        "denied",
+        "error"
+      ]
+    },
+    "rights": {
+      "description": "The permissions associated to a shared item",
+      "type": "string",
+      "enum": [
+        "limited",
+        "revoked",
+        "unlimited"
+      ]
+    },
+    "sharing_flow_type": {
+      "description": "Whether it's a collection sharing flow or an item sharing flow",
+      "type": "string",
+      "enum": [
+        "collection_sharing",
+        "item_sharing"
+      ]
+    },
+    "origin": {
+      "description": "Where the flow was initiated from",
+      "type": "string",
+      "enum": [
+        "collection_detail_view",
+        "collection_left_hand_side_menu_quick_actions_dropdown",
+        "collection_list_view",
+        "collection_list_view_quick_actions_dropdown",
+        "item_detail_view",
+        "item_list_view",
+        "item_list_view_quick_actions_dropdown",
+        "search_quick_actions_dropdown"
+      ]
+    },
+    "option_type": {
+      "description": "Type of the option being selected by the user",
+      "type": "string",
+      "enum": [
+        "login",
+        "secret",
+        "secure_note",
+        "user",
+        "user_group"
+      ]
+    },
+    "is_successful": {
+      "description": "Whether the flow was completed with success (the sharing was achieved)",
+      "type": "boolean"
+    }
+  }
+}

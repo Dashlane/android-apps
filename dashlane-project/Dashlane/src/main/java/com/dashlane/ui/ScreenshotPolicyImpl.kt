@@ -11,10 +11,8 @@ class ScreenshotPolicyImpl @Inject constructor(
     private val sessionManager: SessionManager,
     private val preferencesManager: PreferencesManager,
     private val globalPreferencesManager: GlobalPreferencesManager,
-    private val dadadaSecurity: DaDaDaSecurity
-) :
-    ScreenshotPolicy {
-
+    private val dadadaSecurity: DaDaDaSecurity,
+) : ScreenshotPolicy {
     companion object {
         
         private const val ALLOW_SCREENSHOT_BY_DEFAULT = false
@@ -28,7 +26,11 @@ class ScreenshotPolicyImpl @Inject constructor(
         if (dadadaSecurity.isScreenshotAllowed || globalPreferencesManager.uiTestForceScreenshot) {
             return true
         }
-        return preferencesManager[sessionManager.session?.username]
+        val username = sessionManager.session?.username
+        if (username?.email in dadadaSecurity.playStoreTestAccounts) {
+            return true
+        }
+        return preferencesManager[username]
             .getBoolean(ConstantsPrefs.WINDOW_SECURITY_FLAG_DISABLED, ALLOW_SCREENSHOT_BY_DEFAULT)
     }
 }

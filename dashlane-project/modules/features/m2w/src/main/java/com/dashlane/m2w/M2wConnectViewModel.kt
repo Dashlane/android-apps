@@ -13,7 +13,6 @@ internal class M2wConnectViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     val preferencesManager: PreferencesManager,
 ) : ViewModel(), M2wConnectViewModelContract {
-
     override val showConfirmPopupFlow = MutableStateFlow(false)
 
     override val finishM2W = MutableSharedFlow<M2WResult>(extraBufferCapacity = 1)

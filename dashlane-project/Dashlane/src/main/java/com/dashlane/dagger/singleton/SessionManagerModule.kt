@@ -15,7 +15,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface SessionManagerModule {
-
     @Singleton
     @Binds
     fun bindSessionManager(impl: SessionManagerImpl): SessionManager

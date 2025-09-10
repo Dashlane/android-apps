@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="section_header_breach_alert_title_no_count">Security</string>
+    
+    <string name="section_header_sharing_title_no_count">Sharing</string>
+    
+    <string name="section_header_getting_started_title_no_count">Getting Started</string>
+    
+    <string name="section_header_your_account_title_no_count">Your Account</string>
+    
+    <string name="section_header_whats_new_title_no_count">What’s New</string>
+    
+    <string name="section_header_promotions_title_no_count">Promotions</string>
+</resources>

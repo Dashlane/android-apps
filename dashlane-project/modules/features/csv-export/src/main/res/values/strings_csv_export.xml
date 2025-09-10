@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="csv_export_loading">Exporting</string>
+    
+    <string name="csv_export_intro_positive_button_text">Export to CSV</string>
+    
+    <string name="csv_export_intro_title">Move your Dashlane data using a CSV file</string>
+    
+    <string name="csv_export_intro_description">CSV files aren\'t encrypted, and others can read them. Delete the CSV file from your device after you\'re done using it.</string>
+    
+    <string name="csv_export_error">Can\'t export CSV files</string>
+    
+    <string name="csv_export_success_message">CSV files were exported in Download folder</string>
+    
+    <string name="csv_export_success_cta">See file</string>
+    
+    <string name="csv_export_on_web_app_bar_title">Export data to .CSV</string>
+    
+    <string name="csv_export_on_web_button_export_help_center">Learn how to export on web</string>
+</resources>

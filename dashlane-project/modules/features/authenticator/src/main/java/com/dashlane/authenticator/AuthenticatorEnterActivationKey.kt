@@ -5,13 +5,12 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.dashlane.authenticator.AuthenticatorIntro.Companion.EXTRA_CREDENTIAL_NAME
+import com.dashlane.authenticator.AuthenticatorBoardingActivity.Companion.EXTRA_CREDENTIAL_NAME
 import com.dashlane.ui.activities.DashlaneActivity
 import com.dashlane.util.addTextChangedListener
 import com.dashlane.util.isNotSemanticallyNull
 
 class AuthenticatorEnterActivationKey : DashlaneActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,8 +27,8 @@ class AuthenticatorEnterActivationKey : DashlaneActivity() {
                     setResult(
                         RESULT_OK,
                         Intent().apply {
-                        putExtra(RESULT_OTP_SECRET, secret)
-                    }
+                            putExtra(RESULT_OTP_SECRET, secret)
+                        },
                     )
                     finish()
                 }

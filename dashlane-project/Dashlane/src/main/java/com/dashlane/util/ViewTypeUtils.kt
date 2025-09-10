@@ -5,7 +5,7 @@ package com.dashlane.util
 import com.dashlane.R
 import com.dashlane.ui.activities.fragments.list.ItemWrapperViewHolder
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.vault.summary.SummaryObject
 
 object ViewTypeUtils {

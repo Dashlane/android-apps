@@ -2,15 +2,13 @@ package com.dashlane.autofill.api.dagger
 
 import com.dashlane.autofill.AutofillAnalyzerDef
 import com.dashlane.autofill.AutofillAnalyzerDef.DatabaseAccess
-import com.dashlane.autofill.AutofillAnalyzerDef.IAutofillUsageLog
 import com.dashlane.autofill.api.ApplicationFormSourceDeviceStatusFromContext
 import com.dashlane.autofill.api.AutofillEmptyWebsiteWarningServiceImpl
 import com.dashlane.autofill.api.AutofillFormSourcesStringsFromContext
 import com.dashlane.autofill.changepassword.AutofillChangePasswordActivityIntentProvider
 import com.dashlane.autofill.core.AutoFillDataBaseAccess
 import com.dashlane.autofill.core.AutofillPhishingLoggerImpl
-import com.dashlane.autofill.core.AutofillUsageLog
-import com.dashlane.autofill.core.domain.AutofillSecurityApplication
+import com.dashlane.autofill.core.domain.AutofillSecurityApplicationImpl
 import com.dashlane.autofill.createaccount.AutofillCreateAccountActivityIntentProvider
 import com.dashlane.autofill.emptywebsitewarning.AutofillEmptyWebsiteWarningService
 import com.dashlane.autofill.emptywebsitewarning.EmptyWebsiteWarningActivityIntentProvider
@@ -18,20 +16,18 @@ import com.dashlane.autofill.fillresponse.ChangePasswordActionIntentProvider
 import com.dashlane.autofill.fillresponse.CreateAccountActionIntentProvider
 import com.dashlane.autofill.fillresponse.EmptyWebsiteWarningIntentProvider
 import com.dashlane.autofill.fillresponse.PauseActionIntentProvider
-import com.dashlane.autofill.fillresponse.PhishingWarningIntentProvider
 import com.dashlane.autofill.fillresponse.ViewAllAccountsActionIntentProvider
 import com.dashlane.autofill.internal.ApplicationFormSourceDeviceStatus
 import com.dashlane.autofill.internal.AutofillFormSourcesStrings
 import com.dashlane.autofill.internal.AutofillLimiter
+import com.dashlane.autofill.logs.AutofillUsageLog
+import com.dashlane.autofill.logs.AutofillUsageLogImpl
 import com.dashlane.autofill.pause.AutofillPauseActivityIntentProvider
 import com.dashlane.autofill.pause.services.PausedAutofillLimiter
-import com.dashlane.autofill.phishing.AutofillPhishingActivityIntentProvider
-import com.dashlane.autofill.phishing.AutofillPhishingLogger
-import com.dashlane.autofill.phishing.PhishingWarningDataProvider
-import com.dashlane.autofill.phishing.PhishingWarningDataProviderImpl
 import com.dashlane.autofill.ui.AutofillPerformedCallback
 import com.dashlane.autofill.ui.AutofillPerformedCallbackImpl
 import com.dashlane.autofill.viewallaccounts.AutofillViewAllItemsActivityIntentProvider
+import com.dashlane.inappautofill.AutofillPhishingLogger
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -41,10 +37,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface AutofillApiComponentBindModule {
-
     @Singleton
     @Binds
-    fun bindsAutofillUsageLog(impl: AutofillUsageLog): IAutofillUsageLog
+    fun bindsAutofillUsageLog(impl: AutofillUsageLogImpl): AutofillUsageLog
 
     @Singleton
     @Binds
@@ -52,7 +47,7 @@ interface AutofillApiComponentBindModule {
 
     @Singleton
     @Binds
-    fun bindsAutofillSecurityApplication(impl: AutofillSecurityApplication): AutofillAnalyzerDef.IAutofillSecurityApplication
+    fun bindsAutofillSecurityApplication(impl: AutofillSecurityApplicationImpl): AutofillAnalyzerDef.AutofillSecurityApplication
 
     @Singleton
     @Binds
@@ -90,12 +85,6 @@ interface AutofillApiComponentBindModule {
 
     @Binds
     fun bindAutofillEmptyWebsiteWarningService(impl: AutofillEmptyWebsiteWarningServiceImpl): AutofillEmptyWebsiteWarningService
-
-    @Binds
-    fun bindPhishingWarningIntent(impl: AutofillPhishingActivityIntentProvider): PhishingWarningIntentProvider
-
-    @Binds
-    fun bindPhishingWarningDataProvider(impl: PhishingWarningDataProviderImpl): PhishingWarningDataProvider
 
     @Singleton
     @Binds

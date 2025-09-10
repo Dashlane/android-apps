@@ -5,5 +5,5 @@ import java.time.Instant
 
 data class PausedFormSource(
     val autoFillFormSource: AutoFillFormSource,
-    val pauseUntil: Instant
+    val pauseUntil: Instant,
 )

@@ -8,7 +8,6 @@ import androidx.transition.Transition
 import androidx.transition.TransitionValues
 
 class TextColorTransition : Transition() {
-
     override fun captureStartValues(transitionValues: TransitionValues) {
         captureTextColorValue(transitionValues)
     }
@@ -26,7 +25,7 @@ class TextColorTransition : Transition() {
     override fun createAnimator(
         sceneRoot: ViewGroup,
         startValues: TransitionValues?,
-        endValues: TransitionValues?
+        endValues: TransitionValues?,
     ): Animator? {
         val startTextColor = startValues?.values?.get(PROPNAME_TEXT_COLOR_TRANSITION) as Int?
         val endTextColor = endValues?.values?.get(PROPNAME_TEXT_COLOR_TRANSITION) as Int?

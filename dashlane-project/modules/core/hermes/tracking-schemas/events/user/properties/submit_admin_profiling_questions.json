@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/submit_admin_profiling_questions.json",
+  "type": "object",
+  "description": "When a team creator admin completes profiling questions",
+  "metas": {
+    "area": "ui"
+  },
+  "properties": {
+    "name": {
+      "const": "submit_admin_profiling_questions"
+    },
+    "admin_familiarity_answer_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/admin_familiarity_answer_list"
+    },
+    "admin_familiarity_choice_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/admin_familiarity_choice_list"
+    },
+    "features_answer_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/features_answer_list"
+    },
+    "features_choice_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/features_choice_list"
+    },
+    "is_profiling_complete": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/is_profiling_complete"
+    },
+    "profiling_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/profiling_step"
+    },
+    "team_size_answer_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/team_size_answer_list"
+    },
+    "team_size_choice_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/team_size_choice_list"
+    },
+    "use_case_answer_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/use_case_answer_list"
+    },
+    "use_case_choice_list": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/submit_admin_profiling_questions.json#/definitions/use_case_choice_list"
+    }
+  },
+  "required": [
+    "name",
+    "is_profiling_complete",
+    "profiling_step"
+  ],
+  "additionalProperties": false
+}

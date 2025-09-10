@@ -73,18 +73,10 @@
     <string name="enable_totp_complete_cta_negative">Skip</string>
 
     
-    <string name="disable_totp_confirmation_title">Turn off 2FA? </string>
-    <string name="disable_totp_confirmation_message">2FA is an extra layer of security. If you turn it off, you won’t be sent a push request or asked for a 6-digit token when logging in to your account.</string>
-    <string name="disable_totp_confirmation_cta_positive">Yes, turn off</string>
-    <string name="disable_totp_confirmation_cta_negative">Cancel</string>
-
-    
     <string name="disable_totp_enter_token_title">Enter the 6-digit token from your authenticator app.</string>
     <string name="disable_totp_enter_token_error">Incorrect token</string>
     <string name="disable_totp_enter_token_info">Can’t access your authenticator?</string>
     <string name="disable_totp_enter_token_info_link">Use a recovery code.</string>
-    
-    <string name="disable_totp_enter_token_recovery_dialog_title">2FA recovery</string>
     
     <string name="disable_totp_enter_token_recovery_dialog_choice_description">Use one of the 10 recovery codes that were generated when you set up 2FA. We can also send you codes by text message.</string>
     

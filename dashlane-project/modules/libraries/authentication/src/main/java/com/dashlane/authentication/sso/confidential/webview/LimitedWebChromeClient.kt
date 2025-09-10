@@ -12,7 +12,7 @@ class LimitedWebChromeClient : WebChromeClient() {
         url: String?,
         message: String?,
         defaultValue: String?,
-        result: JsPromptResult?
+        result: JsPromptResult?,
     ): Boolean {
         result?.cancel()
         return true
@@ -23,7 +23,7 @@ class LimitedWebChromeClient : WebChromeClient() {
         view: WebView?,
         url: String?,
         message: String?,
-        result: JsResult?
+        result: JsResult?,
     ): Boolean {
         return hideAlert(result)
     }
@@ -33,7 +33,7 @@ class LimitedWebChromeClient : WebChromeClient() {
         view: WebView?,
         url: String?,
         message: String?,
-        result: JsResult?
+        result: JsResult?,
     ): Boolean {
         return hideAlert(result)
     }

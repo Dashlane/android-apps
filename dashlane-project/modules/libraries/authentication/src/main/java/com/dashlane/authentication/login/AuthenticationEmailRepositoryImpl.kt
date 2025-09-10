@@ -7,30 +7,32 @@ import com.dashlane.authentication.AuthenticationEmptyEmailException
 import com.dashlane.authentication.AuthenticationInvalidEmailException
 import com.dashlane.authentication.AuthenticationNetworkException
 import com.dashlane.authentication.AuthenticationOfflineException
-import com.dashlane.authentication.AuthenticationSecondFactor
 import com.dashlane.authentication.AuthenticationTeamException
 import com.dashlane.authentication.AuthenticationUnknownException
-import com.dashlane.authentication.RegisteredUserDevice
-import com.dashlane.authentication.SecurityFeature
-import com.dashlane.authentication.UnauthenticatedUser
 import com.dashlane.authentication.UserStorage
 import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresDeviceRegistration
 import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresPassword
 import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresServerKey
 import com.dashlane.authentication.login.AuthenticationEmailRepository.Result.RequiresSso
 import com.dashlane.authentication.toAuthenticationException
+import com.dashlane.authentication.toAuthenticationSsoInfo
 import com.dashlane.authentication.toRegisteredUserDevice
+import com.dashlane.data.login.AuthenticationSecondFactor
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.data.login.SecurityFeature
+import com.dashlane.data.login.SsoInfo
+import com.dashlane.data.login.UnauthenticatedUser
 import com.dashlane.server.api.ConnectivityCheck
 import com.dashlane.server.api.DashlaneTime
 import com.dashlane.server.api.endpoints.AccountType
-import com.dashlane.server.api.endpoints.authentication.Auth2faUnauthenticatedSettingsService
-import com.dashlane.server.api.endpoints.authentication.AuthLoginService
 import com.dashlane.server.api.endpoints.authentication.AuthMethod
-import com.dashlane.server.api.endpoints.authentication.AuthRegistrationEmailService
 import com.dashlane.server.api.endpoints.authentication.AuthSecurityType
-import com.dashlane.server.api.endpoints.authentication.AuthSendEmailTokenService
 import com.dashlane.server.api.endpoints.authentication.AuthU2fChallenge
 import com.dashlane.server.api.endpoints.authentication.AuthVerification
+import com.dashlane.server.api.endpoints.authentication.Get2FAStatusUnauthenticatedService
+import com.dashlane.server.api.endpoints.authentication.GetAuthenticationMethodsForDeviceService
+import com.dashlane.server.api.endpoints.authentication.GetAuthenticationMethodsForLoginService
+import com.dashlane.server.api.endpoints.authentication.RequestEmailTokenVerificationService
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeactivatedUserException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceDeactivatedException
 import com.dashlane.server.api.endpoints.authentication.exceptions.DeviceNotFoundException
@@ -45,14 +47,13 @@ import kotlinx.coroutines.withContext
 
 class AuthenticationEmailRepositoryImpl(
     private val userStorage: UserStorage,
-    private val emailService: AuthRegistrationEmailService,
-    private val loginService: AuthLoginService,
-    private val sendEmailTokenService: AuthSendEmailTokenService,
-    private val unauthenticated2faSettingsService: Auth2faUnauthenticatedSettingsService,
+    private val getAuthenticationMethodsForDeviceService: GetAuthenticationMethodsForDeviceService,
+    private val getAuthenticationMethodsForLoginService: GetAuthenticationMethodsForLoginService,
+    private val requestEmailTokenVerificationService: RequestEmailTokenVerificationService,
+    private val get2FAStatusUnauthenticatedService: Get2FAStatusUnauthenticatedService,
     private val connectivityCheck: ConnectivityCheck,
-    private val dashlaneTime: DashlaneTime
+    private val dashlaneTime: DashlaneTime,
 ) : AuthenticationEmailRepository {
-
     override suspend fun getUserStatus(unauthenticatedUser: UnauthenticatedUser): AuthenticationEmailRepository.Result =
         withContext(Dispatchers.Default) { getUserStatusImpl(unauthenticatedUser) }
 
@@ -98,7 +99,7 @@ class AuthenticationEmailRepositoryImpl(
 
     private suspend fun fetchOrRestoreUserStatus(
         login: String,
-        unauthenticatedUser: UnauthenticatedUser
+        unauthenticatedUser: UnauthenticatedUser,
     ): AuthenticationEmailRepository.Result {
         val cipheredBackupToken = unauthenticatedUser.cipheredBackupToken
         val time = dashlaneTime.getClockOrDefault().instant()
@@ -111,13 +112,13 @@ class AuthenticationEmailRepositoryImpl(
 
     private suspend fun getRemoteUserStatusForRestore(
         login: String,
-        cipheredBackupToken: String
+        cipheredBackupToken: String,
     ): AuthenticationEmailRepository.Result {
-        val request = Auth2faUnauthenticatedSettingsService.Request(
-            login = login
+        val request = Get2FAStatusUnauthenticatedService.Request(
+            login = login,
         )
         val response = try {
-            unauthenticated2faSettingsService.execute(request)
+            get2FAStatusUnauthenticatedService.execute(request)
         } catch (e: UserNotFoundException) {
             throw AuthenticationAccountNotFoundException(cause = e)
         } catch (e: DashlaneApiException) {
@@ -133,8 +134,8 @@ class AuthenticationEmailRepositoryImpl(
                 RegisteredUserDevice.ToRestore(
                     login,
                     setOf(SecurityFeature.EMAIL_TOKEN),
-                    cipheredBackupToken
-                )
+                    cipheredBackupToken,
+                ),
             )
         } else {
             
@@ -143,17 +144,17 @@ class AuthenticationEmailRepositoryImpl(
     }
 
     private suspend fun getRemoteUserStatus(login: String): AuthenticationEmailRepository.Result {
-        val request = AuthRegistrationEmailService.Request(
+        val request = GetAuthenticationMethodsForDeviceService.Request(
             login = login,
             methods = listOf(
                 AuthMethod.EMAIL_TOKEN,
                 AuthMethod.TOTP,
                 AuthMethod.DUO_PUSH,
                 AuthMethod.U2F,
-            )
+            ),
         )
         val response = try {
-            emailService.execute(request)
+            getAuthenticationMethodsForDeviceService.execute(request)
         } catch (e: UserNotFoundException) {
             throw AuthenticationAccountNotFoundException(cause = e)
         } catch (e: SsoBlockedException) {
@@ -175,7 +176,7 @@ class AuthenticationEmailRepositoryImpl(
                 try {
                     if (responseData.accountType == AccountType.MASTERPASSWORD) {
                         
-                        sendEmailTokenService.execute(AuthSendEmailTokenService.Request(login = login))
+                        requestEmailTokenVerificationService.execute(RequestEmailTokenVerificationService.Request(login = login))
                     }
                 } catch (e: DashlaneApiException) {
                     throw e.toAuthenticationException()
@@ -184,17 +185,21 @@ class AuthenticationEmailRepositoryImpl(
             AuthVerification.Type.TOTP in verification -> AuthenticationSecondFactorTotp(login, verification = verification)
             AuthVerification.Type.SSO in verification -> return RequiresDeviceRegistration.Sso(
                 login,
-                ssoInfo ?: throw AuthenticationUnknownException(message = "Missing ssoInfo")
+                ssoInfo ?: throw AuthenticationUnknownException(message = "Missing ssoInfo"),
             )
             else -> throw AuthenticationUnknownException(message = "Unknown verification")
         }
 
-        return RequiresDeviceRegistration.SecondFactor(secondFactor = secondFactor, accountType = responseData.accountType, ssoInfo = ssoInfo)
+        return RequiresDeviceRegistration.SecondFactor(
+            secondFactor = secondFactor,
+            accountType = responseData.accountType,
+            ssoInfo = ssoInfo,
+        )
     }
 
     private suspend fun getRemoteDeviceStatus(userDevice: UserStorage.UserDevice): AuthenticationEmailRepository.Result {
         val response = try {
-            loginService.execute(userDevice.toLoginServiceRequest())
+            getAuthenticationMethodsForLoginService.execute(userDevice.toLoginServiceRequest())
         } catch (e: DeviceDeactivatedException) {
             return resetUser(userDevice.login, "Device deactivated ${userDevice.login}")
         } catch (e: DeviceNotFoundException) {
@@ -223,18 +228,18 @@ class AuthenticationEmailRepositoryImpl(
                     AccountType.INVISIBLEMASTERPASSWORD -> RequiresDeviceRegistration.SecondFactor(
                         secondFactor = AuthenticationSecondFactorEmailToken(login = userDevice.login),
                         accountType = responseData.accountType,
-                        ssoInfo = null
+                        ssoInfo = null,
                     )
                 }
             }
 
             AuthVerification.Type.TOTP in verification -> RequiresServerKey(
                 AuthenticationSecondFactorTotp(userDevice.login, verification),
-                ssoInfo
+                ssoInfo,
             )
             AuthVerification.Type.SSO in verification -> RequiresSso(
                 userDevice.login,
-                ssoInfo ?: throw AuthenticationUnknownException(message = "Missing ssoInfo")
+                ssoInfo ?: throw AuthenticationUnknownException(message = "Missing ssoInfo"),
             )
             else -> throw AuthenticationUnknownException(message = "Unknown verification")
         }
@@ -242,7 +247,7 @@ class AuthenticationEmailRepositoryImpl(
 
     private suspend fun resetUser(
         login: String,
-        reason: String
+        reason: String,
     ): AuthenticationEmailRepository.Result {
         userStorage.clearUser(login, reason)
         return getRemoteUserStatus(login)
@@ -265,30 +270,30 @@ private fun List<AuthU2fChallenge>.toU2fChallenges(): List<AuthenticationSecondF
             appId = it.appId,
             challenge = it.challenge,
             version = it.version,
-            keyHandle = it.keyHandle
+            keyHandle = it.keyHandle,
         )
     }
 
-private fun UserStorage.UserDevice.toLoginServiceRequest() = AuthLoginService.Request(
+private fun UserStorage.UserDevice.toLoginServiceRequest() = GetAuthenticationMethodsForLoginService.Request(
     login = login,
     deviceAccessKey = accessKey,
     profiles = listOf(
-        AuthLoginService.Request.Profile(
+        GetAuthenticationMethodsForLoginService.Request.Profile(
             login = login,
-            deviceAccessKey = accessKey
-        )
+            deviceAccessKey = accessKey,
+        ),
     ),
     methods = listOf(
         AuthMethod.TOTP,
         AuthMethod.DUO_PUSH,
         AuthMethod.U2F,
-    )
+    ),
 )
 
 @Suppress("FunctionName")
 private fun AuthenticationSecondFactorTotp(
     login: String,
-    verification: Map<AuthVerification.Type, AuthVerification>
+    verification: Map<AuthVerification.Type, AuthVerification>,
 ): AuthenticationSecondFactor.Totp {
     val isDuoPushEnabled = verification[AuthVerification.Type.DUO_PUSH] != null
     val u2f = verification[AuthVerification.Type.U2F]
@@ -307,7 +312,7 @@ private fun AuthenticationSecondFactorTotp(
         duoPush = if (isDuoPushEnabled) {
             AuthenticationSecondFactor.DuoPush(
                 login = login,
-                securityFeatures = securityFeatures
+                securityFeatures = securityFeatures,
             )
         } else {
             null
@@ -317,7 +322,7 @@ private fun AuthenticationSecondFactorTotp(
                 AuthenticationSecondFactor.U2f(
                     login = login,
                     securityFeatures = securityFeatures,
-                    challenges = it
+                    challenges = it,
                 )
             }
         } else {

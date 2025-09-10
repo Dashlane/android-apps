@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="email_address_login_screen">Email</string>
+    
+    <string name="change_master_password_pop_success_title">Reminder</string>
+    
+    <string name="change_master_password_popup_success_message">We\'ll ask you to enter this Master Password in 14 days for your security</string>
+    
+    <string name="disable_totp_enter_token_recovery_dialog_title">2FA recovery</string>
+    
+    <string name="cannot_connect_to_server">Cannot connect to server.</string>
+</resources>

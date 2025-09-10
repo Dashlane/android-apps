@@ -7,7 +7,6 @@ import com.google.android.gms.tasks.Tasks
 import kotlin.coroutines.suspendCoroutine
 
 object SmsOtpPossibleChecker {
-
     suspend fun isSmsOtpAutofillPossible(context: Context, packageName: String): Boolean {
         val autofillClient = SmsCodeRetriever.getAutofillClient(context.applicationContext)
         val checkTask = autofillClient.hasOngoingSmsRequest(packageName)

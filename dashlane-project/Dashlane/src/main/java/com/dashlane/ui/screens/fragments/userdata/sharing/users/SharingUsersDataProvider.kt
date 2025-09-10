@@ -1,8 +1,9 @@
 package com.dashlane.ui.screens.fragments.userdata.sharing.users
 
-import com.dashlane.core.sharing.SharingDao
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.server.api.endpoints.sharinguserdevice.ItemGroup
+import com.dashlane.sharing.SharingDao
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.sharing.model.getCollectionDownload
 import com.dashlane.sharing.model.isAccepted
 import com.dashlane.sharing.model.isAdmin
@@ -10,7 +11,6 @@ import com.dashlane.sharing.model.isPending
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
 import com.dashlane.storage.userdata.accessor.filter.genericFilter
 import com.dashlane.ui.screens.fragments.userdata.sharing.SharingModels
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.ui.screens.fragments.userdata.sharing.getSharingStatusResource
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
 import com.dashlane.vault.summary.SummaryObject
@@ -23,7 +23,7 @@ class SharingUsersDataProvider @Inject constructor(
     private val genericDataQuery: GenericDataQuery,
     private val sharingDataProvider: SharingDataProvider,
     @IoCoroutineDispatcher
-    private val ioCoroutineDispatcher: CoroutineDispatcher
+    private val ioCoroutineDispatcher: CoroutineDispatcher,
 ) {
     suspend fun getContactsForItem(itemId: String): List<SharingModels> {
         return withContext(ioCoroutineDispatcher) {
@@ -33,7 +33,7 @@ class SharingUsersDataProvider @Inject constructor(
             val summaryObject = genericDataQuery.queryFirst(
                 genericFilter {
                     specificUid(itemId)
-                }
+                },
             ) ?: return@withContext emptyList<SharingModels>()
 
             val collectionGroups = loadCollectionsGroups(collections, itemGroup, summaryObject)
@@ -47,7 +47,7 @@ class SharingUsersDataProvider @Inject constructor(
 
     private fun loadUsers(
         itemGroup: ItemGroup,
-        summaryObject: SummaryObject
+        summaryObject: SummaryObject,
     ) = itemGroup.users?.map {
         SharingModels.ItemUser(
             userId = it.userId,
@@ -57,14 +57,14 @@ class SharingUsersDataProvider @Inject constructor(
             sharingStatusResource = it.getSharingStatusResource(),
             itemGroup = itemGroup,
             item = summaryObject,
-            isItemInCollection = false
+            isItemInCollection = false,
         )
     } ?: emptyList()
 
     private fun loadCollectionsUsers(
         collections: List<Collection>,
         itemGroup: ItemGroup,
-        summaryObject: SummaryObject
+        summaryObject: SummaryObject,
     ) = collections.map {
         it.users?.map { userCollection ->
             SharingModels.ItemUser(
@@ -76,14 +76,14 @@ class SharingUsersDataProvider @Inject constructor(
                     ?.getSharingStatusResource() ?: 0,
                 itemGroup = itemGroup,
                 item = summaryObject,
-                isItemInCollection = true
+                isItemInCollection = true,
             )
         } ?: emptyList()
     }.flatten()
 
     private fun loadGroups(
         itemGroup: ItemGroup,
-        summaryObject: SummaryObject
+        summaryObject: SummaryObject,
     ) = itemGroup.groups?.map {
         SharingModels.ItemUserGroup(
             groupId = it.groupId,
@@ -94,14 +94,14 @@ class SharingUsersDataProvider @Inject constructor(
             sharingStatusResource = it.getSharingStatusResource(),
             itemGroup = itemGroup,
             item = summaryObject,
-            isItemInCollection = false
+            isItemInCollection = false,
         )
     } ?: emptyList()
 
     private fun loadCollectionsGroups(
         collections: List<Collection>,
         itemGroup: ItemGroup,
-        summaryObject: SummaryObject
+        summaryObject: SummaryObject,
     ) = collections.map {
         it.userGroups?.map { userCollectionGroup ->
             SharingModels.ItemUserGroup(
@@ -114,7 +114,7 @@ class SharingUsersDataProvider @Inject constructor(
                     ?.getSharingStatusResource() ?: 0,
                 itemGroup = itemGroup,
                 item = summaryObject,
-                isItemInCollection = true
+                isItemInCollection = true,
             )
         } ?: emptyList()
     }.flatten()

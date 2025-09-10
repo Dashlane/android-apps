@@ -6,16 +6,15 @@ import com.dashlane.hermes.generated.definitions.DeviceSelected
 import com.dashlane.hermes.generated.definitions.TransferMethod
 import com.dashlane.secrettransfer.domain.SecretTransferAnalytics
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ChooseTypeViewModel @Inject constructor(
-    private val secretTransferAnalytics: SecretTransferAnalytics
+    private val secretTransferAnalytics: SecretTransferAnalytics,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow<ChooseTypeState>(ChooseTypeState.Initial(ChooseTypeData()))
 
     val uiState = stateFlow.asStateFlow()
@@ -31,7 +30,10 @@ class ChooseTypeViewModel @Inject constructor(
     }
 
     fun computerClicked() {
-        secretTransferAnalytics.selectTransferMethod(transferMethod = TransferMethod.SECURITY_CHALLENGE, deviceSelected = DeviceSelected.COMPUTER)
+        secretTransferAnalytics.selectTransferMethod(
+            transferMethod = TransferMethod.SECURITY_CHALLENGE,
+            deviceSelected = DeviceSelected.COMPUTER,
+        )
         viewModelScope.launch { stateFlow.emit(ChooseTypeState.GoToUniversal(stateFlow.value.data)) }
     }
 

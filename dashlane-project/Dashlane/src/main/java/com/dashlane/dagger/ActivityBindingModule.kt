@@ -13,5 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 interface ActivityBindingModule {
     @Binds
     @ActivityLifecycleCoroutineScope
-    fun bindLifecycleCoroutineScope(@ActivityLifecycleCoroutineScope coroutineScope: LifecycleCoroutineScope): CoroutineScope
+    fun bindLifecycleCoroutineScope(
+        @ActivityLifecycleCoroutineScope coroutineScope: LifecycleCoroutineScope,
+    ): CoroutineScope
 }

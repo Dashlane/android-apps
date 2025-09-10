@@ -9,9 +9,8 @@ import com.dashlane.vault.summary.SummaryObject
 
 class QuickActionCopyIdentity(
     private val vaultItemCopyService: VaultItemCopyService,
-    private val summaryObject: SummaryObject
+    private val summaryObject: SummaryObject,
 ) : Action {
-
     override val text: Int = R.string.quick_action_copy_name_holder
 
     override val icon: Int = R.drawable.ic_action_copy_outlined
@@ -24,31 +23,32 @@ class QuickActionCopyIdentity(
             is SummaryObject.Passport -> CopyField.PassportLinkedIdentity
             is SummaryObject.IdCard -> CopyField.IdsLinkedIdentity
             is SummaryObject.SocialSecurityStatement -> CopyField.SocialSecurityLinkedIdentity
-            is SummaryObject.AuthCategory,
-            is SummaryObject.SecureNoteCategory,
-            is SummaryObject.Authentifiant,
             is SummaryObject.Address,
-            is SummaryObject.SecureNote,
+            is SummaryObject.AuthCategory,
+            is SummaryObject.Authentifiant,
             is SummaryObject.BankStatement,
-            is SummaryObject.Company,
             is SummaryObject.Collection,
+            is SummaryObject.Company,
+            is SummaryObject.DataChangeHistory,
             is SummaryObject.Email,
             is SummaryObject.FiscalStatement,
+            is SummaryObject.GeneratedPassword,
             is SummaryObject.Identity,
+            is SummaryObject.Passkey,
             is SummaryObject.PaymentCreditCard,
-            is SummaryObject.PaymentPaypal,
             is SummaryObject.PersonalWebsite,
             is SummaryObject.Phone,
+            is SummaryObject.Secret,
             is SummaryObject.SecureFileInfo,
+            is SummaryObject.SecureNote,
+            is SummaryObject.SecureNoteCategory,
             is SummaryObject.SecurityBreach,
-            is SummaryObject.GeneratedPassword,
-            is SummaryObject.DataChangeHistory,
-            is SummaryObject.Passkey,
-            is SummaryObject.Secret -> null
+            is SummaryObject.WiFi,
+            -> null
         }?.let {
             vaultItemCopyService.handleCopy(
                 item = summaryObject,
-                copyField = it
+                copyField = it,
             )
         }
     }
@@ -56,24 +56,24 @@ class QuickActionCopyIdentity(
     companion object {
         fun createActionIfIdentityExist(
             vaultItemCopyService: VaultItemCopyService,
-            summaryObject: SummaryObject
+            summaryObject: SummaryObject,
         ): QuickActionCopyIdentity? {
             when (summaryObject) {
                 is SummaryObject.IdCard -> hasIdentity(
                     summaryObject.fullname,
-                    summaryObject.linkedIdentity
+                    summaryObject.linkedIdentity,
                 )
                 is SummaryObject.DriverLicence -> hasIdentity(
                     summaryObject.fullname,
-                    summaryObject.linkedIdentity
+                    summaryObject.linkedIdentity,
                 )
                 is SummaryObject.Passport -> hasIdentity(
                     summaryObject.fullname,
-                    summaryObject.linkedIdentity
+                    summaryObject.linkedIdentity,
                 )
                 is SummaryObject.SocialSecurityStatement -> hasIdentity(
                     summaryObject.socialSecurityFullname,
-                    summaryObject.linkedIdentity
+                    summaryObject.linkedIdentity,
                 )
                 else -> false
             }.let { hasIdentity ->

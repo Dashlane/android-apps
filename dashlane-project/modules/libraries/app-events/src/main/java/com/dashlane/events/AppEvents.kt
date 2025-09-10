@@ -18,7 +18,7 @@ class AppEvents @Inject constructor(
     private val sessionManager: SessionManager,
     private val scope: SessionCoroutineScopeRepository,
     @MainCoroutineDispatcher
-    private val mainDispatcher: CoroutineDispatcher
+    private val mainDispatcher: CoroutineDispatcher,
 ) {
     private val listenersMapByEventClassName = ConcurrentHashMap<String, MutableMap<Any, (AppEvent) -> Unit>>()
     private val lastEventByEventClassName = ConcurrentHashMap<String, AppEvent>()
@@ -29,7 +29,7 @@ class AppEvents @Inject constructor(
         subscriber: Any,
         clazz: Class<T>,
         deliverLastEvent: Boolean = false,
-        listener: (T) -> Unit
+        listener: (T) -> Unit,
     ) {
         val listenerBySubscriberClassName = listenersMapByEventClassName.getOrPut(clazz.name) { mutableMapOf() }
         val existingListener = listenerBySubscriberClassName[subscriber]
@@ -84,7 +84,7 @@ class AppEvents @Inject constructor(
 inline fun <reified T : AppEvent> AppEvents.register(
     subscriber: Any,
     deliverLastEvent: Boolean = false,
-    noinline listener: (T) -> Unit
+    noinline listener: (T) -> Unit,
 ) {
     register(subscriber, T::class.java, deliverLastEvent, listener)
 }
@@ -105,12 +105,12 @@ inline fun <reified T : AppEvent> AppEvents.registerAsFlow(
     register(
         subscriber = subscriber,
         clazz = clazz,
-        deliverLastEvent = deliverLastEvent
+        deliverLastEvent = deliverLastEvent,
     ) { trySendBlocking(it) }
     awaitClose {
         unregister(
             subscriber,
-            clazz = clazz
+            clazz = clazz,
         )
     }
 }

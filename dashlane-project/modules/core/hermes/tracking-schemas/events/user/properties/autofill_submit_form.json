@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/autofill_submit_form.json",
+  "type": "object",
+  "description": "When the user submits a form (login, registration, save payment, etc.).",
+  "metas": {
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_submit_form"
+    },
+    "fields_detected_by_analysis_engine_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/fields_detected_by_analysis_engine_count"
+    },
+    "fields_filled_by": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/fields_filled_by.json#/definitions/fields_filled_by_count"
+    },
+    "form_loaded_at_date_time": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_loaded_at_date_time"
+    },
+    "form_submitted_at_date_time": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_submitted_at_date_time"
+    },
+    "form_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/form_type"
+    },
+    "has_modified_initially_autofilled_value": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/has_modified_initially_autofilled_value"
+    },
+    "has_password_field": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/has_password_field"
+    },
+    "total_form_fields_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/total_form_fields_count"
+    }
+  },
+  "required": [
+    "name",
+    "fields_detected_by_analysis_engine_count",
+    "fields_filled_by",
+    "form_loaded_at_date_time",
+    "form_submitted_at_date_time",
+    "form_type",
+    "has_modified_initially_autofilled_value",
+    "has_password_field",
+    "total_form_fields_count"
+  ],
+  "additionalProperties": false
+}

@@ -4,14 +4,14 @@ import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 
 fun VaultItem<*>.getUpdatedLinkedWebsites(
-    oldItem: VaultItem<*>
+    oldItem: VaultItem<*>,
 ): Pair<List<String>, List<String>>? {
     val syncObjectToSave = syncObject
     val syncObjectSaved = oldItem.syncObject
     if (syncObjectToSave is SyncObject.Authentifiant && syncObjectSaved is SyncObject.Authentifiant) {
         return getUpdatedLinkedWebsites(
             syncObjectToSave.linkedServices?.associatedDomains?.map { it.domain ?: "" },
-            syncObjectSaved.linkedServices?.associatedDomains?.map { it.domain ?: "" }
+            syncObjectSaved.linkedServices?.associatedDomains?.map { it.domain ?: "" },
         )
     }
     return null

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/delete_u2f_authenticator.json",
+  "type": "object",
+  "description": "When the user deletes a U2F Authenticator on the Web. This event tracks the flow the user goes through.",
+  "metas": {
+    "area": "settings"
+  },
+  "properties": {
+    "name": {
+      "const": "delete_u2f_authenticator"
+    },
+    "error_name": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/two_factor_authentication_error"
+    },
+    "flow_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/flow_step"
+    }
+  },
+  "required": [
+    "name",
+    "flow_step"
+  ],
+  "additionalProperties": false
+}

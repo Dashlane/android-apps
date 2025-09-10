@@ -19,13 +19,12 @@ import com.dashlane.ui.fragments.PasswordGeneratorFragment
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.xml.domain.SyncObject
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import javax.inject.Inject
 
 @OptIn(ObsoleteCoroutinesApi::class)
 @AndroidEntryPoint
 class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGenerationCallback {
-
     @Inject
     lateinit var logRepository: LogRepository
 
@@ -47,14 +46,14 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
 
     override fun passwordSaved(
         generatedPassword: VaultItem<SyncObject.GeneratedPassword>,
-        strength: PasswordStrength?
+        strength: PasswordStrength?,
     ) {
         setFragmentResult(
             PASSWORD_GENERATOR_REQUEST_KEY,
             bundleOf(
                 PASSWORD_GENERATOR_RESULT_ID to generatedPassword.syncObject.id,
-                PASSWORD_GENERATOR_RESULT_PASSWORD to generatedPassword.syncObject.password.toString()
-            )
+                PASSWORD_GENERATOR_RESULT_PASSWORD to generatedPassword.syncObject.password.toString(),
+            ),
         )
     }
 
@@ -69,7 +68,7 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
     override fun onCreateDialogCustomView(
         inflater: LayoutInflater?,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         val view = inflater?.inflate(R.layout.fragment_dialog_password_generator, container, false)
         view?.apply {
@@ -120,14 +119,14 @@ class PasswordGeneratorDialog : NotificationDialogFragment(), PasswordGeneration
         fun newInstance(
             activity: Activity,
             @Origin origin: String,
-            domainAsking: String
+            domainAsking: String,
         ): PasswordGeneratorDialog {
             return Builder()
                 .setArgs(
                     bundleOf(
                         PASSWORD_GENERATOR_ARG_ORIGIN to origin,
-                        PASSWORD_GENERATOR_ARG_DOMAIN to domainAsking
-                    )
+                        PASSWORD_GENERATOR_ARG_DOMAIN to domainAsking,
+                    ),
                 )
                 .setPositiveButtonText(activity, R.string.use)
                 .setNegativeButtonText(activity, R.string.cancel)

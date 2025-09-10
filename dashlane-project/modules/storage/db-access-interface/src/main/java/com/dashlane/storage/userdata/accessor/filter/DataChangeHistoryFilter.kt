@@ -4,5 +4,5 @@ import com.dashlane.xml.domain.SyncObjectType
 
 data class DataChangeHistoryFilter(
     var objectType: SyncObjectType,
-    var objectUid: String
+    var objectUid: String,
 )

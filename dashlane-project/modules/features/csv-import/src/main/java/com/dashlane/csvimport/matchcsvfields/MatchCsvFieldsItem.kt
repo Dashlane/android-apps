@@ -4,13 +4,13 @@ import android.content.Context
 import android.os.Parcelable
 import android.view.View
 import android.widget.TextView
+import com.dashlane.csvimport.R
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Category
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CATEGORY_PASSWORD
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CATEGORY_URL
 import com.dashlane.csvimport.matchcsvfields.MatchCsvFieldsActivity.Companion.CATEGORY_USERNAME
-import com.dashlane.csvimport.R
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.util.DiffUtilComparator
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 import kotlinx.parcelize.Parcelize
 
@@ -18,7 +18,7 @@ import kotlinx.parcelize.Parcelize
 internal data class MatchCsvFieldsItem(
     val id: Int,
     val title: String,
-    @Category val category: Int?
+    @Category val category: Int?,
 ) : DashlaneRecyclerAdapter.ViewTypeProvider,
     DiffUtilComparator<MatchCsvFieldsItem>,
     Parcelable {
@@ -48,7 +48,7 @@ internal data class MatchCsvFieldsItem(
     companion object {
         private val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.list_item_custom_csv_import,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 }

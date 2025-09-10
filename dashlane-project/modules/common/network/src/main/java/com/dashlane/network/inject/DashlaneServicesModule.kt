@@ -2,17 +2,15 @@ package com.dashlane.network.inject
 
 import com.dashlane.network.webservices.DownloadFileService
 import com.dashlane.network.webservices.UploadFileService
-import com.dashlane.server.api.dagger.DashlaneApiEndpointsModule
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 
-@Module(includes = [DashlaneApiEndpointsModule::class])
+@Module
 @InstallIn(SingletonComponent::class)
 class DashlaneServicesModule {
-
     @Provides
     fun getDownloadFileService(retrofit: Retrofit): DownloadFileService {
         

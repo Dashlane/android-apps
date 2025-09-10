@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/generate_public_api_key.json",
+  "type": "object",
+  "description": "When an admin goes through the steps of generating a new public API key. The public_api_key_step property can take different values depending on which step the Admin is facing.",
+  "metas": {
+    "area": "tac"
+  },
+  "properties": {
+    "name": {
+      "const": "generate_public_api_key"
+    },
+    "public_api_key_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/integrations.json#/definitions/public_api_key_step"
+    }
+  },
+  "required": [
+    "name",
+    "public_api_key_step"
+  ],
+  "additionalProperties": false
+}

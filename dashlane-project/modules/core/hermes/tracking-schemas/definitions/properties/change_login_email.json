@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/change_login_email.json",
+  "type": "object",
+  "description": "Definition for Change Login Email events",
+  "definitions": {
+    "change_login_email_flow_step": {
+      "description": "Captures various steps in the Change Login Email flow.",
+      "type": "string",
+      "enum": [
+        "cancel_email_change",
+        "error",
+        "resend_verification_code",
+        "start_email_change",
+        "start_email_change_bulk",
+        "submit_email_change",
+        "successful_email_change",
+        "verify_token"
+      ]
+    },
+    "change_login_error": {
+      "description": "Captures various errors that can appear during the Change Login Email flow.",
+      "type": "string",
+      "enum": [
+        "email_in_pending_request",
+        "existing_email",
+        "generic",
+        "invalid_domain",
+        "invalid_email",
+        "same_email",
+        "wrong_token"
+      ]
+    }
+  }
+}

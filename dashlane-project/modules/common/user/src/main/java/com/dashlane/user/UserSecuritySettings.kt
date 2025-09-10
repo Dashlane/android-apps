@@ -10,14 +10,16 @@ data class UserSecuritySettings(
     val isU2fEnabled: Boolean = false,
     val isSso: Boolean = false,
 ) {
-    constructor(@UserSecurityFlags flags: Int) : this(
+    constructor(
+        @UserSecurityFlags flags: Int,
+    ) : this(
         flags == SECURITY_TOKEN,
         (flags and SECURITY_TOTP) != 0,
         (flags and SECURITY_TOTP_2) != 0,
         (flags and SECURITY_FLAG_DUO) != 0,
         (flags and SECURITY_FLAG_U2F) != 0,
         (flags and SECURITY_FLAG_SSO) != 0,
-        )
+    )
 
     
     fun asFlags(): Int {
@@ -59,7 +61,7 @@ data class UserSecuritySettings(
             SECURITY_FLAG_U2F,
             SECURITY_FLAG_SSO,
         ],
-        flag = true
+        flag = true,
     )
     annotation class UserSecurityFlags
 

@@ -18,7 +18,7 @@ import androidx.core.widget.TextViewCompat
 import com.dashlane.R
 import com.dashlane.design.component.compat.view.BadgeView
 import com.dashlane.design.component.compat.view.ButtonMediumView
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.dashlane.util.DeviceUtils
 import com.dashlane.util.dpToPx
@@ -35,16 +35,14 @@ data class LinkedWebsitesItem(
     val getUrlValue: (String, String) -> String = { _, _ -> defaultUrl },
     val removeWebsiteListener: (LinkedWebsitesItem) -> Unit = {},
     val openWebsiteListener: (LinkedWebsitesItem) -> Unit,
-    val uid: String = UUID.randomUUID().toString()
+    val uid: String = UUID.randomUUID().toString(),
 ) : DashlaneRecyclerAdapter.ViewTypeProvider {
-
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = DashlaneRecyclerAdapter.ViewType(
         R.layout.item_linked_websites,
-        ViewHolder::class.java
+        ViewHolder::class.java,
     )
 
     class ViewHolder(v: View) : EfficientViewHolder<LinkedWebsitesItem>(v) {
-
         private val textChangerListener = object : TextWatcher {
             lateinit var actualItem: LinkedWebsitesItem
 
@@ -115,16 +113,14 @@ data class LinkedAppsItem(
     val removeAppListener: (LinkedAppsItem) -> Unit,
     val openAppListener: (LinkedAppsItem) -> Unit,
     val isEditable: Boolean,
-    val isPageEditMode: Boolean
+    val isPageEditMode: Boolean,
 ) : DashlaneRecyclerAdapter.ViewTypeProvider {
-
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = DashlaneRecyclerAdapter.ViewType(
         R.layout.item_linked_apps,
-        ViewHolder::class.java
+        ViewHolder::class.java,
     )
 
     class ViewHolder(v: View) : EfficientViewHolder<LinkedAppsItem>(v) {
-
         override fun updateView(context: Context, item: LinkedAppsItem?) {
             item ?: return
             view.findViewById<TextView>(R.id.app_name).apply {
@@ -161,16 +157,17 @@ data class LinkedAppsItem(
     }
 }
 
-data class LinkedServicesHeaderItem(@StringRes val title: Int, val locked: Boolean) :
+data class LinkedServicesHeaderItem(
+    @StringRes val title: Int,
+    val locked: Boolean,
+) :
     DashlaneRecyclerAdapter.ViewTypeProvider {
-
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = DashlaneRecyclerAdapter.ViewType(
         R.layout.item_linked_services_header,
-        ViewHolder::class.java
+        ViewHolder::class.java,
     )
 
     class ViewHolder(v: View) : EfficientViewHolder<LinkedServicesHeaderItem>(v) {
-
         override fun updateView(context: Context, item: LinkedServicesHeaderItem?) {
             item ?: return
             view.findViewById<TextView>(R.id.title).apply {
@@ -192,16 +189,14 @@ data class LinkedServicesHeaderItem(@StringRes val title: Int, val locked: Boole
 
 data class LinkedWebsitesAddItem(
     @StringRes val title: Int,
-    val onButtonCLick: (Int) -> Unit
+    val onButtonCLick: (Int) -> Unit,
 ) : DashlaneRecyclerAdapter.ViewTypeProvider {
-
     override fun getViewType(): DashlaneRecyclerAdapter.ViewType<*> = DashlaneRecyclerAdapter.ViewType(
         R.layout.item_linked_websites_add_button,
-        ViewHolder::class.java
+        ViewHolder::class.java,
     )
 
     class ViewHolder(v: View) : EfficientViewHolder<LinkedWebsitesAddItem>(v) {
-
         override fun updateView(context: Context, item: LinkedWebsitesAddItem?) {
             item?.let {
                 (view.findViewById<ButtonMediumView>(R.id.add_website_button)).apply {

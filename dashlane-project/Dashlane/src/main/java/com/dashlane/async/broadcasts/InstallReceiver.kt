@@ -6,8 +6,8 @@ import android.content.Intent
 import com.adjust.sdk.AdjustReferrerReceiver
 import com.dashlane.analytics.install.InstallTrackingManager
 import com.dashlane.async.SyncBroadcastManager
+import com.dashlane.common.logger.adjust.AdjustWrapper
 import com.dashlane.debug.DeveloperUtilities.systemIsInDebug
-import com.dashlane.logger.AdjustWrapper
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.utils.coroutines.inject.qualifiers.ApplicationCoroutineScope
 import com.dashlane.utils.coroutines.inject.qualifiers.DefaultCoroutineDispatcher

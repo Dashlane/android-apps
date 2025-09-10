@@ -13,9 +13,8 @@ class PopupMenuManageUserAccepted(
     isAdmin: Boolean,
     isItemInCollection: Boolean,
     private val onChangePermission: (SharingPermission) -> Unit,
-    private val onAskRevokeUser: () -> Unit
+    private val onAskRevokeUser: () -> Unit,
 ) : PopupMenu(context, anchor), PopupMenu.OnMenuItemClickListener {
-
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.revoke -> onAskRevokeUser()

@@ -14,5 +14,6 @@ interface LockHelper : LockNavigationHelper, LockWatcher {
 
     
     fun startAutoLockGracePeriod()
+
     fun startAutoLockGracePeriod(duration: Duration)
 }

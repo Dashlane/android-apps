@@ -13,7 +13,7 @@ class CharacterColor(private val context: Context) {
                 ForegroundColorSpan(this),
                 index,
                 min(index + 1, charSequence.length),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
             )
         }
     }

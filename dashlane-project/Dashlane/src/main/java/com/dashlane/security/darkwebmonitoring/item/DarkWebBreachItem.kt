@@ -7,19 +7,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import com.dashlane.R
-import com.dashlane.security.identitydashboard.breach.BreachWrapper
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.breach.BreachWrapper
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import com.dashlane.ui.thumbnail.ThumbnailDomainIconView
 import com.skocken.efficientadapter.lib.viewholder.EfficientViewHolder
 
 data class DarkWebBreachItem(val breach: BreachWrapper) : DashlaneRecyclerAdapter.ViewTypeProvider {
-
     var selected = false
 
     override fun getViewType() = VIEW_TYPE
 
     class ViewHolder(v: View) : EfficientViewHolder<DarkWebBreachItem>(v) {
-
         override fun updateView(context: Context, item: DarkWebBreachItem?) {
             item ?: return
             val newAlertIcon = view.findViewById<ImageView>(R.id.new_alert)
@@ -58,7 +56,7 @@ data class DarkWebBreachItem(val breach: BreachWrapper) : DashlaneRecyclerAdapte
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.item_dark_web_breach,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 }

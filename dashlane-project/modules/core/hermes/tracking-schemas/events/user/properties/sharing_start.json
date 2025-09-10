@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/sharing_start.json",
+  "type": "object",
+  "description": "Event triggered when a user starts a sharing flow\r\r\r\rWARNING: The structure shown here might not be fully implemented. Please check the implementation status here\r\rhttps://confluence.dashlane.com/pages/viewpage.action?pageId=350869743#ImplementationstatusofSharingandVaulttracking-update_collection",
+  "metas": {
+    "area": "sharing"
+  },
+  "properties": {
+    "name": {
+      "const": "sharing_start"
+    },
+    "collection_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/collection_id"
+    },
+    "item_id": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/item_id"
+    },
+    "origin": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/origin"
+    },
+    "sharing_flow_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/sharing_flow_type"
+    }
+  },
+  "required": [
+    "name",
+    "origin",
+    "sharing_flow_type"
+  ],
+  "additionalProperties": false
+}

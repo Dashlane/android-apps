@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/login.json",
+  "type": "object",
+  "description": "Authentication Login",
+  "metas": {
+    "area": "authentication",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "login"
+    },
+    "is_backup_code": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/is_backup_code"
+    },
+    "is_first_login": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/is_first_login"
+    },
+    "mode": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/mode"
+    },
+    "status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/status"
+    },
+    "verification_mode": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/verification_mode"
+    }
+  },
+  "required": [
+    "name",
+    "status"
+  ],
+  "additionalProperties": false
+}

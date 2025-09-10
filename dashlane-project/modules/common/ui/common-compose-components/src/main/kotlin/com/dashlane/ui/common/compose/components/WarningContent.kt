@@ -42,7 +42,7 @@ fun WarningContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         Spacer(modifier = Modifier.weight(1f))
 
@@ -51,7 +51,7 @@ fun WarningContent(
             painter = painter,
             contentDescription = contentDescription,
             colorFilter = ColorFilter.tint(DashlaneTheme.colors.oddityBrand),
-            alignment = Alignment.Center
+            alignment = Alignment.Center,
         )
 
         Text(
@@ -61,7 +61,7 @@ fun WarningContent(
             color = DashlaneTheme.colors.textNeutralCatchy,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 32.dp, bottom = 16.dp)
+                .padding(top = 32.dp, bottom = 16.dp),
         )
         Text(
             text = description,
@@ -70,12 +70,12 @@ fun WarningContent(
             color = DashlaneTheme.colors.textNeutralStandard,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(bottom = 16.dp),
         )
         infoBox?.let {
             InfoboxMedium(
                 title = infoBox,
-                mood = Mood.Brand
+                mood = Mood.Brand,
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -84,7 +84,7 @@ fun WarningContent(
             primaryText = primaryButtonText,
             onPrimaryButtonClick = onPrimaryButtonClick,
             secondaryText = secondaryButtonText,
-            onSecondaryButtonClick = onSecondaryButtonClick
+            onSecondaryButtonClick = onSecondaryButtonClick,
         )
     }
 }

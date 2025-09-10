@@ -13,7 +13,7 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
 
     fun getDataChangeHistoryToSave(
         old: VaultItem<T>?,
-        new: VaultItem<T>
+        new: VaultItem<T>,
     ): VaultItem<SyncObject.DataChangeHistory>? {
         old ?: return null 
         try {
@@ -31,7 +31,7 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
                         syncObject = objectHistory.syncObject.copy {
                             objectTitle = newChangeSet.title
                             changeSets = addChangeSet(objectHistory.syncObject.changeSets, newChangeSet)
-                        }
+                        },
                     )
                     .copyWithAttrs { syncState = SyncState.MODIFIED }
             }
@@ -42,30 +42,28 @@ abstract class AbstractHistoryGenerator<T : SyncObject> {
 
     private fun addChangeSet(
         list: List<SyncObject.DataChangeHistory.ChangeSet>?,
-        element: SyncObject.DataChangeHistory.ChangeSet
+        element: SyncObject.DataChangeHistory.ChangeSet,
     ): List<SyncObject.DataChangeHistory.ChangeSet> {
         if (list == null) return listOf(element)
         return list + element
     }
 
-    private fun createOrGetDataChangeHistory(objectType: SyncObjectType, objectUid: String):
-        VaultItem<SyncObject.DataChangeHistory> {
+    private fun createOrGetDataChangeHistory(objectType: SyncObjectType, objectUid: String): VaultItem<SyncObject.DataChangeHistory> {
         val filter = DataChangeHistoryFilter(
             objectUid = objectUid,
-            objectType = objectType
+            objectType = objectType,
         )
         val data = query.query(filter)
 
         return data ?: createDataChangeHistory(objectType, objectUid)
     }
 
-    private fun createDataChangeHistory(objectType: SyncObjectType, objectUid: String):
-        VaultItem<SyncObject.DataChangeHistory> {
+    private fun createDataChangeHistory(objectType: SyncObjectType, objectUid: String): VaultItem<SyncObject.DataChangeHistory> {
         return VaultItem(
             syncObject = SyncObject.DataChangeHistory {
                 this.objectType = objectType.transactionType
                 this.objectId = objectUid
-            }
+            },
         )
     }
 

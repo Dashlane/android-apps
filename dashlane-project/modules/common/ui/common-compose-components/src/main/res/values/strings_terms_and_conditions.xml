@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="passwordless_terms_and_conditions_app_bar_title">Terms and conditions</string>
+    
+    <string name="passwordless_terms_and_conditions_title">Finish creating your account</string>
+    
+    <string name="passwordless_terms_and_conditions_description">Agree to Dashlane’s Terms of Service and Privacy Policy to create your account.</string>
+    
+    <string name="passwordless_terms_and_conditions_terms_of_services">I agree with the Terms of Service and Privacy Policy.*</string>
+    
+    <string name="passwordless_terms_and_conditions_terms_of_services_button">See Terms of Service</string>
+    
+    <string name="passwordless_terms_and_conditions_privacy_policy">I’d like to receive emails with tips and special offers for Dashlane.</string>
+    
+    <string name="passwordless_terms_and_conditions_privacy_policy_button">See Privacy Policy</string>
+    
+    <string name="passwordless_account_creation_create_account_button">Create your account</string>
+</resources>

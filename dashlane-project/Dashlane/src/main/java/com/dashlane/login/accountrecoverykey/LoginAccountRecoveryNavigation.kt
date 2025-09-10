@@ -1,17 +1,18 @@
 package com.dashlane.login.accountrecoverykey
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dashlane.authentication.RegisteredUserDevice
+import com.dashlane.changemasterpassword.ChangeMasterPasswordOrigin
 import com.dashlane.changemasterpassword.ChangeMasterPasswordScreen
 import com.dashlane.createaccount.passwordless.biometrics.BiometricsSetupScreen
+import com.dashlane.data.login.RegisteredUserDevice
+import com.dashlane.design.theme.DashlaneTheme
 import com.dashlane.hermes.generated.definitions.VerificationMode
 import com.dashlane.login.LoginStrategy
 import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryDestination.BiometricsSetup
@@ -25,9 +26,10 @@ import com.dashlane.login.accountrecoverykey.LoginAccountRecoveryDestination.Tot
 import com.dashlane.login.accountrecoverykey.enterark.EnterARKScreen
 import com.dashlane.login.accountrecoverykey.intro.IntroScreen
 import com.dashlane.login.accountrecoverykey.recovery.RecoveryScreen
-import com.dashlane.login.pages.token.compose.LoginTokenScreen
-import com.dashlane.login.pages.totp.compose.LoginTotpScreen
+import com.dashlane.login.token.LoginTokenScreen
+import com.dashlane.login.totp.LoginTotpScreen
 import com.dashlane.pin.setup.PinSetupScreen
+import com.dashlane.ui.common.compose.components.basescreen.scaffoldBackgroundAndInsets
 import com.dashlane.user.UserAccountInfo
 import com.dashlane.util.compose.navigateAndPopupToStart
 
@@ -47,11 +49,12 @@ fun LoginAccountRecoveryNavigation(
     mainViewModel.updateAccountType(accountType)
 
     Scaffold(
-        modifier = Modifier.safeDrawingPadding(),
+        modifier = Modifier.scaffoldBackgroundAndInsets(),
+        containerColor = DashlaneTheme.colors.backgroundAlternate,
     ) { contentPadding ->
         NavHost(
             startDestination = Intro(login),
-            navController = navController
+            navController = navController,
         ) {
             composable<Intro> {
                 IntroScreen(
@@ -62,7 +65,7 @@ fun LoginAccountRecoveryNavigation(
                     goToARK = { navController.navigateAndPopupToStart(EnterArk(login)) },
                     goToToken = { navController.navigateAndPopupToStart(EmailToken(login)) },
                     goToTOTP = { navController.navigateAndPopupToStart(Totp(login)) },
-                    onCancel = onCancel
+                    onCancel = onCancel,
                 )
             }
 
@@ -74,20 +77,20 @@ fun LoginAccountRecoveryNavigation(
                         mainViewModel.vaultKeyDecrypted(obfuscatedVaultKey)
                         when (accountType) {
                             UserAccountInfo.AccountType.InvisibleMasterPassword -> navController.navigate(
-                                PinSetup
+                                PinSetup,
                             )
                             UserAccountInfo.AccountType.MasterPassword -> navController.navigate(
-                                ChangeMasterPassword
+                                ChangeMasterPassword,
                             )
                         }
-                    }
+                    },
                 )
             }
             composable<EmailToken> {
                 LoginTokenScreen(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
-                    goToNext = { navController.navigate(EnterArk(login)) }
+                    goToNext = { navController.navigate(EnterArk(login)) },
                 )
             }
             composable<Totp> {
@@ -95,18 +98,16 @@ fun LoginAccountRecoveryNavigation(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     verificationMode = VerificationMode.OTP2,
-                    goToNext = { navController.navigate(EnterArk(login)) }
+                    goToNext = { navController.navigate(EnterArk(login)) },
                 )
             }
             composable<ChangeMasterPassword> {
                 ChangeMasterPasswordScreen(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
-                    goToNext = {
-                        mainViewModel.masterPasswordChanged(it)
-                        navController.navigateAndPopupToStart(Recovery)
-                    },
-                    goBack = { navController.popBackStack() }
+                    origin = ChangeMasterPasswordOrigin.AccountRecovery,
+                    goToNext = { navController.navigateAndPopupToStart(Recovery) },
+                    goBack = { navController.popBackStack() },
                 )
             }
             composable<Recovery> {
@@ -114,7 +115,7 @@ fun LoginAccountRecoveryNavigation(
                     modifier = Modifier.padding(contentPadding),
                     viewModel = hiltViewModel(),
                     onSuccess = onSuccess,
-                    onCancel = onCancel
+                    onCancel = onCancel,
                 )
             }
             composable<PinSetup> {
@@ -125,7 +126,7 @@ fun LoginAccountRecoveryNavigation(
                     onPinChosen = { pin ->
                         mainViewModel.pinSetup(pin)
                         navController.navigate(BiometricsSetup)
-                    }
+                    },
                 )
             }
             composable<BiometricsSetup> {
@@ -141,7 +142,7 @@ fun LoginAccountRecoveryNavigation(
                     onBiometricsEnabled = {
                         mainViewModel.onEnableBiometrics()
                         navController.navigateAndPopupToStart(Recovery)
-                    }
+                    },
                 )
             }
         }

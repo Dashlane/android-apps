@@ -8,17 +8,24 @@ import com.dashlane.collections.details.CollectionLimiter
 import com.dashlane.collections.spaceData
 import com.dashlane.server.api.endpoints.sharinguserdevice.Collection
 import com.dashlane.session.SessionManager
+import com.dashlane.sharing.SharingDataProvider
 import com.dashlane.storage.userdata.accessor.CollectionDataQuery
+import com.dashlane.storage.userdata.accessor.DataCounter
 import com.dashlane.storage.userdata.accessor.DataSaver
 import com.dashlane.storage.userdata.accessor.filter.CollectionFilter
+import com.dashlane.storage.userdata.accessor.filter.CounterFilter
+import com.dashlane.storage.userdata.accessor.filter.datatype.DataTypeFilter
+import com.dashlane.storage.userdata.accessor.filter.lock.DefaultLockFilter
+import com.dashlane.storage.userdata.accessor.filter.space.NoSpaceFilter
+import com.dashlane.storage.userdata.accessor.filter.status.DefaultStatusFilter
 import com.dashlane.teamspaces.manager.TeamSpaceAccessorProvider
 import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
-import com.dashlane.ui.screens.fragments.userdata.sharing.center.SharingDataProvider
 import com.dashlane.vault.VaultActivityLogger
 import com.dashlane.vault.model.SyncState
 import com.dashlane.vault.summary.SummaryObject
 import com.dashlane.vault.summary.toSummary
+import com.dashlane.xml.domain.SyncObjectType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,10 +43,23 @@ class CollectionsListViewModel @Inject constructor(
     private val collectionLimiter: CollectionLimiter,
     private val collectionDataQuery: CollectionDataQuery,
     private val dataSaver: DataSaver,
-    private val vaultActivityLogger: VaultActivityLogger
+    private val vaultActivityLogger: VaultActivityLogger,
+    private val dataCounter: DataCounter,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<ViewState>(ViewState.Loading(ViewData(emptyList())))
     val uiState = _uiState.asStateFlow()
+
+    private val hasNoCredentialOrSecureNotes
+        get() = dataCounter.count(
+            CounterFilter(
+                object : DataTypeFilter {
+                    override val dataTypes = arrayOf(SyncObjectType.AUTHENTIFIANT, SyncObjectType.SECURE_NOTE)
+                },
+                NoSpaceFilter,
+                DefaultLockFilter,
+                DefaultStatusFilter,
+            ),
+        ) == 0
 
     init {
         refreshCollections()
@@ -75,20 +95,42 @@ class CollectionsListViewModel @Inject constructor(
             val collections = collectionDataQuery.queryAll(
                 CollectionFilter().apply {
                     forCurrentSpace()
-                }
+                },
             )
             val sharedCollections = sharingDataProvider.getAcceptedCollections(needsAdminRights = false)
             val collectionLimit = collectionLimiter.checkCollectionLimit(isShared = false)
             val allCollections =
                 collections.mapNotNull { it.toCollectionViewData(collectionLimit) } + sharedCollections.mapNotNull {
-                    val size = sharingDataProvider.getAcceptedCollectionsItems(it.uuid).size
+                    val size = sharingDataProvider.getAcceptedCollectionsItems(it).size
                     it.toCollectionViewData(size, collectionLimit)
                 }
             val viewData = ViewData(allCollections.sortedBy { it.name })
             if (viewData.collections.isNotEmpty()) {
                 _uiState.emit(ViewState.List(viewData))
             } else {
-                _uiState.emit(ViewState.Empty(viewData))
+                val items = buildEmptyStateItems()
+                val showAddLogin = hasNoCredentialOrSecureNotes
+                _uiState.emit(
+                    ViewState.Empty(
+                        viewData = viewData,
+                        items = items,
+                        showAddLogin = showAddLogin,
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun buildEmptyStateItems(): Set<ViewState.Empty.Item> {
+        val canShareCollection = collectionLimiter.showCollectionSharingBenefitInOnboarding
+        return buildSet {
+            if (hasNoCredentialOrSecureNotes) {
+                add(ViewState.Empty.Item.ADD_LOGIN)
+            } else {
+                add(ViewState.Empty.Item.GROUP)
+            }
+            if (canShareCollection) {
+                add(ViewState.Empty.Item.SHARE)
             }
         }
     }
@@ -107,7 +149,7 @@ class CollectionsListViewModel @Inject constructor(
                 shareAllowed = shareAllowedAndEnabled,
                 shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN,
                 editAllowed = true,
-                deleteAllowed = true
+                deleteAllowed = true,
             )
         }
 
@@ -127,7 +169,7 @@ class CollectionsListViewModel @Inject constructor(
             shareAllowed = isAdmin,
             shareLimitedByTeam = userLimit == CollectionLimiter.UserLimit.NOT_ADMIN,
             editAllowed = isAdmin,
-            deleteAllowed = isAdmin
+            deleteAllowed = isAdmin,
         )
     }
 
@@ -172,8 +214,8 @@ class CollectionsListViewModel @Inject constructor(
                     viewData = it.viewData.copy(
                         collections = it.viewData.collections.filterNot { collectionViewData ->
                             collectionViewData.id == collectionId
-                        }
-                    )
+                        },
+                    ),
                 )
             }
         }.onFailure {

@@ -36,9 +36,8 @@ class LinkedServicesDataProvider @Inject constructor(
     private val activityLogger: VaultActivityLogger,
     private val smartSpaceCategorizationManager: SmartSpaceCategorizationManager,
     private val linkedServicesHelper: LinkedServicesHelper,
-    private val dataSync: DataSync
+    private val dataSync: DataSync,
 ) : LinkedServicesContract.DataProvider {
-
     @Suppress("UNCHECKED_CAST")
     override suspend fun getItem(itemId: String): VaultItem<SyncObject.Authentifiant>? {
         val query = vaultFilter { specificUid(itemId) }
@@ -48,15 +47,15 @@ class LinkedServicesDataProvider @Inject constructor(
     override suspend fun save(
         vaultItem: VaultItem<SyncObject.Authentifiant>,
         linkedWebsites: List<String>,
-        linkedApps: List<String>
+        linkedApps: List<String>,
     ): Boolean {
         val websites = linkedServicesHelper.replaceAllLinkedDomains(
             vaultItem.syncObject.linkedServices,
-            linkedWebsites
+            linkedWebsites,
         ).associatedDomains
         val apps = linkedServicesHelper.replaceAllLinkedAppsByUser(
             vaultItem.syncObject.linkedServices,
-            linkedApps
+            linkedApps,
         ).associatedAndroidApps
         val toSaveItem = vaultItem.copySyncObject {
             this.linkedServices = SyncObject.Authentifiant.LinkedServices(apps, websites)
@@ -73,7 +72,7 @@ class LinkedServicesDataProvider @Inject constructor(
             getEditedField(
                 updatedLinkedWebsites?.first,
                 updatedLinkedWebsites?.second,
-                removedApps
+                removedApps,
             ),
             vaultItem.uid,
             ItemType.CREDENTIAL,
@@ -81,7 +80,7 @@ class LinkedServicesDataProvider @Inject constructor(
             url = vaultItem.urlForGoToWebsite,
             addedWebsites = updatedLinkedWebsites?.first,
             removedWebsites = updatedLinkedWebsites?.second,
-            removedApps = removedApps
+            removedApps = removedApps,
         )
         activityLogger.sendAuthentifiantActivityLog(vaultItem = vaultItem, action = action)
 
@@ -97,7 +96,7 @@ class LinkedServicesDataProvider @Inject constructor(
     private fun getEditedField(
         addedWebsites: List<String>?,
         removedWebsites: List<String>?,
-        removedApps: List<String>?
+        removedApps: List<String>?,
     ): List<Field> {
         return mutableListOf<Field>().apply {
             if (!addedWebsites.isNullOrEmpty() || !removedWebsites.isNullOrEmpty()) {
@@ -111,12 +110,12 @@ class LinkedServicesDataProvider @Inject constructor(
 
     override fun getDuplicateWebsitesItem(
         vaultItem: VaultItem<SyncObject.Authentifiant>?,
-        websites: List<String>
+        websites: List<String>,
     ): Pair<String, String>? {
         
         val addedWebsites = getUpdatedLinkedWebsites(
             websites,
-            vaultItem?.syncObject?.linkedServices?.associatedDomains?.map { it.domain ?: "" }
+            vaultItem?.syncObject?.linkedServices?.associatedDomains?.map { it.domain ?: "" },
         ).first
 
         checkOtherCredentialsDuplicate(addedWebsites, vaultItem?.syncObject)?.let {
@@ -127,7 +126,7 @@ class LinkedServicesDataProvider @Inject constructor(
 
     private fun checkOtherCredentialsDuplicate(
         addedWebsites: List<String>,
-        syncObject: SyncObject.Authentifiant?
+        syncObject: SyncObject.Authentifiant?,
     ): Pair<String, String>? {
         val allAuthentifiant = genericDataQuery
             .queryAll(vaultFilter { specificDataType(SyncObjectType.AUTHENTIFIANT) })
@@ -148,7 +147,7 @@ class LinkedServicesDataProvider @Inject constructor(
 
     private fun checkSelfDuplicate(
         addedWebsites: List<String>,
-        vaultItem: VaultItem<SyncObject.Authentifiant>?
+        vaultItem: VaultItem<SyncObject.Authentifiant>?,
     ): Pair<String, String>? {
         addedWebsites.forEach { website ->
             val isAutomaticallyAddedWebsitesDuplicate =
@@ -166,7 +165,7 @@ class LinkedServicesDataProvider @Inject constructor(
 
     private fun credentialHasWebsite(credential: SummaryObject.Authentifiant, website: String) =
         credential.urlForUI()?.matchDomain(website) == true ||
-                credential.linkedServices?.associatedDomains?.any { linkedService ->
-                    linkedService.domain.matchDomain(website)
-                } == true
+            credential.linkedServices?.associatedDomains?.any { linkedService ->
+                linkedService.domain.matchDomain(website)
+            } == true
 }

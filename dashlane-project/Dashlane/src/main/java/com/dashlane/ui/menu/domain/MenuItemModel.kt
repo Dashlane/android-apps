@@ -9,18 +9,18 @@ sealed class MenuItemModel {
         data class UserProfile(
             val userName: String,
             @StringRes val userStatus: Int,
-            val canUpgrade: Boolean
+            val canUpgrade: Boolean,
         ) : Header()
 
         data class TeamspaceProfile(
             val icon: TeamspaceIcon,
             val name: SpaceName,
-            val mode: Boolean
+            val mode: Boolean,
         ) : Header()
 
         data class EnforcedTeamspaceProfile(
             val userName: String,
-            val spaceName: SpaceName
+            val spaceName: SpaceName,
         ) : Header()
     }
 
@@ -32,15 +32,19 @@ sealed class MenuItemModel {
         val isSelected: Boolean,
         val endIcon: EndIcon? = null,
         val premiumTag: PremiumTag? = null,
-        val callback: () -> Unit
+        val callback: () -> Unit,
     ) : MenuItemModel() {
         sealed class PremiumTag {
             data object PremiumOnly : PremiumTag()
+
             data class Trial(val remainingDays: Long) : PremiumTag()
         }
 
         sealed class EndIcon {
-            data class DotNotification(@StringRes val contentDescription: Int) : EndIcon()
+            data class DotNotification(
+                @StringRes val contentDescription: Int,
+            ) : EndIcon()
+
             data object NewLabel : EndIcon()
         }
     }
@@ -48,11 +52,14 @@ sealed class MenuItemModel {
     data class TeamspaceItem(
         val spaceName: SpaceName,
         val icon: TeamspaceIcon,
-        val onClick: () -> Unit
+        val onClick: () -> Unit,
     ) : MenuItemModel()
 
     data object Divider : MenuItemModel()
-    data class SectionHeader(@StringRes val titleResId: Int) : MenuItemModel()
+
+    data class SectionHeader(
+        @StringRes val titleResId: Int,
+    ) : MenuItemModel()
 
     data object LockoutFooter : MenuItemModel()
 }

@@ -31,7 +31,6 @@ class AutofillChangePasswordActivity :
     CoroutineScope,
     AutoFillResponseActivity(),
     AutofillChangePasswordResultHandler {
-
     override val coroutineContext: CoroutineContext
         get() = lifecycleScope.coroutineContext
 
@@ -68,11 +67,11 @@ class AutofillChangePasswordActivity :
 
     override fun onFinishWithResult(
         result: VaultItem<SyncObject.Authentifiant>,
-        oldItem: VaultItem<SyncObject.Authentifiant>
+        oldItem: VaultItem<SyncObject.Authentifiant>,
     ) {
         finishWithResult(
             itemToFill = result.toItemToFill(oldPassword = oldItem.syncObject.password),
-            matchType = MatchType.REGULAR
+            matchType = MatchType.REGULAR,
         )
     }
 
@@ -80,10 +79,11 @@ class AutofillChangePasswordActivity :
         when (error) {
             USER_LOGGED_OUT,
             DATABASE_ERROR,
-            NO_MATCHING_CREDENTIAL -> {
+            NO_MATCHING_CREDENTIAL,
+            -> {
                 toaster.show(
                     getString(error.resId),
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 )
             }
             else -> {
@@ -112,7 +112,7 @@ class AutofillChangePasswordActivity :
         internal fun getAuthIntentSenderForChangePassword(
             context: Context,
             summary: AutoFillHintSummary,
-            forKeyboard: Boolean
+            forKeyboard: Boolean,
         ) = createIntentSender(context, buildIntent(context, summary, forKeyboard))
     }
 }

@@ -31,9 +31,8 @@ class ItemScreenConfigurationIdCardProvider(
     private val genericDataQuery: GenericDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -41,12 +40,12 @@ class ItemScreenConfigurationIdCardProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.IdCard>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -58,7 +57,7 @@ class ItemScreenConfigurationIdCardProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val title = context.getString(R.string.id_card)
         return ItemHeader(
@@ -75,7 +74,7 @@ class ItemScreenConfigurationIdCardProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         
         val identitySubviews = createIdentitySubviews(
@@ -86,7 +85,7 @@ class ItemScreenConfigurationIdCardProvider(
             editMode = editMode,
             listener = listener,
             item = item,
-            identityAdapter = IdCardIdentityAdapter
+            identityAdapter = IdCardIdentityAdapter,
         )
 
         val subviews = listOfNotNull(
@@ -104,7 +103,7 @@ class ItemScreenConfigurationIdCardProvider(
                 context.getString(R.string.issue_date),
                 CopyField.IdsIssueDate,
                 VaultItem<*>::copyForUpdatedDeliveryDate,
-                vaultItemCopy
+                vaultItemCopy,
             ),
             
             createIdDateField(
@@ -116,7 +115,7 @@ class ItemScreenConfigurationIdCardProvider(
                 context.getString(R.string.expiery_date),
                 CopyField.IdsExpirationDate,
                 VaultItem<*>::copyForUpdatedExpirationDate,
-                vaultItemCopy
+                vaultItemCopy,
             ),
             
             createTeamspaceField(subViewFactory, item),
@@ -127,7 +126,7 @@ class ItemScreenConfigurationIdCardProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
 
         return identitySubviews + subviews
@@ -135,14 +134,14 @@ class ItemScreenConfigurationIdCardProvider(
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.IdCard>
+        item: VaultItem<SyncObject.IdCard>,
     ): ItemSubView<*>? {
         return if (teamspaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamspaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -153,14 +152,14 @@ class ItemScreenConfigurationIdCardProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.IdCard>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val number = item.syncObject.number
         val numberView = subViewFactory.createSubViewString(
             context.getString(R.string.passport_hint_number),
             number,
             false,
-            VaultItem<*>::copyForUpdatedNumber
+            VaultItem<*>::copyForUpdatedNumber,
         )
         return if (numberView == null || editMode) {
             numberView
@@ -171,8 +170,8 @@ class ItemScreenConfigurationIdCardProvider(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.IdsNumber,
                     action = {},
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -187,7 +186,7 @@ class ItemScreenConfigurationIdCardProvider(
 
         override fun withGender(
             item: VaultItem<SyncObject.IdCard>,
-            gender: SyncObject.Gender?
+            gender: SyncObject.Gender?,
         ): VaultItem<SyncObject.IdCard> =
             item.copySyncObject { sex = gender }
 
@@ -198,8 +197,7 @@ class ItemScreenConfigurationIdCardProvider(
 
         override fun linkedIdentity(item: VaultItem<SyncObject.IdCard>) = item.syncObject.linkedIdentity
 
-        override fun withLinkedIdentity(item: VaultItem<SyncObject.IdCard>, identity: String?):
-            VaultItem<SyncObject.IdCard> =
+        override fun withLinkedIdentity(item: VaultItem<SyncObject.IdCard>, identity: String?): VaultItem<SyncObject.IdCard> =
             item.copySyncObject { linkedIdentity = identity }
     }
 }

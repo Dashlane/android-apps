@@ -4,7 +4,6 @@ import com.dashlane.util.isSemanticallyNull
 import com.google.gson.Gson
 
 class AttachmentsParser {
-
     fun parse(jsonAttachments: String?): Array<Attachment> {
         if (jsonAttachments.isSemanticallyNull()) {
             return emptyArray()

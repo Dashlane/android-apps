@@ -5,9 +5,9 @@ import com.dashlane.authentication.RemoteKeyFactory
 import com.dashlane.authentication.RemoteKeyFactoryImpl
 import com.dashlane.authentication.SsoServerKeyFactory
 import com.dashlane.authentication.SsoServerKeyFactoryImpl
-import com.dashlane.authentication.UuidFactory
-import com.dashlane.authentication.UuidFactoryImpl
 import com.dashlane.login.DeviceRegistrationInfoImpl
+import com.dashlane.util.uuid.UuidFactory
+import com.dashlane.util.uuid.UuidFactoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

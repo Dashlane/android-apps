@@ -9,6 +9,10 @@
     <string name="action_item_activate_pin_description">Access your account the safe and simple way by using a PIN.</string>
     <string name="action_item_auto_fill_title">Log in to apps instantly</string>
     <string name="action_item_auto_fill_description">Activate Autofill to log in to apps without typing a password.</string>
+    
+    <string name="action_item_chrome_auto_fill_title">Enable Dashlane Autofill in Chrome</string>
+    
+    <string name="action_item_chrome_auto_fill_description">Due to a recent Chrome update, Dashlane Autofill needs your permission again to keep filling your passwords smoothly. Activate it now to continue autofilling securely in Chrome.</string>
     <string name="action_item_undo_dismiss_description">Item deleted.</string>
     <string name="action_item_undo_dismiss_cta">Undo</string>
     <string name="action_item_zero_password_title">Getting started</string>
@@ -30,12 +34,7 @@
     <string name="section_header_see_all_button_with_count">See all (%1$d)</string>
     <string name="section_header_see_all_button">See all</string>
 
-    <string name="section_header_breach_alert_title_no_count">Security</string>
-    <string name="section_header_sharing_title_no_count">Sharing</string>
-    <string name="section_header_getting_started_title_no_count">Getting Started</string>
-    <string name="section_header_your_account_title_no_count">Your Account</string>
-    <string name="section_header_whats_new_title_no_count">What’s New</string>
-    <string name="section_header_promotions_title_no_count">Promotions</string>
+
 
     <string name="action_item_security_alert_title">Security Alert</string>
     <string name="action_item_security_alert_description">%1$s has been breached and your account may be compromised. Take action to resolve the alert.</string>

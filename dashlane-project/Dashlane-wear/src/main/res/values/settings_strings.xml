@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  
+  <string name="settings_login_email">Email</string>
+  
+  <string name="settings_plan_name">Subscription</string>
+  
+  <string name="settings_logout_button">Log out</string>
+  
+  <string name="settings_set_credential_provider_button">Enable Dashlane as credential provider</string>
+  
+  <string name="settings_app_version">Version</string>
+  
+  <string name="settings_logout_warning">If you log out, we will remove this device from your Dashlane account. Are you sure you want to log out?</string>
+</resources>

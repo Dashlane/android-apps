@@ -12,7 +12,6 @@ class SentryCrashReporter(
     context: Context,
     crashDeviceId: String,
 ) : CrashReporterManager.Client {
-
     init {
         SentryAndroid.init(context) { options ->
             options.release = "com.dashlane@${BuildConfig.VERSION_NAME}.${BuildConfig.VERSION_CODE}"

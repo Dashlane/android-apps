@@ -23,9 +23,8 @@ class TokenReceiverActivityListener @Inject constructor(
     private val sessionManager: SessionManager,
     private val lockRepository: LockRepository,
     private val toaster: Toaster,
-    private val loginTokensModule: LoginTokensModule
+    private val loginTokensModule: LoginTokensModule,
 ) : AbstractActivityLifecycleListener() {
-
     private var receiver: NewTokenReceiver? = null
 
     override fun onActivityResumed(activity: Activity) {
@@ -33,7 +32,7 @@ class TokenReceiverActivityListener @Inject constructor(
         receiver = NewTokenReceiver(activity)
         LocalBroadcastManager.getInstance(activity).registerReceiver(
             receiver!!,
-            IntentFilter(BroadcastConstants.NEW_TOKEN_BROADCAST)
+            IntentFilter(BroadcastConstants.NEW_TOKEN_BROADCAST),
         )
         checkForTokenMessage(activity)
     }
@@ -54,15 +53,15 @@ class TokenReceiverActivityListener @Inject constructor(
             val intent = activity.intent
             if (intent != null && intent.getBooleanExtra(
                     NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION,
-                    false
+                    false,
                 )
             ) {
                 val user = intent.getStringExtra(
-                    NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION_USER
+                    NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION_USER,
                 )
                 val alreadyLoggedIn = intent.getBooleanExtra(
                     NavigationConstants.USER_COMES_FROM_EXTERNAL_PUSH_TOKEN_NOTIFICATION_ALREADY_LOGGED_IN,
-                    false
+                    false,
                 )
                 if (username == user && alreadyLoggedIn) {
                     toaster.show(R.string.push_token_toast_unlock_to_get_token, Toast.LENGTH_LONG)
@@ -76,10 +75,10 @@ class TokenReceiverActivityListener @Inject constructor(
 
         if (tokenGcmShouldNotify) {
             TokenChecker(
-                loginTokensModule
+                loginTokensModule,
             ).checkAndDisplayTokenIfNeeded(
                 activity,
-                username
+                username,
             )
         }
     }

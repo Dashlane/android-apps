@@ -36,9 +36,8 @@ class ItemScreenConfigurationFiscalStatementProvider(
     private val genericDataQuery: GenericDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -46,12 +45,12 @@ class ItemScreenConfigurationFiscalStatementProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.FiscalStatement>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -64,7 +63,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val fiscalTitle = context.getString(R.string.fiscal_statement)
         return ItemHeader(
@@ -81,7 +80,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         
         val onlineNumberView = createOnlineNumberField(context, item, editMode, subViewFactory)
@@ -96,7 +95,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
             listener = listener,
             item = item,
             identityAdapter = FiscalStatementIdentityAdapter,
-            fullNameOnly = true
+            fullNameOnly = true,
         )
 
         return identitySubviews + listOfNotNull(
@@ -114,20 +113,20 @@ class ItemScreenConfigurationFiscalStatementProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.FiscalStatement>
+        item: VaultItem<SyncObject.FiscalStatement>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -138,14 +137,14 @@ class ItemScreenConfigurationFiscalStatementProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.FiscalStatement>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val number = item.syncObject.fiscalNumber
         val numberView = subViewFactory.createSubViewString(
             context.getString(R.string.tax_statement_hint_number),
             number,
             false,
-            VaultItem<*>::copyForUpdatedFiscalNumber
+            VaultItem<*>::copyForUpdatedFiscalNumber,
         )
         return if (numberView == null || editMode) {
             numberView
@@ -156,8 +155,8 @@ class ItemScreenConfigurationFiscalStatementProvider(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.TaxNumber,
                     action = {},
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -166,7 +165,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
         context: Context,
         item: VaultItem<SyncObject.FiscalStatement>,
         editMode: Boolean,
-        subViewFactory: SubViewFactory
+        subViewFactory: SubViewFactory,
     ): ItemSubView<String>? {
         
         val number = item.syncObject.teledeclarantNumber
@@ -174,7 +173,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
             context.getString(R.string.tax_statement_hint_online_number),
             number,
             false,
-            VaultItem<*>::copyForUpdatedOnlineNumber
+            VaultItem<*>::copyForUpdatedOnlineNumber,
         )?.apply {
             if (editMode) {
                 val view = this as ItemEditValueTextSubView
@@ -192,8 +191,8 @@ class ItemScreenConfigurationFiscalStatementProvider(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.TaxNumber,
                     action = {},
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
@@ -203,7 +202,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
         item: VaultItem<SyncObject.FiscalStatement>,
         editMode: Boolean,
         onlineNumberView: ItemSubView<String>?,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ItemSubView<*> =
         createCountryField(
             context,
@@ -220,7 +219,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
                         listener.notifySubViewChanged(onlineNumberView)
                     }
                 }
-            }
+            },
         )
 
     private object FiscalStatementIdentityAdapter : IdentityAdapter<SyncObject.FiscalStatement> {
@@ -233,7 +232,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
 
         override fun withGender(
             item: VaultItem<SyncObject.FiscalStatement>,
-            gender: SyncObject.Gender?
+            gender: SyncObject.Gender?,
         ): VaultItem<SyncObject.FiscalStatement> = item.copySyncObject { }
 
         override fun birthDate(item: VaultItem<SyncObject.FiscalStatement>) = null
@@ -243,8 +242,7 @@ class ItemScreenConfigurationFiscalStatementProvider(
 
         override fun linkedIdentity(item: VaultItem<SyncObject.FiscalStatement>) = item.syncObject.linkedIdentity
 
-        override fun withLinkedIdentity(item: VaultItem<SyncObject.FiscalStatement>, identity: String?):
-            VaultItem<SyncObject.FiscalStatement> =
+        override fun withLinkedIdentity(item: VaultItem<SyncObject.FiscalStatement>, identity: String?): VaultItem<SyncObject.FiscalStatement> =
             item.copySyncObject { linkedIdentity = identity }
     }
 }

@@ -1,0 +1,259 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json",
+  "type": "object",
+  "description": "Definition for attribution parameters",
+  "definitions": {
+    "adid": {
+      "description": "adjust device id, Identifying LAT users on iOS without idfa information",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "android": {
+      "type": "object",
+      "description": "Android specific attribution parameters",
+      "properties": {
+        "adid": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/adid"
+        },
+        "advertising_id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/advertising_id"
+        },
+        "android_id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/android_id"
+        }
+      },
+      "required": [
+        "android_id"
+      ],
+      "additionalProperties": false
+    },
+    "android_id": {
+      "description": "Android only - Android unique device ID. Lowercase, without hyphens",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "gclid": {
+      "description": "Google Click ID (GCLID). Google adwords tracking id. No format to enforce",
+      "type": "string",
+      "pattern": ".+"
+    },
+    "advertising_id": {
+      "description": "Raw Google advertising ID. Lowercase, with hyphens",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "heap_identity": {
+      "description": "Identity of heap user",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "has_cookie": {
+      "description": "if the device has the web cookie to retrieve attribution information",
+      "type": "boolean"
+    },
+    "idfa": {
+      "description": "iOS only - Identifier for Advertisers (IDFA) is a random device identifier assigned by Apple to a user’s device. Uppercase, with hyphens",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "idfv": {
+      "description": "iOS only - Identifier for Advertisers (IDFA) is a random device identifier assigned by Apple to a user’s device. Uppercase, with hyphens",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "ios": {
+      "type": "object",
+      "description": "iOS specific attribution parameters",
+      "properties": {
+        "adid": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/adid"
+        },
+        "advertising_id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/advertising_id"
+        },
+        "idfa": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/idfa"
+        },
+        "idfv": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/idfv"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "everflow_transaction_id": {
+      "description": "Everflow transaction id",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_pathname": {
+      "description": "First visit utm pathname",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_referrer": {
+      "description": "First visit utm_referrer ",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_source": {
+      "description": "First visit utm_source ",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_campaign": {
+      "description": "First visit utm_campaign ",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_medium": {
+      "description": "First visit utm_medium ",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_content": {
+      "description": "First visit utm_content ",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_term": {
+      "description": "First visit utm_term ",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_visit_timestamp": {
+      "description": "First visit utm_visit_timestamp ",
+      "type": "integer"
+    },
+    "utm_last_click_pathname": {
+      "description": "Last visit utm_last_click_pathname",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_last_click_referrer": {
+      "description": "Last visit utm_last_click_referrer",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_last_click_source": {
+      "description": "Last visit utm_last_click_source",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_last_click_campaign": {
+      "description": "Last visit utm_last_click_campaign",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_last_click_medium": {
+      "description": "Last visit utm_last_click_medium",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_last_click_content": {
+      "description": "Last visit utm_last_click_content",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_last_click_term": {
+      "description": "Last visit utm_last_click_term",
+      "type": "string",
+      "pattern": "^.*$"
+    },
+    "utm_last_click_visit_timestamp": {
+      "description": "Last visit utm_last_click_visit_timestamp",
+      "type": "integer"
+    },
+    "web": {
+      "type": "object",
+      "description": "Web specific attribution parameters",
+      "properties": {
+        "has_cookie": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/has_cookie"
+        },
+        "heap_identity": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/heap_identity"
+        },
+        "gclid": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/gclid"
+        },
+        "everflow_transaction_id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/everflow_transaction_id"
+        },
+        "utm_pathname": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_pathname"
+        },
+        "utm_referrer": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_referrer"
+        },
+        "utm_source": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_source"
+        },
+        "utm_campaign": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_campaign"
+        },
+        "utm_medium": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_medium"
+        },
+        "utm_content": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_content"
+        },
+        "utm_term": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_term"
+        },
+        "utm_visit_timestamp": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_visit_timestamp"
+        },
+        "utm_last_click_pathname": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_pathname"
+        },
+        "utm_last_click_referrer": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_referrer"
+        },
+        "utm_last_click_source": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_source"
+        },
+        "utm_last_click_campaign": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_campaign"
+        },
+        "utm_last_click_medium": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_medium"
+        },
+        "utm_last_click_content": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_content"
+        },
+        "utm_last_click_term": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_term"
+        },
+        "utm_last_click_visit_timestamp": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/utm_last_click_visit_timestamp"
+        }
+      },
+      "required": [
+        "has_cookie"
+      ],
+      "additionalProperties": false
+    },
+    "web_account_creation": {
+      "type": "object",
+      "description": "Web specific attribution parameters at account creation",
+      "properties": {
+        "has_cookie": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/has_cookie"
+        },
+        "heap_identity": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/heap_identity"
+        },
+        "gclid": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/gclid"
+        },
+        "everflow_transaction_id": {
+          "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/attribution.json#/definitions/everflow_transaction_id"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

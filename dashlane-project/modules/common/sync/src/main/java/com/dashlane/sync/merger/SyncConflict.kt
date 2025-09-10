@@ -10,13 +10,12 @@ import javax.inject.Inject
 import kotlin.jvm.Throws
 
 class SyncConflict @Inject constructor() {
-
     @Throws(DuplicateException::class)
     fun mergeConflicting(
         syncObjectType: SyncObjectType,
         backupSyncObject: SyncObject,
         outgoingSyncObject: SyncObject,
-        incomingSyncObject: SyncObject
+        incomingSyncObject: SyncObject,
     ): SyncObject {
         val backupXmlObject = backupSyncObject.toTransaction().data
         val outgoingXmlObject = outgoingSyncObject.toTransaction().data
@@ -50,6 +49,6 @@ class SyncConflict @Inject constructor() {
 
     internal class DuplicateException(
         message: String? = null,
-        cause: Throwable? = null
+        cause: Throwable? = null,
     ) : Exception(message, cause)
 }

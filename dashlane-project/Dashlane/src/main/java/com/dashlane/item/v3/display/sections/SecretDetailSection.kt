@@ -1,12 +1,8 @@
 package com.dashlane.item.v3.display.sections
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.dashlane.R
-import com.dashlane.design.component.InfoboxMedium
 import com.dashlane.item.v3.data.SecretFormData
 import com.dashlane.item.v3.display.fields.GenericField
 import com.dashlane.item.v3.display.fields.SectionContent
@@ -22,16 +18,7 @@ fun SecretDetailSection(
     onContentChanged: (String) -> Unit,
     onCopyContent: () -> Unit,
 ) {
-    if (!editMode) {
-        InfoboxMedium(
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .padding(horizontal = 16.dp),
-            title = stringResource(R.string.sharing_secret_on_web)
-        )
-    }
-
-    SectionContent(editMode = editMode) {
+    SectionContent(showCard = !editMode) {
         SectionTitle(title = stringResource(id = R.string.vault_secret_detail_section_title), editMode = editMode)
         GenericField(
             label = stringResource(id = R.string.secret_hint_title),

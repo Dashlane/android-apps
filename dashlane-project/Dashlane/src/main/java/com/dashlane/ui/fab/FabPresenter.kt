@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import com.dashlane.feature.home.data.Filter
 import com.dashlane.navigation.Navigator
 import com.dashlane.util.getBaseActivity
+import com.dashlane.vault.Filter
 import com.skocken.presentation.presenter.BasePresenter
 
-class FabPresenter(navigator: Navigator) : BasePresenter<FabDef.IDataProvider?, FabDef.IView?>(), FabDef.IPresenter {
+class FabPresenter(navigator: Navigator) :
+    BasePresenter<FabDef.IDataProvider?, FabDef.IView?>(),
+    FabDef.IPresenter {
     private val backCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             val handleClick = onBackPressedCaught()

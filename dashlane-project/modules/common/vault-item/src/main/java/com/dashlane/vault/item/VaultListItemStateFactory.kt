@@ -12,7 +12,7 @@ import com.dashlane.xml.domain.SyncObjectType
 import javax.inject.Inject
 
 class VaultListItemStateFactory @Inject constructor(
-    private val dataIdentifierListTextResolver: DataIdentifierListTextResolver
+    private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
 ) {
     fun buildVaultListItemState(item: SummaryObject): VaultListItemState {
         val description = dataIdentifierListTextResolver.getLine2(item)
@@ -26,24 +26,24 @@ class VaultListItemStateFactory @Inject constructor(
         )
     }
 
-    private fun buildThumbnailType(item: SummaryObject): VaultListItemState.ThumbnailState? {
+    fun buildThumbnailType(item: SummaryObject): VaultListItemState.ThumbnailState? {
         return when (item) {
             is SummaryObject.Authentifiant ->
-                VaultListItemState.ThumbnailState.DomainIcon(item.urlForUI())
+                VaultListItemState.ThumbnailState.VaultThumbnail.DomainIcon(item.urlForUI())
 
             is SummaryObject.Passkey ->
-                VaultListItemState.ThumbnailState.DomainIcon(item.urlForGoToWebsite)
+                VaultListItemState.ThumbnailState.VaultThumbnail.DomainIcon(item.urlForGoToWebsite)
 
             is SummaryObject.PaymentCreditCard ->
-                VaultListItemState.ThumbnailState.LegacyOtherIcon(
+                VaultListItemState.ThumbnailState.VaultThumbnail.LegacyOtherIcon(
                     token = IconTokens.itemPaymentOutlined,
-                    color = item.color.getColorResource()
+                    color = item.color.getColorResource(),
                 )
 
             is SummaryObject.SecureNote ->
-                VaultListItemState.ThumbnailState.LegacyOtherIcon(
+                VaultListItemState.ThumbnailState.VaultThumbnail.LegacyOtherIcon(
                     token = IconTokens.itemSecureNoteOutlined,
-                    color = item.type.getColorId()
+                    color = item.type.getColorId(),
                 )
 
             is SummaryObject.Address,
@@ -55,15 +55,19 @@ class VaultListItemStateFactory @Inject constructor(
             is SummaryObject.IdCard,
             is SummaryObject.Identity,
             is SummaryObject.Passport,
-            is SummaryObject.PaymentPaypal,
             is SummaryObject.PersonalWebsite,
             is SummaryObject.Phone,
             is SummaryObject.SocialSecurityStatement,
-            is SummaryObject.Secret -> {
+            is SummaryObject.Secret,
+            is SummaryObject.WiFi,
+            -> {
                 item.syncObjectType.getThumbnailIconToken()?.let { icon ->
-                    VaultListItemState.ThumbnailState.OtherIcon(token = icon)
+                    VaultListItemState.ThumbnailState.VaultThumbnail.OtherIcon(token = icon)
                 }
             }
+
+            is SummaryObject.Collection -> VaultListItemState.ThumbnailState.Icon(token = IconTokens.collectionOutlined)
+
             else -> null
         }
     }
@@ -80,11 +84,11 @@ class VaultListItemStateFactory @Inject constructor(
         this == SyncObjectType.ID_CARD -> IconTokens.itemIdOutlined
         this == SyncObjectType.IDENTITY -> IconTokens.itemIdOutlined
         this == SyncObjectType.PASSPORT -> IconTokens.itemPassportOutlined
-        this == SyncObjectType.PAYMENT_PAYPAL -> IconTokens.itemBankAccountOutlined
         this == SyncObjectType.PERSONAL_WEBSITE -> IconTokens.webOutlined
         this == SyncObjectType.PHONE -> IconTokens.itemPhoneMobileOutlined
         this == SyncObjectType.SOCIAL_SECURITY_STATEMENT -> IconTokens.itemSocialSecurityOutlined
         this == SyncObjectType.SECRET -> IconTokens.itemSecretOutlined
+        this == SyncObjectType.WI_FI -> IconTokens.itemWifiOutlined
         else -> null
     }
 }

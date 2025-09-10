@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/change_team_plan_tier.json",
+  "type": "object",
+  "description": "This event does not respect tracking event design conventions. The flows using this event are now relying on the click event",
+  "metas": {
+    "area": "tac"
+  },
+  "deprecated": true,
+  "properties": {
+    "name": {
+      "const": "change_team_plan_tier"
+    },
+    "current_billing_plan_tier": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/b2b_plan_tier"
+    },
+    "current_plan_paid_seats_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/purchased_seat_count"
+    },
+    "has_promo": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/has_promo"
+    },
+    "next_billing_plan_tier": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/b2b_plan_tier"
+    },
+
+    "plan_change_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/plan_change_step"
+    },
+    "seat_added_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/b2b.json#/definitions/seat_added_count"
+    }
+  },
+  "required": [
+    "name",
+    "current_billing_plan_tier",
+    "current_plan_paid_seats_count",
+    "next_billing_plan_tier",
+    "plan_change_step",
+    "seat_added_count"
+  ],
+  "additionalProperties": false
+}

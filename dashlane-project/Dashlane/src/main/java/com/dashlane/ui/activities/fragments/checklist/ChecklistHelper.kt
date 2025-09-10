@@ -9,9 +9,8 @@ import javax.inject.Inject
 
 class ChecklistHelper @Inject constructor(
     private val sessionManager: SessionManager,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
 ) {
-
     private val userPreferencesManager: UserPreferencesManager
         get() = preferencesManager[sessionManager.session?.username]
 

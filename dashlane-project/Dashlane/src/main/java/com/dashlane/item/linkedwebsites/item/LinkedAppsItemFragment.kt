@@ -20,13 +20,12 @@ import com.dashlane.R
 import com.dashlane.databinding.LinkedAppFragmentBinding
 import com.dashlane.item.subview.action.LoginOpener
 import com.dashlane.ui.activities.fragments.AbstractContentFragment
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LinkedAppsItemFragment : AbstractContentFragment() {
-
     private val viewModel: LinkedAppsViewModel by viewModels({ requireParentFragment() })
     private val appsAdapter = DashlaneRecyclerAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>()
     private lateinit var binding: LinkedAppFragmentBinding
@@ -86,8 +85,8 @@ class LinkedAppsItemFragment : AbstractContentFragment() {
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
-                )
+                    Uri.parse("https://play.google.com/store/apps/details?id=$packageName"),
+                ),
             )
         }
     }

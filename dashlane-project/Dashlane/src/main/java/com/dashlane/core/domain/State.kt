@@ -7,13 +7,12 @@ data class State(
     val country: String,
     val level: Int,
     val codeStr: String,
-    val name: String
+    val name: String,
 ) {
     val stateDescriptor: String
         get() = "$country-$level-$codeStr"
 
     companion object {
-
         private val geographicalStateRegions by lazy {
             GeographicalStatesRepositoryImpl().getGeographicalStateRegions()
         }

@@ -9,18 +9,26 @@ import com.skocken.presentation.definition.Base
 import java.io.File
 
 interface AttachmentListContract {
-
     interface ViewProxy : Base.IView {
         var selectedAttachments: Int
         val itemSize: Int
+
         fun updateActionBar(attachments: List<AttachmentItem>)
+
         fun showAttachmentsList(attachments: List<AttachmentItem>)
+
         fun showFileDeleted(secureFileInfoId: String)
+
         fun showFileDeleteError(secureFileInfoId: String)
+
         fun showExportDone()
+
         fun showPermissionError()
+
         fun showDecryptionError()
+
         fun showExportError()
+
         fun showExportStorageError()
     }
 
@@ -36,11 +44,11 @@ interface AttachmentListContract {
         suspend fun deleteDecipheredFileCache()
 
         suspend fun addAttachment(attachmentItem: AttachmentItem)
+
         suspend fun removeAttachment(attachmentItem: AttachmentItem)
     }
 
     interface Presenter : Base.IPresenter {
-
         var isAttachmentListUpdated: Boolean
 
         fun onCreate()

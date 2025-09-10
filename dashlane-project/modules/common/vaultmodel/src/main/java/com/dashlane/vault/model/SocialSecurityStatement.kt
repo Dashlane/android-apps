@@ -10,7 +10,7 @@ fun createSocialSecurityStatement(
     socialSecurityFullname: String? = null,
     linkedIdentity: String? = null,
     dateOfBirth: LocalDate? = null,
-    sex: SyncObject.Gender? = null
+    sex: SyncObject.Gender? = null,
 ): VaultItem<SyncObject.SocialSecurityStatement> {
     return dataIdentifier.toVaultItem(
         SyncObject.SocialSecurityStatement {
@@ -21,11 +21,11 @@ fun createSocialSecurityStatement(
             this.sex = sex
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
 fun VaultItem<SyncObject.SocialSecurityStatement>.copySyncObject(builder: SyncObject.SocialSecurityStatement.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.SocialSecurityStatement> {
+    VaultItem<SyncObject.SocialSecurityStatement> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

@@ -5,7 +5,7 @@ import com.dashlane.vault.summary.SummaryObject
 fun SummaryObject.attachmentsAllowed(
     attachmentAllItems: Boolean,
     isAccountFrozen: Boolean = false,
-    hasCollections: Boolean = false
+    hasCollections: Boolean = false,
 ) = when {
     isAccountFrozen -> false
     isShared -> false

@@ -6,8 +6,9 @@ import android.text.format.Formatter
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.launch
 import com.dashlane.R
-import com.dashlane.vault.item.VaultItemLogAttachmentHelper
 import com.dashlane.cryptography.asEncryptedFile
+import com.dashlane.featureflipping.UserFeaturesChecker
+import com.dashlane.featureflipping.getSecureFilesMaxFileSize
 import com.dashlane.hermes.generated.definitions.Action
 import com.dashlane.lock.LockHelper
 import com.dashlane.securefile.FileSecurity
@@ -18,8 +19,7 @@ import com.dashlane.securefile.extensions.getFileSize
 import com.dashlane.securefile.extensions.getFileType
 import com.dashlane.securefile.extensions.toSecureFileInfo
 import com.dashlane.session.SessionManager
-import com.dashlane.featureflipping.UserFeaturesChecker
-import com.dashlane.featureflipping.getSecureFilesMaxFileSize
+import com.dashlane.vault.item.VaultItemLogAttachmentHelper
 import com.dashlane.vault.model.VaultItem
 import com.dashlane.vault.model.copySyncObject
 import com.dashlane.xml.domain.SyncObject
@@ -37,9 +37,8 @@ class UploadAttachmentsPresenter(
     private val coroutineScope: CoroutineScope,
     private val sessionManager: SessionManager,
     private val vaultItemLogAttachmentHelper: VaultItemLogAttachmentHelper,
-    private val openDocumentResultLauncher: ActivityResultLauncher<Unit>
+    private val openDocumentResultLauncher: ActivityResultLauncher<Unit>,
 ) : BasePresenter<UploadFileContract.DataProvider, UploadFileContract.ViewProxy>(), UploadFileContract.Presenter {
-
     private var lockedFileUpload: Uri? = null
 
     override fun notifyFileSpaceReserved(secureFile: SecureFile, secureFileInfo: VaultItem<SyncObject.SecureFileInfo>) {
@@ -70,7 +69,7 @@ class UploadAttachmentsPresenter(
 
     override fun notifyFileUploadFailed(
         secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
+        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
     ) {
         
         context?.apply { view.showError(getString(R.string.upload_file_error)) }
@@ -78,13 +77,13 @@ class UploadAttachmentsPresenter(
 
     override fun notifyFileSizeLimitExceeded(
         secureFile: SecureFile,
-        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>
+        secureFileInfo: VaultItem<SyncObject.SecureFileInfo>,
     ) {
         val context = context ?: return
         
         val maxSize = Formatter.formatShortFileSize(
             context,
-            userFeaturesChecker.getSecureFilesMaxFileSize()
+            userFeaturesChecker.getSecureFilesMaxFileSize(),
         )
         view.showError(context.getString(R.string.file_too_big_error, maxSize))
     }
@@ -127,7 +126,7 @@ class UploadAttachmentsPresenter(
                 val secureFile = provider.createSecureFile(
                     filename,
                     inputStream,
-                    encryptedFile
+                    encryptedFile,
                 )
                 val session = sessionManager.session!!
                 val username = session.userId

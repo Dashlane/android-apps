@@ -7,9 +7,9 @@ import com.dashlane.authentication.LoginDataReset
 import com.dashlane.authentication.accountsmanager.AccountsManager
 import com.dashlane.authentication.localkey.AuthenticationLocalKeyRepository
 import com.dashlane.authentication.login.AuthenticationDeviceRepository
-import com.dashlane.common.logger.DeveloperInfoLogger
 import com.dashlane.common.logger.DeveloperLogAction
 import com.dashlane.common.logger.DeveloperLogMessage
+import com.dashlane.common.logger.Logs
 import com.dashlane.crypto.keys.AppKey
 import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.cryptography.decodeBase64ToByteArray
@@ -19,12 +19,13 @@ import com.dashlane.cryptography.encodeUtf8ToByteArray
 import com.dashlane.cryptography.encodeUtf8ToObfuscated
 import com.dashlane.cryptography.toObfuscated
 import com.dashlane.cryptography.use
+import com.dashlane.data.login.LoginMode
 import com.dashlane.device.DeviceInfoRepository
 import com.dashlane.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.lock.LockSelfChecker
-import com.dashlane.login.LoginMode
 import com.dashlane.preference.GlobalPreferencesManager
 import com.dashlane.preference.PreferencesManager
+import com.dashlane.session.Session
 import com.dashlane.session.SessionCredentialsSaver
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionRestorer
@@ -57,7 +58,6 @@ class SessionRestorerImpl @Inject constructor(
     private val sessionCredentialsSaver: SessionCredentialsSaver,
     private val cryptoObjectHelper: CryptoObjectHelper,
     private val syncBroadcastManager: SyncBroadcastManager,
-    private val developerInfoLogger: DeveloperInfoLogger
 ) : SessionRestorer {
     private val _job = Job()
 
@@ -67,22 +67,23 @@ class SessionRestorerImpl @Inject constructor(
     override fun canRestoreSession(
         user: String,
         serverKey: String?,
-        acceptLoggedOut: Boolean
+        acceptLoggedOut: Boolean,
     ): Boolean {
         val username = Username.ofEmailOrNull(user) ?: return false
-        return getSavedCredentials(username, serverKey, acceptLoggedOut)?.use { true } ?: false
+        return getSavedCredentials(username, serverKey, accessKey = null, acceptLoggedOut)?.use { true } ?: false
     }
 
-    override suspend fun restore(username: Username?) {
+    override suspend fun restore(username: Username?): Session? {
         if (username == null) {
             
             _job.complete()
-            return
+            return null
         }
         val accessKey = getAccessKeyForRestore(username) ?: run {
             _job.complete()
-            return
+            return null
         }
+        var restoredSession: Session? = null
         try {
             
             
@@ -90,7 +91,12 @@ class SessionRestorerImpl @Inject constructor(
                 launch {
                     checkLoggedInUserValidity(username, accessKey)
                 }
-                restoreSession(username, serverKey = null, acceptLoggedOut = false)
+                restoredSession = restoreSession(
+                    username = username,
+                    serverKey = null,
+                    accessKey = accessKey,
+                    acceptLoggedOut = false,
+                )
             }
         } catch (e: RevokedDeviceException) {
             
@@ -104,6 +110,7 @@ class SessionRestorerImpl @Inject constructor(
             
             _job.complete()
         }
+        return restoredSession
     }
 
     private fun getAccessKeyForRestore(username: Username): String? {
@@ -111,9 +118,6 @@ class SessionRestorerImpl @Inject constructor(
         return if (accessKey == null) {
             
             if (secureStorageManager.isKeyDataStored(username, SecureDataKey.SECRET_KEY)) {
-                    "Restore global device id to use as access key for $username",
-                    logToUserSupportFile = true
-                )
                 deviceInfoRepository.deviceId
             } else {
                 null
@@ -126,44 +130,52 @@ class SessionRestorerImpl @Inject constructor(
     override suspend fun restoreSession(
         username: Username,
         serverKey: String?,
-        acceptLoggedOut: Boolean
-    ) {
-        val applicationPassword = getSavedCredentials(username, serverKey, acceptLoggedOut)
+        accessKey: String?,
+        acceptLoggedOut: Boolean,
+    ): Session? {
+        val applicationPassword = getSavedCredentials(username, serverKey, accessKey, acceptLoggedOut)
         if (applicationPassword == null) {
             _job.complete()
-            return
+            return null
         }
         val result = runCatching {
             authenticationLocalKeyRepository.validateForLocal(username, applicationPassword)
         }.onFailure {
-                "Restoring session: Stored MP incorrect can not access local key repository",
-                logToUserSupportFile = true
+                message = "Restoring session: Stored MP incorrect can not access local key repository",
+                throwable = it,
+                customLogs = listOf(
+                    Logs.Kibana(
+                        action = DeveloperLogAction.SESSION_ERROR,
+                        username = username.email,
+                        accessKey = accessKey,
+                    ),
+                ),
             )
             syncBroadcastManager.removePasswordBroadcastIntent()
             _job.complete()
-            return
+            return null
         }.getOrThrow()
 
-        when (
-            sessionManager.loadSession(
-                username,
-                applicationPassword,
-                result.secretKey,
-                result.localKey,
-                loginMode = LoginMode.SessionRestore
+        val restoredSession = when (
+            val result = sessionManager.loadSession(
+                username = username,
+                appKey = applicationPassword,
+                secretKey = result.secretKey,
+                localKey = result.localKey,
+                loginMode = LoginMode.SessionRestore,
             )
         ) {
             is SessionResult.Error -> {
-                    "Restoring session: Stored MP incorrect or session initialization failed",
-                    logToUserSupportFile = true
-                )
                 syncBroadcastManager.removePasswordBroadcastIntent()
+                null
             }
 
             is SessionResult.Success -> {
+                result.session
             }
         }
         _job.complete()
+        return restoredSession
     }
 
     private suspend fun checkLoggedInUserValidity(username: Username, accessKey: String) {
@@ -183,10 +195,12 @@ class SessionRestorerImpl @Inject constructor(
         }
     }
 
+    @Suppress("LongMethod")
     private fun getSavedCredentials(
         username: Username,
         serverKey: String?,
-        acceptLoggedOut: Boolean = false
+        accessKey: String?,
+        acceptLoggedOut: Boolean = false,
     ): AppKey? {
         if (!acceptLoggedOut && globalPreferencesManager.isUserLoggedOut) {
             return null
@@ -195,17 +209,33 @@ class SessionRestorerImpl @Inject constructor(
         
         migrateAccountManager(username)
 
-        val secureDataStorage = secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
-        val bytes = secureDataStorage.readLegacy(SecureDataKey.LOCAL_KEY)?.value?.decodeBase64ToByteArrayOrNull() ?: return null
+        val secureDataStorage =
+            secureStorageManager.getSecureDataStorage(username, SecureDataStorage.Type.ANDROID_KEYSTORE_PROTECTED)
+        val bytes =
+            secureDataStorage.readLegacy(SecureDataKey.LOCAL_KEY)?.value?.decodeBase64ToByteArrayOrNull() ?: return null
 
         val localKeyBytes = try {
             cryptoObjectHelper.decrypt(CryptoObjectHelper.LocalKeyLock(username.email), bytes)
-        } catch (exception: AEADBadTagException) {
-            null
-        } catch (exception: IllegalBlockSizeException) {
-            null
+        } catch (exception: Exception) {
+            when (exception) {
+                is AEADBadTagException,
+                is IllegalBlockSizeException,
+                -> {
+                        message = "Session can't be restored because of ${exception::class.simpleName}",
+                        throwable = exception,
+                        customLogs = listOf(
+                            Logs.Kibana(
+                                action = DeveloperLogAction.SESSION_ERROR,
+                                username = username.email,
+                                accessKey = accessKey,
+                            ),
+                        ),
+                    )
+                    null
+                }
+                else -> throw exception
+            }
         }
-
         if (localKeyBytes == null) {
             lockManager.markCredentialsEmpty()
             return null
@@ -259,10 +289,13 @@ class SessionRestorerImpl @Inject constructor(
 
         
         
-        developerInfoLogger.log(
-            username = username,
-            action = DeveloperLogAction.ACCOUNT_MANAGER_MIGRATION,
-            message = DeveloperLogMessage.SUCCESS
+            message = DeveloperLogMessage.SUCCESS.value,
+            customLogs = listOf(
+                Logs.Kibana(
+                    action = DeveloperLogAction.ACCOUNT_MANAGER_MIGRATION,
+                    username = username.email,
+                ),
+            ),
         )
     }
 
@@ -273,7 +306,7 @@ private fun SecureStorageManager.getServerKey(username: Username, localKey: Loca
     if (!isKeyDataStored(username, SecureDataKey.SERVER_KEY)) return null
 
     val serverKeyBytes = getKeyData(SecureDataKey.SERVER_KEY, username, localKey)
-    
+        
         ?: getKeyData(SecureDataKey.SERVER_KEY, username, LocalKey(ByteArray(32)))
             ?.also { data -> storeKeyData(data, SecureDataKey.SERVER_KEY, username, localKey) }
 

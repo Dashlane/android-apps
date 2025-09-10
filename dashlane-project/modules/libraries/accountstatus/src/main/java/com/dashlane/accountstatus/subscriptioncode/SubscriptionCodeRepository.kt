@@ -1,9 +1,9 @@
 package com.dashlane.accountstatus.subscriptioncode
 
-import com.dashlane.session.authorization
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.server.api.endpoints.premium.GetSubscriptionCodeService
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import javax.inject.Inject
 
 interface SubscriptionCodeRepository {

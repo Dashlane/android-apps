@@ -17,7 +17,7 @@ import com.dashlane.autofill.navigation.getAutofillBottomSheetNavigator
 import com.dashlane.autofill.ui.AutoFillResponseActivity
 import com.dashlane.bottomnavigation.delegatenavigation.DelegateNavigationBottomSheetFragment
 import com.dashlane.hermes.generated.definitions.MatchType
-import com.dashlane.limitations.PasswordLimitBottomSheet
+import com.dashlane.limitations.PasswordLimitBottomSheetFragment
 import com.dashlane.limitations.PasswordLimiter
 import com.dashlane.util.Toaster
 import com.dashlane.vault.model.VaultItem
@@ -33,7 +33,6 @@ class AutofillCreateAccountActivity :
     CoroutineScope,
     AutoFillResponseActivity(),
     AutofillCreateAccountResultHandler {
-
     override val coroutineContext: CoroutineContext
         get() = lifecycleScope.coroutineContext
 
@@ -43,17 +42,9 @@ class AutofillCreateAccountActivity :
     @Inject
     lateinit var passwordLimiter: PasswordLimiter
 
-    private lateinit var summaryPackageName: String
-    private lateinit var summaryWebDomain: String
-
-    private var hasExtraCredential: Boolean = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transparent_navigation)
-        summaryPackageName = summary?.packageName ?: ""
-        summaryWebDomain = summary?.webDomain ?: ""
-        hasExtraCredential = intent.getBooleanExtra(EXTRA_HAD_CREDENTIALS, false)
     }
 
     override fun delegatedNavigate(delegateNavigationBottomSheetFragment: DelegateNavigationBottomSheetFragment) {
@@ -77,17 +68,18 @@ class AutofillCreateAccountActivity :
     override fun onFinishWithResult(result: VaultItem<SyncObject.Authentifiant>) {
         finishWithResult(
             itemToFill = result.toItemToFill(),
-            matchType = MatchType.CREATED_PASSWORD
+            matchType = MatchType.CREATED_PASSWORD,
         )
     }
 
     override fun onError(error: AutofillCreateAccountErrors) {
         when (error) {
             USER_LOGGED_OUT,
-            DATABASE_ERROR -> {
+            DATABASE_ERROR,
+            -> {
                 toaster.show(
                     error.message,
-                    Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT,
                 )
             }
             else -> {
@@ -103,27 +95,22 @@ class AutofillCreateAccountActivity :
 
     private fun openBottomSheetDialog() {
         if (passwordLimiter.isPasswordLimitReached()) {
-            PasswordLimitBottomSheet().show(supportFragmentManager, null)
+            PasswordLimitBottomSheetFragment().show(supportFragmentManager, null)
         } else {
             AutofillNavigatorImpl(this).goToCreateAccountDialogFromWaitForDecision()
         }
     }
 
-    private fun AutoFillHintSummary?.getDomainInfoForCreateAccount():
-        CreateAccountDialogFragment.CreateAccountDomainInfo =
+    private fun AutoFillHintSummary?.getDomainInfoForCreateAccount(): CreateAccountDialogFragment.CreateAccountDomainInfo =
         CreateAccountDialogFragment.CreateAccountDomainInfo(this)
 
     companion object {
-        private const val EXTRA_HAD_CREDENTIALS = "extra_had_credentials"
-
         internal fun getAuthIntentSenderForCreateAccount(
             context: Context,
             summary: AutoFillHintSummary,
-            hadCredentials: Boolean,
-            forKeyboard: Boolean
+            forKeyboard: Boolean,
         ): IntentSender {
             val intent = createIntent(context, summary, AutofillCreateAccountActivity::class)
-            intent.putExtra(EXTRA_HAD_CREDENTIALS, hadCredentials)
             intent.putExtra(EXTRA_FOR_KEYBOARD_AUTOFILL, forKeyboard)
             return createIntentSender(context, intent)
         }

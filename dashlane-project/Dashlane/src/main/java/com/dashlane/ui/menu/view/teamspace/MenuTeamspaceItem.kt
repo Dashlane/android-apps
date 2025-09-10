@@ -38,13 +38,13 @@ fun MenuTeamspaceItem(item: MenuItemModel.TeamspaceItem) {
             .clickable { item.onClick.invoke() }
             .padding(all = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         MenuTeamspaceIcon(
             modifier = Modifier
                 .size(24.dp)
                 .padding(end = 4.dp),
-            icon = item.icon
+            icon = item.icon,
         )
         Text(
             text = when (item.spaceName) {
@@ -52,7 +52,7 @@ fun MenuTeamspaceItem(item: MenuItemModel.TeamspaceItem) {
                 is SpaceName.TeamName -> item.spaceName.value
             },
             style = DashlaneTheme.typography.titleBlockMedium,
-            color = DashlaneTheme.colors.textNeutralCatchy
+            color = DashlaneTheme.colors.textNeutralCatchy,
         )
     }
 }
@@ -66,9 +66,9 @@ private fun MenuTeamspaceItemPreview() {
                 spaceName = SpaceName.TeamName("Personnel"),
                 icon = TeamspaceIcon.Space(
                     displayLetter = 'P',
-                    spaceColor = SpaceColor.FixColor(0xFFD000AF.toInt())
-                )
-            ) { }
+                    spaceColor = SpaceColor.FixColor(0xFFD000AF.toInt()),
+                ),
+            ) { },
         )
     }
 }

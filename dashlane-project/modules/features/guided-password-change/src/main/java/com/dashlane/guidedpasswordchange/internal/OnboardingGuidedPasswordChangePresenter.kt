@@ -15,9 +15,11 @@ import com.dashlane.guidedpasswordchange.R
 import com.dashlane.lock.LockHelper
 import com.dashlane.navigation.Navigator
 import com.dashlane.url.toUrl
+import com.dashlane.url.toUrlDomain
 import com.dashlane.util.Toaster
 import com.dashlane.util.applyAppTheme
 import com.dashlane.util.fallbackCustomTab
+import com.dashlane.util.tryOrNull
 import com.dashlane.xml.domain.SyncObjectType
 import com.skocken.presentation.presenter.BasePresenter
 import kotlinx.coroutines.CoroutineScope
@@ -31,11 +33,10 @@ internal class OnboardingGuidedPasswordChangePresenter(
     private val coroutineScope: CoroutineScope,
     private val navigator: Navigator,
     private val toaster: Toaster,
-    private val lockHelper: LockHelper
+    private val lockHelper: LockHelper,
 ) :
     BasePresenter<OnboardingGuidedPasswordChangeContract.DataProvider, OnboardingGuidedPasswordChangeContract.ViewProxy>(),
-    OnboardingGuidedPasswordChangeContract.Presenter {
-
+        OnboardingGuidedPasswordChangeContract.Presenter {
     var changePasswordUrl = domain.toUrl().toString().toUri()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +59,8 @@ internal class OnboardingGuidedPasswordChangePresenter(
     }
 
     override fun onChangePasswordClicked() {
-        OnboardingGuidedPasswordChangeActivity.currentDomainUsername = domain to username
+        val formattedDomain = tryOrNull { domain.toUrlDomain().toString() } ?: domain
+        OnboardingGuidedPasswordChangeActivity.currentDomainUsername = formattedDomain to username
         activity?.let {
             lockHelper.startAutoLockGracePeriod(Duration.ofMinutes(5))
             it.startActivityForResult(createCustomTabIntent(it), CUSTOM_TAB_REQUEST_CODE)
@@ -69,7 +71,7 @@ internal class OnboardingGuidedPasswordChangePresenter(
         runCatching {
             val intent = Intent(
                 Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE,
-                Uri.parse("package:${context!!.packageName}")
+                Uri.parse("package:${context!!.packageName}"),
             )
             activity!!.startActivityForResult(intent, ACTIVATE_AUTOFILL_REQUEST_CODE)
         }
@@ -96,7 +98,7 @@ internal class OnboardingGuidedPasswordChangePresenter(
             .setExitAnimations(
                 context,
                 R.anim.slide_to_left,
-                R.anim.slide_to_right
+                R.anim.slide_to_right,
             )
             .setCloseButtonIcon(getCloseButtonBitmap(context))
             .build()

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 internal data class CoseSign1(
     val protectedHeader: ByteArray,
     val payload: ByteArray,
-    val signature: ByteArray
+    val signature: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -33,7 +33,7 @@ internal data class CoseSign1(
             return CoseSign1(
                 protectedHeader = (array[0] as? BinaryNode)?.binaryValue() ?: return null,
                 payload = (array[2] as? BinaryNode)?.binaryValue() ?: return null,
-                signature = (array[3] as? BinaryNode)?.binaryValue() ?: return null
+                signature = (array[3] as? BinaryNode)?.binaryValue() ?: return null,
             )
         }
     }

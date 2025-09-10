@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/share_item.json",
+  "type": "object",
+  "description": "When an item is shared. One unique event will be sent for both individuals and groups\r\r\r\rWARNING: This event was only implemented in iOS platform. Since then it was decided to cancel its implementation and the client side tracking was replaced by a data model based on server data. Please check the implementation status here\r\rhttps://confluence.dashlane.com/pages/viewpage.action?pageId=350869743#ImplementationstatusofSharingandVaulttracking-share_item",
+  "metas": {
+    "area": "sharing"
+  },
+  "properties": {
+    "name": {
+      "const": "share_item"
+    },
+    "groups_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/groups_count"
+    },
+    "individuals_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/individuals_count"
+    },
+    "item_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/sharing_item_type"
+    },
+    "request_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/request_status"
+    },
+    "rights": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/sharing.json#/definitions/rights"
+    }
+  },
+  "required": [
+    "name",
+    "groups_count",
+    "individuals_count",
+    "item_type",
+    "request_status",
+    "rights"
+  ],
+  "additionalProperties": false
+}

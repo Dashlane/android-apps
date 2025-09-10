@@ -11,9 +11,8 @@ data class BrazeInAppMessage(
     val id: String,
     val buttons: List<Button>,
     val trackingKey: String?,
-    val onImpression: () -> Unit
+    val onImpression: () -> Unit,
 ) {
-
     var displayed = false
 
     fun logImpression() {
@@ -55,6 +54,6 @@ fun InAppMessageModal.toBrazeInAppMessage(): BrazeInAppMessage {
             }
         },
         trackingKey = extras[BrazeInAppMessage.EXTRA_TRACKING_KEY],
-        onImpression = ::logImpression
+        onImpression = ::logImpression,
     )
 }

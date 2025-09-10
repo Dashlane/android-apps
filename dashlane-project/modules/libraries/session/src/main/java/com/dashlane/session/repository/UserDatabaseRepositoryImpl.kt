@@ -1,8 +1,8 @@
 package com.dashlane.session.repository
 
 import com.dashlane.crypto.keys.LocalKey
+import com.dashlane.data.login.LoginInfo
 import com.dashlane.database.DatabaseProvider
-import com.dashlane.login.LoginInfo
 import com.dashlane.session.Session
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Singleton
 @Singleton
 open class UserDatabaseRepositoryImpl @Inject constructor(
     private val sessionCoroutineScopeRepository: SessionCoroutineScopeRepository,
-    private val databaseProvider: DatabaseProvider
+    private val databaseProvider: DatabaseProvider,
 ) : UserDatabaseRepository {
     override fun getRacletteDatabase(session: Session): RacletteDatabase? =
         databaseProvider.getDatabase(session.userId)

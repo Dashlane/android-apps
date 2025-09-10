@@ -8,9 +8,8 @@ import javax.inject.Inject
 class FollowUpNotificationSettingsImpl @Inject constructor(
     private val followUpNotificationsStrings: FollowUpNotificationsStrings,
     private val followUpNotificationFlags: FollowUpNotificationFlags,
-    private val followUpNotificationPersistedSettingsService: FollowUpNotificationSettingsService
+    private val followUpNotificationPersistedSettingsService: FollowUpNotificationSettingsService,
 ) : FollowUpNotificationSettings {
-
     override fun isAvailable(): Boolean = followUpNotificationFlags.canUseFollowUpNotification()
 
     override fun isActive(): Boolean = isChecked() && isAvailable()
@@ -18,7 +17,7 @@ class FollowUpNotificationSettingsImpl @Inject constructor(
     override fun getSetting(): FollowUpNotificationSettingModel = FollowUpNotificationSettingModel(
         isChecked = isChecked(),
         title = getTitle(),
-        description = getDescription()
+        description = getDescription(),
     )
 
     private fun isChecked(): Boolean =

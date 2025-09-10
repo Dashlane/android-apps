@@ -43,11 +43,11 @@ public class EmvTemplate {
 
     private EmvCard card;
 
-    public static Builder Builder() {
+    public static Builder GetBuilder() {
         return new Builder();
     }
 
-    public static Config Config() {
+    public static Config GetConfig() {
         return new Config();
     }
 
@@ -142,7 +142,7 @@ public class EmvTemplate {
         terminal = pTerminal;
         config = pConfig;
         if (config == null) {
-            config = Config();
+            config = GetConfig();
         }
         if (!config.removeDefaultParsers) {
             addDefaultParsers();

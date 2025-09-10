@@ -1,9 +1,9 @@
 package com.dashlane.autofill.pause.services
 
-import com.dashlane.autofill.pause.model.PausedFormSource
 import com.dashlane.autofill.formdetector.model.ApplicationFormSource
 import com.dashlane.autofill.formdetector.model.AutoFillFormSource
 import com.dashlane.autofill.formdetector.model.WebDomainFormSource
+import com.dashlane.autofill.pause.model.PausedFormSource
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Instant
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class MutexPausedFormSourcesProvider @Inject constructor(
-    private val pausedFormSourcesRepository: PausedFormSourcesRepository
+    private val pausedFormSourcesRepository: PausedFormSourcesRepository,
 ) : PausedFormSourcesProvider {
     private val lock = Mutex()
 
@@ -30,11 +30,11 @@ class MutexPausedFormSourcesProvider @Inject constructor(
             when (autoFillFormSource) {
                 is ApplicationFormSource -> pausedFormSourcesRepository.pauseApplication(
                     autoFillFormSource.packageName,
-                    untilInstant
+                    untilInstant,
                 )
                 is WebDomainFormSource -> pausedFormSourcesRepository.pauseWebsite(
                     autoFillFormSource.webDomain,
-                    untilInstant
+                    untilInstant,
                 )
             }
         }
@@ -59,21 +59,21 @@ class MutexPausedFormSourcesProvider @Inject constructor(
         val now = Instant.now()
         return lock.withLock {
             val app = pausedFormSourcesRepository.allPausedApplications()
-                    .filter {
-                        it.value.isAfter(now)
-                    }
-                    .map {
-                        it.key to it.value
-                    }
-                    .sortedBy {
-                        it.first
-                    }
-                    .map {
-                        PausedFormSource(
-                            ApplicationFormSource(it.first),
-                            it.second
-                        )
-                    }
+                .filter {
+                    it.value.isAfter(now)
+                }
+                .map {
+                    it.key to it.value
+                }
+                .sortedBy {
+                    it.first
+                }
+                .map {
+                    PausedFormSource(
+                        ApplicationFormSource(it.first),
+                        it.second,
+                    )
+                }
 
             val web = pausedFormSourcesRepository.allPausedWebsites()
                 .filter {
@@ -89,9 +89,9 @@ class MutexPausedFormSourcesProvider @Inject constructor(
                     PausedFormSource(
                         WebDomainFormSource(
                             "",
-                            it.first
+                            it.first,
                         ),
-                        it.second
+                        it.second,
                     )
                 }
             app + web

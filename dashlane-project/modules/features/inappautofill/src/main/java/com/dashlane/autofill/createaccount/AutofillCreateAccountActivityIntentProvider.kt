@@ -23,8 +23,7 @@ class AutofillCreateAccountActivityIntentProvider @Inject constructor() : Create
         return AutofillCreateAccountActivity.getAuthIntentSenderForCreateAccount(
             context,
             summary,
-            hadCredentials,
-            forKeyboard
+            forKeyboard,
         )
     }
 }

@@ -11,7 +11,7 @@ import kotlin.time.Duration
 @Suppress("FunctionName")
 fun <T> SyncCommandFlow() = MutableSharedFlow<T>(
     replay = 1,
-    onBufferOverflow = BufferOverflow.DROP_OLDEST
+    onBufferOverflow = BufferOverflow.DROP_OLDEST,
 )
 
 fun <T> Flow<T>.throttleLatest(period: Duration): Flow<T> = this

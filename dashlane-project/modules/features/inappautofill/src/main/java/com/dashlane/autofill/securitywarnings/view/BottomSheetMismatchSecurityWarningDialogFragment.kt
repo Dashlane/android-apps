@@ -1,113 +1,107 @@
 package com.dashlane.autofill.securitywarnings.view
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.TextView
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
-import com.dashlane.autofill.api.R
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.dashlane.autofill.formdetector.model.ApplicationFormSource
+import com.dashlane.autofill.model.AuthentifiantItemToFill
 import com.dashlane.autofill.securitywarnings.data.SecurityWarningAction
 import com.dashlane.autofill.securitywarnings.data.SecurityWarningType
-import com.dashlane.autofill.formdetector.model.ApplicationFormSource
-import com.dashlane.autofill.formdetector.model.AutoFillFormSource
-import com.dashlane.ui.configureBottomSheet
-import com.dashlane.util.getParcelableCompat
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.dashlane.autofill.securitywarnings.ui.MismatchSourceWarningBottomSheet
+import com.dashlane.design.theme.DashlaneTheme
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class BottomSheetMismatchSecurityWarningDialogFragment : BottomSheetDialogFragment() {
-
-    private var formSource: AutoFillFormSource? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        formSource = requireArguments().getParcelableCompat(ARG_FORM_SOURCE)
-
-        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.Theme_Dashlane_Transparent_Cancelable)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(
-            R.layout.security_warning_mismatch_bottom_sheet_dialog,
-            container,
-            false
+        savedInstanceState: Bundle?,
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                DashlaneTheme {
+                    MismatchSourceWarningBottomSheet(
+                        viewModel = hiltViewModel(),
+                        onFillCancelled = ::onFillCancelled,
+                        onFillAllowed = ::onFillAllowed,
+                        onFillDenied = ::onFillDenied,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun onFillAllowed(
+        applicationFormSource: ApplicationFormSource?,
+        doNotShowAgain: Boolean,
+    ) {
+        setResult(
+            action = SecurityWarningAction.POSITIVE,
+            applicationFormSource = applicationFormSource,
+            checked = doNotShowAgain,
         )
-        initView(view)
-        return view
     }
 
-    private fun initView(view: View) {
-        val authentifiantLabel = arguments?.getString(ARG_AUTHENTIFIANT_LABEL) ?: ""
-        val formSourceLabel = arguments?.getString(ARG_FORM_SOURCE_LABEL) ?: ""
-
-        val title = view.findViewById<TextView>(R.id.dialog_title)
-        val checkBox = view.findViewById<CheckBox>(R.id.checkbox_do_not_show_again)
-        val positiveButton = view.findViewById<Button>(R.id.autofill_button)
-        val negativeButton = view.findViewById<Button>(R.id.cancel_button)
-
-        title?.text =
-            getString(R.string.autofill_mismatch_warning_title, authentifiantLabel, formSourceLabel)
-        positiveButton.setOnClickListener {
-            setResult(SecurityWarningAction.POSITIVE, checkBox.isChecked)
-            dismiss()
-        }
-        negativeButton.setOnClickListener {
-            setResult(SecurityWarningAction.NEGATIVE, false)
-            dismiss()
-        }
+    private fun onFillDenied(
+        applicationFormSource: ApplicationFormSource?,
+    ) {
+        setResult(
+            action = SecurityWarningAction.NEGATIVE,
+            applicationFormSource = applicationFormSource,
+            checked = false,
+        )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        (dialog as BottomSheetDialog).configureBottomSheet()
+    private fun onFillCancelled(
+        applicationFormSource: ApplicationFormSource?,
+    ) {
+        setResult(
+            action = SecurityWarningAction.CANCEL,
+            applicationFormSource = applicationFormSource,
+            checked = false,
+        )
     }
 
-    override fun onCancel(dialog: DialogInterface) {
-        super.onCancel(dialog)
-        setResult(SecurityWarningAction.CANCEL, false)
+    private fun setResult(
+        action: SecurityWarningAction,
+        applicationFormSource: ApplicationFormSource?,
+        checked: Boolean,
+    ) {
+        setFragmentResult(
+            requestKey = SecurityWarningsViewProxy.SECURITY_WARNING_ACTION_RESULT,
+            result = bundleOf(
+                SecurityWarningsViewProxy.PARAMS_WARNING_TYPE to SecurityWarningType.Mismatch(
+                    applicationFormSource,
+                    checked,
+                ),
+                SecurityWarningsViewProxy.PARAMS_ACTION to action,
+            ),
+        )
         dismiss()
     }
 
-    private fun setResult(action: SecurityWarningAction, checked: Boolean) {
-        setFragmentResult(
-            SecurityWarningsViewProxy.SECURITY_WARNING_ACTION_RESULT,
-            bundleOf(
-                SecurityWarningsViewProxy.PARAMS_WARNING_TYPE to SecurityWarningType.Mismatch(
-                    formSource,
-                    checked
-                ),
-                SecurityWarningsViewProxy.PARAMS_ACTION to action
-            )
-        )
-    }
-
     companion object {
-
-        private const val ARG_FORM_SOURCE = "form_source"
-        private const val ARG_FORM_SOURCE_LABEL = "formSourceLabel"
-        private const val ARG_AUTHENTIFIANT_LABEL = "authentifiantLabel"
+        internal const val ARG_FORM_SOURCE = "form_source"
+        internal const val ARG_FORM_SOURCE_LABEL = "formSourceLabel"
+        internal const val ARG_ITEM_TO_FILL = "itemToFill"
 
         fun create(
-            authentifiantLabel: String,
+            authentifiantToFill: AuthentifiantItemToFill,
             formSourceLabel: String,
-            formSource: ApplicationFormSource?
+            formSource: ApplicationFormSource?,
         ): BottomSheetMismatchSecurityWarningDialogFragment =
             BottomSheetMismatchSecurityWarningDialogFragment().apply {
                 arguments = bundleOf(
-                    ARG_AUTHENTIFIANT_LABEL to authentifiantLabel,
+                    ARG_ITEM_TO_FILL to authentifiantToFill,
                     ARG_FORM_SOURCE_LABEL to formSourceLabel,
-                    ARG_FORM_SOURCE to formSource
+                    ARG_FORM_SOURCE to formSource,
                 )
             }
     }

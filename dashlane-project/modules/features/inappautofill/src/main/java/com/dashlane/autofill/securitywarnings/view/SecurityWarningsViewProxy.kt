@@ -10,7 +10,6 @@ import com.dashlane.autofill.internal.AutofillFormSourcesStrings
 import com.dashlane.autofill.securitywarnings.AutofillSecurityWarningsLogger
 import com.dashlane.autofill.securitywarnings.data.SecurityWarningAction
 import com.dashlane.autofill.securitywarnings.data.SecurityWarningType
-import com.dashlane.autofill.securitywarnings.data.getDomain
 import com.dashlane.autofill.securitywarnings.model.RememberSecurityWarningsService
 import com.dashlane.autofill.securitywarnings.model.SecurityWarningsProcessor
 import com.dashlane.autofill.securitywarnings.model.SecurityWarningsView
@@ -26,77 +25,78 @@ internal open class SecurityWarningsViewProxy(
     private val autoFillResponseActivity: AutoFillResponseActivity,
     @ApplicationContext
     private val applicationContext: Context,
-    private val authentifiantResult: AutofillAnalyzerDef.IAutofillSecurityApplication,
+    private val authentifiantResult: AutofillAnalyzerDef.AutofillSecurityApplication,
     private val securityWarningsLogger: AutofillSecurityWarningsLogger,
     private val rememberSecurityWarningsService: RememberSecurityWarningsService,
     private val autofillFormSourcesStrings: AutofillFormSourcesStrings,
     protected val toaster: Toaster,
-    private val matchType: MatchType
+    private val matchType: MatchType,
 ) : SecurityWarningsView {
-
     private val securityWarningsProcessor: SecurityWarningsProcessor by lazy(LazyThreadSafetyMode.NONE) {
         SecurityWarningsProcessor(
             this,
             applicationContext,
             authentifiantResult,
             securityWarningsLogger,
-            rememberSecurityWarningsService
+            rememberSecurityWarningsService,
         )
     }
 
     init {
         autoFillResponseActivity.supportFragmentManager.setFragmentResultListener(
             SECURITY_WARNING_ACTION_RESULT,
-            autoFillResponseActivity
+            autoFillResponseActivity,
         ) { _, bundle ->
             val securityWarningType = bundle.getParcelableCompat<SecurityWarningType>(PARAMS_WARNING_TYPE)!!
             val action = bundle.getSerializableCompat<SecurityWarningAction>(PARAMS_ACTION)!!
             when (securityWarningType) {
                 is SecurityWarningType.Incorrect -> incorrectAction(securityWarningType, action)
                 is SecurityWarningType.Mismatch -> mismatchAction(securityWarningType, action)
-                is SecurityWarningType.Unknown -> unknownAction(securityWarningType, action)
+                is SecurityWarningType.Unknown -> unknownAction(action)
             }
         }
     }
 
     private fun incorrectAction(securityWarningType: SecurityWarningType, action: SecurityWarningAction) {
         when (action) {
-            SecurityWarningAction.POSITIVE -> securityWarningsProcessor.incorrectWarningPositiveClick(
-                securityWarningType.doNotShowAgainChecked,
-                securityWarningType.formSource.getDomain()
-            )
-            SecurityWarningAction.NEGATIVE -> securityWarningsProcessor.incorrectWarningNegativeClick(
-                securityWarningType.formSource.getDomain()
-            )
-            SecurityWarningAction.CANCEL -> securityWarningsProcessor.incorrectWarningCancelClick(
-                securityWarningType.formSource.getDomain()
-            )
+            SecurityWarningAction.POSITIVE ->
+                securityWarningsProcessor.incorrectWarningPositiveClick(
+                    doNotShowAgain = securityWarningType.doNotShowAgainChecked,
+                )
+
+            SecurityWarningAction.NEGATIVE ->
+                securityWarningsProcessor.incorrectWarningNegativeClick()
+
+            SecurityWarningAction.CANCEL ->
+                securityWarningsProcessor.incorrectWarningCancelClick()
         }
     }
 
     private fun mismatchAction(securityWarningType: SecurityWarningType, action: SecurityWarningAction) {
         when (action) {
-            SecurityWarningAction.POSITIVE -> securityWarningsProcessor.mismatchWarningPositiveClick(
-                securityWarningType.doNotShowAgainChecked,
-                securityWarningType.formSource.getDomain()
-            )
-            SecurityWarningAction.NEGATIVE -> securityWarningsProcessor.onCloseSecurityWarningWithDeny(
-                securityWarningType.formSource.getDomain()
-            )
-            SecurityWarningAction.CANCEL -> securityWarningsProcessor.mismatchWarningCancelClick(
-                securityWarningType.formSource.getDomain()
-            )
+            SecurityWarningAction.POSITIVE ->
+                securityWarningsProcessor.mismatchWarningPositiveClick(
+                    doNotShowAgain = securityWarningType.doNotShowAgainChecked,
+                )
+
+            SecurityWarningAction.NEGATIVE ->
+                securityWarningsProcessor.mismatchWarningNegativeClick()
+
+            SecurityWarningAction.CANCEL ->
+                securityWarningsProcessor.mismatchWarningCancelClick()
         }
     }
 
-    private fun unknownAction(securityWarningType: SecurityWarningType, action: SecurityWarningAction) {
+    private fun unknownAction(action: SecurityWarningAction) {
         when (action) {
-            SecurityWarningAction.POSITIVE -> securityWarningsProcessor.unknownWarningPositiveClick(
-                securityWarningType.formSource.getDomain()
-            )
-            SecurityWarningAction.NEGATIVE, SecurityWarningAction.CANCEL -> securityWarningsProcessor.onCloseSecurityWarningWithDeny(
-                securityWarningType.formSource.getDomain()
-            )
+            SecurityWarningAction.POSITIVE ->
+                securityWarningsProcessor.unknownWarningPositiveClick()
+
+            SecurityWarningAction.NEGATIVE ->
+                securityWarningsProcessor.unknownWarningNegativeClick()
+
+            SecurityWarningAction.CANCEL ->
+                securityWarningsProcessor.unknownWarningCancelClick()
         }
     }
 
@@ -113,14 +113,14 @@ internal open class SecurityWarningsViewProxy(
     override fun finishWithResult(
         unlockedAuthentifiant: UnlockedAuthentifiant,
         showWarningRemembered: Boolean,
-        warningShown: Boolean
+        warningShown: Boolean,
     ) {
         if (showWarningRemembered) {
             toaster.show(R.string.autofill_warning_we_will_remember, Toast.LENGTH_SHORT)
         }
         autoFillResponseActivity.finishWithResult(
             itemToFill = unlockedAuthentifiant.itemToFill,
-            matchType = matchType
+            matchType = matchType,
         )
     }
 
@@ -134,20 +134,18 @@ internal open class SecurityWarningsViewProxy(
         val applicationName = applicationFormSource?.let {
             autofillFormSourcesStrings.getApplicationString(it)
         } ?: ""
-        val authentifiantLabel = unlockedAuthentifiant.authentifiantSummary.title ?: ""
-
         showDialog(
             BottomSheetMismatchSecurityWarningDialogFragment.create(
-                authentifiantLabel,
-                applicationName,
-                applicationFormSource
-            )
+                authentifiantToFill = unlockedAuthentifiant.itemToFill,
+                formSourceLabel = applicationName,
+                formSource = applicationFormSource,
+            ),
         )
     }
 
     override fun showUnknownWarning(unlockedAuthentifiant: UnlockedAuthentifiant) {
         showDialog(
-            BottomSheetUnknownSecurityWarningDialogFragment.create(unlockedAuthentifiant.formSource)
+            BottomSheetUnknownSecurityWarningDialogFragment.create(unlockedAuthentifiant.formSource),
         )
     }
 
@@ -159,7 +157,7 @@ internal open class SecurityWarningsViewProxy(
             dialog = dialogFragment
             dialog.show(
                 supportFragmentManager,
-                AutoFillResponseActivity.SECURITY_WARNING_DIALOG_TAG
+                AutoFillResponseActivity.SECURITY_WARNING_DIALOG_TAG,
             )
         }
     }

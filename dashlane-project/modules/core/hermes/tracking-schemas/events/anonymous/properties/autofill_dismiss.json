@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/anonymous/properties/autofill_dismiss.json",
+  "type": "object",
+  "description": "Dismiss autofill",
+  "metas": {
+    "area": "autofill"
+  },
+  "properties": {
+    "name": {
+      "const": "autofill_dismiss"
+    },
+    "dismiss_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/autofill.json#/definitions/dismiss_type"
+    },
+    "domain": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/domain"
+    },
+    "is_native_app": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/shared.json#/definitions/is_native_app"
+    }
+  },
+  "required": [
+    "name",
+    "dismiss_type",
+    "domain",
+    "is_native_app"
+  ],
+  "additionalProperties": false
+}

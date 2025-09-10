@@ -9,7 +9,7 @@ class StrengthBarAnimation(
     private val progressBar: ProgressBar,
     private val from: Float,
     private val to: Float,
-    private val colorTo: Int
+    private val colorTo: Int,
 ) : Animation() {
     override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
         super.applyTransformation(interpolatedTime, t)

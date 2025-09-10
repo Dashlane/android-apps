@@ -45,15 +45,17 @@ class AuthenticatorDashboardFragment : AbstractContentFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        @Suppress("DEPRECATION")
         setHasOptionsMenu(true)
         val view = inflater.inflate(R.layout.fragment_authenticator_dashboard, container, false)
         setCurrentPageView(AnyPage.TOOLS_AUTHENTICATOR_LOGINS)
         args.otpUri?.let {
-            viewModel.otpUri = it
-            arguments = AuthenticatorDashboardFragmentArgs(otpUri = null).toBundle()
+            
+            
+            if (it != viewModel.latestHandledUri) viewModel.otpUri = it
         }
         AuthenticatorDashboardViewProxy(
             this,
@@ -61,7 +63,7 @@ class AuthenticatorDashboardFragment : AbstractContentFragment() {
             view,
             viewModel,
             backPressedCallback,
-            authenticatorLogger
+            authenticatorLogger,
         ) { clipboardCopy.copyToClipboard(this, sensitiveData = false, autoClear = true) }
         return view
     }
@@ -76,11 +78,13 @@ class AuthenticatorDashboardFragment : AbstractContentFragment() {
         backPressedCallback.remove()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home && viewModel.editState.value == EditLogins) {
             backPressedCallback.handleOnBackPressed()
             return true
         }
+        @Suppress("DEPRECATION")
         return super.onOptionsItemSelected(item)
     }
 

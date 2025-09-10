@@ -8,13 +8,13 @@ import javax.inject.Inject
 class DeleteVaultItemLogger @Inject constructor(private val logRepository: LogRepository) {
     fun logItemDeletionConfirmed() {
         logRepository.queueEvent(
-            Click(Button.OK)
+            Click(Button.OK),
         )
     }
 
     fun logItemDeletionCanceled() {
         logRepository.queueEvent(
-            Click(Button.CANCEL)
+            Click(Button.CANCEL),
         )
     }
 }

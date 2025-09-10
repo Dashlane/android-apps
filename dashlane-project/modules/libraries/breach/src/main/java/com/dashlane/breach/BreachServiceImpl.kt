@@ -1,27 +1,25 @@
 package com.dashlane.breach
 
-import com.dashlane.session.authorization
 import com.dashlane.server.api.endpoints.breaches.GetBreachesService
 import com.dashlane.session.SessionManager
+import com.dashlane.session.authorization
 import com.dashlane.utils.coroutines.inject.qualifiers.IoCoroutineDispatcher
-import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class BreachServiceImpl @Inject constructor(
-    private val gson: Gson,
     private val getBreachesService: GetBreachesService,
     private val getFileBreachesService: GetFileBreachesService,
     @IoCoroutineDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val sessionManager: SessionManager,
 ) : BreachService {
-
     override suspend fun getBreaches(
         fromRevision: Int,
-        revisionOnly: Boolean
+        revisionOnly: Boolean,
     ): BreachService.Result {
         val session = sessionManager.session ?: throw IllegalArgumentException("session is null")
         val response = withContext(ioDispatcher) {
@@ -29,7 +27,7 @@ class BreachServiceImpl @Inject constructor(
                 userAuthorization = session.authorization,
                 request = GetBreachesService.Request(
                     revision = fromRevision.toDouble(),
-                )
+                ),
             )
         }
 
@@ -58,7 +56,7 @@ class BreachServiceImpl @Inject constructor(
 
     private fun toBreach(it: GetBreachesService.Data.LatestBreache): BreachWithOriginalJson? {
         val breach = it.toBreach() ?: return null
-        val json = gson.toJson(breach)
+        val json = Json.encodeToString(breach)
 
         return BreachWithOriginalJson(breach, json)
     }
@@ -79,7 +77,7 @@ class BreachServiceImpl @Inject constructor(
             template = template,
             status = status?.key,
             breachCreationDate = breachCreationDate?.toLong() ?: 0,
-            lastModificationRevision = lastModificationRevision?.toInt() ?: 0
+            lastModificationRevision = lastModificationRevision?.toInt() ?: 0,
         )
     }
 

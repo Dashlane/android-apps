@@ -1,5 +1,6 @@
 package com.dashlane.storage.securestorage.cryptography
 
+import com.dashlane.crypto.keys.AppKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.cryptography.CryptographyIllegalKeyException
@@ -8,14 +9,12 @@ import com.dashlane.cryptography.DecryptionEngine
 import com.dashlane.cryptography.DecryptionSource
 import com.dashlane.cryptography.EncryptionEngine
 import com.dashlane.cryptography.ObfuscatedByteArray
-import com.dashlane.crypto.keys.AppKey
 import okio.Source
 
 internal class FlexibleDecryptionEngine(
     private val cryptography: Cryptography,
-    private val key: ObfuscatedByteArray
+    private val key: ObfuscatedByteArray,
 ) : DecryptionEngine {
-
     override fun <T> decrypt(decryptionSource: DecryptionSource, compressed: Boolean, block: (Source) -> T): T {
         val exceptions = enumValues<CryptographyKey.Type>().map { keyType ->
             try {
@@ -23,7 +22,7 @@ internal class FlexibleDecryptionEngine(
                     decryptionEngine.decrypt(
                         decryptionSource,
                         compressed,
-                        block
+                        block,
                     )
                 }
             } catch (e: CryptographyIllegalKeyException) {
@@ -33,7 +32,10 @@ internal class FlexibleDecryptionEngine(
             }
         }
 
-        throw exceptions.reduce { acc, e -> acc.addSuppressed(e); acc }
+        throw exceptions.reduce { acc, e ->
+            acc.addSuppressed(e)
+            acc
+        }
     }
 
     private fun createDecryptionEngine(keyType: CryptographyKey.Type) =
@@ -46,7 +48,7 @@ internal class FlexibleDecryptionEngine(
 
 internal class FlexibleDecryptionEngineFactory(
     private val cryptography: Cryptography,
-    private val key: AppKey
+    private val key: AppKey,
 ) : CryptographyEngineFactory {
     override fun createDecryptionEngine(): DecryptionEngine =
         FlexibleDecryptionEngine(cryptography, key.cryptographyKeyBytes)

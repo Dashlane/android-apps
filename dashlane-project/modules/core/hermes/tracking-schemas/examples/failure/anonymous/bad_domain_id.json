@@ -1,0 +1,33 @@
+{
+  "category": "anonymous",
+  "date_origin": "local",
+  "id": "b23c8813-2c1a-4503-a951-a0959b3829c8",
+  "schema_version": "1.31.6",
+  "date": "2022-07-25",
+  "context": {
+    "app": {
+      "platform": "ios",
+      "version": "6.2226.1.373390",
+      "build_type": "production"
+    },
+    "os": {
+      "locale": "ja-JP",
+      "type": "iphone",
+      "version": "15.6"
+    }
+  },
+  "properties": {
+    "domain": {
+      "id": "au\u304b\u3075^_^",
+      "type": "web"
+    },
+    "associated_websites_added_list": [],
+    "action": "edit",
+    "space": "personal",
+    "field_list": [
+      "associated_websites_list"
+    ],
+    "name": "update_credential",
+    "associated_websites_removed_list": []
+  }
+}

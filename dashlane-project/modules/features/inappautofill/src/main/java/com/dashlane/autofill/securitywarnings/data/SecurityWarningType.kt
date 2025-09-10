@@ -11,12 +11,12 @@ sealed class SecurityWarningType : Parcelable {
     @Parcelize
     data class Mismatch(
         override val formSource: AutoFillFormSource?,
-        override val doNotShowAgainChecked: Boolean
+        override val doNotShowAgainChecked: Boolean,
     ) : SecurityWarningType(), Parcelable
 
     @Parcelize
     data class Unknown(
-        override val formSource: AutoFillFormSource?
+        override val formSource: AutoFillFormSource?,
     ) : SecurityWarningType(), Parcelable {
         override val doNotShowAgainChecked: Boolean
             get() = false
@@ -25,6 +25,6 @@ sealed class SecurityWarningType : Parcelable {
     @Parcelize
     data class Incorrect(
         override val formSource: AutoFillFormSource?,
-        override val doNotShowAgainChecked: Boolean
+        override val doNotShowAgainChecked: Boolean,
     ) : SecurityWarningType(), Parcelable
 }

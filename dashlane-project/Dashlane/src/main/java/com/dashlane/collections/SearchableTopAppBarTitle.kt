@@ -19,7 +19,7 @@ internal fun SearchableTopAppBarTitle(
     searchLabel: String,
     title: String,
     searchQuery: MutableState<String>,
-    isSearching: MutableState<Boolean>
+    isSearching: MutableState<Boolean>,
 ) {
     if (showSearch) {
         isSearching.value = true
@@ -34,14 +34,14 @@ internal fun SearchableTopAppBarTitle(
                 onClick = {
                     searchQuery.value = ""
                     true
-                }
-            )
+                },
+            ),
         )
     } else {
         Text(
             text = title,
             modifier = Modifier.semantics { heading() },
-            style = DashlaneTheme.typography.titleSectionMedium
+            style = DashlaneTheme.typography.titleSectionMedium,
         )
     }
 }

@@ -13,13 +13,13 @@ import javax.inject.Inject
 
 class UserPreferencesRememberSecurityWarningsJsonRepository @Inject constructor(
     sessionManager: SessionManager,
-    preferencesManager: PreferencesManager
+    preferencesManager: PreferencesManager,
 ) : RememberSecurityWarningsRepository {
     private val userPreferencesManager: UserPreferencesManager = preferencesManager[sessionManager.session?.username]
 
     private enum class PreferencesType {
         INCORRECT,
-        UNKNOWN
+        UNKNOWN,
     }
 
     private val gson = Gson()
@@ -88,7 +88,7 @@ class UserPreferencesRememberSecurityWarningsJsonRepository @Inject constructor(
 
     private fun hasSource(
         securityWarningsJson: SecurityWarningsJson,
-        securityWarning: RememberSecurityWarning
+        securityWarning: RememberSecurityWarning,
     ): Boolean {
         val signatures = securityWarning.allSignatures() ?: return false
 

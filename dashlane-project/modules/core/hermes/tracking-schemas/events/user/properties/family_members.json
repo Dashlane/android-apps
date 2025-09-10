@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/family_members.json",
+  "type": "object",
+  "description": "Family members dashboard event",
+  "metas": {
+    "area": "family",
+    "priority": true
+  },
+  "properties": {
+    "name": {
+      "const": "family_members"
+    },
+    "dashboard_action": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/family.json#/definitions/dashboard_action"
+    }
+  },
+  "required": [
+    "name",
+    "dashboard_action"
+  ],
+  "additionalProperties": false
+}

@@ -19,9 +19,8 @@ import javax.inject.Inject
 import kotlin.jvm.optionals.getOrNull
 
 internal class AttestationValidatorImpl @Inject constructor(
-    private val optionalNitroUrlOverride: Optional<NitroUrlOverride>
+    private val optionalNitroUrlOverride: Optional<NitroUrlOverride>,
 ) : AttestationValidator {
-
     private val isNitroStagingEnabled: Boolean
         get() = optionalNitroUrlOverride.getOrNull()?.nitroStagingEnabled == true
 
@@ -56,7 +55,7 @@ internal class AttestationValidatorImpl @Inject constructor(
         }
         return SecretStreamServerInfo(
             publicKey = attestationDocument.userData.publicKey,
-            header = attestationDocument.userData.header
+            header = attestationDocument.userData.header,
         )
     }
 
@@ -84,7 +83,7 @@ internal class AttestationValidatorImpl @Inject constructor(
 
     private fun verifySignature(
         document: AttestationDocument,
-        coseSign1: CoseSign1
+        coseSign1: CoseSign1,
     ): Boolean {
         val certificateFactory = CertificateFactory.getInstance("X.509")
         val certificate =
@@ -95,8 +94,8 @@ internal class AttestationValidatorImpl @Inject constructor(
                 "Signature1",
                 coseSign1.protectedHeader,
                 ByteArray(0),
-                coseSign1.payload
-            )
+                coseSign1.payload,
+            ),
         )
 
         val signature = Signature.getInstance("SHA384withECDSA").apply {

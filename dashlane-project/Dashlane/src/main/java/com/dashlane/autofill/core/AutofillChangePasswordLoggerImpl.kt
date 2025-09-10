@@ -10,9 +10,8 @@ import com.dashlane.useractivity.hermes.TrackingLogUtils
 import javax.inject.Inject
 
 class AutofillChangePasswordLoggerImpl @Inject constructor(
-    private val hermesLogRepository: LogRepository
+    private val hermesLogRepository: LogRepository,
 ) : AutofillChangePasswordLogger {
-
     override var domain: String? = null
     override var packageName: String? = null
     private val loggerDomain =

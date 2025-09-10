@@ -7,9 +7,11 @@ import com.dashlane.xml.domain.SyncObject
 
 interface AutofillSearch {
     suspend fun loadAuthentifiants(): List<SummaryObject.Authentifiant>
+
     suspend fun loadAuthentifiant(authentifiantId: String): VaultItem<SyncObject.Authentifiant>?
+
     fun matchAuthentifiantsFromQuery(
         query: String?,
-        items: List<SummaryObject.Authentifiant>
+        items: List<SummaryObject.Authentifiant>,
     ): List<MatchedSearchResult>
 }

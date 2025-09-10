@@ -7,7 +7,6 @@ import android.os.Bundle
 import com.dashlane.ui.activities.DashlaneActivity
 
 interface ActivityLifecycleListener : Application.ActivityLifecycleCallbacks {
-
     fun onActivityUserInteraction(activity: DashlaneActivity)
 
     fun onActivityResult(activity: DashlaneActivity, requestCode: Int, resultCode: Int, data: Intent?)

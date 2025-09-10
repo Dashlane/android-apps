@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/user_verification_attempted.json",
+  "type": "object",
+  "description": "After user initiates the user verification process (e.g. during passkey registration).",
+  "metas": {
+    "area": "authentication"
+  },
+  "properties": {
+    "name": {
+      "const": "user_verification_attempted"
+    },
+    "attempt_num": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/attempt_count"
+    },
+    "source": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/passkeys.json#/definitions/authenticator_user_verification_source"
+    },
+    "verification_method": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/authentication.json#/definitions/mode"
+    }
+  },
+  "required": [
+    "name",
+    "attempt_num",
+    "source",
+    "verification_method"
+  ],
+  "additionalProperties": false
+}

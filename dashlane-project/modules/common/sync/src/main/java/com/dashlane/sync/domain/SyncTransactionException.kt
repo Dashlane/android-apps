@@ -10,13 +10,12 @@ class SyncTransactionException(
     val transaction: Transaction,
     val syncObjectType: SyncObjectType,
     message: String? = null,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : SecureException(message, cause) {
-
     val summary
         get() = SyncSummaryItem(
             transaction.identifier,
             transaction.date,
-            syncObjectType
+            syncObjectType,
         )
 }

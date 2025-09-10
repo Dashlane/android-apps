@@ -30,7 +30,7 @@ fun ConfirmEmailScreen(
     secretTransferPayload: SecretTransferPayload,
     goToTOTP: () -> Unit,
     onCancelled: () -> Unit,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -41,7 +41,8 @@ fun ConfirmEmailScreen(
                 goToTOTP()
             }
             is ConfirmEmailState.Error,
-            is ConfirmEmailState.ConfirmEmail -> Unit
+            is ConfirmEmailState.ConfirmEmail,
+            -> Unit
 
             is ConfirmEmailState.RegisterSuccess -> {
                 viewModel.hasNavigated()
@@ -61,7 +62,7 @@ fun ConfirmEmailScreen(
             textPrimary = stringResource(id = R.string.login_secret_transfer_error_button_retry),
             textSecondary = stringResource(id = R.string.login_secret_transfer_error_button_cancel),
             onClickPrimary = { viewModel.retry(secretTransferPayload) },
-            onClickSecondary = viewModel::cancelOnError
+            onClickSecondary = viewModel::cancelOnError,
         )
 
         else -> {
@@ -80,50 +81,50 @@ fun ConfirmEmailContent(
     modifier: Modifier = Modifier,
     email: String,
     onClickConfirm: () -> Unit,
-    onClickCancel: () -> Unit
+    onClickCancel: () -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp)
+            .padding(24.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
         ) {
             DashlaneLogoLockup(height = 40.dp)
             Text(
                 text = (stringResource(id = R.string.login_secret_transfer_step_label, 2, 2)).uppercase(),
                 style = DashlaneTheme.typography.bodyHelperRegular,
                 color = DashlaneTheme.colors.textNeutralQuiet,
-                modifier = Modifier.padding(top = 48.dp)
+                modifier = Modifier.padding(top = 48.dp),
             )
             Text(
                 text = stringResource(id = R.string.login_secret_transfer_confirm_email_title),
                 style = DashlaneTheme.typography.titleSectionLarge,
                 color = DashlaneTheme.colors.textNeutralCatchy,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 8.dp),
             )
             Text(
                 text = stringResource(id = R.string.login_secret_transfer_confirm_email_body),
                 style = DashlaneTheme.typography.bodyStandardRegular,
                 color = DashlaneTheme.colors.textNeutralStandard,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
             )
             Text(
                 text = email,
                 style = DashlaneTheme.typography.bodyStandardRegular,
                 color = DashlaneTheme.colors.textNeutralCatchy,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
             )
         }
         ButtonMediumBar(
             primaryText = stringResource(id = R.string.login_secret_transfer_confirm_email_button_confirm),
             secondaryText = stringResource(id = R.string.login_secret_transfer_confirm_email_button_cancel),
             onPrimaryButtonClick = onClickConfirm,
-            onSecondaryButtonClick = onClickCancel
+            onSecondaryButtonClick = onClickCancel,
         )
     }
 }
@@ -135,7 +136,7 @@ private fun ConfirmEmailContentPreview() {
         ConfirmEmailContent(
             email = "dashlane.com",
             onClickCancel = {},
-            onClickConfirm = {}
+            onClickConfirm = {},
         )
     }
 }

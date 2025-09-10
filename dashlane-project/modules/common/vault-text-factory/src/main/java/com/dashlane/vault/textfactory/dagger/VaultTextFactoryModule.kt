@@ -12,7 +12,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 interface VaultTextFactoryModule {
-
     @Binds
     fun bindsDataIdentifierListTextResolver(impl: DataIdentifierListTextResolverImpl): DataIdentifierListTextResolver
 

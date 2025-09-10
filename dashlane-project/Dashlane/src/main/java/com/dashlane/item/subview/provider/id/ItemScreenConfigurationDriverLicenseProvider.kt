@@ -31,9 +31,8 @@ class ItemScreenConfigurationDriverLicenseProvider(
     private val genericDataQuery: GenericDataQuery,
     private val vaultDataQuery: VaultDataQuery,
     private val dateTimeFieldFactory: DateTimeFieldFactory,
-    private val vaultItemCopy: VaultItemCopyService
+    private val vaultItemCopy: VaultItemCopyService,
 ) : ItemScreenConfigurationProvider() {
-
     @Suppress("UNCHECKED_CAST")
     override fun createScreenConfiguration(
         context: Context,
@@ -41,12 +40,12 @@ class ItemScreenConfigurationDriverLicenseProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): ScreenConfiguration {
         item as VaultItem<SyncObject.DriverLicence>
         return ScreenConfiguration(
             createSubViews(context, item, subViewFactory, editMode, canDelete, listener),
-            createHeader(context, item)
+            createHeader(context, item),
         )
     }
 
@@ -58,7 +57,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
 
     private fun createHeader(
         context: Context,
-        item: VaultItem<*>
+        item: VaultItem<*>,
     ): ItemHeader {
         val title = context.getString(R.string.driver_license)
         return ItemHeader(
@@ -75,7 +74,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
         subViewFactory: SubViewFactory,
         editMode: Boolean,
         canDelete: Boolean,
-        listener: ItemEditViewContract.View.UiUpdateListener
+        listener: ItemEditViewContract.View.UiUpdateListener,
     ): List<ItemSubView<*>> {
         
         val identitySubviews = createIdentitySubviews(
@@ -86,7 +85,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
             editMode = editMode,
             listener = listener,
             item = item,
-            identityAdapter = DriverLicenceIdentityAdapter
+            identityAdapter = DriverLicenceIdentityAdapter,
         )
 
         val subviews = listOfNotNull(
@@ -104,7 +103,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
                 context.getString(R.string.issue_date),
                 CopyField.DriverLicenseIssueDate,
                 VaultItem<*>::copyForUpdatedDeliveryDate,
-                vaultItemCopy
+                vaultItemCopy,
             ),
             
             createIdDateField(
@@ -116,7 +115,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
                 context.getString(R.string.expiery_date),
                 CopyField.DriverLicenseExpirationDate,
                 VaultItem<*>::copyForUpdatedExpirationDate,
-                vaultItemCopy
+                vaultItemCopy,
             ),
             createTeamspaceField(subViewFactory, item),
             
@@ -126,7 +125,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
             
             dateTimeFieldFactory.createLatestUpdateDateField(editMode = editMode, context = context, item = item),
             
-            subViewFactory.createSubviewDelete(context, listener, canDelete)
+            subViewFactory.createSubviewDelete(context, listener, canDelete),
         )
 
         return identitySubviews + subviews
@@ -136,14 +135,14 @@ class ItemScreenConfigurationDriverLicenseProvider(
         subViewFactory: SubViewFactory,
         context: Context,
         item: VaultItem<SyncObject.DriverLicence>,
-        editMode: Boolean
+        editMode: Boolean,
     ): ItemSubView<*>? {
         val number = item.syncObject.number
         val numberView = subViewFactory.createSubViewString(
             context.getString(R.string.passport_hint_number),
             number,
             false,
-            VaultItem<*>::copyForUpdatedNumber
+            VaultItem<*>::copyForUpdatedNumber,
         )
         return if (numberView == null || editMode) {
             numberView
@@ -154,22 +153,22 @@ class ItemScreenConfigurationDriverLicenseProvider(
                     summaryObject = item.toSummary(),
                     copyField = CopyField.DriverLicenseNumber,
                     action = {},
-                    vaultItemCopy = vaultItemCopy
-                )
+                    vaultItemCopy = vaultItemCopy,
+                ),
             )
         }
     }
 
     private fun createTeamspaceField(
         subViewFactory: SubViewFactory,
-        item: VaultItem<SyncObject.DriverLicence>
+        item: VaultItem<SyncObject.DriverLicence>,
     ): ItemSubView<*>? {
         return if (teamSpaceAccessor.canChangeTeamspace) {
             return subViewFactory.createSpaceSelector(
                 item.syncObject.spaceId,
                 teamSpaceAccessor,
                 null,
-                VaultItem<*>::copyForUpdatedTeamspace
+                VaultItem<*>::copyForUpdatedTeamspace,
             )
         } else {
             null
@@ -186,7 +185,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
 
         override fun withGender(
             item: VaultItem<SyncObject.DriverLicence>,
-            gender: SyncObject.Gender?
+            gender: SyncObject.Gender?,
         ): VaultItem<SyncObject.DriverLicence> =
             item.copySyncObject { sex = gender }
 
@@ -197,8 +196,7 @@ class ItemScreenConfigurationDriverLicenseProvider(
 
         override fun linkedIdentity(item: VaultItem<SyncObject.DriverLicence>) = item.syncObject.linkedIdentity
 
-        override fun withLinkedIdentity(item: VaultItem<SyncObject.DriverLicence>, identity: String?):
-            VaultItem<SyncObject.DriverLicence> =
+        override fun withLinkedIdentity(item: VaultItem<SyncObject.DriverLicence>, identity: String?): VaultItem<SyncObject.DriverLicence> =
             item.copySyncObject { linkedIdentity = identity }
     }
 }

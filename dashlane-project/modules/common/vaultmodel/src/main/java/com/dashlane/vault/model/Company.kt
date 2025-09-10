@@ -9,7 +9,7 @@ fun createCompany(
     siret: String? = null,
     siren: String? = null,
     tvaNumber: String? = null,
-    nafcode: String? = null
+    nafcode: String? = null,
 ): VaultItem<SyncObject.Company> {
     return dataIdentifier.toVaultItem(
         SyncObject.Company {
@@ -21,11 +21,10 @@ fun createCompany(
             this.nafCode = nafcode
 
             this.setCommonDataIdentifierAttrs(dataIdentifier)
-        }
+        },
     )
 }
 
-fun VaultItem<SyncObject.Company>.copySyncObject(builder: SyncObject.Company.Builder.() -> Unit = {}):
-        VaultItem<SyncObject.Company> {
+fun VaultItem<SyncObject.Company>.copySyncObject(builder: SyncObject.Company.Builder.() -> Unit = {}): VaultItem<SyncObject.Company> {
     return this.copy(syncObject = this.syncObject.copy(builder))
 }

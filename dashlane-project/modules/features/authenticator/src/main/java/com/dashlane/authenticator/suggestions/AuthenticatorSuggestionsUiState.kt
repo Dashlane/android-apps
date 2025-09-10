@@ -3,14 +3,16 @@ package com.dashlane.authenticator.suggestions
 import android.os.Parcelable
 import com.dashlane.authenticator.AuthenticatorBaseViewModelContract.Companion.DEFAULT_ITEMS_SHOWN
 import com.dashlane.authenticator.R
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 sealed class AuthenticatorSuggestionsUiState {
     object Progress : AuthenticatorSuggestionsUiState()
 
-    object NoLogins : AuthenticatorSuggestionsUiState()
+    object NoLoginOnboarding : AuthenticatorSuggestionsUiState()
+
+    object No2FACompatibleLogins : AuthenticatorSuggestionsUiState()
 
     object AllSetup : AuthenticatorSuggestionsUiState()
 
@@ -18,7 +20,7 @@ sealed class AuthenticatorSuggestionsUiState {
 
     data class HasLogins(
         val logins: List<CredentialItem>,
-        val nbItemsShown: Int = DEFAULT_ITEMS_SHOWN
+        val nbItemsShown: Int = DEFAULT_ITEMS_SHOWN,
     ) : AuthenticatorSuggestionsUiState() {
         @Parcelize
         data class CredentialItem(
@@ -27,13 +29,14 @@ sealed class AuthenticatorSuggestionsUiState {
             val domain: String?,
             val username: String?,
             val packageName: String? = null,
-            val professional: Boolean = false
+            val professional: Boolean = false,
         ) : DashlaneRecyclerAdapter.ViewTypeProvider, Parcelable {
             @IgnoredOnParcel
             var layout = R.layout.authenticator_credential_item
+
             override fun getViewType() = DashlaneRecyclerAdapter.ViewType(
                 layout,
-                AuthenticatorSuggestionsCredentialItemViewHolder::class.java
+                AuthenticatorSuggestionsCredentialItemViewHolder::class.java,
             )
         }
     }

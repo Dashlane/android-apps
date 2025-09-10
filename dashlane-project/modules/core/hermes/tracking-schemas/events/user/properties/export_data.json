@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://track-production.service.kwift.eu/1.31.6/events/user/properties/export_data.json",
+  "type": "object",
+  "description": "Vault Export (backup) from the application. Event is created during and after a successful operation.",
+  "metas": {
+    "area": "settings"
+  },
+  "properties": {
+    "name": {
+      "const": "export_data"
+    },
+    "backup_file_type": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/backup_file_type"
+    },
+    "export_data_status": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transfer_data_status"
+    },
+    "export_data_step": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transfer_data_step"
+    },
+    "export_destination": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transfer_data_source"
+    },
+    "exported_items_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/transferred_items_count"
+    },
+    "items_to_export_count": {
+      "$ref": "https://track-production.service.kwift.eu/1.31.6/definitions/properties/vault.json#/definitions/items_to_transfer_count"
+    }
+  },
+  "required": [
+    "name",
+    "backup_file_type",
+    "export_data_status",
+    "export_data_step"
+  ],
+  "additionalProperties": false
+}

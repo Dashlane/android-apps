@@ -10,7 +10,9 @@ interface SignatureVerification {
     val knownApplication: KnownApplication?
 
     fun isUnknown(): Boolean = secureResult == PackageSignatureStatus.UNKNOWN
+
     fun isIncorrect(): Boolean = secureResult == PackageSignatureStatus.INCORRECT
+
     fun isVerified(): Boolean = secureResult == PackageSignatureStatus.VERIFIED
 
     abstract class Incorrect : SignatureVerification {
@@ -47,14 +49,14 @@ interface SignatureVerification {
     class KnownApplicationIncorrect(
         override val signatureInstalled: AppSignature,
         override val signatureKnown: AppSignature,
-        override val knownApplication: KnownApplication
+        override val knownApplication: KnownApplication,
     ) : Known, Incorrect() {
         override val signatureInMeta: AppSignature? = null
     }
 
     class VaultLinkedAppsIncorrect(
         override val signatureInstalled: AppSignature,
-        override val signatureInMeta: AppSignature
+        override val signatureInMeta: AppSignature,
     ) : VaultLinkedApps, Incorrect() {
         override val signatureKnown: AppSignature? = null
         override val knownApplication: KnownApplication? = null
@@ -63,14 +65,14 @@ interface SignatureVerification {
     class KnownApplicationVerified(
         override val signatureInstalled: AppSignature,
         override val signatureKnown: AppSignature,
-        override val knownApplication: KnownApplication
+        override val knownApplication: KnownApplication,
     ) : Known, Verified() {
         override val signatureInMeta: AppSignature? = null
     }
 
     class VaultLinkedAppsVerified(
         override val signatureInstalled: AppSignature,
-        override val signatureInMeta: AppSignature
+        override val signatureInMeta: AppSignature,
     ) : VaultLinkedApps, Verified() {
         override val signatureKnown: AppSignature? = null
         override val knownApplication: KnownApplication? = null
@@ -82,13 +84,13 @@ interface SignatureVerification {
     }
 
     class WithSignatureUnknown(
-        override val signatureInstalled: AppSignature
+        override val signatureInstalled: AppSignature,
     ) : UnknownWithSignature() {
         override val knownApplication: KnownApplication? = null
     }
 
     class MismatchUnknown(
         override val signatureInstalled: AppSignature,
-        override val knownApplication: KnownApplication
+        override val knownApplication: KnownApplication,
     ) : UnknownWithSignature()
 }

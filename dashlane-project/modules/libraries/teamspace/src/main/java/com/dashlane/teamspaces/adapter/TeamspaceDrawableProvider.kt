@@ -10,7 +10,11 @@ import com.dashlane.teamspaces.model.TeamSpace
 
 object TeamspaceDrawableProvider {
     @JvmStatic
-    fun getIcon(context: Context, teamspace: TeamSpace, @DimenRes dimenResId: Int = 0): Drawable? {
+    fun getIcon(
+        context: Context,
+        teamspace: TeamSpace,
+        @DimenRes dimenResId: Int = 0,
+    ): Drawable? {
         val drawable = when (teamspace) {
             is TeamSpace.Combined -> AppCompatResources.getDrawable(context, R.drawable.all_spaces_icon)
             else -> TeamspaceIconDrawable(
@@ -19,7 +23,7 @@ object TeamspaceDrawableProvider {
                 color = when (val color = teamspace.color) {
                     is SpaceColor.FixColor -> context.getColor(color.colorRes)
                     is SpaceColor.TeamColor -> color.color
-                }
+                },
             )
         }
         if (drawable != null && dimenResId != 0) {

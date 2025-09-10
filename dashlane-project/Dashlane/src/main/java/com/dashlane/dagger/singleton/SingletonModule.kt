@@ -15,18 +15,16 @@ import com.dashlane.braze.BrazeWrapper
 import com.dashlane.debug.DashlaneBuildConfig
 import com.dashlane.hardwaresecurity.CryptoObjectHelper
 import com.dashlane.lock.LockManager
-import com.dashlane.network.inject.RetrofitModule
 import com.dashlane.preference.PreferencesManager
 import com.dashlane.premium.StoreOffersCache
-import com.dashlane.server.api.endpoints.authentication.AuthLoginService
-import com.dashlane.server.api.endpoints.payments.StoreOffersService
+import com.dashlane.server.api.endpoints.authentication.GetAuthenticationMethodsForLoginService
+import com.dashlane.server.api.endpoints.payments.GetAccessibleStoreOffersService
 import com.dashlane.session.SessionInitializer
 import com.dashlane.session.SessionManager
 import com.dashlane.session.SessionManagerImpl
 import com.dashlane.storage.userdata.EmailSuggestionProvider
 import com.dashlane.storage.userdata.EmailSuggestionProviderImpl
 import com.dashlane.storage.userdata.accessor.GenericDataQuery
-import com.dashlane.storage.userdata.accessor.dagger.UserDataAccessorModule
 import com.dashlane.ui.PostAccountCreationCoordinator
 import com.dashlane.ui.activities.onboarding.HomeActivityIntentCoordinator
 import com.dashlane.url.assetlinks.UrlDomainAssetLinkService
@@ -42,14 +40,13 @@ import okhttp3.Call
 import java.time.Clock
 import javax.inject.Singleton
 
-@Module(includes = [BinderModule::class, UserDataAccessorModule::class, RetrofitModule::class, InAppLoginModule::class, TrackingModule::class])
+@Module
 @InstallIn(SingletonComponent::class)
 open class SingletonModule {
-
     @Provides
     @Singleton
     fun provideEmailSuggestionProvider(
-        genericDataQuery: GenericDataQuery
+        genericDataQuery: GenericDataQuery,
     ): EmailSuggestionProvider {
         return EmailSuggestionProviderImpl(genericDataQuery)
     }
@@ -63,7 +60,7 @@ open class SingletonModule {
     fun provideBrazeContentCardSubscriber(
         @ApplicationCoroutineScope coroutineScope: CoroutineScope,
         announcementCenter: AnnouncementCenter,
-        lockManager: LockManager
+        lockManager: LockManager,
     ): BrazeInAppMessageSubscriber {
         return BrazeInAppPopupModule(coroutineScope, announcementCenter, lockManager)
     }
@@ -72,12 +69,12 @@ open class SingletonModule {
     @Provides
     open fun provideBrazeWrapper(
         @ApplicationContext context: Context,
-        brazeInAppPopupModule: BrazeInAppMessageSubscriber
+        brazeInAppPopupModule: BrazeInAppMessageSubscriber,
     ): BrazeWrapper {
         return BrazeWrapper(
             Braze.getInstance(context),
             BrazeInAppMessageManager.getInstance(),
-            brazeInAppPopupModule
+            brazeInAppPopupModule,
         )
     }
 
@@ -90,8 +87,8 @@ open class SingletonModule {
     @Provides
     @Singleton
     fun provideAccessibleOffersCache(
-        service: StoreOffersService,
-        sessionManager: SessionManager
+        service: GetAccessibleStoreOffersService,
+        sessionManager: SessionManager,
     ): StoreOffersCache {
         return StoreOffersCache(service, sessionManager)
     }
@@ -126,13 +123,14 @@ open class SingletonModule {
     }
 
     @Provides
-    fun provideEmailRepository(
+    @Singleton
+    fun provideAuthenticationDeviceRepository(
         userStorage: UserStorage,
-        authLoginService: AuthLoginService
+        getAuthenticationMethodsForLoginService: GetAuthenticationMethodsForLoginService,
     ): AuthenticationDeviceRepository {
         return AuthenticationDeviceRepositoryImpl(
             userStorage,
-            authLoginService
+            getAuthenticationMethodsForLoginService,
         )
     }
 

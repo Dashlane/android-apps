@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class PermissionsManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val lockHelper: LockHelper
+    private val lockHelper: LockHelper,
 ) : PermissionsManager {
     private val handlers = SparseArray<PermissionsManager.OnPermissionResponseHandler?>()
 
@@ -25,7 +25,7 @@ class PermissionsManagerImpl @Inject constructor(
         activity: Activity,
         permissionCode: Int,
         handler: PermissionsManager.OnPermissionResponseHandler?,
-        permission: String
+        permission: String,
     ) {
         handlers.put(permissionCode, handler)
         if (checkSelfPermission(activity, permission) != PermissionChecker.PERMISSION_GRANTED) {
@@ -48,7 +48,7 @@ class PermissionsManagerImpl @Inject constructor(
         activity: Activity,
         permissions: Array<out String>,
         requestCode: Int,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         val handler = getHandlerForRequestCode(requestCode)
         if (handler != null) {

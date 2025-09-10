@@ -5,7 +5,6 @@ import com.skocken.presentation.presenter.BasePresenter
 
 class QuickActionsPresenter : QuickActionsContract.Presenter,
     BasePresenter<QuickActionsContract.DataProvider, QuickActionsContract.ViewProxy>() {
-
     override fun getActions(itemId: String, itemListContext: ItemListContext) {
         val actions = provider.getActions(itemId, itemListContext)
         view.setActions(actions)
@@ -19,7 +18,7 @@ class QuickActionsPresenter : QuickActionsContract.Presenter,
             thumbnailType = configuration?.type?.value,
             thumbnailIconRes = configuration?.iconRes,
             thumbnailColorRes = configuration?.colorRes,
-            thumbnailUrlDomain = configuration?.urlDomain
+            thumbnailUrlDomain = configuration?.urlDomain,
         )
     }
 }

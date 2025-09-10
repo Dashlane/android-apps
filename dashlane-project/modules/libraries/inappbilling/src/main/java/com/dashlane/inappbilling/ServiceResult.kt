@@ -33,8 +33,6 @@ sealed class ServiceResult {
         object ItemAlreadyOwn : Failure("ItemAlreadyOwn")
 
         object ItemNotOwn : Failure("ItemNotOwn")
-
-        object ServiceTimeout : Failure("ServiceTimeout")
     }
 }
 
@@ -49,7 +47,6 @@ internal fun Int.toFailureServiceResult(): ServiceResult.Failure = when (this) {
     BillingClient.BillingResponseCode.ITEM_NOT_OWNED -> ServiceResult.Failure.ItemNotOwn
     BillingClient.BillingResponseCode.ITEM_UNAVAILABLE -> ServiceResult.Failure.ItemUnavailable
     BillingClient.BillingResponseCode.SERVICE_DISCONNECTED -> ServiceResult.Failure.ServiceDisconnected
-    BillingClient.BillingResponseCode.SERVICE_TIMEOUT -> ServiceResult.Failure.ServiceTimeout
     BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE -> ServiceResult.Failure.ServiceUnavailable
     BillingClient.BillingResponseCode.USER_CANCELED -> ServiceResult.Failure.UserCanceled
     else -> ServiceResult.Failure.Error
@@ -60,6 +57,7 @@ internal fun Int.canRetry(): Boolean = when (this) {
     BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE,
     BillingClient.BillingResponseCode.BILLING_UNAVAILABLE,
     BillingClient.BillingResponseCode.DEVELOPER_ERROR,
-    BillingClient.BillingResponseCode.ERROR -> true
+    BillingClient.BillingResponseCode.ERROR,
+    -> true
     else -> false
 }

@@ -4,7 +4,6 @@ import com.dashlane.teamspaces.model.TeamSpace
 import com.dashlane.teamspaces.ui.CurrentTeamSpaceUiFilter
 
 object CurrentSpaceFilter : SpaceFilter {
-
     override fun getSpacesRestrictions(currentTeamSpaceUiFilter: CurrentTeamSpaceUiFilter): Array<out TeamSpace> {
         val currentSpace = currentTeamSpaceUiFilter.currentFilter.teamSpace
 

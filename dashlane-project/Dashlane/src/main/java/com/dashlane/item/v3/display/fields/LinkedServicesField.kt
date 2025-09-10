@@ -20,7 +20,7 @@ fun ColumnScope.LinkedServicesField(
     linkedServices: CredentialFormData.LinkedServices,
     editMode: Boolean,
     isEditable: Boolean,
-    loginActions: LoginActions
+    loginActions: LoginActions,
 ) {
     if (!isEditable) {
         
@@ -33,7 +33,7 @@ fun ColumnScope.LinkedServicesField(
             text = pluralStringResource(
                 id = R.plurals.vault_linked_services_manage,
                 count = linkedServices.size,
-                linkedServices.size
+                linkedServices.size,
             ),
             destinationType = LinkButtonDestinationType.INTERNAL,
             onClick = loginActions.onLinkedServicesOpen,
@@ -55,7 +55,7 @@ private fun PasswordFieldPreview() {
         addedByDashlaneApps = listOf("App 1"),
         addedByDashlaneDomains = listOf("google.com"),
         addedByUserApps = listOf("App 2"),
-        addedByUserDomains = listOf("example.com", "test.com")
+        addedByUserDomains = listOf("example.com", "test.com"),
     )
     DashlanePreview {
         Column {
@@ -63,7 +63,7 @@ private fun PasswordFieldPreview() {
                 linkedServices = linkedServices,
                 editMode = true,
                 isEditable = true,
-                loginActions = LoginActions()
+                loginActions = LoginActions(),
             )
         }
     }

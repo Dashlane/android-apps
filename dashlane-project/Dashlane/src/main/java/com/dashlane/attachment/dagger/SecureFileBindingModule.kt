@@ -1,15 +1,15 @@
 package com.dashlane.attachment.dagger
 
 import com.dashlane.securefile.DownloadFileContract
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import com.dashlane.securefile.UploadFileDataProvider
 import com.dashlane.securefile.DownloadFileDataProvider
 import com.dashlane.securefile.UploadFileContract
-import com.dashlane.securefile.storage.SecureFileStorageImpl
+import com.dashlane.securefile.UploadFileDataProvider
 import com.dashlane.securefile.storage.SecureFileStorage
+import com.dashlane.securefile.storage.SecureFileStorageImpl
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -10,9 +10,9 @@ import com.dashlane.notificationcenter.NotificationCenterRepository
 import com.dashlane.server.api.endpoints.sharinguserdevice.UserGroup
 import com.dashlane.session.SessionManager
 import com.dashlane.sharing.model.getUser
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.adapter.util.DiffUtilComparator
 import com.dashlane.ui.drawable.CircleDrawable
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.util.DiffUtilComparator
 import java.time.Instant
 
 data class SharingActionItemUserGroup(
@@ -22,7 +22,7 @@ data class SharingActionItemUserGroup(
     override val actionItemsRepository: NotificationCenterRepository,
     override val section: ActionItemSection = ActionItemSection.SHARING,
     override val type: ActionItemType = ActionItemType.SHARING,
-    override val trackingKey: String = sharing.groupId
+    override val trackingKey: String = sharing.groupId,
 ) : NotificationItem, DiffUtilComparator<SharingActionItemUserGroup> {
     override val action: NotificationCenterDef.Presenter.() -> Unit = { startSharingRedirection() }
 
@@ -40,12 +40,11 @@ data class SharingActionItemUserGroup(
     companion object {
         val VIEW_TYPE = DashlaneRecyclerAdapter.ViewType(
             R.layout.item_actionitem,
-            ViewHolder::class.java
+            ViewHolder::class.java,
         )
     }
 
     class ViewHolder(val v: View) : ReadStateViewHolder<SharingActionItemUserGroup>(v) {
-
         private val binding = ItemActionitemBinding.bind(view)
 
         override fun updateView(context: Context, item: SharingActionItemUserGroup?) {
@@ -57,7 +56,7 @@ data class SharingActionItemUserGroup(
 
             binding.date.text = formatDateForNotification(
                 item.firstDisplayedDate.toEpochMilli(),
-                Instant.now().toEpochMilli()
+                Instant.now().toEpochMilli(),
             )
             binding.date.visibility = View.VISIBLE
             binding.title.text =
@@ -68,8 +67,8 @@ data class SharingActionItemUserGroup(
                     context = context,
                     backgroundColorRes = R.color.container_expressive_brand_quiet_idle,
                     drawableRes = R.drawable.ic_action_item_sharing_invitation,
-                    drawableTintColorRes = R.color.text_brand_standard
-                )
+                    drawableTintColorRes = R.color.text_brand_standard,
+                ),
             )
         }
 
@@ -79,12 +78,12 @@ data class SharingActionItemUserGroup(
         }
 
         private fun updateUserGroup(
-            referrer: String
+            referrer: String,
         ) {
             binding.description.text =
                 context.getString(
                     R.string.action_item_sharing_invitation_group_description,
-                    referrer
+                    referrer,
                 )
         }
     }

@@ -5,7 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.dashlane.util.R
+import com.dashlane.utils.android.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,57 +14,56 @@ import javax.inject.Singleton
 class NotificationHelper @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val notificationManager: NotificationManager?
+    private val notificationManager: NotificationManager?,
 ) {
-
     enum class Channel(
         val id: String,
         val importance: Int,
         val priority: Int,
-        val title: Int
+        val title: Int,
     ) {
         SECURITY(
             SECURITY_CHANNEL,
             NotificationManagerCompat.IMPORTANCE_HIGH,
             NotificationCompat.PRIORITY_HIGH,
-            R.string.notification_channel_security_title
+            R.string.notification_channel_security_title,
         ),
         TOKEN(
             TOKEN_CHANNEL,
             NotificationManagerCompat.IMPORTANCE_HIGH,
             NotificationCompat.PRIORITY_HIGH,
-            R.string.notification_channel_token_title
+            R.string.notification_channel_token_title,
         ),
         VPN(
             VPN_CHANNEL,
             NotificationManagerCompat.IMPORTANCE_HIGH,
             NotificationCompat.PRIORITY_HIGH,
-            R.string.notification_channel_vpn_title
+            R.string.notification_channel_vpn_title,
         ),
         PASSIVE(
             PASSIVE_CHANNEL,
             NotificationManagerCompat.IMPORTANCE_LOW,
             NotificationCompat.PRIORITY_LOW,
-            R.string.notification_channel_passive_title
+            R.string.notification_channel_passive_title,
         ),
         MARKETING(
             MARKETING_CHANNEL,
             NotificationManagerCompat.IMPORTANCE_DEFAULT,
             NotificationCompat.PRIORITY_DEFAULT,
-            R.string.notification_channel_marketing_title
+            R.string.notification_channel_marketing_title,
         ),
         OTP(
             OTP_CHANNEL,
             NotificationManagerCompat.IMPORTANCE_HIGH,
             NotificationCompat.PRIORITY_HIGH,
-            R.string.notification_channel_otp_title
+            R.string.notification_channel_otp_title,
         ),
         FOLLOW_UP_NOTIFICATION(
             FOLLOW_UP_NOTIFICATION_HIGH_CHANNEL,
             NotificationManagerCompat.IMPORTANCE_HIGH,
             NotificationCompat.PRIORITY_HIGH,
-            R.string.notification_channel_follow_up_notification_title
-        )
+            R.string.notification_channel_follow_up_notification_title,
+        ),
     }
 
     companion object {

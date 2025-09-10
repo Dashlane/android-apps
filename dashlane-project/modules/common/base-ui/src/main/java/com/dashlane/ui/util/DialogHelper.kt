@@ -16,7 +16,7 @@ class DialogHelper @Inject constructor() {
 
     fun builder(
         context: Context,
-        overrideThemeResId: Int
+        overrideThemeResId: Int,
     ): AlertDialog.Builder {
         return MaterialAlertDialogBuilder(context, overrideThemeResId)
     }

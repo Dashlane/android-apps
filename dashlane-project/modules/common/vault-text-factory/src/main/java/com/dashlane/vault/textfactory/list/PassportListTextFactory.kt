@@ -14,7 +14,6 @@ class PassportListTextFactory @Inject constructor(
     private val identityNameHolderService: IdentityNameHolderService,
     private val clock: Clock,
 ) : DataIdentifierListTextFactory<SummaryObject.Passport> {
-
     override fun getTitle(item: SummaryObject.Passport): StatusText {
         val title = identityNameHolderService.getOwner(item)
         return StatusText(if (title.isNotSemanticallyNull()) title else resources.getString(R.string.passport))
@@ -25,6 +24,6 @@ class PassportListTextFactory @Inject constructor(
             resources = resources,
             number = item.number,
             default = default,
-            clock = clock
+            clock = clock,
         ) ?: default
 }

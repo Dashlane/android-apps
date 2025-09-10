@@ -11,9 +11,8 @@ import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
 class InstallTrackingManager @Inject constructor(
-    private val globalPreferencesManager: GlobalPreferencesManager
+    private val globalPreferencesManager: GlobalPreferencesManager,
 ) {
-
     fun installEvent(intent: Intent?) {
         intent?.extras?.let { bundle ->
             try {

@@ -1,5 +1,7 @@
 package com.dashlane.storage.securestorage
 
+import com.dashlane.crypto.keys.AppKey
+import com.dashlane.crypto.keys.LocalKey
 import com.dashlane.cryptography.Cryptography
 import com.dashlane.cryptography.CryptographyEngineFactory
 import com.dashlane.cryptography.CryptographyKey
@@ -12,10 +14,8 @@ import com.dashlane.cryptography.SaltGenerator
 import com.dashlane.cryptography.createEncryptionEngine
 import com.dashlane.cryptography.generateFixedSalt
 import com.dashlane.cryptography.use
-import com.dashlane.crypto.keys.AppKey
-import com.dashlane.crypto.keys.LocalKey
-import com.dashlane.user.Username
 import com.dashlane.storage.securestorage.cryptography.FlexibleDecryptionEngineFactory
+import com.dashlane.user.Username
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,12 +24,12 @@ class LocalKeyRepository @Inject constructor(
     private val secureStorageManager: SecureStorageManager,
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
-    private val keyGenerator: CryptographyKeyGenerator
+    private val keyGenerator: CryptographyKeyGenerator,
 ) {
     fun createLocalKey(
         username: Username,
         appKey: AppKey,
-        cryptographyMarker: CryptographyMarker
+        cryptographyMarker: CryptographyMarker,
     ): LocalKey {
         val localKey = keyGenerator.generateRaw32().use(::LocalKey)
         storeLocalKey(localKey, username, appKey, cryptographyMarker)
@@ -39,7 +39,7 @@ class LocalKeyRepository @Inject constructor(
     fun getLocalKey(username: Username, appKey: AppKey): LocalKey? {
         val secureDataStore = getMPSecureDataStore(
             username,
-            FlexibleDecryptionEngineFactory(cryptography, appKey)
+            FlexibleDecryptionEngineFactory(cryptography, appKey),
         )
         val localKeyBytes = secureDataStore.retrieveData(SecureDataKey.LOCAL_KEY) ?: return null
         if (localKeyBytes.size != 32) return null
@@ -50,7 +50,7 @@ class LocalKeyRepository @Inject constructor(
         username: Username,
         appKey: AppKey,
         newAppKey: AppKey,
-        cryptographyMarker: CryptographyMarker
+        cryptographyMarker: CryptographyMarker,
     ) {
         val localKey = getLocalKey(username, appKey)
         checkNotNull(localKey)
@@ -61,28 +61,29 @@ class LocalKeyRepository @Inject constructor(
         return getMPSecureDataStorage(username).existsLegacy(SecureDataKey.LOCAL_KEY)
     }
 
-    private fun storeLocalKey(
+    fun storeLocalKey(
         localKey: LocalKey,
         username: Username,
         appKey: AppKey,
-        cryptographyMarker: CryptographyMarker
-    ) =
+        cryptographyMarker: CryptographyMarker,
+    ) {
         appKey.cryptographyKey.use { cryptographyKey ->
             val cryptographyEngineFactory = CryptographyEngineFactoryImpl(
                 cryptography,
                 saltGenerator,
                 cryptographyKey,
-                cryptographyMarker
+                cryptographyMarker,
             )
             val secureDataStore = getMPSecureDataStore(username, cryptographyEngineFactory)
             localKey.cryptographyKeyBytes.use(ObfuscatedByteArray::toByteArray).use {
                 secureDataStore.storeData(SecureDataKey.LOCAL_KEY, it)
             }
         }
+    }
 
     private fun getMPSecureDataStore(
         username: Username,
-        cryptographyEngineFactory: CryptographyEngineFactory
+        cryptographyEngineFactory: CryptographyEngineFactory,
     ): SecureDataStore {
         return secureStorageManager.getSecureDataStore(getMPSecureDataStorage(username), cryptographyEngineFactory)
     }
@@ -95,7 +96,7 @@ private class CryptographyEngineFactoryImpl(
     private val cryptography: Cryptography,
     private val saltGenerator: SaltGenerator,
     private val cryptographyKey: CryptographyKey,
-    private val cryptographyMarker: CryptographyMarker
+    private val cryptographyMarker: CryptographyMarker,
 ) : CryptographyEngineFactory {
     override fun createDecryptionEngine(): DecryptionEngine =
         cryptography.createDecryptionEngine(cryptographyKey)

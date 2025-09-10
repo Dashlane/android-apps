@@ -1,5 +1,8 @@
 package com.dashlane.item.v3
 
+import android.content.Context
+import android.location.LocationManager
+import android.net.wifi.WifiManager
 import com.dashlane.item.v3.repositories.CollectionsRepository
 import com.dashlane.item.v3.repositories.CollectionsRepositoryImpl
 import com.dashlane.item.v3.repositories.GeneratedPasswordRepository
@@ -10,21 +13,19 @@ import com.dashlane.item.v3.repositories.NewItemRepository
 import com.dashlane.item.v3.repositories.NewItemRepositoryImpl
 import com.dashlane.item.v3.repositories.PasswordHealthRepository
 import com.dashlane.item.v3.repositories.PasswordHealthRepositoryImpl
-import com.dashlane.item.v3.util.ItemEditValueUpdateManager
-import com.dashlane.item.v3.util.ItemEditValueUpdateManagerImpl
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ViewModelScoped
 
 @Module
 @InstallIn(ViewModelComponent::class)
 interface ItemEditModule {
     @Binds
     fun bindItemEditRepository(impl: ItemEditRepositoryImpl): ItemEditRepository
-
-    @Binds
-    fun bindItemEditValueUpdateManager(impl: ItemEditValueUpdateManagerImpl): ItemEditValueUpdateManager
 
     @Binds
     fun bindGeneratedPasswordRepository(impl: GeneratedPasswordRepositoryImpl): GeneratedPasswordRepository
@@ -37,4 +38,18 @@ interface ItemEditModule {
 
     @Binds
     fun bindPasswordHealthRepository(impl: PasswordHealthRepositoryImpl): PasswordHealthRepository
+
+    companion object {
+        @Provides
+        @ViewModelScoped
+        fun provideWifiManager(
+            @ApplicationContext context: Context,
+        ): WifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        @Provides
+        @ViewModelScoped
+        fun provideLocationManager(
+            @ApplicationContext context: Context,
+        ): LocationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    }
 }

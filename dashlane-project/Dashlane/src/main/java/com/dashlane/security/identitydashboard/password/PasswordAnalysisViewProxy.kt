@@ -14,10 +14,12 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.dashlane.R
-import com.dashlane.security.identitydashboard.PasswordAnalysisScoreViewProxy
+import com.dashlane.passwordhealth.identitydashboard.PasswordAnalysisScoreViewProxy
+import com.dashlane.passwordhealth.identitydashboard.password.PasswordAnalysisContract
+import com.dashlane.passwordhealth.identitydashboard.password.PasswordAnalysisCountBadgeDrawable
 import com.dashlane.ui.activities.fragments.list.wrapper.VaultItemWrapper
-import com.dashlane.ui.adapter.DashlaneRecyclerAdapter
-import com.dashlane.ui.widgets.view.MultiColumnRecyclerView
+import com.dashlane.ui.legacy.recyclerview.DashlaneRecyclerAdapter
+import com.dashlane.ui.legacy.recyclerview.MultiColumnRecyclerView
 import com.dashlane.ui.widgets.view.empty.EmptyScreenConfiguration
 import com.dashlane.ui.widgets.view.empty.EmptyScreenViewProvider
 import com.google.android.material.tabs.TabLayout
@@ -30,14 +32,13 @@ class PasswordAnalysisViewProxy(view: View) :
     PasswordAnalysisContract.ViewProxy,
     EfficientAdapter.OnItemClickListener<DashlaneRecyclerAdapter.ViewTypeProvider>,
     ViewPager.OnPageChangeListener {
-
     private val viewSwitcher = findViewByIdEfficient<ViewSwitcher>(R.id.loader_view_switcher)!!
     private val viewPager = findViewByIdEfficient<ViewPager>(R.id.viewpager)!!
     private val tabLayout = findViewByIdEfficient<TabLayout>(R.id.tabs)!!
 
     private val scoreViewProxy =
         PasswordAnalysisScoreViewProxy(
-            findViewByIdEfficient<ImageView>(R.id.security_score)!!
+            findViewByIdEfficient<ImageView>(R.id.security_score)!!,
         )
     private val tipsTitle = findViewByIdEfficient<TextView>(R.id.tips_title)!!
     private val tipsBody = findViewByIdEfficient<TextView>(R.id.tips_body)!!
@@ -57,7 +58,7 @@ class PasswordAnalysisViewProxy(view: View) :
         adapter: EfficientAdapter<DashlaneRecyclerAdapter.ViewTypeProvider>,
         view: View,
         item: DashlaneRecyclerAdapter.ViewTypeProvider?,
-        position: Int
+        position: Int,
     ) {
         item ?: return
         presenter.onListItemClick(item)
@@ -66,7 +67,7 @@ class PasswordAnalysisViewProxy(view: View) :
     override fun setItems(
         itemsPerMode: Map<PasswordAnalysisContract.Mode, List<Any>>,
         modeToSelect: PasswordAnalysisContract.Mode?,
-        indexToHighlight: Int?
+        indexToHighlight: Int?,
     ) {
         removeListenerPage()
         val previousItem = viewPager.currentItem
@@ -96,14 +97,17 @@ class PasswordAnalysisViewProxy(view: View) :
             tabLayout
         }
         val tabView = parentTabView?.getChildAt(position) as? ViewGroup ?: return
-        (0..tabView.childCount).forEach {
-            val childAt = tabView.getChildAt(it)
+        for (i in 0..tabView.childCount) {
+            val childAt = tabView.getChildAt(i)
             if (childAt is TextView) {
-                val icon = PasswordAnalysisCountBadgeDrawable.newStateListDrawable(childAt.context, counter)
+                val icon = PasswordAnalysisCountBadgeDrawable.newStateListDrawable(
+                    childAt.context,
+                    counter,
+                )
                 childAt.compoundDrawablePadding = TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
                     4F,
-                    context.resources.displayMetrics
+                    context.resources.displayMetrics,
                 ).roundToInt()
                 childAt.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null)
                 
@@ -150,9 +154,8 @@ class PasswordAnalysisViewProxy(view: View) :
 
     private class ListPagerAdapter(
         private val context: Context,
-        private val securityDashboardViewProxy: PasswordAnalysisViewProxy
+        private val securityDashboardViewProxy: PasswordAnalysisViewProxy,
     ) : PagerAdapter() {
-
         private val modes = PasswordAnalysisContract.Mode.values()
 
         val items = mutableMapOf<PasswordAnalysisContract.Mode, List<Any>>()
@@ -204,20 +207,20 @@ class PasswordAnalysisViewProxy(view: View) :
             return when (modes[position]) {
                 PasswordAnalysisContract.Mode.WEAK -> ModeEmptyScreenViewProvider(
                     context,
-                    R.string.security_dashboard_list_weak_empty_title
+                    R.string.security_dashboard_list_weak_empty_title,
                 )
                 PasswordAnalysisContract.Mode.REUSED -> ModeEmptyScreenViewProvider(
                     context,
-                    R.string.security_dashboard_list_reused_empty_title
+                    R.string.security_dashboard_list_reused_empty_title,
                 )
                 PasswordAnalysisContract.Mode.EXCLUDED -> ModeEmptyScreenViewProvider(
                     context,
                     R.string.security_dashboard_list_exclude_empty_title,
-                    R.drawable.ic_empty_password_analysis_ignored
+                    R.drawable.ic_empty_password_analysis_ignored,
                 )
                 PasswordAnalysisContract.Mode.COMPROMISED -> ModeEmptyScreenViewProvider(
                     context,
-                    R.string.security_dashboard_list_compromised_empty_title
+                    R.string.security_dashboard_list_compromised_empty_title,
                 )
             }.emptyViewProvider
         }
@@ -226,15 +229,14 @@ class PasswordAnalysisViewProxy(view: View) :
     private class ModeEmptyScreenViewProvider(
         context: Context,
         @StringRes title: Int,
-        @DrawableRes image: Int = R.drawable.ic_empty_password_analysis
+        @DrawableRes image: Int = R.drawable.ic_empty_password_analysis,
     ) {
-
         val emptyViewProvider = EmptyScreenViewProvider(
             EmptyScreenConfiguration.Builder()
                 .setImage(VectorDrawableCompat.create(context.resources, image, null))
                 .setLine2(context.resources.getString(title))
                 .setAlignTop(true)
-                .build()
+                .build(),
         )
     }
 }

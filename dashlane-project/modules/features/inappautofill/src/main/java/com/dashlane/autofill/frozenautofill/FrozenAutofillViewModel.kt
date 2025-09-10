@@ -19,15 +19,14 @@ class FrozenAutofillViewModel @Inject constructor(
     frozenStateManager: FrozenStateManager,
     private val frozenStateLogger: FrozenStateLogger,
 ) : ViewModel() {
-
     private val stateFlow = MutableStateFlow(
         FrozenAutofillState(
             description = TextResource.StringText(
                 stringRes = R.string.autofill_frozen_bottom_sheet_description,
-                arg = TextResource.Arg.StringArg(frozenStateManager.passwordLimitCount.toString())
+                arg = TextResource.Arg.StringArg(frozenStateManager.passwordLimitCount.toString()),
             ),
-            bottomSheetState = BottomSheetState.FOLDED
-        )
+            bottomSheetState = BottomSheetState.FOLDED,
+        ),
     )
     val uiState = stateFlow.asStateFlow()
 
@@ -47,6 +46,10 @@ class FrozenAutofillViewModel @Inject constructor(
 
     fun onUnfreezeAccountClicked() {
         frozenStateLogger.logUnfreezeAccountClicked()
+        onFinishing()
+    }
+
+    fun onBottomSheetDismiss() {
         onFinishing()
     }
 

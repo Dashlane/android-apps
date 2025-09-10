@@ -14,7 +14,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class DashlaneWrapperActivity : DashlaneActivity() {
-
     @Inject
     lateinit var navigator: Navigator
 
@@ -43,7 +42,7 @@ class DashlaneWrapperActivity : DashlaneActivity() {
         fun startActivity(
             origin: Activity,
             destination: Uri,
-            extra: Bundle?
+            extra: Bundle?,
         ) {
             val intent = newIntent(origin, destination, extra)
             origin.startActivity(intent)
@@ -53,7 +52,7 @@ class DashlaneWrapperActivity : DashlaneActivity() {
             requestCode: Int,
             origin: Activity,
             destination: Uri,
-            extras: Bundle?
+            extras: Bundle?,
         ) {
             val intent = newIntent(origin, destination, extras)
             origin.startActivityForResult(intent, requestCode)
@@ -62,7 +61,7 @@ class DashlaneWrapperActivity : DashlaneActivity() {
         private fun newIntent(
             context: Context,
             destination: Uri,
-            extras: Bundle?
+            extras: Bundle?,
         ): Intent {
             val intent = Intent(context, DashlaneWrapperActivity::class.java)
             intent.action = Intent.ACTION_VIEW

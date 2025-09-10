@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.activities.HomeActivity">
 
-    <com.dashlane.ui.widgets.view.MultiColumnRecyclerView
+    <com.dashlane.ui.legacy.recyclerview.MultiColumnRecyclerView
         android:id="@+id/dashboard_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

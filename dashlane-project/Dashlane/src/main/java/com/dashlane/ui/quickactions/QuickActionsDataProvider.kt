@@ -15,9 +15,8 @@ import javax.inject.Inject
 class QuickActionsDataProvider @Inject constructor(
     private val genericDataQuery: GenericDataQuery,
     private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
-    private val quickActionProvider: QuickActionProvider
+    private val quickActionProvider: QuickActionProvider,
 ) : QuickActionsContract.DataProvider, BaseDataProvider<QuickActionsContract.Presenter>() {
-
     override fun getVaultItem(itemId: String): SummaryObject? {
         val query = vaultFilter { specificUid(itemId) }
         return genericDataQuery.queryFirst(query)

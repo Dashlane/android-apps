@@ -16,7 +16,7 @@ class ItemWrapperProvider @Inject constructor(
     private val dataIdentifierListTextResolver: DataIdentifierListTextResolver,
     private val teamSpaceAccessorProvider: TeamSpaceAccessorProvider,
     private val currentTeamSpaceFilterRepository: CurrentTeamSpaceUiFilter,
-    private val quickActionProvider: QuickActionProvider
+    private val quickActionProvider: QuickActionProvider,
 ) {
     operator fun invoke(item: SummaryObject, container: ItemListContext): VaultItemWrapper<out SummaryObject>? {
         return getItemWrapper(item, container)
@@ -40,7 +40,8 @@ class ItemWrapperProvider @Inject constructor(
             is SummaryObject.Passkey,
             is SummaryObject.SecureNote,
             is SummaryObject.Secret,
-            is SummaryObject.Passport -> DefaultVaultItemWrapper(
+            is SummaryObject.Passport,
+            -> DefaultVaultItemWrapper(
                 vaultItemCopyService = vaultItemCopyService,
                 quickActionProvider = quickActionProvider,
                 summaryObject = item,
@@ -48,7 +49,7 @@ class ItemWrapperProvider @Inject constructor(
                 dataIdentifierListTextResolver = dataIdentifierListTextResolver,
                 navigator = navigator,
                 teamSpaceAccessorProvider = teamSpaceAccessorProvider,
-                currentTeamSpaceUiFilter = currentTeamSpaceFilterRepository
+                currentTeamSpaceUiFilter = currentTeamSpaceFilterRepository,
             )
             is SummaryObject.PaymentCreditCard -> PaymentCreditCardWrapper(
                 vaultItemCopyService = vaultItemCopyService,
@@ -58,7 +59,7 @@ class ItemWrapperProvider @Inject constructor(
                 dataIdentifierListTextResolver = dataIdentifierListTextResolver,
                 navigator = navigator,
                 teamSpaceAccessorProvider = teamSpaceAccessorProvider,
-                currentSpaceFilterRepository = currentTeamSpaceFilterRepository
+                currentSpaceFilterRepository = currentTeamSpaceFilterRepository,
             )
             else -> null
         }
@@ -66,7 +67,7 @@ class ItemWrapperProvider @Inject constructor(
 
     fun getAuthentifiantItemWrapper(
         item: SummaryObject.Authentifiant,
-        container: ItemListContext
+        container: ItemListContext,
     ): DefaultVaultItemWrapper<SummaryObject.Authentifiant> {
         return DefaultVaultItemWrapper(
             vaultItemCopyService = vaultItemCopyService,
@@ -76,7 +77,7 @@ class ItemWrapperProvider @Inject constructor(
             navigator = navigator,
             dataIdentifierListTextResolver = dataIdentifierListTextResolver,
             teamSpaceAccessorProvider = teamSpaceAccessorProvider,
-            currentTeamSpaceUiFilter = currentTeamSpaceFilterRepository
+            currentTeamSpaceUiFilter = currentTeamSpaceFilterRepository,
         )
     }
 }

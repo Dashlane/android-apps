@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.dashlane.hermes.generated.definitions.AnyPage
-import com.dashlane.server.api.endpoints.vpn.VpnGetCredentialsService
+import com.dashlane.server.api.endpoints.vpn.GetCredentialsService
 import com.dashlane.session.SessionManager
 import com.dashlane.util.setCurrentPageView
 import com.dashlane.vpn.thirdparty.R
@@ -17,9 +17,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class VpnThirdPartySetupEmailFragment : Fragment() {
-
     @Inject
-    lateinit var getVpnCredentialsService: VpnGetCredentialsService
+    lateinit var getCredentialsService: GetCredentialsService
 
     @Inject
     lateinit var sessionManager: SessionManager
@@ -37,7 +36,7 @@ class VpnThirdPartySetupEmailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         return inflater.inflate(R.layout.fragment_vpn_third_party_setup_email, container, false)
     }
@@ -49,14 +48,14 @@ class VpnThirdPartySetupEmailFragment : Fragment() {
         val defaultEmail = activity?.intent?.getStringExtra("email")
         val suggestions = activity?.intent?.getStringArrayExtra("suggestions")
         presenter.setView(
-            VpnThirdPartyActivateAccountViewProxy(this, defaultEmail, suggestions?.toList())
+            VpnThirdPartyActivateAccountViewProxy(this, defaultEmail, suggestions?.toList()),
         )
         presenter.setProvider(
             VpnThirdPartyActivateAccountDataProvider(
-                getVpnCredentialsService,
-                sessionManager,
-                authentifiantHelper
-            )
+                getCredentialsService = getCredentialsService,
+                sessionManager = sessionManager,
+                authentifiantHelper = authentifiantHelper,
+            ),
         )
         (activity as? Listener)?.onPresenterReady(presenter)
     }

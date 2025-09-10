@@ -56,7 +56,7 @@ class NewShareItemDataProvider @Inject constructor(
         query ?: return true
         return !vaultItem.hasAttachments() && FILTER_BY_DATA_TYPE[vaultItem.syncObjectType]?.invoke(
             vaultItem,
-            query
+            query,
         ) ?: false
     }
 
@@ -65,22 +65,22 @@ class NewShareItemDataProvider @Inject constructor(
             mapOf<SyncObjectType, (SummaryObject, String) -> (Boolean)>(
                 SyncObjectType.AUTHENTIFIANT to { item, query ->
                     item is SummaryObject.Authentifiant &&
-                            (
-                                query.match(item.title) ||
-                                    query.match(item.url) ||
-                                    query.match(item.userSelectedUrl) ||
-                                    query.match(item.login) ||
-                                    query.match(item.email)
-                            )
+                        (
+                            query.match(item.title) ||
+                                query.match(item.url) ||
+                                query.match(item.userSelectedUrl) ||
+                                query.match(item.login) ||
+                                query.match(item.email)
+                        )
                 },
                 SyncObjectType.SECURE_NOTE to { item, query ->
                     item is SummaryObject.SecureNote &&
-                            (
-                                query.match(item.title) ||
-                                    
-                                    (item.secured != true && query.match(item.content))
-                            )
-                }
+                        (
+                            query.match(item.title) ||
+                                
+                                (item.secured != true && query.match(item.content))
+                        )
+                },
             )
     }
 }

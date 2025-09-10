@@ -6,4 +6,5 @@
     <string name="youtube" translatable="false">Youtube</string>
     <string name="reddit" translatable="false">Reddit</string>
     <string name="linkedin" translatable="false">Linkedin</string>
+    <string name="bluesky" translatable="false">Bluesky</string>
 </resources>
